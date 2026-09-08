@@ -40,8 +40,3 @@ export function resolveWorkspacePath(uri: URI, workspaceRoot: string): string {
 
   return resolved;
 }
-
-/** `ADE_WORKSPACE`가 없으면 현재 작업 디렉터리를 쓴다. */
-export function workspaceRootFromEnv(): string {
-  return process.env["ADE_WORKSPACE"] ?? process.cwd();
-}

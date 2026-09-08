@@ -12,3 +12,19 @@ export const ErrorBody = z.object({
   message: z.string(),
 });
 export type ErrorBody = z.infer<typeof ErrorBody>;
+
+/**
+ * 도메인이 아니라 요청·프로토콜 자체가 잘못된 경우.
+ *
+ * `VersionMismatch`는 서버가 더 이상 받지 않는 `protocolVersion`이 왔을 때다.
+ * 캐시된 구 클라이언트가 붙는 상황이라 클라이언트에게 갱신을 알려야 한다.
+ */
+export const ProtocolErrorCode = z.enum([
+  "VersionMismatch",
+  "BadRequest",
+  "Internal",
+]);
+export type ProtocolErrorCode = z.infer<typeof ProtocolErrorCode>;
+
+export const ProtocolErrorBody = ErrorBody.extend({ code: ProtocolErrorCode });
+export type ProtocolErrorBody = z.infer<typeof ProtocolErrorBody>;

@@ -2,8 +2,6 @@ TMP NOTE
 
 ## 3. 클라이언트 구조
 
-`<scheme>://<authority:node>/<path>`
-
 ### 폴더
 
 ```
@@ -155,31 +153,7 @@ Root
 
 **모든 걸 DI에 넣지 말 것.** 순수 함수 유틸은 그냥 import. DI는 "교체 가능성이 있거나 라이프사이클이 있는 것"에만.
 
----
 
-## 6. 서버 구조
-
-```
-server/src/
-  core/          DI, 이벤트, 라이프사이클 (도메인 모름)
-  domain/        도메인 타입·규칙·인터페이스
-  services/      유스케이스 (요청-응답)
-  infra/         DB, FS, 외부 API
-  transport/     HTTP 라우트, SSE
-  runtime/       장기 실행 작업 (나중)
-  bootstrap.ts
-```
-
-### 클라이언트와의 대응
-
-| 클라이언트 | 서버 | 역할 |
-|---|---|---|
-| view | transport | 바깥 세계와의 접점 |
-| viewmodel | services | 유스케이스 조율 |
-| model | domain | 도메인 규칙 |
-| infra | infra | I/O 구현 |
-
-의존 방향 동일: `domain`이 안쪽, 나머지가 안쪽을 향함.
 
 ### services vs runtime
 

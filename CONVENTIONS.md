@@ -32,6 +32,18 @@
 - 공유가 필요하면 `contracts`에 두고 패키지명으로 가져온다 — `import { URI } from "contracts"`. tsconfig `paths` 별칭은 쓰지 않는다(tsc만 알아서 vitest·node에서 깨진다).
 - 위 세 줄은 `eslint.config.ts`의 `import-x/no-restricted-paths`가 강제한다. 위반하면 어디로 옮기라는 안내가 함께 나온다.
 
+## 코드 구조
+
+- 코드는 도메인별 `features/<name>/` 아래에 모은다. 레이어를 최상위로 두지 않는다. → [ADR 0005](docs/adr/0005-code-structure.md)
+- 도메인을 모르는 것(DI·설정·부팅)만 `core/`에 둔다.
+- feature 내부 — client는 `model/` `infra/` `viewmodel/` `view/`, server는 `domain/` `infra/` `services/` `transport/`.
+- 의존은 안쪽(`model`/`domain`)을 향한다. 어느 구현이 꽂힐지는 `app`/`bootstrap`이 정한다.
+- `index.ts`에는 바깥이 실제로 부르는 것만 넣는다. 내부 구현·에러 타입·유틸은 내보내지 않는다.
+- features끼리 직접 import하지 않는다. DI나 이벤트로만 소통한다.
+- `shared/`는 `features/`를 import할 수 없다. 공통 추출은 아래로만 한다.
+- **빈 레이어를 미리 만들지 않는다.** 실제 I/O나 유스케이스가 생길 때 폴더를 만든다.
+- 파일 이름은 camelCase, React 컴포넌트만 PascalCase.
+
 ## URI
 - 파일·리소스는 문자열 경로 대신 `URI`로 가리킨다. → [ADR 0003](docs/adr/0003-uri.md)
 - `URI.parse()` 또는 `URI.file()`로만 만든다.
