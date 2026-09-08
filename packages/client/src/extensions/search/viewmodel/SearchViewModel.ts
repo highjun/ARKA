@@ -1,5 +1,5 @@
 import type { Disposable } from '#core/di';
-import { ViewModelBase } from '#core/view-model';
+import { ViewModelBase } from '#core/viewmodel';
 import { atom } from 'nanostores';
 import type { ISearchModel } from '../model/ISearchModel';
 import type { ISearchViewModel, SearchFileRow } from './ISearchViewModel';

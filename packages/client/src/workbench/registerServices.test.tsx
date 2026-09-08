@@ -1,4 +1,4 @@
-import { ViewModelProvider } from "#core/view-model";
+import { ViewModelProvider } from "#core/viewmodel";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { FileContentViewModelToken, WorkspaceFilesToken } from "../extensions/filesystem";

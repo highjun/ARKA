@@ -1,4 +1,5 @@
 import type { ESLint } from "eslint";
+import { fileNames } from "./fileNames";
 import { modelIsStateLibraryFree } from "./modelIsStateLibraryFree";
 import { slicesAreSiblings } from "./slicesAreSiblings";
 import { testNamesKorean } from "./testNamesKorean";
@@ -16,6 +17,7 @@ export const arkaRules: ESLint.Plugin = {
   rules: {
     "view-only-uses-view-model": viewOnlyUsesViewModel,
     "model-is-state-library-free": modelIsStateLibraryFree,
+    "file-names": fileNames,
     "slices-are-siblings": slicesAreSiblings,
     "test-names-korean": testNamesKorean,
   },

@@ -1,5 +1,5 @@
 import type { Disposable } from '#core/di';
-import { ViewModelBase } from '#core/view-model';
+import { ViewModelBase } from '#core/viewmodel';
 import { atom } from 'nanostores';
 import type { ITabDirtyState } from '../model/ITabDirtyState';
 import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';

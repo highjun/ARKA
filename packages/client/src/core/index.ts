@@ -4,6 +4,6 @@ export * from "./registry";
 export * from "./action";
 export * from "./menu";
 export * from "./commands";
-export * from "./view-model";
+export * from "./viewmodel";
 export * from "./errors";
 export * from "./http";

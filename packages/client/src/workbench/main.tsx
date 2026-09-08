@@ -1,6 +1,6 @@
 import "./reset.css";
 import "./globals.css";
-import { ViewModelProvider } from "#core/view-model";
+import { ViewModelProvider } from "#core/viewmodel";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RootView } from "./view/RootView";

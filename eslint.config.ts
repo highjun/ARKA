@@ -113,7 +113,7 @@ export default [
           // `#`으로 시작하는 것은 `patterns.group`에서 주석으로 읽혀 무시된다 — `paths`로 적는다.
           paths: [
             { name: "#core/di", message: "component/는 DI를 모릅니다. 그건 view/의 일입니다." },
-            { name: "#core/view-model", message: "component/는 ViewModel을 모릅니다. 필요한 값은 props로 받으세요." },
+            { name: "#core/viewmodel", message: "component/는 ViewModel을 모릅니다. 필요한 값은 props로 받으세요." },
           ],
           patterns: [
             { group: ["**/viewmodel/**", "**/model/**"], message: "component/는 ViewModel·Model을 모릅니다. 필요한 값은 props로 받으세요." },
@@ -197,6 +197,13 @@ export default [
         },
       ],
     },
+  },
+
+  {
+    // 파일·폴더 이름. 실측 관행(클래스 PascalCase / 함수 모듈 camelCase / 계약 I<Name>)을 규칙으로.
+    files: ["packages/*/src/**/*.{ts,tsx}"],
+    plugins: { arka: arkaRules },
+    rules: { "arka/file-names": "error" },
   },
 
   {

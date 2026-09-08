@@ -3,7 +3,7 @@ import { SidebarContentRegistryToken } from '../model/ISidebarContentRegistry';
 import { TabContentRegistryToken } from '../model/ITabContentRegistry';
 import { ShellViewModelToken } from '../viewmodel/IShellViewModel';
 import { matchMenuItems } from '#core/menu';
-import { useViewModel } from '#core/view-model';
+import { useViewModel } from '#core/viewmodel';
 import { Button } from '@primer/react';
 import { ContextMenu, Icon, ModeToggle, Text } from '#components/common';
 import { Dialog } from '#components/layout';

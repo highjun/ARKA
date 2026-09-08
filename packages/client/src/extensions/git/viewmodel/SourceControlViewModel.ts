@@ -1,5 +1,5 @@
 import type { Disposable } from '#core/di';
-import { ViewModelBase } from '#core/view-model';
+import { ViewModelBase } from '#core/viewmodel';
 import { atom } from 'nanostores';
 import type { GitFileStatus } from 'contracts';
 import type { IGitModel } from '../model/IGitModel';

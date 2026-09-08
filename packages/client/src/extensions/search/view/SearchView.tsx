@@ -1,4 +1,4 @@
-import { useViewModel } from '#core/view-model';
+import { useViewModel } from '#core/viewmodel';
 import { ActionList, Button, Spinner, TextInput } from '@primer/react';
 import { Text } from '#components/common';
 import { SearchViewModelToken } from '../viewmodel/ISearchViewModel';

@@ -1,4 +1,4 @@
-import { useViewModel } from '#core/view-model';
+import { useViewModel } from '#core/viewmodel';
 import { ActionList, Button, IconButton, Spinner, TextInput } from '@primer/react';
 import { Icon, Text } from '#components/common';
 import type { ChangeRow } from '../viewmodel/ISourceControlViewModel';

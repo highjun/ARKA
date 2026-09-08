@@ -1,4 +1,4 @@
-import { useViewModel } from '#core/view-model';
+import { useViewModel } from '#core/viewmodel';
 import { Button, Spinner } from '@primer/react';
 import { Container, Dialog } from '#components/layout';
 import { FileTree } from '../component';

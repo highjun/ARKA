@@ -1,4 +1,4 @@
-import { useViewModel } from '#core/view-model';
+import { useViewModel } from '#core/viewmodel';
 import { ErrorLogToken } from '../model/IErrorLog';
 import { CrashScreen, ErrorBoundary } from '../component';
 import { ShellView } from './ShellView';

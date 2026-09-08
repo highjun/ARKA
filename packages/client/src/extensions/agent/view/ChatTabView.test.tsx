@@ -1,5 +1,5 @@
 import { createContainer, singleton, scoped } from '#core/di';
-import { ViewModelProvider } from '#core/view-model';
+import { ViewModelProvider } from '#core/viewmodel';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { ChatModel } from '../model/ChatModel';

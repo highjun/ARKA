@@ -1,5 +1,5 @@
 import { createContainer, scoped, singleton } from '#core/di';
-import { ViewModelProvider } from '#core/view-model';
+import { ViewModelProvider } from '#core/viewmodel';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { SearchModelToken } from '../model/ISearchModel';

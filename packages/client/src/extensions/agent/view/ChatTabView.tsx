@@ -1,4 +1,4 @@
-import { useViewModel } from '#core/view-model';
+import { useViewModel } from '#core/viewmodel';
 import { Banner, Button } from '@primer/react';
 import { Text } from '#components/common';
 import type { ReactNode } from 'react';

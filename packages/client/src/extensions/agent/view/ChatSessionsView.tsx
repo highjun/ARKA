@@ -1,4 +1,4 @@
-import { useViewModel } from '#core/view-model';
+import { useViewModel } from '#core/viewmodel';
 import { Spinner } from '@primer/react';
 import { SessionList } from '../component';
 import { ChatViewModelToken } from '../viewmodel/IChatViewModel';

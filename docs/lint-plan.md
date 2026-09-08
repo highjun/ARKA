@@ -58,7 +58,7 @@ ADR의 결정 중 **기계가 판정할 수 있는 것**을 도구로 옮기는 
 
 **`describe`/`it`** — 한 문장이 두 규칙을 뭉뚱그리고 있었다. 실측은 `it` 89% 한글, `describe` 76% 영문으로 정반대인데, `describe`의 영문은 산문이 아니라 **테스트 대상 식별자**(`describe('listDirectory')`)다. ADR 0008도 "`describe`는 대상 단위로"라고 이미 적어놨다 — 문장 둘이 서로 어긋났다. 가르면 `describe` 위반이 137→0이 되고 `it` 78건만 남는다.
 
-**`core/view-model/`** — 유일한 kebab-case 폴더다. 형제는 `commands/`·`registry/`·`menu/`이고 슬라이스 쪽은 `viewmodel/`이다. `core/viewmodel/`로 바꾸면 폴더명 규칙에 예외가 없어진다.
+**`core/viewmodel/`** — 유일한 kebab-case 폴더다. 형제는 `commands/`·`registry/`·`menu/`이고 슬라이스 쪽은 `viewmodel/`이다. `core/viewmodel/`로 바꾸면 폴더명 규칙에 예외가 없어진다.
 
 ## 함께 고칠 문서 오류
 

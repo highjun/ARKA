@@ -1,5 +1,5 @@
 import { CommandCenterRegistryToken } from '#core/commands';
-import { useViewModel } from '#core/view-model';
+import { useViewModel } from '#core/viewmodel';
 import { Text } from '#components/common';
 import styles from './KeybindingsTabView.module.css';
 
