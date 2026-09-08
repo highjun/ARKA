@@ -7,7 +7,7 @@ import styles from './ActivityBar.module.css';
 import { Container } from '#components/layout/Container';
 import { Icon } from '#components/common/Icon';
 import { IconButton } from '#components/common/IconButton';
-import { ContextMenu } from '#components/shell/ContextMenu';
+import { ContextMenu } from '#components/common/ContextMenu';
 import type { IconId } from '#components/common/Icon';
 
 export interface ActivityBarItem {

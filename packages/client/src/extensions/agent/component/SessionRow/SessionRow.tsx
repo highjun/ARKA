@@ -3,8 +3,8 @@ import { assembleCompound } from '#utils/assembleCompound';
 import { mergeClassNames } from '#utils/mergeClassNames';
 import styles from './SessionRow.module.css';
 import { CounterLabel } from '@primer/react';
-import { StatusIndicator } from '#components/agent/StatusIndicator';
-import type { StatusIndicatorStatus } from '#components/agent/StatusIndicator';
+import { StatusIndicator } from '../StatusIndicator';
+import type { StatusIndicatorStatus } from '../StatusIndicator';
 import { Timestamp } from '#components/common/Timestamp';
 
 interface SessionRowSelection {

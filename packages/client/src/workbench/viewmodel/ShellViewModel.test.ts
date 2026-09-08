@@ -1,5 +1,6 @@
 import { createRegistry } from '#core';
-import type { IFileContentViewModel } from '../../filesystem';
+import type { ITabDirtyState } from '../model/ITabDirtyState';
+import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
 import type { ICommandCenterRegistry } from '#core/commands';
 import { ActivityModel } from '../model/ActivityModel';
 import { ROOT_PANE_ID } from '../model/tabsShare';
@@ -33,38 +34,40 @@ const fakeStorage = (): IStorage => {
   };
 };
 
-/** 읽기 전용 흉내 atom — 이 테스트는 구독을 안 본다. `nanostores`는 테스트의 외부 허용 목록에
- *  없다(`arka/external-import-allowlist`) — 진짜 `atom()` 대신 최소 모양만 흉내낸다. */
-const fakeAtom = <T,>(value: T) => ({ get: () => value, listen: () => () => undefined });
-
-/** `IShellViewModel`이 파일 감시 생명주기(`onMount`/`onDispose`)만 위임하는 최소 흉내 —
- *  탭 트리·활동 로직은 이 파일의 관심사가 아니다. `watching` 으로 위임이 실제로 일어났는지 본다. */
-const fakeFileContentViewModel = (): IFileContentViewModel & { watching: boolean } => {
-  const state: { watching: boolean; rows: Record<string, never> } = { watching: false, rows: {} };
+/** 셸이 선언한 계약의 가짜다 — filesystem을 알 필요가 없다. `dirty`에 탭 id를 넣으면 그
+ *  탭이 저장 안 된 것으로 보인다. */
+const fakeTabDirtyState = (): ITabDirtyState & { dirty: Set<string> } => {
+  const dirty = new Set<string>();
   return {
-    get watching() {
-      return state.watching;
+    dirty,
+    isDirty: (tabId) => dirty.has(tabId),
+    onDidChange: () => ({ dispose: () => undefined }),
+  };
+};
+
+/** 켜졌는지만 본다 — 무엇이 켜지는지는 셸의 관심이 아니다. */
+const fakeStartup = (): IWorkbenchStartup & { started: boolean } => {
+  const state = { started: false };
+  return {
+    get started() {
+      return state.started;
     },
-    rows: fakeAtom(state.rows),
-    openFile: () => undefined,
-    editFile: () => undefined,
-    saveFile: () => undefined,
-    retargetOpenFile: () => undefined,
-    startWatching: () => {
-      state.watching = true;
+    start: () => {
+      state.started = true;
     },
-    stopWatching: () => {
-      state.watching = false;
+    stop: () => {
+      state.started = false;
     },
-  } as unknown as IFileContentViewModel & { watching: boolean };
+  };
 };
 
 /** 진짜 Model 을 조립한다 — I/O 가 없어 바꿔 낄 이유가 없다. `activityBarRegistry`는 탐색기
  *  하나만 등록한 가짜다 — 진짜(`application.tsx`)와 같은 모양이면 충분하다. */
-const make = (): { tabsModel: ITabsModel; viewModel: IShellViewModel; fileContentViewModel: IFileContentViewModel & { watching: boolean } } => {
+const make = (): { tabsModel: ITabsModel; viewModel: IShellViewModel; tabDirtyState: ITabDirtyState & { dirty: Set<string> }; startup: IWorkbenchStartup & { started: boolean } } => {
   const activityBarRegistry: IActivityBarRegistry = createRegistry();
   activityBarRegistry.add({ id: 'explorer', title: '탐색기', iconId: 'files' });
-  const fileContentViewModel = fakeFileContentViewModel();
+  const tabDirtyState = fakeTabDirtyState();
+  const startup = fakeStartup();
 
   const storage = fakeStorage();
   const activityModel = new ActivityModel();
@@ -75,11 +78,12 @@ const make = (): { tabsModel: ITabsModel; viewModel: IShellViewModel; fileConten
     tabsModel,
     themeModel,
     activityBarRegistry,
-    fileContentViewModel,
+    tabDirtyState,
+    startup,
     commandCenterRegistry: fakeCommandCenterRegistry(),
     copyToClipboard: () => undefined,
   });
-  return { tabsModel, viewModel, fileContentViewModel };
+  return { tabsModel, viewModel, tabDirtyState, startup };
 };
 
 const activeIds = (viewModel: IShellViewModel): string[] =>
@@ -138,6 +142,7 @@ describe('IShellViewModel — 파일 미리보기', () => {
       kind: 'file',
       title: 'STATUS.md',
       isPreview: true,
+      isDirty: false,
     });
   });
 
@@ -238,7 +243,7 @@ describe('IShellViewModel — 탭', () => {
     expect(activeLeafOf(viewModel)).toEqual({
       kind: 'leaf',
       id: ROOT_PANE_ID,
-      tabs: [{ id: 'a', kind: 'file', title: 'a', isPreview: false }],
+      tabs: [{ id: 'a', kind: 'file', title: 'a', isPreview: false, isDirty: false }],
       activeTabId: 'a',
     });
   });
@@ -485,7 +490,7 @@ describe('IShellViewModel — 분할', () => {
     expect(viewModel.tree).toEqual({
       kind: 'leaf',
       id: ROOT_PANE_ID,
-      tabs: [{ id: 'a', kind: 'file', title: 'a', isPreview: false }],
+      tabs: [{ id: 'a', kind: 'file', title: 'a', isPreview: false, isDirty: false }],
       activeTabId: 'a',
     });
     expect(viewModel.activeLeafId).toBe(ROOT_PANE_ID);
@@ -696,8 +701,8 @@ describe('IShellViewModel — retargetTabs', () => {
 });
 
 /**
- * `window.confirm` 대신이다(2026-09-04) — `isDirty`는 `filesystem` 모듈 소관이라 ViewModel이
- * 직접 알 수 없다. View가 계산해 값으로 건네고, ViewModel은 그 값을 바탕으로 확인 흐름만 관리한다.
+ * `window.confirm` 대신이다(2026-09-04) — 무엇이 더러운지는 `ITabDirtyState`가 알고, ViewModel은
+ * 그 답을 물어 확인 흐름만 관리한다. 셸은 파일이라는 개념을 모른다.
  */
 describe('requestCloseTab / confirmCloseTab / cancelCloseTab', () => {
   it('dirty가 아니면 바로 닫는다 — 확인을 구하지 않는다', () => {
@@ -705,28 +710,30 @@ describe('requestCloseTab / confirmCloseTab / cancelCloseTab', () => {
     viewModel.previewFile('a.md');
     viewModel.pinTab('a.md');
 
-    viewModel.requestCloseTab(ROOT_PANE_ID, 'a.md', false);
+    viewModel.requestCloseTab(ROOT_PANE_ID, 'a.md');
 
     expect(viewModel.pendingTabClose).toBeNull();
     expect(tabIdsOf(activeLeafOf(viewModel))).toEqual([]);
   });
 
   it('dirty면 즉시 닫지 않고 확인 대상을 담아 둔다', () => {
-    const { viewModel } = make();
+    const { viewModel, tabDirtyState } = make();
     viewModel.previewFile('a.md');
     viewModel.pinTab('a.md');
+    tabDirtyState.dirty.add('a.md');
 
-    viewModel.requestCloseTab(ROOT_PANE_ID, 'a.md', true);
+    viewModel.requestCloseTab(ROOT_PANE_ID, 'a.md');
 
     expect(viewModel.pendingTabClose).toEqual({ leafId: ROOT_PANE_ID, tabId: 'a.md' });
     expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(['a.md']);
   });
 
   it('confirmCloseTab은 담아 둔 대상을 실제로 닫고 비운다', () => {
-    const { viewModel } = make();
+    const { viewModel, tabDirtyState } = make();
     viewModel.previewFile('a.md');
     viewModel.pinTab('a.md');
-    viewModel.requestCloseTab(ROOT_PANE_ID, 'a.md', true);
+    tabDirtyState.dirty.add('a.md');
+    viewModel.requestCloseTab(ROOT_PANE_ID, 'a.md');
 
     viewModel.confirmCloseTab();
 
@@ -735,10 +742,11 @@ describe('requestCloseTab / confirmCloseTab / cancelCloseTab', () => {
   });
 
   it('cancelCloseTab은 닫지 않고 비운다', () => {
-    const { viewModel } = make();
+    const { viewModel, tabDirtyState } = make();
     viewModel.previewFile('a.md');
     viewModel.pinTab('a.md');
-    viewModel.requestCloseTab(ROOT_PANE_ID, 'a.md', true);
+    tabDirtyState.dirty.add('a.md');
+    viewModel.requestCloseTab(ROOT_PANE_ID, 'a.md');
 
     viewModel.cancelCloseTab();
 
@@ -760,20 +768,20 @@ describe('requestCloseTab / confirmCloseTab / cancelCloseTab', () => {
  * 주석 참고.
  */
 describe('onMount / onDispose — 파일 감시 생명주기 위임', () => {
-  it('onMount는 fileContentViewModel의 감시를 시작한다', () => {
-    const { viewModel, fileContentViewModel } = make();
+  it('onMount는 등록된 시작 작업을 켠다', () => {
+    const { viewModel, startup } = make();
 
     viewModel.onMount();
 
-    expect(fileContentViewModel.watching).toBe(true);
+    expect(startup.started).toBe(true);
   });
 
   it('onDispose는 감시를 멈춘다', () => {
-    const { viewModel, fileContentViewModel } = make();
+    const { viewModel, startup } = make();
     viewModel.onMount();
 
     viewModel.onDispose();
 
-    expect(fileContentViewModel.watching).toBe(false);
+    expect(startup.started).toBe(false);
   });
 });

@@ -102,7 +102,7 @@ describe('useCodeMirrorEditor', () => {
   /**
    * **타이핑 자체는 여기서 재현하지 않는다.** CodeMirror 는 진짜 브라우저의 `contenteditable` 입력
    * 이벤트를 관찰해 변경을 계산하는데, jsdom 은 그것을 흉내내지 못한다 — 실제 키 입력이 문서를
-   * 바꾸고 그것이 저장까지 이어지는지는 `visible/shell.spec.ts` 가 진짜 브라우저로 본다.
+   * 바꾸고 그것이 저장까지 이어지는지는 `e2e/shell.spec.ts` 가 진짜 브라우저로 본다.
    */
 });
 

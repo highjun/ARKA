@@ -12,29 +12,31 @@ import {
   PinTabToken,
   WorkspaceFilesToken,
   WorkspaceWatchToken,
-} from "../features/filesystem";
-import { createWorkspaceFilesPort } from "../features/filesystem/infra/HttpWorkspaceFiles";
-import { createWorkspaceWatchPort } from "../features/filesystem/infra/HttpWorkspaceWatch";
-import { DirectoryTreeView } from "../features/filesystem/view/DirectoryTreeView";
-import { FileContentView } from "../features/filesystem/view/FileContentView";
+} from "../extensions/filesystem";
+import { createWorkspaceFilesPort } from "../extensions/filesystem/infra/HttpWorkspaceFiles";
+import { createWorkspaceWatchPort } from "../extensions/filesystem/infra/HttpWorkspaceWatch";
+import { DirectoryTreeView } from "../extensions/filesystem/view/DirectoryTreeView";
+import { FileContentView } from "../extensions/filesystem/view/FileContentView";
+import { createStoragePort } from "./infra/LocalStorage";
+import { ActivityBarRegistry } from "./model/ActivityBarRegistry";
+import { ActivityModel } from "./model/ActivityModel";
+import { SidebarContentRegistry } from "./model/SidebarContentRegistry";
+import { TabContentRegistry } from "./model/TabContentRegistry";
+import { TabsModel } from "./model/TabsModel";
+import { ThemeModel } from "./model/ThemeModel";
+import { ShellViewModel } from "./viewmodel/ShellViewModel";
 import {
-  ActivityBarRegistry,
   ActivityBarRegistryToken,
-  ActivityModel,
   ActivityModelToken,
-  createStoragePort,
-  ShellViewModel,
   ShellViewModelToken,
-  SidebarContentRegistry,
   SidebarContentRegistryToken,
   StorageToken,
-  TabContentRegistry,
   TabContentRegistryToken,
-  TabsModel,
+  TabDirtyStateToken,
   TabsModelToken,
-  ThemeModel,
   ThemeModelToken,
-} from "../features/shell";
+  WorkbenchStartupToken,
+} from "./tokens";
 
 /** 탐색기 활동의 id. ActivityBar·SidebarContent 등록 둘 다 이 문자열로 서로를 잇는다. */
 const EXPLORER_ID = "explorer";
@@ -120,6 +122,25 @@ export function createApplication(): Container {
     PinTabToken,
     scoped((c) => ({ pin: (path: string) => c.resolve(ShellViewModelToken).pinTab(path) })),
   );
+  // 셸은 "이 탭이 dirty인가"라는 계약만 알고, 그게 filesystem이라는 것은 이 조립부만 안다
+  // — `PinTabToken`을 뒤집은 모양이다. 스코프에서 resolve해야 View가 보는 것과 같은 인스턴스다.
+  container.register(
+    TabDirtyStateToken,
+    scoped((c) => ({
+      isDirty: (tabId: string) =>
+        c.resolve(FileContentViewModelToken).rows[tabId]?.isDirty ?? false,
+      onDidChange: (listener: () => void) =>
+        c.resolve(FileContentViewModelToken).onDidChange(listener),
+    })),
+  );
+  // 셸이 뜨고 질 때 켜고 끌 것. 지금은 파일 감시 하나다 — 셸은 무엇이 켜지는지 모른다.
+  container.register(
+    WorkbenchStartupToken,
+    scoped((c) => ({
+      start: () => c.resolve(FileContentViewModelToken).startWatching(),
+      stop: () => c.resolve(FileContentViewModelToken).stopWatching(),
+    })),
+  );
   container.register(
     FileContentViewModelToken,
     scoped(
@@ -139,7 +160,8 @@ export function createApplication(): Container {
           tabsModel: c.resolve(TabsModelToken),
           themeModel: c.resolve(ThemeModelToken),
           activityBarRegistry: c.resolve(ActivityBarRegistryToken),
-          fileContentViewModel: c.resolve(FileContentViewModelToken),
+          tabDirtyState: c.resolve(TabDirtyStateToken),
+          startup: c.resolve(WorkbenchStartupToken),
           commandCenterRegistry: c.resolve(CommandCenterRegistryToken),
           copyToClipboard,
         }),

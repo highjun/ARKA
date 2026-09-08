@@ -39,6 +39,11 @@ export class FileContentViewModel extends ViewModelBase implements IFileContentV
     return this.#rows.get();
   }
 
+  /** `ViewModelBase.subscribe`(React 배선)를 계약이 쓰는 `Disposable` 모양으로 감싼다. */
+  onDidChange(listener: () => void): Disposable {
+    return { dispose: this.subscribe(listener) };
+  }
+
   /** `#model.open`에 위임한다. */
   openFile(path: string): void {
     void this.#model.open(path);

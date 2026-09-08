@@ -1,6 +1,6 @@
 import { matchMenuItems } from '#core/menu';
 import { useViewModel } from '#core/view-model';
-import { ContextMenu } from '../../shared/components';
+import { ContextMenu } from '#components/common';
 import type { ReactNode } from 'react';
 import { CommandCenterRegistryToken } from './tokens';
 

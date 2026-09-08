@@ -6,10 +6,10 @@ import { useSessionList } from './useSessionList';
 import styles from './SessionList.module.css';
 import { IconButton } from '@primer/react';
 import { Icon } from '#components/common/Icon';
-import { SidebarLayout } from '#components/shell/SidebarLayout';
-import { Menu } from '#components/shell/Menu';
-import { SessionRow } from '#components/agent/SessionRow';
-import type { StatusIndicatorStatus } from '#components/agent/StatusIndicator';
+import { SidebarLayout } from '#components/layout/SidebarLayout';
+import { Menu } from '#components/common/Menu';
+import { SessionRow } from '../SessionRow';
+import type { StatusIndicatorStatus } from '../StatusIndicator';
 
 const hasContent = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
 

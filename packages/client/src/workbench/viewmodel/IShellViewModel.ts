@@ -17,8 +17,8 @@ export type TabContextTarget = { readonly leafId: PaneId; readonly tabId: string
  * 화면이 그릴 탭 한 줄.
  *
  * Model 의 `OpenTab` 과 거의 같지만 **내용(`ReactNode`)은 없다** — `ITabContentRegistry`가
- * `kind`로 찾아 그린다(binding.tsx가 안다, ViewModel은 모른다). 아이콘은 탭마다 registry 조회가
- * 필요해 binding.tsx에서 병합한다(파일별 `isDirty`를 병합하는 것과 같은 자리).
+ * `kind`로 찾아 그린다(View가 안다, ViewModel은 모른다). 아이콘은 탭마다 registry 조회가
+ * 필요해 View에서 병합한다.
  */
 export type ShellTabRow = {
   /** 워크스페이스 루트 기준 경로다. */
@@ -27,6 +27,8 @@ export type ShellTabRow = {
   readonly title: string;
   /** 미리보기 자리에 있다 — 다음 파일을 열면 이 탭이 갈린다. 화면은 기울임으로 알린다. */
   readonly isPreview: boolean;
+  /** 저장 안 된 변경이 있다. 답은 `ITabDirtyState`가 주고, 셸은 무엇이 더러운지 모른다. */
+  readonly isDirty: boolean;
 };
 
 /**
@@ -95,21 +97,20 @@ export interface IShellViewModel {
   closeTab(leafId: PaneId, tabId: string): void;
 
   /**
-   * 저장 안 된 파일 탭을 닫을 때 확인을 구하는 흐름 — `isDirty`(다른 모듈 소관이라 View가
-   * 계산해 건넨다, `#modules/ShellModule` 정본 참고)가 거짓이면 바로 `closeTab`과 같다. 참이면
+   * 저장 안 된 탭을 닫을 때 확인을 구하는 흐름 — `ITabDirtyState`에 물어 거짓이면 바로
+   * `closeTab`과 같다. 참이면
    * `pendingTabClose`를 채워 View의 `Dialog`가 뜨게 하고, `confirmCloseTab`/`cancelCloseTab`이
    * 이어받는다. 네이티브 `window.confirm` 대신이다(2026-09-04 — UI 일관성).
    */
   readonly pendingTabClose: { readonly leafId: PaneId; readonly tabId: string } | null;
-  requestCloseTab(leafId: PaneId, tabId: string, isDirty: boolean): void;
+  requestCloseTab(leafId: PaneId, tabId: string): void;
   confirmCloseTab(): void;
   cancelCloseTab(): void;
 
   /**
-   * `leafId` 안에서 `tabId`만 남기고 나머지를 닫는다. `protectedTabIds`(다른 모듈 소관인 dirty
-   * 여부라 View가 계산해 건넨다, `requestCloseTab`의 `isDirty`와 같은 이유)에 있는 탭은 저장 안
-   * 된 변경을 잃지 않도록 건너뛰고 남긴다 — 확인창을 여러 개 띄우는 대신 조용히 보존하는 쪽을
-   * 기본값으로 택했다.
+   * `leafId` 안에서 `tabId`만 남기고 나머지를 닫는다. `protectedTabIds`에 있는 탭은 저장 안 된
+   * 변경을 잃지 않도록 건너뛰고 남긴다 — 확인창을 여러 개 띄우는 대신 조용히 보존하는 쪽을
+   * 기본값으로 택했다. 인자를 생략하면 `ITabDirtyState`에 물어 스스로 채운다.
    */
   closeOtherTabs(leafId: PaneId, tabId: string, protectedTabIds?: readonly string[]): void;
   /** `leafId` 안에서 `tabId`보다 뒤에 있는 탭을 전부 닫는다. `protectedTabIds`는 `closeOtherTabs`와 같다. */

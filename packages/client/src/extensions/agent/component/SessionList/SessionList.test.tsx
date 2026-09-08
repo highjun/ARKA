@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { implementsClassName, implementsDataComponent, implementsNoA11yViolations } from '#utils/testing';
 import { SessionList } from './SessionList';
 import type { AgentSessionItem } from './SessionList';
-import { Menu } from '#components/shell/Menu';
+import { Menu } from '#components/common/Menu';
 
 const SESSIONS: AgentSessionItem[] = [
   { id: 'a', title: '첫 세션' },

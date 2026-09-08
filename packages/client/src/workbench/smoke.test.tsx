@@ -1,8 +1,8 @@
 import { ViewModelProvider } from "#core/view-model";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import { FileContentViewModelToken, WorkspaceFilesToken } from "../features/filesystem";
-import type { IWorkspaceFiles } from "../features/filesystem";
+import { FileContentViewModelToken, WorkspaceFilesToken } from "../extensions/filesystem";
+import type { IWorkspaceFiles } from "../extensions/filesystem";
 import { App } from "./App";
 import { createApplication } from "./application";
 

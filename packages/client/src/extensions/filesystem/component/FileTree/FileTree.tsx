@@ -7,7 +7,7 @@ import { compactFolderChains, isApplePlatform, nextSelection, selectAll, selecti
 import type { FlatTreeNode } from './useTreeNavigation';
 import styles from './FileTree.module.css';
 import { Icon } from '#components/common/Icon';
-import { FileIcon } from '#components/filesystem/FileIcon';
+import { FileIcon } from '../FileIcon';
 
 export type FileTreeItemId = string;
 export type FileTreeItemType = 'folder' | 'file';

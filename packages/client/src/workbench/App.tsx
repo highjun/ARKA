@@ -1,8 +1,9 @@
 import { CommandCenterRegistryToken } from "#core/commands";
 import { useAppContext, useViewModel } from "#core/view-model";
 import { useEffect, useRef, useState } from "react";
-import { FileContentViewModelToken } from "../features/filesystem";
-import { ShellView, ShellViewModelToken } from "../features/shell";
+import { FileContentViewModelToken } from "../extensions/filesystem";
+import { ShellView } from "./view/ShellView";
+import { ShellViewModelToken } from "./tokens";
 
 /**
  * 조립 루트. Shell 자신의 도메인 로직이 아니라 **앱 전체 단위 배선**(전역 키다운·beforeunload·

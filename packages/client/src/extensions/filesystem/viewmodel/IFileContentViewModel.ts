@@ -1,3 +1,4 @@
+import type { Disposable } from '#core/di';
 /**
  * 화면이 그리는 파일 하나.
  *
@@ -37,6 +38,11 @@ export type FileRowMap = Readonly<Record<string, FileRow>>;
  */
 export interface IFileContentViewModel {
   readonly rows: FileRowMap;
+  /**
+   * `rows`가 바뀌었음을 알린다 — 화면 밖에서 이 값을 지켜봐야 하는 쪽(예: 탭의 dirty 표시)이
+   * 쓴다. `ViewModelBase.subscribe`는 React 배선이라 계약에 두지 않고, 이 메서드로 감싼다.
+   */
+  onDidChange(listener: () => void): Disposable;
   openFile(path: string): void;
   /** 타이핑할 때마다 부른다 — 로컬 버퍼만 바뀐다. */
   editFile(path: string, content: string): void;

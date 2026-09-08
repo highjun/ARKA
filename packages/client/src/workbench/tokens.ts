@@ -4,7 +4,9 @@ import type { IActivityModel } from "./model/IActivityModel";
 import type { ISidebarContentRegistry } from "./model/ISidebarContentRegistry";
 import type { IStorage } from "./model/IStorage";
 import type { ITabContentRegistry } from "./model/ITabContentRegistry";
+import type { ITabDirtyState } from "./model/ITabDirtyState";
 import type { ITabsModel } from "./model/ITabsModel";
+import type { IWorkbenchStartup } from "./model/IWorkbenchStartup";
 import type { IThemeModel } from "./model/IThemeModel";
 import type { IShellViewModel } from "./viewmodel/IShellViewModel";
 
@@ -16,4 +18,6 @@ export const ActivityBarRegistryToken = createToken<IActivityBarRegistry>("activ
 export const SidebarContentRegistryToken =
   createToken<ISidebarContentRegistry>("sidebarContentRegistry");
 export const TabContentRegistryToken = createToken<ITabContentRegistry>("tabContentRegistry");
+export const TabDirtyStateToken = createToken<ITabDirtyState>("tabDirtyState");
+export const WorkbenchStartupToken = createToken<IWorkbenchStartup>("workbenchStartup");
 export const ShellViewModelToken = createToken<IShellViewModel>("shellViewModel");

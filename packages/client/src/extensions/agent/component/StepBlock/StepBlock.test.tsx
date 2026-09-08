@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { implementsClassName, implementsDataComponent, implementsForwardRef, implementsNoA11yViolations } from '#utils/testing';
 import { StepBlock } from './StepBlock';
-import type { StatusIndicatorStatus } from '#components/agent/StatusIndicator';
+import type { StatusIndicatorStatus } from '../StatusIndicator';
 
 /**
  * 클릭→토글 인터랙션은 검사하지 않는다 — jsdom 이 네이티브 `<details>`의 클릭 토글을 구현하지

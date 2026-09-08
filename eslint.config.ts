@@ -52,12 +52,21 @@ export default [
   // 구조 규칙. 문서로만 있던 계층 규율을 강제한다 — ADR 0005의 의존 방향이 코드에서
   // 실제로 지켜지는지는 이것들이 본다.
   {
-    files: ["packages/*/src/features/*/view/**/*.tsx"],
+    // 글롭은 슬라이스 구조를 그대로 따라간다. 구조가 바뀌면 여기도 바꿔야 하는데, 안 바꾸면
+    // 매치되는 파일이 0개가 되어 규칙이 에러도 경고도 없이 죽는다(2026-09-08에 실제로 겪음).
+    // `npx eslint --print-config <파일>`로 규칙이 붙어 있는지 확인할 수 있다.
+    files: [
+      "packages/client/src/workbench/view/**/*.tsx",
+      "packages/client/src/extensions/*/view/**/*.tsx",
+    ],
     plugins: { arka: arkaRules },
     rules: { "arka/view-only-uses-view-model": "error" },
   },
   {
-    files: ["packages/*/src/features/*/model/**/*.ts"],
+    files: [
+      "packages/client/src/workbench/model/**/*.ts",
+      "packages/client/src/extensions/*/model/**/*.ts",
+    ],
     plugins: { arka: arkaRules },
     rules: { "arka/model-is-state-library-free": "error" },
   },
@@ -70,7 +79,8 @@ export default [
     // 건너뛴다.
     settings: {
       "import-x/resolver": {
-        node: { extensions: [".ts", ".js", ".json"] },
+        // `.tsx`가 빠지면 확장자 없이 가리키는 import를 해석하지 못해 zone이 조용히 통과한다.
+        node: { extensions: [".ts", ".tsx", ".js", ".json"] },
       },
     },
     rules: {
@@ -95,6 +105,43 @@ export default [
               from: "./packages/client/src",
               message:
                 "server는 client를 import할 수 없습니다. 공유할 코드는 contracts 패키지로 옮기고 패키지명 'contracts'로 가져오세요.",
+            },
+            // 아래는 클라이언트 내부 네 구역의 경계다. → docs/adr/0005-client-structure.md
+            {
+              target: "./packages/client/src/extensions",
+              from: "./packages/client/src/workbench",
+              message:
+                "extension은 workbench를 import할 수 없습니다. 이 0건이 마이크로커널 전환의 조건입니다. 필요한 것은 core의 DI 토큰이나 이벤트로 받으세요.",
+            },
+            // extension끼리는 서로 모른다. `no-restricted-paths`는 "형제끼리 금지"를 한 줄로
+            // 못 써서 쌍마다 적어야 한다 — extension을 추가하면 여기도 추가해야 한다.
+            {
+              target: "./packages/client/src/extensions/filesystem",
+              from: "./packages/client/src/extensions/agent",
+              message:
+                "extension끼리 직접 import할 수 없습니다. DI 토큰이나 이벤트로만 소통하세요.",
+            },
+            {
+              target: "./packages/client/src/extensions/agent",
+              from: "./packages/client/src/extensions/filesystem",
+              message:
+                "extension끼리 직접 import할 수 없습니다. DI 토큰이나 이벤트로만 소통하세요.",
+            },
+            {
+              target: "./packages/client/src/core",
+              from: ["./packages/client/src/workbench", "./packages/client/src/extensions"],
+              message:
+                "core는 workbench·extensions를 import할 수 없습니다. core는 조립과 중개만 하고 무엇이 꽂히는지 몰라야 합니다.",
+            },
+            {
+              target: "./packages/client/src/shared",
+              from: [
+                "./packages/client/src/core",
+                "./packages/client/src/workbench",
+                "./packages/client/src/extensions",
+              ],
+              message:
+                "shared는 아무것도 import할 수 없습니다. 공통 추출은 아래로만 합니다.",
             },
           ],
         },

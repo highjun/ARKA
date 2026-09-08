@@ -1,7 +1,8 @@
 import { useViewModel } from '#core/view-model';
 import { Button, Spinner } from '@primer/react';
-import { Container, Dialog, FileTree } from '../../../shared/components';
-import type { FileTreeItem } from '../../../shared/components';
+import { Container, Dialog } from '#components/layout';
+import { FileTree } from '../component';
+import type { FileTreeItem } from '../component';
 import type { MouseEvent } from 'react';
 import { CommandContextMenu } from '#core/commands';
 import type {
@@ -10,7 +11,7 @@ import type {
 
   FileTreeRow,
 } from '../viewmodel/IDirectoryTreeViewModel';
-import { DirectoryTreeViewModelToken } from '../tokens';
+import { DirectoryTreeViewModelToken, FileContentViewModelToken } from '../tokens';
 import styles from './DirectoryTreeView.module.css';
 
 /**
@@ -70,6 +71,7 @@ export const DirectoryTreeView = ({
   readonly onFilePin: (path: string) => void;
 }) => {
   const viewModel = useViewModel(DirectoryTreeViewModelToken);
+  const fileContentViewModel = useViewModel(FileContentViewModelToken);
 
   // 컴포넌트 어휘(FileTreeItem)를 ViewModel 어휘(경로 + 폴더 여부)로 바꾸기만 한다.
   const handleActivate = (item: FileTreeItem) => {
@@ -79,12 +81,21 @@ export const DirectoryTreeView = ({
     if (item.type !== 'folder') onFilePin(item.id);
   };
   const handleExpand = (item: FileTreeItem, expanded: boolean) => viewModel.setFolderExpanded(item.id, expanded);
-  /** 옮긴 뒤에만 Shell에 새 경로를 올린다 — 실패하면 `moveEntry`가 이미 `failureNotice`에 담고
-   *  다시 던지므로, 여기서는 성공했을 때만 후속 조치를 하고 실패는 조용히 넘긴다. */
+  /**
+   * 옮긴 뒤에만 후속 조치를 한다 — 실패하면 `moveEntry`가 이미 `failureNotice`에 담고 다시
+   * 던지므로 여기서는 조용히 넘긴다.
+   *
+   * **편집 버퍼는 여기서 옮긴다.** 이름이 바뀌면 열려 있던 내용도 새 경로를 따라가야 하는데,
+   * 그건 파일 도메인의 일이라 셸이 대신 해주지 않는다. 셸에는 "탭이 가리키는 경로가 바뀌었다"만
+   * 올린다.
+   */
   const handleDrop = (source: FileTreeItem, target: FileTreeItem) => {
     viewModel
       .moveEntry(source.id, target.id)
-      .then((newPath) => onFileMove(source.id, newPath))
+      .then((newPath) => {
+        fileContentViewModel.retargetOpenFile(source.id, newPath);
+        onFileMove(source.id, newPath);
+      })
       .catch(() => undefined);
   };
 

@@ -1,13 +1,14 @@
 import { CommandCenterRegistryToken } from '#core/commands';
-import { FileContentViewModelToken } from '../../filesystem/tokens';
 import { ShellViewModelToken, SidebarContentRegistryToken, TabContentRegistryToken } from '../tokens';
 import { matchMenuItems } from '#core/menu';
 import { useViewModel } from '#core/view-model';
 import { Button } from '@primer/react';
-import { CommandPalette, ContextMenu, Dialog, Icon, ModeToggle, Shell, Tab, Text } from '../../../shared/components';
-import type { IconId, TabItem, TabTreeNode } from '../../../shared/components';
+import { ContextMenu, Icon, ModeToggle, Text } from '#components/common';
+import { Dialog } from '#components/layout';
+import { CommandPalette, Shell, Tab } from '../component';
+import type { IconId } from '#components/common';
+import type { TabItem, TabTreeNode } from '../component';
 import type { ReactNode } from 'react';
-import type { FileRowMap } from '../../filesystem';
 import type { ICommandCenterRegistry } from '#core/commands';
 import type { ITabContentRegistry } from '../model/ITabContentRegistry';
 import type { ShellTabPaneNode, ShellTabRow, TabContextTarget } from '../viewmodel/IShellViewModel';
@@ -20,7 +21,7 @@ import styles from './ShellView.module.css';
  * 로직이면 ViewModel로 옮겼다.
  *
  * 전역 배선(키다운 디스패치·beforeunload 가드·빌드ID 조회·테마 DOM 반영)은 여기 없다 — Shell
- * 자신의 도메인 로직이 아니라 앱 전체 단위 배선이라 `src/app/App.tsx`(View 규율 밖)로 옮겼다.
+ * 자신의 도메인 로직이 아니라 앱 전체 단위 배선이라 `src/workbench/App.tsx`(View 규율 밖)로 옮겼다.
  * `buildId`는 그래서 props로 받는다.
  *
  * 탭 닫기 확인은 `window.confirm` 대신 `IShellViewModel.pendingTabClose` + 기존 `Dialog`다
@@ -28,28 +29,26 @@ import styles from './ShellView.module.css';
  */
 const DOES_NOTHING_YET = () => {};
 
-type ShellTabDisplayRow = ShellTabRow & { readonly isDirty: boolean; readonly iconId: string };
+type ShellTabDisplayRow = ShellTabRow & { readonly iconId: string };
 type ShellTabDisplayNode =
   | { readonly kind: 'leaf'; readonly id: string; readonly tabs: readonly ShellTabDisplayRow[]; readonly activeTabId: string | null; readonly size?: number }
   | { readonly kind: 'split'; readonly id: string; readonly orientation: 'horizontal' | 'vertical'; readonly children: readonly ShellTabDisplayNode[]; readonly size?: number };
 
 /**
- * `IShellViewModel.tree` 에는 없는 `isDirty`·`iconId` 를 이 트리 전체에 병합한다 — 둘 다 다른
- * 모듈(`filesystem`의 dirty 상태, `ITabContentRegistry`의 아이콘)이 아는 것이라 ViewModel 은
- * 모른다. 순수 함수라 훅이 아니다 — 렌더 본문에서 그냥 부른다.
+ * `IShellViewModel.tree` 에는 없는 `iconId` 를 이 트리 전체에 병합한다 — 탭마다 registry 조회가
+ * 필요해 ViewModel 이 모른다. 순수 함수라 훅이 아니다 — 렌더 본문에서 그냥 부른다.
  */
-const mergeTabDisplay = (node: ShellTabPaneNode, fileRows: FileRowMap, tabContentRegistry: ITabContentRegistry): ShellTabDisplayNode => {
+const mergeTabDisplay = (node: ShellTabPaneNode, tabContentRegistry: ITabContentRegistry): ShellTabDisplayNode => {
   if (node.kind === 'leaf') {
     return {
       ...node,
       tabs: node.tabs.map((tab) => ({
         ...tab,
-        isDirty: fileRows[tab.id]?.isDirty ?? false,
         iconId: tabContentRegistry.tryGet(tab.kind)?.iconId ?? 'file',
       })),
     };
   }
-  return { ...node, children: node.children.map((child) => mergeTabDisplay(child, fileRows, tabContentRegistry)) };
+  return { ...node, children: node.children.map((child) => mergeTabDisplay(child, tabContentRegistry)) };
 };
 
 /** ViewModel 의 트리를 `@arka/ui`의 `Tab`이 요구하는 트리로 바꾼다 — 탭마다 `content`를 여기서
@@ -123,34 +122,23 @@ const buildTabContextMenu = (tree: TabTreeNode, commandCenterRegistry: ICommandC
  * 다른 모듈을 Shell 에 잇는 **유일한 자리** — `sidebarContentRegistry`·`tabContentRegistry`를
  * 조회해서 그릴 뿐이다(`registries/`). 어떤 모듈이 무엇을 등록했는지는 `application.ts`만 안다.
  *
- * **저장 안 된 변경도 여기서 합친다.** `fileContentViewModel` 은 `FileContentView` 가 이미 쓰고
- * 있는 것과 **같은 인스턴스**다(`useViewModel` 은 앱 전체가 공유하는 awilix 컨테이너에서 이름으로
- * 꺼낼 뿐이다) — 그래서 여기서 한 번 더 구독해도 상태가 갈리지 않는다. 파일 감시(startWatching)는
- * 더 이상 여기서 걸지 않는다 — `IShellViewModel.onMount`가 대신 건다(useViewModel이 자동으로 부른다,
- * Shell이 앱 전체에서 한 번만 마운트되는 루트이기 때문이다).
+ * **파일을 모른다.** 탭의 dirty 여부는 ViewModel이 `ITabDirtyState`에 물어 트리에 담아 주고,
+ * 무엇이 그 답을 채우는지는 조립부(`registerServices`)만 안다.
  */
 export const ShellView = ({ buildId }: { readonly buildId: string }) => {
   const viewModel = useViewModel(ShellViewModelToken);
-  const fileContentViewModel = useViewModel(FileContentViewModelToken);
   const sidebarContentRegistry = useViewModel(SidebarContentRegistryToken);
   const tabContentRegistry = useViewModel(TabContentRegistryToken);
   const commandCenterRegistry = useViewModel(CommandCenterRegistryToken);
 
   const onFileOpen = (path: string) => viewModel.previewFile(path);
   const onFilePin = (path: string) => viewModel.pinTab(path);
-  /**
-   * 탭(경로 참조)과 편집 버퍼(내용·dirty)는 서로 다른 모델이라 둘 다 옮겨야 한다 — `retargetTabs`만
-   * 부르면 탭은 새 경로를 가리키지만 그 경로로 다시 `openFile`이 불려 편집 중이던 내용을 잃는다.
-   */
-  const onFileMove = (oldPath: string, newPath: string) => {
-    viewModel.retargetTabs(oldPath, newPath);
-    fileContentViewModel.retargetOpenFile(oldPath, newPath);
-  };
+  /** 탭이 가리키는 경로만 옮긴다 — 편집 버퍼는 그것을 소유한 쪽이 스스로 옮긴다. */
+  const onFileMove = (oldPath: string, newPath: string) => viewModel.retargetTabs(oldPath, newPath);
 
-  /** 저장 안 된 파일 탭을 닫으려 하면 확인을 구한다 — dirty 여부는 `filesystem` 모듈 소관이라
-   *  여기서 계산해 값으로 건넨다(ViewModel은 다른 도메인을 모른다). */
+  /** 저장 안 된 탭을 닫으려 하면 확인을 구한다 — dirty 여부는 ViewModel이 `ITabDirtyState`에 묻는다. */
   const onTabClose = (leafId: string, tabId: string) => {
-    viewModel.requestCloseTab(leafId, tabId, fileContentViewModel.rows[tabId]?.isDirty ?? false);
+    viewModel.requestCloseTab(leafId, tabId);
   };
 
   const renderTab = (tab: ShellTabRow): ReactNode => {
@@ -163,7 +151,7 @@ export const ShellView = ({ buildId }: { readonly buildId: string }) => {
     return PanelComponent ? <PanelComponent onFileOpen={onFileOpen} onFileMove={onFileMove} onFilePin={onFilePin} /> : null;
   };
 
-  const treeWithDirty = mergeTabDisplay(viewModel.tree, fileContentViewModel.rows, tabContentRegistry);
+  const treeWithDirty = mergeTabDisplay(viewModel.tree, tabContentRegistry);
   const activeActivityId = viewModel.activities.find((activity) => activity.isActive)?.id ?? null;
   const panelContent = activeActivityId === null ? null : renderPanel(activeActivityId);
   const uiTree = buildTree(treeWithDirty, renderTab);

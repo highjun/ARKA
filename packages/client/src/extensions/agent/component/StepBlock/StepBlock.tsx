@@ -6,8 +6,8 @@ import { mergeClassNames } from '#utils/mergeClassNames';
 import styles from './StepBlock.module.css';
 import { Details } from '@primer/react';
 import { Icon } from '#components/common/Icon';
-import { StatusIndicator } from '#components/agent/StatusIndicator';
-import type { StatusIndicatorStatus } from '#components/agent/StatusIndicator';
+import { StatusIndicator } from '../StatusIndicator';
+import type { StatusIndicatorStatus } from '../StatusIndicator';
 
 // `StepBlockBaseProps`처럼 공유 베이스 인터페이스로 뽑지 않는다 — `ui/props-extends-html-attributes`
 // 는 export된 각 Props 인터페이스가 `HTMLAttributes` 계열을 직접 상속하는지만 본다(간접 상속은

@@ -36,7 +36,7 @@ import { Container } from '#components/layout/Container';
 import { Icon } from '#components/common/Icon';
 import type { IconId } from '#components/common/Icon';
 import { IconButton } from '#components/common/IconButton';
-import { ContextMenu } from '#components/shell/ContextMenu';
+import { ContextMenu } from '#components/common/ContextMenu';
 
 // ─── 공통 도메인 ───
 

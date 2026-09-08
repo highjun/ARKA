@@ -19,7 +19,7 @@ export type TabSplitOrientation = 'horizontal' | 'vertical';
  * 검증 로직을 새로 만들어야 한다.
  *
  * 탭 안의 실제 내용물 상태(파일 내용·`isDirty` 등)도 여기 없다 — 그 탭을 등록한 모듈이 스스로
- * 갖는다(`filesystem`의 `IFileContentModel`이 하듯이). Shell은 "무엇이 열려 있고 어느 게
+ * 갖는다(내용을 소유하는 쪽이 따로 있다). Shell은 "무엇이 열려 있고 어느 게
  * 활성·미리보기인지"라는 뼈대만 안다.
  *
  * `@arka/ui`의 `TabGroupItem`을 그대로 쓰지 않는 것도 같은 이유다 — 그 타입은 `content`

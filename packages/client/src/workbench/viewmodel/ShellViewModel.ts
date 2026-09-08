@@ -1,7 +1,8 @@
 import type { Disposable } from '#core/di';
 import { ViewModelBase } from '#core/view-model';
 import { atom } from 'nanostores';
-import type { IFileContentViewModel } from '../../filesystem';
+import type { ITabDirtyState } from '../model/ITabDirtyState';
+import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
 import type { IActivityBarRegistry } from '../model/IActivityBarRegistry';
 import type { IActivityModel } from '../model/IActivityModel';
 import type { ICommandCenterRegistry } from '#core/commands';
@@ -25,10 +26,11 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
    * ("열려 있는 동안"이라는 개념)가 탭 단위가 아니라 **앱 전체 단위**이기 때문이다(비활성 탭의
    * 파일도 감시 대상이어야 하는데, 비활성 탭은 렌더 자체가 안 될 수 있다). Shell은 앱 전체에서
    * 한 번만 마운트되는 루트라, 그 생명주기(`onMount`/`onDispose`)에 얹는 게 정확히 "앱이 사는
-   * 동안"과 같다. `IFileContentViewModel`에 얹지 않는 이유 — 그건 탭마다 마운트/언마운트되는
+   * 동안"과 같다. 탭 ViewModel에 얹지 않는 이유 — 그건 탭마다 마운트/언마운트되는
    * `FileContentView`가 부르므로, 탭 하나만 닫혀도 감시가 통째로 꺼진다(2026-09-04).
    */
-  readonly #fileContentViewModel: IFileContentViewModel;
+  readonly #tabDirtyState: ITabDirtyState;
+  readonly #startup: IWorkbenchStartup;
   readonly #activities;
   readonly #tree;
   readonly #activeLeafId;
@@ -52,7 +54,8 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     tabsModel,
     themeModel,
     activityBarRegistry,
-    fileContentViewModel,
+    tabDirtyState,
+    startup,
     commandCenterRegistry,
     copyToClipboard,
   }: {
@@ -60,7 +63,8 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     tabsModel: ITabsModel;
     themeModel: IThemeModel;
     activityBarRegistry: IActivityBarRegistry;
-    fileContentViewModel: IFileContentViewModel;
+    tabDirtyState: ITabDirtyState;
+    startup: IWorkbenchStartup;
     commandCenterRegistry: ICommandCenterRegistry;
     /** `no-restricted-globals`가 ViewModel의 `navigator` 직접 참조를 막는다 — 조립부(`app/`,
      *  대상 아님)가 이 얇은 함수를 주입한다(`DirectoryTreeViewModel`과 같은 패턴). */
@@ -71,7 +75,8 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     this.#tabsModel = tabsModel;
     this.#themeModel = themeModel;
     this.#activityBar = activityBarRegistry;
-    this.#fileContentViewModel = fileContentViewModel;
+    this.#tabDirtyState = tabDirtyState;
+    this.#startup = startup;
     this.#copyToClipboard = copyToClipboard;
 
     // Model은 값과 이벤트만 준다 — 파생된 화면 상태(atom)는 전부 여기서 소유한다.
@@ -84,6 +89,8 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
       activityModel.onDidChange(() => this.#recompute()),
       tabsModel.onDidChange(() => this.#recompute()),
       themeModel.onDidChange(() => this.#recompute()),
+      // dirty가 바뀌면 탭 표시가 달라진다 — 무엇이 더러워졌는지는 모르고 다시 계산만 한다.
+      tabDirtyState.onDidChange(() => this.#recompute()),
     ];
 
     this.#registerCommands(commandCenterRegistry);
@@ -92,12 +99,12 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   /** `useViewModel`이 Shell 마운트에 자동으로 건다(`view-only-uses-view-model`) — Shell은 앱
    *  전체에서 한 번만 뜨는 루트라 이게 곧 "앱이 사는 동안"이다. */
   onMount(): void {
-    this.#fileContentViewModel.startWatching();
+    this.#startup.start();
   }
 
-  /** `#fileContentViewModel.stopWatching()`에 위임한다. */
+  /** `#startup.stop()`에 위임한다 — 무엇이 꺼지는지는 조립부만 안다. */
   onDispose(): void {
-    this.#fileContentViewModel.stopWatching();
+    this.#startup.stop();
   }
 
   /** `#activities`를 값으로 노출한다. */
@@ -160,7 +167,8 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   }
 
   /** `isDirty`가 거짓이면 바로 `closeTab`, 참이면 `#pendingTabClose`에 담아 확인을 기다린다. */
-  requestCloseTab(leafId: PaneId, tabId: string, isDirty: boolean): void {
+  requestCloseTab(leafId: PaneId, tabId: string): void {
+    const isDirty = this.#tabDirtyState.isDirty(tabId);
     if (!isDirty) {
       this.closeTab(leafId, tabId);
       return;
@@ -375,7 +383,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
    * `application.tsx`는 `commandCenterRegistryBinding`을 등록하기만 하면 되고, "scope를 만든
    * 다음에 불러야 한다"는 순서 제약 자체가 없어졌다.
    *
-   * `dirtyTabIdsIn`이 `#fileContentViewModel.rows`(교차 도메인, 생성자에서 이미 주입됨)를 본다 —
+   * `dirtyTabIdsIn`이 `#tabDirtyState`(셸이 선언한 계약, 조립부가 채운다)를 본다 —
    * 저장 안 된 탭은 배치로 닫지 않는다.
    */
   #registerCommands(commandCenterRegistry: ICommandCenterRegistry): void {
@@ -436,8 +444,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     /** 이 leaf 안에서, 저장 안 된 변경이 있어 배치로 닫으면 안 되는 탭 id들. */
     const dirtyTabIdsIn = (leafId: PaneId): readonly string[] => {
       const tabs = findLeafTabs(this.tree, leafId) ?? [];
-      const rows = this.#fileContentViewModel.rows;
-      return tabs.filter((tab) => rows[tab.id]?.isDirty === true).map((tab) => tab.id);
+      return tabs.filter((tab) => this.#tabDirtyState.isDirty(tab.id)).map((tab) => tab.id);
     };
 
     const registerSplit = (id: string, label: string, position: SplitEdgeDropPosition): void => {
@@ -462,8 +469,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
       execute: (context) => {
         const target = targetOf(context);
         if (target === null) return;
-        const isDirty = this.#fileContentViewModel.rows[target.tabId]?.isDirty ?? false;
-        this.requestCloseTab(target.leafId, target.tabId, isDirty);
+        this.requestCloseTab(target.leafId, target.tabId);
       },
     });
 
@@ -514,13 +520,19 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     commandCenterRegistry.registerMenuItem({ id: 'shell.tab.context.copyPath', menuId: 'shell.tab.context', commandId: 'shell.tab.copyPath', group: '3_copy', order: 0 });
   }
 
-  /** Model 의 트리를 화면용 트리로 바꾼다 — leaf 의 탭마다 `isPreview` 를 파생시킨다. */
+  /** Model 의 트리를 화면용 트리로 바꾼다 — leaf 의 탭마다 `isPreview`·`isDirty` 를 파생시킨다. */
   #toShellTree(node: TabPaneNode, previewId: string | null): ShellTabPaneNode {
     if (node.kind === 'leaf') {
       return {
         kind: 'leaf',
         id: node.id,
-        tabs: node.tabs.map((tab) => ({ id: tab.id, kind: tab.kind, title: tab.title, isPreview: tab.id === previewId })),
+        tabs: node.tabs.map((tab) => ({
+          id: tab.id,
+          kind: tab.kind,
+          title: tab.title,
+          isPreview: tab.id === previewId,
+          isDirty: this.#tabDirtyState.isDirty(tab.id),
+        })),
         activeTabId: node.activeTabId,
         size: node.size,
       };

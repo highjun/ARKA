@@ -4,13 +4,13 @@ import { mergeClassNames } from '#utils/mergeClassNames';
 import styles from './ChatRoom.module.css';
 import { IconButton } from '@primer/react';
 import { Icon } from '#components/common/Icon';
-import { SidebarLayout } from '#components/shell/SidebarLayout';
-import { InputComposer } from '#components/agent/InputComposer';
-import { Message } from '#components/agent/Message';
-import { StatusIndicator } from '#components/agent/StatusIndicator';
-import type { MessageRole } from '#components/agent/Message';
-import type { InputComposerMode } from '#components/agent/InputComposer';
-import type { StatusIndicatorStatus } from '#components/agent/StatusIndicator';
+import { SidebarLayout } from '#components/layout/SidebarLayout';
+import { InputComposer } from '../InputComposer';
+import { Message } from '../Message';
+import { StatusIndicator } from '../StatusIndicator';
+import type { MessageRole } from '../Message';
+import type { InputComposerMode } from '../InputComposer';
+import type { StatusIndicatorStatus } from '../StatusIndicator';
 
 /** 채팅방 로그에 표시할 메시지 한 건. */
 export interface ChatRoomMessage {
