@@ -14,9 +14,6 @@
     "noImplicitOverride": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
-    "paths": {
-      "@contracts/*": ["./packages/contracts/src/*"]
-    }
+    "noEmit": true
   }
 }

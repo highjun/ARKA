@@ -20,6 +20,10 @@ export default [
       // zod 스키마를 `export const X` + `export type X`로 함께 내보내는데,
       // 코어 규칙은 이걸 재선언으로 본다. 진짜 재선언은 tsc가 잡는다.
       "no-redeclare": "off",
+      // 코어 규칙은 어떤 전역이 있는지 스스로 알 수 없어 `process` 같은 것을
+      // 미정의로 본다. 각 패키지 tsconfig의 `types`가 전역을 정하고 tsc가
+      // 검사하므로 여기서 중복해서 볼 이유가 없다.
+      "no-undef": "off",
     },
   },
 
@@ -49,13 +53,13 @@ export default [
               target: "./packages/client/src",
               from: "./packages/server/src",
               message:
-                "client는 server를 import할 수 없습니다. 공유할 코드는 contracts로 옮기고 @contracts/*로 가져오세요.",
+                "client는 server를 import할 수 없습니다. 공유할 코드는 contracts 패키지로 옮기고 패키지명 'contracts'로 가져오세요.",
             },
             {
               target: "./packages/server/src",
               from: "./packages/client/src",
               message:
-                "server는 client를 import할 수 없습니다. 공유할 코드는 contracts로 옮기고 @contracts/*로 가져오세요.",
+                "server는 client를 import할 수 없습니다. 공유할 코드는 contracts 패키지로 옮기고 패키지명 'contracts'로 가져오세요.",
             },
           ],
         },
