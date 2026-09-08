@@ -7,6 +7,7 @@ import { createProtocolGuard } from "./core/protocol";
 import { createRequestLog } from "./core/requestLog";
 import { createAgentFeature } from "./features/agent";
 import { createFsRoutes, createWatchRoutes, createWorkspaceOperations } from "./features/filesystem";
+import { createSearchRoutes } from "./features/search";
 import { createStaticRoutes } from "./features/static";
 
 export type Application = {
@@ -44,6 +45,7 @@ export const createApp = ({ config, log, startedAt }: { config: ServerConfig; lo
   app.route("/", createWatchRoutes(config.workspaceRoot));
   app.route("/", createFsRoutes(config.workspaceRoot));
   app.route("/", agent.routes);
+  app.route("/", createSearchRoutes(config.workspaceRoot));
 
   // 정적 서빙은 마지막이다 — SPA fallback이 확장자 없는 경로를 전부 index.html로 되돌리므로
   // API 라우트보다 먼저 붙으면 `/api/*`까지 삼킨다.

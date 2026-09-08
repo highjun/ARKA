@@ -5,6 +5,8 @@ import { FileContentViewModelToken, WorkspaceFilesToken } from "../extensions/fi
 import type { IWorkspaceFiles } from "../extensions/filesystem";
 import { MockWorkspaceFiles } from "../extensions/filesystem/model/MockWorkspaceFiles";
 import { AgentApiToken, AgentEventsToken } from "../extensions/agent";
+import { SearchServiceToken } from "../extensions/search";
+import { MockSearchService } from "../extensions/search/model/MockSearchService";
 import { MockAgentBackend } from "../extensions/agent/model/MockAgentBackend";
 import { ErrorLogToken } from "./model/IErrorLog";
 import { TabContentRegistryToken } from "./model/ITabContentRegistry";
@@ -39,6 +41,7 @@ const mountWith = (workspaceFiles: IWorkspaceFiles) => {
   const agent = new MockAgentBackend();
   container.register(AgentApiToken, { lifetime: "singleton", create: () => agent });
   container.register(AgentEventsToken, { lifetime: "singleton", create: () => agent });
+  container.register(SearchServiceToken, { lifetime: "singleton", create: () => new MockSearchService({ "a.md": "원본" }) });
   render(
     <ViewModelProvider container={container}>
       <RootView />
@@ -190,5 +193,17 @@ describe("에이전트 배선", () => {
       fireEvent.submit(textarea.closest("form") as HTMLFormElement);
     });
     expect(await screen.findByText("받은 입력: 안녕")).toBeDefined();
+  });
+});
+
+describe("검색 배선", () => {
+  it("검색 활동에서 찾은 결과를 누르면 파일 탭이 열린다", async () => {
+    mountWith(new MockWorkspaceFiles({ "a.md": "원본" }));
+    fireEvent.click(screen.getByLabelText("검색"));
+    await act(async () => {
+      fireEvent.change(await screen.findByLabelText("검색어"), { target: { value: "원본" } });
+    });
+    fireEvent.click(await screen.findByText("원본", { selector: "span" }));
+    expect(await screen.findByRole("tab", { name: /a\.md/u })).toBeDefined();
   });
 });

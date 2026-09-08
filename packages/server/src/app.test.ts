@@ -65,6 +65,14 @@ describe("createApp", () => {
     expect(await response.json()).toMatchObject({ content: "hello" });
   });
 
+  it("/api/search가 워크스페이스를 찾는다", async () => {
+    const response = await buildApp().request("/api/search?query=hel&caseSensitive=false", withProtocol());
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ matches: [{ path: "a.txt", line: 1, column: 1, preview: "hello" }], truncated: false });
+    const bad = await buildApp().request("/api/search?query=", withProtocol());
+    expect(bad.status).toBe(400);
+  });
+
   it("옮기기 목적지가 이미 있으면 409이고 덮어쓰지 않는다", async () => {
     await writeFile(path.join(workspaceRoot, "b.txt"), "keep");
     const app = buildApp();

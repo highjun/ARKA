@@ -26,6 +26,9 @@ import { createAgentApiPort } from "../extensions/agent/infra/HttpAgentApi";
 import { createAgentEventsPort } from "../extensions/agent/infra/SseAgentEvents";
 import { ChatSessionsView } from "../extensions/agent/view/ChatSessionsView";
 import { ChatTabView } from "../extensions/agent/view/ChatTabView";
+import { SearchModel, SearchModelToken, SearchServiceToken, SearchViewModel, SearchViewModelToken } from "../extensions/search";
+import { createSearchServicePort } from "../extensions/search/infra/HttpSearchService";
+import { SearchView } from "../extensions/search/view/SearchView";
 import { createWorkspaceFilesPort } from "../extensions/filesystem/infra/HttpWorkspaceFiles";
 import { createWorkspaceWatchPort } from "../extensions/filesystem/infra/HttpWorkspaceWatch";
 import { DirectoryTreeView } from "../extensions/filesystem/view/DirectoryTreeView";
@@ -75,6 +78,8 @@ const WorkbenchStartupToken = createToken<IWorkbenchStartup>("workbenchStartup")
 const EXPLORER_ID = "explorer";
 /** 에이전트 활동의 id. */
 const AGENT_ID = "agent";
+/** 검색 활동의 id. */
+const SEARCH_ID = "search";
 /** 파일 탭의 kind. `IShellViewModel.previewFile`이 여는 탭의 kind와 같아야 TabContent가 찾는다. */
 const FILE_TAB_KIND = "file";
 
@@ -104,6 +109,7 @@ export function createApplication(): Container {
 
   container.register(WorkspaceFilesToken, singleton(createWorkspaceFilesPort));
   container.register(WorkspaceWatchToken, singleton(createWorkspaceWatchPort));
+  container.register(SearchServiceToken, singleton(createSearchServicePort));
   container.register(AgentApiToken, singleton(createAgentApiPort));
   container.register(AgentEventsToken, singleton(createAgentEventsPort));
   container.register(StorageToken, singleton(createStoragePort));
@@ -154,6 +160,8 @@ export function createApplication(): Container {
   // ViewModel은 scoped다 — 화면 하나가 사는 동안만 유지되고, 그 스코프를 dispose하면
   // 구독까지 함께 정리된다.
   container.register(ChatViewModelToken, scoped((c) => new ChatViewModel({ chatModel: c.resolve(ChatModelToken) })));
+  container.register(SearchModelToken, singleton((c) => new SearchModel({ searchService: c.resolve(SearchServiceToken) })));
+  container.register(SearchViewModelToken, scoped((c) => new SearchViewModel({ searchModel: c.resolve(SearchModelToken) })));
   container.register(
     DirectoryTreeViewModelToken,
     scoped(
@@ -276,6 +284,8 @@ export function createApplication(): Container {
     iconId: "fileCode",
     TabComponent: ({ tabId }) => <FileContentView path={tabId} />,
   });
+  container.resolve(ActivityBarRegistryToken).add({ id: SEARCH_ID, title: "검색", iconId: "search" });
+  container.resolve(SidebarContentRegistryToken).add({ id: SEARCH_ID, PanelComponent: ({ onFileOpen }) => <SearchView onFileOpen={onFileOpen} /> });
   container.resolve(ActivityBarRegistryToken).add({ id: AGENT_ID, title: "에이전트", iconId: "brain" });
   container.resolve(SidebarContentRegistryToken).add({ id: AGENT_ID, PanelComponent: ({ onOpenTab }) => <ChatSessionsView onOpenTab={onOpenTab} /> });
   container.resolve(TabContentRegistryToken).add({
