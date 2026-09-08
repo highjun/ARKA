@@ -18,6 +18,18 @@
 
 백로그 전체는 `backlog/tasks/`(Backlog.md)에 있다. 이 문서는 설계 메모와 위 목록만 둔다.
 
+## 현재 상태 (2026-09-09, 브랜치 `restructure/client-microkernel-prestage`, main 대비 48커밋)
+
+`pnpm run check`(타입·린트·stylelint·테스트 1,300여 개)·E2E 13·VRT 138·Docker 경계 스모크가 전부 통과한다. 로컬에서 보려면:
+
+```
+pnpm install && pnpm run build && pnpm run start   # http://127.0.0.1:3000, 워크스페이스는 현재 디렉터리(ADE_WORKSPACE)
+```
+
+들어 있는 것: 탐색기·에디터(검색 결과 줄 이동), 파일에서 찾기(Ctrl+Shift+F), 소스 제어(상태·diff·스테이지·커밋, Ctrl+Shift+G), 에이전트 대화(세션·스트리밍·입력 요청·파일 변경 확인, Ctrl+Shift+A; 키 없으면 스크립트 실행기), 마크다운 미리보기(Ctrl+Shift+V), 커맨드 팔레트(Ctrl+K)·키보드 단축키 탭·설정 탭(테마·밀도, Ctrl+,), 오류 화면·알림, PWA, 프로토콜 버전 띠. 운영: JSON 로그·헬스·SIGTERM·요청 로그·인증 컨텍스트 자리·SQLite 이벤트 로그·Dockerfile/compose·CI(check/e2e/VRT/docker)·릴리스 워크플로.
+
+결정을 남긴 것(백로그 TASK-14·16·17)은 취향 문제라 한 줄 답이면 반영한다. 나머지 판단은 각 커밋 본문의 "결정한 것 / 확인 필요"에 신고해 뒀다 — `git log main..HEAD`로 훑으면 된다.
+
 ---
 
 ## Server 구조
