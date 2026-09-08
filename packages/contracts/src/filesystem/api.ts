@@ -1,31 +1,36 @@
 import { z } from "zod";
 import { ErrorBody } from "../common/errors";
-import { ProtocolVersioned } from "../common/version";
-import { FileErrorCode } from "./types";
+import { FileEntryType } from "./types";
 
-/** `/fs/*` 엔드포인트가 반환하는 에러 바디. */
-export const FileErrorBody = ErrorBody.extend({ code: FileErrorCode });
+/** `/api/files*` 엔드포인트가 반환하는 에러 바디. */
+export const FileErrorBody = ErrorBody;
 export type FileErrorBody = z.infer<typeof FileErrorBody>;
 
 /**
- * `uri`는 형식을 검증하지 않고 문자열로 받는다. 서버가 `URI.parse()`로 파싱하며
- * 잘못된 값은 거기서 걸린다. 스키마에서도 검사하면 같은 파싱이 두 번 돈다.
+ * 쓰기·생성·이동·삭제가 공통으로 돌려주는 응답. 바뀐 대상의 경로만 알린다 — 호출부가
+ * 그것으로 자기 상태를 갱신한다.
  */
-export const ReadFileRequest = ProtocolVersioned.extend({
-  uri: z.string(),
-});
-export type ReadFileRequest = z.infer<typeof ReadFileRequest>;
+export const PathResult = z.object({ path: z.string() });
+export type PathResult = z.infer<typeof PathResult>;
 
-/**
- * `content`는 파일 바이트를 base64로 인코딩한 값이다. 전송이 JSON이라 바이트를
- * 그대로 실을 수 없다.
- *
- * `etag`는 그 바이트를 읽은 시점의 버전이다. 지금은 쓰는 데가 없지만, 나중에
- * 쓰기가 이 값을 되돌려줘 그사이 끼어든 변경을 감지한다. 그때 추가하면 응답
- * 스키마가 바뀌고 그건 곧 프로토콜 변경이다.
- */
-export const ReadFileResponse = z.object({
-  content: z.base64(),
-  etag: z.string(),
+export const WriteFileRequest = z.object({
+  path: z.string(),
+  content: z.string(),
 });
-export type ReadFileResponse = z.infer<typeof ReadFileResponse>;
+export type WriteFileRequest = z.infer<typeof WriteFileRequest>;
+
+export const CreateEntryRequest = z.object({
+  path: z.string(),
+  type: FileEntryType,
+});
+export type CreateEntryRequest = z.infer<typeof CreateEntryRequest>;
+
+export const MoveEntryRequest = z.object({
+  from: z.string(),
+  to: z.string(),
+});
+export type MoveEntryRequest = z.infer<typeof MoveEntryRequest>;
+
+/** SSE로 흘려보내는 파일 변경 알림. 경로 하나가 바뀌었다는 사실만 담는다. */
+export const WatchEvent = z.object({ path: z.string() });
+export type WatchEvent = z.infer<typeof WatchEvent>;
