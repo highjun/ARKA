@@ -26,6 +26,10 @@ import { createAgentApiPort } from "../extensions/agent/infra/HttpAgentApi";
 import { createAgentEventsPort } from "../extensions/agent/infra/SseAgentEvents";
 import { ChatSessionsView } from "../extensions/agent/view/ChatSessionsView";
 import { ChatTabView } from "../extensions/agent/view/ChatTabView";
+import { DIFF_TAB_KIND, GitModel, GitModelToken, GitServiceToken, SourceControlViewModel, SourceControlViewModelToken } from "../extensions/git";
+import { createGitServicePort } from "../extensions/git/infra/HttpGitService";
+import { DiffTabView } from "../extensions/git/view/DiffTabView";
+import { SourceControlView } from "../extensions/git/view/SourceControlView";
 import { SearchModel, SearchModelToken, SearchServiceToken, SearchViewModel, SearchViewModelToken } from "../extensions/search";
 import { createSearchServicePort } from "../extensions/search/infra/HttpSearchService";
 import { SearchView } from "../extensions/search/view/SearchView";
@@ -80,6 +84,8 @@ const EXPLORER_ID = "explorer";
 const AGENT_ID = "agent";
 /** 검색 활동의 id. */
 const SEARCH_ID = "search";
+/** 소스 제어 활동의 id. */
+const SCM_ID = "scm";
 /** 파일 탭의 kind. `IShellViewModel.previewFile`이 여는 탭의 kind와 같아야 TabContent가 찾는다. */
 const FILE_TAB_KIND = "file";
 
@@ -110,6 +116,7 @@ export function createApplication(): Container {
   container.register(WorkspaceFilesToken, singleton(createWorkspaceFilesPort));
   container.register(WorkspaceWatchToken, singleton(createWorkspaceWatchPort));
   container.register(SearchServiceToken, singleton(createSearchServicePort));
+  container.register(GitServiceToken, singleton(createGitServicePort));
   container.register(AgentApiToken, singleton(createAgentApiPort));
   container.register(AgentEventsToken, singleton(createAgentEventsPort));
   container.register(StorageToken, singleton(createStoragePort));
@@ -162,6 +169,8 @@ export function createApplication(): Container {
   container.register(ChatViewModelToken, scoped((c) => new ChatViewModel({ chatModel: c.resolve(ChatModelToken) })));
   container.register(SearchModelToken, singleton((c) => new SearchModel({ searchService: c.resolve(SearchServiceToken) })));
   container.register(SearchViewModelToken, scoped((c) => new SearchViewModel({ searchModel: c.resolve(SearchModelToken) })));
+  container.register(GitModelToken, singleton((c) => new GitModel({ gitService: c.resolve(GitServiceToken) })));
+  container.register(SourceControlViewModelToken, scoped((c) => new SourceControlViewModel({ gitModel: c.resolve(GitModelToken) })));
   container.register(
     DirectoryTreeViewModelToken,
     scoped(
@@ -286,6 +295,9 @@ export function createApplication(): Container {
   });
   container.resolve(ActivityBarRegistryToken).add({ id: SEARCH_ID, title: "검색", iconId: "search" });
   container.resolve(SidebarContentRegistryToken).add({ id: SEARCH_ID, PanelComponent: ({ onFileOpen }) => <SearchView onFileOpen={onFileOpen} /> });
+  container.resolve(ActivityBarRegistryToken).add({ id: SCM_ID, title: "소스 제어", iconId: "sourceControl" });
+  container.resolve(SidebarContentRegistryToken).add({ id: SCM_ID, PanelComponent: ({ onOpenTab }) => <SourceControlView onOpenTab={onOpenTab} /> });
+  container.resolve(TabContentRegistryToken).add({ id: DIFF_TAB_KIND, iconId: "sourceControl", TabComponent: ({ tabId }) => <DiffTabView tabId={tabId} /> });
   container.resolve(ActivityBarRegistryToken).add({ id: AGENT_ID, title: "에이전트", iconId: "brain" });
   container.resolve(SidebarContentRegistryToken).add({ id: AGENT_ID, PanelComponent: ({ onOpenTab }) => <ChatSessionsView onOpenTab={onOpenTab} /> });
   container.resolve(TabContentRegistryToken).add({

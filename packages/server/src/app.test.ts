@@ -65,6 +65,14 @@ describe("createApp", () => {
     expect(await response.json()).toMatchObject({ content: "hello" });
   });
 
+  it("/api/git/status는 저장소가 아니면 repository: false", async () => {
+    const response = await buildApp().request("/api/git/status", withProtocol());
+    expect(await response.json()).toEqual({ repository: false, branch: null, files: [] });
+    const commit = await buildApp().request("/api/git/commit", json({ message: "x" }));
+    expect(commit.status).toBe(404);
+    expect(await commit.json()).toMatchObject({ code: "NotARepository" });
+  });
+
   it("/api/search가 워크스페이스를 찾는다", async () => {
     const response = await buildApp().request("/api/search?query=hel&caseSensitive=false", withProtocol());
     expect(response.status).toBe(200);

@@ -13,6 +13,8 @@ RUN pnpm run build
 
 # 실행 단계 — node_modules가 없다. 서버는 의존성까지 한 파일로 번들됐고 클라이언트는 정적 파일이다.
 FROM node:24-alpine
+# 소스 제어 기능이 git CLI를 워크스페이스에서 돌린다(features/git).
+RUN apk add --no-cache git
 ENV NODE_ENV=production \
     ADE_HOST=0.0.0.0 \
     ADE_PORT=3000 \

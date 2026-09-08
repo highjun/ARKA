@@ -1,0 +1,67 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.empty {
+  padding: var(--space-md);
+}
+
+.header {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: center;
+  padding: var(--space-sm);
+}
+
+.commit {
+  display: flex;
+  gap: var(--space-xs);
+  padding: 0 var(--space-sm) var(--space-sm);
+}
+
+.failure {
+  display: block;
+  padding: 0 var(--space-sm) var(--space-xs);
+}
+
+.lists {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.groupHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: var(--space-xs);
+}
+
+.badge {
+  font-family: var(--fontStack-monospace);
+  font-size: var(--text-body-size-small);
+  color: var(--fgColor-muted);
+}
+
+.badge[data-badge='A'],
+.badge[data-badge='U'] {
+  color: var(--fgColor-success);
+}
+
+.badge[data-badge='D'] {
+  color: var(--fgColor-danger);
+}
+
+.badge[data-badge='M'] {
+  color: var(--fgColor-attention);
+}
+
+.path {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -1,0 +1,36 @@
+.root {
+  height: 100%;
+  margin: 0;
+  overflow: auto;
+  font-family: var(--fontStack-monospace);
+  font-size: var(--text-body-size-small);
+  line-height: var(--text-body-lineHeight-small);
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-lg);
+}
+
+.line {
+  display: block;
+  padding: 0 var(--space-sm);
+}
+
+.line[data-kind='add'] {
+  background-color: var(--bgColor-success-muted);
+}
+
+.line[data-kind='del'] {
+  background-color: var(--bgColor-danger-muted);
+}
+
+.line[data-kind='hunk'] {
+  color: var(--fgColor-accent);
+  background-color: var(--bgColor-accent-muted);
+}
+
+.line[data-kind='meta'] {
+  color: var(--fgColor-muted);
+}
