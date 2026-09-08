@@ -20,7 +20,7 @@ import { FileContentView } from "../extensions/filesystem/view/FileContentView";
 import { createDocumentTheme } from "./infra/DocumentTheme";
 import { createGlobalErrorHandlers } from "./infra/GlobalErrorHandlers";
 import { createGlobalKeybindings } from "./infra/GlobalKeybindings";
-import { createBuildInfoPort } from "./infra/HttpBuildInfo";
+import { createServerInfoPort } from "./infra/HttpServerInfo";
 import { createUnloadGuard } from "./infra/UnloadGuard";
 import { createStoragePort } from "./infra/LocalStorage";
 import { WorkbenchStartupRegistry } from "./model/WorkbenchStartupRegistry";
@@ -34,7 +34,7 @@ import { TabsModel } from "./model/TabsModel";
 import { ThemeModel } from "./model/ThemeModel";
 import { ShellViewModel } from "./viewmodel/ShellViewModel";
 import { ActivityBarRegistryToken } from "./model/IActivityBarRegistry";
-import { BuildInfoToken } from "./model/IBuildInfo";
+import { ServerInfoToken } from "./model/IServerInfo";
 import { ActivityModelToken } from "./model/IActivityModel";
 import { SidebarContentRegistryToken } from "./model/ISidebarContentRegistry";
 import { StorageToken } from "./model/IStorage";
@@ -73,6 +73,9 @@ export function createApplication(): Container {
   const copyToClipboard = (text: string): void => {
     void navigator.clipboard.writeText(text);
   };
+  const reloadApp = (): void => {
+    location.reload();
+  };
   const isTypingSurface = (): boolean => {
     const active = document.activeElement;
     if (active === null) return false;
@@ -83,7 +86,7 @@ export function createApplication(): Container {
   container.register(WorkspaceFilesToken, singleton(createWorkspaceFilesPort));
   container.register(WorkspaceWatchToken, singleton(createWorkspaceWatchPort));
   container.register(StorageToken, singleton(createStoragePort));
-  container.register(BuildInfoToken, singleton(createBuildInfoPort));
+  container.register(ServerInfoToken, singleton(createServerInfoPort));
   container.register(CommandCenterRegistryToken, singleton(() => new CommandCenterRegistry()));
   container.register(ActivityBarRegistryToken, singleton(() => new ActivityBarRegistry()));
   container.register(SidebarContentRegistryToken, singleton(() => new SidebarContentRegistry()));
@@ -215,9 +218,10 @@ export function createApplication(): Container {
           activityBarRegistry: c.resolve(ActivityBarRegistryToken),
           tabDirtyState: c.resolve(TabDirtyStateToken),
           startup: c.resolve(WorkbenchStartupToken),
-          buildInfo: c.resolve(BuildInfoToken),
+          serverInfo: c.resolve(ServerInfoToken),
           commandCenterRegistry: c.resolve(CommandCenterRegistryToken),
           copyToClipboard,
+          reloadApp,
         }),
     ),
   );

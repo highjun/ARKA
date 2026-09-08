@@ -4,6 +4,8 @@ export { CrashScreen } from './CrashScreen';
 export type { CrashScreenProps } from './CrashScreen';
 export { ErrorBoundary } from './ErrorBoundary';
 export type { ErrorBoundaryProps } from './ErrorBoundary';
+export { UpdateBanner } from './UpdateBanner';
+export type { UpdateBannerProps } from './UpdateBanner';
 export { CommandPalette } from './CommandPalette';
 export type { CommandPaletteItem, CommandPaletteProps, CommandPaletteRootProps } from './CommandPalette';
 export { Shell } from './Shell';

@@ -1,7 +1,7 @@
 import { createRegistry } from '#core';
 import type { ITabDirtyState } from '../model/ITabDirtyState';
 import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
-import type { IBuildInfo } from '../model/IBuildInfo';
+import type { IServerInfo } from '../model/IServerInfo';
 import type { ICommandCenterRegistry } from '#core/commands';
 import { ActivityModel } from '../model/ActivityModel';
 import { ROOT_PANE_ID } from '../model/tabsShare';
@@ -65,13 +65,11 @@ const fakeStartup = (): IWorkbenchStartup & { started: boolean } => {
 
 /** 진짜 Model 을 조립한다 — I/O 가 없어 바꿔 낄 이유가 없다. `activityBarRegistry`는 탐색기
  *  하나만 등록한 가짜다 — 진짜(`registerServices.tsx`)와 같은 모양이면 충분하다. */
-const make = (): { tabsModel: ITabsModel; viewModel: IShellViewModel; tabDirtyState: ITabDirtyState & { dirty: Set<string> }; startup: IWorkbenchStartup & { started: boolean } } => {
+const make = (serverInfo: IServerInfo = { load: () => Promise.resolve(null) }): { tabsModel: ITabsModel; viewModel: IShellViewModel; tabDirtyState: ITabDirtyState & { dirty: Set<string> }; startup: IWorkbenchStartup & { started: boolean } } => {
   const activityBarRegistry: IActivityBarRegistry = createRegistry();
   activityBarRegistry.add({ id: 'explorer', title: '탐색기', iconId: 'files' });
   const tabDirtyState = fakeTabDirtyState();
   const startup = fakeStartup();
-  const buildInfo: IBuildInfo = { load: () => Promise.resolve(null) };
-
   const storage = fakeStorage();
   const activityModel = new ActivityModel();
   const tabsModel = new TabsModel({ storage });
@@ -83,9 +81,10 @@ const make = (): { tabsModel: ITabsModel; viewModel: IShellViewModel; tabDirtySt
     activityBarRegistry,
     tabDirtyState,
     startup,
-    buildInfo,
+    serverInfo,
     commandCenterRegistry: fakeCommandCenterRegistry(),
     copyToClipboard: () => undefined,
+    reloadApp: () => undefined,
   });
   return { tabsModel, viewModel, tabDirtyState, startup };
 };
@@ -787,5 +786,32 @@ describe('onMount / onDispose — 파일 감시 생명주기 위임', () => {
     viewModel.onDispose();
 
     expect(startup.started).toBe(false);
+  });
+});
+
+describe('IShellViewModel — 낡은 클라이언트', () => {
+  const settled = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  it('서버 프로토콜 버전이 다르면 낡았다고 표시한다', async () => {
+    const { viewModel } = make({ load: () => Promise.resolve({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 999 }) });
+    viewModel.onMount?.();
+    await settled();
+    expect(viewModel.isClientOutdated).toBe(true);
+    expect(viewModel.buildId).not.toBe('');
+  });
+
+  it('같으면 낡지 않았다', async () => {
+    const { viewModel } = make({ load: () => Promise.resolve({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1 }) });
+    viewModel.onMount?.();
+    await settled();
+    expect(viewModel.isClientOutdated).toBe(false);
+  });
+
+  it('서버 정보를 못 읽으면 낡지 않은 것으로 둔다 — 진단이 기능을 막지 않는다', async () => {
+    const { viewModel } = make();
+    viewModel.onMount?.();
+    await settled();
+    expect(viewModel.isClientOutdated).toBe(false);
+    expect(viewModel.buildId).toBe('');
   });
 });

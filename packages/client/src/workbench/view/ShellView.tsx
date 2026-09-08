@@ -7,7 +7,7 @@ import { useViewModel } from '#core/view-model';
 import { Button } from '@primer/react';
 import { ContextMenu, Icon, ModeToggle, Text } from '#components/common';
 import { Dialog } from '#components/layout';
-import { CommandPalette, Shell, Tab } from '../component';
+import { CommandPalette, Shell, Tab, UpdateBanner } from '../component';
 import type { IconId } from '#components/common';
 import type { TabItem, TabTreeNode } from '../component';
 import type { ReactNode } from 'react';
@@ -169,6 +169,7 @@ export const ShellView = () => {
 
   return (
     <>
+      {viewModel.isClientOutdated ? <UpdateBanner onReload={() => viewModel.reloadApp()} /> : null}
       <Shell
         colorMode={viewModel.theme as 'light' | 'dark'}
         overlays={

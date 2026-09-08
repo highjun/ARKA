@@ -3,7 +3,8 @@ import { ViewModelBase } from '#core/view-model';
 import { atom } from 'nanostores';
 import type { ITabDirtyState } from '../model/ITabDirtyState';
 import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
-import type { IBuildInfo } from '../model/IBuildInfo';
+import { PROTOCOL_VERSION } from 'contracts';
+import type { IServerInfo } from '../model/IServerInfo';
 import type { IActivityBarRegistry } from '../model/IActivityBarRegistry';
 import type { IActivityModel } from '../model/IActivityModel';
 import type { ICommandCenterRegistry } from '#core/commands';
@@ -46,8 +47,10 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
    */
   readonly #tabDirtyState: ITabDirtyState;
   readonly #startup: IWorkbenchStartup;
-  readonly #buildInfo: IBuildInfo;
+  readonly #serverInfo: IServerInfo;
   readonly #buildId = this.observe(atom(''));
+  readonly #isClientOutdated = this.observe(atom(false));
+  readonly #reloadApp: () => void;
   readonly #activities;
   readonly #tree;
   readonly #activeLeafId;
@@ -73,9 +76,10 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     activityBarRegistry,
     tabDirtyState,
     startup,
-    buildInfo,
+    serverInfo,
     commandCenterRegistry,
     copyToClipboard,
+    reloadApp,
   }: {
     activityModel: IActivityModel;
     tabsModel: ITabsModel;
@@ -83,11 +87,13 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     activityBarRegistry: IActivityBarRegistry;
     tabDirtyState: ITabDirtyState;
     startup: IWorkbenchStartup;
-    buildInfo: IBuildInfo;
+    serverInfo: IServerInfo;
     commandCenterRegistry: ICommandCenterRegistry;
     /** `no-restricted-globals`가 ViewModel의 `navigator` 직접 참조를 막는다 — 조립부(`app/`,
      *  대상 아님)가 이 얇은 함수를 주입한다(`DirectoryTreeViewModel`과 같은 패턴). */
     copyToClipboard: (text: string) => void;
+    /** `location.reload()` — 같은 이유로 주입받는다. */
+    reloadApp: () => void;
   }) {
     super();
     this.#activityModel = activityModel;
@@ -96,8 +102,9 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     this.#activityBar = activityBarRegistry;
     this.#tabDirtyState = tabDirtyState;
     this.#startup = startup;
-    this.#buildInfo = buildInfo;
+    this.#serverInfo = serverInfo;
     this.#copyToClipboard = copyToClipboard;
+    this.#reloadApp = reloadApp;
 
     // Model은 값과 이벤트만 준다 — 파생된 화면 상태(atom)는 전부 여기서 소유한다.
     this.#activities = this.observe(atom(this.#computeActivities()));
@@ -120,8 +127,9 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
    *  전체에서 한 번만 뜨는 루트라 이게 곧 "앱이 사는 동안"이다. */
   onMount(): void {
     this.#startup.start();
-    void this.#buildInfo.load().then((builtAt) => {
-      this.#buildId.set(builtAt === null ? '' : formatBuildTime(builtAt));
+    void this.#serverInfo.load().then((info) => {
+      this.#buildId.set(info === null ? '' : formatBuildTime(info.builtAt));
+      this.#isClientOutdated.set(info !== null && info.protocolVersion !== PROTOCOL_VERSION);
     });
   }
 
@@ -350,6 +358,14 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   /** 화면 구석에 띄울 빌드 표시. 아직 못 읽었거나 실패했으면 빈 문자열이다. */
   get buildId(): string {
     return this.#buildId.get();
+  }
+
+  get isClientOutdated(): boolean {
+    return this.#isClientOutdated.get();
+  }
+
+  reloadApp(): void {
+    this.#reloadApp();
   }
 
   get theme(): string {
