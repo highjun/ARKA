@@ -3,7 +3,7 @@ import { DirectoryListing, FileContent, FileErrorBody } from 'contracts';
 import type { FileEntryType, IWorkspaceFiles } from '../model/IWorkspaceFiles';
 
 /**
- * 세션 서버(`server/files.ts`)의 파일 API 를 읽는 구현.
+ * 서버(`features/filesystem`)의 파일 API 를 읽는 구현.
  *
  * 경로가 상대(`/api/files`)인 것은 개발에서는 vite 프록시가, 배포에서는 같은 서버가 한 오리진으로
  * 묶어 주기 때문이다 — 클라이언트가 서버 주소를 알면 배포 형태가 코드에 새어든다.

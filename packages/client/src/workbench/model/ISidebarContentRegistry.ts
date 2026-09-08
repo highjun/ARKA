@@ -26,7 +26,7 @@ export type SidebarContentDescriptor = {
 export const SidebarContentRegistryToken = createToken<ISidebarContentRegistry>("sidebarContentRegistry");
 /**
  * 2026-09-06 — Registry가 Model과 같은 파일 구성 엄격함을 받으면서 타입 별칭에서 인터페이스로
- * 바뀌었다. `@arka/core`의 `Registry<T>`와 구조가 같지만, 빈 `extends`는
+ * 바뀌었다. `core`의 `Registry<T>`와 구조가 같지만, 빈 `extends`는
  * `@typescript-eslint/no-empty-object-type`에 걸려 멤버를 그대로 옮겨 적는다.
  */
 export interface ISidebarContentRegistry {

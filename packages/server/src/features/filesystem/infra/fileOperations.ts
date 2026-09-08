@@ -9,12 +9,12 @@ import type { DirectoryListing, FileContent, FileEntry, FileEntryType } from 'co
  * 본다** — dist 는 우리가 만든 정적 산출물이지만 워크스페이스에는 실제로 심링크가 있고,
  * 문자열 검사만으로는 그 너머로 나가는 것을 막지 못한다.
  *
- * 순수 함수로 둔다(NestJS DI에 묶지 않는다) — `FilesService`가 `ConfigService`의 `workdir`을
- * 채워 얇게 감쌀 뿐, 여기 로직은 프레임워크와 무관하게 독립적으로 테스트한다(`files.util.spec.ts`,
+ * 순수 함수로 둔다 — 라우트(`transport/fsRoutes.ts`)와 유스케이스(`services/`)가 워크스페이스 루트를
+ * 채워 부를 뿐, 여기 로직은 프레임워크와 무관하게 독립적으로 테스트한다(`fileOperations.test.ts`,
  * 실제 디스크·심링크를 쓴다).
  *
- * 마운트가 여전히 `:ro` 면 쓰기·생성·이동·삭제는 전부 `EROFS` 로 실패한다 — 그건 이 파일이 아니라
- * 배포 설정(`arka.deploy.json`)이 정한다.
+ * 마운트가 `:ro` 면 쓰기·생성·이동·삭제는 전부 `EROFS` 로 실패한다 — 그건 이 파일이 아니라
+ * 배포 설정(`docker-compose.yml`)이 정한다.
  */
 
 /** 폰 브라우저에 통째로 밀어넣지 않기 위한 상한. 넘으면 잘라서 `truncated` 로 알린다. */
@@ -143,7 +143,7 @@ export const readFileContent = async (rootDir: string, absPath: string): Promise
  * 파일을 통째로 덮어쓴다.
  *
  * 호출부가 이미 `resolveWithin` 으로 경로를 걸렀고, 대상이 파일임도 `stat` 으로 확인한 뒤 부른다
- * — 여기서 다시 확인하지 않는다(`FilesController` 의 라우팅 하나가 그 책임을 진다).
+ * — 여기서 다시 확인하지 않는다(`fsRoutes` 의 라우팅 하나가 그 책임을 진다).
  *
  * **잘린 파일(`truncated: true`)은 여기로 오면 안 된다.** 앞부분만 읽은 내용을 덮어쓰면 뒷부분이
  * 통째로 사라진다 — 그 판단은 클라이언트가 `readOnly` 로 미리 막는다(`FileContentViewModel`).
@@ -179,7 +179,7 @@ export const moveEntry = async (fromAbs: string, toAbs: string): Promise<void> =
  * 파일이나 디렉터리를 지운다. 디렉터리면 안까지 통째로.
  *
  * 되돌릴 방법이 없는 작업이다 — 확인은 호출부(컨텍스트 메뉴의 다이얼로그)의 몫이고, 여기서는
- * 다시 묻지 않는다. 워크스페이스 루트 자신을 지우는 것을 막는 것도 호출부(`FilesController`)의
+ * 다시 묻지 않는다. 워크스페이스 루트 자신을 지우는 것을 막는 것도 호출부(`fsRoutes`)의
  * 몫이다 — 이 함수는 `rootDir` 을 모르므로 판단할 수 없다.
  */
 export const removeEntry = async (absPath: string): Promise<void> => {

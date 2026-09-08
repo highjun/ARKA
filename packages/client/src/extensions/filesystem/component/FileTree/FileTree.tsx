@@ -364,7 +364,7 @@ export interface FileTreeRootProps extends Omit<HTMLAttributes<HTMLElement>, 'ch
  * 트리라 data-driven이 요구사항에 더 맞는다).
  *
  * `expandedIds`/`selectedIds`는 하이브리드 controlled/uncontrolled다(`ModeToggle`/`CommandPalette`
- * 등 `@arka/ui`의 다른 stateful 컴포넌트와 같은 관용구) — 값을 넘기면 그게 우선하고, 안 넘기면
+ * 등 `shared/components`의 다른 stateful 컴포넌트와 같은 관용구) — 값을 넘기면 그게 우선하고, 안 넘기면
  * `defaultExpandedIds`/`defaultSelectedIds`를 시작값으로 이 컴포넌트가 스스로 관리한다. 그 외에
  * "지금 포커스가 어디 있는지"는 항상 이 컴포넌트 내부 상태이고, `useTreeNavigation`에 있다.
  *

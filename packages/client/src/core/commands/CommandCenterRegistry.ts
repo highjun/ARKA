@@ -12,7 +12,7 @@ import type {
   MenuRegistry,
 } from './ICommandCenterRegistry';
 
-/** `ICommandCenterRegistry`의 유일한 구현체 — 네 레지스트리 모두 `@arka/core`의 `createRegistry()`로 만든다. */
+/** `ICommandCenterRegistry`의 유일한 구현체 — 네 레지스트리 모두 `core`의 `createRegistry()`로 만든다. */
 export class CommandCenterRegistry implements ICommandCenterRegistry {
   readonly #commands: CommandRegistry = createRegistry();
   readonly #contexts: ContextRegistry = createRegistry();

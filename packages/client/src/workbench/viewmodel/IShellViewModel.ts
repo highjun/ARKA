@@ -2,7 +2,7 @@ import { createToken } from '#core/di';
 import type { PaneId } from '../model/ITabsModel';
 
 /**
- * `@arka/ui`의 `TabSplitOrientation`·`SplitEdgeDropPosition`과 값이 같다 — ViewModel도 Model과
+ * `shared/components`의 `TabSplitOrientation`·`SplitEdgeDropPosition`과 값이 같다 — ViewModel도 Model과
  * 같은 이유로 외부 라이브러리를 직접 import 하지 않는다(`MODEL-13`, ViewModel도 대상이다). Model이
  * `TabSplitOrientation`을 이미 선언해 뒀지만 그걸 가져다 쓰는 대신 여기서도 다시 선언한다 —
  * 가져다 쓰면 이 파일이 `export type { TabSplitOrientation }`로 다시 내보내야 View 층까지
@@ -88,7 +88,7 @@ export const ShellViewModelToken = createToken<IShellViewModel>("shellViewModel"
 export interface IShellViewModel {
   /**
    * `useViewModel`이 Shell 마운트/언마운트에 자동으로 건다(`view-only-uses-view-model` — View는
-   * 이 훅을 직접 걸 수 없다, `@arka/core`의 `useViewModel` 생명주기 참고). 열린 파일 감시 시작·
+   * 이 훅을 직접 걸 수 없다, `core`의 `useViewModel` 생명주기 참고). 열린 파일 감시 시작·
    * 정지를 여기 얹는다 — Shell은 앱 전체에서 한 번만 마운트되는 루트라 그 생명주기가 곧 "앱이
    * 사는 동안"과 같다.
    */

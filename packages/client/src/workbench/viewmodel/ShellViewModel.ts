@@ -94,7 +94,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     serverInfo: IServerInfo;
     notificationService: INotificationService;
     commandCenterRegistry: ICommandCenterRegistry;
-    /** `no-restricted-globals`가 ViewModel의 `navigator` 직접 참조를 막는다 — 조립부(`app/`,
+    /** `no-restricted-globals`가 ViewModel의 `navigator` 직접 참조를 막는다 — 조립부(`registerServices.tsx`,
      *  대상 아님)가 이 얇은 함수를 주입한다(`DirectoryTreeViewModel`과 같은 패턴). */
     copyToClipboard: (text: string) => void;
     /** `location.reload()` — 같은 이유로 주입받는다. */

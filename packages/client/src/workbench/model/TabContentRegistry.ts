@@ -1,7 +1,7 @@
 import { createRegistry, type DescriptorMatch, type Registry } from '#core';
 import type { TabContentDescriptor, ITabContentRegistry } from './ITabContentRegistry';
 
-/** `ITabContentRegistry`의 유일한 구현체 — `@arka/core`의 `createRegistry()`를 그대로 감싼다. */
+/** `ITabContentRegistry`의 유일한 구현체 — `core`의 `createRegistry()`를 그대로 감싼다. */
 export class TabContentRegistry implements ITabContentRegistry {
   readonly #registry: Registry<TabContentDescriptor> = createRegistry();
 

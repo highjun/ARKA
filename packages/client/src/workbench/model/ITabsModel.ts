@@ -1,9 +1,9 @@
 import { createToken, type Disposable } from '#core/di';
 
 /**
- * `@arka/ui`의 `TabSplitOrientation`과 값이 같다 — 그대로 import 하지 않는 것은 Model이 기반
+ * `shared/components`의 `TabSplitOrientation`과 값이 같다 — 그대로 import 하지 않는 것은 Model이 기반
  * 스택(`#core`) 밖의 외부 라이브러리를 직접 알면 안 되기
- * 때문이다(`MODEL-13`). 값만 맞춰 독자적으로 선언한다 — 구조적 타이핑이라 `@arka/ui`의 `Tab`에
+ * 때문이다(`MODEL-13`). 값만 맞춰 독자적으로 선언한다 — 구조적 타이핑이라 `shared/components`의 `Tab`에
  * 그대로 흘려 넣어도 별도 변환이 필요 없다.
  */
 export type TabSplitOrientation = 'horizontal' | 'vertical';
@@ -22,7 +22,7 @@ export type TabSplitOrientation = 'horizontal' | 'vertical';
  * 갖는다(내용을 소유하는 쪽이 따로 있다). Shell은 "무엇이 열려 있고 어느 게
  * 활성·미리보기인지"라는 뼈대만 안다.
  *
- * `@arka/ui`의 `TabGroupItem`을 그대로 쓰지 않는 것도 같은 이유다 — 그 타입은 `content`
+ * `shared/components`의 `TabGroupItem`을 그대로 쓰지 않는 것도 같은 이유다 — 그 타입은 `content`
  * (`ReactNode`)·`isDirty`·`isPreview`처럼 여기서 일부러 갖지 않기로 한 파생 필드를 갖고 있다.
  */
 export type OpenTab = {
@@ -35,11 +35,11 @@ export type OpenTab = {
 export type PaneId = string;
 
 /**
- * 탭 트리 한 조각 — leaf(탭 묶음 하나)이거나 split(자식을 나눈 가지)이다. `@arka/ui`의 `Tab`이
+ * 탭 트리 한 조각 — leaf(탭 묶음 하나)이거나 split(자식을 나눈 가지)이다. `shared/components`의 `Tab`이
  * 받는 `TabTreeNode`와 재귀 구조가 같다(그 컴포넌트의 계약이 이 모양을 요구하니 별도 변환
  * 계층을 둘 이유가 없다) — `orientation`도 `TabSplitOrientation`을 그대로 가져다 쓴다. 다만
  * leaf의 탭 목록은 `TabGroupItem[]`이 아니라 `OpenTab[]`이다(위 `OpenTab` 주석 참고 — Model은
- * React 노드나 파생 필드를 갖지 않는다). `size`는 `@arka/ui`의 리사이즈가 쓰는 비율값을 그대로
+ * React 노드나 파생 필드를 갖지 않는다). `size`는 `shared/components`의 리사이즈가 쓰는 비율값을 그대로
  * 지속한다.
  */
 export interface TabPaneLeaf {

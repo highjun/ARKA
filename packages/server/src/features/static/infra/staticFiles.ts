@@ -5,10 +5,10 @@ import fs from 'node:fs';
  * 빌드된 SPA 를 이 서버가 직접 내보낸다.
  *
  * 앞단에 nginx 를 세우지 않는 이유는 배포 규칙이다 — cloudflared 가 앱 컨테이너 **하나**에
- * 직결하므로(`AGENTS.md` 배포 섹션), 정적 파일을 맡을 자리가 여기밖에 없다.
+ * 직결하므로(→ ADR 0014, `docker-compose.yml`), 정적 파일을 맡을 자리가 여기밖에 없다.
  *
- * 순수 함수로 둔다(NestJS DI에 묶지 않는다) — `StaticService`가 `client/dist` 경로를 채워 얇게
- * 감쌀 뿐, 여기 로직은 프레임워크와 무관하게 독립적으로 테스트한다(`static.util.spec.ts`, 디스크
+ * 순수 함수로 둔다 — 라우트(`transport/staticRoutes.ts`)가 `dist/client` 경로를 채워 부를 뿐,
+ * 여기 로직은 프레임워크와 무관하게 독립적으로 테스트한다(`staticFiles.test.ts`, 디스크
  * 없이 `exists` 함수를 주입한다).
  */
 

@@ -34,7 +34,7 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
     directoryTreeModel: IDirectoryTreeModel;
     commandCenterRegistry: ICommandCenterRegistry;
     /** `no-restricted-globals`가 Model/ViewModel의 `navigator` 직접 참조를 막는다 — 조립부
-     *  (`app/`, 대상 아님)가 이 얇은 함수를 주입한다. */
+     *  (`registerServices.tsx`, 대상 아님)가 이 얇은 함수를 주입한다. */
     copyToClipboard: (text: string) => void;
     /** 위와 같은 이유로 `document.activeElement` 접근도 조립부가 대신 판정해 함수로 준다. */
     isTypingSurface: () => boolean;

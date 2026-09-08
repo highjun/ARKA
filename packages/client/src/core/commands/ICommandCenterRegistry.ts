@@ -8,14 +8,14 @@ import type {
 } from '#core/menu';
 
 /**
- * VSCode 용어에 맞춘 얇은 별칭 — 구현은 `@arka/core`의 `ActionDescriptor`/`ActionRegistry` 그대로다.
+ * VSCode 용어에 맞춘 얇은 별칭 — 구현은 `core`의 `ActionDescriptor`/`ActionRegistry` 그대로다.
  * "Action"보다 "Command"가 이 앱에서 부르기로 한 이름이라 여기서만 바꿔 부른다.
  */
 export type CommandDescriptor<TContext = unknown> = ActionDescriptor<TContext>;
 export type CommandRegistry<TContext = unknown> = ActionRegistry<TContext>;
 
 /**
- * `@arka/core`의 타입을 그대로 재노출한다 — 계약 파일(`I*.ts`)은 타입 별칭 선언만 담을 수 있어
+ * `core`의 타입을 그대로 재노출한다 — 계약 파일(`I*.ts`)은 타입 별칭 선언만 담을 수 있어
  * (`arka/model-type-only`) 소스 없는 `export type { X }` 재export 목록 대신 별칭으로 하나씩 편다.
  */
 export type ContextDescriptor = CoreContextDescriptor;
@@ -37,7 +37,7 @@ export type MenuRegistry = CoreMenuRegistry;
  * (`isPaletteOpen`/`setPaletteOpen`)은 `IShellViewModel`로 옮겼다 — 이미 `isSidebarOpen` 같은
  * 같은 성격의 shell UI 상태를 갖고 있다.
  *
- * 넷 다 `@arka/core`의 `createRegistry()`로 이 Registry가 만들고, 앱 시작 시(`application.tsx`)
+ * 넷 다 `core`의 `createRegistry()`로 이 Registry가 만들고, 앱 시작 시(`registerServices.tsx`)
  * 한 번 채워진다.
  */
 export const CommandCenterRegistryToken = createToken<ICommandCenterRegistry>('commandCenterRegistry');

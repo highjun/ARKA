@@ -12,9 +12,9 @@ import { resolveWithin } from './fileOperations';
  * 감시한다 — 디렉터리 하나를 감시하면 그 직계 자식의 생성·삭제·이름변경뿐 아니라 자식 파일의
  * 내용 변경까지 잡히므로 "이 목록이 바뀌었을 수 있다" 판정에는 그것으로 충분하다.
  *
- * 순수 함수로 둔다(NestJS DI에 묶지 않는다) — `WatchService`가 `ConfigService`의 `workdir`을
- * 채워 얇게 감쌀 뿐, 여기 로직은 프레임워크와 무관하게 독립적으로 테스트한다(`watch.util.spec.ts`,
- * 실제 파일시스템과 실제 `fs.watch`를 쓴다).
+ * 순수 함수로 둔다 — 라우트(`transport/watchRoutes.ts`)가 워크스페이스 루트를 채워 부를 뿐,
+ * 여기 로직은 프레임워크와 무관하게 독립적으로 테스트한다(`watchOperations.test.ts`, 실제
+ * 파일시스템과 실제 `fs.watch`를 쓴다).
  */
 
 /** 짧은 시간에 몰리는 fs 이벤트를 한 프레임으로 묶는 대기 시간. 에디터의 "임시파일 쓰고 rename"

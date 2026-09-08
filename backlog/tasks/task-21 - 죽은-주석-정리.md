@@ -1,9 +1,10 @@
 ---
 id: TASK-21
 title: 죽은 주석 정리
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-08 15:40'
+updated_date: '2026-09-08 16:31'
 labels:
   - docs
 dependencies: []

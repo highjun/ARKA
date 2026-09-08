@@ -1,7 +1,7 @@
 import { createRegistry, type DescriptorMatch, type Registry } from '#core';
 import type { ActivityBarDescriptor, IActivityBarRegistry } from './IActivityBarRegistry';
 
-/** `IActivityBarRegistry`의 유일한 구현체 — `@arka/core`의 `createRegistry()`를 그대로 감싼다. */
+/** `IActivityBarRegistry`의 유일한 구현체 — `core`의 `createRegistry()`를 그대로 감싼다. */
 export class ActivityBarRegistry implements IActivityBarRegistry {
   readonly #registry: Registry<ActivityBarDescriptor> = createRegistry();
 

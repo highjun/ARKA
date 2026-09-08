@@ -52,7 +52,7 @@ const mergeTabDisplay = (node: ShellTabPaneNode, tabContentRegistry: ITabContent
   return { ...node, children: node.children.map((child) => mergeTabDisplay(child, tabContentRegistry)) };
 };
 
-/** ViewModel 의 트리를 `@arka/ui`의 `Tab`이 요구하는 트리로 바꾼다 — 탭마다 `content`를 여기서
+/** ViewModel 의 트리를 `shared/components`의 `Tab`이 요구하는 트리로 바꾼다 — 탭마다 `content`를 여기서
  *  처음이자 마지막으로 채워 넣는다(Model·ViewModel 은 `ReactNode`를 갖지 않는다는 원칙). */
 const buildTree = (node: ShellTabDisplayNode, renderTab: (tab: ShellTabRow) => ReactNode): TabTreeNode => {
   if (node.kind === 'leaf') {
@@ -121,7 +121,7 @@ const buildTabContextMenu = (tree: TabTreeNode, commandCenterRegistry: ICommandC
 
 /**
  * 다른 모듈을 Shell 에 잇는 **유일한 자리** — `sidebarContentRegistry`·`tabContentRegistry`를
- * 조회해서 그릴 뿐이다(`registries/`). 어떤 모듈이 무엇을 등록했는지는 `application.ts`만 안다.
+ * 조회해서 그릴 뿐이다. 어떤 모듈이 무엇을 등록했는지는 `registerServices.tsx`만 안다.
  *
  * **파일을 모른다.** 탭의 dirty 여부는 ViewModel이 `ITabDirtyState`에 물어 트리에 담아 주고,
  * 무엇이 그 답을 채우는지는 조립부(`registerServices`)만 안다.

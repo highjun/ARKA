@@ -1,6 +1,6 @@
 import { createToken, type Disposable } from '#core/di';
 
-/** 화면 밝기. `@arka/ui`의 `ThemeProvider`가 `colorMode`로 받아 토큰을 갈아 끼운다. */
+/** 화면 밝기. `shared/components`의 `ThemeProvider`가 `colorMode`로 받아 토큰을 갈아 끼운다. */
 export type Theme = 'light' | 'dark';
 
 export const ThemeModelToken = createToken<IThemeModel>("themeModel");

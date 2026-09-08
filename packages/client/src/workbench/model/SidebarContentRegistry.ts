@@ -1,7 +1,7 @@
 import { createRegistry, type DescriptorMatch, type Registry } from '#core';
 import type { SidebarContentDescriptor, ISidebarContentRegistry } from './ISidebarContentRegistry';
 
-/** `ISidebarContentRegistry`의 유일한 구현체 — `@arka/core`의 `createRegistry()`를 그대로 감싼다. */
+/** `ISidebarContentRegistry`의 유일한 구현체 — `core`의 `createRegistry()`를 그대로 감싼다. */
 export class SidebarContentRegistry implements ISidebarContentRegistry {
   readonly #registry: Registry<SidebarContentDescriptor> = createRegistry();
 
