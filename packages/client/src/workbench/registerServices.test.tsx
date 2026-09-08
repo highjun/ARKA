@@ -241,3 +241,14 @@ describe("커맨드와 단축키", () => {
     expect(screen.getByText("shell.openCommandPalette")).toBeDefined();
   });
 });
+
+describe("마크다운 미리보기 배선", () => {
+  it("파일을 열고 Ctrl+Shift+V를 누르면 미리보기 탭이 렌더된 제목을 보여 준다", async () => {
+    mountWith(new MockWorkspaceFiles({ "a.md": "# 안녕 세상" }));
+    fireEvent.click(await screen.findByText("a.md"));
+    await screen.findByRole("button", { name: "저장" });
+    fireEvent.keyDown(window, { key: "V", ctrlKey: true, shiftKey: true });
+    expect(await screen.findByRole("tab", { name: /미리보기 a\.md/u })).toBeDefined();
+    expect(await screen.findByRole("heading", { level: 1, name: "안녕 세상" })).toBeDefined();
+  });
+});

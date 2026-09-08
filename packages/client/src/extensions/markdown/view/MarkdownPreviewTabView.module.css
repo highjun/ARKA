@@ -1,0 +1,10 @@
+.root {
+  height: 100%;
+  overflow: auto;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-lg);
+}

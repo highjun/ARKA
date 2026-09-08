@@ -100,6 +100,8 @@ export interface IShellViewModel {
   readonly tree: ShellTabPaneNode;
   /** 지금 포커스된 pane(leaf). Split이 여러 개여도 "지금 조작 대상"은 하나뿐이다. */
   readonly activeLeafId: PaneId;
+  /** 활성 leaf의 활성 탭. 없으면 `null`. 익스텐션 커맨드("지금 파일의 미리보기")가 조립부를 통해 읽는다. */
+  readonly activeTab: { readonly id: string; readonly kind: string } | null;
 
   selectActivity(id: string): void;
   selectTab(leafId: PaneId, tabId: string): void;

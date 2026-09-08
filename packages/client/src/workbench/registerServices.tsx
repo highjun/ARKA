@@ -30,6 +30,15 @@ import { DIFF_TAB_KIND, GitModel, GitModelToken, GitServiceToken, SourceControlV
 import { createGitServicePort } from "../extensions/git/infra/HttpGitService";
 import { DiffTabView } from "../extensions/git/view/DiffTabView";
 import { SourceControlView } from "../extensions/git/view/SourceControlView";
+import {
+  MarkdownPreviewModel,
+  MarkdownPreviewModelToken,
+  MarkdownPreviewViewModel,
+  MarkdownPreviewViewModelToken,
+  MarkdownSourceToken,
+  PREVIEW_TAB_KIND,
+} from "../extensions/markdown";
+import { MarkdownPreviewTabView } from "../extensions/markdown/view/MarkdownPreviewTabView";
 import { SearchModel, SearchModelToken, SearchServiceToken, SearchViewModel, SearchViewModelToken } from "../extensions/search";
 import { createSearchServicePort } from "../extensions/search/infra/HttpSearchService";
 import { SearchView } from "../extensions/search/view/SearchView";
@@ -76,6 +85,8 @@ const UnloadGuardToken = createToken<IWorkbenchStartup>("startup.unloadGuard");
 const GlobalKeybindingsToken = createToken<IWorkbenchStartup>("startup.globalKeybindings");
 const GlobalErrorHandlersToken = createToken<IWorkbenchStartup>("startup.globalErrorHandlers");
 const ErrorNotifierToken = createToken<IWorkbenchStartup>("startup.errorNotifier");
+/** 익스텐션의 커맨드는 그 ViewModel이 만들어질 때 등록된다 — 탭이 뜨기 전에도 팔레트에 있어야 하므로 셸이 뜰 때 만들어 둔다(VSCode의 activation). */
+const MarkdownActivationToken = createToken<IWorkbenchStartup>("startup.markdown");
 /** 위 다섯을 합친 것 — `ShellViewModel`이 이것 하나만 받는다. */
 const WorkbenchStartupToken = createToken<IWorkbenchStartup>("workbenchStartup");
 
@@ -171,7 +182,40 @@ export function createApplication(): Container {
   container.register(SearchModelToken, singleton((c) => new SearchModel({ searchService: c.resolve(SearchServiceToken) })));
   container.register(SearchViewModelToken, scoped((c) => new SearchViewModel({ searchModel: c.resolve(SearchModelToken) })));
   container.register(GitModelToken, singleton((c) => new GitModel({ gitService: c.resolve(GitServiceToken) })));
+  // markdown은 filesystem을 모른다 — 두 포트를 markdown이 바라는 모양으로 감싸 넘기는 것은 조립부의 일이다.
+  container.register(
+    MarkdownSourceToken,
+    singleton((c) => {
+      const files = c.resolve(WorkspaceFilesToken);
+      const watch = c.resolve(WorkspaceWatchToken);
+      return {
+        read: async (path: string) => {
+          const file = await files.read(path);
+          if (file.encoding === "binary") throw new Error("텍스트 파일이 아니다.");
+          return { content: file.content, truncated: file.truncated };
+        },
+        // 파일 자체를 감시하면 에디터의 저장(임시 파일 → rename)이 inotify를 놓친다 — 부모 디렉터리를 본다.
+        watch: (path: string, onChange: () => void) => watch.watch([path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : ""], onChange),
+      };
+    }),
+  );
+  container.register(MarkdownPreviewModelToken, singleton((c) => new MarkdownPreviewModel({ source: c.resolve(MarkdownSourceToken) })));
   container.register(SourceControlViewModelToken, scoped((c) => new SourceControlViewModel({ gitModel: c.resolve(GitModelToken) })));
+  container.register(
+    MarkdownPreviewViewModelToken,
+    scoped(
+      (c) =>
+        new MarkdownPreviewViewModel({
+          previewModel: c.resolve(MarkdownPreviewModelToken),
+          commandCenterRegistry: c.resolve(CommandCenterRegistryToken),
+          activeFile: () => {
+            const active = c.resolve(ShellViewModelToken).activeTab;
+            return active !== null && active.kind === FILE_TAB_KIND ? active.id : null;
+          },
+          openTab: (tab) => c.resolve(ShellViewModelToken).openTab(tab),
+        }),
+    ),
+  );
   container.register(
     DirectoryTreeViewModelToken,
     scoped(
@@ -226,6 +270,15 @@ export function createApplication(): Container {
   container.register(
     ErrorNotifierToken,
     scoped((c) => createErrorNotifier({ errorLog: c.resolve(ErrorLogToken), notifications: c.resolve(NotificationServiceToken) })),
+  );
+  container.register(
+    MarkdownActivationToken,
+    scoped((c) => ({
+      start: () => {
+        c.resolve(MarkdownPreviewViewModelToken);
+      },
+      stop: () => undefined,
+    })),
   );
   container.register(
     GlobalKeybindingsToken,
@@ -285,6 +338,7 @@ export function createApplication(): Container {
   startupRegistry.add({ id: "globalKeybindings", token: GlobalKeybindingsToken });
   startupRegistry.add({ id: "unloadGuard", token: UnloadGuardToken });
   startupRegistry.add({ id: "fileWatch", token: FileWatchStartupToken });
+  startupRegistry.add({ id: "markdown", token: MarkdownActivationToken });
 
   // Registry 전부 singleton이라 루트에서 한 번만 채운다.
   container.resolve(ActivityBarRegistryToken).add({ id: EXPLORER_ID, title: "탐색기", iconId: "files", keybinding: "ctrl+shift+e" });
@@ -302,6 +356,7 @@ export function createApplication(): Container {
   container.resolve(ActivityBarRegistryToken).add({ id: AGENT_ID, title: "에이전트", iconId: "brain", keybinding: "ctrl+shift+a" });
   container.resolve(SidebarContentRegistryToken).add({ id: AGENT_ID, PanelComponent: ({ onOpenTab }) => <ChatSessionsView onOpenTab={onOpenTab} /> });
   container.resolve(TabContentRegistryToken).add({ id: "keybindings", iconId: "keyboard", TabComponent: () => <KeybindingsTabView /> });
+  container.resolve(TabContentRegistryToken).add({ id: PREVIEW_TAB_KIND, iconId: "bookOpen", TabComponent: ({ tabId }) => <MarkdownPreviewTabView tabId={tabId} /> });
   container.resolve(TabContentRegistryToken).add({
     id: CHAT_TAB_KIND,
     iconId: "brain",

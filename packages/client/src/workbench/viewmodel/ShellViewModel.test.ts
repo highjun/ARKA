@@ -871,3 +871,12 @@ describe('IShellViewModel — showActivity', () => {
     expect(viewModel.isSidebarOpen).toBe(true);
   });
 });
+
+describe('IShellViewModel — activeTab', () => {
+  it('활성 leaf의 활성 탭을 준다', () => {
+    const { viewModel } = make();
+    expect(viewModel.activeTab).toBeNull();
+    viewModel.previewFile('a.md');
+    expect(viewModel.activeTab).toEqual({ id: 'a.md', kind: 'file' });
+  });
+});

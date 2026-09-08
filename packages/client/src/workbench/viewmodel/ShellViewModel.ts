@@ -427,6 +427,12 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     this.#tabsModel.setTree(nextTree);
   }
 
+  get activeTab(): { readonly id: string; readonly kind: string } | null {
+    const leaf = this.#findLeaf(this.#tabsModel.tree, this.#tabsModel.activeLeafId);
+    const active = leaf?.tabs.find((tab) => tab.id === leaf.activeTabId);
+    return active === undefined ? null : { id: active.id, kind: active.kind };
+  }
+
   get reveal(): IShellViewModel['reveal'] {
     return this.#reveal.get();
   }
