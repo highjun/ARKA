@@ -13,5 +13,7 @@ test.describe("검색", () => {
     await page.getByText("README.md", { exact: true }).first().click();
     await page.getByText("# ADE", { exact: true }).first().click();
     await expect(page.getByRole("tab", { name: /README\.md/u })).toBeVisible();
+    // 결과의 줄로 커서가 간다 — 활성 줄이 그 내용이다.
+    await expect(page.locator(".cm-activeLine").first()).toContainText("ADE");
   });
 });

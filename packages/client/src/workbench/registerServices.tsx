@@ -291,7 +291,7 @@ export function createApplication(): Container {
   container.resolve(TabContentRegistryToken).add({
     id: FILE_TAB_KIND,
     iconId: "fileCode",
-    TabComponent: ({ tabId }) => <FileContentView path={tabId} />,
+    TabComponent: ({ tabId, reveal }) => <FileContentView path={tabId} reveal={reveal} />,
   });
   container.resolve(ActivityBarRegistryToken).add({ id: SEARCH_ID, title: "검색", iconId: "search" });
   container.resolve(SidebarContentRegistryToken).add({ id: SEARCH_ID, PanelComponent: ({ onFileOpen }) => <SearchView onFileOpen={onFileOpen} /> });

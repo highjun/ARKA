@@ -54,6 +54,8 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   readonly #reloadApp: () => void;
   readonly #notificationService: INotificationService;
   readonly #notifications;
+  readonly #reveal = this.observe(atom<IShellViewModel['reveal']>(null));
+  #revealSeq = 0;
   readonly #activities;
   readonly #tree;
   readonly #activeLeafId;
@@ -413,8 +415,16 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     this.#tabsModel.setTree(nextTree);
   }
 
-  /** 활성 leaf 기준으로 미리보기 탭을 열거나, 이미 열려 있으면 고정한다. */
-  previewFile(path: string): void {
+  get reveal(): IShellViewModel['reveal'] {
+    return this.#reveal.get();
+  }
+
+  /** 활성 leaf 기준으로 미리보기 탭을 열거나, 이미 열려 있으면 고정한다. `position`은 그 탭의 내용에 전달된다. */
+  previewFile(path: string, position?: { readonly line: number; readonly column: number }): void {
+    if (position !== undefined) {
+      this.#revealSeq += 1;
+      this.#reveal.set({ tabId: path, line: position.line, column: position.column, seq: this.#revealSeq });
+    }
     const tab: OpenTab = { id: path, kind: 'file', title: this.#nameOf(path) };
     const tree = this.#tabsModel.tree;
     const activeLeafId = this.#tabsModel.activeLeafId;

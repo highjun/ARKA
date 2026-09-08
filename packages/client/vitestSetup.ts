@@ -63,3 +63,11 @@ if (typeof globalThis.PointerEvent === 'undefined') {
 
   globalThis.PointerEvent = PointerEventPolyfill as unknown as typeof PointerEvent;
 }
+
+/**
+ * jsdom의 `Range`에는 `getClientRects`가 없다 — CodeMirror가 `scrollIntoView` 뒤 측정(rAF)에서 부르며
+ * 테스트가 끝난 뒤 "잡히지 않은 예외"로 남는다. 레이아웃이 없는 환경이라 빈 목록으로 답한다.
+ */
+if (typeof Range !== 'undefined' && typeof Range.prototype.getClientRects !== 'function') {
+  Range.prototype.getClientRects = () => ({ length: 0, item: () => null, [Symbol.iterator]: function* () {} }) as unknown as DOMRectList;
+}

@@ -847,3 +847,16 @@ describe('IShellViewModel — 알림', () => {
     expect(viewModel.notifications).toEqual([]);
   });
 });
+
+describe('IShellViewModel — 위치 요청', () => {
+  it('위치와 함께 열면 reveal이 그 탭을 가리키고 요청마다 seq가 오른다', () => {
+    const { viewModel } = make();
+    expect(viewModel.reveal).toBeNull();
+    viewModel.previewFile('a.md', { line: 3, column: 2 });
+    expect(viewModel.reveal).toEqual({ tabId: 'a.md', line: 3, column: 2, seq: 1 });
+    viewModel.previewFile('a.md', { line: 3, column: 2 });
+    expect(viewModel.reveal?.seq).toBe(2);
+    viewModel.previewFile('b.md');
+    expect(viewModel.reveal?.tabId).toBe('a.md');
+  });
+});

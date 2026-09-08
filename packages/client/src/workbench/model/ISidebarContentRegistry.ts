@@ -11,7 +11,8 @@ import type { DescriptorMatch } from '#core';
 export type SidebarContentDescriptor = {
   readonly id: string;
   readonly PanelComponent: ComponentType<{
-    readonly onFileOpen: (path: string) => void;
+    /** 파일을 미리보기로 연다. `position`을 주면 그 줄·열(1부터)로 커서를 옮긴다(검색 결과). */
+    readonly onFileOpen: (path: string, position?: { readonly line: number; readonly column: number }) => void;
     /** 파일이 옮겨졌다(드래그앤드롭 등) — 그 경로를 보던 탭이 새 경로를 따라가야 한다
      *  (`IShellViewModel.retargetTabs`). */
     readonly onFileMove: (oldPath: string, newPath: string) => void;

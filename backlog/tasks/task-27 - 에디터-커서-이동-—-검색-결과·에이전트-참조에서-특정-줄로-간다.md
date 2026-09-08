@@ -1,9 +1,10 @@
 ---
 id: TASK-27
 title: 에디터 커서 이동 — 검색 결과·에이전트 참조에서 특정 줄로 간다
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-08 16:39'
+updated_date: '2026-09-08 17:08'
 labels:
   - client
   - editor
@@ -17,3 +18,9 @@ ordinal: 27000
 <!-- SECTION:DESCRIPTION:BEGIN -->
 IEditorAdapter 수준의 계약: 파일 탭에 {line, column} 요청을 전달해 CodeMirror가 그 위치로 스크롤·선택한다. 검색 결과 클릭이 첫 사용처.
 <!-- SECTION:DESCRIPTION:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+IShellViewModel.previewFile(path, position) + reveal; TabComponent가 reveal prop을 받고 FileContentView → TextEditor revealAt → CodeMirror 선택·scrollIntoView. 검색 결과 클릭이 첫 사용처(E2E 확인).
+<!-- SECTION:NOTES:END -->

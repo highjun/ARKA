@@ -1,9 +1,10 @@
 ---
 id: TASK-9
 title: 계약 테스트 확장 — IWorkspaceWatch·IStorage·IDirectoryTreeModel
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-08 15:40'
+updated_date: '2026-09-08 17:04'
 labels:
   - test
 dependencies: []

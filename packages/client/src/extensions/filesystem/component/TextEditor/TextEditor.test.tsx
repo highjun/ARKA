@@ -82,3 +82,20 @@ describe('TextEditor', () => {
     });
   });
 });
+
+describe('revealAt', () => {
+  it('요청한 줄로 커서를 옮기고 같은 seq는 다시 적용하지 않는다', async () => {
+    const { rerender } = render(<TextEditor path="a.ts" content={'one\ntwo\nthree'} revealAt={{ line: 2, column: 2, seq: 1 }} />);
+    const textbox = await screen.findByRole('textbox');
+    expect(textbox.querySelector('.cm-activeLine')?.textContent).toBe('two');
+    rerender(<TextEditor path="a.ts" content={'one\ntwo\nthree'} revealAt={{ line: 3, column: 1, seq: 2 }} />);
+    expect(textbox.querySelector('.cm-activeLine')?.textContent).toBe('three');
+  });
+
+  it('내용이 늦게 와도 그 줄이 생기면 간다', async () => {
+    const { rerender } = render(<TextEditor path="a.ts" content="" loading revealAt={{ line: 3, column: 1, seq: 1 }} />);
+    rerender(<TextEditor path="a.ts" content={'one\ntwo\nthree'} revealAt={{ line: 3, column: 1, seq: 1 }} />);
+    const textbox = await screen.findByRole('textbox');
+    expect(textbox.querySelector('.cm-activeLine')?.textContent).toBe('three');
+  });
+});

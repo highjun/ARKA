@@ -3,6 +3,7 @@ import { mergeClassNames } from '#utils/mergeClassNames';
 import { assembleCompound } from '#utils/assembleCompound';
 import styles from './TextEditor.module.css';
 import { useCodeMirrorEditor } from './useCodeMirrorEditor';
+import type { RevealPosition } from './useCodeMirrorEditor';
 import { Spinner } from '@primer/react';
 import { Icon } from '#components/common/Icon';
 import { IconButton } from '#components/common/IconButton';
@@ -38,6 +39,8 @@ export interface TextEditorRootProps extends Omit<HTMLAttributes<HTMLElement>, '
   readonly isSaving?: boolean;
   /** 파일을 여는 중이면 본문 위에 Circular Progress 오버레이를 띄운다. */
   readonly loading?: boolean;
+  /** 이 위치로 커서를 옮기고 보이게 한다. `seq`가 바뀔 때마다 다시 간다. */
+  readonly revealAt?: RevealPosition | null;
 }
 
 /**
@@ -55,9 +58,10 @@ const Root = ({
   isDirty = false,
   isSaving = false,
   loading = false,
+  revealAt = null,
   ...rest
 }: TextEditorRootProps) => {
-  const { hostRef, openSearch } = useCodeMirrorEditor({ path, content, readOnly, onChange, onSave });
+  const { hostRef, openSearch } = useCodeMirrorEditor({ path, content, readOnly, onChange, onSave, revealAt });
 
   return (
     <section

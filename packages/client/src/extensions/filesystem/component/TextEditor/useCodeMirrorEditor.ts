@@ -129,12 +129,16 @@ const theme = EditorView.theme({
   '.cm-panels input, .cm-panels button': { color: 'var(--codeMirror-fgColor)' },
 });
 
+/** "이 위치를 보여 달라"는 요청. `seq`가 바뀔 때마다 같은 줄이어도 다시 간다. 줄·열은 1부터. */
+export type RevealPosition = { readonly line: number; readonly column: number; readonly seq: number };
+
 export interface UseCodeMirrorEditorOptions {
   readonly path: string;
   readonly content: string;
   readonly readOnly: boolean;
   readonly onChange?: (content: string) => void;
   readonly onSave?: () => void;
+  readonly revealAt?: RevealPosition | null;
 }
 
 export interface UseCodeMirrorEditorResult {
@@ -185,7 +189,7 @@ const readOnlyExtensions = (
       ]),
 ];
 
-export const useCodeMirrorEditor = ({ path, content, readOnly, onChange, onSave }: UseCodeMirrorEditorOptions): UseCodeMirrorEditorResult => {
+export const useCodeMirrorEditor = ({ path, content, readOnly, onChange, onSave, revealAt = null }: UseCodeMirrorEditorOptions): UseCodeMirrorEditorResult => {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<EditorView | null>(null);
   const readOnlyCompartmentRef = useRef<Compartment | null>(null);
@@ -283,6 +287,23 @@ export const useCodeMirrorEditor = ({ path, content, readOnly, onChange, onSave 
     if (editor === null || editor.state.doc.toString() === content) return;
     editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: content } });
   }, [content]);
+
+  /**
+   * 요청한 위치로 커서를 옮기고 그 줄이 보이게 스크롤한다. 파일이 아직 안 읽혔으면(줄이 없으면)
+   * 내용이 도착한 뒤에 다시 시도한다 — 그래서 `content`도 의존성이다. 같은 `seq`는 한 번만 적용한다.
+   */
+  const appliedRevealRef = useRef<number | null>(null);
+  useEffect(() => {
+    const editor = viewRef.current;
+    if (editor === null || revealAt === null || appliedRevealRef.current === revealAt.seq) return;
+    const { doc } = editor.state;
+    if (revealAt.line > doc.lines) return; // 아직 내용이 덜 왔다 — 다음 content에서 다시
+    const line = doc.line(revealAt.line);
+    const pos = Math.min(line.from + Math.max(revealAt.column - 1, 0), line.to);
+    appliedRevealRef.current = revealAt.seq;
+    editor.dispatch({ selection: { anchor: pos }, effects: EditorView.scrollIntoView(pos, { y: 'center' }) });
+    editor.focus();
+  }, [revealAt, content]);
 
   const openSearch = useCallback(() => {
     const editor = viewRef.current;

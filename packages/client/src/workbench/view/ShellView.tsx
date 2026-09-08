@@ -132,7 +132,7 @@ export const ShellView = () => {
   const tabContentRegistry = useViewModel(TabContentRegistryToken);
   const commandCenterRegistry = useViewModel(CommandCenterRegistryToken);
 
-  const onFileOpen = (path: string) => viewModel.previewFile(path);
+  const onFileOpen = (path: string, position?: { readonly line: number; readonly column: number }) => viewModel.previewFile(path, position);
   const onFilePin = (path: string) => viewModel.pinTab(path);
   /** 탭이 가리키는 경로만 옮긴다 — 편집 버퍼는 그것을 소유한 쪽이 스스로 옮긴다. */
   const onFileMove = (oldPath: string, newPath: string) => viewModel.retargetTabs(oldPath, newPath);
@@ -145,7 +145,8 @@ export const ShellView = () => {
 
   const renderTab = (tab: ShellTabRow): ReactNode => {
     const TabComponent = tabContentRegistry.tryGet(tab.kind)?.TabComponent;
-    return TabComponent ? <TabComponent tabId={tab.id} /> : null;
+    const reveal = viewModel.reveal !== null && viewModel.reveal.tabId === tab.id ? viewModel.reveal : null;
+    return TabComponent ? <TabComponent tabId={tab.id} reveal={reveal} /> : null;
   };
 
   const renderPanel = (activityId: string): ReactNode => {

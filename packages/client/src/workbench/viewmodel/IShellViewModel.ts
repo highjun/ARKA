@@ -140,7 +140,13 @@ export interface IShellViewModel {
    *
    * 탭 제목은 경로가 아니라 파일 이름이다 — 폰의 좁은 스트립에 경로 전체가 들어가지 않는다.
    */
-  previewFile(path: string): void;
+  previewFile(path: string, position?: { readonly line: number; readonly column: number }): void;
+
+  /**
+   * 마지막 위치 요청 — 어느 탭의 몇 줄·몇 열. View가 그 탭의 내용에 넘긴다. `seq`는 요청마다 오른다.
+   * 없으면 `null`. 셸은 파일을 모르므로 "탭 id와 위치"만 든다.
+   */
+  readonly reveal: { readonly tabId: string; readonly line: number; readonly column: number; readonly seq: number } | null;
 
   /**
    * 파일이 아닌 탭을 **고정으로** 연다 — 대화, 설정 같은 것. 이미 열려 있으면 그 탭으로 간다.

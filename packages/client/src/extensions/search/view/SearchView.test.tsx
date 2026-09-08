@@ -30,6 +30,6 @@ describe('SearchView', () => {
     expect(await screen.findByText('src/a.ts')).toBeInTheDocument();
     expect(screen.getByText('1개 파일에서 1개')).toBeInTheDocument();
     fireEvent.click(screen.getByText('const hello = 1;'));
-    expect(onFileOpen).toHaveBeenCalledWith('src/a.ts');
+    expect(onFileOpen).toHaveBeenCalledWith('src/a.ts', { line: 1, column: 7 });
   });
 });

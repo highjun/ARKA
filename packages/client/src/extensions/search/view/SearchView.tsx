@@ -5,9 +5,9 @@ import { SearchViewModelToken } from '../viewmodel/ISearchViewModel';
 import styles from './SearchView.module.css';
 
 /**
- * 사이드바의 검색 패널. 결과를 누르면 그 파일을 연다 — 줄로 가는 것은 에디터가 커서 이동을 받을 때(백로그).
+ * 사이드바의 검색 패널. 결과를 누르면 그 파일을 그 줄·열로 연다.
  */
-export const SearchView = ({ onFileOpen }: { readonly onFileOpen: (path: string) => void }) => {
+export const SearchView = ({ onFileOpen }: { readonly onFileOpen: (path: string, position?: { readonly line: number; readonly column: number }) => void }) => {
   const viewModel = useViewModel(SearchViewModelToken);
   return (
     <div data-component="SearchView" className={styles['root']}>
@@ -40,7 +40,7 @@ export const SearchView = ({ onFileOpen }: { readonly onFileOpen: (path: string)
             <ActionList.Group key={file.path}>
               <ActionList.GroupHeading as="h3">{file.path}</ActionList.GroupHeading>
               {file.matches.map((match) => (
-                <ActionList.Item key={`${String(match.line)}:${String(match.column)}`} onSelect={() => onFileOpen(file.path)}>
+                <ActionList.Item key={`${String(match.line)}:${String(match.column)}`} onSelect={() => onFileOpen(file.path, { line: match.line, column: match.column })}>
                   <ActionList.LeadingVisual>
                     <Text size="small" tone="muted">
                       {match.line}

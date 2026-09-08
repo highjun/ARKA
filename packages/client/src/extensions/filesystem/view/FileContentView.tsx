@@ -17,7 +17,7 @@ import styles from './FileContentView.module.css';
  * 안내 한 줄뿐이다. **편집·저장은 `TextEditor`에 그대로 위임한다** — 버퍼 관리·저장 버튼·Ctrl+S는
  * 전부 그 컴포넌트가 갖고, 여기서는 ViewModel이 이미 접어 준 값을 그대로 넘길 뿐이다.
  */
-export const FileContentView = ({ path }: { readonly path: string }) => {
+export const FileContentView = ({ path, reveal = null }: { readonly path: string; readonly reveal?: { readonly line: number; readonly column: number; readonly seq: number } | null }) => {
   const viewModel = useViewModel(FileContentViewModelToken);
   viewModel.openFile(path);
 
@@ -40,6 +40,7 @@ export const FileContentView = ({ path }: { readonly path: string }) => {
         isDirty={row?.isDirty ?? false}
         isSaving={row?.isSaving ?? false}
         loading={loading}
+        revealAt={reveal}
       />
     </div>
   );

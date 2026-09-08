@@ -8,10 +8,14 @@ import type { DescriptorMatch } from '#core';
  * 옛 `shell/registries/index.ts`(타입 3개짜리 grouping 파일)에서 정식 Registry 역할로
  * 풀어냈다(2026-09-05, 5-C) — `IActivityBarRegistry`와 같은 이유로 갈렸다.
  */
+/** 탭 안의 특정 위치를 보여 달라는 요청. 줄·열은 1부터, `seq`는 같은 위치를 다시 요청해도 구분되게. */
+export type TabReveal = { readonly line: number; readonly column: number; readonly seq: number };
+
 export type TabContentDescriptor = {
   readonly id: string;
   readonly iconId: string;
-  readonly TabComponent: ComponentType<{ readonly tabId: string }>;
+  /** `reveal`은 셸이 그 탭에 위치 요청이 있을 때만 준다 — 내용이 무시해도 된다(diff·대화 탭). */
+  readonly TabComponent: ComponentType<{ readonly tabId: string; readonly reveal?: TabReveal | null }>;
 };
 
 export const TabContentRegistryToken = createToken<ITabContentRegistry>("tabContentRegistry");
