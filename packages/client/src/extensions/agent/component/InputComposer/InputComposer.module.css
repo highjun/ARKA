@@ -41,6 +41,7 @@
 
 .toolbar {
   display: flex;
+
   /* 라벨을 줄여도("Action"/"Plan") 모델 선택 버튼까지 합친 폭 자체가 컨테이너보다 넓어지는
      지점은 여전히 있다 — `SegmentedControl`의 `variant={{ narrow: 'hideLabels' }}`은 뷰포트
      폭 기준이라 컨테이너가 좁아서 생기는 이 경우를 못 잡는다(2026-08-31 재확인, 320px 컨테이너
@@ -51,10 +52,7 @@
   justify-content: space-between;
   gap: var(--space-xs);
   border-style: solid;
-  border-top-width: var(--borderWidth-thin);
-  border-right-width: 0;
-  border-bottom-width: 0;
-  border-left-width: 0;
+  border-width: var(--borderWidth-thin) 0 0 0;
   border-color: var(--borderColor-muted);
   background-color: var(--bgColor-default);
   padding-inline: var(--space-sm);
@@ -63,6 +61,7 @@
 
 .modes {
   display: flex;
+
   /* `min-width: 0`(shrink 허용)이 아니라 `flex-shrink: 0` — 얘를 줄이면 `SegmentedControl`이
      자기 내용 폭 밖으로 넘쳐 `.actions`와 겹쳤다(위 `.toolbar`의 `flex-wrap` 주석 참고). 줄이는
      대신 통째로 다음 줄로 내려가게 한다. */

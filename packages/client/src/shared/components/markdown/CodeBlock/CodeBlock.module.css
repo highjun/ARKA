@@ -19,10 +19,7 @@
   justify-content: space-between;
   gap: var(--space-xs);
   border-style: solid;
-  border-top-width: 0;
-  border-right-width: 0;
-  border-bottom-width: var(--borderWidth-thin);
-  border-left-width: 0;
+  border-width: 0 0 var(--borderWidth-thin) 0;
   border-color: var(--borderColor-muted);
   background-color: var(--bgColor-muted);
   padding-inline: var(--space-md);

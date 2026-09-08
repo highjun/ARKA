@@ -59,8 +59,7 @@
  * 막으면 대신 정상적으로 축소(shrink)하거나 넘치는(overflow) 쪽으로 처리된다.
  */
 .layout > [data-width] {
-  flex-direction: column;
-  flex-wrap: nowrap;
+  flex-flow: column nowrap;
 }
 
 /*
@@ -123,7 +122,7 @@
   display: inline-grid;
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
   .sidebarToggle {
     display: none;
   }
@@ -159,7 +158,7 @@
   transform: translateX(0);
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
   .sidebar,
   .sidebar.sidebarOpen {
     visibility: visible;
@@ -184,7 +183,7 @@
   padding: var(--space-xs);
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
   .sidebarCloseButtonRow {
     display: none;
   }
@@ -202,10 +201,7 @@
   flex-grow: 1;
   flex-direction: column;
   border-style: solid;
-  border-top-width: 0;
-  border-right-width: 0;
-  border-bottom-width: 0;
-  border-left-width: var(--borderWidth-thin);
+  border-width: 0 0 0 var(--borderWidth-thin);
   border-color: var(--borderColor-default);
 }
 
@@ -220,10 +216,7 @@
   height: var(--control-medium-size);
   padding-inline: var(--space-sm);
   border-style: solid;
-  border-top-width: 0;
-  border-right-width: 0;
-  border-bottom-width: var(--borderWidth-thin);
-  border-left-width: 0;
+  border-width: 0 0 var(--borderWidth-thin) 0;
   border-color: var(--borderColor-muted);
 }
 

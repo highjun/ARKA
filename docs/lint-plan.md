@@ -65,12 +65,13 @@ ADR의 결정 중 **기계가 판정할 수 있는 것**을 도구로 옮기는 
 - **CONVENTIONS** "위 세 줄은 `no-restricted-paths`가 강제한다" — 그중 "패키지명으로 가져온다"와 "paths 별칭 금지"는 **강제되지 않는다.** 문서가 과장하고 있다
 - **`tooling/eslint-rules/viewOnlyUsesViewModel.ts`** 주석이 조립 루트를 `app/`이라 부른다 — [ADR 0005](adr/0005-client-structure.md)가 **기각한 이름**이다
 
-## 알려진 구멍
+## 메운 구멍 (2026-09-09)
 
-규칙을 쓸 때 함께 메울 것.
+- ~~`view-only-uses-view-model`이 Identifier callee만 본다~~ → `React.useState()` 같은 멤버 호출도 잡는다
+- ~~extension 쌍 zone이 수동 나열~~ → `arka/slices-are-siblings`가 경로에서 슬라이스 이름을 뽑아 비교한다. 클라이언트 `extensions/*`와 서버 `features/*`에 같은 규칙. 슬라이스를 추가해도 설정을 안 건드린다
+- ~~zone이 `packages/*/src/**`만 본다~~ → `e2e/`, `.storybook/`, `*.config.ts`, `test/`, `tooling/`까지 대상. E2E·VRT가 소스를 import하면 잡는 zone을 추가했다
+- ~~커스텀 규칙 fixture 테스트 없음~~ → `tooling/eslint-rules/*.test.ts`(RuleTester, `pnpm run test:tooling`)
+- ~~stylelint 없음~~ → `packages/client/stylelint.config.js`, `pnpm run lint:css`. 색 직접 지정(hex·이름·rgb/hsl 함수) 금지, 나머지는 `stylelint-config-standard`
 
-- `arka/model-is-state-library-free`의 금지 목록이 **4개 하드코딩**이다
-- 두 커스텀 규칙 모두 글롭이 한쪽 확장자만 본다(`model/**/*.ts`, `view/**/*.tsx`)
-- `view-only-uses-view-model`이 `CallExpression`의 **Identifier callee만** 본다 — `React.useState()`는 안 잡힌다
-- extension 쌍 zone이 **수동 나열**이다. 세 번째 extension이 생기면 6쌍이 필요하고 빠뜨리면 조용히 통과한다
-- 모든 zone이 `packages/*/src/**`에만 적용된다 — `tooling/`, `test/vrt/`, `e2e/`, 설정 파일은 대상 밖이다
+남은 것:
+- `arka/model-is-state-library-free`의 금지 목록이 하드코딩이다(12개)

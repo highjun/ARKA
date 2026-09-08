@@ -82,10 +82,22 @@
  * 자체 CSS)가 셀 경계에서 다시 끊기는 걸로 드러났다(2026-09-02). `block`으로 바꾸면 익명 셀
  * 생성 자체가 없어져 자손 percentage-height 체인이 정상적으로 이어진다.
  */
+
+/*
+ * Radix `ScrollAreaViewport`는 `children`을 `<div style="min-width:100%; display:table">`로
+ * 한 번 더 감싼다(공개 API로 className/style을 못 주는 자리, `@radix-ui/react-scroll-area` 소스로
+ * 확인) — 이 wrapper는 height가 없어 콘텐츠 높이만큼만 자라고(세로), `display:table`의 자동
+ * 레이아웃 특성상 `white-space:nowrap` 자손 텍스트의 고유 폭만큼 컨테이너보다 더 넓게도 자란다
+ * (가로). 세로 문제는 짧은 콘텐츠 아래 남는 빈 공간이 이 subtree 밖으로 취급돼 ContextMenu 같은
+ * 자손 이벤트가 거기서 안 먹는 버그로, 가로 문제는 자손의 `text-overflow:ellipsis`가 "박스가
+ * 콘텐츠보다 좁아야" 발동하는데 그 조건 자체가 성립하지 않아 긴 텍스트가 안 잘리는 버그로
+ * 이어졌다(2026-09-02, 사이드바 우클릭·FileTree 파일명 ellipsis 두 버그로 각각 발견).
+ */
 .viewport > div {
   display: block !important;
   flex: 1 1 auto;
   min-width: 0;
+  min-height: 100%;
 }
 
 /*
@@ -99,20 +111,6 @@
 .root[data-scroll='horizontal'] > .viewport > div {
   flex-shrink: 0;
   min-width: auto;
-}
-
-/*
- * Radix `ScrollAreaViewport`는 `children`을 `<div style="min-width:100%; display:table">`로
- * 한 번 더 감싼다(공개 API로 className/style을 못 주는 자리, `@radix-ui/react-scroll-area` 소스로
- * 확인) — 이 wrapper는 height가 없어 콘텐츠 높이만큼만 자라고(세로), `display:table`의 자동
- * 레이아웃 특성상 `white-space:nowrap` 자손 텍스트의 고유 폭만큼 컨테이너보다 더 넓게도 자란다
- * (가로). 세로 문제는 짧은 콘텐츠 아래 남는 빈 공간이 이 subtree 밖으로 취급돼 ContextMenu 같은
- * 자손 이벤트가 거기서 안 먹는 버그로, 가로 문제는 자손의 `text-overflow:ellipsis`가 "박스가
- * 콘텐츠보다 좁아야" 발동하는데 그 조건 자체가 성립하지 않아 긴 텍스트가 안 잘리는 버그로
- * 이어졌다(2026-09-02, 사이드바 우클릭·FileTree 파일명 ellipsis 두 버그로 각각 발견).
- */
-.viewport > div {
-  min-height: 100%;
 }
 
 /* `scroll="horizontal"`(Tab 탭 스트립 전용, 코드베이스 전체에서 유일한 사용처)은 제외한다 —

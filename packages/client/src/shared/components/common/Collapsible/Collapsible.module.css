@@ -52,10 +52,7 @@
 
 .content {
   border-style: solid;
-  border-top-width: var(--borderWidth-thin);
-  border-right-width: 0;
-  border-bottom-width: 0;
-  border-left-width: 0;
+  border-width: var(--borderWidth-thin) 0 0 0;
   border-color: var(--borderColor-muted);
   background-color: var(--bgColor-default);
   padding-inline: var(--space-sm);

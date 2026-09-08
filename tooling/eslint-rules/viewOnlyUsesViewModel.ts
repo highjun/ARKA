@@ -32,8 +32,14 @@ export const viewOnlyUsesViewModel: Rule.RuleModule = {
     return {
       CallExpression(node) {
         const callee = node.callee;
-        if (callee.type !== "Identifier") return;
-        const name = callee.name;
+        // `React.useState()`처럼 멤버로 부르는 훅도 같은 훅이다 — Identifier만 보면 그 형태로 우회된다.
+        const name =
+          callee.type === "Identifier"
+            ? callee.name
+            : callee.type === "MemberExpression" && callee.property.type === "Identifier"
+              ? callee.property.name
+              : null;
+        if (name === null) return;
         if (name === "useViewModel") return;
         if (DI_ACCESSORS.has(name)) {
           context.report({ node, messageId: "diAccessNotAllowed", data: { name } });

@@ -1,10 +1,7 @@
 .QuoteBlock {
   margin-block: var(--space-md);
   border-style: solid;
-  border-top-width: 0;
-  border-right-width: 0;
-  border-bottom-width: 0;
-  border-left-width: var(--borderWidth-thick);
+  border-width: 0 0 0 var(--borderWidth-thick);
   border-color: var(--borderColor-accent-emphasis);
   background-color: transparent;
   padding-block: var(--space-xs);

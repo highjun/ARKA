@@ -18,10 +18,7 @@
   align-items: center;
   gap: var(--space-xs);
   border-style: solid;
-  border-top-width: 0;
-  border-right-width: 0;
-  border-bottom-width: var(--borderWidth-thin);
-  border-left-width: 0;
+  border-width: 0 0 var(--borderWidth-thin) 0;
   border-color: var(--borderColor-muted);
   padding-inline: var(--space-sm);
   padding-block: var(--space-xs);
@@ -63,6 +60,7 @@
   height: 100%;
   overflow: auto;
   isolation: isolate;
+
   /* 끝까지 스크롤했을 때 마지막 줄이 컨테이너 경계에 딱 붙어 보이지 않도록 여백을 둔다
    * (2026-09-01 지적으로 확인). CodeMirror 자체엔 height 지정이 없어 이 `.body`가 실질적
    * 스크롤 박스라 — 이 한 줄로 충분하다. */

@@ -12,6 +12,7 @@
   padding: var(--space-xs);
   color: var(--fgColor-default);
   box-shadow: var(--shadow-floating-medium);
+
   /* Shell의 portal root(`pointer-events: none`)로 포탈될 수 있어 여기서 되살린다. Shell 없이
      `document.body`로 포탈될 때(Storybook 등)는 조상에 `pointer-events: none`가 없어 무해하다. */
   pointer-events: auto;
@@ -55,9 +56,6 @@
   margin-block: var(--space-xs);
   margin-inline: calc(var(--space-xs) * -1);
   border-style: solid;
-  border-top-width: var(--borderWidth-thin);
-  border-right-width: 0;
-  border-bottom-width: 0;
-  border-left-width: 0;
+  border-width: var(--borderWidth-thin) 0 0 0;
   border-color: var(--borderColor-muted);
 }

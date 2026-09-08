@@ -182,7 +182,29 @@ export default [
   },
 
   {
-    files: ["packages/*/src/**/*.{ts,tsx}"],
+    // 슬라이스 형제 금지. 루트를 늘리면 그 아래 슬라이스에 자동으로 적용된다.
+    files: ["packages/client/src/extensions/**/*.{ts,tsx}", "packages/server/src/features/**/*.ts"],
+    plugins: { arka: arkaRules },
+    rules: {
+      "arka/slices-are-siblings": [
+        "error",
+        { roots: ["packages/client/src/extensions", "packages/server/src/features"] },
+      ],
+    },
+  },
+
+  {
+    // `src/` 밖(e2e·VRT·tooling·설정 파일)도 zone의 대상이다 — 그동안 `packages/*/src/**`만 봐서
+    // E2E 스펙이 `workbench/model`을 직접 import해도 0건이었다.
+    files: [
+      "packages/*/src/**/*.{ts,tsx}",
+      "packages/*/e2e/**/*.ts",
+      "packages/*/.storybook/*.{ts,tsx}",
+      "packages/*/*.config.ts",
+      "test/**/*.ts",
+      "tooling/**/*.ts",
+      "*.config.ts",
+    ],
     plugins: { "import-x": importX },
     // 기본 리졸버는 .js/.mjs/.cjs/.json만 찾는다. .ts를 넣지 않으면 확장자 없는
     // import를 해석하지 못하고, 그러면 아래 규칙이 에러도 경고도 없이 조용히
@@ -198,6 +220,13 @@ export default [
         "error",
         {
           zones: [
+            // E2E와 VRT는 앱을 화면으로만 본다 — 소스를 import하면 그 테스트는 더 이상 바깥 관점이 아니다.
+            {
+              target: ["./packages/client/e2e", "./test/vrt"],
+              from: ["./packages/client/src", "./packages/server/src", "./packages/contracts/src"],
+              message:
+                "E2E·VRT는 소스를 import하지 않습니다. 화면에 보이는 것만으로 검사하세요 — 배선은 registerServices.test.tsx가, 계약은 test/contract/가 봅니다.",
+            },
             {
               target: "./packages/contracts/src",
               from: ["./packages/client/src", "./packages/server/src"],
@@ -223,20 +252,8 @@ export default [
               message:
                 "extension은 workbench를 import할 수 없습니다. 이 0건이 마이크로커널 전환의 조건입니다. 필요한 것은 core의 DI 토큰이나 이벤트로 받으세요.",
             },
-            // extension끼리는 서로 모른다. `no-restricted-paths`는 "형제끼리 금지"를 한 줄로
-            // 못 써서 쌍마다 적어야 한다 — extension을 추가하면 여기도 추가해야 한다.
-            {
-              target: "./packages/client/src/extensions/filesystem",
-              from: "./packages/client/src/extensions/agent",
-              message:
-                "extension끼리 직접 import할 수 없습니다. DI 토큰이나 이벤트로만 소통하세요.",
-            },
-            {
-              target: "./packages/client/src/extensions/agent",
-              from: "./packages/client/src/extensions/filesystem",
-              message:
-                "extension끼리 직접 import할 수 없습니다. DI 토큰이나 이벤트로만 소통하세요.",
-            },
+            // extension끼리(그리고 서버 feature끼리)는 서로 모른다 — 쌍별 zone이 아니라
+            // `arka/slices-are-siblings`가 경로에서 슬라이스 이름을 뽑아 비교한다(아래).
             // `workbench → extensions`는 조립부에서만이다. 조립부는 마이크로커널로 갈 때
             // 동적 로더로 교체될 코드라 엮여도 버려지지만, workbench의 계층이 특정 extension을
             // 알면 그건 옮길 수가 없다 — 전환이 이동이 아니라 재작성이 된다.
@@ -266,18 +283,6 @@ export default [
               target: "./packages/server/src/features/filesystem/infra",
               from: "./packages/server/src/features/filesystem/transport",
               message: "infra는 transport를 모릅니다. 의존은 안쪽(domain)을 향합니다.",
-            },
-            // 서버 features 간 직접 import 금지 — 클라이언트 extensions와 같은 규칙인데
-            // 그동안 서버에만 빠져 있었다. extension이 늘면 여기도 쌍을 추가해야 한다.
-            {
-              target: "./packages/server/src/features/filesystem",
-              from: "./packages/server/src/features/static",
-              message: "server의 feature끼리 직접 import할 수 없습니다. 이벤트로 소통하세요.",
-            },
-            {
-              target: "./packages/server/src/features/static",
-              from: "./packages/server/src/features/filesystem",
-              message: "server의 feature끼리 직접 import할 수 없습니다. 이벤트로 소통하세요.",
             },
             {
               target: "./packages/client/src/core",

@@ -57,7 +57,8 @@ export const modelIsStateLibraryFree: Rule.RuleModule = {
         // `import type`은 컴파일에서 완전히 지워져 런타임 결합을 만들지 않는다. 잡으려는 것은
         // "Model이 atom을 들고 화면 상태를 소유하는 것"이지 타입 참조가 아니다.
         // (레지스트리가 `ComponentType`을 타입으로만 참조하는 것이 그 예다.)
-        if (node.importKind === "type") return;
+        // estree 타입에는 없는 TS 확장 필드다 — 파서(typescript-eslint)가 채워 준다.
+        if ((node as { importKind?: string }).importKind === "type") return;
         report(node as unknown as Rule.Node, String(node.source.value));
       },
     };

@@ -10,6 +10,7 @@
  * `padding-block`을 0으로 두는 건 그래서다: 28px 높이에서 2px(상단 accent 보더 예약)를 빼면
  * 26px 남는데, 여기서 padding까지 빼면 28px 버튼이 들어갈 자리가 없다 — 라벨·아이콘은
  * `align-items: center`만으로 이미 세로 중앙에 놓이니 padding 없이도 안 눌려 보인다. */
+
 /* `flex-shrink: 1`(+`min-width`) — 탭이 다 안 들어가면 먼저 줄어들며 제목이 말줄임표로 잘린다
  * (`.headerLabel`의 `overflow:hidden;text-overflow:ellipsis`가 받는다). 최소폭에 닿은 뒤에야
  * `Container`(부모, `.stripListContainer`)의 가로 스크롤이 넘겨받는다 — Firefox 탭·VSCode
@@ -27,12 +28,10 @@
   align-items: center;
   gap: var(--space-xs);
   border-style: solid;
+
   /* 상단은 항상 2px를 예약해둔다(투명) — active일 때 색만 바뀌지 두께가 안 생겨서, 탭마다
    * 높이가 들쭉날쭉해지지 않는다. */
-  border-top-width: var(--borderWidth-thick);
-  border-right-width: var(--borderWidth-thin);
-  border-bottom-width: 0;
-  border-left-width: 0;
+  border-width: var(--borderWidth-thick) var(--borderWidth-thin) 0 0;
   border-top-color: transparent;
   border-right-color: var(--borderColor-muted);
   padding-inline: var(--space-sm);
@@ -78,6 +77,7 @@
 }
 
 /* 활성 탭의 닫기 버튼(`headerCloseButtonPinned`) 자리 — 닫기 버튼 크기에 맞춘다. */
+
 /* margin-left 를 안 준다 — `.header`의 gap(4px)이 이미 라벨과의 간격을 준다. 예전엔 여기 또
    margin-left: var(--space-xs)가 있어서 실제로는 8px씩 벌어져 있었다(2026-08-25 지적으로 확인). */
 .headerActionSlot {
@@ -150,11 +150,9 @@
   justify-content: space-between;
   overflow: hidden;
   border-style: solid;
-  border-top-width: 0;
-  border-right-width: 0;
-  border-bottom-width: var(--borderWidth-thin);
-  border-left-width: 0;
+  border-width: 0 0 var(--borderWidth-thin) 0;
   border-color: var(--borderColor-default);
+
   /* muted — active 탭만 default로 띄워서 대비를 준다(바로 아래 `.header[data-active]`). */
   background-color: var(--bgColor-muted);
 }
@@ -201,6 +199,7 @@
   top: var(--base-size-4);
   bottom: var(--base-size-4);
   left: 0;
+
   /* 컴포넌트 내부 상대 스태킹(드래그 인디케이터/리사이즈 핸들) — Primer의 전역 z-index
      스케일(dropdown~skipLink, 100 이상)과 무관해서 전역 토큰이 없다. 네 곳(strip 인디케이터
      2개·패널 드롭 인디케이터·리사이즈 핸들)이 공유하는 단일 DOM 조상이 없어(각자 다른
@@ -219,6 +218,7 @@
   top: var(--base-size-4);
   bottom: var(--base-size-4);
   right: 0;
+
   /* 컴포넌트 내부 상대 스태킹 — .stripIndicatorBefore 참고. */
   --tab-drag-affordance-z: 10;
 
@@ -310,6 +310,7 @@
 .panelDropIndicator {
   position: absolute;
   inset: 0;
+
   /* 컴포넌트 내부 상대 스태킹 — .stripIndicatorBefore 참고. */
   --tab-drag-affordance-z: 10;
 
@@ -382,18 +383,12 @@
 
 .splitBranchDividerHorizontal {
   border-style: solid;
-  border-right-width: var(--borderWidth-thin);
-  border-top-width: 0;
-  border-bottom-width: 0;
-  border-left-width: 0;
+  border-width: 0 var(--borderWidth-thin) 0 0;
 }
 
 .splitBranchDividerVertical {
   border-style: solid;
-  border-bottom-width: var(--borderWidth-thin);
-  border-top-width: 0;
-  border-right-width: 0;
-  border-left-width: 0;
+  border-width: 0 0 var(--borderWidth-thin) 0;
 }
 
 .leafSection {
@@ -439,6 +434,7 @@
  */
 .resizeHandle {
   position: absolute;
+
   /* 컴포넌트 내부 상대 스태킹 — .stripIndicatorBefore 참고. */
   --tab-drag-affordance-z: 10;
 

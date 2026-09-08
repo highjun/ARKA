@@ -2,10 +2,7 @@
   flex-shrink: 0;
   border-style: solid;
   border-color: var(--borderColor-muted);
-  border-top-width: 0;
-  border-right-width: 0;
-  border-bottom-width: 0;
-  border-left-width: 0;
+  border-width: 0;
 }
 
 .Divider[data-orientation='horizontal'] {
