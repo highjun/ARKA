@@ -21,7 +21,7 @@ export default defineConfig({
   use: { baseURL: `http://127.0.0.1:${PORT}` },
   webServer: {
     // 이미 빌드된 정적 스토리북을 띄운다 — 빌드는 `pnpm run vrt`가 먼저 한다.
-    command: `node_modules/.bin/http-server packages/client/storybook-static -p ${String(PORT)} -s`,
+    command: `node_modules/.bin/http-server packages/client/.output/storybook-static -p ${String(PORT)} -s`,
     cwd: repoRoot,
     url: `http://127.0.0.1:${PORT}/index.json`,
     reuseExistingServer: false,

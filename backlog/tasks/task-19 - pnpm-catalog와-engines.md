@@ -1,10 +1,10 @@
 ---
 id: TASK-19
 title: pnpm catalog와 engines
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-08 15:40'
-updated_date: '2026-09-08 15:41'
+updated_date: '2026-09-08 17:04'
 labels:
   - tooling
 dependencies: []
@@ -21,5 +21,5 @@ Playwright 버전이 루트·client·Docker 태그 3곳. catalog:로 한 곳에.
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-engines.node >=24와 .nvmrc는 CI 라운드(2026-09-09)에서 넣었다. catalog:만 남았다.
+catalog: (@playwright/test·vitest·typescript·zod). Docker 태그의 Playwright 버전은 아직 vrt 스크립트에 손으로 — 이미지 태그를 catalog에서 뽑는 건 pnpm이 지원하지 않는다.
 <!-- SECTION:NOTES:END -->
