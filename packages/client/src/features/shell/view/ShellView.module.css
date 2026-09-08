@@ -1,0 +1,32 @@
+.brandGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.brandText {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+}
+
+.buildId {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .buildId {
+    display: inline;
+  }
+}
+
+.trailingGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.tab {
+  min-height: 0;
+  flex-grow: 1;
+}
