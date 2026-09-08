@@ -268,21 +268,28 @@ export default [
               message:
                 "workbench의 계층은 특정 extension을 알 수 없습니다. 계약을 workbench에 선언하고 조립부(registerServices.tsx)가 잇게 하세요 — `ITabDirtyState`가 그 예입니다.",
             },
-            // 서버 계층 방향. `Transport → (Service) → Domain ← Infra`
-            // → docs/adr/0007-server-structure.md
+            // 서버 계층 방향. `Transport → Runtime → Domain ← Infra`. feature가 늘어도 글롭이 잡는다.
+            // → docs/adr/0007-server-structure.md, 0019(runtime)
             {
-              target: "./packages/server/src/features/filesystem/domain",
+              target: "./packages/server/src/features/*/domain",
               from: [
-                "./packages/server/src/features/filesystem/infra",
-                "./packages/server/src/features/filesystem/transport",
+                "./packages/server/src/features/*/infra",
+                "./packages/server/src/features/*/runtime",
+                "./packages/server/src/features/*/services",
+                "./packages/server/src/features/*/transport",
               ],
               message:
                 "domain은 바깥을 모릅니다. 필요한 것은 domain이 인터페이스로 선언하고 infra가 구현하게 하세요.",
             },
             {
-              target: "./packages/server/src/features/filesystem/infra",
-              from: "./packages/server/src/features/filesystem/transport",
-              message: "infra는 transport를 모릅니다. 의존은 안쪽(domain)을 향합니다.",
+              target: "./packages/server/src/features/*/infra",
+              from: ["./packages/server/src/features/*/runtime", "./packages/server/src/features/*/services", "./packages/server/src/features/*/transport"],
+              message: "infra는 runtime·transport를 모릅니다. 의존은 안쪽(domain)을 향합니다.",
+            },
+            {
+              target: ["./packages/server/src/features/*/runtime", "./packages/server/src/features/*/services"],
+              from: "./packages/server/src/features/*/transport",
+              message: "runtime·services는 transport를 모릅니다. 어느 구현이 꽂힐지는 조립부(app.ts)가 정합니다.",
             },
             {
               target: "./packages/client/src/core",
