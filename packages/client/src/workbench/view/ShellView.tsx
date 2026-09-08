@@ -24,7 +24,6 @@ import styles from './ShellView.module.css';
  *
  * 전역 배선(키다운 디스패치·beforeunload 가드·빌드ID 조회·테마 DOM 반영)은 여기 없다 — Shell
  * 자신의 도메인 로직이 아니라 앱 전체 단위 배선이라 `src/workbench/Workbench.tsx`(View 규율 밖)로 옮겼다.
- * `buildId`는 그래서 props로 받는다.
  *
  * 탭 닫기 확인은 `window.confirm` 대신 `IShellViewModel.pendingTabClose` + 기존 `Dialog`다
  * (2026-09-04 — 네이티브 대화상자는 앱 UI와 다르게 생겨 일관성이 없다는 판단).
@@ -127,7 +126,7 @@ const buildTabContextMenu = (tree: TabTreeNode, commandCenterRegistry: ICommandC
  * **파일을 모른다.** 탭의 dirty 여부는 ViewModel이 `ITabDirtyState`에 물어 트리에 담아 주고,
  * 무엇이 그 답을 채우는지는 조립부(`registerServices`)만 안다.
  */
-export const ShellView = ({ buildId }: { readonly buildId: string }) => {
+export const ShellView = () => {
   const viewModel = useViewModel(ShellViewModelToken);
   const sidebarContentRegistry = useViewModel(SidebarContentRegistryToken);
   const tabContentRegistry = useViewModel(TabContentRegistryToken);
@@ -189,7 +188,7 @@ export const ShellView = ({ buildId }: { readonly buildId: string }) => {
         actions={
           <span className={styles['trailingGroup']}>
             <Text size="small" tone="muted" className={styles['buildId']}>
-              {buildId}
+              {viewModel.buildId}
             </Text>
             <ModeToggle
               values={['light', 'dark']}

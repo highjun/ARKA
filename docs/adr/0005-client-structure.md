@@ -8,8 +8,7 @@
 client/src
 ├─ core/         # 조립과 중개를 맡는 커널 — DI, 이벤트, 레지스트리, 커맨드
 ├─ workbench/    # 기능이 꽂히는 자리와 그 운영 — 사이드바·패널·탭, 레이아웃, 조립
-│   ├─ main.tsx            # 진입점 — 부트만 한다
-│   ├─ Workbench.tsx       # 전역 배선(키다운·beforeunload·테마)을 걸고 셸을 띄운다
+│   ├─ main.tsx            # 진입점 — 부트만 한다. 전역 배선은 infra/의 기여들이 건다
 │   ├─ registerServices.tsx # 조립 — 무엇이 꽂히는지는 이 파일만 안다
 │   └─ *.css               # 전역 스타일. 앱에 한 번 적용되는 부수효과라 shared가 아니다
 ├─ extensions/   # 자리를 채우는 도메인 기능 — 파일·Git·에이전트별로 나눈다
@@ -59,9 +58,11 @@ viewmodel ──바인딩──→ view
 - **DI 토큰은 자기 계약 파일에 둔다** — `model/IThemeModel.ts`가 `IThemeModel`과 `ThemeModelToken`을 함께 내보낸다. 슬라이스 루트에 `tokens.ts`를 두지 않는다
 - 계층별 금지 — `component/`는 ViewModel·Model·DI를, `view/`는 `useViewModel` 외 훅을, `viewmodel/`은 DOM 조작과 도메인 판단을, `model/`은 React·fetch·window·전역 상태를, `infra/`는 React를 쓰지 않는다
 - 빈 레이어를 미리 만들지 않는다
+- **전역 부수효과(DOM 조작·`window` 리스너)는 `infra/`에 두고 기여로 등록한다.** `viewmodel/`은 DOM을, `model/`은 `window`를 금지하므로 남는 자리가 거기뿐이다. 셸은 무엇이 켜지는지 모르고 목록만 받아 켠다 — VSCode의 `IWorkbenchContributionsRegistry`와 같다
 
 
 ## 기각:
+- **전역 배선을 담는 컴포넌트(`App.tsx`)** — 갈 곳 없는 부수효과가 모이는 자루가 된다. "지우면 모양만 사라지는가"에 아니오라 view도 아니어서 어느 폴더에도 안 맞는다. 각 효과를 `infra/` 기여로 흩으면 파일 자체가 사라진다.
 - **`app/`을 따로 두기** — workbench가 곧 자리 제공자이자 조립자다. 나누면 "이건 app이야 workbench야"를 매번 묻게 된다.
 - **`shared/`를 `workbench/` 안으로** — workbench가 *자리*와 *누구나 쓰는 프리미티브* 두 가지를 겸하게 된다.
 - **`shared/`를 `core/`로** — core의 정의("UI도 모름")를 고쳐야 한다.

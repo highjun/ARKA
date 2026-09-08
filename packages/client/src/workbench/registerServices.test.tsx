@@ -3,15 +3,15 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { FileContentViewModelToken, WorkspaceFilesToken } from "../extensions/filesystem";
 import type { IWorkspaceFiles } from "../extensions/filesystem";
-import { Workbench } from "./Workbench";
+import { ShellView } from "./view/ShellView";
 import { createApplication } from "./registerServices";
 
 /**
  * 조립이 실제로 맞물리는지만 본다 — 화면의 내용은 각 컴포넌트가, 계층의 규칙은 각 계층의
  * unit test가 이미 본다. 여기서 걸리는 것은 **배선이 틀린 경우**뿐이다.
  *
- * `<Workbench />`을 마운트한다(`<ShellView />`가 아니다) — beforeunload 가드·전역 키다운 등 앱
- * 전체 배선이 `Workbench.tsx`에 있다.
+ * `<ShellView />`을 마운트한다(`<ShellView />`가 아니다) — beforeunload 가드·전역 키다운 등 앱
+ * 전체 배선이 `infra/`의 기여들에 있다.
  *
  * 파일시스템 구현만 대신한다. 진짜 구현을 그대로 두면 이 테스트가 서버를 요구하게 된다.
  */
@@ -35,7 +35,7 @@ const mountWith = (workspaceFiles: Partial<IWorkspaceFiles>) => {
   });
   render(
     <ViewModelProvider container={container}>
-      <Workbench />
+      <ShellView />
     </ViewModelProvider>,
   );
   return container;

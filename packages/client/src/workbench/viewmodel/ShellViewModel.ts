@@ -3,6 +3,7 @@ import { ViewModelBase } from '#core/view-model';
 import { atom } from 'nanostores';
 import type { ITabDirtyState } from '../model/ITabDirtyState';
 import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
+import type { IBuildInfo } from '../model/IBuildInfo';
 import type { IActivityBarRegistry } from '../model/IActivityBarRegistry';
 import type { IActivityModel } from '../model/IActivityModel';
 import type { ICommandCenterRegistry } from '#core/commands';
@@ -12,6 +13,20 @@ import type { IThemeModel } from '../model/IThemeModel';
 import type { ShellActivityRow, ShellTabPaneNode, ShellTabRow, IShellViewModel, SplitEdgeDropPosition, TabContextTarget } from './IShellViewModel';
 
 /** `IShellViewModel`의 유일한 구현체 — `IActivityModel`·`ITabsModel`·`IThemeModel`을 조합해 화면 상태를 파생시킨다. */
+/**
+ * 빌드 시각을 화면에 띄울 한 줄로 바꾼다.
+ *
+ * 서버는 ISO로만 주고 형식은 여기서 정한다 — **보는 사람의 시간대로** 읽혀야 하기 때문이다.
+ * 서버가 UTC로 굳혀 보내면 폰에서 시차를 머릿속으로 빼야 한다.
+ */
+const formatBuildTime = (iso: string): string => {
+  const at = new Date(iso);
+  if (Number.isNaN(at.getTime())) return '';
+
+  const two = (value: number): string => String(value).padStart(2, '0');
+  return `v${String(at.getFullYear())}.${two(at.getMonth() + 1)}.${two(at.getDate())} ${two(at.getHours())}:${two(at.getMinutes())}`;
+};
+
 export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   /** 트리 전체가 빈 leaf 하나로 무너졌을 때(전부 닫힘) 되돌아갈 자리 — Model 의 초기 상태와 같다. */
   static readonly #EMPTY_ROOT: TabPaneNode = { kind: 'leaf', id: ROOT_PANE_ID, tabs: [], activeTabId: null };
@@ -31,6 +46,8 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
    */
   readonly #tabDirtyState: ITabDirtyState;
   readonly #startup: IWorkbenchStartup;
+  readonly #buildInfo: IBuildInfo;
+  readonly #buildId = this.observe(atom(''));
   readonly #activities;
   readonly #tree;
   readonly #activeLeafId;
@@ -56,6 +73,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     activityBarRegistry,
     tabDirtyState,
     startup,
+    buildInfo,
     commandCenterRegistry,
     copyToClipboard,
   }: {
@@ -65,6 +83,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     activityBarRegistry: IActivityBarRegistry;
     tabDirtyState: ITabDirtyState;
     startup: IWorkbenchStartup;
+    buildInfo: IBuildInfo;
     commandCenterRegistry: ICommandCenterRegistry;
     /** `no-restricted-globals`가 ViewModel의 `navigator` 직접 참조를 막는다 — 조립부(`app/`,
      *  대상 아님)가 이 얇은 함수를 주입한다(`DirectoryTreeViewModel`과 같은 패턴). */
@@ -77,6 +96,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     this.#activityBar = activityBarRegistry;
     this.#tabDirtyState = tabDirtyState;
     this.#startup = startup;
+    this.#buildInfo = buildInfo;
     this.#copyToClipboard = copyToClipboard;
 
     // Model은 값과 이벤트만 준다 — 파생된 화면 상태(atom)는 전부 여기서 소유한다.
@@ -100,6 +120,9 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
    *  전체에서 한 번만 뜨는 루트라 이게 곧 "앱이 사는 동안"이다. */
   onMount(): void {
     this.#startup.start();
+    void this.#buildInfo.load().then((builtAt) => {
+      this.#buildId.set(builtAt === null ? '' : formatBuildTime(builtAt));
+    });
   }
 
   /** `#startup.stop()`에 위임한다 — 무엇이 꺼지는지는 조립부만 안다. */
@@ -324,6 +347,11 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   }
 
   /** `#theme`를 값으로 노출한다. */
+  /** 화면 구석에 띄울 빌드 표시. 아직 못 읽었거나 실패했으면 빈 문자열이다. */
+  get buildId(): string {
+    return this.#buildId.get();
+  }
+
   get theme(): string {
     return this.#theme.get();
   }

@@ -148,6 +148,8 @@ export interface IShellViewModel {
    * 부팅 시 되돌리는 메서드가 따로 없다 — `IThemeModel`이 생성자에서 스스로 저장된 값을 복원하므로
    * View 가 명시적으로 부를 게 없다.
    */
+  /** 화면 구석에 띄울 빌드 표시. 아직 못 읽었거나 실패했으면 빈 문자열이다. */
+  readonly buildId: string;
   readonly theme: string;
   toggleTheme(): void;
 

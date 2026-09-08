@@ -1,5 +1,5 @@
 import { CommandCenterRegistry, CommandCenterRegistryToken } from "#core/commands";
-import { createContainer, scoped, singleton, type Container } from "#core/di";
+import { createContainer, createToken, scoped, singleton, type Container } from "#core/di";
 import {
   DirectoryTreeModel,
   DirectoryTreeModelToken,
@@ -17,7 +17,12 @@ import { createWorkspaceFilesPort } from "../extensions/filesystem/infra/HttpWor
 import { createWorkspaceWatchPort } from "../extensions/filesystem/infra/HttpWorkspaceWatch";
 import { DirectoryTreeView } from "../extensions/filesystem/view/DirectoryTreeView";
 import { FileContentView } from "../extensions/filesystem/view/FileContentView";
+import { createDocumentTheme } from "./infra/DocumentTheme";
+import { createGlobalKeybindings } from "./infra/GlobalKeybindings";
+import { createBuildInfoPort } from "./infra/HttpBuildInfo";
+import { createUnloadGuard } from "./infra/UnloadGuard";
 import { createStoragePort } from "./infra/LocalStorage";
+import { WorkbenchStartupRegistry } from "./model/WorkbenchStartupRegistry";
 import { ActivityBarRegistry } from "./model/ActivityBarRegistry";
 import { ActivityModel } from "./model/ActivityModel";
 import { SidebarContentRegistry } from "./model/SidebarContentRegistry";
@@ -26,6 +31,7 @@ import { TabsModel } from "./model/TabsModel";
 import { ThemeModel } from "./model/ThemeModel";
 import { ShellViewModel } from "./viewmodel/ShellViewModel";
 import { ActivityBarRegistryToken } from "./model/IActivityBarRegistry";
+import { BuildInfoToken } from "./model/IBuildInfo";
 import { ActivityModelToken } from "./model/IActivityModel";
 import { SidebarContentRegistryToken } from "./model/ISidebarContentRegistry";
 import { StorageToken } from "./model/IStorage";
@@ -33,8 +39,16 @@ import { TabContentRegistryToken } from "./model/ITabContentRegistry";
 import { TabDirtyStateToken } from "./model/ITabDirtyState";
 import { TabsModelToken } from "./model/ITabsModel";
 import { ThemeModelToken } from "./model/IThemeModel";
-import { WorkbenchStartupToken } from "./model/IWorkbenchStartup";
+import { WorkbenchStartupRegistryToken, type IWorkbenchStartup } from "./model/IWorkbenchStartup";
 import { ShellViewModelToken } from "./viewmodel/IShellViewModel";
+
+/** 셸 수명주기에 얹는 기여들. 조립부만 아는 것이라 여기서 만든다. */
+const FileWatchStartupToken = createToken<IWorkbenchStartup>("startup.fileWatch");
+const DocumentThemeToken = createToken<IWorkbenchStartup>("startup.documentTheme");
+const UnloadGuardToken = createToken<IWorkbenchStartup>("startup.unloadGuard");
+const GlobalKeybindingsToken = createToken<IWorkbenchStartup>("startup.globalKeybindings");
+/** 위 넷을 합친 것 — `ShellViewModel`이 이것 하나만 받는다. */
+const WorkbenchStartupToken = createToken<IWorkbenchStartup>("workbenchStartup");
 
 /** 탐색기 활동의 id. ActivityBar·SidebarContent 등록 둘 다 이 문자열로 서로를 잇는다. */
 const EXPLORER_ID = "explorer";
@@ -65,10 +79,12 @@ export function createApplication(): Container {
   container.register(WorkspaceFilesToken, singleton(createWorkspaceFilesPort));
   container.register(WorkspaceWatchToken, singleton(createWorkspaceWatchPort));
   container.register(StorageToken, singleton(createStoragePort));
+  container.register(BuildInfoToken, singleton(createBuildInfoPort));
   container.register(CommandCenterRegistryToken, singleton(() => new CommandCenterRegistry()));
   container.register(ActivityBarRegistryToken, singleton(() => new ActivityBarRegistry()));
   container.register(SidebarContentRegistryToken, singleton(() => new SidebarContentRegistry()));
   container.register(TabContentRegistryToken, singleton(() => new TabContentRegistry()));
+  container.register(WorkbenchStartupRegistryToken, singleton(() => new WorkbenchStartupRegistry()));
 
   container.register(ActivityModelToken, singleton(() => new ActivityModel()));
   container.register(
@@ -127,17 +143,47 @@ export function createApplication(): Container {
     scoped((c) => ({
       isDirty: (tabId: string) =>
         c.resolve(FileContentViewModelToken).rows[tabId]?.isDirty ?? false,
+      hasAnyDirty: () =>
+        Object.values(c.resolve(FileContentViewModelToken).rows).some((row) => row.isDirty),
       onDidChange: (listener: () => void) =>
         c.resolve(FileContentViewModelToken).onDidChange(listener),
     })),
   );
-  // 셸이 뜨고 질 때 켜고 끌 것. 지금은 파일 감시 하나다 — 셸은 무엇이 켜지는지 모른다.
+  // 셸이 뜨고 질 때 켜고 끌 것들. 셸은 무엇이 켜지는지 모르고 목록만 받는다.
   container.register(
-    WorkbenchStartupToken,
+    FileWatchStartupToken,
     scoped((c) => ({
       start: () => c.resolve(FileContentViewModelToken).startWatching(),
       stop: () => c.resolve(FileContentViewModelToken).stopWatching(),
     })),
+  );
+  container.register(
+    DocumentThemeToken,
+    scoped((c) => createDocumentTheme({ themeModel: c.resolve(ThemeModelToken) })),
+  );
+  container.register(
+    UnloadGuardToken,
+    scoped((c) => createUnloadGuard({ tabDirtyState: c.resolve(TabDirtyStateToken) })),
+  );
+  container.register(
+    GlobalKeybindingsToken,
+    scoped((c) =>
+      createGlobalKeybindings({ commandCenterRegistry: c.resolve(CommandCenterRegistryToken) }),
+  ),
+  );
+  // 등록된 것을 스코프에서 resolve해 하나로 합친다 — descriptor가 토큰을 담는 이유가 여기다.
+  container.register(
+    WorkbenchStartupToken,
+    scoped((c) => {
+      const items = c
+        .resolve(WorkbenchStartupRegistryToken)
+        .list()
+        .map((descriptor) => c.resolve(descriptor.token));
+      return {
+        start: () => items.forEach((item) => item.start()),
+        stop: () => items.forEach((item) => item.stop()),
+      };
+    }),
   );
   container.register(
     FileContentViewModelToken,
@@ -160,13 +206,20 @@ export function createApplication(): Container {
           activityBarRegistry: c.resolve(ActivityBarRegistryToken),
           tabDirtyState: c.resolve(TabDirtyStateToken),
           startup: c.resolve(WorkbenchStartupToken),
+          buildInfo: c.resolve(BuildInfoToken),
           commandCenterRegistry: c.resolve(CommandCenterRegistryToken),
           copyToClipboard,
         }),
     ),
   );
 
-  // 세 Registry 전부 singleton이라 루트에서 한 번만 채운다.
+  const startupRegistry = container.resolve(WorkbenchStartupRegistryToken);
+  startupRegistry.add({ id: "documentTheme", token: DocumentThemeToken });
+  startupRegistry.add({ id: "globalKeybindings", token: GlobalKeybindingsToken });
+  startupRegistry.add({ id: "unloadGuard", token: UnloadGuardToken });
+  startupRegistry.add({ id: "fileWatch", token: FileWatchStartupToken });
+
+  // Registry 전부 singleton이라 루트에서 한 번만 채운다.
   container.resolve(ActivityBarRegistryToken).add({ id: EXPLORER_ID, title: "탐색기", iconId: "files" });
   container.resolve(SidebarContentRegistryToken).add({ id: EXPLORER_ID, PanelComponent: DirectoryTreeView });
   container.resolve(TabContentRegistryToken).add({

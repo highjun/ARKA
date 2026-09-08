@@ -71,6 +71,24 @@ test.describe("데스크톱", () => {
     await expect(page.getByText("src", { exact: true })).toBeVisible();
   });
 
+  test("빌드 표시가 화면에 보인다", async ({ page }) => {
+    await page.goto("/");
+
+    // 서버가 주는 ISO를 보는 사람의 시간대로 서식한 결과라, 형식만 확인한다.
+    await expect(page.getByText(/^v\d{4}\.\d{2}\.\d{2} \d{2}:\d{2}$/u)).toBeVisible();
+  });
+
+  /**
+   * 전역 키 리스너는 `infra/GlobalKeybindings`가 건다(2026-09-08, Workbench.tsx 해체).
+   * 조립부가 기여 등록을 빠뜨리면 타입 검사도 단위 테스트도 통과하는데 단축키만 조용히 죽는다.
+   */
+  test("ctrl+k로 커맨드 팔레트가 열린다", async ({ page }) => {
+    await page.goto("/");
+    await page.keyboard.press("Control+k");
+
+    await expect(page.getByRole("dialog")).toBeVisible();
+  });
+
   test("폴더를 펼치면 자식이 보인다", async ({ page }) => {
     await page.goto("/");
     await treeRow(page, "src").click();

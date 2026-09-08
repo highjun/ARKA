@@ -1,6 +1,7 @@
 import { createRegistry } from '#core';
 import type { ITabDirtyState } from '../model/ITabDirtyState';
 import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
+import type { IBuildInfo } from '../model/IBuildInfo';
 import type { ICommandCenterRegistry } from '#core/commands';
 import { ActivityModel } from '../model/ActivityModel';
 import { ROOT_PANE_ID } from '../model/tabsShare';
@@ -41,6 +42,7 @@ const fakeTabDirtyState = (): ITabDirtyState & { dirty: Set<string> } => {
   return {
     dirty,
     isDirty: (tabId) => dirty.has(tabId),
+    hasAnyDirty: () => dirty.size > 0,
     onDidChange: () => ({ dispose: () => undefined }),
   };
 };
@@ -68,6 +70,7 @@ const make = (): { tabsModel: ITabsModel; viewModel: IShellViewModel; tabDirtySt
   activityBarRegistry.add({ id: 'explorer', title: '탐색기', iconId: 'files' });
   const tabDirtyState = fakeTabDirtyState();
   const startup = fakeStartup();
+  const buildInfo: IBuildInfo = { load: () => Promise.resolve(null) };
 
   const storage = fakeStorage();
   const activityModel = new ActivityModel();
@@ -80,6 +83,7 @@ const make = (): { tabsModel: ITabsModel; viewModel: IShellViewModel; tabDirtySt
     activityBarRegistry,
     tabDirtyState,
     startup,
+    buildInfo,
     commandCenterRegistry: fakeCommandCenterRegistry(),
     copyToClipboard: () => undefined,
   });

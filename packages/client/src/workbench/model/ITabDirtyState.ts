@@ -15,6 +15,8 @@ export const TabDirtyStateToken = createToken<ITabDirtyState>("tabDirtyState");
 export interface ITabDirtyState {
   /** 없거나 더러워질 수 없는 탭이면 `false`. */
   isDirty(tabId: string): boolean;
+  /** 어느 탭이든 저장 안 된 변경이 있는가 — 새로고침 경고가 쓴다. VSCode의 `dirtyCount`에 해당한다. */
+  hasAnyDirty(): boolean;
   /** 답이 바뀌었음을 알린다 — 셸이 구독해 탭 표시를 다시 계산한다. */
   onDidChange(listener: () => void): Disposable;
 }
