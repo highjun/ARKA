@@ -1,0 +1,25 @@
+.Divider {
+  flex-shrink: 0;
+  border-style: solid;
+  border-color: var(--borderColor-muted);
+  border-top-width: 0;
+  border-right-width: 0;
+  border-bottom-width: 0;
+  border-left-width: 0;
+}
+
+.Divider[data-orientation='horizontal'] {
+  margin-block: var(--space-md);
+  width: 100%;
+  border-top-width: var(--borderWidth-thin);
+}
+
+/* `align-self: stretch`는 부모가 flex/grid일 때만 작동한다 — `<hr>`은 기본 block이라
+   `height: 100%`로 직접 채워야 flex 여부와 무관하게 동작한다. 부모가 실제 높이를 가져야
+   퍼센트 높이가 풀리는 건 CSS 자체의 제약이라, 문서(docs.json)가 이미 명시한 요구사항
+   그대로다(2026-09-02 발견 — align-self만으로는 비-flex 부모에서 선이 안 보이는 버그). */
+.Divider[data-orientation='vertical'] {
+  margin-inline: var(--space-md);
+  height: 100%;
+  border-left-width: var(--borderWidth-thin);
+}

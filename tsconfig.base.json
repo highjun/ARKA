@@ -12,6 +12,8 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true

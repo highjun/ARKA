@@ -1,0 +1,169 @@
+import { createWorkspaceFilesPort } from './HttpWorkspaceFiles';
+
+/**
+ * 계약을 네트워크 경계에서 검사한다 — 손으로 갈아끼우는 것은 `fetch` 하나뿐이고, Adapter 의
+ * 이름은 이 파일 어디에도 나오지 않는다. 구현을 바꿔도 이 테스트는 그대로 남아야 한다.
+ */
+
+const originalFetch = globalThis.fetch;
+
+type Call = { readonly url: string; readonly method: string; readonly headers: Record<string, string>; readonly body: string | undefined };
+
+const serverReplies = (body: unknown, status = 200): { calls: readonly Call[] } => {
+  const calls: Call[] = [];
+  globalThis.fetch = ((input: unknown, init?: { method?: string; headers?: Record<string, string>; body?: string }) => {
+    calls.push({ url: String(input), method: init?.method ?? 'GET', headers: init?.headers ?? {}, body: init?.body });
+    return Promise.resolve({
+      ok: status < 400,
+      status,
+      json: () => Promise.resolve(body),
+    });
+  }) as unknown as typeof fetch;
+  return { calls };
+};
+
+afterEach(() => {
+  globalThis.fetch = originalFetch;
+  localStorage.clear();
+});
+
+const LISTING = {
+  path: 'projects',
+  parent: '',
+  entries: [{ name: 'dev-kit', type: 'dir', size: 0, mtime: 1 }],
+};
+
+describe('list', () => {
+  it('returns the directory listing the server sent', async () => {
+    serverReplies(LISTING);
+    expect(await createWorkspaceFilesPort().list('projects')).toEqual(LISTING);
+  });
+
+  it('carries the path as a query parameter, not a path segment', async () => {
+    const { calls } = serverReplies(LISTING);
+    await createWorkspaceFilesPort().list('projects/dev-kit');
+    expect(calls[0]?.url).toBe('/api/files?path=projects%2Fdev-kit');
+  });
+
+  it('encodes paths that would otherwise change the request', async () => {
+    const { calls } = serverReplies(LISTING);
+    await createWorkspaceFilesPort().list('노트 & 자료#1');
+    expect(calls[0]?.url).toBe('/api/files?path=%EB%85%B8%ED%8A%B8+%26+%EC%9E%90%EB%A3%8C%231');
+  });
+
+  it('asks for the root with an empty path', async () => {
+    const { calls } = serverReplies(LISTING);
+    await createWorkspaceFilesPort().list('');
+    expect(calls[0]?.url).toBe('/api/files?path=');
+  });
+});
+
+describe('read', () => {
+  it('returns the file content the server sent', async () => {
+    const content = { path: 'a.md', content: '# hi\n', truncated: false, encoding: 'utf8' };
+    serverReplies(content);
+    expect(await createWorkspaceFilesPort().read('a.md')).toEqual(content);
+  });
+
+  it('uses the content endpoint', async () => {
+    const { calls } = serverReplies({});
+    await createWorkspaceFilesPort().read('a.md');
+    expect(calls[0]?.url).toBe('/api/files/content?path=a.md');
+  });
+});
+
+describe('write', () => {
+  it('PUT 으로 경로와 내용을 본문에 싣는다 — 경로는 그대로, URL 인코딩하지 않는다', async () => {
+    const { calls } = serverReplies({});
+    await createWorkspaceFilesPort().write('a.md', '# hi\n');
+
+    expect(calls[0]?.url).toBe('/api/files/content');
+    expect(calls[0]?.method).toBe('PUT');
+    expect(JSON.parse(calls[0]?.body ?? '{}')).toEqual({ path: 'a.md', content: '# hi\n' });
+  });
+
+  it('JSON 본문을 알린다', async () => {
+    const { calls } = serverReplies({});
+    await createWorkspaceFilesPort().write('a.md', 'x');
+    expect(calls[0]?.headers['content-type']).toBe('application/json');
+  });
+
+  it('실패하면 상태와 사유를 담아 던진다', async () => {
+    serverReplies({ message: '이 배포는 읽기 전용이다 — 저장할 수 없다.' }, 403);
+    await expect(createWorkspaceFilesPort().write('a.md', 'x')).rejects.toThrow(/403.*읽기 전용/u);
+  });
+});
+
+describe('create', () => {
+  it('POST 로 경로와 종류를 본문에 싣는다', async () => {
+    const { calls } = serverReplies({});
+    await createWorkspaceFilesPort().create('a.md', 'file');
+
+    expect(calls[0]?.url).toBe('/api/files');
+    expect(calls[0]?.method).toBe('POST');
+    expect(JSON.parse(calls[0]?.body ?? '{}')).toEqual({ path: 'a.md', type: 'file' });
+  });
+
+  it('실패하면 상태와 사유를 담아 던진다', async () => {
+    serverReplies({ message: 'already exists' }, 409);
+    await expect(createWorkspaceFilesPort().create('a.md', 'file')).rejects.toThrow(/409.*already exists/u);
+  });
+});
+
+describe('move', () => {
+  it('POST 로 출발지와 목적지를 본문에 싣는다', async () => {
+    const { calls } = serverReplies({});
+    await createWorkspaceFilesPort().move('a.md', 'b.md');
+
+    expect(calls[0]?.url).toBe('/api/files/move');
+    expect(calls[0]?.method).toBe('POST');
+    expect(JSON.parse(calls[0]?.body ?? '{}')).toEqual({ from: 'a.md', to: 'b.md' });
+  });
+
+  it('실패하면 상태와 사유를 담아 던진다', async () => {
+    serverReplies({ message: 'already exists' }, 409);
+    await expect(createWorkspaceFilesPort().move('a.md', 'b.md')).rejects.toThrow(/409.*already exists/u);
+  });
+});
+
+describe('remove', () => {
+  it('DELETE 로 경로를 쿼리로 싣는다', async () => {
+    const { calls } = serverReplies({});
+    await createWorkspaceFilesPort().remove('a.md');
+
+    expect(calls[0]?.url).toBe('/api/files?path=a.md');
+    expect(calls[0]?.method).toBe('DELETE');
+  });
+
+  it('실패하면 상태와 사유를 담아 던진다', async () => {
+    serverReplies({ message: 'forbidden' }, 403);
+    await expect(createWorkspaceFilesPort().remove('a.md')).rejects.toThrow(/403.*forbidden/u);
+  });
+});
+
+describe('failure', () => {
+  it('throws with the status and the reason the server gave', async () => {
+    serverReplies({ message: 'forbidden' }, 403);
+    await expect(createWorkspaceFilesPort().list('../etc')).rejects.toThrow(/403.*forbidden/u);
+  });
+
+  it('still throws when the body carries no reason', async () => {
+    serverReplies(null, 500);
+    await expect(createWorkspaceFilesPort().read('a.md')).rejects.toThrow(/500/u);
+  });
+});
+
+describe('authorization', () => {
+  it('sends the stored token when there is one', async () => {
+    localStorage.setItem('workbench.token', 'secret');
+    const { calls } = serverReplies(LISTING);
+    await createWorkspaceFilesPort().list('');
+    expect(calls[0]?.headers['authorization']).toBe('Bearer secret');
+  });
+
+  it('sends no authorization header when there is none', async () => {
+    const { calls } = serverReplies(LISTING);
+    await createWorkspaceFilesPort().list('');
+    expect(calls[0]?.headers['authorization']).toBeUndefined();
+  });
+});

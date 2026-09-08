@@ -1,0 +1,4 @@
+.Highlight {
+  background-color: var(--bgColor-attention-muted);
+  color: var(--fgColor-default);
+}

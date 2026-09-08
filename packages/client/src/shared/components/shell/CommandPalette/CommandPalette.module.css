@@ -1,0 +1,135 @@
+/* `cmdk`는 각 요소에 `cmdk-*` 속성(클래스가 아니다)을 스스로 붙인다 — 그 선택자로 스타일한다.
+   `.content` 아래로 좁혀서 다른 컴포넌트의 같은 속성과 안 섞이게 한다. */
+
+/* 둘 다 `pointer-events: auto` — Shell의 portal root가 `pointer-events: none`이라(빈 화면일 때
+   클릭을 막지 않으려고) 그 자식인 이 둘이 되살려야 한다. `document.body`로 포탈될 때(Storybook
+   등)는 조상에 그 속성이 없어 무해하다. */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--zIndex-popover);
+  background-color: var(--overlay-backdrop-bgColor);
+  pointer-events: auto;
+}
+
+.content {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  z-index: calc(var(--zIndex-popover) + 1);
+  width: calc(100vw - var(--space-lg) * 2);
+  max-width: 560px;
+  max-height: 60vh;
+  transform: translateX(-50%);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--borderRadius-medium);
+  border-style: solid;
+  border-width: var(--borderWidth-thin);
+  border-color: var(--borderColor-muted);
+  background-color: var(--bgColor-default);
+  color: var(--fgColor-default);
+  box-shadow: var(--shadow-floating-large);
+  pointer-events: auto;
+}
+
+.content [cmdk-input] {
+  width: 100%;
+  border-style: none;
+  border-bottom-style: solid;
+  border-bottom-width: var(--borderWidth-thin);
+  border-bottom-color: var(--borderColor-muted);
+  padding: var(--space-md);
+  font-size: var(--text-body-size-medium);
+  line-height: var(--text-body-lineHeight-medium);
+  color: var(--fgColor-default);
+  background-color: transparent;
+  outline: none;
+}
+
+.content [cmdk-input]::placeholder {
+  color: var(--fgColor-muted);
+}
+
+.content [cmdk-list] {
+  overflow-y: auto;
+  padding: var(--space-xs);
+}
+
+.content [cmdk-group-heading] {
+  padding-inline: var(--space-sm);
+  padding-block: var(--space-xs);
+  font-size: var(--base-text-size-xs);
+  line-height: var(--base-text-lineHeight-tight);
+  color: var(--fgColor-muted);
+}
+
+.content [cmdk-item] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  cursor: default;
+  user-select: none;
+  border-radius: var(--borderRadius-small);
+  padding-inline: var(--space-sm);
+  padding-block: var(--space-sm);
+  font-size: var(--text-body-size-small);
+  line-height: var(--text-body-lineHeight-small);
+  outline: none;
+  transition: background-color var(--motion-duration-short) var(--motion-easing-move);
+}
+
+.itemLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shortcuts {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--space-xs);
+}
+
+.shortcutKey {
+  min-width: 1.5em;
+  border-style: solid;
+  border-width: var(--borderWidth-thin);
+  border-radius: var(--borderRadius-small);
+  padding-inline: var(--space-xs);
+  /* stylelint-disable-next-line arka/spacing-tokens -- 2px 미만 base-size 토큰이 없다, 키캡
+     칩의 미세 조정값이라 리터럴이 불가피하다 */
+  padding-block: 1px;
+  font-family: inherit;
+  font-size: var(--base-text-size-xs);
+  line-height: var(--base-text-lineHeight-tight);
+  text-align: center;
+  background-color: var(--buttonKeybindingHint-default-bgColor-rest);
+  border-color: var(--buttonKeybindingHint-default-borderColor-rest);
+  color: var(--buttonKeybindingHint-default-fgColor-rest);
+}
+
+.content [cmdk-item][data-selected='true'] {
+  background-color: var(--bgColor-accent-emphasis);
+  color: var(--fgColor-onEmphasis);
+}
+
+/* 선택된 행 위에서는 kbd 도 강조 배경에 맞춰 반전한다 — Primer가 강조 배경 위 키바인딩 힌트용으로
+   갖고 있는 토큰과 정확히 같은 짝(`Button`의 `keybindingHint`가 `primary` variant 위에서 쓰는 것과
+   동일)이다. */
+.content [cmdk-item][data-selected='true'] .shortcutKey {
+  background-color: var(--buttonKeybindingHint-primary-bgColor-rest);
+  border-color: var(--buttonKeybindingHint-primary-borderColor-rest);
+  color: var(--buttonKeybindingHint-primary-fgColor-rest);
+}
+
+.content [cmdk-empty] {
+  padding: var(--space-md);
+  text-align: center;
+  font-size: var(--text-body-size-small);
+  color: var(--fgColor-muted);
+}

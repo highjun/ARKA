@@ -1,0 +1,215 @@
+/*
+ * `margin`·`padding: 0`·`list-style: none`을 여기 함께 둔다(예전엔 `.root, .group` 규칙으로
+ * 따로 있었는데, 소스 순서상 그 규칙이 나중에 와서 이 규칙의 `padding-block`을 죽이고 있었다 —
+ * `padding: 0`이 축약형이라 `padding-block`까지 덮어쓴다. 2026-08-31 발견 — 그때까지 상하
+ * 여백이 한 번도 실제로 반영된 적이 없었다).
+ */
+.root {
+  margin: 0;
+  list-style: none;
+  user-select: none;
+  padding-block: var(--space-xs);
+  padding-inline: var(--space-sm);
+  font-size: var(--text-body-size-medium);
+  line-height: var(--text-body-lineHeight-medium);
+  color: var(--fgColor-default);
+}
+
+/*
+ * radius를 안 준다 — `Container`의 `bordered`(카드처럼 어디에나 놓일 수 있는 범용 스크롤
+ * 래퍼)와 달리, 파일 트리는 패널 안에 꽉 차는 워크스페이스 섹션이다(VSCode·JetBrains 등도
+ * 트리 경계에 라운딩을 안 준다) — 카드가 아니라 인셋(inset) 패널이라는 뜻으로 각지게 둔다.
+ */
+.root[data-chrome='bordered'] {
+  border-style: solid;
+  border-width: var(--borderWidth-thin);
+  border-color: var(--borderColor-muted);
+  background-color: var(--bgColor-default);
+}
+
+/*
+ * `<ul>`/`<li>`는 브라우저 기본 스타일(리스트 점, 좌측 여백)을 갖는다 — 예전엔 Primer `TreeView`가
+ * 대신 리셋해 줬는데, 이제 직접 그리니 우리가 챙긴다(2026-08-24, `ModeToggle`에서 겪었던 것과 같은
+ * 종류의 "리셋을 누가 해줄 거라 가정하지 않는다" 원칙).
+ *
+ * `position: relative` + `::before` — 이 그룹(= 폴더 하나의 자식들) 전체가 공유하는 들여쓰기
+ * 안내선 하나. x좌표는 `FileTree.tsx`가 `--tree-guide-left`로 얹는다(자식 행 자신의 마커 칸
+ * 중앙과 맞춘 값) — 그룹 자신의 전체 높이만큼 그어지므로, 자식이 몇 겹이든 조상→자손으로 이어지는
+ * 세로선처럼 보인다(각 깊이가 자기 그룹에서 딱 한 줄만 긋고, 중첩된 자손 그룹은 각자 자기 깊이의
+ * 선을 또 긋는 식 — 굳이 조상의 전체 트리 구조를 알 필요 없이 CSS만으로 이어진다).
+ */
+.group {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * x좌표는 `FileTree.tsx`가 인라인 `style.left`로 직접 얹는다(자식 행 자신의 마커 칸 중앙과
+ * 맞춘 값) — CSS 커스텀 프로퍼티로 다리를 놓지 않는 이유는 stylelint의 Primer 토큰 검사가
+ * "알 수 없는 커스텀 프로퍼티"로 오탐하기 때문이다(레이아웃 좌표는 애초에 디자인 토큰이 아니다).
+ * width:0 + border-left — 1px 선을 `background-color`가 아니라 `border-left-color`로 그린다,
+ * 그래야 `--borderColor-*` 토큰(테두리 전용 축)을 배경색 자리에 쓰는 것으로 오인되지 않는다.
+ */
+.guide {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: var(--borderWidth-thin) solid var(--borderColor-muted);
+}
+
+.item {
+  position: relative;
+  outline: none;
+}
+
+.item:focus-visible > .row {
+  outline: 2px solid var(--fgColor-accent);
+  outline-offset: -2px;
+}
+
+/*
+ * 시각적으로는 VSCode(22px)보다 크되 촘촘한 28px 로 두고, 터치 규격(44px)은 안 보이는
+ * `::after` 로 탭 영역만 확장한다 — 행 자체를 44px 까지 키우면(Primer `TreeView`가 그랬다)
+ * "너무 헐렁하다"는 지적을 받았던 적이 있다. `pointer-events: none` 이라 실제로 클릭을
+ * 가로채진 않는다(순수 계측/설계 의도 표시용) — 정말 44px 히트 영역이 필요해지면 그때
+ * `pointer-events: auto` + 위아래 행과의 겹침 처리를 다시 설계한다.
+ */
+.item::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: 44px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/*
+ * `.root`가 이제 `padding-inline: var(--space-sm)`로 안쪽 여백을 갖는다(패널 여백 확보) —
+ * 하지만 행의 hover·선택 배경은 여전히 패널 가장자리까지 닿아야 한다("선택 막대가 패널 폭을
+ * 꽉 채운다" 설계, VSCode와 같음). `margin-inline`으로 그 여백만큼 도로 밀고 나가 배경을
+ * 가장자리까지 되돌린다 — 왼쪽은 `FileTree.tsx`의 깊이별 `paddingLeft`가 이미 이 값을 더해
+ * 상쇄하고(인라인 스타일이라 여기 `padding-inline`으로는 못 건드린다), 오른쪽은
+ * `padding-right`로 직접 되돌린다.
+ */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 32px;
+  border-radius: var(--borderRadius-medium);
+  margin-inline: calc(-1 * var(--space-sm));
+  padding-right: var(--space-sm);
+  cursor: pointer;
+  transition: background-color var(--motion-duration-short) var(--motion-easing-move);
+}
+
+.row:hover {
+  background-color: var(--control-transparent-bgColor-hover);
+}
+
+.item[aria-disabled='true'] > .row {
+  cursor: not-allowed;
+  color: var(--fgColor-muted);
+}
+
+.item[data-active] > .row {
+  background-color: var(--control-transparent-bgColor-selected);
+}
+
+/*
+ * 드래그 중인 항목이 이 폴더 위에 있을 때(`data-drop='inside'`, FileTree.tsx의 `dropTargetId`
+ * 계산)의 시각 피드백 — JS 상태는 이미 정확히 갱신되지만, 이 스타일이 D&D를 새 커스텀 트리로
+ * 옮기며 로직만 복원되고 함께 추가되지 않아 시각적 변화가 전혀 없었다(2026-09-02 발견). hover·
+ * 선택과 구분되는 세 번째 상태라 accent 계열 토큰을 쓴다(`.item:focus-visible > .row`의 포커스
+ * 링과 같은 `--fgColor-accent`로 톤을 맞춘다). `[data-active]` 규칙보다 뒤에 둬 같은 특이도에서
+ * 드롭 피드백이 선택색을 덮도록 한다.
+ */
+.item[data-drop='inside'] > .row {
+  background-color: var(--bgColor-accent-muted);
+  outline: 2px solid var(--fgColor-accent);
+  outline-offset: -2px;
+}
+
+/*
+ * 셰브론(폴더)과 파일 아이콘이 그리는 자리 — 조건문 하나로 갈릴 뿐 같은 슬롯이라애초에 서로 다른
+ * x좌표에서 시작할 수가 없다(2026-08-24, Primer TreeView가 이 둘을 별개 그리드 칸으로 나눠서
+ * 겪었던 정렬 문제 전체를 이 구조 자체로 없앤다).
+ */
+.marker {
+  display: flex;
+  flex-shrink: 0;
+  width: var(--base-size-20);
+  height: var(--base-size-20);
+  align-items: center;
+  justify-content: center;
+  color: var(--fgColor-muted);
+}
+
+@media (pointer: coarse) {
+  .marker {
+    width: var(--base-size-24);
+    height: var(--base-size-24);
+  }
+}
+
+.fileIcon {
+  width: 100%;
+  height: 100%;
+}
+
+.label {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 이름 편집 중인 행의 라벨 — `.label`과 같은 자리를 차지하되 실제로 타이핑되는 입력이다. */
+.labelInput {
+  min-width: 0;
+  flex: 1 1 auto;
+  border-style: solid;
+  border-width: var(--borderWidth-thin);
+  border-color: var(--borderColor-accent-emphasis);
+  border-radius: var(--borderRadius-small);
+  background-color: var(--bgColor-default);
+  padding-inline: var(--space-xs);
+  color: var(--fgColor-default);
+  font: inherit;
+  outline: none;
+}
+
+/* 이 행에 관련된 요청이 진행 중이다(자식 로딩·파일 열기·편집 커밋 등) — 오른쪽 끝에 붙는다. */
+.trailingSpinner {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--fgColor-muted);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .trailingSpinner {
+    animation: FileTree-spin 1s linear infinite;
+  }
+}
+
+@keyframes FileTree-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.empty {
+  padding-inline: var(--space-sm);
+  padding-block: var(--space-sm);
+  font-style: italic;
+  color: var(--fgColor-muted);
+}

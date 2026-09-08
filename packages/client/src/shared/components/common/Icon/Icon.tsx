@@ -1,0 +1,45 @@
+import { forwardRef } from 'react';
+import type { HTMLAttributes } from 'react';
+import { clsx } from 'clsx';
+import { assembleCompound } from '#utils/assembleCompound';
+import styles from './Icon.module.css';
+import { icons } from './data';
+import codicon from '@iconify-json/codicon/icons.json';
+import octicon from '@iconify-json/octicon/icons.json';
+import * as Iconify from '@iconify/react/offline';
+
+export type IconId = keyof typeof icons;
+export type IconSize = 'sm' | 'md' | 'lg';
+export const ICON_MAP: Record<IconId, string> = icons;
+
+/**
+ * 코디콘·옥티콘 전체 아이콘 세트를 통째로 번들에 넣는다(오프라인 동작 — `api.iconify.design` 외부 API 의존 제거). 실제 쓰는 건 ICON_MAP에 있는 것뿐이지만 JSON 통짜 import라 개별 아이콘 단위 트리쉐이킹은 안 된다.
+ */
+Iconify.addCollection(codicon as Parameters<typeof Iconify.addCollection>[0]);
+Iconify.addCollection(octicon as Parameters<typeof Iconify.addCollection>[0]);
+
+export interface IconRootProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'id'> {
+  /** 표시할 아이콘. */
+  readonly iconId: IconId;
+  /** Icon의 크기. sm, md, lg 중 하나로 기본값은 md. */
+  readonly size?: IconSize;
+}
+
+const Root = forwardRef<HTMLSpanElement, IconRootProps>(
+  ({ className, iconId, size = 'md', ...props }, ref) => (
+    <span
+      ref={ref}
+      aria-hidden="true"
+      data-icon={iconId}
+      data-size={size}
+      className={clsx(className, styles['Icon'])}
+      {...props}
+      data-component="Icon"
+    >
+      <Iconify.Icon aria-hidden="true" focusable="false" height="100%" width="100%" icon={ICON_MAP[iconId]} />
+    </span>
+  ),
+);
+
+export type { IconRootProps as IconProps };
+export const Icon = assembleCompound('Icon', Root, {});

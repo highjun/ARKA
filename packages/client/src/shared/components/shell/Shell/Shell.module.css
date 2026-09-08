@@ -1,0 +1,254 @@
+/*
+ * Primer `ThemeProvider`(`Shell.tsx`가 루트를 감싸는 컴포넌트)는 컴파일 소스(`ThemeProviderBase.js`)
+ * 확인 결과 `className`/`style`을 아예 안 받는 `<div data-component="ThemeProvider" ...>`를
+ * 렌더한다 — height 지정이 없어 `.root { height: 100% }`만으로는 여기서 막힌다(퍼센트 height는
+ * 직계 부모가 definite height를 가져야 풀린다). arka-workbench는 우연히 전역 규칙
+ * `[data-color-mode] { height: 100% }`를 갖고 있어(다른 이유로 예전에 추가) 이 정확한 div를
+ * 구제해 왔을 뿐 — Storybook엔 그 규칙이 없어 800px 뷰포트에서 Shell 루트가 92px로 찌그러지는
+ * 게 처음 드러났다(2026-09-01, Playwright 실측으로 확인).
+ *
+ * `.storybook/preview.tsx`의 캔버스 데코레이터까지 고쳐서 `height`/`flex`를 태워보려 했지만,
+ * 그 데코레이터를 만지면 `display:flex`가 margin collapse를 끊어서 VRT 커버 대상 컴포넌트들
+ * (`Timestamp` 등, Shell과 무관한 것들)의 스크린샷이 몇 px씩 밀리는 부수 피해가 났다(2026-09-01,
+ * `pnpm test:visual`로 확인) — Shell 한 곳을 고치자고 Shell을 안 쓰는 스토리 전부의 베이스라인을
+ * 흔들 이유가 없어서, 데코레이터는 그대로 두고 `Shell.module.css` 안에서만 해결한다.
+ *
+ * `.contentFill`(아래)이 이미 쓰는 것과 같은 해법 — 퍼센트/flex 대신 `position: absolute;
+ * inset: 0`으로 아예 다른 경로를 쓴다. Shell을 담은 `ThemeProvider`(안쪽·바깥쪽 둘 다, 중첩
+ * 깊이 무관하게 `:has()`로 잡는다)를 그 자체로 채워서 그 자식(`.root`)이 기댈 definite한 박스로
+ * 만들고, 그 ThemeProvider의 부모(데코레이터 div 포함)에도 `position: relative`를 얹어 기준점을
+ * 마련한다 — `position: relative`는 offset을 안 주는 한 레이아웃에 아무 영향이 없어(margin
+ * collapse도 안 끊는다) 앞서 겪은 부수 피해가 없다. `:has()`가 전부 "Shell을 담고 있을 때만"으로
+ * 좁혀 걸려 있어 Shell이 없는 스토리는 이 규칙 자체가 매치되지 않는다.
+ */
+:global(:has(> [data-component='ThemeProvider']:has([data-component='Shell']))) {
+  position: relative;
+}
+
+:global([data-component='ThemeProvider']:has([data-component='Shell'])) {
+  position: absolute;
+  inset: 0;
+}
+
+.root {
+  position: absolute;
+  inset: 0;
+}
+
+.layout {
+  height: 100%;
+}
+
+/*
+ * Primer `SplitPageLayout`의 `[data-width]`(`PageLayoutWrapper`, `containerWidth` prop을 그대로
+ * 노출하는 문서화된 속성)는 `display:flex; flex-wrap:wrap`인데 `align-content`를 지정하지 않는다
+ * (`@primer/react` 컴파일 CSS로 확인). Header·Content가 둘 다 `width:100%`라 각각 별도 flex
+ * 줄이 되고, 다중 줄 flex의 기본 교차축 정렬(`align-content:stretch`)이 남는 세로 공간을 두
+ * 줄에 균등 배분해 Header(원래 32px)가 부풀고 Content가 짓눌렸다(2026-09-02, "파일 탭이 메인
+ * 영역 아래 반쪽에만 보인다" 버그의 실체 — Tab pane 분할이 아니라 이 Header줄/Content줄 배분
+ * 문제였다). `column`으로 바꾸면 주축이 세로가 되어, Primer가 `PageLayoutContent`에 이미 걸어둔
+ * `flex: 1 1 100%`가 의도대로 "Header를 뺀 나머지 세로 공간을 전부 가져간다"로 동작한다 —
+ * `align-content`를 직접 오버라이드하는 대신 Primer가 준비해 둔 flex-grow를 올바른 축에서 쓰는
+ * 쪽을 택했다(Shell은 Pane 슬롯을 안 써서 안전하다).
+ *
+ * `flex-wrap: nowrap`도 함께 준다 — 원본의 `wrap`을 그대로 두면, Content 내부(에디터 등)가
+ * 요구하는 최소 높이가 Header를 뺀 남은 공간보다 커질 때 flexbox가 그 초과분을 "새 줄"로
+ * 취급해 Content를 Header **옆(가로)**으로 밀어내 버린다(컬럼 방향에서 wrap의 교차축은
+ * 가로라서) — Playwright E2E에서 탭 스트립 메뉴 버튼·에디터 찾기 버튼·저장 버튼 등 곳곳이
+ * `PageLayoutWrapper`에 클릭을 가로채이는 회귀로 처음 드러났다(2026-09-02). `nowrap`으로
+ * 막으면 대신 정상적으로 축소(shrink)하거나 넘치는(overflow) 쪽으로 처리된다.
+ */
+.layout > [data-width] {
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+
+/*
+ * `position: relative` — 아래 `.contentFill`의 기준점이다. Primer `SplitPageLayout.Content`는
+ * 내부적으로 div를 하나 더 감싸는데(우리 className이 안 닿는 자리), 그 안쪽 div는 flex item의
+ * 기본값 `min-height: auto`를 그대로 쓴다 — 그 안의 내용(예: 아주 긴 파일을 연 `TextEditor`)이
+ * 실제로 커지면 flex-grow가 아니라 내용 높이만큼 그냥 자라 버려서, `#root`의 `overflow: hidden`
+ * 에 그대로 잘리고 에디터 내부 스크롤이 사라진다(2026-08-31 확인 — Primer 클래스명을 몰라도
+ * 되는 구조로 바꾸는 과정에서 재현). Primer의 그 안쪽 div엔 `min-height: 0`을 줄 방법이 없다
+ * (className이 안 닿음) — 대신 `.contentFill`을 `position: absolute; inset: 0`으로 만들어,
+ * 이 요소(가장 가까운 positioned 조상)를 기준으로 크기를 정하게 한다. absolute 배치는 사이에
+ * 낀 Primer의 그 div가 어떤 높이로 계산되든 완전히 무시하므로, Primer 내부 구조를 몰라도 항상
+ * 정확히 이 박스만큼만 채운다.
+ */
+.content {
+  min-height: 0;
+  height: 100%;
+  position: relative;
+}
+
+.contentFill {
+  position: absolute;
+  inset: 0;
+}
+
+/* ContextMenu·CommandPalette가 여기로 포탈된다 — 레이아웃에 자리를 차지하면 안 된다. */
+.portalRoot {
+  position: fixed;
+  inset: 0;
+  z-index: var(--zIndex-popover);
+  pointer-events: none;
+}
+
+/* ─── 헤더 ─── */
+
+.headerRow {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: var(--space-md);
+}
+
+/* brand/actions 자체의 내부 간격은 소비자가 자기 콘텐츠를 감싸며 정한다(브랜드 로고+텍스트 vs
+   순수 버튼들에 따라 필요한 간격이 다르다) — 이 gap 은 오직 Shell 이 직접 그리는 사이드바
+   토글 버튼과 brand 사이만을 위한 것이다(사이드바가 없을 땐 group 의 자식이 하나뿐이라 gap
+   자체가 아무 효과도 없다). */
+.headerGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+/* 좁은 화면(< 768px)에서만 보인다 — 데스크톱은 Sidebar 가 항상 도킹되어 있어 토글이 필요 없다.
+   `display: inline-grid`인 이유는 `IconButton`(Primer) 자신이 아이콘을 가운데 놓으려고
+   `inline-grid; place-content:center`를 쓰기 때문이다 — `block`으로 덮으면 `place-content`가
+   무효가 되어 아이콘이 어긋난다(워크벤치에서 실제로 겪은 버그, 이관하며 그대로 가져온다). */
+.sidebarToggle {
+  display: inline-grid;
+}
+
+@media (min-width: 768px) {
+  .sidebarToggle {
+    display: none;
+  }
+}
+
+/* ─── 사이드바 ─── */
+
+/*
+ * 기본(좁은 화면)은 슬라이드로 여닫는다 — `min-width: 768px`에서 데스크톱 도킹 패널로 되돌린다
+ * (정본 breakpoint 방향에 맞춰 모바일을 기본값으로 둔다). 데스크톱은 열림 상태와 무관하게 항상
+ * 보여야 해서, 미디어쿼리 안에서 두 상태(`.sidebar`·`.sidebar.sidebarOpen`) 모두를 중립 상태로
+ * 되돌린다. `.sidebar`는 `responsiveVariant="fullscreen"`이 이미 `position: fixed`로 만들어 둔
+ * 바로 그 바깥 래퍼에 붙는다(`@primer/react` 소스로 확인함) — `transform`을 걸면 화면 전체를
+ * 덮는 스크림째로 밀려나서, 닫혔을 때 뒤 화면 클릭도 다시 먹는다. `visibility`를
+ * `transition-delay`로 늦춰서 슬라이드가 끝난 뒤에야 접근성 트리·탭 순서에서 빠지게 한다(먼저
+ * 숨기면 슬라이드 도중 스크린 리더가 사라진 것처럼 읽는다).
+ *
+ * `data-state`가 아니라 클래스(`.sidebarOpen`)로 여닫는다 — `SplitPageLayout.Sidebar`는 정해진
+ * prop만 구조분해하고 나머지는 버려서(`...rest` 없음) 임의의 `data-*`를 이 바깥 래퍼까지 못
+ * 보낸다. `className`만은 실제로 살아남는다.
+ */
+.sidebar {
+  visibility: hidden;
+  transition:
+    transform 200ms var(--motion-easing-move),
+    visibility 0s linear 200ms;
+  transform: translateX(-100%);
+}
+
+.sidebar.sidebarOpen {
+  visibility: visible;
+  transition: transform 200ms var(--motion-easing-move);
+  transform: translateX(0);
+}
+
+@media (min-width: 768px) {
+  .sidebar,
+  .sidebar.sidebarOpen {
+    visibility: visible;
+    transition: none;
+    transform: none;
+  }
+}
+
+.sidebarInner {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+}
+
+/* 닫기 버튼 전용 자리 — ActivityBar/패널과 겹치지 않게 별도 행으로 위에 쌓는다. 기본(좁은
+   화면)엔 뜨고, 데스크톱 도킹 패널(닫기 개념이 없음)에서는 숨긴다. */
+.sidebarCloseButtonRow {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: flex-end;
+  padding: var(--space-xs);
+}
+
+@media (min-width: 768px) {
+  .sidebarCloseButtonRow {
+    display: none;
+  }
+}
+
+.sidebarBody {
+  display: flex;
+  min-height: 0;
+  flex-grow: 1;
+}
+
+.sidebarPanel {
+  display: flex;
+  min-width: 0;
+  flex-grow: 1;
+  flex-direction: column;
+  border-style: solid;
+  border-top-width: 0;
+  border-right-width: 0;
+  border-bottom-width: 0;
+  border-left-width: var(--borderWidth-thin);
+  border-color: var(--borderColor-default);
+}
+
+/* VSCode Explorer 헤더와 같은 자리 — 제목(대문자·muted) + "..." 더보기 버튼. 없어도(둘 다
+   `undefined`) 이 행 자체가 안 뜬다(Shell.tsx). */
+.sidebarPanelHeader {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  height: var(--control-medium-size);
+  padding-inline: var(--space-sm);
+  border-style: solid;
+  border-top-width: 0;
+  border-right-width: 0;
+  border-bottom-width: var(--borderWidth-thin);
+  border-left-width: 0;
+  border-color: var(--borderColor-muted);
+}
+
+/* 더보기 버튼(`common/IconButton`, 32px)이 coarse-pointer에서 44px로 커지면(2026-09-02,
+   "모바일에서 버튼이 작다" 대응) 이 행(기존 --control-medium-size, 32px)을 벗어난다 — 같이
+   키운다. */
+@media (pointer: coarse) {
+  .sidebarPanelHeader {
+    height: var(--control-minTarget-coarse);
+  }
+}
+
+.sidebarPanelTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--base-text-size-xs);
+  font-weight: var(--base-text-weight-semibold);
+  line-height: var(--base-text-lineHeight-tight);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--fgColor-muted);
+}
+
+.sidebarPanelBody {
+  min-height: 0;
+  flex-grow: 1;
+}

@@ -1,0 +1,63 @@
+/* `ContextMenu.module.css`의 `.content`/`.item`/`.label`/`.separator`와 값을 맞춘다 — 같은
+   메뉴 시각 언어를 쓴다(우클릭이냐 버튼 클릭이냐만 다르다). */
+.content {
+  z-index: var(--zIndex-popover);
+  overflow: hidden;
+  min-width: 180px;
+  border-radius: var(--borderRadius-small);
+  border-style: solid;
+  border-width: var(--borderWidth-thin);
+  border-color: var(--borderColor-muted);
+  background-color: var(--bgColor-default);
+  padding: var(--space-xs);
+  color: var(--fgColor-default);
+  box-shadow: var(--shadow-floating-medium);
+  /* Shell의 portal root(`pointer-events: none`)로 포탈될 수 있어 여기서 되살린다. Shell 없이
+     `document.body`로 포탈될 때(Storybook 등)는 조상에 `pointer-events: none`가 없어 무해하다. */
+  pointer-events: auto;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  height: var(--control-xsmall-size);
+  cursor: default;
+  user-select: none;
+  align-items: center;
+  gap: var(--space-sm);
+  border-radius: var(--borderRadius-small);
+  padding-inline: var(--space-md);
+  padding-block: 0;
+  font-size: var(--text-body-size-small);
+  line-height: var(--text-body-lineHeight-small);
+  outline: none;
+  transition: background-color var(--motion-duration-short) var(--motion-easing-move);
+}
+
+.item:hover {
+  background-color: var(--control-transparent-bgColor-hover);
+}
+
+.item[data-disabled] {
+  pointer-events: none;
+  color: var(--fgColor-muted);
+}
+
+.label {
+  padding-inline: var(--space-sm);
+  padding-block: var(--space-xs);
+  font-size: var(--base-text-size-xs);
+  line-height: var(--base-text-lineHeight-tight);
+  color: var(--fgColor-muted);
+}
+
+.separator {
+  margin-block: var(--space-xs);
+  margin-inline: calc(var(--space-xs) * -1);
+  border-style: solid;
+  border-top-width: var(--borderWidth-thin);
+  border-right-width: 0;
+  border-bottom-width: 0;
+  border-left-width: 0;
+  border-color: var(--borderColor-muted);
+}

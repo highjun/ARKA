@@ -1,4 +1,15 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["src"]
+  "compilerOptions": {
+    // 브라우저에서 도는 PWA라 fetch·atob·TextDecoder가 필요하다. server가
+    // types: ["node"]로 Node 전역을 받는 것과 짝을 이룬다.
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    // node를 넣지 않는다 — 브라우저 패키지라 process 같은 게 보이면 안 된다.
+    // vitest globals는 vite.config.ts의 globals: true와 짝이다.
+    "types": ["vitest/globals"],
+    "jsx": "react-jsx"
+  },
+  // vitestSetup.ts가 @testing-library/jest-dom의 matcher 타입을 확장한다.
+  // 프로그램에 포함되지 않으면 toBeInTheDocument 같은 게 타입에 안 잡힌다.
+  "include": ["src", "vitestSetup.ts"]
 }

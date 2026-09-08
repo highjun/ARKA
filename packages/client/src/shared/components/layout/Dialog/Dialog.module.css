@@ -1,0 +1,75 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--zIndex-overlay);
+  background-color: var(--overlay-backdrop-bgColor);
+}
+
+/*
+ * 위치는 뷰포트 중앙 고정, 폭은 짧은 메시지에 맞춰 좁게 둔다(넓은 폼이 아니라 예/아니오
+ * 확인창이라서다).
+ */
+.content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: var(--zIndex-overlay);
+  width: min(360px, calc(100vw - var(--space-lg) * 2));
+  transform: translate(-50%, -50%);
+  border-radius: var(--borderRadius-medium);
+  border-style: solid;
+  border-width: var(--borderWidth-thin);
+  border-color: var(--borderColor-muted);
+  background-color: var(--bgColor-default);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-floating-medium);
+  color: var(--fgColor-default);
+}
+
+/* 아이콘·제목·닫기 버튼 한 줄 — 제목이 남는 폭을 다 먹고, 아이콘·버튼은 고정폭이다. */
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+.icon[data-tone='attention'] {
+  color: var(--fgColor-attention);
+}
+
+.icon[data-tone='danger'] {
+  color: var(--fgColor-danger);
+}
+
+.title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-weight: var(--base-text-weight-semibold);
+  font-size: var(--text-body-size-medium);
+  line-height: var(--text-body-lineHeight-medium);
+}
+
+.closeButton {
+  flex-shrink: 0;
+}
+
+/* header와 형제 — 아이콘 폭만큼 들여쓰지 않고 상자 전체 폭을 그대로 쓴다. */
+.description {
+  margin: 0;
+  margin-top: var(--space-xxs);
+  font-size: var(--text-body-size-small);
+  line-height: var(--text-body-lineHeight-small);
+  color: var(--fgColor-muted);
+}
+
+.actions {
+  display: flex;
+  margin-top: var(--space-md);
+  justify-content: flex-end;
+  gap: var(--space-sm);
+}

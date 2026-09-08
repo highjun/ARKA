@@ -1,0 +1,10 @@
+.root {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+.textEditor {
+  min-height: 0;
+  flex-grow: 1;
+}

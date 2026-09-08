@@ -1,0 +1,37 @@
+.List {
+  list-style-position: outside;
+}
+
+.List[data-list-kind='unordered'] {
+  list-style-type: disc;
+  padding-inline-start: var(--space-md);
+}
+
+.List[data-list-kind='ordered'] {
+  list-style-type: decimal;
+  padding-inline-start: var(--space-md);
+}
+
+.List[data-list-kind='checkbox'] {
+  list-style-type: none;
+  padding-inline-start: 0;
+}
+
+.ListItem + .ListItem {
+  margin-top: var(--space-xs);
+}
+
+/* 중첩 목록도 이 컴포넌트 자신이라 항상 .List 클래스를 갖는다 — 태그(ol/ul) 대신 그 클래스로 받는다. */
+.ListItem > .List {
+  margin-top: var(--space-xs);
+}
+
+/* 체크박스는 소비처가 직접 넣는 <input> 이라 클래스를 못 붙인다 — 타입 대신 속성 선택자로 받는다. */
+.ListItem > [type='checkbox']:first-child {
+  margin-right: var(--space-xs);
+  vertical-align: middle;
+}
+
+.ListItem[data-list-item-kind='checkbox'] {
+  list-style-type: none;
+}

@@ -1,0 +1,32 @@
+/*
+ * Primer `IconButton`의 크기 CSS는 `:where()`로 감싸여 있어 실특이도가 사실상 0이다
+ * (`.prc-Button-ButtonBase-*:where(.prc-Button-IconButton-*):where([data-size=small])
+ * {width:var(--control-small-size,1.75rem)}`, `@primer/react/dist/Button/ButtonBase-*.css`
+ * 확인). `IconButton`은 우리가 넘긴 `className`을 Primer 클래스와 같은 엘리먼트에 나란히
+ * 붙이고 `data-size`도 그 엘리먼트에 남으므로, `.root[data-size]`(클래스 1+속성 1)면
+ * `!important` 없이 항상 이긴다.
+ *
+ * `small`/`medium`/`large` 전부를 coarse-pointer에서 하나(`--control-minTarget-coarse`,
+ * 44px — Apple HIG 44pt·Material 48dp와 부합)로 통일한다. 화면 안에 28px·32px·44px가
+ * 섞이면 "여전히 들쭉날쭉하다"는 재피드백을 부르므로, `size` prop과 무관하게 터치 환경에서는
+ * 하나의 목표 크기로 수렴시킨다(2026-09-02, "모바일에서 버튼이 작다" 피드백 대응). 데스크톱/
+ * 마우스(스토리북 포함)는 이 블록 자체가 평가되지 않아 기존 28~40px 크기 그대로다.
+ */
+@media (pointer: coarse) {
+  .root[data-size] {
+    width: var(--control-minTarget-coarse);
+    height: var(--control-minTarget-coarse);
+  }
+
+  /*
+   * 버튼 박스가 커지는데 안의 아이콘(`sm`, 16px)이 그대로면 여백만 늘어나 어색하다 — 처음엔
+   * `lg`(24px)로 맞췄는데, 실제 폰에서 확인한 사용자가 "아이콘이 부담스럽게 크다"고 지적했다
+   * (박스가 아니라 아이콘 그림 자체가 크다는 지적, 2026-09-02). `md`(20px)로 한 단계 낮춘다 —
+   * 44px 박스에서 비율(≈0.45)이 16px 아이콘 시절(28px 박스, ≈0.57)보다는 작지만, 여백이
+   * 과하지도 않다.
+   */
+  .root [data-component='Icon'][data-size='sm'] {
+    width: var(--base-size-20);
+    height: var(--base-size-20);
+  }
+}

@@ -1,0 +1,19 @@
+/* Font Family Hosting: Pretendard for Sans, Cascadia Code for Monospace */
+@import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
+@import '@fontsource-variable/cascadia-code';
+
+/*
+ * `@primer/primitives` 토큰 CSS — 이걸 아무도 import 한 적이 없었다(2026-08-23 발견). 그동안
+ * `--fgColor-default`·`--space-sm`·`--borderRadius-medium` 같은 토큰이 전부 빈 값이었다는 뜻이다
+ * — 구조·타입은 멀쩡해 보여도 실제 화면은 색도 여백도 없이 렌더링되고 있었다.
+ * `primitives.css`가 spacing/size/radius/motion/typography 같은 색과 무관한 축을 전부 묶어
+ * import하고, 색상은 라이트/다크가 갈리는 축이라 `functional/themes/`에서 따로 온다 —
+ * `ThemeProvider`의 `data-color-mode`/`data-light-theme`/`data-dark-theme`가 이 파일들의
+ * 선택자와 맞물린다(기본값 둘 다 `light`/`dark` — `useThemeProvider`의 `defaultDayScheme`/
+ * `defaultNightScheme` 확인).
+ */
+@import '@primer/primitives/dist/css/primitives.css';
+@import '@primer/primitives/dist/css/functional/themes/light.css';
+@import '@primer/primitives/dist/css/functional/themes/dark.css';
+
+@import './reset.css';

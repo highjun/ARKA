@@ -1,0 +1,22 @@
+.Icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+}
+
+.Icon[data-size='sm'] {
+  width: var(--base-size-16);
+  height: var(--base-size-16);
+}
+
+.Icon[data-size='md'] {
+  width: var(--base-size-20);
+  height: var(--base-size-20);
+}
+
+.Icon[data-size='lg'] {
+  width: var(--base-size-24);
+  height: var(--base-size-24);
+}

@@ -1,0 +1,27 @@
+.Text[data-text-variant='body'][data-text-size='small'] {
+  font-size: var(--text-body-size-small);
+  line-height: var(--text-body-lineHeight-small);
+}
+
+.Text[data-text-variant='body'][data-text-size='medium'] {
+  font-size: var(--text-body-size-medium);
+  line-height: var(--text-body-lineHeight-medium);
+}
+
+.Text[data-text-variant='body'][data-text-size='large'] {
+  font-size: var(--text-body-size-large);
+  line-height: var(--text-body-lineHeight-large);
+}
+
+.Text[data-text-variant='caption'] {
+  font-size: var(--text-caption-size);
+  line-height: var(--text-caption-lineHeight);
+}
+
+.Text[data-text-tone='muted'] {
+  color: var(--fgColor-muted);
+}
+
+.Text[data-text-tone='danger'] {
+  color: var(--fgColor-danger);
+}
