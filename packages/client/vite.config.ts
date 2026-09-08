@@ -1,8 +1,47 @@
 import react from "@vitejs/plugin-react";
+import { VitePWA } from "vite-plugin-pwa";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    // 설치 가능한 PWA(→ ADR 0018). Service Worker 파일명은 `app-sw.js`다 — `/sw.js`는 이 호스트명에
+    // 남은 옛 PWA를 걷어내는 kill-switch가 서버에서 차지하고 있다(server/features/static).
+    VitePWA({
+      registerType: "autoUpdate",
+      filename: "app-sw.js",
+      includeAssets: ["arka-mark.svg"],
+      manifest: {
+        name: "ADE",
+        short_name: "ADE",
+        description: "Agent Development Environment",
+        lang: "ko",
+        display: "standalone",
+        start_url: "/",
+        scope: "/",
+        theme_color: "#1f2328",
+        background_color: "#ffffff",
+        icons: [
+          { src: "icon-192.png", sizes: "192x192", type: "image/png" },
+          { src: "icon-512.png", sizes: "512x512", type: "image/png" },
+          { src: "icon-512-maskable.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+        ],
+      },
+      workbox: {
+        // API는 절대 캐시하지 않는다 — 낡은 응답이 화면에 남는 것이 가장 나쁜 실패다. 앱 셸(정적
+        // 자산)만 프리캐시한다. 새 빌드가 뜨면 SW가 갱신되고 클라이언트가 스스로 새로고침한다.
+        navigateFallbackDenylist: [/^\/api\//u],
+        globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
+        // 앱 번들이 한 청크(2.5MB)라 workbox 기본 상한(2MB)에 걸린다. 청크 분할은 TASK-25.
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
+      },
+      // 개발 서버에서는 켜지 않는다 — 새로고침마다 캐시와 싸우게 된다.
+      devOptions: { enabled: false },
+    }),
+  ],
   // 배포 단위는 루트 dist/ 하나다(→ ADR 0013) — 서버 번들(dist/server)과 나란히 놓인다.
   build: { outDir: "../../dist/client", emptyOutDir: true },
   server: {
