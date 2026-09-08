@@ -1,0 +1,73 @@
+# ADR 0008: 클라이언트 테스트
+
+## 결정
+
+### 무엇을 테스트하나
+
+> **이 코드가 잘못 동작하면 누가/무엇이 알려주는가?**
+
+- 타입 체커·린트가 알려준다 → 불필요
+- 계약 테스트가 알려준다 → 이미 커버됨
+- Storybook 빌드가 알려준다 → 부분 커버. 렌더 실패만 잡는다
+- **아무도 안 알려준다 → 테스트 필요**
+
+**"눈으로 보면 안다"는 답이 아니다.** 변경한 사람이 그 화면을 보고 있다는 보장이 없다. 커버리지 숫자가 아니라 이 질문으로 개별 판단한다.
+
+### 종류와 비중
+
+```
+component/   Storybook — 시각 검증
+view/        스모크    — 렌더, 이벤트 연결
+viewmodel/   중간      — 상태 전이, 커맨드
+model/       집중      — 도메인 규칙 (순수해서 테스트가 쉽고 값이 크다)
+infra/       계약      — 인터페이스 준수
+```
+
+- **계약 테스트가 중심이다.** `model/`이 선언한 인터페이스마다, 그것을 구현한 **모든 것**이 통과할 스위트를 함수로 쓴다. TSDoc이 약속한 것(던지는 에러, 부수효과, 제약)을 강제한다. **mock도 반드시 통과시킨다** — 그래야 Storybook과 단위 테스트를 신뢰할 수 있다. 값은 둘이다: mock이 실물처럼 군다는 보장, 그리고 계약 위반이 즉시 잡히므로 **구현 코드 리뷰를 줄일 수 있다**는 것.
+- **단위 테스트는 계약이 못 잡는 것만.** 인터페이스 없는 순수 함수(경로 정규화, etag 비교, 정렬), ViewModel 상태 전이, infra의 에러 변환(HTTP 404 → NotFound는 구현마다 달라 계약이 아니다). **적을수록 좋은 신호다** — 인터페이스로 잘 나뉘어 있다는 뜻이다. "이걸 테스트해야 하나?"가 자주 나오면 **그 코드가 잘못된 계층에 있는지 먼저 의심한다.**
+- **스모크는 view가 렌더되고 이벤트가 연결되는지만.** 스타일·레이아웃은 Storybook 담당이다.
+- **Storybook은 시각 검증이다.** 커버 범위는 `shared/components/` 전부, `*/component/` 전부, 컨테이너 view는 주요 상태만. **최소 세트는 기본 / 빈 / 로딩 / 에러** — 빈 상태와 에러가 가장 빠뜨리기 쉽다. mock VM은 인터페이스만 구현하면 되고 고정값 객체면 충분하다. **스토리 작성이 어려우면 구조를 의심한다.**
+- **E2E와 VRT는 `e2e/`에.** E2E는 최소 흐름부터 늘린다. **VRT 스냅샷은 Docker에서만 생성·비교한다** — 호스트마다 폰트 렌더링·서브픽셀이 달라, 고정하지 않으면 기준이 아니라 소음이 된다.
+- **테스트하지 않는 것**: getter/setter만 있는 것, 라이브러리 동작(Radix가 팝오버를 여는지), 구현 세부(내부 메서드 호출 횟수).
+
+### 배치와 작성
+
+단위·계약·스모크는 코드 옆에, E2E와 VRT는 `e2e/`에 모은다.
+
+```
+extensions/filesystem/
+  model/       directoryTree.ts / .test.ts
+               workspaceFiles.contract.ts    계약 스위트
+               fixtures.ts                   테스트와 스토리가 공유
+  infra/       HttpWorkspaceFiles.ts / .test.ts
+  viewmodel/   DirectoryTreeViewModel.ts / .test.ts
+  view/        DirectoryTreeView.tsx / .test.tsx
+  component/   FileTree.tsx / .test.tsx / .stories.tsx
+               MockDirectoryTreeViewModel.ts
+
+e2e/           *.spec.ts                     E2E + VRT
+```
+
+- 계약 스위트는 `<name>.contract.ts` — 함수를 export할 뿐 스스로 실행되지 않아 `.test.ts`가 아니다
+- Mock은 `Mock<Name>.ts`
+- 테스트 이름은 **동작을 한국어로 서술**한다 — `'없는 파일을 읽으면 NotFound를 던진다'`. `describe`는 대상 단위로 — `describe('URI')`
+- 도구는 Vitest + `@testing-library/react`, E2E·VRT는 Playwright
+- 루트 `check = typecheck && lint && test` — 제출 전 이것 하나만 돌리면 되게 한다
+
+## 기각:
+- **테스트 층 이름을 표준(Unit/Integration/E2E)으로 갈아끼우기** — 「클라이언트 테스트 전략」이 이미 "계약 테스트"·"스모크"를 정의했다. 바깥 자료와 단어가 겹치는 비용보다 확정된 어휘를 흔드는 비용이 크다.
+- **커버리지 목표와 층별 비율 목표** — "누가 알려주는가"로 개별 판단한다.
+- **Jest식 스냅샷(`toMatchSnapshot`)** — 무비판적으로 갱신하게 된다. VRT는 다르다. 이미지 차이는 눈으로 봐야 승인된다.
+- **VRT 스냅샷을 호스트에서 생성하기** — 폰트 렌더링·서브픽셀이 기계마다 달라 기준이 소음이 된다.
+- **던더 폴더(`__tests__`, `__mocks__`)** — 같은 것을 폴더명과 파일명 두 군데로 표시하게 되고, 슬라이스 안에서 폴더가 한 겹 더 늘어난다.
+- **별도 `tests/` 폴더** — 슬라이스 원칙을 깨뜨린다.
+
+## 상태:
+승인됨. 계층 이름은 [ADR 0005](0005-client-structure.md)를 따른다. 「클라이언트 테스트 전략」 문서를 이 저장소의 이름으로 옮긴 것이다.
+
+현재 코드와 다른 것:
+
+1. 스토리북 미설치, 스토리 0개.
+2. **계약 테스트가 하나도 없다.** `workbench/smoke.test.tsx`가 `IWorkspaceFiles` 대역을 네 곳에서 손으로 만드는데, 그 대역이 실물 `HttpWorkspaceFiles`처럼 구는지 아무도 검사하지 않는다.
+3. **`workbench/smoke.test.tsx`는 여기서 말하는 "스모크"가 아니다.** 여기의 스모크는 *view가 렌더되고 이벤트가 연결되는지*인데, 그 파일은 *조립이 맞물리는지*를 본다. 조립 테스트를 뭐라 부를지는 아직 정해지지 않았다.
+4. **VRT 미도입이고 Docker 환경이 없다.** `playwright.config.ts`와 CONVENTIONS는 지금 "스크린샷 기준 이미지는 두지 않는다"라고 적혀 있어 이 ADR과 정반대다. Docker 고정이 그 근거("기계마다 깨진다")를 없애므로 결정이 바뀌었다.
