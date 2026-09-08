@@ -11,8 +11,8 @@ afterEach(() => {
 
 describe('HttpServerInfo', () => {
   it('계약대로 온 답을 그대로 준다', async () => {
-    serverReplies({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1 });
-    expect(await createServerInfoPort().load()).toEqual({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1 });
+    serverReplies({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1, workspaceName: 'ws' });
+    expect(await createServerInfoPort().load()).toEqual({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1, workspaceName: 'ws' });
   });
 
   it('계약에 어긋나면 null이다 — 던지지 않는다', async () => {

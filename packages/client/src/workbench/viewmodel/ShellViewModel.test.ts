@@ -796,15 +796,16 @@ describe('IShellViewModel — 낡은 클라이언트', () => {
   const settled = () => new Promise((resolve) => setTimeout(resolve, 0));
 
   it('서버 프로토콜 버전이 다르면 낡았다고 표시한다', async () => {
-    const { viewModel } = make({ load: () => Promise.resolve({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 999 }) });
+    const { viewModel } = make({ load: () => Promise.resolve({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 999, workspaceName: 'ws' }) });
     viewModel.onMount?.();
     await settled();
     expect(viewModel.isClientOutdated).toBe(true);
     expect(viewModel.buildId).not.toBe('');
+    expect(viewModel.workspaceName).toBe('ws');
   });
 
   it('같으면 낡지 않았다', async () => {
-    const { viewModel } = make({ load: () => Promise.resolve({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1 }) });
+    const { viewModel } = make({ load: () => Promise.resolve({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1, workspaceName: 'ws' }) });
     viewModel.onMount?.();
     await settled();
     expect(viewModel.isClientOutdated).toBe(false);

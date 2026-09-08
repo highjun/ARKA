@@ -43,9 +43,22 @@ describe("createApp", () => {
     expect(HealthResponse.parse(await response.json())).toEqual({ status: "ok" });
   });
 
-  it("/api/version은 시작 시각과 프로토콜 버전을 헤더 없이도 준다", async () => {
+  it("/api/version은 시작 시각·프로토콜 버전·워크스페이스 이름을 헤더 없이도 준다", async () => {
     const response = await buildApp().request("/api/version");
-    expect(VersionResponse.parse(await response.json())).toEqual({ builtAt: "2026-09-09T00:00:00.000Z", protocolVersion: PROTOCOL_VERSION });
+    expect(VersionResponse.parse(await response.json())).toEqual({
+      builtAt: "2026-09-09T00:00:00.000Z",
+      protocolVersion: PROTOCOL_VERSION,
+      workspaceName: path.basename(workspaceRoot),
+    });
+  });
+
+  it("요청 로그에 사용자가 실린다 — 기본은 local, Access 헤더가 있으면 그 이메일", async () => {
+    const app = buildApp();
+    logged.length = 0;
+    await app.request("/api/version");
+    expect(logged.at(-1)?.fields).toMatchObject({ user: "local" });
+    await app.request("/api/version", { headers: { "cf-access-authenticated-user-email": "me@example.com" } });
+    expect(logged.at(-1)?.fields).toMatchObject({ user: "me@example.com" });
   });
 
   it("프로토콜 헤더가 없는 /api/* 요청은 426이다", async () => {

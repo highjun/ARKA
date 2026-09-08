@@ -5,6 +5,8 @@ export type ServerInfo = {
   readonly builtAt: string;
   /** 서버가 말하는 프로토콜 버전. 클라이언트의 `PROTOCOL_VERSION`과 다르면 이 클라이언트는 낡은 것이다. */
   readonly protocolVersion: number;
+  /** 워크스페이스 루트 디렉터리 이름. 창 제목처럼 보여 준다. */
+  readonly workspaceName: string;
 };
 
 export const ServerInfoToken = createToken<IServerInfo>('serverInfo');

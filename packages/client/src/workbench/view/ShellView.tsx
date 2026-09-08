@@ -189,7 +189,7 @@ export const ShellView = () => {
         brand={
           <span className={styles['brandGroup']}>
             <img src="/arka-mark.svg" alt="" width={20} height={20} />
-            <span className={styles['brandText']}>ARKA</span>
+            <span className={styles['brandText']}>{viewModel.workspaceName === '' ? 'ARKA' : viewModel.workspaceName}</span>
           </span>
         }
         actions={

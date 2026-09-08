@@ -50,6 +50,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   readonly #startup: IWorkbenchStartup;
   readonly #serverInfo: IServerInfo;
   readonly #buildId = this.observe(atom(''));
+  readonly #workspaceName = this.observe(atom(''));
   readonly #isClientOutdated = this.observe(atom(false));
   readonly #reloadApp: () => void;
   readonly #notificationService: INotificationService;
@@ -139,6 +140,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     this.#startup.start();
     void this.#serverInfo.load().then((info) => {
       this.#buildId.set(info === null ? '' : formatBuildTime(info.builtAt));
+      this.#workspaceName.set(info?.workspaceName ?? '');
       this.#isClientOutdated.set(info !== null && info.protocolVersion !== PROTOCOL_VERSION);
     });
   }
@@ -374,6 +376,10 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   /** 화면 구석에 띄울 빌드 표시. 아직 못 읽었거나 실패했으면 빈 문자열이다. */
   get buildId(): string {
     return this.#buildId.get();
+  }
+
+  get workspaceName(): string {
+    return this.#workspaceName.get();
   }
 
   get isClientOutdated(): boolean {

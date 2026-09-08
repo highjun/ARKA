@@ -169,6 +169,8 @@ export interface IShellViewModel {
    */
   /** 화면 구석에 띄울 빌드 표시. 아직 못 읽었거나 실패했으면 빈 문자열이다. */
   readonly buildId: string;
+  /** 워크스페이스 이름 — VSCode 창 제목의 폴더 이름 자리. 아직 못 읽었으면 빈 문자열. */
+  readonly workspaceName: string;
   /**
    * 서버가 말하는 프로토콜 버전이 이 클라이언트의 것과 다르다 — 캐시된 PWA가 낡았다(→ ADR 0017).
    * 화면은 "다시 불러오기"를 권하는 띠를 띄운다. 서버 정보를 못 읽었으면 `false`다.
