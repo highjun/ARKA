@@ -5,7 +5,7 @@ import { expect, test, type Page } from "@playwright/test";
  *
  * 여기서 검사하는 것은 배선이 아니라 **눈에 보이는가**다 — 그건 jsdom이 영영 알 수 없다.
  * jsdom은 CSS 레이아웃을 적용하지 않아 요소가 화면 밖으로 밀려 있어도 `getByText`가 찾는다.
- * 조립이 맞물리는지는 `src/workbench/smoke.test.tsx`가 이미 본다.
+ * 조립이 맞물리는지는 `src/workbench/registerServices.test.tsx`가 이미 본다.
  */
 
 const PHONE = { width: 390, height: 844 };

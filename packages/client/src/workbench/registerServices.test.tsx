@@ -1,17 +1,20 @@
 import { ViewModelProvider } from "#core/view-model";
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { FileContentViewModelToken, WorkspaceFilesToken } from "../extensions/filesystem";
 import type { IWorkspaceFiles } from "../extensions/filesystem";
-import { ShellView } from "./view/ShellView";
+import { ErrorLogToken } from "./model/IErrorLog";
+import { TabContentRegistryToken } from "./model/ITabContentRegistry";
+import { TabContentRegistry } from "./model/TabContentRegistry";
+import { RootView } from "./view/RootView";
 import { createApplication } from "./registerServices";
 
 /**
  * 조립이 실제로 맞물리는지만 본다 — 화면의 내용은 각 컴포넌트가, 계층의 규칙은 각 계층의
  * unit test가 이미 본다. 여기서 걸리는 것은 **배선이 틀린 경우**뿐이다.
  *
- * `<ShellView />`을 마운트한다(`<ShellView />`가 아니다) — beforeunload 가드·전역 키다운 등 앱
- * 전체 배선이 `infra/`의 기여들에 있다.
+ * `<RootView />`를 마운트한다 — main.tsx가 그리는 것과 같은 트리다. beforeunload 가드·전역
+ * 키다운·오류 핸들러 등 앱 전체 배선이 `infra/`의 기여들에 있다.
  *
  * 파일시스템 구현만 대신한다. 진짜 구현을 그대로 두면 이 테스트가 서버를 요구하게 된다.
  */
@@ -35,7 +38,7 @@ const mountWith = (workspaceFiles: Partial<IWorkspaceFiles>) => {
   });
   render(
     <ViewModelProvider container={container}>
-      <ShellView />
+      <RootView />
     </ViewModelProvider>,
   );
   return container;
@@ -149,5 +152,55 @@ describe("저장 안 된 변경 보호", () => {
     window.dispatchEvent(event);
 
     expect(event.defaultPrevented).toBe(false);
+  });
+});
+
+/**
+ * 화면이 죽어도 아무도 모르는 상태를 막는 배선이 실제로 닿는지 본다 — 탭 하나가 렌더 중 던지면
+ * 빈 화면 대신 `CrashScreen`이 뜨고, `IErrorLog`에 기록이 남아야 한다.
+ */
+describe("렌더 오류 보호", () => {
+  it("탭이 렌더 중 던지면 CrashScreen이 뜨고 IErrorLog에 남는다", async () => {
+    // React가 잡힌 오류를 console.error로도 내보낸다 — 테스트 출력이 그걸로 덮이지 않게 막는다.
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const container = createApplication().createScope("test");
+    container.register(WorkspaceFilesToken, {
+      lifetime: "singleton",
+      create: () => {
+        const stub: Partial<IWorkspaceFiles> = {
+          list: () => Promise.resolve({ path: "", parent: null, entries: [{ name: "a.md", type: "file" as const }] }),
+          read: () => Promise.resolve({ path: "a.md", content: "", truncated: false, encoding: "utf8" as const }),
+        };
+        return stub as IWorkspaceFiles;
+      },
+    });
+    // 파일 탭을 그리는 컴포넌트를 터지는 것으로 바꾼다 — 자식 스코프에 다시 등록해 부모를 가린다.
+    container.register(TabContentRegistryToken, {
+      lifetime: "singleton",
+      create: () => {
+        const registry = new TabContentRegistry();
+        registry.add({
+          id: "file",
+          iconId: "file",
+          TabComponent: () => {
+            throw new Error("탭이 터졌다");
+          },
+        });
+        return registry;
+      },
+    });
+    render(
+      <ViewModelProvider container={container}>
+        <RootView />
+      </ViewModelProvider>,
+    );
+
+    fireEvent.click(await screen.findByText("a.md"));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("탭이 터졌다");
+    expect(container.resolve(ErrorLogToken).entries.map((entry) => [entry.source, entry.message])).toEqual([
+      ["render", "탭이 터졌다"],
+    ]);
+    consoleError.mockRestore();
   });
 });

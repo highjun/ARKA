@@ -3,7 +3,7 @@ import "./globals.css";
 import { ViewModelProvider } from "#core/view-model";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { ShellView } from "./view/ShellView";
+import { RootView } from "./view/RootView";
 import { createApplication } from "./registerServices";
 
 const root = document.getElementById("root");
@@ -15,7 +15,7 @@ if (!root) {
 createRoot(root).render(
   <StrictMode>
     <ViewModelProvider container={createApplication()}>
-      <ShellView />
+      <RootView />
     </ViewModelProvider>
   </StrictMode>,
 );
