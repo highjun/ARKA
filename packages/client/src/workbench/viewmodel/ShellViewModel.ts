@@ -531,6 +531,13 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     }
 
     commandCenterRegistry.registerCommand({
+      id: 'shell.openSettings',
+      label: '설정 열기',
+      execute: () => this.openTab({ id: 'settings', kind: 'settings', title: '설정' }),
+    });
+    commandCenterRegistry.registerKeybinding({ id: 'shell.openSettings.keybinding', keybinding: 'ctrl+,', actionId: 'shell.openSettings' });
+
+    commandCenterRegistry.registerCommand({
       id: 'shell.openKeybindings',
       label: '키보드 단축키 보기',
       execute: () => this.openTab({ id: 'keybindings', kind: 'keybindings', title: '키보드 단축키' }),

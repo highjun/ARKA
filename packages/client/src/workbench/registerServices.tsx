@@ -46,6 +46,7 @@ import { createWorkspaceFilesPort } from "../extensions/filesystem/infra/HttpWor
 import { createWorkspaceWatchPort } from "../extensions/filesystem/infra/HttpWorkspaceWatch";
 import { DirectoryTreeView } from "../extensions/filesystem/view/DirectoryTreeView";
 import { FileContentView } from "../extensions/filesystem/view/FileContentView";
+import { createDocumentDensity } from "./infra/DocumentDensity";
 import { createDocumentTheme } from "./infra/DocumentTheme";
 import { createErrorNotifier } from "./infra/ErrorNotifier";
 import { createGlobalErrorHandlers } from "./infra/GlobalErrorHandlers";
@@ -54,6 +55,11 @@ import { createServerInfoPort } from "./infra/HttpServerInfo";
 import { createUnloadGuard } from "./infra/UnloadGuard";
 import { createStoragePort } from "./infra/LocalStorage";
 import { KeybindingsTabView } from "./view/KeybindingsTabView";
+import { SettingsTabView } from "./view/SettingsTabView";
+import { SettingsModel } from "./model/SettingsModel";
+import { SettingsModelToken } from "./model/ISettingsModel";
+import { SettingsViewModel } from "./viewmodel/SettingsViewModel";
+import { SettingsViewModelToken } from "./viewmodel/ISettingsViewModel";
 import { WorkbenchStartupRegistry } from "./model/WorkbenchStartupRegistry";
 import { ActivityBarRegistry } from "./model/ActivityBarRegistry";
 import { ActivityModel } from "./model/ActivityModel";
@@ -81,6 +87,7 @@ import { ShellViewModelToken } from "./viewmodel/IShellViewModel";
 /** 셸 수명주기에 얹는 기여들. 조립부만 아는 것이라 여기서 만든다. */
 const FileWatchStartupToken = createToken<IWorkbenchStartup>("startup.fileWatch");
 const DocumentThemeToken = createToken<IWorkbenchStartup>("startup.documentTheme");
+const DocumentDensityToken = createToken<IWorkbenchStartup>("startup.documentDensity");
 const UnloadGuardToken = createToken<IWorkbenchStartup>("startup.unloadGuard");
 const GlobalKeybindingsToken = createToken<IWorkbenchStartup>("startup.globalKeybindings");
 const GlobalErrorHandlersToken = createToken<IWorkbenchStartup>("startup.globalErrorHandlers");
@@ -149,6 +156,11 @@ export function createApplication(): Container {
   container.register(
     ThemeModelToken,
     singleton((c) => new ThemeModel({ storage: c.resolve(StorageToken) })),
+  );
+  container.register(SettingsModelToken, singleton((c) => new SettingsModel({ storage: c.resolve(StorageToken) })));
+  container.register(
+    SettingsViewModelToken,
+    scoped((c) => new SettingsViewModel({ themeModel: c.resolve(ThemeModelToken), settingsModel: c.resolve(SettingsModelToken) })),
   );
   container.register(
     DirectoryTreeModelToken,
@@ -260,6 +272,10 @@ export function createApplication(): Container {
     scoped((c) => createDocumentTheme({ themeModel: c.resolve(ThemeModelToken) })),
   );
   container.register(
+    DocumentDensityToken,
+    scoped((c) => createDocumentDensity({ settingsModel: c.resolve(SettingsModelToken) })),
+  );
+  container.register(
     UnloadGuardToken,
     scoped((c) => createUnloadGuard({ tabDirtyState: c.resolve(TabDirtyStateToken) })),
   );
@@ -335,6 +351,7 @@ export function createApplication(): Container {
   startupRegistry.add({ id: "globalErrorHandlers", token: GlobalErrorHandlersToken });
   startupRegistry.add({ id: "errorNotifier", token: ErrorNotifierToken });
   startupRegistry.add({ id: "documentTheme", token: DocumentThemeToken });
+  startupRegistry.add({ id: "documentDensity", token: DocumentDensityToken });
   startupRegistry.add({ id: "globalKeybindings", token: GlobalKeybindingsToken });
   startupRegistry.add({ id: "unloadGuard", token: UnloadGuardToken });
   startupRegistry.add({ id: "fileWatch", token: FileWatchStartupToken });
@@ -356,6 +373,7 @@ export function createApplication(): Container {
   container.resolve(ActivityBarRegistryToken).add({ id: AGENT_ID, title: "에이전트", iconId: "brain", keybinding: "ctrl+shift+a" });
   container.resolve(SidebarContentRegistryToken).add({ id: AGENT_ID, PanelComponent: ({ onOpenTab }) => <ChatSessionsView onOpenTab={onOpenTab} /> });
   container.resolve(TabContentRegistryToken).add({ id: "keybindings", iconId: "keyboard", TabComponent: () => <KeybindingsTabView /> });
+  container.resolve(TabContentRegistryToken).add({ id: "settings", iconId: "settingsGear", TabComponent: () => <SettingsTabView /> });
   container.resolve(TabContentRegistryToken).add({ id: PREVIEW_TAB_KIND, iconId: "bookOpen", TabComponent: ({ tabId }) => <MarkdownPreviewTabView tabId={tabId} /> });
   container.resolve(TabContentRegistryToken).add({
     id: CHAT_TAB_KIND,

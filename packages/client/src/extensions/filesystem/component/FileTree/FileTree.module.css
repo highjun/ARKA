@@ -99,7 +99,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-xs);
-  min-height: 32px;
+  min-height: var(--ade-row-height, 32px);
   border-radius: var(--borderRadius-medium);
   margin-inline: calc(-1 * var(--space-sm));
   padding-right: var(--space-sm);

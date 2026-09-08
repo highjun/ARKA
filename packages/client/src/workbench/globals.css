@@ -16,3 +16,15 @@
 @import '@primer/primitives/dist/css/functional/themes/light.css';
 @import '@primer/primitives/dist/css/functional/themes/dark.css';
 @import './reset.css';
+
+/*
+ * 밀도 토큰 — 셸이 `<html data-density>`로 정하고(설정 → DocumentDensity 기여) 컴포넌트는 변수만 본다.
+ * IDE 밀도와 터치 타겟(44px)의 충돌을 여기서 한 번에 푼다.
+ */
+:root {
+  --ade-row-height: 28px;
+}
+
+[data-density='touch'] {
+  --ade-row-height: 44px;
+}

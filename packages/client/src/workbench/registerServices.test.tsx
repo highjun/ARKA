@@ -252,3 +252,15 @@ describe("마크다운 미리보기 배선", () => {
     expect(await screen.findByRole("heading", { level: 1, name: "안녕 세상" })).toBeDefined();
   });
 });
+
+describe("설정 배선", () => {
+  it("설정 탭에서 밀도를 바꾸면 html의 data-density가 따라온다", async () => {
+    mountWith(new MockWorkspaceFiles({}));
+    fireEvent.keyDown(window, { key: ",", ctrlKey: true });
+    expect(await screen.findByRole("tab", { name: /설정/u })).toBeDefined();
+    expect(document.documentElement.dataset["density"]).toBe("compact");
+    fireEvent.click(screen.getByLabelText(/^넓게/u));
+    expect(document.documentElement.dataset["density"]).toBe("touch");
+    expect(localStorage.getItem("workbench.settings")).toContain("touch");
+  });
+});
