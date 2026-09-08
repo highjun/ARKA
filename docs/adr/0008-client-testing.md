@@ -33,7 +33,7 @@ infra/       계약      — 인터페이스 준수
 
 ### 배치와 작성
 
-단위·계약·스모크·스토리는 코드 옆에, E2E는 `e2e/`, VRT는 `test/vrt/`에 모은다.
+단위·계약·스모크·스토리는 코드 옆에, E2E는 `e2e/`, VRT는 `test/vrt/`에 모은다. **패키지 둘 이상을 한 프로세스에 올리는 계약 실행**(클라이언트 어댑터 ↔ 서버 앱)은 어느 패키지에도 둘 수 없으므로 `test/contract/`에 둔다 — 스위트 자신은 계약을 소유한 `model/`에 있고, 여기는 실행만 한다.
 
 ```
 extensions/filesystem/
@@ -71,5 +71,5 @@ test/vrt/      vrt.config.ts, stories.spec.ts, snapshots/
 현재 코드와 다른 것:
 
 1. **스토리가 프리미티브 셋(Icon·Divider·Timestamp)뿐이다.** 스토리북과 VRT 파이프라인은 돌지만 커버 범위(`shared/components/` 전부, `*/component/` 전부)는 아직 비어 있다.
-2. **계약 테스트가 하나도 없다.** `workbench/registerServices.test.tsx`가 `IWorkspaceFiles` 대역을 네 곳에서 손으로 만드는데, 그 대역이 실물 `HttpWorkspaceFiles`처럼 구는지 아무도 검사하지 않는다.
+2. ~~계약 테스트가 하나도 없다.~~ 2026-09-09 — `IWorkspaceFiles`에 첫 스위트(`workspaceFiles.contract.ts`)가 생겼다. `MockWorkspaceFiles`와, 서버 앱에 `fetch`를 직결한 `HttpWorkspaceFiles`(`test/contract/`) 둘 다 통과한다. 첫 실행에서 서버의 move가 목적지를 덮어쓰는 계약 위반을 잡았다. 다른 인터페이스(`IWorkspaceWatch`·`IStorage`·`IDirectoryTreeModel` 등)는 아직 없다.
 3. VRT가 아직 CI에 없다. 사람이 `pnpm run vrt`를 기억해서 돌려야 한다.

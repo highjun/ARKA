@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { FileContentViewModelToken, WorkspaceFilesToken } from "../extensions/filesystem";
 import type { IWorkspaceFiles } from "../extensions/filesystem";
+import { MockWorkspaceFiles } from "../extensions/filesystem/model/MockWorkspaceFiles";
 import { ErrorLogToken } from "./model/IErrorLog";
 import { TabContentRegistryToken } from "./model/ITabContentRegistry";
 import { TabContentRegistry } from "./model/TabContentRegistry";
@@ -16,9 +17,9 @@ import { createApplication } from "./registerServices";
  * `<RootView />`를 마운트한다 — main.tsx가 그리는 것과 같은 트리다. beforeunload 가드·전역
  * 키다운·오류 핸들러 등 앱 전체 배선이 `infra/`의 기여들에 있다.
  *
- * 파일시스템 구현만 대신한다. 진짜 구현을 그대로 두면 이 테스트가 서버를 요구하게 된다.
+ * 파일시스템 구현만 `MockWorkspaceFiles`로 대신한다. 진짜 구현을 그대로 두면 이 테스트가 서버를
+ * 요구하게 된다. Mock이 실물처럼 구는 것은 `workspaceFiles.contract.ts`가 보증한다.
  */
-const listing = { path: "", parent: null, entries: [{ name: "projects", type: "dir" as const }] };
 
 /**
  * `createApplication()`이 실제 저장소(→ `localStorage`)를 쓴다 — 매 테스트가 새 컨테이너를
@@ -29,13 +30,10 @@ afterEach(() => {
   localStorage.clear();
 });
 
-const mountWith = (workspaceFiles: Partial<IWorkspaceFiles>) => {
+const mountWith = (workspaceFiles: IWorkspaceFiles) => {
   const container = createApplication().createScope("test");
   // 자식 스코프에 다시 등록해 그 스코프 안에서만 부모를 가린다.
-  container.register(WorkspaceFilesToken, {
-    lifetime: "singleton",
-    create: () => workspaceFiles as IWorkspaceFiles,
-  });
+  container.register(WorkspaceFilesToken, { lifetime: "singleton", create: () => workspaceFiles });
   render(
     <ViewModelProvider container={container}>
       <RootView />
@@ -45,11 +43,7 @@ const mountWith = (workspaceFiles: Partial<IWorkspaceFiles>) => {
 };
 
 it("셸에 탐색기 활동이 있다", () => {
-  mountWith({
-    list: () => Promise.resolve(listing),
-    read: () =>
-      Promise.resolve({ path: "", content: "", truncated: false, encoding: "utf8" as const }),
-  });
+  mountWith(new MockWorkspaceFiles({ projects: null }));
 
   expect(screen.getByLabelText("탐색기")).toBeDefined();
 });
@@ -59,11 +53,7 @@ it("셸에 탐색기 활동이 있다", () => {
  * 보이는지가 아니라 **배선이 닿는지**만 보는 테스트다.
  */
 it("워크스페이스 트리가 사이드바까지 연결된다", async () => {
-  mountWith({
-    list: () => Promise.resolve(listing),
-    read: () =>
-      Promise.resolve({ path: "", content: "", truncated: false, encoding: "utf8" as const }),
-  });
+  mountWith(new MockWorkspaceFiles({ projects: null }));
 
   expect(await screen.findByText("projects")).toBeDefined();
 });
@@ -77,22 +67,7 @@ it("워크스페이스 트리가 사이드바까지 연결된다", async () => {
  */
 describe("저장 안 된 변경 보호", () => {
   const mountWithOpenFile = async () => {
-    const container = mountWith({
-      list: () =>
-        Promise.resolve({
-          path: "",
-          parent: null,
-          entries: [{ name: "a.md", type: "file" as const }],
-        }),
-      read: () =>
-        Promise.resolve({
-          path: "a.md",
-          content: "원본",
-          truncated: false,
-          encoding: "utf8" as const,
-        }),
-      write: () => Promise.resolve(),
-    });
+    const container = mountWith(new MockWorkspaceFiles({ "a.md": "원본" }));
 
     // 탐색기는 이미 기본 활동이다 — 다시 누르면 "같은 것을 또 골랐다"로 읽어 오히려 닫는다.
     fireEvent.click(await screen.findByText("a.md"));
@@ -164,16 +139,7 @@ describe("렌더 오류 보호", () => {
     // React가 잡힌 오류를 console.error로도 내보낸다 — 테스트 출력이 그걸로 덮이지 않게 막는다.
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const container = createApplication().createScope("test");
-    container.register(WorkspaceFilesToken, {
-      lifetime: "singleton",
-      create: () => {
-        const stub: Partial<IWorkspaceFiles> = {
-          list: () => Promise.resolve({ path: "", parent: null, entries: [{ name: "a.md", type: "file" as const }] }),
-          read: () => Promise.resolve({ path: "a.md", content: "", truncated: false, encoding: "utf8" as const }),
-        };
-        return stub as IWorkspaceFiles;
-      },
-    });
+    container.register(WorkspaceFilesToken, { lifetime: "singleton", create: () => new MockWorkspaceFiles({ "a.md": "" }) });
     // 파일 탭을 그리는 컴포넌트를 터지는 것으로 바꾼다 — 자식 스코프에 다시 등록해 부모를 가린다.
     container.register(TabContentRegistryToken, {
       lifetime: "singleton",

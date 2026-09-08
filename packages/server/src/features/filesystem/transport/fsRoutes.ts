@@ -81,6 +81,10 @@ export function createFsRoutes(workspaceRoot: string): Hono {
     if (to === null) {
       throw new FileError("NotFound", `no such parent: ${body.data.to}`);
     }
+    // `rename`은 목적지 파일을 조용히 덮어쓴다 — 계약은 "이미 있으면 실패"다. 계약 테스트가 잡아냈다.
+    if ((await resolveWithin(workspaceRoot, body.data.to)) !== null) {
+      throw new FileError("Exists", `already exists: ${body.data.to}`);
+    }
     await moveEntry(from, to);
     return c.json({ path: body.data.to });
   });

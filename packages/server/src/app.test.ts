@@ -1,5 +1,5 @@
 import { realpathSync } from "node:fs";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { HealthResponse } from "contracts";
@@ -47,6 +47,18 @@ describe("createApp", () => {
     const response = await buildApp().request("/api/files/content?path=a.txt");
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({ content: "hello" });
+  });
+
+  it("옮기기 목적지가 이미 있으면 409이고 덮어쓰지 않는다", async () => {
+    await writeFile(path.join(workspaceRoot, "b.txt"), "keep");
+    const app = buildApp();
+    const response = await app.request("/api/files/move", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ from: "a.txt", to: "b.txt" }),
+    });
+    expect(response.status).toBe(409);
+    expect(await readFile(path.join(workspaceRoot, "b.txt"), "utf8")).toBe("keep");
   });
 
   it("루트 밖 감시 요청은 500이 아니라 403 파일 오류다", async () => {
