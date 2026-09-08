@@ -1,4 +1,5 @@
-import type { DirectoryListing, FileContent, FileEntryType, IWorkspaceFiles } from '../model/IWorkspaceFiles';
+import { DirectoryListing, FileContent, FileErrorBody } from 'contracts';
+import type { FileEntryType, IWorkspaceFiles } from '../model/IWorkspaceFiles';
 
 /**
  * 세션 서버(`server/files.ts`)의 파일 API 를 읽는 구현.
@@ -8,6 +9,9 @@ import type { DirectoryListing, FileContent, FileEntryType, IWorkspaceFiles } fr
  *
  * 경로를 `URLSearchParams` 로 싣는다. 경로 세그먼트에 붙이면 슬래시·한글·`#` 을 우리가 직접
  * 인코딩해야 하고, 한 군데만 빠뜨려도 조용히 다른 파일을 연다.
+ *
+ * 응답은 `contracts`의 스키마로 검증한다 — `as T`로 믿어 버리면 서버가 모양을 바꿨을 때
+ * 화면 깊숙한 곳에서 `undefined`로 터진다. 여기서 던지면 원인이 전송 경계에 있다고 바로 드러난다.
  */
 
 class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
@@ -20,11 +24,11 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
   static readonly #TIMEOUT_MS = 10_000;
 
   async list(path: string): Promise<DirectoryListing> {
-    return this.#get<DirectoryListing>('/api/files', path);
+    return DirectoryListing.parse(await this.#get('/api/files', path));
   }
 
   async read(path: string): Promise<FileContent> {
-    return this.#get<FileContent>('/api/files/content', path);
+    return FileContent.parse(await this.#get('/api/files/content', path));
   }
 
   async write(path: string, content: string): Promise<void> {
@@ -74,7 +78,7 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
     }
   }
 
-  async #get<T>(endpoint: string, path: string): Promise<T> {
+  async #get(endpoint: string, path: string): Promise<unknown> {
     const response = await this.#fetch(`${endpoint}?${new URLSearchParams({ path }).toString()}`, {
       headers: this.#headers(),
     });
@@ -84,7 +88,7 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
       const reason = await this.#reasonOf(response);
       throw new Error(`파일을 읽지 못했다 (${String(response.status)}${reason}).`);
     }
-    return (await response.json()) as T;
+    return response.json();
   }
 
   /** GET·PUT 이 공유하는 것 — 타임아웃과 "응답이 없다" 로의 번역. 상태 코드 판정은 호출부의 몫이다. */
@@ -100,8 +104,8 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
 
   async #reasonOf(response: Response): Promise<string> {
     try {
-      const body = (await response.json()) as { message?: unknown };
-      return typeof body.message === 'string' ? `: ${body.message}` : '';
+      const body = FileErrorBody.safeParse(await response.json());
+      return body.success ? `: ${body.data.message}` : '';
     } catch {
       return '';
     }

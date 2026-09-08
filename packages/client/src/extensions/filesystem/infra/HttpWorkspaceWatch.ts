@@ -1,3 +1,4 @@
+import { WatchEvent } from 'contracts';
 import type { IWorkspaceWatch, WorkspaceWatchUnsubscribe } from '../model/IWorkspaceWatch';
 
 /**
@@ -176,9 +177,8 @@ class HttpWorkspaceWatchAdapter implements IWorkspaceWatch {
     if (payload === '') return null;
 
     try {
-      const event = JSON.parse(payload) as { paths?: unknown };
-      if (!Array.isArray(event.paths)) return null;
-      return event.paths.filter((path): path is string => typeof path === 'string');
+      const event = WatchEvent.safeParse(JSON.parse(payload));
+      return event.success ? event.data.paths : null;
     } catch {
       // 깨진 프레임 하나 때문에 스트림 전체를 끊지 않는다 — 다음 프레임이 정상일 수 있다.
       return null;

@@ -30,7 +30,7 @@ afterEach(() => {
 const LISTING = {
   path: 'projects',
   parent: '',
-  entries: [{ name: 'dev-kit', type: 'dir', size: 0, mtime: 1 }],
+  entries: [{ name: 'dev-kit', type: 'dir' }],
 };
 
 describe('list', () => {
@@ -66,9 +66,19 @@ describe('read', () => {
   });
 
   it('uses the content endpoint', async () => {
-    const { calls } = serverReplies({});
+    const { calls } = serverReplies({ path: 'a.md', content: '', truncated: false, encoding: 'utf8' });
     await createWorkspaceFilesPort().read('a.md');
     expect(calls[0]?.url).toBe('/api/files/content?path=a.md');
+  });
+
+  it('응답이 계약에 어긋나면 던진다 — 서버가 모양을 바꾼 것을 전송 경계에서 잡는다', async () => {
+    serverReplies({ path: 'a.md', content: 42 });
+    await expect(createWorkspaceFilesPort().read('a.md')).rejects.toThrow();
+  });
+
+  it('계약에 없는 필드는 버린다', async () => {
+    serverReplies({ path: 'a.md', content: '', truncated: false, encoding: 'utf8', size: 3 });
+    expect(await createWorkspaceFilesPort().read('a.md')).not.toHaveProperty('size');
   });
 });
 
@@ -89,7 +99,7 @@ describe('write', () => {
   });
 
   it('실패하면 상태와 사유를 담아 던진다', async () => {
-    serverReplies({ message: '이 배포는 읽기 전용이다 — 저장할 수 없다.' }, 403);
+    serverReplies({ code: 'NoPermission', message: '이 배포는 읽기 전용이다 — 저장할 수 없다.' }, 403);
     await expect(createWorkspaceFilesPort().write('a.md', 'x')).rejects.toThrow(/403.*읽기 전용/u);
   });
 });
@@ -105,7 +115,7 @@ describe('create', () => {
   });
 
   it('실패하면 상태와 사유를 담아 던진다', async () => {
-    serverReplies({ message: 'already exists' }, 409);
+    serverReplies({ code: 'Exists', message: 'already exists' }, 409);
     await expect(createWorkspaceFilesPort().create('a.md', 'file')).rejects.toThrow(/409.*already exists/u);
   });
 });
@@ -121,7 +131,7 @@ describe('move', () => {
   });
 
   it('실패하면 상태와 사유를 담아 던진다', async () => {
-    serverReplies({ message: 'already exists' }, 409);
+    serverReplies({ code: 'Exists', message: 'already exists' }, 409);
     await expect(createWorkspaceFilesPort().move('a.md', 'b.md')).rejects.toThrow(/409.*already exists/u);
   });
 });
@@ -136,14 +146,14 @@ describe('remove', () => {
   });
 
   it('실패하면 상태와 사유를 담아 던진다', async () => {
-    serverReplies({ message: 'forbidden' }, 403);
+    serverReplies({ code: 'NoPermission', message: 'forbidden' }, 403);
     await expect(createWorkspaceFilesPort().remove('a.md')).rejects.toThrow(/403.*forbidden/u);
   });
 });
 
 describe('failure', () => {
   it('throws with the status and the reason the server gave', async () => {
-    serverReplies({ message: 'forbidden' }, 403);
+    serverReplies({ code: 'NoPermission', message: 'forbidden' }, 403);
     await expect(createWorkspaceFilesPort().list('../etc')).rejects.toThrow(/403.*forbidden/u);
   });
 

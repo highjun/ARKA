@@ -12,39 +12,14 @@ import { createToken } from '#core/di';
  * 것은 서버가 어디에 뿌리내렸는지가 화면에 새지 않게 하기 위해서다.
  */
 
-export type FileEntryType = 'dir' | 'file';
-
 /**
- * 이름과 종류뿐이다 — 트리가 그리는 데 그 둘이면 된다.
- *
- * `size`/`mtime` 을 받던 시절이 있었는데 아무도 읽지 않았고, 서버는 그걸 채우려고 엔트리마다
- * `stat` 을 해야 했다. Port 가 요구하지 않으면 그 비용도 사라진다.
- *
- * `shared/files/type`의 같은 이름 타입과 모양이 같다 — 그래도 여기서 다시 선언한다. Port
- * 계약 파일(`I*.ts`)은 import 자체를 금지한다(`port-type-only`): 계약이 외부 모듈에서
- * 파생되면, 그 모듈이 바뀌는 순간 계약도 같이 바뀌어 Port를 둔 의미가 사라지기 때문이다
- * (`shared`도 예외가 아니다). 두 선언이 어긋나면 사람이 리뷰로 잡는다.
+ * 형태는 `contracts`가 원본이다 — zod 스키마에서 뽑은 타입을 그대로 쓴다. 여기서 다시 선언하면
+ * 서버와 어긋나도 아무도 모른다(실제로 `WatchEvent`가 그랬다). 화면이 쓰지 않는 필드가 계약에
+ * 있다면 계약에서 빼는 것이지 여기서 가리는 것이 아니다.
  */
-export type FileEntry = {
-  readonly name: string;
-  readonly type: FileEntryType;
-};
+import type { DirectoryListing, FileContent, FileEntry, FileEntryType } from 'contracts';
 
-export type DirectoryListing = {
-  readonly path: string;
-  /** 상위 경로. 루트면 `null`. */
-  readonly parent: string | null;
-  readonly entries: readonly FileEntry[];
-};
-
-export type FileContent = {
-  readonly path: string;
-  /** 바이너리면 빈 문자열이다 — 화면은 `encoding` 을 보고 "볼 수 없는 파일"로 그린다. */
-  readonly content: string;
-  /** 상한을 넘어 앞부분만 왔다. */
-  readonly truncated: boolean;
-  readonly encoding: 'utf8' | 'binary';
-};
+export type { DirectoryListing, FileContent, FileEntry, FileEntryType };
 
 export const WorkspaceFilesToken = createToken<IWorkspaceFiles>("workspaceFiles");
 /** 워크스페이스 파일시스템에 대한 CRUD 조작을 감싸는 Port 계약. */

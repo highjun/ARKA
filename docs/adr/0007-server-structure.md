@@ -67,4 +67,4 @@ Transport → (Service) → Domain ← Infra
 1. **`services/`가 서버 전체에 없다.** `transport`가 `infra`를 직접 부른다. 위 구조가 이를 허용하지만("필요할 때만"), **언제 필요한지의 조건이 아직 문장으로 정해지지 않았다.**
 2. **`domain/`에는 `filesystem/domain/errors.ts` 하나뿐이다** — `FileError` 클래스. 인터페이스도 순수 함수도 없고, 서버 전체에 `implements`가 0건이다. 서버 `infra`는 자유 함수라 구현할 인터페이스가 없다. 클라이언트의 포트/어댑터 구조와 비대칭이며, 이 비대칭을 유지할지는 정해지지 않았다.
 3. `features/static/`에는 `domain/`이 없다. 도메인 개념이 없어서다 — "빈 레이어를 미리 만들지 않는다"에 부합한다.
-4. **클라이언트가 `contracts`를 한 번도 import하지 않는다.** 사용 0건이고 클라이언트가 같은 타입을 자체 재정의한다. `contracts`는 현재 사실상 서버 전용이다.
+4. ~~클라이언트가 `contracts`를 한 번도 import하지 않는다.~~ 2026-09-09에 해소 — 클라이언트 `infra/`가 응답을 `contracts` 스키마로 `parse`하고, `model/IWorkspaceFiles.ts`는 타입을 `contracts`에서 가져온다.

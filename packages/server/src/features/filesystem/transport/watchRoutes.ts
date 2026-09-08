@@ -1,3 +1,4 @@
+import type { WatchEvent } from "contracts";
 import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import { FileError } from "../domain/errors";
@@ -32,7 +33,8 @@ export function createWatchRoutes(workspaceRoot: string): Hono {
 
     return streamSSE(c, async (stream) => {
       const send = (paths: readonly string[]): void => {
-        void stream.writeSSE({ data: JSON.stringify({ paths }) });
+        const event: WatchEvent = { paths: [...paths] };
+        void stream.writeSSE({ data: JSON.stringify(event) });
       };
 
       const handle = watchPaths(workspaceRoot, resolved, send);

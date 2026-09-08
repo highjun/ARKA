@@ -1,3 +1,4 @@
+import { VersionResponse } from 'contracts';
 import type { IBuildInfo } from '../model/IBuildInfo';
 
 class HttpBuildInfoAdapter implements IBuildInfo {
@@ -6,8 +7,8 @@ class HttpBuildInfoAdapter implements IBuildInfo {
     try {
       const response = await fetch('/api/version');
       if (!response.ok) return null;
-      const body = (await response.json()) as { builtAt?: string | null };
-      return body.builtAt ?? null;
+      const body = VersionResponse.safeParse(await response.json());
+      return body.success ? body.data.builtAt : null;
     } catch {
       return null;
     }

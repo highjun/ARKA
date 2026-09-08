@@ -31,6 +31,11 @@ export const MoveEntryRequest = z.object({
 });
 export type MoveEntryRequest = z.infer<typeof MoveEntryRequest>;
 
-/** SSE로 흘려보내는 파일 변경 알림. 경로 하나가 바뀌었다는 사실만 담는다. */
-export const WatchEvent = z.object({ path: z.string() });
+/**
+ * SSE로 흘려보내는 파일 변경 알림. 짧은 시간에 몰린 변경을 한 프레임으로 묶어 보낸다.
+ *
+ * 빈 배열은 하트비트다 — 실제 변경은 항상 하나 이상을 담으므로 겹치지 않는다. 클라이언트는
+ * 빈 배열을 "연결이 살아 있다"로만 읽고 `onChange`를 부르지 않는다.
+ */
+export const WatchEvent = z.object({ paths: z.array(z.string()) });
 export type WatchEvent = z.infer<typeof WatchEvent>;
