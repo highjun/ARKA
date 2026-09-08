@@ -7,6 +7,11 @@
   sudo chown -R "$(id -u):$(id -g)" .output test/vrt/snapshots
   ```
   이후 실행은 `--user`로 돌아 다시 생기지 않는다.
+- [ ] **Cloudflare Tunnel + Access 설정** (ADR 0014) — 콘솔 작업이라 에이전트가 못 한다. 앱에는 인증이 0이므로 이것이 유일한 게이트다. 설정 뒤 `curl https://arka.sangjun.dev/api/files`가 인증 없이 200을 주지 않는지 확인한다(TASK-4가 이를 자동화한다).
+- [ ] **GitHub 저장소 설정** — TASK-1(CI)이 올라가면 Actions가 켜져 있는지, 브랜치 보호(main에 `check` 필수)를 걸지 결정.
+- [ ] **결정 요청** — TASK-3(PWA 도입 여부), TASK-14(ADR 0013 유지), TASK-16(테스트 폴더 배치), TASK-17(index.html 위치)은 에이전트가 기본안을 제시하지만 사용자 취향이 갈리는 것이라 한 줄 답이면 된다.
+
+백로그 전체는 `backlog/tasks/`(Backlog.md)에 있다. 이 문서는 설계 메모와 위 목록만 둔다.
 
 ---
 
@@ -453,52 +458,3 @@ CD가 아니라 **CI의 릴리스 잡**이다. 배포할 서버가 없으므로.
 **추가 신호**: 커맨드로 노출될 만한 동작이면 무조건 controlled.
 
 `useControllableState` 훅으로 통일하되, 상태를 가진 컴포넌트에만.
-
-TMP
-- client/test/{vrt,e2e}으로 client/ 안에서 전역적인 test 관련 로직을 하나의 폴더로 묶기
-- .output/로 storybook-static 옮기기
-
-- dist/는 아예 별개로 따로 두어야 할듯? 서버와 클라이언트랑 같이 가야 하는 거 아냐?
-- index.html을 src/workbench 안으로 옮기는 건?
-
-- Lint 규칙
-    - Lint 커스텀 규칙은 fixtures를 관리해야 할 것
-    - 현재 걸린 Lint 규칙 하나씩 리뷰
-- Config 파일 관리: vite, vitestSetup, playwright config 확인
-
-- Conventions.md를 간결하게 유지하기
-- CI 파이프라인
-    - 추가로, CI 되면 arka.sangjun.dev로 배포하기. 오키?
-
----
-
-## 린트 2단계 — 코드를 고쳐야 켤 수 있는 것 (2026-09-08)
-
-1단계 12개는 켰다(위반 0건, 전부 깨서 확인). 아래는 위반이 있어 못 켠 것.
-
-- **DI 토큰은 자기 계약 파일에** — 위반 1건. `core/commands/tokens.ts`를 `ICommandCenterRegistry.ts`로 병합하면 예외 없는 규칙이 된다. `registerServices.tsx`의 비-export 로컬 토큰 5개는 조립 디테일이라 규칙 대상 밖.
-- **`it()` 이름은 한글** — 위반 78건 / 20개 파일. `core/`(26)·`shared/components/`(13)에 편중.
-
-## 린트 구멍 3개 — 실제로 뚫리는 것을 확인함
-
-- **`React.useState()`가 안 잡힌다.** `viewOnlyUsesViewModel.ts:35`가 `callee.type !== "Identifier"`면 그냥 버려서, `useState()`는 잡히는데 `React.useState()`는 통과한다. 지금 그 형태가 0건이라 새는 건 없지만, 누가 그 스타일로 쓰면 규율이 조용히 무력화된다. → 기존 규칙에 `MemberExpression` 분기 추가
-- **extension 쌍 zone이 수동 나열이다.** `no-restricted-paths`가 "형제끼리 금지"를 일반화 못 해 쌍마다 필요하다. 지금 `filesystem ↔ agent` 2개뿐이라 **`extensions/git/`을 만들어 `filesystem`을 import하면 0건으로 통과한다**(실제로 해봄). 셋이면 6쌍, 넷이면 12쌍. **셋 중 가장 급하다** — 다른 둘은 "누가 그렇게 쓰면"이지만 이건 extension을 추가하는 순간 자동으로 발생한다. → `arka/extensions-are-siblings` 커스텀 규칙이 경로에서 슬라이스 이름을 뽑아 비교
-- **zone이 `packages/*/src/**`만 본다.** `e2e/`, `test/vrt/`, `tooling/`, `*.config.ts`가 대상 밖이다. E2E 스펙에서 `workbench/model/ThemeModel`을 직접 import해도 0건이다(실제로 해봄) — "밖에서 보이는 것만 검사한다"는 전제가 깨지는데 아무도 안 막는다. → zone의 `files` 글롭 확대
-
-## 규칙을 쉽게 만들려고 고쳐야 할 문장 (아직 안 함)
-
-실제 구현에 영향이 없고, 문장을 실측에 맞추면 판정이 가능해지는 것들. → `docs/lint-plan.md`
-
-- **파일 이름 규칙** — "camelCase, React 컴포넌트만 PascalCase"인데 실측 위반 55건. 실제 관행은 "클래스 파일 PascalCase / 함수 모듈 camelCase / 계약 `I<Name>.ts`"다. **문장을 고치면 코드를 안 바꾸고 위반이 0이 된다.**
-- **`describe`/`it`** — 한 문장이 두 규칙을 뭉뚱그린다. `it` 89% 한글 / `describe` 76% 영문으로 정반대인데, `describe`의 영문은 산문이 아니라 대상 식별자(`describe('listDirectory')`)다. ADR 0008도 "`describe`는 대상 단위로"라고 이미 적어놨다 — **문장 둘이 서로 어긋난다.** 가르면 `describe` 위반이 137→0.
-- **`core/view-model/`** — 유일한 kebab-case 폴더. 형제는 `commands/`·`registry/`·`menu/`, 슬라이스 쪽은 `viewmodel/`. `core/viewmodel/`로 바꾸면 폴더명 규칙에 예외가 없어진다.
-
-## 결정이 필요한 것
-
-- **`PROTOCOL_VERSION`을 배선할지 지울지** (→ ADR 0015). 선언만 있고 쓰는 곳이 0건이다. 로컬에선 클라이언트·서버가 같이 빌드되어 문제가 안 되지만, 원격 배포(ADR 0014)로 폰에 PWA가 캐시되는 순간 실제가 된다. **배포 전에 정해야 한다.**
-- **ADR 0013**(산출물·설정)은 한 번 지우셨던 문서를 다시 쓴 것이다. 불필요하면 지우고 CONVENTIONS에만 남긴다.
-
-## 배포 전 반드시
-
-- **Cloudflare Access 정책과 Tunnel 설정은 콘솔 작업이라 내가 못 한다.** 그게 유일한 인증 수단이다(→ ADR 0014).
-- `curl https://arka.sangjun.dev/api/files`가 **인증 없이 200을 주면 안 된다.** 주면 워크스페이스 전체가 공개된 것이다.
