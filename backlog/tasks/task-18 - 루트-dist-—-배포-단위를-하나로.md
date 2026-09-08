@@ -1,9 +1,10 @@
 ---
 id: TASK-18
 title: 루트 dist/ — 배포 단위를 하나로
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-08 15:40'
+updated_date: '2026-09-08 15:44'
 labels:
   - release
 dependencies: []
@@ -16,3 +17,9 @@ ordinal: 18000
 <!-- SECTION:DESCRIPTION:BEGIN -->
 ADR 0013 상태에 '아직 없다'. 서버 빌드 태스크와 함께.
 <!-- SECTION:DESCRIPTION:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+TASK-2와 함께 — 루트 dist/{client,server}.
+<!-- SECTION:NOTES:END -->

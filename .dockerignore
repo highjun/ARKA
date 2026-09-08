@@ -1,0 +1,13 @@
+node_modules
+**/node_modules
+dist
+.output
+**/.output
+storybook-static
+**/storybook-static
+.git
+.github
+backlog
+docs
+test
+*.md

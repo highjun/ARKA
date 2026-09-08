@@ -17,7 +17,9 @@
     "lint:config": "! grep -rl '\"paths\"' tsconfig.base.json packages/*/tsconfig.json || (echo 'tsconfig paths 별칭을 쓰지 않습니다 — package.json의 imports 필드를 쓰세요 (ADR 0012)' && exit 1)",
     "test:contract": "vitest run -c test/contract/vitest.config.ts",
     "test:tooling": "vitest run -c tooling/vitest.config.ts",
-    "lint:css": "stylelint \"packages/client/src/**/*.css\" --config packages/client/stylelint.config.js"
+    "lint:css": "stylelint \"packages/client/src/**/*.css\" --config packages/client/stylelint.config.js",
+    "build": "pnpm --filter client build && pnpm --filter server build",
+    "start": "ADE_CLIENT_ROOT=dist/client node dist/server/index.js"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

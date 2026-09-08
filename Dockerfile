@@ -1,0 +1,28 @@
+# 빌드 단계 — 의존성 설치와 번들. 산출물은 dist/ 하나다(client 정적 파일 + server 단일 번들).
+FROM node:24-alpine AS build
+# corepack은 Node 25에서 빠진다 — 버전을 package.json의 packageManager와 같게 직접 고정한다.
+RUN npm install -g pnpm@11.13.0
+WORKDIR /app
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .nvmrc ./
+COPY packages/contracts/package.json packages/contracts/
+COPY packages/client/package.json packages/client/
+COPY packages/server/package.json packages/server/
+RUN pnpm install --frozen-lockfile
+COPY . .
+RUN pnpm run build
+
+# 실행 단계 — node_modules가 없다. 서버는 의존성까지 한 파일로 번들됐고 클라이언트는 정적 파일이다.
+FROM node:24-alpine
+ENV NODE_ENV=production \
+    ADE_HOST=0.0.0.0 \
+    ADE_PORT=3000 \
+    ADE_WORKSPACE=/workspace \
+    ADE_CLIENT_ROOT=/app/dist/client
+WORKDIR /app
+COPY --from=build /app/dist ./dist
+# 워크스페이스는 볼륨이다. compose가 호스트 UID로 실행하므로 여기서 사용자를 고정하지 않는다.
+VOLUME ["/workspace"]
+EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
+  CMD wget -qO- http://127.0.0.1:3000/api/health || exit 1
+CMD ["node", "dist/server/index.js"]

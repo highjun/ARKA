@@ -14,4 +14,4 @@
 - 산출물을 `.gitignore`에만 넣고 린트에는 안 넣기 — 실제로 `storybook-static/`의 번들이 `no-func-assign`으로 수백 건 에러를 냈다.
 
 ## 상태:
-승인됨. 배포 단위를 하나로 묶는 루트 `dist/`와 서버 빌드 스크립트는 아직 없다 — 서버는 `tsx`로 소스를 직접 실행한다.
+승인됨. 2026-09-09 — 루트 `dist/`가 생겼다: `dist/client/`(vite)와 `dist/server/index.js`(esbuild 단일 번들, 의존성 포함). `pnpm run build`가 둘을 만들고 `pnpm run start`가 돌린다. Dockerfile은 `dist/`만 실행 이미지에 복사한다(node_modules 없음). 컨테이너 경계 스모크는 `test/docker/smoke.sh`.

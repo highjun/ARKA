@@ -33,7 +33,7 @@ export default defineConfig({
     env: {
       ADE_WORKSPACE: path.join(clientRoot, "e2e/fixture"),
       ADE_PORT: String(PORT),
-      ADE_CLIENT_ROOT: path.join(clientRoot, "dist"),
+      ADE_CLIENT_ROOT: path.join(repoRoot, "dist/client"),
     },
     url: `http://127.0.0.1:${PORT}/`,
     reuseExistingServer: false,

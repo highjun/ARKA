@@ -11,6 +11,13 @@
 - [ ] **GitHub 원격 저장소** — 지금 `git remote`가 없다. `.github/workflows/ci.yml`은 push/PR에서 돌지만 원격이 있어야 실행된다. 저장소를 만들어 push하고, Actions가 켜져 있는지와 브랜치 보호(main에 `check`·`e2e`·`VRT` 필수)를 걸지 결정.
 - [ ] **결정 요청** — TASK-3(PWA 도입 여부), TASK-14(ADR 0013 유지), TASK-16(테스트 폴더 배치), TASK-17(index.html 위치)은 에이전트가 기본안을 제시하지만 사용자 취향이 갈리는 것이라 한 줄 답이면 된다.
 
+- [ ] **배포 실행** — 이미지와 compose가 준비됐다. 서버 PC에서:
+  ```
+  UID=$(id -u) GID=$(id -g) ADE_WORKSPACE=/path/to/workspace docker compose up -d --build
+  curl http://127.0.0.1:3000/api/health
+  ```
+  컨테이너는 호스트 루프백 3000에만 열린다. 바깥은 cloudflared Tunnel이 이 포트에 붙는다.
+
 백로그 전체는 `backlog/tasks/`(Backlog.md)에 있다. 이 문서는 설계 메모와 위 목록만 둔다.
 
 ---
