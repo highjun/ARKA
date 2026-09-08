@@ -4,8 +4,15 @@ import type { Logger } from "./core/log";
 import type { ServerConfig } from "./core/config";
 import { serializeError } from "./core/log";
 import { createProtocolGuard } from "./core/protocol";
+import { createAgentFeature } from "./features/agent";
 import { createFsRoutes, createWatchRoutes } from "./features/filesystem";
 import { createStaticRoutes } from "./features/static";
+
+export type Application = {
+  readonly app: Hono;
+  /** 장기 실행 자원(Run·DB)을 정리한다. 종료 경로에서 부른다. */
+  close(): void;
+};
 
 /**
  * 조립은 여기 한 곳이다. 이 파일만 읽으면 어떤 라우트가 도는지 다 보인다 — 클라이언트의
@@ -13,8 +20,9 @@ import { createStaticRoutes } from "./features/static";
  *
  * `serve()` 없이 `app.request()`로 통째로 테스트할 수 있게 `Hono`를 돌려준다.
  */
-export const createApp = ({ config, log, startedAt }: { config: ServerConfig; log: Logger; startedAt: string }): Hono => {
+export const createApp = ({ config, log, startedAt }: { config: ServerConfig; log: Logger; startedAt: string }): Application => {
   const app = new Hono();
+  const agent = createAgentFeature({ dataDir: config.dataDir, log });
 
   // 아래 둘은 프로토콜 헤더 없이 부를 수 있다 — 낡은 클라이언트도 자기가 낡았다는 것을 알아야 한다.
   app.get("/api/health", (c) => c.json({ status: "ok" }));
@@ -25,6 +33,7 @@ export const createApp = ({ config, log, startedAt }: { config: ServerConfig; lo
 
   app.route("/", createWatchRoutes(config.workspaceRoot));
   app.route("/", createFsRoutes(config.workspaceRoot));
+  app.route("/", agent.routes);
 
   // 정적 서빙은 마지막이다 — SPA fallback이 확장자 없는 경로를 전부 index.html로 되돌리므로
   // API 라우트보다 먼저 붙으면 `/api/*`까지 삼킨다.
@@ -39,5 +48,5 @@ export const createApp = ({ config, log, startedAt }: { config: ServerConfig; lo
     return c.json({ code: "Internal", message: "internal error" }, 500);
   });
 
-  return app;
+  return { app, close: () => agent.close() };
 };

@@ -17,11 +17,14 @@ ENV NODE_ENV=production \
     ADE_HOST=0.0.0.0 \
     ADE_PORT=3000 \
     ADE_WORKSPACE=/workspace \
+    ADE_DATA_DIR=/data \
     ADE_CLIENT_ROOT=/app/dist/client
 WORKDIR /app
 COPY --from=build /app/dist ./dist
-# 워크스페이스는 볼륨이다. compose가 호스트 UID로 실행하므로 여기서 사용자를 고정하지 않는다.
-VOLUME ["/workspace"]
+# 워크스페이스와 데이터(SQLite)는 볼륨이다. compose가 호스트 UID로 실행하므로 여기서 사용자를 고정하지
+# 않는다. /data는 어떤 UID로 돌아도 쓸 수 있어야 하므로 미리 만들고 열어 둔다.
+RUN mkdir -p /data && chmod 777 /data
+VOLUME ["/workspace", "/data"]
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
   CMD wget -qO- http://127.0.0.1:3000/api/health || exit 1

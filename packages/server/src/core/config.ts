@@ -1,4 +1,5 @@
-import { realpath, stat } from "node:fs/promises";
+import { mkdir, realpath, stat } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { z } from "zod";
 
@@ -31,6 +32,8 @@ const Env = z.object({
   ADE_HOST: z.string().min(1).default("127.0.0.1"),
   /** 빌드된 클라이언트가 있는 디렉터리. 없으면 정적 서빙을 켜지 않는다. */
   ADE_CLIENT_ROOT: z.string().min(1).optional(),
+  /** 데이터 디렉터리(SQLite 등). 없으면 `~/.ade`. 없는 디렉터리는 만든다. */
+  ADE_DATA_DIR: z.string().min(1).optional(),
 });
 
 export type ServerConfig = {
@@ -40,6 +43,8 @@ export type ServerConfig = {
   readonly host: string;
   /** 절대경로. 정적 서빙을 켜지 않으면 `undefined`. */
   readonly clientRoot: string | undefined;
+  /** 절대경로. `data.db`가 여기 산다. */
+  readonly dataDir: string;
 };
 
 /**
@@ -74,12 +79,21 @@ export const loadConfig = async (env: Readonly<Record<string, string | undefined
     const field = issue?.path.join(".") ?? "env";
     throw new ConfigError(`${field}: ${issue?.message ?? "invalid"}`);
   }
-  const { ADE_WORKSPACE, ADE_PORT, ADE_HOST, ADE_CLIENT_ROOT } = parsed.data;
+  const { ADE_WORKSPACE, ADE_PORT, ADE_HOST, ADE_CLIENT_ROOT, ADE_DATA_DIR } = parsed.data;
+
+  // 데이터 디렉터리는 워크스페이스와 달리 우리가 소유한다 — 없으면 만든다.
+  const dataDir = path.resolve(ADE_DATA_DIR ?? path.join(os.homedir(), ".ade"));
+  try {
+    await mkdir(dataDir, { recursive: true });
+  } catch (error) {
+    throw new ConfigError(`ADE_DATA_DIR: cannot create ${dataDir}: ${error instanceof Error ? error.message : String(error)}`);
+  }
 
   return {
     workspaceRoot: await resolveDirectory("ADE_WORKSPACE", ADE_WORKSPACE ?? process.cwd()),
     port: ADE_PORT,
     host: ADE_HOST,
     clientRoot: ADE_CLIENT_ROOT === undefined ? undefined : await resolveDirectory("ADE_CLIENT_ROOT", ADE_CLIENT_ROOT),
+    dataDir: await resolveDirectory("ADE_DATA_DIR", dataDir),
   };
 };

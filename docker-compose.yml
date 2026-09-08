@@ -10,6 +10,8 @@ services:
     user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - "${ADE_WORKSPACE:-./workspace}:/workspace"
+      # 세션·이벤트 로그(SQLite). 백업은 이 볼륨의 data.db 파일 복사다.
+      - ade-data:/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
@@ -17,3 +19,6 @@ services:
       timeout: 3s
       start_period: 5s
       retries: 3
+
+volumes:
+  ade-data:
