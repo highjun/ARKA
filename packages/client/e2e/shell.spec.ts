@@ -5,7 +5,7 @@ import { expect, test, type Page } from "@playwright/test";
  *
  * 여기서 검사하는 것은 배선이 아니라 **눈에 보이는가**다 — 그건 jsdom이 영영 알 수 없다.
  * jsdom은 CSS 레이아웃을 적용하지 않아 요소가 화면 밖으로 밀려 있어도 `getByText`가 찾는다.
- * 조립이 맞물리는지는 `src/app/smoke.test.tsx`가 이미 본다.
+ * 조립이 맞물리는지는 `src/workbench/smoke.test.tsx`가 이미 본다.
  */
 
 const PHONE = { width: 390, height: 844 };
@@ -76,5 +76,30 @@ test.describe("데스크톱", () => {
     await treeRow(page, "src").click();
 
     await expect(page.getByText("main.ts", { exact: true })).toBeVisible();
+  });
+});
+
+/**
+ * dirty 표시와 닫기 확인은 **셸이 파일을 직접 모르게 된 뒤에도** 도는지 봐야 하는 흐름이다
+ * (2026-09-08 — `ITabDirtyState`로 결합을 끊음). 조립부가 계약을 잘못 이으면 타입 검사도
+ * 단위 테스트도 통과하는데 화면에서만 조용히 죽는다.
+ */
+test.describe("저장하지 않은 변경", () => {
+  test.use({ viewport: DESKTOP });
+
+  test("편집하면 탭이 dirty로 표시되고, 닫으려 하면 확인을 구한다", async ({ page }) => {
+    await page.goto("/");
+    await treeRow(page, "edit-me.md").click();
+
+    const tab = page.getByRole("tab", { name: /edit-me\.md/u });
+    await expect(tab).toBeVisible();
+    await expect(tab).not.toHaveAttribute("data-dirty", "");
+
+    await page.getByRole("textbox").first().click();
+    await page.keyboard.type("바뀐 내용");
+    await expect(tab).toHaveAttribute("data-dirty", "");
+
+    await page.getByLabel("edit-me.md 닫기").click();
+    await expect(page.getByText("저장하지 않은 변경사항이 있다")).toBeVisible();
   });
 });

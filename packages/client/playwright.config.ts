@@ -14,11 +14,11 @@ const PORT = 5199;
  * **스크린샷 베이스라인은 두지 않는다.** 앱 화면은 자주 바뀌어 베이스라인이 곧 짐이 된다.
  * 여기서 필요한 것은 "보이는가" 하나다.
  *
- * 테스트가 여는 워크스페이스는 `visible/fixture`다 — 저장소나 사용자의 실제 파일에 기대면
+ * 테스트가 여는 워크스페이스는 `e2e/fixture`다 — 저장소나 사용자의 실제 파일에 기대면
  * 테스트가 그 디렉터리 내용에 묶여, 파일 하나만 늘어도 깨진다.
  */
 export default defineConfig({
-  testDir: path.join(clientRoot, "visible"),
+  testDir: path.join(clientRoot, "e2e"),
   timeout: 60_000,
   outputDir: path.join(clientRoot, ".output/playwright/test-results"),
   reporter: [
@@ -31,7 +31,7 @@ export default defineConfig({
     command: "pnpm --filter client build && pnpm --filter server exec tsx src/index.ts",
     cwd: repoRoot,
     env: {
-      ADE_WORKSPACE: path.join(clientRoot, "visible/fixture"),
+      ADE_WORKSPACE: path.join(clientRoot, "e2e/fixture"),
       ADE_PORT: String(PORT),
       ADE_CLIENT_ROOT: path.join(clientRoot, "dist"),
     },
