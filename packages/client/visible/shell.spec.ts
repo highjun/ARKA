@@ -22,7 +22,7 @@ test.describe("폰", () => {
 
   test("사이드바를 열면 워크스페이스 트리가 읽힌다", async ({ page }) => {
     await page.goto("/");
-    await page.getByLabel("탐색기", { exact: true }).click();
+    await page.getByLabel("사이드바 열기").click();
 
     await expect(page.getByText("src", { exact: true })).toBeVisible();
     await expect(page.getByText("README.md", { exact: true })).toBeVisible();
@@ -34,7 +34,7 @@ test.describe("폰", () => {
    */
   test("드로어에 불투명한 배경이 있다", async ({ page }) => {
     await page.goto("/");
-    await page.getByLabel("탐색기", { exact: true }).click();
+    await page.getByLabel("사이드바 열기").click();
 
     const row = treeRow(page, "README.md");
     await expect(row).toBeVisible();
@@ -54,7 +54,7 @@ test.describe("폰", () => {
 
   test("파일을 누르면 탭이 열리고 내용이 보인다", async ({ page }) => {
     await page.goto("/");
-    await page.getByLabel("탐색기", { exact: true }).click();
+    await page.getByLabel("사이드바 열기").click();
     await treeRow(page, "README.md").click();
 
     await expect(page.getByRole("tab", { name: /README\.md/u })).toBeVisible();
