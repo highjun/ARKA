@@ -221,3 +221,23 @@ describe("소스 제어 배선", () => {
     expect(await screen.findByText("main")).toBeDefined();
   });
 });
+
+describe("커맨드와 단축키", () => {
+  it("Ctrl+Shift+F가 검색 활동을 열고, 팔레트에 단축키가 보인다", async () => {
+    mountWith(new MockWorkspaceFiles({}));
+    fireEvent.keyDown(window, { key: "F", ctrlKey: true, shiftKey: true });
+    expect(await screen.findByLabelText("검색어")).toBeDefined();
+
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true });
+    const item = await screen.findByText("검색 보기");
+    expect(item.closest("[cmdk-item]")?.textContent).toContain("Shift");
+  });
+
+  it("키보드 단축키 커맨드가 목록 탭을 연다", async () => {
+    mountWith(new MockWorkspaceFiles({}));
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true });
+    fireEvent.click(await screen.findByText("키보드 단축키 보기"));
+    expect(await screen.findByRole("tab", { name: /키보드 단축키/u })).toBeDefined();
+    expect(screen.getByText("shell.openCommandPalette")).toBeDefined();
+  });
+});

@@ -44,6 +44,7 @@ import { createGlobalKeybindings } from "./infra/GlobalKeybindings";
 import { createServerInfoPort } from "./infra/HttpServerInfo";
 import { createUnloadGuard } from "./infra/UnloadGuard";
 import { createStoragePort } from "./infra/LocalStorage";
+import { KeybindingsTabView } from "./view/KeybindingsTabView";
 import { WorkbenchStartupRegistry } from "./model/WorkbenchStartupRegistry";
 import { ActivityBarRegistry } from "./model/ActivityBarRegistry";
 import { ActivityModel } from "./model/ActivityModel";
@@ -286,20 +287,21 @@ export function createApplication(): Container {
   startupRegistry.add({ id: "fileWatch", token: FileWatchStartupToken });
 
   // Registry 전부 singleton이라 루트에서 한 번만 채운다.
-  container.resolve(ActivityBarRegistryToken).add({ id: EXPLORER_ID, title: "탐색기", iconId: "files" });
+  container.resolve(ActivityBarRegistryToken).add({ id: EXPLORER_ID, title: "탐색기", iconId: "files", keybinding: "ctrl+shift+e" });
   container.resolve(SidebarContentRegistryToken).add({ id: EXPLORER_ID, PanelComponent: DirectoryTreeView });
   container.resolve(TabContentRegistryToken).add({
     id: FILE_TAB_KIND,
     iconId: "fileCode",
     TabComponent: ({ tabId, reveal }) => <FileContentView path={tabId} reveal={reveal} />,
   });
-  container.resolve(ActivityBarRegistryToken).add({ id: SEARCH_ID, title: "검색", iconId: "search" });
+  container.resolve(ActivityBarRegistryToken).add({ id: SEARCH_ID, title: "검색", iconId: "search", keybinding: "ctrl+shift+f" });
   container.resolve(SidebarContentRegistryToken).add({ id: SEARCH_ID, PanelComponent: ({ onFileOpen }) => <SearchView onFileOpen={onFileOpen} /> });
-  container.resolve(ActivityBarRegistryToken).add({ id: SCM_ID, title: "소스 제어", iconId: "sourceControl" });
+  container.resolve(ActivityBarRegistryToken).add({ id: SCM_ID, title: "소스 제어", iconId: "sourceControl", keybinding: "ctrl+shift+g" });
   container.resolve(SidebarContentRegistryToken).add({ id: SCM_ID, PanelComponent: ({ onOpenTab }) => <SourceControlView onOpenTab={onOpenTab} /> });
   container.resolve(TabContentRegistryToken).add({ id: DIFF_TAB_KIND, iconId: "sourceControl", TabComponent: ({ tabId }) => <DiffTabView tabId={tabId} /> });
-  container.resolve(ActivityBarRegistryToken).add({ id: AGENT_ID, title: "에이전트", iconId: "brain" });
+  container.resolve(ActivityBarRegistryToken).add({ id: AGENT_ID, title: "에이전트", iconId: "brain", keybinding: "ctrl+shift+a" });
   container.resolve(SidebarContentRegistryToken).add({ id: AGENT_ID, PanelComponent: ({ onOpenTab }) => <ChatSessionsView onOpenTab={onOpenTab} /> });
+  container.resolve(TabContentRegistryToken).add({ id: "keybindings", iconId: "keyboard", TabComponent: () => <KeybindingsTabView /> });
   container.resolve(TabContentRegistryToken).add({
     id: CHAT_TAB_KIND,
     iconId: "brain",

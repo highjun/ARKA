@@ -6,6 +6,8 @@ export type ActivityBarDescriptor = {
   readonly id: string;
   readonly title: string;
   readonly iconId: string;
+  /** 이 활동을 여는 단축키(`ctrl+shift+e` 형태). 셸이 `<title> 보기` 커맨드와 함께 등록한다. */
+  readonly keybinding?: string;
 };
 
 export const ActivityBarRegistryToken = createToken<IActivityBarRegistry>("activityBarRegistry");

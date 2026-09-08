@@ -161,7 +161,11 @@ export const ShellView = () => {
 
   // 팔레트 목록은 커맨드 registry를 그대로 옮긴 것이다 — 등록은 부팅 시 한 번 끝나므로 매 렌더
   // 다시 계산해도 가볍다.
-  const commandItems = commandCenterRegistry.commandRegistry.list().map((command) => ({ id: command.id, label: command.label }));
+  const shortcutOf = (commandId: string): readonly string[] | undefined => {
+    const binding = commandCenterRegistry.keybindingRegistry.list().find((entry) => entry.actionId === commandId);
+    return binding?.keybinding.split('+').map((key) => key.charAt(0).toUpperCase() + key.slice(1));
+  };
+  const commandItems = commandCenterRegistry.commandRegistry.list().map((command) => ({ id: command.id, label: command.label, shortcut: shortcutOf(command.id) }));
   const onCommandSelect = (id: string) => {
     commandCenterRegistry.commandRegistry.tryGet(id)?.execute(undefined);
     viewModel.setPaletteOpen(false);

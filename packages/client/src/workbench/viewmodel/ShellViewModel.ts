@@ -172,6 +172,12 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     this.#activityModel.setActiveActivityId(current === id ? null : id);
   }
 
+  showActivity(id: string): void {
+    if (!this.#isActivityId(id)) return;
+    this.#activityModel.setActiveActivityId(id);
+    this.setSidebarOpen(true);
+  }
+
   /** 존재하지 않는 leaf·탭 요청은 무시한다. */
   selectTab(leafId: PaneId, tabId: string): void {
     const tree = this.#tabsModel.tree;
@@ -501,6 +507,22 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
       execute: () => this.setPaletteOpen(true),
     });
     commandCenterRegistry.registerKeybinding({ id: 'shell.openCommandPalette.keybinding', keybinding: 'ctrl+k', actionId: 'shell.openCommandPalette' });
+
+    // 활동마다 `<title> 보기` — VSCode의 `workbench.view.explorer`(Ctrl+Shift+E) 같은 것. 단축키는
+    // 활동을 등록한 쪽이 descriptor에 적는다.
+    for (const activity of this.#activityBar.list()) {
+      const commandId = `shell.showActivity.${activity.id}`;
+      commandCenterRegistry.registerCommand({ id: commandId, label: `${activity.title} 보기`, execute: () => this.showActivity(activity.id) });
+      if (activity.keybinding !== undefined) {
+        commandCenterRegistry.registerKeybinding({ id: `${commandId}.keybinding`, keybinding: activity.keybinding, actionId: commandId });
+      }
+    }
+
+    commandCenterRegistry.registerCommand({
+      id: 'shell.openKeybindings',
+      label: '키보드 단축키 보기',
+      execute: () => this.openTab({ id: 'keybindings', kind: 'keybindings', title: '키보드 단축키' }),
+    });
 
     const isTabContextTarget = (value: unknown): value is TabContextTarget =>
       typeof value === 'object' && value !== null && 'leafId' in value && 'tabId' in value;

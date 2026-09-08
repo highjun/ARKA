@@ -860,3 +860,13 @@ describe('IShellViewModel — 위치 요청', () => {
     expect(viewModel.reveal?.tabId).toBe('a.md');
   });
 });
+
+describe('IShellViewModel — showActivity', () => {
+  it('같은 활동을 다시 켜도 끄지 않고 드로어를 연다', () => {
+    const { viewModel } = make();
+    viewModel.showActivity('explorer');
+    viewModel.showActivity('explorer');
+    expect(activeIds(viewModel)).toEqual(['explorer']);
+    expect(viewModel.isSidebarOpen).toBe(true);
+  });
+});

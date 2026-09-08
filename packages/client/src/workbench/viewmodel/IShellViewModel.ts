@@ -184,6 +184,12 @@ export interface IShellViewModel {
   toggleTheme(): void;
 
   /**
+   * 활동을 **켠다** — `selectActivity`와 달리 같은 것을 다시 골라도 끄지 않고, 드로어도 연다.
+   * 커맨드·단축키(`<title> 보기`)가 부른다.
+   */
+  showActivity(id: string): void;
+
+  /**
    * 모바일 드로어가 열려 있는가.
    *
    * `AppFrame` 이 스스로도 관리할 수 있는데(controlled/uncontrolled 하이브리드) 굳이 여기서 갖는
