@@ -9,7 +9,7 @@ import { Collapsible } from './Collapsible';
  * 초기 렌더에 그대로 반영되는지만 본다.
  */
 describe('Collapsible', () => {
-  it('renders content when open is true', () => {
+  it('open 이 true 면 내용을 렌더링한다', () => {
     render(
       <Collapsible open>
         <Collapsible.Trigger>자세히</Collapsible.Trigger>
@@ -21,7 +21,7 @@ describe('Collapsible', () => {
     expect(screen.getByText('자세히').closest('details')).toHaveAttribute('open');
   });
 
-  it('does not render the open attribute when open is false', () => {
+  it('open 이 false 면 open 속성을 붙이지 않는다', () => {
     render(
       <Collapsible open={false}>
         <Collapsible.Trigger>자세히</Collapsible.Trigger>

@@ -9,12 +9,12 @@ const ITEMS: TabItem[] = [
 ];
 
 describe('useTabStrip', () => {
-  it('is not reorderable when onTabReorder is omitted', () => {
+  it('onTabReorder 를 생략하면 순서를 바꿀 수 없다', () => {
     const { result } = renderHook(() => useTabStrip('a', ITEMS, vi.fn(), vi.fn(), undefined, undefined, undefined, undefined));
     expect(result.current.context.reorderable).toBe(false);
   });
 
-  it('commits a reorder on drop when a valid drop indicator resolves', () => {
+  it('유효한 drop indicator 가 정해진 상태에서 drop 하면 순서 변경을 확정한다', () => {
     const onTabReorder = vi.fn();
     const { result } = renderHook(() => useTabStrip('a', ITEMS, vi.fn(), vi.fn(), undefined, onTabReorder, undefined, undefined));
 

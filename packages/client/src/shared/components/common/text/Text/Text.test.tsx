@@ -9,7 +9,7 @@ describe('Text', () => {
   implementsForwardRef((extra) => <Text {...extra} />, HTMLSpanElement);
   implementsNoA11yViolations(() => <Text>안내 문구</Text>);
 
-  it('defaults to variant="body", size="medium" and tone="default"', () => {
+  it('variant="body", size="medium", tone="default" 가 기본값이다', () => {
     render(<Text>내용</Text>);
 
     expect(screen.getByText('내용')).toHaveAttribute('data-text-variant', 'body');
@@ -17,7 +17,7 @@ describe('Text', () => {
     expect(screen.getByText('내용')).toHaveAttribute('data-text-tone', 'default');
   });
 
-  it('reflects the variant, size and tone props', () => {
+  it('variant, size, tone props 를 data 속성에 반영한다', () => {
     render(
       <Text variant="caption" size="small" tone="muted">
         내용
@@ -29,19 +29,19 @@ describe('Text', () => {
     expect(screen.getByText('내용')).toHaveAttribute('data-text-tone', 'muted');
   });
 
-  it.each(['body', 'caption'] as const)('accepts variant="%s"', (variant) => {
+  it.each(['body', 'caption'] as const)('variant="%s" 를 받는다', (variant) => {
     render(<Text variant={variant}>내용</Text>);
 
     expect(screen.getByText('내용')).toHaveAttribute('data-text-variant', variant);
   });
 
-  it.each(['small', 'medium', 'large'] as const)('accepts size="%s"', (size) => {
+  it.each(['small', 'medium', 'large'] as const)('size="%s" 를 받는다', (size) => {
     render(<Text size={size}>내용</Text>);
 
     expect(screen.getByText('내용')).toHaveAttribute('data-text-size', size);
   });
 
-  it.each(['default', 'muted', 'danger'] as const)('accepts tone="%s"', (tone) => {
+  it.each(['default', 'muted', 'danger'] as const)('tone="%s" 를 받는다', (tone) => {
     render(<Text tone={tone}>내용</Text>);
 
     expect(screen.getByText('내용')).toHaveAttribute('data-text-tone', tone);

@@ -6,7 +6,7 @@ import { Container } from './Container';
 
 /** 다섯 조각을 감싼 구조가 계약대로 동작하는지 본다 — 내용은 Viewport 안에 들어가고 ref 도 거기 꽂힌다. */
 describe('Container', () => {
-  it('renders children in the viewport and forwards the ref to it', () => {
+  it('children 을 Viewport 안에 렌더링하고 ref 도 거기에 넘긴다', () => {
     const ref = createRef<HTMLDivElement>();
 
     render(<Container ref={ref}>content</Container>);

@@ -154,8 +154,11 @@ export default [
 
   {
     // 스냅샷은 변경 시 무비판적으로 갱신하게 된다. → docs/adr/0008-client-testing.md
-    files: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
+    // 테스트 이름은 한글 문장이다(린트 2단계, 2026-09-09에 78건을 번역한 뒤 켰다).
+    files: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}", "**/*.contract.ts"],
+    plugins: { arka: arkaRules },
     rules: {
+      "arka/test-names-korean": "error",
       "no-restricted-syntax": [
         "error",
         {

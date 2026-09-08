@@ -33,24 +33,24 @@ const LISTING = {
 };
 
 describe('list', () => {
-  it('returns the directory listing the server sent', async () => {
+  it('서버가 보낸 디렉터리 목록을 그대로 돌려준다', async () => {
     serverReplies(LISTING);
     expect(await createWorkspaceFilesPort().list('projects')).toEqual(LISTING);
   });
 
-  it('carries the path as a query parameter, not a path segment', async () => {
+  it('경로를 path segment 가 아니라 query parameter 로 실어 보낸다', async () => {
     const { calls } = serverReplies(LISTING);
     await createWorkspaceFilesPort().list('projects/dev-kit');
     expect(calls[0]?.url).toBe('/api/files?path=projects%2Fdev-kit');
   });
 
-  it('encodes paths that would otherwise change the request', async () => {
+  it('요청을 바꿔버릴 수 있는 경로는 인코딩한다', async () => {
     const { calls } = serverReplies(LISTING);
     await createWorkspaceFilesPort().list('노트 & 자료#1');
     expect(calls[0]?.url).toBe('/api/files?path=%EB%85%B8%ED%8A%B8+%26+%EC%9E%90%EB%A3%8C%231');
   });
 
-  it('asks for the root with an empty path', async () => {
+  it('빈 경로로 루트를 요청한다', async () => {
     const { calls } = serverReplies(LISTING);
     await createWorkspaceFilesPort().list('');
     expect(calls[0]?.url).toBe('/api/files?path=');
@@ -58,13 +58,13 @@ describe('list', () => {
 });
 
 describe('read', () => {
-  it('returns the file content the server sent', async () => {
+  it('서버가 보낸 파일 내용을 그대로 돌려준다', async () => {
     const content = { path: 'a.md', content: '# hi\n', truncated: false, encoding: 'utf8' };
     serverReplies(content);
     expect(await createWorkspaceFilesPort().read('a.md')).toEqual(content);
   });
 
-  it('uses the content endpoint', async () => {
+  it('content 엔드포인트를 사용한다', async () => {
     const { calls } = serverReplies({ path: 'a.md', content: '', truncated: false, encoding: 'utf8' });
     await createWorkspaceFilesPort().read('a.md');
     expect(calls[0]?.url).toBe('/api/files/content?path=a.md');
@@ -151,12 +151,12 @@ describe('remove', () => {
 });
 
 describe('failure', () => {
-  it('throws with the status and the reason the server gave', async () => {
+  it('서버가 준 status 와 reason 을 담아 던진다', async () => {
     serverReplies({ code: 'NoPermission', message: 'forbidden' }, 403);
     await expect(createWorkspaceFilesPort().list('../etc')).rejects.toThrow(/403.*forbidden/u);
   });
 
-  it('still throws when the body carries no reason', async () => {
+  it('본문에 reason 이 없어도 던진다', async () => {
     serverReplies(null, 500);
     await expect(createWorkspaceFilesPort().read('a.md')).rejects.toThrow(/500/u);
   });

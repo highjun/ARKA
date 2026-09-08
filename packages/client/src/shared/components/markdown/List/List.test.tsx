@@ -10,7 +10,7 @@ import { List } from './List';
 
 describe('List', () => {
   describe('Markup', () => {
-    it('renders an ol for the ordered variant', () => {
+    it('ordered variant 는 ol 로 렌더링한다', () => {
       const { container } = render(
         <List variant="ordered">
           <List.Item>하나</List.Item>
@@ -20,7 +20,7 @@ describe('List', () => {
       expect(container.querySelector('ol')).toHaveAttribute('data-list-kind', 'ordered');
     });
 
-    it('inherits the checkbox kind from the list', () => {
+    it('항목이 리스트의 checkbox kind 를 물려받는다', () => {
       render(
         <List variant="checkbox">
           <List.Item>할 일</List.Item>
@@ -30,7 +30,7 @@ describe('List', () => {
       expect(screen.getByText('할 일')).toHaveAttribute('data-list-item-kind', 'checkbox');
     });
 
-    it('lets an item opt into the checkbox kind on its own', () => {
+    it('항목이 스스로 checkbox kind 를 선택할 수 있다', () => {
       render(
         <List>
           <List.Item checkbox>할 일</List.Item>
@@ -43,7 +43,7 @@ describe('List', () => {
     // 체크박스는 `aria-hidden` 이라 role 쿼리로는 안 잡힌다(disabled·readOnly라 접근성 이름을
     // 못 갖는데, 이름 없는 체크박스는 axe 위반이라 아예 접근성 트리에서 뺐다 — 목록 항목의
     // 텍스트가 이미 같은 정보를 시각적으로 전달한다). DOM 자체는 container 쿼리로 검증한다.
-    it('renders a disabled checkbox input reflecting checked for checkbox items', () => {
+    it('checkbox 항목은 checked 를 반영한 disabled checkbox input 을 렌더링한다', () => {
       const { container } = render(
         <List variant="checkbox">
           <List.Item checked>완료한 일</List.Item>
@@ -57,7 +57,7 @@ describe('List', () => {
       expect(todo).not.toBeChecked();
     });
 
-    it('does not render a checkbox input for non-checkbox items', () => {
+    it('checkbox 가 아닌 항목에는 checkbox input 을 렌더링하지 않는다', () => {
       const { container } = render(
         <List>
           <List.Item>일반 항목</List.Item>

@@ -387,7 +387,7 @@ describe('FileTree', () => {
       expect(isSelected('b.ts')).toBe(false);
     });
 
-    it('reports activation', () => {
+    it('활성화를 onActivate 로 알린다', () => {
       const onActivate = vi.fn();
       render(<FileTree items={ITEMS} onActivate={onActivate} />);
 
@@ -526,7 +526,7 @@ describe('FileTree', () => {
       expect(screen.getByRole('treeitem', { name: 'b.ts' })).not.toHaveAttribute('aria-selected');
     });
 
-    it('reports which row was right-clicked, without swallowing the event', () => {
+    it('어느 행을 우클릭했는지 알리고 이벤트는 삼키지 않는다', () => {
       const onContextMenu = vi.fn();
       render(<FileTree items={ITEMS} onContextMenu={onContextMenu} />);
 

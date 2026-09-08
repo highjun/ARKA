@@ -12,19 +12,19 @@ const registryWith = (...entries: KeybindingDescriptor[]) => {
 const ctx = createRegistry() as ContextRegistry;
 
 describe('matchKeybinding', () => {
-  it('matches an entry without a when clause', () => {
+  it('when 절이 없는 항목은 매칭된다', () => {
     const registry = registryWith({ id: 'todo.add.key', keybinding: 'ctrl+k', actionId: 'todo.add' });
 
     expect(matchKeybinding(registry, ctx, 'ctrl+k')?.actionId).toBe('todo.add');
   });
 
-  it('returns undefined when no keybinding matches', () => {
+  it('맞는 keybinding 이 없으면 undefined 를 돌려준다', () => {
     const registry = registryWith({ id: 'todo.add.key', keybinding: 'ctrl+k', actionId: 'todo.add' });
 
     expect(matchKeybinding(registry, ctx, 'ctrl+b')).toBeUndefined();
   });
 
-  it('skips an entry whose when clause is false', () => {
+  it('when 절이 false 인 항목은 건너뛴다', () => {
     const registry = registryWith(
       { id: 'a', keybinding: 'ctrl+b', actionId: 'bold', when: () => false },
       { id: 'b', keybinding: 'ctrl+b', actionId: 'fallback', when: () => true },
@@ -33,7 +33,7 @@ describe('matchKeybinding', () => {
     expect(matchKeybinding(registry, ctx, 'ctrl+b')?.actionId).toBe('fallback');
   });
 
-  it('reads the condition at match time, not at registration time', () => {
+  it('조건은 등록 시점이 아니라 매칭 시점에 읽는다', () => {
     let markdown = false;
     const registry = registryWith({ id: 'a', keybinding: 'ctrl+b', actionId: 'bold', when: () => markdown });
 
@@ -43,7 +43,7 @@ describe('matchKeybinding', () => {
     expect(matchKeybinding(registry, ctx, 'ctrl+b')?.actionId).toBe('bold');
   });
 
-  it('passes the context registry to the when clause', () => {
+  it('when 절에 context registry 를 넘긴다', () => {
     const registry = registryWith({
       id: 'a',
       keybinding: 'ctrl+b',

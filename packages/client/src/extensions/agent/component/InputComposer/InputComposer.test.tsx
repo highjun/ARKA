@@ -9,7 +9,7 @@ describe('InputComposer', () => {
   implementsDataComponent((extra) => <InputComposer {...extra} />, 'InputComposer');
   implementsNoA11yViolations(() => <InputComposer />);
 
-  it('enables submit only for a non-blank value and clears it after sending', () => {
+  it('값이 비어 있지 않을 때만 전송할 수 있고 전송 후에는 값을 비운다', () => {
     const onSubmitValue = vi.fn();
 
     render(<InputComposer onSubmitValue={onSubmitValue} />);
@@ -28,7 +28,7 @@ describe('InputComposer', () => {
     expect(textarea).toHaveValue('');
   });
 
-  it('submits on Enter but keeps the newline for Shift+Enter', () => {
+  it('Enter 로 전송하고 Shift+Enter 는 줄바꿈으로 남긴다', () => {
     const onSubmitValue = vi.fn();
 
     render(<InputComposer defaultValue="안녕" onSubmitValue={onSubmitValue} />);
@@ -41,7 +41,7 @@ describe('InputComposer', () => {
     expect(onSubmitValue).toHaveBeenCalledWith('안녕');
   });
 
-  it('keeps a controlled value untouched and only reports the change', () => {
+  it('제어된 value 는 건드리지 않고 변경만 알린다', () => {
     const onValueChange = vi.fn();
 
     render(<InputComposer value="고정" onValueChange={onValueChange} />);
@@ -53,7 +53,7 @@ describe('InputComposer', () => {
     expect(textarea).toHaveValue('고정');
   });
 
-  it('does not call onValueChange when clearing the value after an uncontrolled submit', () => {
+  it('비제어 전송 뒤 값을 비울 때 onValueChange 를 부르지 않는다', () => {
     const onValueChange = vi.fn();
     const onSubmitValue = vi.fn();
 
@@ -65,7 +65,7 @@ describe('InputComposer', () => {
     expect(onValueChange).not.toHaveBeenCalled();
   });
 
-  it('switches mode when a segment is clicked and reports it via onModeChange', () => {
+  it('세그먼트를 클릭하면 mode 를 바꾸고 onModeChange 로 알린다', () => {
     const onModeChange = vi.fn();
 
     render(<InputComposer defaultMode="action" onModeChange={onModeChange} />);
@@ -75,7 +75,7 @@ describe('InputComposer', () => {
     expect(onModeChange).toHaveBeenCalledWith('plan');
   });
 
-  it('keeps a controlled mode unchanged and only reports the change', () => {
+  it('제어된 mode 는 바꾸지 않고 변경만 알린다', () => {
     const onModeChange = vi.fn();
 
     render(<InputComposer mode="action" onModeChange={onModeChange} />);

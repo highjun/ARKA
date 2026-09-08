@@ -9,7 +9,7 @@ const ITEMS = [
 ];
 
 describe('useTabSplit', () => {
-  it('prunes empty leaves out of the visible tree', () => {
+  it('빈 leaf 는 visibleTree 에서 잘라낸다', () => {
     const emptyLeaf: TabTreeLeaf = { kind: 'leaf', id: 'empty', activeTab: '', tabItems: [] };
     const fullLeaf: TabTreeLeaf = { kind: 'leaf', id: 'full', activeTab: 'a', tabItems: ITEMS as never };
     const { result } = renderHook(() =>
@@ -23,7 +23,7 @@ describe('useTabSplit', () => {
     expect(result.current.visibleTree).toEqual(fullLeaf);
   });
 
-  it('exposes a shared context with no active resize/drop by default', () => {
+  it('기본 상태의 공유 context 에는 진행 중인 resize/drop 이 없다', () => {
     const leaf: TabTreeLeaf = { kind: 'leaf', id: 'only', activeTab: 'a', tabItems: ITEMS as never };
     const { result } = renderHook(() => useTabSplit({ tree: leaf, onTabClick: vi.fn(), onMenuClick: vi.fn() }));
 

@@ -15,7 +15,7 @@ const noop = () => {};
 
 /** `tree`가 없으면 Group(단일 탭 묶음), 있으면 Split(분할 트리)로 렌더된다 — 두 경로 모두 같은 계약을 지킨다. */
 describe('Tab', () => {
-  it('renders as Group when tree is omitted', () => {
+  it('tree 를 생략하면 Group 으로 렌더링한다', () => {
     render(<Tab activeTab="a" tabItems={ITEMS} onTabClick={noop} onMenuClick={noop} />);
 
     expect(screen.getByRole('tab', { name: /A/ })).toBeInTheDocument();
@@ -34,7 +34,7 @@ describe('Tab', () => {
     expect(screen.getByText('탐색기에서 파일을 고르세요.')).toBeInTheDocument();
   });
 
-  it('renders as Split when tree is given', () => {
+  it('tree 를 주면 Split 으로 렌더링한다', () => {
     const tree: TabTreeLeaf = { kind: 'leaf', id: 'only', activeTab: 'a', tabItems: ITEMS };
 
     render(<Tab tree={tree} onTabClick={noop} onMenuClick={noop} />);

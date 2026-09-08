@@ -22,19 +22,19 @@ describe('StepBlock', () => {
       expect(container.querySelector('[data-kind="thinking"]')).toBeInTheDocument();
     });
 
-    it('renders the summary when expanded', () => {
+    it('펼쳐지면 summary 를 렌더링한다', () => {
       render(<StepBlock kind="thinking" summary="내용" defaultExpanded />);
 
       expect(screen.getByText('내용')).toBeInTheDocument();
     });
 
-    it('shows the empty label when there is no summary', () => {
+    it('summary 가 없으면 빈 상태 라벨을 보여준다', () => {
       render(<StepBlock kind="thinking" defaultExpanded />);
 
       expect(screen.getByText('생각 내용이 없습니다.')).toBeInTheDocument();
     });
 
-    it('shows a custom empty label when provided', () => {
+    it('빈 상태 라벨을 넘기면 그것을 보여준다', () => {
       render(<StepBlock kind="thinking" defaultExpanded emptyLabel="커스텀 안내" />);
 
       expect(screen.getByText('커스텀 안내')).toBeInTheDocument();
@@ -68,13 +68,13 @@ describe('StepBlock', () => {
       expect(screen.getByRole('img', { name: label })).toBeInTheDocument();
     });
 
-    it('renders input/output when expanded and body exists', () => {
+    it('펼쳐진 상태에서 본문이 있으면 input/output 을 렌더링한다', () => {
       render(<StepBlock kind="tool" toolId="read_file" toolInput={{ path: 'a.ts' }} defaultExpanded />);
 
       expect(screen.getByText(/a\.ts/)).toBeInTheDocument();
     });
 
-    it('never expands when there is no input or output, even if expanded is forced', () => {
+    it('input 도 output 도 없으면 expanded 를 강제해도 절대 펼쳐지지 않는다', () => {
       render(<StepBlock kind="tool" toolId="read_file" expanded />);
 
       expect(screen.getByText('read_file').closest('details')).not.toHaveAttribute('open');

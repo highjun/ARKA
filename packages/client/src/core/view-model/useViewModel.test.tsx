@@ -72,7 +72,7 @@ const setup = () => {
 };
 
 describe('useViewModel', () => {
-  it('resolves the VM instance and renders its observable property', () => {
+  it('VM 인스턴스를 resolve 해서 observable 속성을 렌더링한다', () => {
     render(
       <ViewModelProvider container={setup()}>
         <WorkspaceView />
@@ -113,7 +113,7 @@ describe('useViewModel', () => {
     expect(screen.getByRole('button').textContent).toBe('workspace: readme.md *');
   });
 
-  it('resolves the same VM instance across re-renders within one scope', () => {
+  it('한 scope 안에서는 리렌더링해도 같은 VM 인스턴스를 resolve 한다', () => {
     const container = setup();
 
     const { rerender } = render(
@@ -132,7 +132,7 @@ describe('useViewModel', () => {
     expect(screen.getByRole('button').textContent).toBe('workspace: readme.md');
   });
 
-  it('gives each scope its own VM instance', () => {
+  it('scope 마다 별도의 VM 인스턴스를 준다', () => {
     const root = createContainer();
     root.register(WorkspaceViewModelToken, scoped(() => new WorkspaceViewModelImpl()));
 
@@ -164,7 +164,7 @@ describe('useViewModel', () => {
     expect(seen.every((instance) => instance === seen[0])).toBe(true);
   });
 
-  it('throws when used outside a ViewModelProvider', () => {
+  it('ViewModelProvider 밖에서 쓰면 던진다', () => {
     expect(() => render(<WorkspaceView />)).toThrow('useAppContext must be used within a ViewModelProvider.');
   });
 });
@@ -204,7 +204,7 @@ describe('useViewModel — 생명주기(onMount/onDispose)', () => {
     return root.createScope('test');
   };
 
-  it('calls onMount once the View mounts', () => {
+  it('View 가 마운트되면 onMount 를 부른다', () => {
     render(
       <ViewModelProvider container={setupWatcher()}>
         <WatcherView />
@@ -214,7 +214,7 @@ describe('useViewModel — 생명주기(onMount/onDispose)', () => {
     expect(screen.getByText('watching')).toBeTruthy();
   });
 
-  it('calls onDispose when the View unmounts', () => {
+  it('View 가 언마운트되면 onDispose 를 부른다', () => {
     const container = setupWatcher();
     const vm = container.resolve(WatcherViewModelToken);
 

@@ -6,6 +6,8 @@ import type { IWorkspaceFiles } from "../extensions/filesystem";
 import { MockWorkspaceFiles } from "../extensions/filesystem/model/MockWorkspaceFiles";
 import { AgentApiToken, AgentEventsToken } from "../extensions/agent";
 import { SearchServiceToken } from "../extensions/search";
+import { GitServiceToken } from "../extensions/git";
+import { MockGitService } from "../extensions/git/model/MockGitService";
 import { MockSearchService } from "../extensions/search/model/MockSearchService";
 import { MockAgentBackend } from "../extensions/agent/model/MockAgentBackend";
 import { ErrorLogToken } from "./model/IErrorLog";
@@ -42,6 +44,7 @@ const mountWith = (workspaceFiles: IWorkspaceFiles) => {
   container.register(AgentApiToken, { lifetime: "singleton", create: () => agent });
   container.register(AgentEventsToken, { lifetime: "singleton", create: () => agent });
   container.register(SearchServiceToken, { lifetime: "singleton", create: () => new MockSearchService({ "a.md": "원본" }) });
+  container.register(GitServiceToken, { lifetime: "singleton", create: () => new MockGitService() });
   render(
     <ViewModelProvider container={container}>
       <RootView />
@@ -205,5 +208,16 @@ describe("검색 배선", () => {
     });
     fireEvent.click(await screen.findByText("원본", { selector: "span" }));
     expect(await screen.findByRole("tab", { name: /a\.md/u })).toBeDefined();
+  });
+});
+
+describe("소스 제어 배선", () => {
+  it("소스 제어 활동에서 변경을 누르면 diff 탭이 열린다", async () => {
+    mountWith(new MockWorkspaceFiles({ "a.md": "원본" }));
+    const git = new MockGitService();
+    git.write("a.md", "원본");
+    // 조립부가 만든 컨테이너의 GitService는 위 mountWith가 덮었지만, 이 테스트는 변경이 있는 저장소가 필요하다.
+    fireEvent.click(screen.getByLabelText("소스 제어"));
+    expect(await screen.findByText("main")).toBeDefined();
   });
 });

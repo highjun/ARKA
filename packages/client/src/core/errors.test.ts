@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { CoreError } from './errors';
 
 describe('CoreError', () => {
-  it('sets name and message', () => {
+  it('name 과 message 를 설정한다', () => {
     const error = new CoreError('boom');
 
     expect(error.name).toBe('CoreError');
@@ -10,7 +10,7 @@ describe('CoreError', () => {
     expect(error).toBeInstanceOf(Error);
   });
 
-  it('sets name to the subclass name when extended', () => {
+  it('상속하면 name 을 서브클래스 이름으로 설정한다', () => {
     class SpecificError extends CoreError {}
 
     const error = new SpecificError('boom');

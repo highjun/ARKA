@@ -3,7 +3,7 @@ import { CoreError } from '#core/errors';
 import { DescriptorNotFoundError, DuplicateDescriptorError } from './errors';
 
 describe('DescriptorNotFoundError', () => {
-  it('carries the missing id and a matching message', () => {
+  it('없는 id 와 그에 맞는 message 를 담는다', () => {
     const error = new DescriptorNotFoundError('todo.add');
 
     expect(error.id).toBe('todo.add');
@@ -13,7 +13,7 @@ describe('DescriptorNotFoundError', () => {
 });
 
 describe('DuplicateDescriptorError', () => {
-  it('carries the duplicated id and a matching message', () => {
+  it('중복된 id 와 그에 맞는 message 를 담는다', () => {
     const error = new DuplicateDescriptorError('todo.add');
 
     expect(error.id).toBe('todo.add');
