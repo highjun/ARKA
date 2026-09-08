@@ -4,3 +4,6 @@ export * from "./common/errors";
 export * from "./common/api";
 export * from "./filesystem/types";
 export * from "./filesystem/api";
+export * from "./agent/types";
+export * from "./agent/events";
+export * from "./agent/api";
