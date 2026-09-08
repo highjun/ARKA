@@ -815,3 +815,22 @@ describe('IShellViewModel — 낡은 클라이언트', () => {
     expect(viewModel.buildId).toBe('');
   });
 });
+
+describe('IShellViewModel — openTab', () => {
+  it('파일이 아닌 탭을 고정으로 열고 활성으로 만든다', () => {
+    const { viewModel } = make();
+    viewModel.openTab({ id: 'chat-1', kind: 'chat', title: '대화' });
+    const leaf = activeLeafOf(viewModel);
+    expect(leaf.tabs).toEqual([{ id: 'chat-1', kind: 'chat', title: '대화', isPreview: false, isDirty: false }]);
+    expect(leaf.activeTabId).toBe('chat-1');
+  });
+
+  it('이미 열려 있으면 그 탭으로 갈 뿐 복제하지 않는다', () => {
+    const { viewModel } = make();
+    viewModel.openTab({ id: 'chat-1', kind: 'chat', title: '대화' });
+    viewModel.previewFile('a.md');
+    viewModel.openTab({ id: 'chat-1', kind: 'chat', title: '대화' });
+    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(['chat-1', 'a.md']);
+    expect(activeLeafOf(viewModel).activeTabId).toBe('chat-1');
+  });
+});

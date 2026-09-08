@@ -18,6 +18,8 @@
   ```
   컨테이너는 호스트 루프백 3000에만 열린다. 바깥은 cloudflared Tunnel이 이 포트에 붙는다.
 
+- [ ] **LLM API 키** — 지금 에이전트는 키 없이 도는 스크립트 실행기다(ADR 0019). 실제 실행기(TASK-26)를 붙이려면 Anthropic API 키가 필요하다. 준비되면 서버 환경변수 `ADE_ANTHROPIC_API_KEY`로 넘긴다(compose의 `.env`). 키를 리포에 넣지 않는다.
+
 백로그 전체는 `backlog/tasks/`(Backlog.md)에 있다. 이 문서는 설계 메모와 위 목록만 둔다.
 
 ---

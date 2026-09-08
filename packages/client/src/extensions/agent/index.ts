@@ -4,3 +4,6 @@ export { AgentApiToken, type IAgentApi } from './model/IAgentApi';
 export { AgentEventsToken, type IAgentEvents } from './model/IAgentEvents';
 export { ChatModelToken, type IChatModel } from './model/IChatModel';
 export { ChatViewModelToken, type IChatViewModel } from './viewmodel/IChatViewModel';
+export { ChatModel } from './model/ChatModel';
+export { ChatViewModel } from './viewmodel/ChatViewModel';
+export { CHAT_TAB_KIND } from './view/ChatSessionsView';

@@ -4,6 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { FileContentViewModelToken, WorkspaceFilesToken } from "../extensions/filesystem";
 import type { IWorkspaceFiles } from "../extensions/filesystem";
 import { MockWorkspaceFiles } from "../extensions/filesystem/model/MockWorkspaceFiles";
+import { AgentApiToken, AgentEventsToken } from "../extensions/agent";
+import { MockAgentBackend } from "../extensions/agent/model/MockAgentBackend";
 import { ErrorLogToken } from "./model/IErrorLog";
 import { TabContentRegistryToken } from "./model/ITabContentRegistry";
 import { TabContentRegistry } from "./model/TabContentRegistry";
@@ -32,8 +34,11 @@ afterEach(() => {
 
 const mountWith = (workspaceFiles: IWorkspaceFiles) => {
   const container = createApplication().createScope("test");
-  // 자식 스코프에 다시 등록해 그 스코프 안에서만 부모를 가린다.
+  // 자식 스코프에 다시 등록해 그 스코프 안에서만 부모를 가린다. 에이전트 백엔드도 메모리 것으로.
   container.register(WorkspaceFilesToken, { lifetime: "singleton", create: () => workspaceFiles });
+  const agent = new MockAgentBackend();
+  container.register(AgentApiToken, { lifetime: "singleton", create: () => agent });
+  container.register(AgentEventsToken, { lifetime: "singleton", create: () => agent });
   render(
     <ViewModelProvider container={container}>
       <RootView />
@@ -168,5 +173,22 @@ describe("렌더 오류 보호", () => {
       ["render", "탭이 터졌다"],
     ]);
     consoleError.mockRestore();
+  });
+});
+
+/** 에이전트 활동 → 새 대화 → 탭이 열리고 보낸 말에 답이 오는지 — 배선 전체가 맞물리는지만 본다. */
+describe("에이전트 배선", () => {
+  it("새 대화를 만들면 탭이 열리고 보내면 답이 온다", async () => {
+    mountWith(new MockWorkspaceFiles({}));
+    fireEvent.click(screen.getByLabelText("에이전트"));
+    fireEvent.click(await screen.findByRole("button", { name: /새 대화/u }));
+    expect(await screen.findByRole("tab", { name: /새 대화/u })).toBeDefined();
+
+    const textarea = await screen.findByRole("textbox");
+    await act(async () => {
+      fireEvent.change(textarea, { target: { value: "안녕" } });
+      fireEvent.submit(textarea.closest("form") as HTMLFormElement);
+    });
+    expect(await screen.findByText("받은 입력: 안녕")).toBeDefined();
   });
 });

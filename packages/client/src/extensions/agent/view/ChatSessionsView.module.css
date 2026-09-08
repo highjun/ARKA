@@ -1,0 +1,9 @@
+.root {
+  height: 100%;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-lg);
+}

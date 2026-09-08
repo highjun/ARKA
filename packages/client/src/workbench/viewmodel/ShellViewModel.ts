@@ -377,6 +377,22 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     this.#themeModel.setTheme(this.#themeModel.theme === 'dark' ? 'light' : 'dark');
   }
 
+  /** 고정 탭으로 연다. 이미 있으면 그 탭을 활성으로만 만든다 — 미리보기 자리와 무관하다. */
+  openTab(tab: { readonly id: string; readonly kind: string; readonly title: string }): void {
+    const tree = this.#tabsModel.tree;
+    const activeLeafId = this.#tabsModel.activeLeafId;
+    const leaf = this.#findLeaf(tree, activeLeafId);
+    if (!leaf) return;
+    const open: OpenTab = { id: tab.id, kind: tab.kind, title: tab.title };
+    const already = leaf.tabs.some((existing) => existing.id === open.id);
+    const nextTree = this.#replaceLeaf(tree, activeLeafId, (l) => ({
+      ...l,
+      tabs: already ? l.tabs : [...l.tabs, open],
+      activeTabId: open.id,
+    }));
+    this.#tabsModel.setTree(nextTree);
+  }
+
   /** 활성 leaf 기준으로 미리보기 탭을 열거나, 이미 열려 있으면 고정한다. */
   previewFile(path: string): void {
     const tab: OpenTab = { id: path, kind: 'file', title: this.#nameOf(path) };
