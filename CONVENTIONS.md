@@ -17,6 +17,14 @@
     - "무엇을 하는지"와 타입이 이미 말하는 것은 쓰지 않는다.
     - 배경 설명이 길어지면 ADR로 옮기고 링크만 남긴다.
 
+## 테스트
+
+- 테스트는 대상 코드 옆에 둔다. `uri.ts` → 같은 폴더의 `uri.test.ts`. 별도 `test/` 트리를 만들지 않는다.
+- `vitest`를 쓴다. 패키지마다 `"test": "vitest run"` 스크립트를 두고, 루트에서 `pnpm run test`로 전부 돌린다.
+- 설정 파일은 갈라질 때만 만든다. 기본값으로 도는 동안에는 두지 않는다.
+- `describe`/`it` 이름은 한글로 쓴다.
+- TSDoc의 `@throws`에 적은 경우는 각각 테스트로 확인한다. 적어두기만 하면 주장일 뿐이다.
+
 ## 패키지
 - 패키지는 `contracts`·`client`·`server` 3개뿐이다. → [ADR 0001](docs/adr/0001-monorepo-pnpm.md)
 - `contracts`는 `client`·`server`를 import하지 않는다.
@@ -31,5 +39,6 @@
 ## 제출 전 확인
 
 - [ ] `pnpm run typecheck` 통과
+- [ ] `pnpm run test` 통과
 - [ ] 이번 라운드가 한 가지 관심사인가
 - [ ] 스스로 판단한 지점을 신고했는가
