@@ -1,23 +1,31 @@
 /**
- * empty-authority 형태(`scheme:///path`)만 지원한다.
+ * `scheme://authority/path` 형태의 리소스 식별자.
+ *
+ * `authority`는 파일이 어디에 속하는지를 가리킨다 — `git://HEAD/a.txt`의
+ * 리비전, `run://abc123/out.log`의 실행. 디스크 파일처럼 속한 곳이 없으면
+ * 비어 있고, 그때가 슬래시 세 개(`file:///a.txt`)다.
+ *
+ * `path`는 어느 스킴이든 workspace 루트 기준 상대경로이며 선행 슬래시를 갖지
+ * 않는다.
  *
  * @see docs/adr/0003-uri.md
  */
 export class URI {
   readonly scheme: string;
+  readonly authority: string;
   readonly path: string;
 
   // 검증을 우회해서 만들 수 없게 한다.
-  private constructor(scheme: string, path: string) {
+  private constructor(scheme: string, authority: string, path: string) {
     this.scheme = scheme;
+    this.authority = authority;
     this.path = path;
   }
 
   /**
-   * @throws Error 
+   * @throws Error
    * - query나 fragment가 있는 경우
-   * - `scheme://` 구분자가 없는 경우
-   * - authority가 비어 있지 않은 경우(`file://host/...`).
+   * - `scheme://authority/` 형태가 아닌 경우(구분자나 경로 슬래시가 없음)
    */
   static parse(value: string): URI {
     if (value.includes("?")) {
@@ -27,30 +35,26 @@ export class URI {
       throw new Error(`URI.parse: fragments are not supported: ${value}`);
     }
 
-    const match = /^([a-zA-Z][a-zA-Z0-9+.-]*):\/\/(.*)$/.exec(value);
-    if (!match) {
-      throw new Error(`URI.parse: not a valid "scheme://path" URI: ${value}`);
-    }
-
-    const scheme = match[1];
-    const rest = match[2];
-    // rest는 `://` 다음 전부라, authority가 있으면 `/`로 시작하지 않는다(`host/a`).
-    // undefined 비교는 noUncheckedIndexedAccess 때문이며 실제로는 발생하지 않는다.
-    if (scheme === undefined || rest === undefined || !rest.startsWith("/")) {
+    // authority는 슬래시를 포함하지 않으므로 첫 `/`가 path의 시작점이다.
+    const match = /^([a-zA-Z][a-zA-Z0-9+.-]*):\/\/([^/]*)\/(.*)$/.exec(value);
+    const scheme = match?.[1];
+    const authority = match?.[2];
+    const path = match?.[3];
+    if (scheme === undefined || authority === undefined || path === undefined) {
       throw new Error(
-        `URI.parse: only empty-authority URIs (scheme:///path) are supported: ${value}`,
+        `URI.parse: not a valid "scheme://authority/path" URI: ${value}`,
       );
     }
 
-    return new URI(scheme, rest);
+    return new URI(scheme, authority, path);
   }
 
-  /** 경로에 선행 슬래시가 없으면 붙인다. */
+  /** 디스크 파일은 속한 곳이 없어 `authority`가 비어 있다. */
   static file(path: string): URI {
-    return new URI("file", path.startsWith("/") ? path : `/${path}`);
+    return new URI("file", "", path.startsWith("/") ? path.slice(1) : path);
   }
 
   toString(): string {
-    return `${this.scheme}://${this.path}`;
+    return `${this.scheme}://${this.authority}/${this.path}`;
   }
 }

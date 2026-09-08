@@ -30,6 +30,7 @@
 - `contracts`는 `client`·`server`를 import하지 않는다.
 - `client`와 `server`는 서로 import하지 않는다.
 - 공유가 필요하면 `contracts`에 두고 `@contracts/*`로 가져온다.
+- 위 세 줄은 `eslint.config.ts`의 `import-x/no-restricted-paths`가 강제한다. 위반하면 어디로 옮기라는 안내가 함께 나온다.
 
 ## URI
 - 파일·리소스는 문자열 경로 대신 `URI`로 가리킨다. → [ADR 0003](docs/adr/0003-uri.md)
@@ -38,7 +39,6 @@
 
 ## 제출 전 확인
 
-- [ ] `pnpm run typecheck` 통과
-- [ ] `pnpm run test` 통과
+- [ ] `pnpm run check` 통과 (typecheck → lint → test)
 - [ ] 이번 라운드가 한 가지 관심사인가
 - [ ] 스스로 판단한 지점을 신고했는가

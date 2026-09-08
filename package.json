@@ -6,11 +6,18 @@
   "packageManager": "pnpm@11.13.0",
   "scripts": {
     "typecheck": "pnpm -r run typecheck",
-    "test": "pnpm -r run test"
+    "lint": "eslint .",
+    "test": "pnpm -r run test",
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run test"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^26.4.1",
-    "typescript": "^7.0.2",
+    "eslint": "^10.10.0",
+    "eslint-plugin-import-x": "^4.17.1",
+    "jiti": "^2.7.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.69.0",
     "vitest": "^5.0.0"
   }
 }
