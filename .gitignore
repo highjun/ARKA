@@ -3,3 +3,5 @@ dist/
 *.log
 .output/
 storybook-static/
+.env
+.env.*

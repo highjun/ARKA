@@ -22,7 +22,7 @@ const log: Logger = {
 
 const buildApp = () =>
   createApp({
-    config: { workspaceRoot, port: 0, host: "127.0.0.1", clientRoot: undefined, dataDir: ":memory:" },
+    config: { workspaceRoot, port: 0, host: "127.0.0.1", clientRoot: undefined, dataDir: ":memory:", anthropic: undefined },
     log,
     startedAt: "2026-09-09T00:00:00.000Z",
   }).app;

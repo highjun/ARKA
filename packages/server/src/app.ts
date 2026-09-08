@@ -6,7 +6,7 @@ import { serializeError } from "./core/log";
 import { createProtocolGuard } from "./core/protocol";
 import { createRequestLog } from "./core/requestLog";
 import { createAgentFeature } from "./features/agent";
-import { createFsRoutes, createWatchRoutes } from "./features/filesystem";
+import { createFsRoutes, createWatchRoutes, createWorkspaceOperations } from "./features/filesystem";
 import { createStaticRoutes } from "./features/static";
 
 export type Application = {
@@ -23,7 +23,13 @@ export type Application = {
  */
 export const createApp = ({ config, log, startedAt }: { config: ServerConfig; log: Logger; startedAt: string }): Application => {
   const app = new Hono();
-  const agent = createAgentFeature({ dataDir: config.dataDir, log });
+  // 에이전트 툴은 filesystem의 유스케이스로 파일을 다룬다 — 두 feature를 잇는 것은 조립부의 일이다.
+  const agent = createAgentFeature({
+    dataDir: config.dataDir,
+    log,
+    workspace: createWorkspaceOperations(config.workspaceRoot),
+    anthropic: config.anthropic,
+  });
 
   // 맨 앞이다 — 뒤의 어떤 핸들러가 답하든 한 줄 남는다.
   app.use("*", createRequestLog(log));

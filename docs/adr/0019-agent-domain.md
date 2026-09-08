@@ -34,4 +34,6 @@ App → Workspace → Session → Run
 - 처음부터 실제 LLM 실행기 — 키가 없으면 아무것도 검증할 수 없다. 스크립트 실행기가 있어야 UI·저장·재개를 먼저 굳힌다.
 
 ## 상태:
-승인됨. USER_NOTE의 "services vs runtime"·"스코프 계층" 메모를 옮긴 것이다. 이벤트 로그 스키마(`contracts/src/agent/events.ts`)가 §15가 말한 **가장 중요한 계약 우선 리뷰 지점**이다.
+승인됨. USER_NOTE의 "services vs runtime"·"스코프 계층" 메모를 옮긴 것이다.
+
+2026-09-09 — 실제 실행기 `AnthropicRunner`(infra)가 생겼다. `ADE_ANTHROPIC_API_KEY`가 있으면 그것을, 없으면 `ScriptedRunner`를 조립한다. Messages API 스트리밍 + 수동 툴 루프, adaptive thinking(요약 표시), 툴은 워크스페이스 목록·읽기·쓰기·생성과 `ask_user`(→ `input.requested`). 모델 기본은 `claude-opus-5`(`ADE_ANTHROPIC_MODEL`). 서버 측 refusal fallback(beta)은 켜지 않았다 — 거절은 `run.error`로 남는다. 이벤트 로그 스키마(`contracts/src/agent/events.ts`)가 §15가 말한 **가장 중요한 계약 우선 리뷰 지점**이다.

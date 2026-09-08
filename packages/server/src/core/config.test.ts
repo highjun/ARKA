@@ -23,7 +23,12 @@ const env = (overrides: Record<string, string>) => ({ ADE_DATA_DIR: path.join(ba
 describe("loadConfig", () => {
   it("기본값은 포트 3000, 루프백, 정적 서빙 없음이다", async () => {
     const config = await loadConfig({ ADE_WORKSPACE: path.join(base, "ws"), ADE_DATA_DIR: path.join(base, "data") });
-    expect(config).toEqual({ workspaceRoot: path.join(base, "ws"), port: 3000, host: "127.0.0.1", clientRoot: undefined, dataDir: path.join(base, "data") });
+    expect(config).toEqual({ workspaceRoot: path.join(base, "ws"), port: 3000, host: "127.0.0.1", clientRoot: undefined, dataDir: path.join(base, "data"), anthropic: undefined });
+  });
+
+  it("API 키가 있으면 anthropic 설정이 생기고 모델 기본값은 claude-opus-5다", async () => {
+    const config = await loadConfig(env({ ADE_WORKSPACE: path.join(base, "ws"), ADE_ANTHROPIC_API_KEY: "sk-test" }));
+    expect(config.anthropic).toEqual({ apiKey: "sk-test", model: "claude-opus-5" });
   });
 
   it("데이터 디렉터리가 없으면 만든다", async () => {
