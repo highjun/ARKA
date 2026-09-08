@@ -1,7 +1,26 @@
 import type { Rule } from "eslint";
 
-/** Model이 알면 안 되는 것들. 화면 상태 라이브러리와 브라우저 전역. */
-const FORBIDDEN_MODULES = new Set(["nanostores", "mobx", "react", "react-dom"]);
+/**
+ * Model이 알면 안 되는 것들 — 화면 상태 라이브러리와 React.
+ *
+ * 우리가 쓰는 것(`nanostores`)만 막으면 다음 사람이 다른 것을 들여올 때 조용히 통과한다.
+ * 잡으려는 것은 특정 라이브러리가 아니라 "Model이 화면 상태를 소유하는 것"이라, 같은 부류를
+ * 함께 적는다.
+ */
+const FORBIDDEN_MODULES = new Set([
+  "nanostores",
+  "mobx",
+  "mobx-react-lite",
+  "jotai",
+  "zustand",
+  "redux",
+  "@reduxjs/toolkit",
+  "react-redux",
+  "valtio",
+  "recoil",
+  "react",
+  "react-dom",
+]);
 
 /**
  * `model/`은 상태 라이브러리도 React도 모른다.

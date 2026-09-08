@@ -8,9 +8,10 @@
     "typecheck": "pnpm -r run typecheck",
     "lint": "eslint .",
     "test": "pnpm -r run test",
-    "check": "pnpm run typecheck && pnpm run lint && pnpm run test",
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run lint:config && pnpm run test",
     "vrt": "pnpm --filter client run build-storybook && docker run --rm -v \"$PWD\":/work -w /work -e HOME=/tmp mcr.microsoft.com/playwright:v1.63.0-noble node_modules/.bin/playwright test -c test/vrt/vrt.config.ts",
-    "vrt:update": "pnpm --filter client run build-storybook && docker run --rm -v \"$PWD\":/work -w /work -e HOME=/tmp mcr.microsoft.com/playwright:v1.63.0-noble node_modules/.bin/playwright test -c test/vrt/vrt.config.ts --update-snapshots"
+    "vrt:update": "pnpm --filter client run build-storybook && docker run --rm -v \"$PWD\":/work -w /work -e HOME=/tmp mcr.microsoft.com/playwright:v1.63.0-noble node_modules/.bin/playwright test -c test/vrt/vrt.config.ts --update-snapshots",
+    "lint:config": "! grep -rl '\"paths\"' tsconfig.base.json packages/*/tsconfig.json || (echo 'tsconfig paths 별칭을 쓰지 않습니다 — package.json의 imports 필드를 쓰세요 (ADR 0012)' && exit 1)"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

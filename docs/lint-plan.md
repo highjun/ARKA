@@ -6,7 +6,7 @@ ADR의 결정 중 **기계가 판정할 수 있는 것**을 도구로 옮기는 
 
 실제로 오늘 그 반대 사례를 겪었다 — 구조를 재편하면서 커스텀 규칙 둘의 글롭이 따라가지 않아 **매치되는 파일이 0개가 됐고, 명백한 위반도 통과했다.** 규칙이 죽었는지는 `npx eslint --print-config <파일>`로 확인한다.
 
-## 지금 강제되는 것 — 15개
+## 지금 강제되는 것 — 27개
 
 | 수단 | 잡는 것 |
 |---|---|
@@ -14,9 +14,15 @@ ADR의 결정 중 **기계가 판정할 수 있는 것**을 도구로 옮기는 
 | `arka/view-only-uses-view-model` | `view/`에서 `useViewModel` 외 훅, `useAppContext`, `*.resolve` |
 | `arka/model-is-state-library-free` | `model/`에서 `nanostores`·`mobx`·`react`·`react-dom` **값** import |
 | tsc | `new URI()` 차단(private constructor), query/fragment 부재 |
-| `package.json` 스크립트 | VRT를 Docker에서만 실행, `check = typecheck && lint && test` |
+| `package.json` 스크립트 | VRT를 Docker에서만 실행, `check`, **`lint:config`(tsconfig `paths` 금지)** |
+| `no-restricted-globals` | `model/`의 `fetch`·`window`·`document`·`localStorage`, `viewmodel/`의 `document`·`window` |
+| `no-restricted-imports` | `component/`의 ViewModel·Model·DI, `infra/`의 React |
+| `no-restricted-syntax` | `toMatchSnapshot`, Primer 배럴 re-export, 던더 폴더 |
+| zone (추가분) | workbench 계층→extensions, 서버 domain←infra←transport, 서버 feature 쌍 |
 
-## 1단계 — 지금 켜면 공짜 (실측 위반 전부 0건)
+## 1단계 — 구현 완료 (2026-09-08)
+
+**12개 전부 켰고 위반 0건이다.** 각 규칙을 일부러 깨서 잡히는 것을 확인했다 — 통과만 보면 규칙이 죽어 있어도 초록이기 때문이다.
 
 | # | 규칙 | 출처 | 수단 |
 |---|---|---|---|

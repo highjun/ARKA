@@ -64,12 +64,121 @@ export default [
     rules: { "arka/view-only-uses-view-model": "error" },
   },
   {
+    // `.tsx`도 본다 — 확장자를 하나만 적으면 `model/X.tsx`가 무규칙 지대가 된다.
     files: [
-      "packages/client/src/workbench/model/**/*.ts",
-      "packages/client/src/extensions/*/model/**/*.ts",
+      "packages/client/src/workbench/model/**/*.{ts,tsx}",
+      "packages/client/src/extensions/*/model/**/*.{ts,tsx}",
     ],
     plugins: { arka: arkaRules },
-    rules: { "arka/model-is-state-library-free": "error" },
+    rules: {
+      "arka/model-is-state-library-free": "error",
+      // 커스텀 규칙은 import만 본다. 전역 접근은 여기서 막는다 — ADR 0005의 금지 목록에
+      // `fetch`·`window`가 있는데 그동안 "리뷰로 본다"로 비워둔 절반이다.
+      // `this.#fetch()`는 멤버 접근이라 여기 걸리지 않는다(전역 참조만 본다).
+      "no-restricted-globals": [
+        "error",
+        { name: "fetch", message: "model/은 I/O를 정의만 합니다. 실제 호출은 infra/가 합니다." },
+        { name: "window", message: "model/은 브라우저 전역을 모릅니다. infra/로 옮기세요." },
+        { name: "document", message: "model/은 브라우저 전역을 모릅니다. infra/로 옮기세요." },
+        { name: "localStorage", message: "model/은 브라우저 전역을 모릅니다. `IStorage` 같은 계약을 선언하고 infra/가 구현하게 하세요." },
+      ],
+    },
+  },
+
+  {
+    // ViewModel은 화면 상태와 프레젠테이션 로직만 다룬다 — DOM은 만지지 않는다.
+    files: [
+      "packages/client/src/workbench/viewmodel/**/*.{ts,tsx}",
+      "packages/client/src/extensions/*/viewmodel/**/*.{ts,tsx}",
+    ],
+    rules: {
+      "no-restricted-globals": [
+        "error",
+        { name: "document", message: "viewmodel/은 DOM을 조작하지 않습니다. 조립부가 얇은 함수를 주입하거나 infra/ 기여로 옮기세요." },
+        { name: "window", message: "viewmodel/은 DOM을 조작하지 않습니다. 조립부가 얇은 함수를 주입하거나 infra/ 기여로 옮기세요." },
+      ],
+    },
+  },
+
+  {
+    // component/는 props만 받아 그린다 — ViewModel·Model·DI를 모른다.
+    files: [
+      "packages/client/src/workbench/component/**/*.{ts,tsx}",
+      "packages/client/src/extensions/*/component/**/*.{ts,tsx}",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          // `#`으로 시작하는 것은 `patterns.group`에서 주석으로 읽혀 무시된다 — `paths`로 적는다.
+          paths: [
+            { name: "#core/di", message: "component/는 DI를 모릅니다. 그건 view/의 일입니다." },
+            { name: "#core/view-model", message: "component/는 ViewModel을 모릅니다. 필요한 값은 props로 받으세요." },
+          ],
+          patterns: [
+            { group: ["**/viewmodel/**", "**/model/**"], message: "component/는 ViewModel·Model을 모릅니다. 필요한 값은 props로 받으세요." },
+          ],
+        },
+      ],
+    },
+  },
+
+  {
+    // infra/는 I/O 구현이다 — 화면을 그리지 않는다.
+    files: ["packages/*/src/**/infra/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        { paths: [
+          { name: "react", message: "infra/는 React를 모릅니다. 화면이 필요하면 component/나 view/의 일입니다." },
+          { name: "react-dom", message: "infra/는 React를 모릅니다." },
+        ] },
+      ],
+    },
+  },
+
+  {
+    // Primer는 우리 배럴을 통과하지 않는다 — import 문만 보고 우리 것인지 알 수 있어야 한다.
+    // → docs/adr/0006-design-system.md
+    files: ["packages/client/src/shared/components/**/index.ts"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "ExportNamedDeclaration[source.value=/^@primer/], ExportAllDeclaration[source.value=/^@primer/]",
+          message: "Primer 컴포넌트를 배럴로 통과시키지 마세요. 쓰는 쪽이 `@primer/react`에서 직접 가져오면 우리 것인지 Primer 것인지 import 문에 드러납니다.",
+        },
+      ],
+    },
+  },
+
+  {
+    // 스냅샷은 변경 시 무비판적으로 갱신하게 된다. → docs/adr/0008-client-testing.md
+    files: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "MemberExpression[property.name=/^toMatch(Inline)?Snapshot$/]",
+          message: "`toMatchSnapshot`을 쓰지 않습니다. 무엇이 왜 그래야 하는지를 단언으로 적으세요. 화면 모양은 VRT(test/vrt/)가 봅니다.",
+        },
+      ],
+    },
+  },
+
+  {
+    // 던더 폴더를 쓰지 않는다 — 같은 것을 폴더명과 파일명 두 군데로 표시하게 된다.
+    // 파일이 하나라도 들어오면 그 파일 전체가 에러가 된다.
+    files: ["**/__tests__/**", "**/__mocks__/**", "**/__fixtures__/**", "**/__snapshots__/**"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Program",
+          message: "던더 폴더를 쓰지 않습니다. 테스트는 대상 옆 `*.test.ts`, Mock은 `Mock<Name>.ts`, fixture는 `fixtures.ts`입니다.",
+        },
+      ],
+    },
   },
 
   {
@@ -127,6 +236,48 @@ export default [
               from: "./packages/client/src/extensions/filesystem",
               message:
                 "extension끼리 직접 import할 수 없습니다. DI 토큰이나 이벤트로만 소통하세요.",
+            },
+            // `workbench → extensions`는 조립부에서만이다. 조립부는 마이크로커널로 갈 때
+            // 동적 로더로 교체될 코드라 엮여도 버려지지만, workbench의 계층이 특정 extension을
+            // 알면 그건 옮길 수가 없다 — 전환이 이동이 아니라 재작성이 된다.
+            {
+              target: [
+                "./packages/client/src/workbench/model",
+                "./packages/client/src/workbench/viewmodel",
+                "./packages/client/src/workbench/view",
+                "./packages/client/src/workbench/component",
+              ],
+              from: "./packages/client/src/extensions",
+              message:
+                "workbench의 계층은 특정 extension을 알 수 없습니다. 계약을 workbench에 선언하고 조립부(registerServices.tsx)가 잇게 하세요 — `ITabDirtyState`가 그 예입니다.",
+            },
+            // 서버 계층 방향. `Transport → (Service) → Domain ← Infra`
+            // → docs/adr/0007-server-structure.md
+            {
+              target: "./packages/server/src/features/filesystem/domain",
+              from: [
+                "./packages/server/src/features/filesystem/infra",
+                "./packages/server/src/features/filesystem/transport",
+              ],
+              message:
+                "domain은 바깥을 모릅니다. 필요한 것은 domain이 인터페이스로 선언하고 infra가 구현하게 하세요.",
+            },
+            {
+              target: "./packages/server/src/features/filesystem/infra",
+              from: "./packages/server/src/features/filesystem/transport",
+              message: "infra는 transport를 모릅니다. 의존은 안쪽(domain)을 향합니다.",
+            },
+            // 서버 features 간 직접 import 금지 — 클라이언트 extensions와 같은 규칙인데
+            // 그동안 서버에만 빠져 있었다. extension이 늘면 여기도 쌍을 추가해야 한다.
+            {
+              target: "./packages/server/src/features/filesystem",
+              from: "./packages/server/src/features/static",
+              message: "server의 feature끼리 직접 import할 수 없습니다. 이벤트로 소통하세요.",
+            },
+            {
+              target: "./packages/server/src/features/static",
+              from: "./packages/server/src/features/filesystem",
+              message: "server의 feature끼리 직접 import할 수 없습니다. 이벤트로 소통하세요.",
             },
             {
               target: "./packages/client/src/core",
