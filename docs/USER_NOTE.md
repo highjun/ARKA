@@ -2,11 +2,6 @@
 
 에이전트가 할 수 없어 사용자 손이 필요한 것만 모은다. 끝낸 항목은 지운다.
 
-- [ ] **VRT 산출물 소유권 복구** (2026-09-09) — Docker VRT가 root로 만든 디렉터리 때문에 `pnpm run vrt`가 쓰기 거부로 실패한다. 한 번만:
-  ```
-  sudo chown -R "$(id -u):$(id -g)" .output test/vrt/snapshots
-  ```
-  이후 실행은 `--user`로 돌아 다시 생기지 않는다.
 - [ ] **Cloudflare Tunnel + Access 설정** (ADR 0014) — 콘솔 작업이라 에이전트가 못 한다. 앱에는 인증이 0이므로 이것이 유일한 게이트다. 설정 뒤 `curl https://arka.sangjun.dev/api/files`가 인증 없이 200을 주지 않는지 확인한다(TASK-4가 이를 자동화한다).
 - [ ] **GitHub 원격 저장소** — 지금 `git remote`가 없다. `.github/workflows/ci.yml`은 push/PR에서 돌지만 원격이 있어야 실행된다. 저장소를 만들어 push하고, Actions가 켜져 있는지와 브랜치 보호(main에 `check`·`e2e`·`VRT` 필수)를 걸지 결정.
 - [ ] **결정 요청** — TASK-3(PWA 도입 여부), TASK-14(ADR 0013 유지), TASK-16(테스트 폴더 배치), TASK-17(index.html 위치)은 에이전트가 기본안을 제시하지만 사용자 취향이 갈리는 것이라 한 줄 답이면 된다.
