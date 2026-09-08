@@ -26,5 +26,9 @@ export const ProtocolErrorCode = z.enum([
 ]);
 export type ProtocolErrorCode = z.infer<typeof ProtocolErrorCode>;
 
-export const ProtocolErrorBody = ErrorBody.extend({ code: ProtocolErrorCode });
+export const ProtocolErrorBody = ErrorBody.extend({
+  code: ProtocolErrorCode,
+  /** `VersionMismatch`일 때 서버가 받는 버전들. 클라이언트가 갱신을 안내하는 데 쓴다. */
+  supported: z.array(z.number().int().positive()).optional(),
+});
 export type ProtocolErrorBody = z.infer<typeof ProtocolErrorBody>;

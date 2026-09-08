@@ -1,7 +1,9 @@
+import { PROTOCOL_VERSION } from "contracts";
 import { Hono } from "hono";
 import type { Logger } from "./core/log";
 import type { ServerConfig } from "./core/config";
 import { serializeError } from "./core/log";
+import { createProtocolGuard } from "./core/protocol";
 import { createFsRoutes, createWatchRoutes } from "./features/filesystem";
 import { createStaticRoutes } from "./features/static";
 
@@ -14,10 +16,12 @@ import { createStaticRoutes } from "./features/static";
 export const createApp = ({ config, log, startedAt }: { config: ServerConfig; log: Logger; startedAt: string }): Hono => {
   const app = new Hono();
 
+  // 아래 둘은 프로토콜 헤더 없이 부를 수 있다 — 낡은 클라이언트도 자기가 낡았다는 것을 알아야 한다.
   app.get("/api/health", (c) => c.json({ status: "ok" }));
+  app.get("/api/version", (c) => c.json({ builtAt: startedAt, protocolVersion: PROTOCOL_VERSION }));
 
-  // 클라이언트가 지금 서빙 중인 번들이 언제 것인지 표시하는 데만 쓴다 — 실패해도 화면은 돈다.
-  app.get("/api/version", (c) => c.json({ builtAt: startedAt }));
+  // 그 밖의 /api/*는 헤더가 맞아야 통과한다. 등록 순서가 곧 적용 범위다(→ core/protocol.ts).
+  app.use("/api/*", createProtocolGuard([PROTOCOL_VERSION]));
 
   app.route("/", createWatchRoutes(config.workspaceRoot));
   app.route("/", createFsRoutes(config.workspaceRoot));

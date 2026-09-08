@@ -2,7 +2,7 @@ import { realpathSync } from "node:fs";
 import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { afterAll, afterEach, beforeAll, vi } from "vitest";
+import { afterAll, afterEach } from "vitest";
 import { createWorkspaceFilesPort } from "../../packages/client/src/extensions/filesystem/infra/HttpWorkspaceFiles";
 import { testWorkspaceFilesContract } from "../../packages/client/src/extensions/filesystem/model/workspaceFiles.contract";
 import { createApp } from "../../packages/server/src/app";
@@ -16,17 +16,11 @@ import { createApp } from "../../packages/server/src/app";
 const roots: string[] = [];
 const originalFetch = globalThis.fetch;
 
-beforeAll(() => {
-  // `HttpWorkspaceFiles`가 인증 토큰을 `localStorage`에서 찾는다 — Node에는 없으므로 빈 저장소를 둔다.
-  vi.stubGlobal("localStorage", { getItem: () => null });
-});
-
 afterEach(() => {
   globalThis.fetch = originalFetch;
 });
 
 afterAll(async () => {
-  vi.unstubAllGlobals();
   await Promise.all(roots.map((root) => rm(root, { recursive: true, force: true })));
 });
 

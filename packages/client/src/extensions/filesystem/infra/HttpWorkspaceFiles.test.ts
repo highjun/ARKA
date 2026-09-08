@@ -24,7 +24,6 @@ const serverReplies = (body: unknown, status = 200): { calls: readonly Call[] } 
 
 afterEach(() => {
   globalThis.fetch = originalFetch;
-  localStorage.clear();
 });
 
 const LISTING = {
@@ -163,15 +162,14 @@ describe('failure', () => {
   });
 });
 
-describe('authorization', () => {
-  it('sends the stored token when there is one', async () => {
-    localStorage.setItem('workbench.token', 'secret');
+describe('프로토콜 헤더', () => {
+  it('모든 요청에 x-ade-protocol을 싣는다 — 서버가 낡은 클라이언트를 가려내는 근거다', async () => {
     const { calls } = serverReplies(LISTING);
     await createWorkspaceFilesPort().list('');
-    expect(calls[0]?.headers['authorization']).toBe('Bearer secret');
+    expect(calls[0]?.headers['x-ade-protocol']).toBe('1');
   });
 
-  it('sends no authorization header when there is none', async () => {
+  it('인증 헤더는 없다 — 앱은 인증을 모른다', async () => {
     const { calls } = serverReplies(LISTING);
     await createWorkspaceFilesPort().list('');
     expect(calls[0]?.headers['authorization']).toBeUndefined();

@@ -10,7 +10,12 @@ export const HealthResponse = z.object({ status: z.literal("ok") });
 export type HealthResponse = z.infer<typeof HealthResponse>;
 
 /**
- * `GET /api/version` — 지금 서빙 중인 서버가 언제 떴는지. 화면 구석에 표시하는 진단용이다.
+ * `GET /api/version` — 지금 서빙 중인 서버가 언제 떴는지와 프로토콜 버전. 프로토콜 헤더 없이 부를 수
+ * 있는 둘(`/api/health`와 이것) 중 하나다 — 낡은 클라이언트도 자기가 낡았다는 것을 알아야 한다.
  */
-export const VersionResponse = z.object({ builtAt: z.string() });
+export const VersionResponse = z.object({
+  builtAt: z.string(),
+  /** 서버가 지금 말하는 프로토콜 버전. 클라이언트가 자기 `PROTOCOL_VERSION`과 비교해 낡았는지 안다. */
+  protocolVersion: z.number().int().positive(),
+});
 export type VersionResponse = z.infer<typeof VersionResponse>;

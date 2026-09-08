@@ -5,6 +5,8 @@
 set -euo pipefail
 
 IMAGE="${IMAGE:-ade:smoke}"
+# /api/*는 프로토콜 헤더가 있어야 통과한다(→ ADR 0017).
+H='x-ade-protocol: 1'
 PORT="${PORT:-3997}"
 NAME="ade-smoke-$$"
 WORKSPACE="$(mktemp -d)"
@@ -29,16 +31,16 @@ run() {
 
 echo "# ① 볼륨 권한 — 컨테이너가 만든 파일을 호스트 사용자가 소유한다"
 run
-curl -sf -X POST -H 'content-type: application/json' \
+curl -sf -X POST -H "$H" -H 'content-type: application/json' \
   -d '{"path":"from-container.txt","type":"file"}' "http://127.0.0.1:${PORT}/api/files" >/dev/null
 [ "$(stat -c %u "$WORKSPACE/from-container.txt")" = "$(id -u)" ] || { echo "owner mismatch"; exit 1; }
-curl -sf -X PUT -H 'content-type: application/json' \
+curl -sf -X PUT -H "$H" -H 'content-type: application/json' \
   -d '{"path":"from-container.txt","content":"hello"}' "http://127.0.0.1:${PORT}/api/files/content" >/dev/null
 [ "$(cat "$WORKSPACE/from-container.txt")" = "hello" ] || { echo "content mismatch"; exit 1; }
 
 echo "# ② bind mount에서 watch — 호스트가 바꾸면 SSE가 알린다"
 SSE="$(mktemp)"
-curl -sN --max-time 8 "http://127.0.0.1:${PORT}/api/files/watch?path=" > "$SSE" &
+curl -sN --max-time 8 -H "$H" "http://127.0.0.1:${PORT}/api/files/watch?path=" > "$SSE" &
 SSE_PID=$!
 sleep 1
 echo "changed" > "$WORKSPACE/from-host.txt"
@@ -54,7 +56,7 @@ for _ in $(seq 1 30); do
   if curl -sf "http://127.0.0.1:${PORT}/api/health" >/dev/null; then break; fi
   sleep 0.5
 done
-curl -sf "http://127.0.0.1:${PORT}/api/files/content?path=from-container.txt" | grep -q '"hello"' || { echo "data lost"; exit 1; }
+curl -sf -H "$H" "http://127.0.0.1:${PORT}/api/files/content?path=from-container.txt" | grep -q '"hello"' || { echo "data lost"; exit 1; }
 
 echo "# ④ 정적 클라이언트가 같은 오리진에서 나온다"
 curl -sf "http://127.0.0.1:${PORT}/" | grep -q '<div id="root">' || { echo "client not served"; exit 1; }

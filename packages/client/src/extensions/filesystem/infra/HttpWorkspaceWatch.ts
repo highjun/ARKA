@@ -1,11 +1,12 @@
+import { apiHeaders } from '#core/http';
 import { WatchEvent } from 'contracts';
 import type { IWorkspaceWatch, WorkspaceWatchUnsubscribe } from '../model/IWorkspaceWatch';
 
 /**
  * 세션 서버(`server/watch.ts`)의 SSE 를 읽는 구현.
  *
- * `EventSource` 를 쓰지 않는다 — 인증 헤더를 실어야 하는데 `EventSource` 는 헤더를 붙일 수 없다
- * (`HttpAgentStreamAdapter` 와 같은 이유).
+ * `EventSource` 를 쓰지 않는다 — 프로토콜 헤더(→ ADR 0017)를 실어야 하는데 `EventSource` 는 헤더를
+ * 붙일 수 없다.
  *
  * 배경에서 무기한 도는 구독이라 `watch()` 자신은 기다리지 않는다 — 연결·재연결은 안에서 알아서
  * 하고, 부르는 쪽은 해지 함수만 쥐고 있으면 된다.
@@ -83,7 +84,7 @@ class HttpWorkspaceWatchAdapter implements IWorkspaceWatch {
     const query = new URLSearchParams();
     for (const path of paths) query.append('path', path);
 
-    const response = await fetch(`/api/files/watch?${query.toString()}`, { headers: this.#headers(), signal });
+    const response = await fetch(`/api/files/watch?${query.toString()}`, { headers: apiHeaders(), signal });
     if (!response.ok) throw new Error(`감시 연결이 실패했다 (${String(response.status)}).`);
     if (!response.body) throw new Error('감시 응답에 본문이 없다.');
 
@@ -161,12 +162,6 @@ class HttpWorkspaceWatchAdapter implements IWorkspaceWatch {
     });
   }
 
-  #headers(): Record<string, string> {
-    const headers: Record<string, string> = {};
-    const token = localStorage.getItem('workbench.token');
-    if (token !== null && token !== '') headers['authorization'] = `Bearer ${token}`;
-    return headers;
-  }
 
   #parse(frame: string): readonly string[] | null {
     const payload = frame

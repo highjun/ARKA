@@ -2,12 +2,17 @@ import { realpathSync } from "node:fs";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { HealthResponse } from "contracts";
+import { HealthResponse, PROTOCOL_HEADER, PROTOCOL_VERSION, VersionResponse } from "contracts";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createApp } from "./app";
 import type { LogFields, Logger } from "./core/log";
 
 let workspaceRoot: string;
+/** 프로토콜 헤더를 실은 요청. 실제 클라이언트가 보내는 것과 같다. */
+const withProtocol = (init: RequestInit = {}): RequestInit => ({
+  ...init,
+  headers: { ...(init.headers as Record<string, string> | undefined), [PROTOCOL_HEADER]: String(PROTOCOL_VERSION) },
+});
 const logged: { event: string; fields: LogFields | undefined }[] = [];
 const log: Logger = {
   info: (event, fields) => logged.push({ event, fields }),
@@ -38,13 +43,24 @@ describe("createApp", () => {
     expect(HealthResponse.parse(await response.json())).toEqual({ status: "ok" });
   });
 
-  it("/api/version은 시작 시각을 준다", async () => {
+  it("/api/version은 시작 시각과 프로토콜 버전을 헤더 없이도 준다", async () => {
     const response = await buildApp().request("/api/version");
-    expect(await response.json()).toEqual({ builtAt: "2026-09-09T00:00:00.000Z" });
+    expect(VersionResponse.parse(await response.json())).toEqual({ builtAt: "2026-09-09T00:00:00.000Z", protocolVersion: PROTOCOL_VERSION });
+  });
+
+  it("프로토콜 헤더가 없는 /api/* 요청은 426이다", async () => {
+    const response = await buildApp().request("/api/files?path=");
+    expect(response.status).toBe(426);
+    expect(await response.json()).toMatchObject({ code: "VersionMismatch", supported: [PROTOCOL_VERSION] });
+  });
+
+  it("지원하지 않는 프로토콜 버전은 426이다", async () => {
+    const response = await buildApp().request("/api/files?path=", { headers: { [PROTOCOL_HEADER]: "999" } });
+    expect(response.status).toBe(426);
   });
 
   it("파일 라우트가 붙어 있다", async () => {
-    const response = await buildApp().request("/api/files/content?path=a.txt");
+    const response = await buildApp().request("/api/files/content?path=a.txt", withProtocol());
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({ content: "hello" });
   });
@@ -52,17 +68,20 @@ describe("createApp", () => {
   it("옮기기 목적지가 이미 있으면 409이고 덮어쓰지 않는다", async () => {
     await writeFile(path.join(workspaceRoot, "b.txt"), "keep");
     const app = buildApp();
-    const response = await app.request("/api/files/move", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ from: "a.txt", to: "b.txt" }),
-    });
+    const response = await app.request(
+      "/api/files/move",
+      withProtocol({
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ from: "a.txt", to: "b.txt" }),
+      }),
+    );
     expect(response.status).toBe(409);
     expect(await readFile(path.join(workspaceRoot, "b.txt"), "utf8")).toBe("keep");
   });
 
   it("루트 밖 감시 요청은 500이 아니라 403 파일 오류다", async () => {
-    const response = await buildApp().request("/api/files/watch?path=../");
+    const response = await buildApp().request("/api/files/watch?path=../", withProtocol());
     expect(response.status).toBe(403);
     expect(await response.json()).toMatchObject({ code: "NoPermission" });
   });

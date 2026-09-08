@@ -1,3 +1,4 @@
+import { apiHeaders } from '#core/http';
 import { DirectoryListing, FileContent, FileErrorBody } from 'contracts';
 import type { FileEntryType, IWorkspaceFiles } from '../model/IWorkspaceFiles';
 
@@ -34,7 +35,7 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
   async write(path: string, content: string): Promise<void> {
     const response = await this.#fetch('/api/files/content', {
       method: 'PUT',
-      headers: { ...this.#headers(), 'content-type': 'application/json' },
+      headers: { ...apiHeaders(), 'content-type': 'application/json' },
       body: JSON.stringify({ path, content }),
     });
     if (!response.ok) {
@@ -46,7 +47,7 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
   async create(path: string, type: FileEntryType): Promise<void> {
     const response = await this.#fetch('/api/files', {
       method: 'POST',
-      headers: { ...this.#headers(), 'content-type': 'application/json' },
+      headers: { ...apiHeaders(), 'content-type': 'application/json' },
       body: JSON.stringify({ path, type }),
     });
     if (!response.ok) {
@@ -58,7 +59,7 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
   async move(from: string, to: string): Promise<void> {
     const response = await this.#fetch('/api/files/move', {
       method: 'POST',
-      headers: { ...this.#headers(), 'content-type': 'application/json' },
+      headers: { ...apiHeaders(), 'content-type': 'application/json' },
       body: JSON.stringify({ from, to }),
     });
     if (!response.ok) {
@@ -70,7 +71,7 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
   async remove(path: string): Promise<void> {
     const response = await this.#fetch(`/api/files?${new URLSearchParams({ path }).toString()}`, {
       method: 'DELETE',
-      headers: this.#headers(),
+      headers: apiHeaders(),
     });
     if (!response.ok) {
       const reason = await this.#reasonOf(response);
@@ -80,7 +81,7 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
 
   async #get(endpoint: string, path: string): Promise<unknown> {
     const response = await this.#fetch(`${endpoint}?${new URLSearchParams({ path }).toString()}`, {
-      headers: this.#headers(),
+      headers: apiHeaders(),
     });
 
     // 서버가 사유를 JSON 으로 준다. 못 읽어도 상태 코드만으로 말이 되게 둔다.
@@ -111,12 +112,6 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
     }
   }
 
-  #headers(): Record<string, string> {
-    const headers: Record<string, string> = {};
-    const token = localStorage.getItem('workbench.token');
-    if (token !== null && token !== '') headers['authorization'] = `Bearer ${token}`;
-    return headers;
-  }
 }
 
 /** `IWorkspaceFiles`의 실제 구현(`HttpWorkspaceFilesAdapter`)을 만든다. */

@@ -6,3 +6,4 @@ export * from "./menu";
 export * from "./commands";
 export * from "./view-model";
 export * from "./errors";
+export * from "./http";
