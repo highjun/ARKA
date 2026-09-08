@@ -8,3 +8,4 @@ export * from "./agent/types";
 export * from "./agent/events";
 export * from "./agent/api";
 export * from "./search/api";
+export * from "./git/api";
