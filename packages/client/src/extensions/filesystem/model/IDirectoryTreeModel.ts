@@ -1,4 +1,4 @@
-import type { Disposable } from '#core/di';
+import { createToken, type Disposable } from '#core/di';
 import type { FileEntry, FileEntryType } from '../model/IWorkspaceFiles';
 
 /**
@@ -23,6 +23,7 @@ export type DirectoryNode = {
 /** 경로(루트는 `''`) → 그 디렉터리의 상태. */
 export type DirectoryMap = Readonly<Record<string, DirectoryNode>>;
 
+export const DirectoryTreeModelToken = createToken<IDirectoryTreeModel>("directoryTreeModel");
 /** 디렉터리 트리 상태를 소유하고 파일시스템 조작을 제공하는 Model 계약. */
 export interface IDirectoryTreeModel {
   readonly directories: DirectoryMap;

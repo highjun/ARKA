@@ -1,10 +1,10 @@
-import "../shared/reset.css";
-import "../shared/globals.css";
+import "./reset.css";
+import "./globals.css";
 import { ViewModelProvider } from "#core/view-model";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { App } from "./App";
-import { createApplication } from "./application";
+import { Workbench } from "./Workbench";
+import { createApplication } from "./registerServices";
 
 const root = document.getElementById("root");
 if (!root) {
@@ -15,7 +15,7 @@ if (!root) {
 createRoot(root).render(
   <StrictMode>
     <ViewModelProvider container={createApplication()}>
-      <App />
+      <Workbench />
     </ViewModelProvider>
   </StrictMode>,
 );

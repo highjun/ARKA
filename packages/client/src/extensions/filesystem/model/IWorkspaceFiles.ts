@@ -1,3 +1,4 @@
+import { createToken } from '#core/di';
 /**
  * 워크스페이스를 읽는 통로.
  *
@@ -45,6 +46,7 @@ export type FileContent = {
   readonly encoding: 'utf8' | 'binary';
 };
 
+export const WorkspaceFilesToken = createToken<IWorkspaceFiles>("workspaceFiles");
 /** 워크스페이스 파일시스템에 대한 CRUD 조작을 감싸는 Port 계약. */
 export interface IWorkspaceFiles {
   list(path: string): Promise<DirectoryListing>;

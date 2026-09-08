@@ -1,3 +1,5 @@
+import { createToken } from '#core/di';
+export const WorkbenchStartupToken = createToken<IWorkbenchStartup>("workbenchStartup");
 /**
  * 셸이 뜨고 지는 것에 맞춰 켜고 꺼야 하는 것 — 지금은 파일 감시 하나다.
  *

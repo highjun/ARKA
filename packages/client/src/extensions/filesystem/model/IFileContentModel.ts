@@ -1,4 +1,4 @@
-import type { Disposable } from '#core/di';
+import { createToken, type Disposable } from '#core/di';
 
 /**
  * 열린 파일들의 내용.
@@ -37,6 +37,7 @@ export type OpenFile = {
 /** 경로 → 그 파일의 상태. */
 export type OpenFileMap = Readonly<Record<string, OpenFile>>;
 
+export const FileContentModelToken = createToken<IFileContentModel>("fileContentModel");
 /** 열린 파일의 내용을 읽고·편집하고·저장하는 Model 계약. */
 export interface IFileContentModel {
   readonly files: OpenFileMap;

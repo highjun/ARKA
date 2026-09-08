@@ -1,4 +1,4 @@
-import type { Disposable } from '#core/di';
+import { createToken, type Disposable } from '#core/di';
 
 /**
  * 사이드바 활동 하나의 id. 어떤 활동이 있는지는 Model이 모른다 — `IActivityBarRegistry`
@@ -7,6 +7,7 @@ import type { Disposable } from '#core/di';
  */
 export type ActivityId = string;
 
+export const ActivityModelToken = createToken<IActivityModel>("activityModel");
 /**
  * 지금 어느 활동이 활성인지, 그 값 하나만 갖는다.
  *

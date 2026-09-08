@@ -1,3 +1,4 @@
+import { createToken } from '#core/di';
 import type { DescriptorMatch } from '#core';
 
 /** 활동 아이콘 바 항목 하나 — 어떤 아이콘이 있고, 눌렀을 때 부를 라벨이 뭔가. */
@@ -7,8 +8,9 @@ export type ActivityBarDescriptor = {
   readonly iconId: string;
 };
 
+export const ActivityBarRegistryToken = createToken<IActivityBarRegistry>("activityBarRegistry");
 /**
- * Shell이 갖는 확장 지점의 계약. `FilesystemModule` 등 각 모듈이 `application.tsx`를 통해 여기
+ * Shell이 갖는 확장 지점의 계약. `FilesystemModule` 등 각 모듈이 `registerServices.tsx`를 통해 여기
  * 등록하고, Shell은 등록된 것을 그릴 뿐 어떤 모듈이 무엇을 등록했는지 모른다.
  *
  * `ISidebarContentRegistry`와 1:1로 묶지 않는다 — 예전 `conversation` 활동은 아이콘 바엔 있었지만

@@ -68,6 +68,5 @@ e2e/           *.spec.ts                     E2E + VRT
 현재 코드와 다른 것:
 
 1. 스토리북 미설치, 스토리 0개.
-2. **계약 테스트가 하나도 없다.** `workbench/smoke.test.tsx`가 `IWorkspaceFiles` 대역을 네 곳에서 손으로 만드는데, 그 대역이 실물 `HttpWorkspaceFiles`처럼 구는지 아무도 검사하지 않는다.
-3. **`workbench/smoke.test.tsx`는 여기서 말하는 "스모크"가 아니다.** 여기의 스모크는 *view가 렌더되고 이벤트가 연결되는지*인데, 그 파일은 *조립이 맞물리는지*를 본다. 조립 테스트를 뭐라 부를지는 아직 정해지지 않았다.
-4. **VRT 미도입이고 Docker 환경이 없다.** `playwright.config.ts`와 CONVENTIONS는 지금 "스크린샷 기준 이미지는 두지 않는다"라고 적혀 있어 이 ADR과 정반대다. Docker 고정이 그 근거("기계마다 깨진다")를 없애므로 결정이 바뀌었다.
+2. **계약 테스트가 하나도 없다.** `workbench/registerServices.test.tsx`가 `IWorkspaceFiles` 대역을 네 곳에서 손으로 만드는데, 그 대역이 실물 `HttpWorkspaceFiles`처럼 구는지 아무도 검사하지 않는다.
+3. **VRT 미도입이고 Docker 환경이 없다.** `playwright.config.ts`와 CONVENTIONS는 지금 "스크린샷 기준 이미지는 두지 않는다"라고 적혀 있어 이 ADR과 정반대다. Docker 고정이 그 근거("기계마다 깨진다")를 없애므로 결정이 바뀌었다.

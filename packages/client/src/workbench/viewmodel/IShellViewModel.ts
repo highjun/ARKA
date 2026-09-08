@@ -1,3 +1,4 @@
+import { createToken } from '#core/di';
 import type { PaneId } from '../model/ITabsModel';
 
 /**
@@ -66,6 +67,7 @@ export type ShellActivityRow = {
   readonly isActive: boolean;
 };
 
+export const ShellViewModelToken = createToken<IShellViewModel>("shellViewModel");
 /**
  * Shell 의 화면 상태.
  *

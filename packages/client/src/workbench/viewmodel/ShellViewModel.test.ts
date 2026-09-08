@@ -62,7 +62,7 @@ const fakeStartup = (): IWorkbenchStartup & { started: boolean } => {
 };
 
 /** 진짜 Model 을 조립한다 — I/O 가 없어 바꿔 낄 이유가 없다. `activityBarRegistry`는 탐색기
- *  하나만 등록한 가짜다 — 진짜(`application.tsx`)와 같은 모양이면 충분하다. */
+ *  하나만 등록한 가짜다 — 진짜(`registerServices.tsx`)와 같은 모양이면 충분하다. */
 const make = (): { tabsModel: ITabsModel; viewModel: IShellViewModel; tabDirtyState: ITabDirtyState & { dirty: Set<string> }; startup: IWorkbenchStartup & { started: boolean } } => {
   const activityBarRegistry: IActivityBarRegistry = createRegistry();
   activityBarRegistry.add({ id: 'explorer', title: '탐색기', iconId: 'files' });

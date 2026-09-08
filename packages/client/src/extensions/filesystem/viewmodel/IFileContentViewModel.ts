@@ -1,4 +1,4 @@
-import type { Disposable } from '#core/di';
+import { createToken, type Disposable } from '#core/di';
 /**
  * 화면이 그리는 파일 하나.
  *
@@ -30,6 +30,7 @@ export type FileRow = {
 
 export type FileRowMap = Readonly<Record<string, FileRow>>;
 
+export const FileContentViewModelToken = createToken<IFileContentViewModel>("fileContentViewModel");
 /**
  * 화면(에디터)이 필요로 하는 파일 상태·조작을 노출하는 ViewModel 계약.
  *

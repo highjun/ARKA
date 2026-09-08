@@ -1,3 +1,4 @@
+import { createToken } from '#core/di';
 /**
  * 워크스페이스의 파일·디렉터리 변경을 구독하는 통로.
  *
@@ -11,6 +12,7 @@
 
 export type WorkspaceWatchUnsubscribe = () => void;
 
+export const WorkspaceWatchToken = createToken<IWorkspaceWatch>("workspaceWatch");
 /** 워크스페이스 변경 구독을 감싸는 Port 계약. */
 export interface IWorkspaceWatch {
   /**

@@ -29,7 +29,7 @@
 - 코드는 도메인별 슬라이스 아래에 모은다. 레이어를 최상위로 두지 않는다. → client [ADR 0005](docs/adr/0005-client-structure.md), server [ADR 0007](docs/adr/0007-server-structure.md)
 - 도메인을 모르는 것(DI·설정·부팅)만 `core/`에 둔다.
 - 슬라이스 내부 — client는 `model/` `infra/` `viewmodel/` `view/` `component/`, server는 `domain/` `infra/` `services/` `transport/`.
-- 의존은 안쪽(`model`/`domain`)을 향한다. 어느 구현이 꽂힐지는 조립부(client는 `workbench/application.tsx`)가 정한다.
+- 의존은 안쪽(`model`/`domain`)을 향한다. 어느 구현이 꽂힐지는 조립부(client는 `workbench/registerServices.tsx`)가 정한다.
 - `index.ts`에는 바깥이 실제로 부르는 것만 넣는다. 내부 구현·에러 타입·유틸은 내보내지 않는다.
 - 슬라이스끼리 직접 import하지 않는다. DI 토큰이나 이벤트로만 소통한다.
 - `shared/`는 아무것도 import할 수 없다. 공통 추출은 아래로만 한다.
@@ -57,7 +57,7 @@
 - `describe`/`it` 이름은 한글로 쓴다. TSDoc의 `@throws`에 적은 경우는 각각 테스트로 확인한다 — 적어두기만 하면 주장일 뿐이다.
 - 설정 파일은 갈라질 때만 만든다. 기본값으로 도는 동안에는 두지 않는다.
 
-E2E는 `pnpm --filter client test:e2e`로 돌린다. `workbench/smoke.test.tsx`는 여기서 말하는 스모크(view 렌더)가 아니라 **조립이 맞물리는지** 보는 테스트다 — 이름을 아직 정하지 않았다.
+E2E는 `pnpm --filter client test:e2e`로 돌린다. 조립이 맞물리는지는 `workbench/registerServices.test.tsx`가 본다 — 대상(`registerServices.tsx`) 옆에 있는 단위 테스트다.
 
 ## URI
 - 파일·리소스는 문자열 경로 대신 `URI`로 가리킨다. → [ADR 0003](docs/adr/0003-uri.md)

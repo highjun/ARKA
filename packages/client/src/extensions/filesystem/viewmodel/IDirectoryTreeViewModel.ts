@@ -1,3 +1,4 @@
+import { createToken } from '#core/di';
 /**
  * 화면이 그리는 트리.
  *
@@ -50,6 +51,7 @@ export type EditingEntry =
   | { readonly kind: 'rename'; readonly id: string; readonly initialValue: string }
   | { readonly kind: 'newFile' | 'newFolder'; readonly parentId: string };
 
+export const DirectoryTreeViewModelToken = createToken<IDirectoryTreeViewModel>("directoryTreeViewModel");
 /**
  * `FileTree` 컴포넌트가 필요로 하는 상태·조작을 모두 노출하는 ViewModel 계약.
  *

@@ -1,3 +1,4 @@
+import { createToken } from '#core/di';
 import type { ComponentType } from 'react';
 import type { DescriptorMatch } from '#core';
 
@@ -20,6 +21,7 @@ export type SidebarContentDescriptor = {
   }>;
 };
 
+export const SidebarContentRegistryToken = createToken<ISidebarContentRegistry>("sidebarContentRegistry");
 /**
  * 2026-09-06 — Registry가 Model과 같은 파일 구성 엄격함을 받으면서 타입 별칭에서 인터페이스로
  * 바뀌었다. `@arka/core`의 `Registry<T>`와 구조가 같지만, 빈 `extends`는

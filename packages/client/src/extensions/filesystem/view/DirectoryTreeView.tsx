@@ -11,7 +11,8 @@ import type {
 
   FileTreeRow,
 } from '../viewmodel/IDirectoryTreeViewModel';
-import { DirectoryTreeViewModelToken, FileContentViewModelToken } from '../tokens';
+import { DirectoryTreeViewModelToken } from '../viewmodel/IDirectoryTreeViewModel';
+import { FileContentViewModelToken } from '../viewmodel/IFileContentViewModel';
 import styles from './DirectoryTreeView.module.css';
 
 /**

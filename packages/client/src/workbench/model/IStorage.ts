@@ -1,3 +1,5 @@
+import { createToken } from '#core/di';
+export const StorageToken = createToken<IStorage>("storage");
 /**
  * 브라우저 전역(`localStorage`)을 감싸는 통로 — 키/값 하나씩 읽고 쓰는 것 이상은 하지 않는다.
  *

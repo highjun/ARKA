@@ -3,7 +3,7 @@ import { useAppContext, useViewModel } from "#core/view-model";
 import { useEffect, useRef, useState } from "react";
 import { FileContentViewModelToken } from "../extensions/filesystem";
 import { ShellView } from "./view/ShellView";
-import { ShellViewModelToken } from "./tokens";
+import { ShellViewModelToken } from "./viewmodel/IShellViewModel";
 
 /**
  * 조립 루트. Shell 자신의 도메인 로직이 아니라 **앱 전체 단위 배선**(전역 키다운·beforeunload·
@@ -45,7 +45,7 @@ const normalizeKeydown = (event: KeyboardEvent): string => {
   return parts.join("+");
 };
 
-export const App = () => {
+export const Workbench = () => {
   const container = useAppContext();
   const shellViewModel = useViewModel(ShellViewModelToken);
   const fileContentViewModel = useViewModel(FileContentViewModelToken);

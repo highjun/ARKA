@@ -25,18 +25,16 @@ import { TabContentRegistry } from "./model/TabContentRegistry";
 import { TabsModel } from "./model/TabsModel";
 import { ThemeModel } from "./model/ThemeModel";
 import { ShellViewModel } from "./viewmodel/ShellViewModel";
-import {
-  ActivityBarRegistryToken,
-  ActivityModelToken,
-  ShellViewModelToken,
-  SidebarContentRegistryToken,
-  StorageToken,
-  TabContentRegistryToken,
-  TabDirtyStateToken,
-  TabsModelToken,
-  ThemeModelToken,
-  WorkbenchStartupToken,
-} from "./tokens";
+import { ActivityBarRegistryToken } from "./model/IActivityBarRegistry";
+import { ActivityModelToken } from "./model/IActivityModel";
+import { SidebarContentRegistryToken } from "./model/ISidebarContentRegistry";
+import { StorageToken } from "./model/IStorage";
+import { TabContentRegistryToken } from "./model/ITabContentRegistry";
+import { TabDirtyStateToken } from "./model/ITabDirtyState";
+import { TabsModelToken } from "./model/ITabsModel";
+import { ThemeModelToken } from "./model/IThemeModel";
+import { WorkbenchStartupToken } from "./model/IWorkbenchStartup";
+import { ShellViewModelToken } from "./viewmodel/IShellViewModel";
 
 /** 탐색기 활동의 id. ActivityBar·SidebarContent 등록 둘 다 이 문자열로 서로를 잇는다. */
 const EXPLORER_ID = "explorer";

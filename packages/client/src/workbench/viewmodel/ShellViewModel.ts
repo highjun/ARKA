@@ -375,12 +375,12 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
 
   /**
    * Shell이 다루는 커맨드 전부를 여기서 등록한다(2026-09-06, 옛 `app/shellCommands.ts` +
-   * `application.tsx`의 `wireBuiltinCommands`가 여기로 합쳐졌다) — "이 화면이 다루는 커맨드는
+   * `registerServices.tsx`의 `wireBuiltinCommands`가 여기로 합쳐졌다) — "이 화면이 다루는 커맨드는
    * 이 화면의 ViewModel이 안다"로 방향을 바꿨다. `commandCenterRegistry`를 생성자에서 DI로
    * 받아, 자기 자신이 처음 만들어지는 순간(=Shell이 처음 마운트되는 순간, `.scoped()`라 scope당
    * 한 번) `this`로 직접 등록한다 — 예전처럼 "루트에서 resolve하면 유령 인스턴스가 된다"는 함정
    * 자체가 사라진다(등록이 항상 지금 만들어지는 바로 그 인스턴스를 캡처하기 때문). 이제
-   * `application.tsx`는 `commandCenterRegistryBinding`을 등록하기만 하면 되고, "scope를 만든
+   * `registerServices.tsx`는 `commandCenterRegistryBinding`을 등록하기만 하면 되고, "scope를 만든
    * 다음에 불러야 한다"는 순서 제약 자체가 없어졌다.
    *
    * `dirtyTabIdsIn`이 `#tabDirtyState`(셸이 선언한 계약, 조립부가 채운다)를 본다 —

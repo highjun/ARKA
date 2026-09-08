@@ -1,10 +1,11 @@
-import type { Disposable } from '#core/di';
+import { createToken, type Disposable } from '#core/di';
 
+export const TabDirtyStateToken = createToken<ITabDirtyState>("tabDirtyState");
 /**
  * "이 탭에 저장 안 된 변경이 있는가"를 셸이 묻는 자리.
  *
  * **셸이 파일을 모르게 하는 계약이다.** 셸은 묻기만 하고, 답은 탭을 기여한 쪽이 채운다 —
- * 누가 채우는지는 조립부(`application.tsx`)만 안다. `IPinTab`을 뒤집은 모양이다.
+ * 누가 채우는지는 조립부(`registerServices.tsx`)만 안다. `IPinTab`을 뒤집은 모양이다.
  *
  * VSCode의 `IWorkingCopyService`(`registerWorkingCopy`/`isDirty(resource)`/`onDidChangeDirty`)와
  * 같은 역할이다 — 거기서도 탭 UI는 파일 계층이 아니라 이 서비스에 묻는다. 다만 VSCode는 열린

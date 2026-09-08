@@ -1,5 +1,7 @@
 import { CommandCenterRegistryToken } from '#core/commands';
-import { ShellViewModelToken, SidebarContentRegistryToken, TabContentRegistryToken } from '../tokens';
+import { SidebarContentRegistryToken } from '../model/ISidebarContentRegistry';
+import { TabContentRegistryToken } from '../model/ITabContentRegistry';
+import { ShellViewModelToken } from '../viewmodel/IShellViewModel';
 import { matchMenuItems } from '#core/menu';
 import { useViewModel } from '#core/view-model';
 import { Button } from '@primer/react';
@@ -21,7 +23,7 @@ import styles from './ShellView.module.css';
  * 로직이면 ViewModel로 옮겼다.
  *
  * 전역 배선(키다운 디스패치·beforeunload 가드·빌드ID 조회·테마 DOM 반영)은 여기 없다 — Shell
- * 자신의 도메인 로직이 아니라 앱 전체 단위 배선이라 `src/workbench/App.tsx`(View 규율 밖)로 옮겼다.
+ * 자신의 도메인 로직이 아니라 앱 전체 단위 배선이라 `src/workbench/Workbench.tsx`(View 규율 밖)로 옮겼다.
  * `buildId`는 그래서 props로 받는다.
  *
  * 탭 닫기 확인은 `window.confirm` 대신 `IShellViewModel.pendingTabClose` + 기존 `Dialog`다
