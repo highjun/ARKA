@@ -12,3 +12,8 @@ export function workspaceRootFromEnv(): string {
 export function portFromEnv(): number {
   return Number(process.env["ADE_PORT"] ?? 3000);
 }
+
+/** 빌드된 클라이언트가 있는 디렉터리. 없으면 정적 서빙을 켜지 않는다. */
+export function clientRootFromEnv(): string | undefined {
+  return process.env["ADE_CLIENT_ROOT"];
+}

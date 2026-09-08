@@ -2,6 +2,7 @@ import js from "@eslint/js";
 import importX from "eslint-plugin-import-x";
 import reactHooks from "eslint-plugin-react-hooks";
 import tseslint from "typescript-eslint";
+import { arkaRules } from "./tooling/eslint-rules";
 
 export default [
   { ignores: ["**/node_modules/**", "**/dist/**"] },
@@ -46,6 +47,19 @@ export default [
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
     },
+  },
+
+  // 구조 규칙. 문서로만 있던 계층 규율을 강제한다 — ADR 0005의 의존 방향이 코드에서
+  // 실제로 지켜지는지는 이것들이 본다.
+  {
+    files: ["packages/*/src/features/*/view/**/*.tsx"],
+    plugins: { arka: arkaRules },
+    rules: { "arka/view-only-uses-view-model": "error" },
+  },
+  {
+    files: ["packages/*/src/features/*/model/**/*.ts"],
+    plugins: { arka: arkaRules },
+    rules: { "arka/model-is-state-library-free": "error" },
   },
 
   {

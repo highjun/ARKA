@@ -43,6 +43,17 @@
 - `shared/`는 `features/`를 import할 수 없다. 공통 추출은 아래로만 한다.
 - **빈 레이어를 미리 만들지 않는다.** 실제 I/O나 유스케이스가 생길 때 폴더를 만든다.
 - 파일 이름은 camelCase, React 컴포넌트만 PascalCase.
+- **`model/`은 상태 라이브러리와 React를 런타임으로 알지 않는다.** 값은 getter로, 변화는 `onDidChange` 이벤트로 낸다. atom은 ViewModel이 소유한다.
+- **`view/`가 부르는 훅은 `useViewModel` 하나뿐이다.** 로컬 상태가 필요하면 ViewModel로 옮긴다. DI 접근(`useAppContext`·`resolve`)도 하지 않는다.
+- 위 두 줄은 `tooling/eslint-rules/`가 강제한다.
+
+## 테스트 층
+
+- **단위** — 각 계층의 규칙. 대상 옆 `*.test.ts`.
+- **스모크**(`app/smoke.test.tsx`) — 조립이 맞물리는지. jsdom에 `<App />`을 통째로 마운트한다.
+- **시각**(`visible/*.spec.ts`) — 진짜 브라우저에서 **보이는지**. jsdom은 CSS를 적용하지 않아 화면 밖으로 밀린 요소도 찾아낸다. `pnpm --filter client test:visible`.
+- 시각 테스트는 `visible/fixture`를 워크스페이스로 연다 — 저장소 내용에 기대면 파일 하나만 늘어도 깨진다.
+- 스크린샷 기준 이미지는 두지 않는다. 앱 화면은 자주 바뀌어 기준이 곧 짐이 된다.
 
 ## URI
 - 파일·리소스는 문자열 경로 대신 `URI`로 가리킨다. → [ADR 0003](docs/adr/0003-uri.md)

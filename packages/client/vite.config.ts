@@ -9,6 +9,8 @@ export default defineConfig({
     proxy: { "/api": { target: "http://localhost:3000", changeOrigin: true } },
   },
   test: {
+    // `visible/`은 Playwright가 진짜 브라우저로 돌린다 — vitest가 집어가면 안 된다.
+    exclude: ["**/node_modules/**", "**/dist/**", "visible/**"],
     environment: "jsdom",
     setupFiles: ["./vitestSetup.ts"],
     // arka-ui에서 가져온 테스트들이 전역 describe/it을 쓴다. 명시적 import도
