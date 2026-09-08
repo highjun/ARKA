@@ -27,12 +27,13 @@ infra/       계약      — 인터페이스 준수
 - **단위 테스트는 계약이 못 잡는 것만.** 인터페이스 없는 순수 함수(경로 정규화, etag 비교, 정렬), ViewModel 상태 전이, infra의 에러 변환(HTTP 404 → NotFound는 구현마다 달라 계약이 아니다). **적을수록 좋은 신호다** — 인터페이스로 잘 나뉘어 있다는 뜻이다. "이걸 테스트해야 하나?"가 자주 나오면 **그 코드가 잘못된 계층에 있는지 먼저 의심한다.**
 - **스모크는 view가 렌더되고 이벤트가 연결되는지만.** 스타일·레이아웃은 Storybook 담당이다.
 - **Storybook은 시각 검증이다.** 커버 범위는 `shared/components/` 전부, `*/component/` 전부, 컨테이너 view는 주요 상태만. **최소 세트는 기본 / 빈 / 로딩 / 에러** — 빈 상태와 에러가 가장 빠뜨리기 쉽다. mock VM은 인터페이스만 구현하면 되고 고정값 객체면 충분하다. **스토리 작성이 어려우면 구조를 의심한다.**
-- **E2E와 VRT는 `e2e/`에.** E2E는 최소 흐름부터 늘린다. **VRT 스냅샷은 Docker에서만 생성·비교한다** — 호스트마다 폰트 렌더링·서브픽셀이 달라, 고정하지 않으면 기준이 아니라 소음이 된다.
+- **E2E는 `e2e/`에.** 최소 흐름부터 늘린다.
+- **VRT는 스토리를 순회한다.** 스토리북을 정적 빌드해 `index.json`의 스토리마다 `iframe.html`을 찍는다 — 스토리를 추가하면 VRT가 저절로 따라오고, 컴포넌트마다 스펙을 새로 쓰지 않는다. 설정과 기준 이미지는 저장소 전역의 `test/vrt/`에 둔다(특정 패키지의 산출물이 아니라 저장소가 합의한 기준이라서다). **Docker에서만 생성·비교한다** — 호스트마다 폰트 렌더링·서브픽셀이 달라, 고정하지 않으면 기준이 아니라 소음이 된다.
 - **테스트하지 않는 것**: getter/setter만 있는 것, 라이브러리 동작(Radix가 팝오버를 여는지), 구현 세부(내부 메서드 호출 횟수).
 
 ### 배치와 작성
 
-단위·계약·스모크는 코드 옆에, E2E와 VRT는 `e2e/`에 모은다.
+단위·계약·스모크·스토리는 코드 옆에, E2E는 `e2e/`, VRT는 `test/vrt/`에 모은다.
 
 ```
 extensions/filesystem/
@@ -45,7 +46,8 @@ extensions/filesystem/
   component/   FileTree.tsx / .test.tsx / .stories.tsx
                MockDirectoryTreeViewModel.ts
 
-e2e/           *.spec.ts                     E2E + VRT
+e2e/           *.spec.ts                     E2E
+test/vrt/      vrt.config.ts, stories.spec.ts, snapshots/
 ```
 
 - 계약 스위트는 `<name>.contract.ts` — 함수를 export할 뿐 스스로 실행되지 않아 `.test.ts`가 아니다
@@ -60,13 +62,14 @@ e2e/           *.spec.ts                     E2E + VRT
 - **Jest식 스냅샷(`toMatchSnapshot`)** — 무비판적으로 갱신하게 된다. VRT는 다르다. 이미지 차이는 눈으로 봐야 승인된다.
 - **VRT 스냅샷을 호스트에서 생성하기** — 폰트 렌더링·서브픽셀이 기계마다 달라 기준이 소음이 된다.
 - **던더 폴더(`__tests__`, `__mocks__`)** — 같은 것을 폴더명과 파일명 두 군데로 표시하게 되고, 슬라이스 안에서 폴더가 한 겹 더 늘어난다.
-- **별도 `tests/` 폴더** — 슬라이스 원칙을 깨뜨린다.
+- **별도 `tests/` 폴더** — 슬라이스 원칙을 깨뜨린다. `test/vrt/`는 예외다: 기준 이미지는 코드가 아니라 저장소 전체가 합의한 기준이고, 옆에 둘 대상 코드가 없다.
+- **VRT 스냅샷을 `__snapshots__`에 두기** — 그건 Jest/Vitest의 `toMatchSnapshot` 관례인데 그 방식을 위에서 기각했고, 던더 폴더도 기각했다. Playwright 관례는 `<spec>-snapshots/`라 어느 쪽도 아니다.
 
 ## 상태:
 승인됨. 계층 이름은 [ADR 0005](0005-client-structure.md)를 따른다. 「클라이언트 테스트 전략」 문서를 이 저장소의 이름으로 옮긴 것이다.
 
 현재 코드와 다른 것:
 
-1. 스토리북 미설치, 스토리 0개.
+1. **스토리가 프리미티브 셋(Icon·Divider·Timestamp)뿐이다.** 스토리북과 VRT 파이프라인은 돌지만 커버 범위(`shared/components/` 전부, `*/component/` 전부)는 아직 비어 있다.
 2. **계약 테스트가 하나도 없다.** `workbench/registerServices.test.tsx`가 `IWorkspaceFiles` 대역을 네 곳에서 손으로 만드는데, 그 대역이 실물 `HttpWorkspaceFiles`처럼 구는지 아무도 검사하지 않는다.
-3. **VRT 미도입이고 Docker 환경이 없다.** `playwright.config.ts`와 CONVENTIONS는 지금 "스크린샷 기준 이미지는 두지 않는다"라고 적혀 있어 이 ADR과 정반대다. Docker 고정이 그 근거("기계마다 깨진다")를 없애므로 결정이 바뀌었다.
+3. VRT가 아직 CI에 없다. 사람이 `pnpm run vrt`를 기억해서 돌려야 한다.

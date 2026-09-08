@@ -49,8 +49,9 @@
 - **단위** — 계약이 못 잡는 것만. 대상 옆 `*.test.ts`. 적을수록 좋은 신호다.
 - **스모크** — view가 렌더되고 이벤트가 연결되는지만. 스타일은 Storybook 담당.
 - **Storybook** — 시각 검증. 최소 세트는 기본 / 빈 / 로딩 / 에러.
-- **E2E·VRT** — `e2e/*.spec.ts`. VRT 스냅샷은 Docker에서만 생성·비교한다.
-- 단위·계약·스모크는 코드 옆에, E2E·VRT만 `e2e/`에. 던더 폴더와 별도 `tests/` 폴더는 쓰지 않는다.
+- **E2E** — `e2e/*.spec.ts`.
+- **VRT** — 스토리를 순회해 찍는다. `pnpm run vrt`(비교) / `vrt:update`(기준 갱신). **Docker에서만** 생성·비교한다.
+- 단위·계약·스모크·스토리는 코드 옆에, E2E는 `e2e/`, VRT는 `test/vrt/`에. 던더 폴더와 그 밖의 `tests/` 폴더는 쓰지 않는다.
 - Mock은 `Mock<Name>.ts`, fixture는 `fixtures.ts`로 테스트와 스토리가 공유한다.
 - `toMatchSnapshot`은 쓰지 않는다 — 무비판적으로 갱신하게 된다.
 - 커버리지 목표를 두지 않는다.

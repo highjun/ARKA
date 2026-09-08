@@ -5,7 +5,8 @@ import tseslint from "typescript-eslint";
 import { arkaRules } from "./tooling/eslint-rules";
 
 export default [
-  { ignores: ["**/node_modules/**", "**/dist/**"] },
+  // 산출물은 검사하지 않는다 — 번들된 코드가 규칙에 걸려도 고칠 소스가 여기가 아니다.
+  { ignores: ["**/node_modules/**", "**/dist/**", "**/storybook-static/**", "**/.output/**"] },
 
   js.configs.recommended,
 

@@ -4,119 +4,6 @@ TMP NOTE
 추가로 ADR에 있는 결정 중 객관적인 내용은 린트로 강제한다.
 ADR 결정 중 단순 취향(실제 구현에 영향이 없는 부분)으로 수정해서 린트 규칙을 쉽게 적용할 수 있는 형태로 할 수 있다면, 그렇게 수정할 수 있다.
 
-## 3. 클라이언트 구조
-
-### 폴더
-
-```
-client/src/
-  core/         di, transport, types — 기능 없음, 꽂을 자리만
-  features/     기능별 수직 슬라이스
-  shared/       UI 프리미티브, 순수 유틸
-  app/          진입점, 레이아웃, bootstrap
-```
-
-### feature 내부 — MVVM + Data 계층
-
-```
-features/<name>/
-  model/        도메인 타입·규칙 + infra가 구현할 인터페이스 선언
-  infra/        I/O 구현 (필요할 때만)
-  viewmodel/    화면 상태 + 프레젠테이션 로직 (MobX)
-  view/         React 컴포넌트
-  index.ts      공개 표면
-```
-
-### 계층별 정의
-
-| 계층 | 담당 | 판별 질문 | 금지 |
-|---|---|---|---|
-| view | UI 기술 | 지우면 모양만 사라지는가 | 로직, viewmodel 외 상태 소스 |
-| viewmodel | 프레젠테이션 로직 | 화면이 없으면 존재하지 않는가 | DOM 조작, 도메인 판단 |
-| model | 도메인 규칙 | CLI여도, 저장소가 바뀌어도 유효한가 | React, fetch, window, 전역 상태 |
-| infra | I/O 기술 | 테스트에 mock이 필요한가 | React |
-
-**중요**: `model/`은 I/O를 **정의**하되 특정 구현에 의존하지 않는다. 인터페이스 선언은 `model/`, 실제 `fetch`를 쓰는 구현은 `infra/`.
-
-```
-infra ──implements──→ model
-```
-
-화살표가 안쪽을 향한다. `model/`은 `infra/`의 존재를 모르고, 어떤 구현이 꽂힐지는 `bootstrap.ts`가 결정한다.
-
-**`infra/`는 필요할 때만.** 실제 I/O가 없는 feature(레이아웃 설정 등)는 3폴더로 끝.
-
-
-### 절대 규칙
-
-1. **의존성 단방향**: `view → viewmodel → model ← infra`
-2. **features 간 직접 import 금지** — DI(`useService`) 또는 이벤트로만
-3. **`shared/`는 `features/`를 import 불가** — `contracts/`와 외부 라이브러리만
-4. **공통 추출은 아래로만** (`features → shared`), 옆으로 절대 금지
-
-이 규칙들은 나중에 마이크로커널로 전환하기 위한 조건이기도 하다.
-
-### 바인딩
-
-```
-model     ──Emitter 이벤트──→ viewmodel
-viewmodel ──MobX observer───→ view
-```
-
-계층마다 다른 메커니즘. **model은 MobX를 모르고, view는 Emitter를 모른다.**
-
-`model/`이 observable을 가지면: MobX에 묶이고, 상태 소유자가 모호해지고, 순수 테스트가 불가능해진다. model은 **사실(fact)과 사건(event)**을, viewmodel은 **화면 상태(state)**를 다룬다.
-
-비동기 콜백에서 observable을 바꿀 땐 `runInAction`으로 감싼다. 이벤트를 배열로 받는 이유도 여기 있다 — 한 번의 액션으로 묶어야 리렌더가 한 번.
-
----
-
-## 4. ViewModel — MobX
-
-### 결정
-
-| 결정 | 기각 | 이유 |
-|---|---|---|
-| MobX | Zustand | 인터페이스/구현 분리 → **계약 우선 리뷰 가능** |
-
-**추가 이점**
-- 생성자 주입이 DI와 자연스럽게 맞음
-- `dispose()` 라이프사이클이 명확 → side effect 통제
-- 인터페이스가 있어 Storybook mock이 쉬움
-- 서버(클래스+생성자 주입)와 스타일 통일
-
-**비용**
-- 번들이 조금 큼
-- `observer` 누락 시 조용히 리렌더 안 됨 → **ESLint `mobx/missing-observer` 필수**
-
-### 형태
-
-```ts
-// viewmodel/IFileTreeVM.ts  ← 리뷰 대상
-export interface IFileTreeVM {
-  readonly nodes: readonly TreeNode[]
-  readonly loading: boolean
-  expand(uri: URI): Promise<void>
-}
-
-// viewmodel/FileTreeVM.ts  ← 구현
-export class FileTreeVM implements IFileTreeVM {
-  constructor(private fs: IFileSystem) {
-    makeAutoObservable(this)
-    this.sub = fs.onDidChangeFile(e => this.applyChanges(e))
-  }
-  dispose() { this.sub.dispose() }
-}
-```
-
-**ViewModel은 Model의 래퍼가 아니다.** Model에 없는 것을 갖는다 — selected, expanded, loading, sortBy 같은 **화면에만 존재하는 상태**.
-
-**ViewModel은 항상 인터페이스로 Model을 참조**한다(생성자 주입). 구현체를 직접 import하지 않는다.
-
-**ViewModel끼리 직접 참조 금지.** 같은 feature 내 상위→하위 소유는 허용. 다른 feature면 model 계층의 이벤트로 소통.
-
----
-
 ## 5. DI
 
 ### 결정
@@ -158,7 +45,7 @@ Root
 **모든 걸 DI에 넣지 말 것.** 순수 함수 유틸은 그냥 import. DI는 "교체 가능성이 있거나 라이프사이클이 있는 것"에만.
 
 
-
+## Server 구조
 ### services vs runtime
 
 > **클라이언트가 다 나갔다가 10분 뒤 돌아왔을 때, 그동안 무슨 일이 있었는지 보여줘야 하는가?**
@@ -187,81 +74,6 @@ app.post('/fs/read', async (req) => {
   return ReadFileResponse.parse({ content: encode(content) })
 })
 ```
-
----
-
-## 7. 파일시스템 설계
-
-### 프로바이더 패턴
-
-```ts
-interface IFileSystemProvider {
-  readonly scheme: string
-  readonly readonly?: boolean
-
-  stat(uri): Promise<FileStat>
-  readDirectory(uri): Promise<DirEntry[]>
-  readFile(uri): Promise<Uint8Array>
-  writeFile(uri, content, opts): Promise<void>
-  delete(uri, opts): Promise<void>
-  rename(from, to, opts): Promise<void>
-  createDirectory(uri): Promise<void>
-  onDidChangeFile(listener: (events: FileChangeEvent[]) => void): Disposable
-}
-```
-
-**지금은 `file:` 프로바이더 하나만 구현.** 인터페이스는 확장 가능하게.
-
-**패턴의 진짜 값**: 여러 백엔드 지원이 아니라 **모든 것을 파일처럼 다룰 수 있게 되는 것**. 에이전트 실행 결과, 프롬프트 히스토리, 데이터셋 샘플을 전부 "열어볼 수 있는 무언가"로 만들면 UI를 새로 만들 필요가 없다.
-
-### 핵심 결정 3가지
-
-**(a) 변경 이벤트는 배열로 배치 전달**
-
-```ts
-onDidChangeFile(listener: (events: FileChangeEvent[]) => void)
-```
-
-에이전트가 파일 50개를 만들면 이벤트도 50개. 하나씩 오면 리렌더가 50번.
-
-**(b) 파일과 문서를 분리**
-
-- 파일 = 디스크의 바이트
-- 문서 = 편집 중인 메모리 상태 (dirty, undo 스택, 커서)
-- 하나의 파일을 여러 탭에서 열어도 문서 모델은 하나
-- 저장은 문서 → 파일 방향의 명시적 커밋
-
-이걸 분리해야 "에이전트가 파일을 수정했는데 사용자가 그 파일을 열어놓고 있는" 충돌을 다룰 수 있다.
-
-**(c) etag로 충돌 감지**
-
-```ts
-interface WriteOptions {
-  create: boolean
-  overwrite: boolean
-  etag?: string   // 있으면 일치할 때만 쓰기
-}
-```
-
-충돌은 에러가 아니라 **해결해야 할 상태**. diff를 보여주고 선택하게 하는 UX가 필요.
-
-### 에러 타입
-
-```ts
-export enum FileErrorCode {
-  NotFound, NoPermission, Exists, NotADirectory,
-  IsADirectory, Conflict, Unavailable,
-}
-```
-
-**지금 정의해야 한다.** 클라이언트가 원격 프로바이더를 쓰므로 HTTP 상태코드를 이 코드로 변환해야 하는데, 나중에 하면 에러 처리가 곳곳에 흩어진다.
-
-### 지금 하지 말 것
-
-- `watch()` 경로별 구독 — 서버가 이벤트를 통째로 스트림. 파일이 수천 개 될 때 최적화
-- `copy()`, `readFileStream()` — 필요해지면
-
----
 
 ## 8. 디자인 시스템
 
@@ -387,73 +199,6 @@ extension   둘 다 앎 — 자리를 채움
 
 ---
 
-## 10. 에이전트 런타임 (Phase 5)
-
-### 이벤트 로그
-
-실행 상태를 "현재 값"이 아니라 **append-only 이벤트 시퀀스**로 저장.
-
-```
-seq 1: RunStarted
-seq 2: StepStarted
-seq 3: ToolCallRequested
-seq 4: ApprovalRequested      ← HITL로 멈춤
-seq 5: ApprovalGranted
-seq 6: ToolCallCompleted
-seq 7: TokenDelta × N
-seq 8: RunCompleted
-```
-
-**이 형태여야 하는 이유**
-- 재접속 시 `seq > 마지막수신`만 전송 (모바일 필수)
-- 여러 클라이언트가 같은 Run을 동시에 관측
-- 리플레이·타임트래블 디버깅이 공짜
-- 관측성(트레이스, 토큰 사용량)이 부가기능이 아니라 기본
-
-시퀀스는 **Run 단위 단조증가**. 전역 순서 불필요.
-
-**저장소는 SQLite 테이블 하나로 충분.** Kafka는 초당 수만 이벤트·다중 팀 소비 상황용이고, 여기선 운영 부담만 크다.
-
-**OpenTelemetry span 구조와 호환되게 설계할 것.** 내부 관측과 사용자용 트레이스 뷰가 같은 데이터를 쓴다. 나중에 맞추려면 재작성.
-
-### 상태 기계
-
-```
-pending → running → completed
-             ├────→ failed
-             ├────→ cancelled
-             └────→ waiting_approval → running   ← 에이전트 특유
-```
-
-`waiting_approval`이 상태 기계를 상당히 복잡하게 만든다.
-
-### 모바일 대응
-
-- 재연결 시 `Last-Event-ID` 기반 이어받기
-- **토큰 델타 배칭** — 초당 수십 개를 그대로 보내면 클라이언트가 죽는다. 데스크톱은 원본, 모바일은 100ms 배치. 클라이언트가 구독 시 프로파일 선언
-
-### 툴 실행
-
-로컬 단일 사용자라 **보안 격리는 불필요**. 안정성 격리(툴 무한루프가 서버를 멈추지 않게)만 유용.
-
-**단, 인터페이스 뒤에 둘 것.**
-
-```ts
-interface IToolExecutor {
-  execute(tool: ToolDef, args: unknown): Promise<Result>
-}
-```
-
-인프로세스로 시작하고 나중에 프로세스/컨테이너로 교체 가능하게.
-
-### 클라이언트 대응 개념
-
-DI 상위 스코프가 그 역할을 한다. 별도 계층은 대개 불필요 — 브라우저를 닫으면 어차피 사라지고, 진짜 오래 걸리는 건 서버가 한다.
-
-필요해지는 경우: 오프라인 큐, 낙관적 업데이트+롤백, 다중 파일 작업. 사례가 쌓이면 그때 슬라이스를 만든다.
-
----
-
 ## 11. 검증
 
 ### 도구가 검사하는 것
@@ -557,9 +302,7 @@ c.registerValue(FileTreeVMToken, new MockFileTreeVM({ nodes: sampleNodes }))
 
 **버릴 것**: Doc-gen — 에이전트는 소스를 직접 읽으므로 재포장 문서에서 얻을 정보가 없고, 낡은 생성 문서는 오히려 해롭다
 
-**ADR 형식**: 제목 / 맥락 / 결정 / **기각한 것과 이유**. 마지막이 필수 — 없으면 이미 기각된 방향이 반복 제안된다.
-
-주석에 긴 배경 설명이 들어가면 ADR로 옮기고 링크만 남긴다.
+**ADR 형식**: 제목 / 결정 / 기각 / 상태
 
 ### 중복 제거 기준
 
@@ -631,25 +374,6 @@ CD가 아니라 **CI의 릴리스 잡**이다. 배포할 서버가 없으므로.
 
 **Watchtower**는 dev compose 오버라이드로만. 서버 시작 시 마이그레이션 자동 실행이 전제.
 
-### 터널링
-
-**우리가 구현하지 않는다.** Tailscale 사용법을 문서로 안내. 직접 만들면 보안 책임만 진다.
-
-**단, 서버에 필요한 것**: 인증(노출되는 순간 필수), HTTPS(PWA의 Service Worker·푸시가 요구), 기본 localhost 바인딩 + 외부 노출은 명시적 옵트인.
-
-**알아둘 한계**: 폰 절전 시 연결 끊김(재연결 필수), PC가 꺼져 있으면 접근 불가, 푸시 알림은 외부 서비스 필요.
-
-### 나중 (제품화)
-
-install.sh, 첫 실행 마법사, `ade doctor`, `ade diagnostics`(시크릿 마스킹), 옵트인 텔레메트리, 마이그레이션 롤백, 라이트 테마.
-
-전부 **새 파일 추가로 끝나므로** 지금 만들 이유가 없다.
-
-### 판단 기준
-
-> **나중에 넣을 때 기존 코드를 광범위하게 고쳐야 하면 지금, 새 파일 추가로 끝나면 나중.**
-
----
 
 ## 13. 에이전트 협업
 
@@ -825,3 +549,28 @@ Command Registry가 키보드·팔레트·모바일 진입점·i18n·에러 재�
 | 0011 | SQLite | Postgres, Kafka |
 
 각 4줄. **"왜 이렇게 안 했는가" 필수.**
+
+
+TMP
+
+
+마지막으로 기타 내용들을 관리하자.
+- Testing
+    - Vitest 별개 코드가 필요한 거 없지?
+    - 스토리북 운영(`.storybook/`)
+    - VRT: 스토리북 기반으로 하되, 전역에서 관리하기
+    - test/{vrt, e2e}로 하면 좋을 듯
+
+- test/e2e/ 로 test 관련 로직을 하나의 폴더로 묶기
+- dist/는 아예 별개로 따로 두어야 할듯? 서버와 클라이언트랑 같이 가야 하는 거 아냐?
+- .output/로 storybook-static 옮기기
+- index.html을 src/workbench 안으로 옮기는 건?
+
+- Lint 규칙
+    - Lint 커스텀 규칙은 fixtures를 관리해야 할 것
+    - 현재 걸린 Lint 규칙 하나씩 리뷰
+- Config 파일 관리: vite, vitestSetup, playwright config 확인
+
+- Conventions.md를 간결하게 유지하기
+- CI 파이프라인
+    - 추가로, CI 되면 arka.sangjun.dev로 배포하기. 오키?
