@@ -17,6 +17,7 @@
   curl http://127.0.0.1:3000/api/health
   ```
   컨테이너는 호스트 루프백 3000에만 열린다. 바깥은 cloudflared Tunnel이 이 포트에 붙는다.
+  배포 뒤에는 `bash test/deploy/anon-smoke.sh https://arka.sangjun.dev`(또는 GitHub Actions의 "Deploy smoke")로 익명 요청이 막히는지 확인한다. 태그 `v*`를 push하면 release.yml이 ghcr.io 이미지를 만든다 — 그 뒤 서버에서는 compose의 `image:`를 그 이미지로 바꾸고 `docker compose pull && up -d`.
 
 - [ ] **LLM API 키** — 지금 에이전트는 키 없이 도는 스크립트 실행기다(ADR 0019). 실제 실행기(TASK-26)를 붙이려면 Anthropic API 키가 필요하다. 준비되면 서버 환경변수 `ADE_ANTHROPIC_API_KEY`로 넘긴다(compose의 `.env`). 키를 리포에 넣지 않는다.
 

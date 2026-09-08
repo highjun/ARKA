@@ -1,0 +1,39 @@
+# 태그 → 이미지 빌드·푸시 → GitHub Release. CD가 아니라 CI의 릴리스 잡이다 — 배포할 서버가 없다.
+# 서버 PC에서는 `docker compose pull && docker compose up -d`로 받는다(USER_NOTE).
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  image:
+    name: 이미지 빌드·푸시
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=raw,value=latest
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true

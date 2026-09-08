@@ -1,0 +1,17 @@
+# 배포 뒤 수동으로 돌린다 — 익명 요청이 Access에 막히는지(→ ADR 0014). 200이 나오면 실패한다.
+name: Deploy smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      origin:
+        description: 검사할 오리진
+        default: https://arka.sangjun.dev
+        required: true
+
+jobs:
+  anon:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash test/deploy/anon-smoke.sh "${{ inputs.origin }}"

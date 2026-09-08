@@ -4,6 +4,7 @@ import type { Logger } from "./core/log";
 import type { ServerConfig } from "./core/config";
 import { serializeError } from "./core/log";
 import { createProtocolGuard } from "./core/protocol";
+import { createRequestLog } from "./core/requestLog";
 import { createAgentFeature } from "./features/agent";
 import { createFsRoutes, createWatchRoutes } from "./features/filesystem";
 import { createStaticRoutes } from "./features/static";
@@ -23,6 +24,9 @@ export type Application = {
 export const createApp = ({ config, log, startedAt }: { config: ServerConfig; log: Logger; startedAt: string }): Application => {
   const app = new Hono();
   const agent = createAgentFeature({ dataDir: config.dataDir, log });
+
+  // 맨 앞이다 — 뒤의 어떤 핸들러가 답하든 한 줄 남는다.
+  app.use("*", createRequestLog(log));
 
   // 아래 둘은 프로토콜 헤더 없이 부를 수 있다 — 낡은 클라이언트도 자기가 낡았다는 것을 알아야 한다.
   app.get("/api/health", (c) => c.json({ status: "ok" }));
