@@ -1,3 +1,4 @@
+import { testStorageContract } from '../model/storage.contract';
 import { createStoragePort } from './LocalStorage';
 
 /**
@@ -30,4 +31,9 @@ describe('get·set', () => {
 
     expect(storage.get('k')).toBe('b');
   });
+});
+
+testStorageContract('LocalStorage', () => {
+  localStorage.clear();
+  return createStoragePort();
 });
