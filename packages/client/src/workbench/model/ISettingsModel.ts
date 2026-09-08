@@ -8,6 +8,8 @@ export type Density = 'auto' | 'compact' | 'touch';
 
 export type Settings = {
   readonly density: Density;
+  /** 에이전트가 파일을 바꾸는 툴을 부르기 전에 묻는다. 기본은 묻는다. */
+  readonly agentConfirmWrites: boolean;
 };
 
 export const SettingsModelToken = createToken<ISettingsModel>('settingsModel');

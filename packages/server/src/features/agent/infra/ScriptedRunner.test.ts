@@ -11,6 +11,7 @@ const contextOf = (input: string, { mode = "action", answer = "준" }: { mode?: 
     runId: "r",
     input,
     mode,
+    confirmWrites: false,
     history: [],
     signal: new AbortController().signal,
     emit: (event) => emitted.push(event),

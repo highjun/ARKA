@@ -32,7 +32,7 @@ describe('HttpAgentApi', () => {
     globalThis.fetch = originalFetch;
     const runs = serverReplies({ runId: 'r', status: 'running' });
     expect(await createAgentApiPort().startRun('s1', 'hi', 'plan')).toEqual({ runId: 'r', status: 'running' });
-    expect(runs[0]).toMatchObject({ url: '/api/agent/sessions/s1/runs', body: JSON.stringify({ input: 'hi', mode: 'plan' }) });
+    expect(runs[0]).toMatchObject({ url: '/api/agent/sessions/s1/runs', body: JSON.stringify({ input: 'hi', mode: 'plan', confirmWrites: true }) });
   });
 
   it('실패하면 상태와 서버 사유를 담아 던진다', async () => {

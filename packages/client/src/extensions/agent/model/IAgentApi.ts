@@ -14,8 +14,8 @@ export interface IAgentApi {
   listSessions(): Promise<readonly AgentSession[]>;
   createSession(title?: string): Promise<AgentSession>;
   updateSession(id: SessionId, patch: { readonly title?: string; readonly archived?: boolean }): Promise<AgentSession>;
-  /** 응답은 즉시 온다 — 진행은 `IAgentEvents`로 본다. */
-  startRun(sessionId: SessionId, input: string, mode: RunMode): Promise<RunResponse>;
+  /** 응답은 즉시 온다 — 진행은 `IAgentEvents`로 본다. `confirmWrites`는 파일을 바꾸기 전에 묻게 한다. */
+  startRun(sessionId: SessionId, input: string, mode: RunMode, options?: { readonly confirmWrites?: boolean }): Promise<RunResponse>;
   provideInput(sessionId: SessionId, runId: string, requestId: string, text: string): Promise<void>;
   cancelRun(sessionId: SessionId, runId: string): Promise<void>;
 }

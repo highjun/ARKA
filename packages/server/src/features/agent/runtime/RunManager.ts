@@ -84,7 +84,7 @@ export class RunManager {
    * Run을 시작한다. 응답은 즉시 돌아오고 실행은 뒤에서 이어진다.
    * @throws AgentError `SessionNotFound`, `RunInProgress`
    */
-  start(sessionId: SessionId, input: string, mode: RunMode): RunResponse {
+  start(sessionId: SessionId, input: string, mode: RunMode, { confirmWrites = true }: { confirmWrites?: boolean } = {}): RunResponse {
     const session = this.getSession(sessionId);
     if (this.#active.has(sessionId)) throw new AgentError("RunInProgress", `session ${sessionId} already has a running run`);
 
@@ -97,7 +97,7 @@ export class RunManager {
     this.#events.append({ sessionId, runId, type: "run.started", mode, input });
     this.#sessions.update(sessionId, { lastRunStatus: "running", updatedAt: this.#now() });
 
-    void this.#execute(sessionId, active, { input, mode, history });
+    void this.#execute(sessionId, active, { input, mode, history, confirmWrites });
     return { runId, status: "running" };
   }
 
@@ -136,7 +136,11 @@ export class RunManager {
     return active;
   }
 
-  async #execute(sessionId: SessionId, active: ActiveRun, { input, mode, history }: { input: string; mode: RunMode; history: RunContext["history"] }): Promise<void> {
+  async #execute(
+    sessionId: SessionId,
+    active: ActiveRun,
+    { input, mode, history, confirmWrites }: { input: string; mode: RunMode; history: RunContext["history"]; confirmWrites: boolean },
+  ): Promise<void> {
     const { runId, abort } = active;
     const emit = (event: RunEventInput): void => {
       this.#events.append({ ...event, sessionId, runId } as Parameters<IEventStore["append"]>[0]);
@@ -146,6 +150,7 @@ export class RunManager {
       runId,
       input,
       mode,
+      confirmWrites,
       history,
       signal: abort.signal,
       emit,

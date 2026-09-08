@@ -21,8 +21,8 @@ class HttpAgentApiAdapter implements IAgentApi {
     return SessionResponse.parse(await this.#json(`/api/agent/sessions/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch })).session;
   }
 
-  async startRun(sessionId: SessionId, input: string, mode: RunMode) {
-    return RunResponse.parse(await this.#json(`/api/agent/sessions/${encodeURIComponent(sessionId)}/runs`, { method: 'POST', body: { input, mode } }));
+  async startRun(sessionId: SessionId, input: string, mode: RunMode, { confirmWrites = true }: { readonly confirmWrites?: boolean } = {}) {
+    return RunResponse.parse(await this.#json(`/api/agent/sessions/${encodeURIComponent(sessionId)}/runs`, { method: 'POST', body: { input, mode, confirmWrites } }));
   }
 
   async provideInput(sessionId: SessionId, runId: string, requestId: string, text: string): Promise<void> {

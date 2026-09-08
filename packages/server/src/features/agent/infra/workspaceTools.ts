@@ -75,3 +75,7 @@ export const createWorkspaceTools = (workspace: WorkspaceAccess): IAgentTools =>
 });
 
 export const ASK_USER_TOOL = "ask_user";
+/** 워크스페이스를 바꾸는 툴 — `confirmWrites`가 켜져 있으면 실행 전에 사용자에게 묻는다. */
+export const WRITING_TOOLS: ReadonlySet<string> = new Set(["write_file", "create_entry"]);
+/** 허락으로 치는 답. 나머지는 전부 거부다 — 모호하면 안 바꾸는 쪽이 안전하다. */
+export const isApproval = (answer: string): boolean => /^(?:예|네|응|허용|승인|y|yes|ok|okay)\s*[.!]?$/iu.test(answer.trim());

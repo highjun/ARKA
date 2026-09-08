@@ -80,6 +80,8 @@ export interface IChatModel {
    * 없다. 실패는 `chats[id].failure`에 남기고 던지지 않는다.
    */
   send(sessionId: SessionId, text: string, mode: RunMode): Promise<void>;
+  /** 새 Run에 실을 옵션 — 파일 변경 전 확인 여부. 조립부가 설정에서 읽어 넣는다. */
+  readonly confirmWrites: () => boolean;
   /** 도는 Run을 끊는다. 없으면 아무 일도 없다. */
   cancel(sessionId: SessionId): Promise<void>;
 

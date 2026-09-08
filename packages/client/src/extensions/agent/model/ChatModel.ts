@@ -19,9 +19,12 @@ export class ChatModel implements IChatModel {
   #sessionsFailure: string | null = null;
   #chats: Readonly<Record<SessionId, SessionChat>> = {};
 
-  constructor({ api, events }: { api: IAgentApi; events: IAgentEvents }) {
+  readonly confirmWrites: () => boolean;
+
+  constructor({ api, events, confirmWrites = () => true }: { api: IAgentApi; events: IAgentEvents; confirmWrites?: () => boolean }) {
     this.#api = api;
     this.#events = events;
+    this.confirmWrites = confirmWrites;
   }
 
   get sessions(): readonly AgentSession[] {
@@ -102,7 +105,7 @@ export class ChatModel implements IChatModel {
       if (chat.pendingInput !== null) {
         await this.#api.provideInput(sessionId, chat.pendingInput.runId, chat.pendingInput.requestId, text);
       } else {
-        await this.#api.startRun(sessionId, text, mode);
+        await this.#api.startRun(sessionId, text, mode, { confirmWrites: this.confirmWrites() });
       }
       this.#setChat({ ...(this.#chats[sessionId] ?? chat), failure: null });
     } catch (error) {

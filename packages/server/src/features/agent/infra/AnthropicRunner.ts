@@ -2,7 +2,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import type { AgentEvent } from "contracts";
 import type { IAgentRunner, RunContext } from "../domain/IAgentRunner";
 import type { IAgentTools } from "../domain/IAgentTools";
-import { ASK_USER_TOOL } from "./workspaceTools";
+import { ASK_USER_TOOL, isApproval, WRITING_TOOLS } from "./workspaceTools";
 
 /** 실행기가 클라이언트에게 바라는 것 — 테스트가 가짜 스트림을 꽂을 수 있게 좁힌다. */
 export type MessagesClient = {
@@ -116,6 +116,11 @@ export class AnthropicRunner implements IAgentRunner {
       const question = (use.input as { question?: unknown }).question;
       const answer = await ctx.requestInput(typeof question === "string" ? question : "계속하려면 답이 필요하다.");
       return { output: { answer }, isError: false };
+    }
+    if (ctx.confirmWrites && WRITING_TOOLS.has(use.name)) {
+      const path = (use.input as { path?: unknown }).path;
+      const answer = await ctx.requestInput(`파일을 바꾸려 한다: ${use.name} ${typeof path === "string" ? path : ""} — 허용하려면 '예'라고 답하세요.`);
+      if (!isApproval(answer)) return { output: { error: `사용자가 거부했다: ${answer}` }, isError: true };
     }
     return this.#tools.execute(use.name, use.input, ctx.signal);
   }

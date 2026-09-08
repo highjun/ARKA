@@ -185,7 +185,15 @@ export function createApplication(): Container {
 
   container.register(
     ChatModelToken,
-    singleton((c) => new ChatModel({ api: c.resolve(AgentApiToken), events: c.resolve(AgentEventsToken) })),
+    singleton(
+      (c) =>
+        new ChatModel({
+          api: c.resolve(AgentApiToken),
+          events: c.resolve(AgentEventsToken),
+          // 설정은 workbench의 것이다 — agent는 모르고, 조립부가 함수로 넘긴다.
+          confirmWrites: () => c.resolve(SettingsModelToken).settings.agentConfirmWrites,
+        }),
+    ),
   );
 
   // ViewModel은 scoped다 — 화면 하나가 사는 동안만 유지되고, 그 스코프를 dispose하면

@@ -3,7 +3,7 @@ import { Emitter } from '#core/events';
 import type { Density, ISettingsModel, Settings } from './ISettingsModel';
 import type { IStorage } from './IStorage';
 
-const DEFAULTS: Settings = { density: 'auto' };
+const DEFAULTS: Settings = { density: 'auto', agentConfirmWrites: true };
 const isDensity = (value: unknown): value is Density => value === 'auto' || value === 'compact' || value === 'touch';
 
 /** `ISettingsModel`의 유일한 구현체. 저장된 값이 깨져 있으면 기본값으로 돌아간다. */
@@ -24,8 +24,12 @@ export class SettingsModel implements ISettingsModel {
   }
 
   update(patch: Partial<Settings>): void {
-    const next: Settings = { ...this.#settings, ...(patch.density !== undefined ? { density: patch.density } : {}) };
-    if (next.density === this.#settings.density) return;
+    const next: Settings = {
+      ...this.#settings,
+      ...(patch.density !== undefined ? { density: patch.density } : {}),
+      ...(patch.agentConfirmWrites !== undefined ? { agentConfirmWrites: patch.agentConfirmWrites } : {}),
+    };
+    if (next.density === this.#settings.density && next.agentConfirmWrites === this.#settings.agentConfirmWrites) return;
     this.#settings = next;
     this.#storage.set(SettingsModel.#KEY, JSON.stringify(next));
     this.#changed.fire();
@@ -39,8 +43,11 @@ export class SettingsModel implements ISettingsModel {
     const raw = storage.get(SettingsModel.#KEY);
     if (raw === null) return DEFAULTS;
     try {
-      const parsed = JSON.parse(raw) as { density?: unknown };
-      return { density: isDensity(parsed.density) ? parsed.density : DEFAULTS.density };
+      const parsed = JSON.parse(raw) as { density?: unknown; agentConfirmWrites?: unknown };
+      return {
+        density: isDensity(parsed.density) ? parsed.density : DEFAULTS.density,
+        agentConfirmWrites: typeof parsed.agentConfirmWrites === 'boolean' ? parsed.agentConfirmWrites : DEFAULTS.agentConfirmWrites,
+      };
     } catch {
       return DEFAULTS;
     }

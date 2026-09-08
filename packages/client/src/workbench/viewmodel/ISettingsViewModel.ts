@@ -8,4 +8,6 @@ export interface ISettingsViewModel {
   readonly density: Density;
   setTheme(theme: 'light' | 'dark'): void;
   setDensity(density: Density): void;
+  readonly agentConfirmWrites: boolean;
+  setAgentConfirmWrites(value: boolean): void;
 }

@@ -10,6 +10,7 @@ export class SettingsViewModel extends ViewModelBase implements ISettingsViewMod
   readonly #settingsModel: ISettingsModel;
   readonly #theme;
   readonly #density;
+  readonly #agentConfirmWrites;
 
   constructor({ themeModel, settingsModel }: { themeModel: IThemeModel; settingsModel: ISettingsModel }) {
     super();
@@ -17,8 +18,12 @@ export class SettingsViewModel extends ViewModelBase implements ISettingsViewMod
     this.#settingsModel = settingsModel;
     this.#theme = this.observe(atom<Theme>(themeModel.theme));
     this.#density = this.observe(atom<Density>(settingsModel.settings.density));
+    this.#agentConfirmWrites = this.observe(atom(settingsModel.settings.agentConfirmWrites));
     themeModel.onDidChange(() => this.#theme.set(themeModel.theme));
-    settingsModel.onDidChange(() => this.#density.set(settingsModel.settings.density));
+    settingsModel.onDidChange(() => {
+      this.#density.set(settingsModel.settings.density);
+      this.#agentConfirmWrites.set(settingsModel.settings.agentConfirmWrites);
+    });
   }
 
   get theme(): Theme {
@@ -35,5 +40,13 @@ export class SettingsViewModel extends ViewModelBase implements ISettingsViewMod
 
   setDensity(density: Density): void {
     this.#settingsModel.update({ density });
+  }
+
+  get agentConfirmWrites(): boolean {
+    return this.#agentConfirmWrites.get();
+  }
+
+  setAgentConfirmWrites(value: boolean): void {
+    this.#settingsModel.update({ agentConfirmWrites: value });
   }
 }

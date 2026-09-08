@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createWorkspaceTools, type WorkspaceAccess } from "./workspaceTools";
+import { createWorkspaceTools, isApproval, type WorkspaceAccess } from "./workspaceTools";
 
 const workspace: WorkspaceAccess = {
   list: (path) => Promise.resolve({ path, parent: null, entries: [{ name: "a.md", type: "file" }] }),
@@ -27,5 +27,12 @@ describe("createWorkspaceTools", () => {
     expect(await tools.execute("read_file", { path: 1 }, signal)).toMatchObject({ isError: true });
     expect(await tools.execute("unknown", {}, signal)).toMatchObject({ isError: true });
     expect(await tools.execute("create_entry", { path: "x", type: "link" }, signal)).toMatchObject({ isError: true });
+  });
+});
+
+describe("isApproval", () => {
+  it("예·yes·ok는 허락, 나머지는 거부다", () => {
+    expect(["예", "네 ", "yes", "OK", "y"].map(isApproval)).toEqual([true, true, true, true, true]);
+    expect(["아니오", "no", "예전에", "", "예? 잠깐"].map(isApproval)).toEqual([false, false, false, false, false]);
   });
 });

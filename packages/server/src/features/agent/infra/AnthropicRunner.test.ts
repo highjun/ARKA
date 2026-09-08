@@ -66,6 +66,7 @@ const contextOf = (input: string, answer = "예") => {
     runId: "r",
     input,
     mode: "action",
+    confirmWrites: false,
     history: [],
     signal: new AbortController().signal,
     emit: (event) => emitted.push(event),
@@ -105,6 +106,28 @@ describe("AnthropicRunner", () => {
     await new AnthropicRunner({ client, model: "test", tools }).run(ctx);
     expect(prompts).toEqual(["어느 파일?"]);
     expect(emitted.find((e) => e.type === "tool.result")).toMatchObject({ output: { answer: "b.md" } });
+  });
+
+  it("confirmWrites면 쓰기 툴 앞에서 묻고, 허락이 아니면 실행하지 않는다", async () => {
+    const executed: string[] = [];
+    const writing: IAgentTools = {
+      definitions: [{ name: "write_file", description: "w", inputSchema: { type: "object" } }],
+      execute: (name) => {
+        executed.push(name);
+        return Promise.resolve({ output: { ok: true }, isError: false });
+      },
+    };
+    const denied = clientOf([toolTurn("write_file", { path: "a.md", content: "x" }), textTurn("알겠다")]);
+    const { ctx, prompts, emitted } = contextOf("고쳐", "아니오");
+    await new AnthropicRunner({ client: denied, model: "test", tools: writing }).run({ ...ctx, confirmWrites: true });
+    expect(prompts[0]).toContain("write_file a.md");
+    expect(executed).toEqual([]);
+    expect(emitted.find((e) => e.type === "tool.result")).toMatchObject({ isError: true });
+
+    const allowed = clientOf([toolTurn("write_file", { path: "a.md", content: "x" }), textTurn("했다")]);
+    const approved = contextOf("고쳐", "예");
+    await new AnthropicRunner({ client: allowed, model: "test", tools: writing }).run({ ...approved.ctx, confirmWrites: true });
+    expect(executed).toEqual(["write_file"]);
   });
 
   it("거절되면 던진다 — 런타임이 run.error로 남긴다", async () => {

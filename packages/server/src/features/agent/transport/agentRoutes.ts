@@ -36,7 +36,7 @@ export const createAgentRoutes = ({ runManager, events }: { runManager: RunManag
   app.post("/api/agent/sessions/:id/runs", async (c) => {
     const body = StartRunRequest.safeParse(await c.req.json().catch(() => null));
     if (!body.success) return c.json({ code: "BadRequest", message: body.error.message }, 400);
-    return c.json(runManager.start(c.req.param("id"), body.data.input, body.data.mode), 202);
+    return c.json(runManager.start(c.req.param("id"), body.data.input, body.data.mode, { confirmWrites: body.data.confirmWrites }), 202);
   });
 
   app.post("/api/agent/sessions/:id/runs/:runId/input", async (c) => {

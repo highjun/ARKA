@@ -31,6 +31,8 @@ export type SessionResponse = z.infer<typeof SessionResponse>;
 export const StartRunRequest = z.object({
   input: z.string().min(1),
   mode: RunMode.default("action"),
+  /** 파일을 바꾸는 툴(write_file·create_entry) 앞에서 사용자에게 묻는다. 기본은 묻는다 — 안전한 쪽이 기본이다. */
+  confirmWrites: z.boolean().default(true),
 });
 export type StartRunRequest = z.infer<typeof StartRunRequest>;
 

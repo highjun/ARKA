@@ -15,6 +15,8 @@ export interface RunContext {
   readonly runId: RunId;
   readonly input: string;
   readonly mode: RunMode;
+  /** 파일을 바꾸는 툴 앞에서 `requestInput`으로 허락을 구해야 한다. */
+  readonly confirmWrites: boolean;
   /** 이 Run이 시작되기 전까지의 세션 이벤트 전부 — 대화 맥락이다. */
   readonly history: readonly AgentEvent[];
   /** 사용자가 끊으면 abort된다. 실행기는 이것을 LLM 요청·툴 프로세스에 전달해야 한다. */

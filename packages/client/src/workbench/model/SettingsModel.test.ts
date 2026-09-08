@@ -30,3 +30,13 @@ describe('SettingsModel', () => {
     expect(new SettingsModel({ storage }).settings.density).toBe('auto');
   });
 });
+
+describe('SettingsModel — 에이전트 확인', () => {
+  it('기본은 묻고, 끄면 저장된다', () => {
+    const storage = new MockStorage();
+    const model = new SettingsModel({ storage });
+    expect(model.settings.agentConfirmWrites).toBe(true);
+    model.update({ agentConfirmWrites: false });
+    expect(new SettingsModel({ storage }).settings.agentConfirmWrites).toBe(false);
+  });
+});
