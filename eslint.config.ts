@@ -10,9 +10,6 @@ export default [
 
   {
     files: ["**/*.{ts,tsx}"],
-    // 규칙을 켜지는 않고 플러그인만 등록한다. 흡수해 온 코드가 몇 자리에서
-    // `@typescript-eslint/*`를 eslint-disable로 지목하는데, 플러그인이 없으면
-    // 그 주석 자체가 "없는 규칙"이라며 에러가 된다.
     plugins: { "@typescript-eslint": tseslint.plugin },
     languageOptions: {
       parser: tseslint.parser,
@@ -32,6 +29,11 @@ export default [
       // 미정의로 본다. 각 패키지 tsconfig의 `types`가 전역을 정하고 tsc가
       // 검사하므로 여기서 중복해서 볼 이유가 없다.
       "no-undef": "off",
+      // 흡수해 온 코드가 몇 자리에서 이것들을 eslint-disable로 지목한다. 규칙이
+      // 꺼져 있으면 그 주석이 "쓸모없는 지시"로 남아 오히려 노이즈가 된다.
+      // 타입 정보가 필요 없는 것들만 켠다(parserOptions.project를 안 두므로).
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-empty-object-type": "error",
     },
   },
 

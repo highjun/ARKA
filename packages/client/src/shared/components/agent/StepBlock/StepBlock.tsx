@@ -85,7 +85,6 @@ const Root = forwardRef<HTMLDetailsElement, StepBlockRootProps>((props, ref) => 
   if (rest.kind === 'thinking') {
     // `kind`는 분기용 판별 필드일 뿐 DOM에 흘려보내면 안 되는 값이라(항상 값이 있어
     // `undefined` spread로 자연 소거되는 `Tab.tsx`의 `tree?: never`와 달리) 의도적으로 버린다.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { kind: _kind, title = '생각 중', summary, emptyLabel = '생각 내용이 없습니다.', ...detailsProps } = rest;
 
     return (
@@ -113,7 +112,6 @@ const Root = forwardRef<HTMLDetailsElement, StepBlockRootProps>((props, ref) => 
   }
 
   // 위 `kind='thinking'` 분기와 같은 이유로 판별 필드를 의도적으로 버린다.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { kind: _kind, toolId, toolInput, toolOutput, ...detailsProps } = rest;
   const hasBody = toolInput !== undefined || toolOutput !== undefined;
 
