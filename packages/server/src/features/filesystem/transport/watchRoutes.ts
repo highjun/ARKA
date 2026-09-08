@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import { FileError } from "../domain/errors";
 import { MAX_WATCH_PATHS, resolveWatchPaths, watchPaths } from "../infra/watchOperations";
+import { fileErrorResponse } from "./fileErrorHandler";
 
 /**
  * 폰 브라우저·중간 프록시가 조용한 연결을 끊는다. 클라이언트의 idle-timeout(45s)이 이
@@ -47,6 +48,13 @@ export function createWatchRoutes(workspaceRoot: string): Hono {
       // 스트림은 클라이언트가 끊을 때까지 열어 둔다.
       await new Promise<void>((resolve) => stream.onAbort(resolve));
     });
+  });
+
+  // `fsRoutes`와 같은 번역기를 건다 — 루트 밖 감시 요청이 500이 아니라 403으로 나가게.
+  app.onError((error, c) => {
+    const response = fileErrorResponse(error, c);
+    if (response === undefined) throw error;
+    return response;
   });
 
   return app;

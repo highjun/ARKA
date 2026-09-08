@@ -1,12 +1,6 @@
 import { stat } from "node:fs/promises";
-import {
-  CreateEntryRequest,
-  MoveEntryRequest,
-  WriteFileRequest,
-  type FileErrorCode,
-} from "contracts";
+import { CreateEntryRequest, MoveEntryRequest, WriteFileRequest } from "contracts";
 import { Hono } from "hono";
-import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { FileError } from "../domain/errors";
 import {
   createEntry,
@@ -18,6 +12,7 @@ import {
   resolveWithin,
   writeFileContent,
 } from "../infra/fileOperations";
+import { fileErrorResponse } from "./fileErrorHandler";
 
 /**
  * `/api/files*` 라우트. 핸들러는 검증하고 조작을 부르고 응답만 만든다.
@@ -98,50 +93,12 @@ export function createFsRoutes(workspaceRoot: string): Hono {
   });
 
   // 조작이 던진 것을 HTTP로 옮기는 자리. 라우트마다 try/catch를 두지 않는다.
+  // 파일 오류가 아니면 다시 던져 앱 루트가 받게 한다.
   app.onError((error, c) => {
-    if (error instanceof FileError) {
-      return c.json({ code: error.code, message: error.message }, statusOf(error.code));
-    }
-    const code = (error as NodeJS.ErrnoException).code;
-    const mapped = fromErrno(code);
-    return c.json({ code: mapped, message: error.message }, statusOf(mapped));
+    const response = fileErrorResponse(error, c);
+    if (response === undefined) throw error;
+    return response;
   });
 
   return app;
-}
-
-function fromErrno(code: string | undefined): FileErrorCode {
-  switch (code) {
-    case "ENOENT":
-      return "NotFound";
-    case "EACCES":
-    case "EPERM":
-      return "NoPermission";
-    case "EEXIST":
-      return "Exists";
-    case "EISDIR":
-      return "IsADirectory";
-    case "ENOTDIR":
-      return "NotADirectory";
-    default:
-      return "Unavailable";
-  }
-}
-
-function statusOf(code: FileErrorCode): ContentfulStatusCode {
-  switch (code) {
-    case "NotFound":
-      return 404;
-    case "NoPermission":
-      return 403;
-    case "Exists":
-    case "Conflict":
-      return 409;
-    case "IsADirectory":
-    case "NotADirectory":
-      // 대상은 있는데 요청이 그 종류를 잘못 짚은 것이다.
-      return 400;
-    case "Unavailable":
-      return 503;
-  }
 }
