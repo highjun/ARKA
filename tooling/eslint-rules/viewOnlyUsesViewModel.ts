@@ -13,8 +13,8 @@ const DI_ACCESSORS = new Set(["useAppContext"]);
  * DI 접근(`useAppContext`, `container.resolve`)도 막는다. 그걸 열어두면 View가 어떤 것이든
  * 꺼내 쓸 수 있어 의존이 계약에 드러나지 않는다.
  *
- * 조립 루트(`app/`)는 대상 글롭에 안 걸리므로 예외를 따로 두지 않는다 — 전역 배선은 거기
- * 모이고, 그 파일은 View가 아니다.
+ * 조립부(`workbench/registerServices.tsx`)는 대상 글롭에 안 걸리므로 예외를 따로 두지 않는다
+ * — 그 파일은 View가 아니다. 전역 배선은 `workbench/infra/`의 기여들이 건다.
  */
 export const viewOnlyUsesViewModel: Rule.RuleModule = {
   meta: {

@@ -22,7 +22,7 @@
 - `contracts`는 `client`·`server`를 import하지 않는다.
 - `client`와 `server`는 서로 import하지 않는다.
 - 공유가 필요하면 `contracts`에 두고 패키지명으로 가져온다 — `import { URI } from "contracts"`. tsconfig `paths` 별칭은 쓰지 않는다(tsc만 알아서 vitest·node에서 깨진다).
-- 위 세 줄은 `eslint.config.ts`의 `import-x/no-restricted-paths`가 강제한다. 위반하면 어디로 옮기라는 안내가 함께 나온다.
+- 위 **두 줄**(`contracts`·`client`↔`server`)은 `eslint.config.ts`의 `import-x/no-restricted-paths`가 강제한다. 위반하면 어디로 옮기라는 안내가 함께 나온다. **셋째 줄(패키지명 import·`paths` 금지)은 아직 강제되지 않는다** — 리뷰로 본다. → [린트 설계](docs/lint-plan.md)
 
 ## 코드 구조
 

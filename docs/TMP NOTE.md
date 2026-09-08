@@ -1,49 +1,3 @@
-TMP NOTE
-
-필요한 ADR들을 먼저 리스트업해줘.
-추가로 ADR에 있는 결정 중 객관적인 내용은 린트로 강제한다.
-ADR 결정 중 단순 취향(실제 구현에 영향이 없는 부분)으로 수정해서 린트 규칙을 쉽게 적용할 수 있는 형태로 할 수 있다면, 그렇게 수정할 수 있다.
-
-## 5. DI
-
-### 결정
-
-| 대상 | 결정 | 이유 |
-|---|---|---|
-| 클라이언트 | **자체 구현 (~100줄)** | 번들 경량, React 라이프사이클 통제, 필요 기능이 적음 |
-| 서버 | **Awilix** (서비스 3~4개 넘을 때) | Session/Run 스코프 + disposer가 정확히 이 용도 |
-
-기각: Inversify(reflect-metadata로 무거움), 클라이언트에 Awilix(Proxy 기반이라 트리쉐이킹 불리)
-
-**자체 구현에 시간을 많이 쓰지 말 것.** 100줄 이상 정교해지고 싶어지면 라이브러리로 갈아타는 게 맞다.
-
-### 필수 기능
-
-- 토큰 기반 (symbol) — 문자열 키 대신
-- 계층 스코프
-- dispose
-- 순환 의존 감지 (없으면 스택 오버플로로 터지고 원인 추적이 매우 어려움)
-
-### 스코프 규칙
-
-```
-Root
- ├─ 공유 서비스
- └─ ChildScope
-      자기 서비스
-```
-
-- **위로만 참조** (자식 → 부모). 형제는 볼 수 없음
-- **아래로만 정리** (dispose 전파)
-- 공유하려면 부모 스코프에 등록
-- 자식에 같은 토큰 재등록 = 오버라이드 (테스트 mock)
-
-**React StrictMode 주의**: effect 이중 실행으로 스코프가 즉시 dispose될 수 있음. 개발 중 "VM이 죽었다"는 증상이 나오면 여기를 의심.
-
-### 원칙
-
-**모든 걸 DI에 넣지 말 것.** 순수 함수 유틸은 그냥 import. DI는 "교체 가능성이 있거나 라이프사이클이 있는 것"에만.
-
 
 ## Server 구조
 ### services vs runtime
@@ -463,59 +417,12 @@ CD가 아니라 **CI의 릴리스 잡**이다. 배포할 서버가 없으므로.
 
 > **검토 부담이 커지면 그건 구조 문제다.** 공개 표면이 넓어졌거나, feature 경계가 흐려졌거나, 계약 없이 구현부터 갔거나. 더 열심히 보는 게 아니라 구조를 조이거나 린트 규칙을 추가한다.
 
----
-
-## 14. 도입 순서
-
 ### 3원칙
 
 1. **강제 장치가 대상보다 먼저** — 린트 → features, 토큰 → 컴포넌트, Stylelint → CSS
 2. **추상화는 사례 2~3개 뒤에** — Event Bus, Contribution Point, 서버 DI
 3. **되돌리기 비싼 것을 먼저** — contracts, 이벤트 스키마, 의존 방향, 인증 자리
 
-### Phase 0 — 리포 골격
-
-workspace → tsconfig → contracts 첫 타입(URI, 에러 코드) → 린트 경계 규칙 → Vitest → **filesystem zod 스키마** → 서버 `/fs/read` → 클라 호출 확인
-
-**완료 = 파일 하나 읽는 왕복이 타입으로 완결.** 여기가 되면 나머지 API는 같은 패턴의 반복.
-
-### Phase 1 — 클라이언트 기반
-
-core/types(Disposable, Emitter) → core/di → **디자인 토큰** → Stylelint → Radix+CSS Modules → shared/ui 최소 → Storybook → transport → 레이아웃 껍데기 + `useIsMobile()` → feature 경계 규칙 → 스캐폴딩
-
-**토큰이 컴포넌트보다 먼저.** 컴포넌트를 먼저 만들면 색을 하드코딩하고 나중에 전부 고쳐야 한다.
-
-### Phase 2 — 파일시스템
-
-서버 계층 → Workspace·인증 자리 → 프로바이더 → SSE → 클라 model → **첫 계약 테스트** → MobX 도입 → VM 인터페이스(리뷰) → view → 에러 처리 정책 → docker-compose → CI 완성
-
-**첫 계약 테스트를 잘 만들어두면 이후 에이전트가 그 패턴을 따른다.**
-
-### Phase 3 — 에디터
-
-라이브러리 결정(모바일 편집 때문에 **CodeMirror 6 유력**) → TextDocument → IEditorAdapter(리뷰) → 어댑터 구현 → EditorVM → 탭 스코프 → **테마 어댑터** → 저장·충돌 감지
-
-### Phase 4 — 통합
-
-**Command Registry → Context Key → 키바인딩 → 커맨드 팔레트** (함께 해야 효율적) → i18n 문자열 수집 → Event Bus 추출 → 레이아웃 재설계 → 밀도 모드 → MobileShell → 포커스 관리
-
-Command Registry가 키보드·팔레트·모바일 진입점·i18n·에러 재시도·익스텐션 기여의 **결절점**이다. Context Key 없이 커맨드만 있으면 단축키가 충돌한다.
-
-### Phase 5 — 에이전트
-
-**이벤트 로그 스키마(리뷰, 가장 중요)** → 시퀀싱·재개 → runtime 계층 → 서버 DI + Session/Run 스코프 → 스트림·배칭 → IToolExecutor → LLM 어댑터 → HITL 승인
-
-**스키마 설계에 시간을 충분히 쓸 것.** 여기서 틀리면 저장소·전송·클라이언트를 전부 되돌린다.
-
-### Phase 6 — 제품화
-
-릴리스 파이프라인 → Docker 스모크 → Watchtower(dev) → install.sh → doctor → 터널링 문서 → 라이트 테마 → 시각 회귀
-
-### Phase 7 — 플러그인
-
-**공개 API 안정화** → Contribution Point → app→workbench, features→extensions → 라이프사이클 → Extension Host → 테마 변수 공개
-
----
 
 ## 15. 리뷰 필수 지점
 
@@ -536,34 +443,23 @@ Command Registry가 키보드·팔레트·모바일 진입점·i18n·에러 재�
 
 | # | 제목 | 기각한 것 |
 |---|---|---|
-| 0001 | 모노레포 pnpm | Turborepo, Nx |
 | 0002 | contracts 패키지 + zod | 각자 정의 후 수동 동기화 |
-| 0003 | URI vs string path | string path (스킴 구분 불가) |
 | 0004 | 프로토콜 버저닝 | 버전 없이 시작 |
-| 0005 | MVVM + MobX | Zustand (타입/구현 한 덩어리) |
-| 0006 | model/infra 분리 | Model에 I/O 포함 (추상·구체 혼재) |
-| 0007 | 클라이언트 DI 자체 구현 | Inversify, Awilix |
 | 0008 | Radix + CSS Modules | Tailwind, Primer 컴포넌트, MUI |
 | 0009 | 디자인 토큰 2층 (Primer 값 복사) | 자체 팔레트 설계, npm 의존성 |
 | 0010 | 로컬 전용 배포 | 클라우드 호스팅 |
 | 0011 | SQLite | Postgres, Kafka |
 
-각 4줄. **"왜 이렇게 안 했는가" 필수.**
+필요한 ADR들을 먼저 리스트업해줘.
+추가로 ADR에 있는 결정 중 객관적인 내용은 린트로 강제한다.
+ADR 결정 중 단순 취향(실제 구현에 영향이 없는 부분)으로 수정해서 린트 규칙을 쉽게 적용할 수 있는 형태로 할 수 있다면, 그렇게 수정할 수 있다.
 
 
 TMP
-
-
-마지막으로 기타 내용들을 관리하자.
-- Testing
-    - Vitest 별개 코드가 필요한 거 없지?
-    - 스토리북 운영(`.storybook/`)
-    - VRT: 스토리북 기반으로 하되, 전역에서 관리하기
-    - test/{vrt, e2e}로 하면 좋을 듯
-
-- test/e2e/ 로 test 관련 로직을 하나의 폴더로 묶기
-- dist/는 아예 별개로 따로 두어야 할듯? 서버와 클라이언트랑 같이 가야 하는 거 아냐?
+- client/test/{vrt,e2e}으로 client/ 안에서 전역적인 test 관련 로직을 하나의 폴더로 묶기
 - .output/로 storybook-static 옮기기
+
+- dist/는 아예 별개로 따로 두어야 할듯? 서버와 클라이언트랑 같이 가야 하는 거 아냐?
 - index.html을 src/workbench 안으로 옮기는 건?
 
 - Lint 규칙
