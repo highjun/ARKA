@@ -32,8 +32,6 @@ export default defineConfig({
         // 자산)만 프리캐시한다. 새 빌드가 뜨면 SW가 갱신되고 클라이언트가 스스로 새로고침한다.
         navigateFallbackDenylist: [/^\/api\//u],
         globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
-        // 앱 번들이 한 청크(2.5MB)라 workbox 기본 상한(2MB)에 걸린다. 청크 분할은 TASK-25.
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
@@ -43,7 +41,24 @@ export default defineConfig({
     }),
   ],
   // 배포 단위는 루트 dist/ 하나다(→ ADR 0013) — 서버 번들(dist/server)과 나란히 놓인다.
-  build: { outDir: "../../dist/client", emptyOutDir: true },
+  build: {
+    outDir: "../../dist/client",
+    emptyOutDir: true,
+    // 벤더를 청크로 나눈다 — 앱 코드가 바뀌어도 CodeMirror·Primer·React 청크는 캐시에 남고, PWA 프리캐시
+    // 항목 하나가 2MB를 넘지 않는다.
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            { name: "codemirror", test: /node_modules[\\/]@(?:codemirror|lezer)[\\/]/u },
+            { name: "primer", test: /node_modules[\\/]@primer[\\/]/u },
+            { name: "radix", test: /node_modules[\\/]@radix-ui[\\/]/u },
+            { name: "react", test: /node_modules[\\/](?:react|react-dom|scheduler)[\\/]/u },
+          ],
+        },
+      },
+    },
+  },
   server: {
     // 클라이언트는 `/api/*`를 같은 출처로 부른다 — dev에서도 그 전제가 깨지지 않게
     // 서버로 넘긴다. SSE(`/api/files/watch`)가 버퍼링되지 않도록 프록시를 쓴다.
