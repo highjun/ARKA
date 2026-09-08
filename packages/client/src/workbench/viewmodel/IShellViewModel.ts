@@ -67,6 +67,13 @@ export type ShellActivityRow = {
   readonly isActive: boolean;
 };
 
+/** 알림 한 줄 — `INotificationService`의 것에서 화면이 쓰는 필드만. */
+export type ShellNotificationRow = {
+  readonly id: string;
+  readonly severity: 'info' | 'warning' | 'error';
+  readonly message: string;
+};
+
 export const ShellViewModelToken = createToken<IShellViewModel>("shellViewModel");
 /**
  * Shell 의 화면 상태.
@@ -163,6 +170,10 @@ export interface IShellViewModel {
   readonly isClientOutdated: boolean;
   /** 앱을 다시 불러온다. 낡은 클라이언트 띠의 버튼이 부른다. */
   reloadApp(): void;
+
+  /** 화면 구석에 쌓인 알림. 닫을 때까지 남는다. */
+  readonly notifications: readonly ShellNotificationRow[];
+  dismissNotification(id: string): void;
   readonly theme: string;
   toggleTheme(): void;
 

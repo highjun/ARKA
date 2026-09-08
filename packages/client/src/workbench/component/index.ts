@@ -1,5 +1,7 @@
 export { ActivityBar } from './ActivityBar';
 export type { ActivityBarItem, ActivityBarProps, ActivityBarRootProps } from './ActivityBar';
+export { NotificationList } from './NotificationList';
+export type { NotificationListItem, NotificationListProps } from './NotificationList';
 export { CrashScreen } from './CrashScreen';
 export type { CrashScreenProps } from './CrashScreen';
 export { ErrorBoundary } from './ErrorBoundary';

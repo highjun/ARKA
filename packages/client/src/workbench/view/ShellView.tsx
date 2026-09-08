@@ -7,7 +7,7 @@ import { useViewModel } from '#core/view-model';
 import { Button } from '@primer/react';
 import { ContextMenu, Icon, ModeToggle, Text } from '#components/common';
 import { Dialog } from '#components/layout';
-import { CommandPalette, Shell, Tab, UpdateBanner } from '../component';
+import { CommandPalette, NotificationList, Shell, Tab, UpdateBanner } from '../component';
 import type { IconId } from '#components/common';
 import type { TabItem, TabTreeNode } from '../component';
 import type { ReactNode } from 'react';
@@ -237,6 +237,8 @@ export const ShellView = () => {
           }
         />
       </Shell>
+
+      <NotificationList items={viewModel.notifications} onDismiss={(id) => viewModel.dismissNotification(id)} />
 
       {pendingTabClose === null ? null : (
         <Dialog

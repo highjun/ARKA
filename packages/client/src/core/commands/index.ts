@@ -1,4 +1,3 @@
 export { CommandCenterRegistry } from "./CommandCenterRegistry";
-export type { ICommandCenterRegistry } from "./ICommandCenterRegistry";
-export { CommandCenterRegistryToken } from "./tokens";
+export { CommandCenterRegistryToken, type ICommandCenterRegistry } from "./ICommandCenterRegistry";
 export { CommandContextMenu } from "./CommandMenuView";

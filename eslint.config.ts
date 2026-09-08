@@ -167,6 +167,21 @@ export default [
   },
 
   {
+    // DI 토큰은 자기 계약 파일(`I<Name>.ts`)에 둔다 — 슬라이스 루트의 `tokens.ts`는 모든 계약을
+    // import하는 역방향 허브가 된다(→ ADR 0005). 파일이 하나라도 생기면 그 파일 전체가 에러다.
+    files: ["packages/client/src/**/tokens.ts"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Program",
+          message: "tokens.ts를 두지 않습니다. 토큰은 그 계약 파일(I<Name>.ts)에서 createToken으로 함께 내보내세요.",
+        },
+      ],
+    },
+  },
+
+  {
     // 던더 폴더를 쓰지 않는다 — 같은 것을 폴더명과 파일명 두 군데로 표시하게 된다.
     // 파일이 하나라도 들어오면 그 파일 전체가 에러가 된다.
     files: ["**/__tests__/**", "**/__mocks__/**", "**/__fixtures__/**", "**/__snapshots__/**"],

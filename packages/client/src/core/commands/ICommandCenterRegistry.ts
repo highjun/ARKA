@@ -1,3 +1,4 @@
+import { createToken } from '#core/di';
 import type { ActionDescriptor, ActionRegistry, ContextDescriptor as CoreContextDescriptor, ContextRegistry as CoreContextRegistry } from '#core/action';
 import type {
   KeybindingDescriptor as CoreKeybindingDescriptor,
@@ -39,6 +40,7 @@ export type MenuRegistry = CoreMenuRegistry;
  * 넷 다 `@arka/core`의 `createRegistry()`로 이 Registry가 만들고, 앱 시작 시(`application.tsx`)
  * 한 번 채워진다.
  */
+export const CommandCenterRegistryToken = createToken<ICommandCenterRegistry>('commandCenterRegistry');
 export interface ICommandCenterRegistry {
   readonly commandRegistry: CommandRegistry;
   readonly contextRegistry: ContextRegistry;

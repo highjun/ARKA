@@ -2,7 +2,7 @@ import { matchMenuItems } from '#core/menu';
 import { useViewModel } from '#core/view-model';
 import { ContextMenu } from '#components/common';
 import type { ReactNode } from 'react';
-import { CommandCenterRegistryToken } from './tokens';
+import { CommandCenterRegistryToken } from './ICommandCenterRegistry';
 
 /**
  * 다른 모듈이 자기 컨텍스트 메뉴를 갖고 싶을 때 쓰는 자리 — `menuId`로 등록된 `MenuItemDescriptor`를

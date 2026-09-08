@@ -2,6 +2,7 @@ import { createRegistry } from '#core';
 import type { ITabDirtyState } from '../model/ITabDirtyState';
 import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
 import type { IServerInfo } from '../model/IServerInfo';
+import { NotificationService } from '../model/NotificationService';
 import type { ICommandCenterRegistry } from '#core/commands';
 import { ActivityModel } from '../model/ActivityModel';
 import { ROOT_PANE_ID } from '../model/tabsShare';
@@ -65,11 +66,12 @@ const fakeStartup = (): IWorkbenchStartup & { started: boolean } => {
 
 /** 진짜 Model 을 조립한다 — I/O 가 없어 바꿔 낄 이유가 없다. `activityBarRegistry`는 탐색기
  *  하나만 등록한 가짜다 — 진짜(`registerServices.tsx`)와 같은 모양이면 충분하다. */
-const make = (serverInfo: IServerInfo = { load: () => Promise.resolve(null) }): { tabsModel: ITabsModel; viewModel: IShellViewModel; tabDirtyState: ITabDirtyState & { dirty: Set<string> }; startup: IWorkbenchStartup & { started: boolean } } => {
+const make = (serverInfo: IServerInfo = { load: () => Promise.resolve(null) }): { tabsModel: ITabsModel; viewModel: IShellViewModel; tabDirtyState: ITabDirtyState & { dirty: Set<string> }; startup: IWorkbenchStartup & { started: boolean }; notificationService: NotificationService } => {
   const activityBarRegistry: IActivityBarRegistry = createRegistry();
   activityBarRegistry.add({ id: 'explorer', title: '탐색기', iconId: 'files' });
   const tabDirtyState = fakeTabDirtyState();
   const startup = fakeStartup();
+  const notificationService = new NotificationService({ newId: () => 'n' });
   const storage = fakeStorage();
   const activityModel = new ActivityModel();
   const tabsModel = new TabsModel({ storage });
@@ -82,11 +84,12 @@ const make = (serverInfo: IServerInfo = { load: () => Promise.resolve(null) }): 
     tabDirtyState,
     startup,
     serverInfo,
+    notificationService,
     commandCenterRegistry: fakeCommandCenterRegistry(),
     copyToClipboard: () => undefined,
     reloadApp: () => undefined,
   });
-  return { tabsModel, viewModel, tabDirtyState, startup };
+  return { tabsModel, viewModel, tabDirtyState, startup, notificationService };
 };
 
 const activeIds = (viewModel: IShellViewModel): string[] =>
@@ -832,5 +835,15 @@ describe('IShellViewModel — openTab', () => {
     viewModel.openTab({ id: 'chat-1', kind: 'chat', title: '대화' });
     expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(['chat-1', 'a.md']);
     expect(activeLeafOf(viewModel).activeTabId).toBe('chat-1');
+  });
+});
+
+describe('IShellViewModel — 알림', () => {
+  it('알림 서비스의 것을 그대로 내고, 닫으면 사라진다', () => {
+    const { viewModel, notificationService } = make();
+    notificationService.notify('error', '실패');
+    expect(viewModel.notifications).toEqual([{ id: 'n', severity: 'error', message: '실패' }]);
+    viewModel.dismissNotification('n');
+    expect(viewModel.notifications).toEqual([]);
   });
 });

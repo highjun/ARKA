@@ -31,6 +31,7 @@ import { createWorkspaceWatchPort } from "../extensions/filesystem/infra/HttpWor
 import { DirectoryTreeView } from "../extensions/filesystem/view/DirectoryTreeView";
 import { FileContentView } from "../extensions/filesystem/view/FileContentView";
 import { createDocumentTheme } from "./infra/DocumentTheme";
+import { createErrorNotifier } from "./infra/ErrorNotifier";
 import { createGlobalErrorHandlers } from "./infra/GlobalErrorHandlers";
 import { createGlobalKeybindings } from "./infra/GlobalKeybindings";
 import { createServerInfoPort } from "./infra/HttpServerInfo";
@@ -41,6 +42,8 @@ import { ActivityBarRegistry } from "./model/ActivityBarRegistry";
 import { ActivityModel } from "./model/ActivityModel";
 import { ErrorLog } from "./model/ErrorLog";
 import { ErrorLogToken } from "./model/IErrorLog";
+import { NotificationService } from "./model/NotificationService";
+import { NotificationServiceToken } from "./model/INotificationService";
 import { SidebarContentRegistry } from "./model/SidebarContentRegistry";
 import { TabContentRegistry } from "./model/TabContentRegistry";
 import { TabsModel } from "./model/TabsModel";
@@ -64,6 +67,7 @@ const DocumentThemeToken = createToken<IWorkbenchStartup>("startup.documentTheme
 const UnloadGuardToken = createToken<IWorkbenchStartup>("startup.unloadGuard");
 const GlobalKeybindingsToken = createToken<IWorkbenchStartup>("startup.globalKeybindings");
 const GlobalErrorHandlersToken = createToken<IWorkbenchStartup>("startup.globalErrorHandlers");
+const ErrorNotifierToken = createToken<IWorkbenchStartup>("startup.errorNotifier");
 /** 위 다섯을 합친 것 — `ShellViewModel`이 이것 하나만 받는다. */
 const WorkbenchStartupToken = createToken<IWorkbenchStartup>("workbenchStartup");
 
@@ -111,6 +115,7 @@ export function createApplication(): Container {
   container.register(WorkbenchStartupRegistryToken, singleton(() => new WorkbenchStartupRegistry()));
 
   container.register(ErrorLogToken, singleton(() => new ErrorLog()));
+  container.register(NotificationServiceToken, singleton(() => new NotificationService()));
   container.register(ActivityModelToken, singleton(() => new ActivityModel()));
   container.register(
     TabsModelToken,
@@ -201,6 +206,10 @@ export function createApplication(): Container {
     scoped((c) => createGlobalErrorHandlers({ errorLog: c.resolve(ErrorLogToken) })),
   );
   container.register(
+    ErrorNotifierToken,
+    scoped((c) => createErrorNotifier({ errorLog: c.resolve(ErrorLogToken), notifications: c.resolve(NotificationServiceToken) })),
+  );
+  container.register(
     GlobalKeybindingsToken,
     scoped((c) =>
       createGlobalKeybindings({ commandCenterRegistry: c.resolve(CommandCenterRegistryToken) }),
@@ -242,6 +251,7 @@ export function createApplication(): Container {
           tabDirtyState: c.resolve(TabDirtyStateToken),
           startup: c.resolve(WorkbenchStartupToken),
           serverInfo: c.resolve(ServerInfoToken),
+          notificationService: c.resolve(NotificationServiceToken),
           commandCenterRegistry: c.resolve(CommandCenterRegistryToken),
           copyToClipboard,
           reloadApp,
@@ -252,6 +262,7 @@ export function createApplication(): Container {
   const startupRegistry = container.resolve(WorkbenchStartupRegistryToken);
   // 오류 핸들러가 첫째다 — 뒤의 기여가 켜지다 던져도 잡힌다.
   startupRegistry.add({ id: "globalErrorHandlers", token: GlobalErrorHandlersToken });
+  startupRegistry.add({ id: "errorNotifier", token: ErrorNotifierToken });
   startupRegistry.add({ id: "documentTheme", token: DocumentThemeToken });
   startupRegistry.add({ id: "globalKeybindings", token: GlobalKeybindingsToken });
   startupRegistry.add({ id: "unloadGuard", token: UnloadGuardToken });

@@ -43,7 +43,7 @@ ADR의 결정 중 **기계가 판정할 수 있는 것**을 도구로 옮기는 
 
 | 규칙 | 위반 | 할 일 |
 |---|---|---|
-| DI 토큰은 자기 계약 파일에(`tokens.ts` 금지) | **1** | `core/commands/tokens.ts`를 `ICommandCenterRegistry.ts`로 병합. `registerServices.tsx`의 비-export 로컬 토큰 5개는 조립 디테일이라 규칙 대상 밖 |
+| ~~DI 토큰은 자기 계약 파일에(`tokens.ts` 금지)~~ | 0 | 2026-09-09 병합 완료, `**/tokens.ts` 금지 규칙 켬 |
 | `it()` 이름은 한글 | **78** (20개 파일) | 기계적 번역. `core/`(26)·`shared/components/`(13)에 편중 |
 
 ## 규칙으로 만들지 않는 것

@@ -5,13 +5,14 @@ import type { ITabDirtyState } from '../model/ITabDirtyState';
 import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
 import { PROTOCOL_VERSION } from 'contracts';
 import type { IServerInfo } from '../model/IServerInfo';
+import type { INotificationService } from '../model/INotificationService';
 import type { IActivityBarRegistry } from '../model/IActivityBarRegistry';
 import type { IActivityModel } from '../model/IActivityModel';
 import type { ICommandCenterRegistry } from '#core/commands';
 import { ROOT_PANE_ID } from '../model/tabsShare';
 import type { OpenTab, PaneId, TabPaneLeaf, TabPaneNode, TabSplitOrientation, ITabsModel } from '../model/ITabsModel';
 import type { IThemeModel } from '../model/IThemeModel';
-import type { ShellActivityRow, ShellTabPaneNode, ShellTabRow, IShellViewModel, SplitEdgeDropPosition, TabContextTarget } from './IShellViewModel';
+import type { ShellActivityRow, ShellTabPaneNode, ShellTabRow, IShellViewModel, SplitEdgeDropPosition, TabContextTarget, ShellNotificationRow } from './IShellViewModel';
 
 /** `IShellViewModel`의 유일한 구현체 — `IActivityModel`·`ITabsModel`·`IThemeModel`을 조합해 화면 상태를 파생시킨다. */
 /**
@@ -51,6 +52,8 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   readonly #buildId = this.observe(atom(''));
   readonly #isClientOutdated = this.observe(atom(false));
   readonly #reloadApp: () => void;
+  readonly #notificationService: INotificationService;
+  readonly #notifications;
   readonly #activities;
   readonly #tree;
   readonly #activeLeafId;
@@ -77,6 +80,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     tabDirtyState,
     startup,
     serverInfo,
+    notificationService,
     commandCenterRegistry,
     copyToClipboard,
     reloadApp,
@@ -88,6 +92,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     tabDirtyState: ITabDirtyState;
     startup: IWorkbenchStartup;
     serverInfo: IServerInfo;
+    notificationService: INotificationService;
     commandCenterRegistry: ICommandCenterRegistry;
     /** `no-restricted-globals`가 ViewModel의 `navigator` 직접 참조를 막는다 — 조립부(`app/`,
      *  대상 아님)가 이 얇은 함수를 주입한다(`DirectoryTreeViewModel`과 같은 패턴). */
@@ -103,8 +108,10 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     this.#tabDirtyState = tabDirtyState;
     this.#startup = startup;
     this.#serverInfo = serverInfo;
+    this.#notificationService = notificationService;
     this.#copyToClipboard = copyToClipboard;
     this.#reloadApp = reloadApp;
+    this.#notifications = this.observe(atom(this.#computeNotifications()));
 
     // Model은 값과 이벤트만 준다 — 파생된 화면 상태(atom)는 전부 여기서 소유한다.
     this.#activities = this.observe(atom(this.#computeActivities()));
@@ -118,6 +125,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
       themeModel.onDidChange(() => this.#recompute()),
       // dirty가 바뀌면 탭 표시가 달라진다 — 무엇이 더러워졌는지는 모르고 다시 계산만 한다.
       tabDirtyState.onDidChange(() => this.#recompute()),
+      notificationService.onDidChange(() => this.#notifications.set(this.#computeNotifications())),
     ];
 
     this.#registerCommands(commandCenterRegistry);
@@ -366,6 +374,18 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
 
   reloadApp(): void {
     this.#reloadApp();
+  }
+
+  get notifications(): readonly ShellNotificationRow[] {
+    return this.#notifications.get();
+  }
+
+  dismissNotification(id: string): void {
+    this.#notificationService.dismiss(id);
+  }
+
+  #computeNotifications(): readonly ShellNotificationRow[] {
+    return this.#notificationService.notifications.map(({ id, severity, message }) => ({ id, severity, message }));
   }
 
   get theme(): string {
