@@ -136,6 +136,12 @@ export interface IShellViewModel {
   previewFile(path: string): void;
 
   /**
+   * 파일이 아닌 탭을 **고정으로** 연다 — 대화, 설정 같은 것. 이미 열려 있으면 그 탭으로 간다.
+   * `kind`는 `ITabContentRegistry`가 아는 것이어야 화면에 내용이 생긴다. 지금 포커스된 leaf 기준이다.
+   */
+  openTab(tab: { readonly id: string; readonly kind: string; readonly title: string }): void;
+
+  /**
    * 미리보기 탭(`isPreview`)을 고정한다 — 이미 고정돼 있으면(또는 다른 탭이 미리보기 자리에
    * 있으면) 아무 일도 없다. `previewFile`의 "같은 파일을 다시 열면 고정된다"와 같은 동작을
    * 탭 스트립 쪽 상호작용(미리보기 탭 더블클릭)에서도 쓸 수 있게 별도로 연다.

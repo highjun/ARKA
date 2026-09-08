@@ -18,6 +18,8 @@ export type SidebarContentDescriptor = {
     /** 파일 행을 더블클릭했다 — 미리보기 탭을 고정한다(`IShellViewModel.pinTab`, Tab 헤더
      *  더블클릭과 같은 뜻). */
     readonly onFilePin: (path: string) => void;
+    /** 파일이 아닌 탭을 연다(`IShellViewModel.openTab`) — 대화 세션 같은 것. */
+    readonly onOpenTab: (tab: { readonly id: string; readonly kind: string; readonly title: string }) => void;
   }>;
 };
 
