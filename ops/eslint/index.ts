@@ -51,7 +51,7 @@ const base: Linter.Config[] = [
     },
   },
 
-  // 테스트 이름은 한글로. 실패 출력이 곧 리뷰 대상이다(→ ADR 0002, 0008).
+  // 테스트 이름은 한글로. 실패 출력이 곧 리뷰 대상이다(→ ADR 0008).
   {
     files: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}", "**/*.contract.ts"],
     rules: {

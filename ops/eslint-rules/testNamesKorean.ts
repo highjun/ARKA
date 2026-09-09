@@ -23,7 +23,7 @@ const textOf = (node: Rule.Node & { type: "Literal" | "TemplateLiteral" }): stri
   node.type === "Literal" ? String(node.value) : node.quasis.map((q) => q.value.cooked ?? q.value.raw).join(" ");
 
 /**
- * `it()`/`test()` 이름은 한글 문장이다(→ ADR 0002, 0008). `describe`는 대상 식별자라 대상이 아니다.
+ * `it()`/`test()` 이름은 한글 문장이다(→ ADR 0008). `describe`는 대상 식별자라 대상이 아니다.
  *
  * 판정은 "한글이 하나라도 있는가"다 — 식별자(`onValueChange`, `data-token`)가 섞인 한글 문장은 통과하고,
  * 영문만 있는 문장은 걸린다.
