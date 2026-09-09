@@ -1,0 +1,39 @@
+# ADR 0019: 에이전트 도메인 — 스코프 계층, 이벤트 로그가 원본, runtime/
+
+## 결정:
+
+### 스코프 계층
+```
+App → Workspace → Session → Run
+```
+- **Session**은 대화 한 줄기다. 제목·상태·보관 여부를 갖고 Run을 여럿 품는다.
+- **Run**은 사용자 입력 하나에 대한 에이전트의 실행 한 번이다. 요청 수명보다 오래 살고, 클라이언트가 나갔다 와도 이어져야 한다.
+- Run 스코프를 dispose하면 LLM 요청 취소·툴 프로세스 종료·스트림 정리가 한 번에 된다.
+
+### 이벤트 로그가 원본이다
+- 세션 안에서 일어난 모든 일은 **append-only 이벤트**(`AgentEvent`)로 남는다. 메시지·생각·툴 호출·입력 요청·오류가 전부 이벤트다. 세션의 "현재 상태"는 이벤트를 접은 **투영**이지 따로 저장하는 값이 아니다.
+- 이벤트는 `seq`(세션 안에서 단조 증가)로 정렬되고, 클라이언트는 `since=seq`로 이어 받는다 — 나갔다 돌아온 10분 동안의 일이 그대로 보인다.
+- 스키마는 **type별 zod 객체의 discriminated union**이다. 진화 규칙: 필드를 지우거나 뜻을 바꾸지 않는다. 바꾸려면 **새 type을 추가**하고 옛 type은 읽기만 남긴다. 알 수 없는 type은 클라이언트가 건너뛴다(`z.discriminatedUnion` 실패 시 프레임을 버린다).
+- 저장은 SQLite([ADR 0011](0011-sqlite.md)의 결정 — 실제 파일은 `~/.ade/data.db`), 드라이버는 **`node:sqlite`**(Node 24 내장, 네이티브 빌드 없음).
+
+### services/ vs runtime/
+> 클라이언트가 다 나갔다가 10분 뒤 돌아왔을 때, 그동안 무슨 일이 있었는지 보여줘야 하는가?
+
+- 아니다 → `services/`(파일 watch처럼 연결이 끊기면 아무것도 안 남는 것).
+- 그렇다 → `runtime/`. 에이전트 Run이 첫 사례다. **장기 실행 때문에** 생기는 계층이지 에이전트 전용이 아니다 — 나중에 배치 평가도 같은 인프라를 쓴다.
+- 서버 `features/agent/`는 `domain/ infra/ runtime/ transport/`를 갖는다. `runtime/`은 Run의 수명을 소유하고, `infra/`는 이벤트 저장과 LLM 호출을 구현한다.
+
+### 실행기는 포트다
+- Run을 실제로 굴리는 것은 `IAgentRunner`(domain 인터페이스)다. LLM 제공자·툴 집합은 그 구현의 사정이다. 첫 구현은 **스크립트 실행기**(API 키 없이 동작, 계약 테스트·E2E·스토리의 기준)이고, 실제 LLM 실행기는 키가 있을 때 붙인다.
+
+## 기각:
+- 세션 상태를 문서로 저장하고 갱신하기 — 스트리밍 중간 상태·재개·감사 추적이 전부 따로 필요해진다. 이벤트를 남기면 셋이 공짜다.
+- 이벤트 type마다 버전 번호 — 옛 type을 읽기 전용으로 남기는 것과 같은 효과인데 분기가 두 겹이 된다.
+- better-sqlite3 — 네이티브 빌드가 필요해 alpine 이미지에서 컴파일러를 끌고 온다. `node:sqlite`가 같은 동기 API를 준다.
+- WebSocket — 서버→클라이언트 한 방향 스트림이면 SSE로 충분하고 이미 파일 watch가 그 길을 쓴다. 클라이언트→서버는 요청이다.
+- 처음부터 실제 LLM 실행기 — 키가 없으면 아무것도 검증할 수 없다. 스크립트 실행기가 있어야 UI·저장·재개를 먼저 굳힌다.
+
+## 상태:
+승인됨. USER_NOTE의 "services vs runtime"·"스코프 계층" 메모를 옮긴 것이다.
+
+2026-09-09 — 실제 실행기 `AnthropicRunner`(infra)가 생겼다. `ADE_ANTHROPIC_API_KEY`가 있으면 그것을, 없으면 `ScriptedRunner`를 조립한다. Messages API 스트리밍 + 수동 툴 루프, adaptive thinking(요약 표시), 툴은 워크스페이스 목록·읽기·쓰기·생성과 `ask_user`(→ `input.requested`). 모델 기본은 `claude-opus-5`(`ADE_ANTHROPIC_MODEL`). 서버 측 refusal fallback(beta)은 켜지 않았다 — 거절은 `run.error`로 남는다. 이벤트 로그 스키마(`contracts/src/agent/events.ts`)가 §15가 말한 **가장 중요한 계약 우선 리뷰 지점**이다.
