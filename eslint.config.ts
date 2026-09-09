@@ -207,6 +207,14 @@ export default [
   },
 
   {
+    // 컴포넌트에는 스토리가 있다. 2026-09-09에 위반 0을 실측하고 켰다 — lint-plan이 "전건 위반이라
+    // 규칙이 아니라 백로그"라고 미뤄 둔 것이다. `view/`는 대상이 아니다(`.storybook/main.ts`).
+    files: ["packages/client/src/**/component/**/*.tsx", "packages/client/src/shared/components/**/*.tsx"],
+    plugins: { arka: arkaRules },
+    rules: { "arka/components-have-stories": "error" },
+  },
+
+  {
     // 슬라이스 형제 금지. 루트를 늘리면 그 아래 슬라이스에 자동으로 적용된다.
     files: ["packages/client/src/extensions/**/*.{ts,tsx}", "packages/server/src/features/**/*.ts"],
     plugins: { arka: arkaRules },

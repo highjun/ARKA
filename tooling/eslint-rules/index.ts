@@ -1,4 +1,5 @@
 import type { ESLint } from "eslint";
+import { componentsHaveStories } from "./componentsHaveStories";
 import { fileNames } from "./fileNames";
 import { modelIsStateLibraryFree } from "./modelIsStateLibraryFree";
 import { slicesAreSiblings } from "./slicesAreSiblings";
@@ -20,5 +21,6 @@ export const arkaRules: ESLint.Plugin = {
     "file-names": fileNames,
     "slices-are-siblings": slicesAreSiblings,
     "test-names-korean": testNamesKorean,
+    "components-have-stories": componentsHaveStories,
   },
 };
