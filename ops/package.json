@@ -3,12 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "main": "./eslint-rules/index.ts",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "task": "tsx task.ts",
     "smoke": "bash deploy/smoke.sh",
-    "anon-smoke": "bash deploy/anon-smoke.sh"
+    "anon-smoke": "bash deploy/anon-smoke.sh",
+    "lint": "eslint ."
+  },
+  "exports": {
+    ".": "./eslint-rules/index.ts",
+    "./eslint": "./eslint/index.ts"
   }
 }

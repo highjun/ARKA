@@ -7,7 +7,8 @@
     "build": "esbuild src/index.ts --bundle --platform=node --format=esm --target=node24 --sourcemap --outfile=../../.output/dist/server/index.js",
     "dev": "tsx watch src/index.ts",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",
@@ -19,7 +20,8 @@
   "devDependencies": {
     "esbuild": "^0.28.2",
     "tsx": "^4.23.13",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "ops": "workspace:*"
   },
   "imports": {
     "#contracts": "contracts"

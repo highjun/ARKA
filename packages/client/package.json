@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "storybook": "storybook dev -p 6006 --no-open",
-    "build-storybook": "storybook build -o .output/storybook-static"
+    "build-storybook": "storybook build -o .output/storybook-static",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@codemirror/commands": "^6.11.0",
@@ -69,7 +70,8 @@
     "storybook": "^10.6.0",
     "vite": "^8.2.2",
     "vite-plugin-pwa": "^1.3.0",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "ops": "workspace:*"
   },
   "imports": {
     "#core/*": "./src/core/*/index.ts",

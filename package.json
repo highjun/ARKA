@@ -9,7 +9,7 @@
   },
   "scripts": {
     "typecheck": "pnpm -r run typecheck",
-    "lint": "eslint .",
+    "lint": "pnpm -r run lint",
     "test": "pnpm -r run test",
     "check": "pnpm run typecheck && pnpm run lint && pnpm run lint:css && pnpm run lint:config && pnpm run test",
     "verify": "pnpm run check && pnpm run build && pnpm --filter client test:e2e && pnpm run vrt && pnpm --filter ops run smoke",
