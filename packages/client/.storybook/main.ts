@@ -16,6 +16,9 @@ import type { StorybookConfig } from '@storybook/react-vite';
  */
 const config: StorybookConfig = {
   stories: ['../src/**/*.stories.tsx'],
+  // jsdom엔 레이아웃·페인트가 없어 단위 테스트의 axe는 `color-contrast`를 끈다
+  // (`shared/utils/axe.tsx`). 실제 브라우저에서 그걸 보는 자리가 여기다.
+  addons: ['@storybook/addon-a11y'],
   framework: { name: '@storybook/react-vite', options: {} },
   // 로컬 전용 도구라 사용 통계를 밖으로 보내지 않는다.
   core: { disableTelemetry: true },

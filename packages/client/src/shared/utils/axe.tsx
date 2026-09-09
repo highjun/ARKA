@@ -2,9 +2,12 @@ import axe from 'axe-core';
 
 /**
  * jsdom엔 실제 레이아웃·페인트가 없어 `color-contrast`(실제 렌더링된 색 대비 계산)는 신뢰할 수
- * 없다 — 그건 Storybook의 `@storybook/addon-a11y`(`a11y: { test: 'error' }`, 실제 브라우저)가
- * 이미 맡고 있다. 여기서는 구조적 규칙(role·label·중복 id 등, DOM 트리만으로 판정 가능한 것)만
- * 본다.
+ * 없다. 여기서는 구조적 규칙(role·label·중복 id 등, DOM 트리만으로 판정 가능한 것)만 본다.
+ *
+ * 색 대비는 실제 브라우저에서 본다 — `.storybook/main.ts`의 `@storybook/addon-a11y`가 스토리마다
+ * 검사해 패널에 띄운다. **다만 아무것도 실패시키지 않는다** — 사람이 스토리북을 열어 봐야 안다.
+ * 자동으로 막으려면 test-runner가 필요하고, 그건 VRT·E2E와 같은 "관문을 어디에 둘 것인가"
+ * 문제다(TASK-35).
  *
  * `region`(페이지 전체 콘텐츠가 랜드마크 안에 있어야 한다)도 여기선 못 지킨다 — 컴포넌트 단위
  * 테스트는 `<main>` 같은 앱 셸의 랜드마크 구조 없이 `document.body`에 바로 렌더한다. Portal로

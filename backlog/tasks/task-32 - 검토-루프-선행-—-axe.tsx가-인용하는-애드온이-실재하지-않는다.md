@@ -1,9 +1,10 @@
 ---
 id: TASK-32
 title: 검토 루프 선행 — axe.tsx가 인용하는 애드온이 실재하지 않는다
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-09 01:37'
+updated_date: '2026-09-09 02:11'
 labels:
   - review
   - a11y
@@ -21,3 +22,9 @@ shared/utils/axe.tsx가 jsdom에서 color-contrast를 끄는 근거로 "@storybo
 <!-- AC:BEGIN -->
 - [ ] #1 색대비를 실제로 검사하는 곳이 있거나, axe.tsx 주석이 검사하지 않는다는 사실을 정확히 적는다
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+@storybook/addon-a11y를 설치하고 .storybook/main.ts에 붙였다. axe.tsx 주석에서 거짓("이미 맡고 있다")을 지우고 실제 상태를 적었다 — 애드온이 스토리마다 검사해 패널에 띄우지만 아무것도 실패시키지 않는다. 자동으로 막으려면 test-runner가 필요하고 그건 VRT·E2E와 같은 관문 문제(TASK-35)라 거기로 넘겼다.
+<!-- SECTION:NOTES:END -->
