@@ -40,9 +40,9 @@ export default defineConfig({
       devOptions: { enabled: false },
     }),
   ],
-  // 배포 단위는 루트 dist/ 하나다(→ ADR 0013) — 서버 번들(dist/server)과 나란히 놓인다.
+  // 배포 단위는 `.output/dist/` 하나다(→ ADR 0013) — 서버 번들(`.output/dist/server`)과 나란히 놓인다.
   build: {
-    outDir: "../../dist/client",
+    outDir: "../../.output/dist/client",
     emptyOutDir: true,
     // 벤더를 청크로 나눈다 — 앱 코드가 바뀌어도 CodeMirror·Primer·React 청크는 캐시에 남고, PWA 프리캐시
     // 항목 하나가 2MB를 넘지 않는다.

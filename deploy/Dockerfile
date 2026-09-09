@@ -1,4 +1,4 @@
-# 빌드 단계 — 의존성 설치와 번들. 산출물은 dist/ 하나다(client 정적 파일 + server 단일 번들).
+# 빌드 단계 — 의존성 설치와 번들. 산출물은 `.output/dist/` 하나다(client 정적 파일 + server 단일 번들).
 FROM node:24-alpine AS build
 # corepack은 Node 25에서 빠진다 — 버전을 package.json의 packageManager와 같게 직접 고정한다.
 RUN npm install -g pnpm@11.13.0
@@ -22,7 +22,8 @@ ENV NODE_ENV=production \
     ADE_DATA_DIR=/data \
     ADE_CLIENT_ROOT=/app/dist/client
 WORKDIR /app
-COPY --from=build /app/dist ./dist
+# 저장소에서는 생성물을 `.output/` 아래로 숨기지만, 이미지 안에서는 숨길 이유가 없다.
+COPY --from=build /app/.output/dist ./dist
 # 워크스페이스와 데이터(SQLite)는 볼륨이다. compose가 호스트 UID로 실행하므로 여기서 사용자를 고정하지
 # 않는다. /data는 어떤 UID로 돌아도 쓸 수 있어야 하므로 미리 만들고 열어 둔다.
 RUN mkdir -p /data && chmod 777 /data
