@@ -42,6 +42,7 @@ import { MarkdownPreviewTabView } from "../extensions/markdown/view/MarkdownPrev
 import { SearchModel, SearchModelToken, SearchServiceToken, SearchViewModel, SearchViewModelToken } from "../extensions/search";
 import { createSearchServicePort } from "../extensions/search/infra/HttpSearchService";
 import { SearchView } from "../extensions/search/view/SearchView";
+import { createWorkspaceMarkdownSource } from "../extensions/markdown/infra/WorkspaceMarkdownSource";
 import { createWorkspaceFilesPort } from "../extensions/filesystem/infra/HttpWorkspaceFiles";
 import { createWorkspaceWatchPort } from "../extensions/filesystem/infra/HttpWorkspaceWatch";
 import { DirectoryTreeView } from "../extensions/filesystem/view/DirectoryTreeView";
@@ -202,22 +203,13 @@ export function createApplication(): Container {
   container.register(SearchModelToken, singleton((c) => new SearchModel({ searchService: c.resolve(SearchServiceToken) })));
   container.register(SearchViewModelToken, scoped((c) => new SearchViewModel({ searchModel: c.resolve(SearchModelToken) })));
   container.register(GitModelToken, singleton((c) => new GitModel({ gitService: c.resolve(GitServiceToken) })));
-  // markdown은 filesystem을 모른다 — 두 포트를 markdown이 바라는 모양으로 감싸 넘기는 것은 조립부의 일이다.
+  // markdown은 filesystem을 모른다 — 두 포트를 markdown이 바라는 모양으로 감싸는 어댑터에 넘기는
+  // 것까지가 조립부의 일이다. 감싸는 방법 자체는 markdown의 infra가 안다.
   container.register(
     MarkdownSourceToken,
-    singleton((c) => {
-      const files = c.resolve(WorkspaceFilesToken);
-      const watch = c.resolve(WorkspaceWatchToken);
-      return {
-        read: async (path: string) => {
-          const file = await files.read(path);
-          if (file.encoding === "binary") throw new Error("텍스트 파일이 아니다.");
-          return { content: file.content, truncated: file.truncated };
-        },
-        // 파일 자체를 감시하면 에디터의 저장(임시 파일 → rename)이 inotify를 놓친다 — 부모 디렉터리를 본다.
-        watch: (path: string, onChange: () => void) => watch.watch([path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : ""], onChange),
-      };
-    }),
+    singleton((c) =>
+      createWorkspaceMarkdownSource({ files: c.resolve(WorkspaceFilesToken), watch: c.resolve(WorkspaceWatchToken) }),
+    ),
   );
   container.register(MarkdownPreviewModelToken, singleton((c) => new MarkdownPreviewModel({ source: c.resolve(MarkdownSourceToken) })));
   container.register(SourceControlViewModelToken, scoped((c) => new SourceControlViewModel({ gitModel: c.resolve(GitModelToken) })));
