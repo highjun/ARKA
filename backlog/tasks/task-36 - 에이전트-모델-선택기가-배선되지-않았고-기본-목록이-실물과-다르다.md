@@ -1,0 +1,25 @@
+---
+id: TASK-36
+title: 에이전트 모델 선택기가 배선되지 않았고 기본 목록이 실물과 다르다
+status: To Do
+assignee: []
+created_date: '2026-09-09 01:57'
+labels:
+  - review
+  - agent
+dependencies: []
+priority: medium
+ordinal: 36000
+---
+
+## Description
+
+<!-- SECTION:DESCRIPTION:BEGIN -->
+InputComposer.tsx:40의 DEFAULT_MODELS가 GPT-5.5·Sonnet·Local 세 개를 하드코딩하고 있는데, ChatTabView는 InputComposer에 models도 selectedModelId도 넘기지 않는다. 그래서 화면에는 항상 이 placeholder가 뜨고 고르는 것이 아무 일도 하지 않는다. 게다가 ADE가 실제로 돌리는 것은 AnthropicRunner(ADE_ANTHROPIC_MODEL, 기본 claude-opus-5)라 목록의 GPT-5.5는 실행할 수 없는 이름이다. 배선하거나, 배선 전까지는 선택기를 감춘다.
+<!-- SECTION:DESCRIPTION:END -->
+
+## Acceptance Criteria
+<!-- AC:BEGIN -->
+- [ ] #1 화면의 모델 목록이 서버가 실제로 돌릴 수 있는 것과 일치한다
+- [ ] #2 모델을 고르면 다음 요청에 반영되거나, 반영되지 않는 선택기는 화면에 없다
+<!-- AC:END -->

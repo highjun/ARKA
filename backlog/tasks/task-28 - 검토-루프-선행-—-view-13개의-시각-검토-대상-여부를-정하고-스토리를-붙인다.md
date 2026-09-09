@@ -1,9 +1,10 @@
 ---
 id: TASK-28
 title: 검토 루프 선행 — view 13개의 시각 검토 대상 여부를 정하고 스토리를 붙인다
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-09 01:37'
+updated_date: '2026-09-09 01:55'
 labels:
   - review
   - storybook
