@@ -1,10 +1,10 @@
 ---
 id: TASK-28
 title: 검토 루프 선행 — view 13개의 시각 검토 대상 여부를 정하고 스토리를 붙인다
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-09 01:37'
-updated_date: '2026-09-09 01:55'
+updated_date: '2026-09-09 02:01'
 labels:
   - review
   - storybook
@@ -25,3 +25,9 @@ ordinal: 28000
 - [ ] #2 스토리를 붙이기로 한 view는 기본/빈/로딩/에러 최소 세트를 갖는다
 - [ ] #3 pnpm run vrt가 새 스토리의 기준 이미지와 함께 초록이다
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+방침: 조합이 드러나는 view 여섯만 대상(.storybook/main.ts에 목록과 사유). 스토리 6개 파일 33개 — SearchView 5, SourceControlView 6, SettingsTabView 3, ChatTabView 6, DirectoryTreeView 7, ShellView 8. 인수 조건 3("새 스토리의 기준 이미지와 함께 초록")은 기준 이미지 정책이 바뀌어(Accept 시점 생성) 폐기했다. 대신 33개를 Docker에서 한 번 찍어 렌더를 눈으로 확인하고 기준은 지웠다. 찍는 과정에서 TASK-36(모델 선택기 미배선)·TASK-37(Shell 헤더 잘림)을 발견했다.
+<!-- SECTION:NOTES:END -->
