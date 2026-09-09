@@ -39,7 +39,6 @@ infra/       계약      — 인터페이스 준수
 extensions/filesystem/
   model/       directoryTree.ts / .test.ts
                workspaceFiles.contract.ts    계약 스위트
-               fixtures.ts                   테스트와 스토리가 공유
   infra/       HttpWorkspaceFiles.ts / .test.ts
   viewmodel/   DirectoryTreeViewModel.ts / .test.ts
   view/        DirectoryTreeView.tsx / .test.tsx
@@ -73,3 +72,5 @@ test/vrt/      vrt.config.ts, stories.spec.ts, snapshots/
 1. **스토리가 프리미티브 셋(Icon·Divider·Timestamp)뿐이다.** 스토리북과 VRT 파이프라인은 돌지만 커버 범위(`shared/components/` 전부, `*/component/` 전부)는 아직 비어 있다.
 2. ~~계약 테스트가 하나도 없다.~~ 2026-09-09 — `IWorkspaceFiles`에 첫 스위트(`workspaceFiles.contract.ts`)가 생겼다. `MockWorkspaceFiles`와, 서버 앱에 `fetch`를 직결한 `HttpWorkspaceFiles`(`test/contract/`) 둘 다 통과한다. 첫 실행에서 서버의 move가 목적지를 덮어쓰는 계약 위반을 잡았다. 다른 인터페이스(`IWorkspaceWatch`·`IStorage`·`IDirectoryTreeModel` 등)는 아직 없다.
 3. VRT가 아직 CI에 없다. 사람이 `pnpm run vrt`를 기억해서 돌려야 한다.
+
+2026-09-09 개정 — **`fixtures.ts`("테스트와 스토리가 공유") 규약을 철회한다.** 48커밋 동안 채택률이 0이었고, 실측해 보니 그럴 이유가 있었다. `FileTree`가 대표적이다 — 스토리는 그럴듯한 프로젝트 트리 하나(`src/components/Button.tsx` …)를 쓰고, 테스트는 단언마다 다른 최소 트리 셋(`ITEMS`·`NESTED_ITEMS`·`TWO_ITEMS`)을 쓴다. 같은 데이터가 아니고 같아서도 안 된다. 스토리는 사람이 보는 그림이라 그럴듯해야 하고, 테스트는 실패했을 때 원인이 좁아야 한다. 공유를 강제하면 스토리는 앙상해지고 테스트는 무뎌진다. `Mock<Name>.ts` 명명은 실제로 쓰이고 있으므로(10개) 그대로 둔다.
