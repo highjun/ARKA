@@ -6,7 +6,7 @@
 
 1. `CONVENTIONS.md`를 읽는다. 왜 그렇게 정했는지는 `docs/adr/`에 있다.
 2. 할 일은 **Backlog.md**(`backlog/tasks/`)에 있다. 새 할 일이 생기면 `backlog task create`로 남기고, 시작하면 `In Progress`, 끝나면 `Done`으로 옮긴다. 산문 백로그를 다른 문서에 쌓지 않는다.
-3. 사용자만 할 수 있는 일(sudo, 클라우드 콘솔, 비밀값)은 `docs/USER_NOTE.md` 맨 위 "사용자가 해야 할 일"에 적는다.
+3. 사용자만 할 수 있는 일(sudo, 클라우드 콘솔, 비밀값)은 `docs/USER_NOTE.md` 맨 위 "사용자가 해야 할 일"에 적는다. **이 파일은 추적하지 않는다** — 사용자 개인 메모라서다. 규칙이 될 내용은 `CONVENTIONS.md`나 ADR로 옮긴다.
 
 ## 라운드
 

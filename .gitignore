@@ -5,3 +5,4 @@ dist/
 storybook-static/
 .env
 .env.*
+docs/USER_NOTE.md
