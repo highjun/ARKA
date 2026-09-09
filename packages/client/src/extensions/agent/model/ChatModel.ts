@@ -1,6 +1,6 @@
 import type { Disposable } from '#core/di';
 import { Emitter } from '#core/events';
-import type { AgentSession, RunMode, SessionId } from 'contracts';
+import type { AgentSession, RunMode, SessionId } from '#contracts';
 import type { IAgentApi } from './IAgentApi';
 import type { IAgentEvents } from './IAgentEvents';
 import type { IChatModel, SessionChat, SessionsStatus } from './IChatModel';

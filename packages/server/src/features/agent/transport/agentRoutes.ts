@@ -1,4 +1,4 @@
-import { CreateSessionRequest, EventsQuery, ProvideInputRequest, StartRunRequest, UpdateSessionRequest } from "contracts";
+import { CreateSessionRequest, EventsQuery, ProvideInputRequest, StartRunRequest, UpdateSessionRequest } from "#contracts";
 import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import type { IEventStore } from "../domain/IEventStore";

@@ -1,4 +1,4 @@
-import type { AgentSession, SessionId } from "contracts";
+import type { AgentSession, SessionId } from "#contracts";
 import { AgentError } from "../domain/errors";
 import type { ISessionStore, SessionPatch } from "../domain/ISessionStore";
 

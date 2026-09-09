@@ -1,6 +1,6 @@
 import type { Disposable } from '#core/di';
 import { Emitter } from '#core/events';
-import type { GitFileStatus } from 'contracts';
+import type { GitFileStatus } from '#contracts';
 import { diffKeyOf, type DiffEntry, type GitLoadStatus, type IGitModel } from './IGitModel';
 import type { IGitService } from './IGitService';
 

@@ -1,5 +1,5 @@
 import { createToken } from '#core/di';
-import type { SearchMatch, SearchRequest, SearchResponse } from 'contracts';
+import type { SearchMatch, SearchRequest, SearchResponse } from '#contracts';
 
 export type { SearchMatch, SearchResponse };
 

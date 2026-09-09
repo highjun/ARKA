@@ -1,7 +1,7 @@
 import type { Disposable } from '#core/di';
 import { ViewModelBase } from '#core/viewmodel';
 import { atom } from 'nanostores';
-import type { RunStatus } from 'contracts';
+import type { RunStatus } from '#contracts';
 import type { IChatModel, SessionChat } from '../model/IChatModel';
 import { emptyChat } from '../model/transcript';
 import type { ChatComposerState, ChatSessionRow, ChatState, IChatViewModel } from './IChatViewModel';

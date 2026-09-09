@@ -1,6 +1,6 @@
 import { open, readdir } from "node:fs/promises";
 import path from "node:path";
-import type { SearchMatch, SearchRequest, SearchResponse } from "contracts";
+import type { SearchMatch, SearchRequest, SearchResponse } from "#contracts";
 
 /** 이 이름의 디렉터리는 들어가지 않는다 — 워크스페이스 안의 산출물·의존성. */
 const SKIPPED_DIRS = new Set(["node_modules", ".git", "dist", ".output", "storybook-static", ".pnpm-store"]);

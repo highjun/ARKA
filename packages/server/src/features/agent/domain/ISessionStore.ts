@@ -1,4 +1,4 @@
-import type { AgentSession, RunStatus, SessionId } from "contracts";
+import type { AgentSession, RunStatus, SessionId } from "#contracts";
 
 /** 세션 요약을 바꾸는 조각. 이벤트에서 투영된 값이라 원본이 아니다 — 지우고 다시 만들 수 있어야 한다. */
 export type SessionPatch = {

@@ -1,5 +1,5 @@
 import { stat } from "node:fs/promises";
-import type { DirectoryListing, FileContent, FileEntryType } from "contracts";
+import type { DirectoryListing, FileContent, FileEntryType } from "#contracts";
 import { FileError } from "../domain/errors";
 import { createEntry, listDirectory, readFileContent, resolveNewEntry, resolveWithin, writeFileContent } from "../infra/fileOperations";
 

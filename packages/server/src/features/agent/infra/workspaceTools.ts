@@ -1,4 +1,4 @@
-import type { DirectoryListing, FileContent, FileEntryType } from "contracts";
+import type { DirectoryListing, FileContent, FileEntryType } from "#contracts";
 import type { AgentToolDefinition, IAgentTools, ToolOutcome } from "../domain/IAgentTools";
 
 /** 조립부가 넘기는 워크스페이스 유스케이스 — filesystem feature의 `WorkspaceOperations`와 모양이 같다. */

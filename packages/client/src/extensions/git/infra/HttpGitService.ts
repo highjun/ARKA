@@ -1,5 +1,5 @@
 import { apiHeaders } from '#core/http';
-import { GitCommitResponse, GitDiffResponse, GitErrorBody, GitStatusResponse } from 'contracts';
+import { GitCommitResponse, GitDiffResponse, GitErrorBody, GitStatusResponse } from '#contracts';
 import type { IGitService } from '../model/IGitService';
 
 /** `/api/git/*`를 읽고 쓰는 구현. 응답은 계약 스키마로 검증하고, 실패는 서버 사유를 담아 던진다. */

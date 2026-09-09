@@ -1,5 +1,5 @@
 import { apiHeaders } from '#core/http';
-import { AgentErrorBody, RunResponse, SessionListResponse, SessionResponse } from 'contracts';
+import { AgentErrorBody, RunResponse, SessionListResponse, SessionResponse } from '#contracts';
 import type { AgentSession, IAgentApi, RunMode, SessionId } from '../model/IAgentApi';
 
 /**

@@ -1,5 +1,5 @@
 import { apiHeaders } from '#core/http';
-import { VersionResponse } from 'contracts';
+import { VersionResponse } from '#contracts';
 import type { IServerInfo, ServerInfo } from '../model/IServerInfo';
 
 class HttpServerInfoAdapter implements IServerInfo {

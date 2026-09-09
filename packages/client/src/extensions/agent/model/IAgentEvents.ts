@@ -1,5 +1,5 @@
 import { createToken } from '#core/di';
-import type { AgentEvent, SessionId } from 'contracts';
+import type { AgentEvent, SessionId } from '#contracts';
 
 export type { AgentEvent };
 

@@ -1,5 +1,5 @@
 import { apiHeaders } from '#core/http';
-import { SearchResponse } from 'contracts';
+import { SearchResponse } from '#contracts';
 import type { ISearchService, SearchQuery } from '../model/ISearchService';
 
 /** `GET /api/search`를 읽는 구현. 응답은 계약 스키마로 검증한다. */

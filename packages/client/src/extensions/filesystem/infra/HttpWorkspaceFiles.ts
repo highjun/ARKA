@@ -1,5 +1,5 @@
 import { apiHeaders } from '#core/http';
-import { DirectoryListing, FileContent, FileErrorBody } from 'contracts';
+import { DirectoryListing, FileContent, FileErrorBody } from '#contracts';
 import type { FileEntryType, IWorkspaceFiles } from '../model/IWorkspaceFiles';
 
 /**

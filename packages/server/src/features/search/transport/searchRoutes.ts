@@ -1,4 +1,4 @@
-import { SearchRequest } from "contracts";
+import { SearchRequest } from "#contracts";
 import { Hono } from "hono";
 import { searchFiles } from "../infra/searchFiles";
 

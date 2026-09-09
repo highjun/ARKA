@@ -1,5 +1,5 @@
 import { createToken } from '#core/di';
-import type { GitFileStatus, GitStatusResponse } from 'contracts';
+import type { GitFileStatus, GitStatusResponse } from '#contracts';
 
 export type { GitFileStatus, GitStatusResponse };
 

@@ -1,5 +1,5 @@
 import { createToken, type Disposable } from '#core/di';
-import type { GitFileStatus } from 'contracts';
+import type { GitFileStatus } from '#contracts';
 
 export type GitLoadStatus = 'idle' | 'loading' | 'loaded' | 'error';
 

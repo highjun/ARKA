@@ -1,4 +1,4 @@
-import { PROTOCOL_HEADER, type ProtocolErrorBody } from "contracts";
+import { PROTOCOL_HEADER, type ProtocolErrorBody } from "#contracts";
 import type { MiddlewareHandler } from "hono";
 
 /**

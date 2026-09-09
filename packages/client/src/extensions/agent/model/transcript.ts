@@ -1,4 +1,4 @@
-import type { AgentEvent, SessionId } from 'contracts';
+import type { AgentEvent, SessionId } from '#contracts';
 import type { SessionChat, TranscriptItem } from './IChatModel';
 
 /** 아직 아무것도 받지 않은 대화. */

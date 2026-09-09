@@ -1,7 +1,7 @@
 import type { Disposable } from '#core/di';
 import { ViewModelBase } from '#core/viewmodel';
 import { atom } from 'nanostores';
-import type { GitFileStatus } from 'contracts';
+import type { GitFileStatus } from '#contracts';
 import type { IGitModel } from '../model/IGitModel';
 import type { ChangeRow, DiffState, ISourceControlViewModel } from './ISourceControlViewModel';
 

@@ -1,5 +1,5 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import type { AgentEvent } from "contracts";
+import type { AgentEvent } from "#contracts";
 import type { IAgentRunner, RunContext } from "../domain/IAgentRunner";
 import type { IAgentTools } from "../domain/IAgentTools";
 import { ASK_USER_TOOL, isApproval, WRITING_TOOLS } from "./workspaceTools";

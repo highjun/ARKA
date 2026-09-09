@@ -3,7 +3,7 @@ import { ViewModelBase } from '#core/viewmodel';
 import { atom } from 'nanostores';
 import type { ITabDirtyState } from '../model/ITabDirtyState';
 import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
-import { PROTOCOL_VERSION } from 'contracts';
+import { PROTOCOL_VERSION } from '#contracts';
 import type { IServerInfo } from '../model/IServerInfo';
 import type { INotificationService } from '../model/INotificationService';
 import type { IActivityBarRegistry } from '../model/IActivityBarRegistry';

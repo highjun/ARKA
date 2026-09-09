@@ -1,4 +1,4 @@
-import { GitCommitRequest, GitDiffRequest, GitPathsRequest, type GitErrorCode } from "contracts";
+import { GitCommitRequest, GitDiffRequest, GitPathsRequest, type GitErrorCode } from "#contracts";
 import { Hono } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { GitError } from "../domain/errors";

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { AgentSession } from "contracts";
+import type { AgentSession } from "#contracts";
 import { AgentError } from "./errors";
 import type { ISessionStore } from "./ISessionStore";
 

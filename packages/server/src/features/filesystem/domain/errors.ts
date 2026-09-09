@@ -1,4 +1,4 @@
-import type { FileErrorCode } from "contracts";
+import type { FileErrorCode } from "#contracts";
 
 /**
  * 파일시스템 동작의 실패. `code`는 그대로 클라이언트에 전달되므로

@@ -1,5 +1,5 @@
 import { apiHeaders, readSse, sleep } from '#core/http';
-import { AgentEvent, type SessionId } from 'contracts';
+import { AgentEvent, type SessionId } from '#contracts';
 import type { IAgentEvents } from '../model/IAgentEvents';
 
 /** 끊기면 이만큼 쉬고 다시 붙는다. */

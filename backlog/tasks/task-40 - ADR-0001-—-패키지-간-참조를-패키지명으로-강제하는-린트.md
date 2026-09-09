@@ -4,6 +4,7 @@ title: ADR 0001 — 패키지 간 참조를 패키지명으로 강제하는 린�
 status: To Do
 assignee: []
 created_date: '2026-09-09 05:24'
+updated_date: '2026-09-09 05:39'
 labels:
   - review
   - adr
@@ -25,3 +26,9 @@ ADR 0001이 "패키지 간 참조는 workspace 패키지명(from \"contracts\")�
 - [ ] #2 tooling/eslint-rules/*.test.ts에 valid/invalid fixture가 있다
 - [ ] #3 일부러 깨뜨려 규칙이 실제로 무는 것을 확인했다
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-09-09: contracts 참조가 맨이름 "contracts"에서 "#contracts"(imports 필드)로 바뀌었다. 규칙은 "패키지 경계를 상대경로로 넘지 않는다"를 잡으면 된다. 실험으로 tsc·vitest·esbuild·vite·eslint·test/contract 일곱 경로 전부 #contracts를 해석하는 것을 확인했다.
+<!-- SECTION:NOTES:END -->

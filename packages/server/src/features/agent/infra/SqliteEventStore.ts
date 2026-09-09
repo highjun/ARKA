@@ -1,5 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
-import { AgentEvent, type AgentEventInput, type SessionId } from "contracts";
+import { AgentEvent, type AgentEventInput, type SessionId } from "#contracts";
 import type { IEventStore } from "../domain/IEventStore";
 
 type Row = { readonly payload: string };

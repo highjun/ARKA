@@ -1,5 +1,5 @@
 import { createToken } from '#core/di';
-import type { AgentSession, RunMode, RunResponse, SessionId } from 'contracts';
+import type { AgentSession, RunMode, RunResponse, SessionId } from '#contracts';
 
 export type { AgentSession, RunMode, RunResponse, SessionId };
 

@@ -1,4 +1,4 @@
-import type { AgentEvent, AgentSession, RunMode, RunResponse, SessionId } from 'contracts';
+import type { AgentEvent, AgentSession, RunMode, RunResponse, SessionId } from '#contracts';
 import type { IAgentApi } from './IAgentApi';
 import type { IAgentEvents } from './IAgentEvents';
 

@@ -1,4 +1,4 @@
-import type { AgentEvent } from 'contracts';
+import type { AgentEvent } from '#contracts';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { IAgentApi } from './IAgentApi';
 import type { IAgentEvents } from './IAgentEvents';

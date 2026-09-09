@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { RunMode } from "contracts";
+import type { RunMode } from "#contracts";
 import type { RunContext, RunEventInput } from "../domain/IAgentRunner";
 import { ScriptedRunner } from "./ScriptedRunner";
 

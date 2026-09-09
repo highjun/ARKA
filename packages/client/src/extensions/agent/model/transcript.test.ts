@@ -1,4 +1,4 @@
-import type { AgentEvent } from 'contracts';
+import type { AgentEvent } from '#contracts';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { emptyChat, foldEvent } from './transcript';
 

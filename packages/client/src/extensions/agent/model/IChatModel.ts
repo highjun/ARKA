@@ -1,5 +1,5 @@
 import { createToken, type Disposable } from '#core/di';
-import type { AgentSession, RunId, RunMode, RunStatus, SessionId } from 'contracts';
+import type { AgentSession, RunId, RunMode, RunStatus, SessionId } from '#contracts';
 
 /**
  * 이벤트 로그를 화면이 읽을 수 있는 대화로 접은 것 — **투영**이다. 원본은 서버의 이벤트다.

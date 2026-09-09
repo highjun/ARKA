@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { GitFileStatus, GitStatusResponse, StagedChange, UnstagedChange } from "contracts";
+import type { GitFileStatus, GitStatusResponse, StagedChange, UnstagedChange } from "#contracts";
 import { GitError } from "../domain/errors";
 import type { GitRunner } from "./gitCommand";
 

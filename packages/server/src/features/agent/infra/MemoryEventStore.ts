@@ -1,4 +1,4 @@
-import type { AgentEvent, AgentEventInput, SessionId } from "contracts";
+import type { AgentEvent, AgentEventInput, SessionId } from "#contracts";
 import type { IEventStore } from "../domain/IEventStore";
 
 /** 메모리 안의 `IEventStore`. 테스트와 임시 실행용 — 프로세스가 죽으면 사라진다. */

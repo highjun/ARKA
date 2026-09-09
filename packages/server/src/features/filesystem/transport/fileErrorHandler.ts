@@ -1,4 +1,4 @@
-import type { FileErrorCode } from "contracts";
+import type { FileErrorCode } from "#contracts";
 import type { Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { FileError } from "../domain/errors";

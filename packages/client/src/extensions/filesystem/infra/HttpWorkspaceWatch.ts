@@ -1,5 +1,5 @@
 import { apiHeaders, readSse, sleep } from '#core/http';
-import { WatchEvent } from 'contracts';
+import { WatchEvent } from '#contracts';
 import type { IWorkspaceWatch, WorkspaceWatchUnsubscribe } from '../model/IWorkspaceWatch';
 
 /** 서버 재시작 등으로 스트림이 뜻하지 않게 끊기면 이만큼 쉬고 다시 붙는다. */

@@ -1,4 +1,4 @@
-import type { AgentErrorCode } from "contracts";
+import type { AgentErrorCode } from "#contracts";
 import type { Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { AgentError } from "../domain/errors";

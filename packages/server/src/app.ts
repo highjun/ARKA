@@ -1,4 +1,4 @@
-import { PROTOCOL_VERSION } from "contracts";
+import { PROTOCOL_VERSION } from "#contracts";
 import { Hono } from "hono";
 import type { Logger } from "./core/log";
 import type { ServerConfig } from "./core/config";

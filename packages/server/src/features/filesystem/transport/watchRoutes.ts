@@ -1,4 +1,4 @@
-import type { WatchEvent } from "contracts";
+import type { WatchEvent } from "#contracts";
 import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import { FileError } from "../domain/errors";

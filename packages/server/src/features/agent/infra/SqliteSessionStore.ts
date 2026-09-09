@@ -1,5 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
-import type { AgentSession, RunStatus, SessionId } from "contracts";
+import type { AgentSession, RunStatus, SessionId } from "#contracts";
 import { AgentError } from "../domain/errors";
 import type { ISessionStore, SessionPatch } from "../domain/ISessionStore";
 

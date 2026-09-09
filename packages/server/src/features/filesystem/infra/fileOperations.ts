@@ -1,6 +1,6 @@
 import { mkdir, open, readdir, realpath, rename, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { DirectoryListing, FileContent, FileEntry, FileEntryType } from 'contracts';
+import type { DirectoryListing, FileContent, FileEntry, FileEntryType } from '#contracts';
 
 /**
  * 워크스페이스를 읽고 쓴다 — 목록·읽기·쓰기·생성·이동·삭제.

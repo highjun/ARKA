@@ -1,4 +1,4 @@
-import type { AgentEvent, AgentEventInput, SessionId } from "contracts";
+import type { AgentEvent, AgentEventInput, SessionId } from "#contracts";
 
 /**
  * 이벤트 로그 — 세션 안에서 일어난 모든 일의 원본(→ ADR 0019). append-only다.

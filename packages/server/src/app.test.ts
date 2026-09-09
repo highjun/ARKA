@@ -2,7 +2,7 @@ import { realpathSync } from "node:fs";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { HealthResponse, PROTOCOL_HEADER, PROTOCOL_VERSION, VersionResponse } from "contracts";
+import { HealthResponse, PROTOCOL_HEADER, PROTOCOL_VERSION, VersionResponse } from "#contracts";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createApp } from "./app";
 import type { LogFields, Logger } from "./core/log";

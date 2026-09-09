@@ -1,4 +1,4 @@
-import type { AgentEvent, AgentEventInput, RunId, RunMode, SessionId } from "contracts";
+import type { AgentEvent, AgentEventInput, RunId, RunMode, SessionId } from "#contracts";
 
 /** Run 안에서 실행기가 낼 수 있는 이벤트 — 세션·Run 식별자는 런타임이 붙이므로 뺀 모양이다. */
 export type RunEventInput = Extract<AgentEventInput, { runId: string }> extends infer E

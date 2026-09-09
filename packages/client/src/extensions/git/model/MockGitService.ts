@@ -1,4 +1,4 @@
-import type { GitFileStatus, GitStatusResponse } from 'contracts';
+import type { GitFileStatus, GitStatusResponse } from '#contracts';
 import type { IGitService } from './IGitService';
 
 type Entry = { readonly committed: string | null; readonly index: string | null; readonly worktree: string | null };

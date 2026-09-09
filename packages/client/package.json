@@ -76,6 +76,7 @@
     "#core/errors": "./src/core/errors.ts",
     "#utils/*": "./src/shared/utils/*.tsx",
     "#components/*": "./src/shared/components/*/index.ts",
-    "#core": "./src/core/index.ts"
+    "#core": "./src/core/index.ts",
+    "#contracts": "contracts"
   }
 }
