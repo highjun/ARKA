@@ -18,7 +18,7 @@ cleanup() {
 trap cleanup EXIT
 
 echo "# build"
-docker build -q -t "$IMAGE" . >/dev/null
+docker build -q -f deploy/Dockerfile -t "$IMAGE" . >/dev/null
 
 run() {
   docker run -d --name "$NAME" --user "$(id -u):$(id -g)" \

@@ -18,10 +18,13 @@
 ## 제출 전
 
 ```
-pnpm run check
+pnpm run check      라운드마다
+pnpm run verify     내보내기 전에
 ```
 
-typecheck → lint → lint:css → lint:config → test(패키지·contract·tooling) 순서다. 앞에서 걸리면 뒤를 안 돌린다.
+`check`는 typecheck → lint → lint:css → lint:config → test 순서다. 앞에서 걸리면 뒤를 안 돌린다.
+
+`verify`는 `check` + 빌드 + E2E + VRT + Docker 경계 스모크다. **CI가 없으므로 이것이 유일한 관문이다** — 특히 `deploy/smoke.sh`가 빈 컨테이너에서 `pnpm install --frozen-lockfile`부터 다시 하므로 "내 기계에서만 되는 것"을 잡는다. 몇 분 걸리니 라운드마다 돌리지 않는다.
 
 - 새 실수 패턴을 발견하면 지적하지 말고 린트 규칙으로 만든다. 규칙에는 `message`로 대안을 적고 `tooling/eslint-rules/*.test.ts`에 valid/invalid를 둔다.
 - 커밋 메시지는 한글 자연문. 첫 줄은 무엇을 왜 했는지, 본문에 "결정한 것 / 확인 필요".
