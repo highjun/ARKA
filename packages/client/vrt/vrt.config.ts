@@ -1,7 +1,8 @@
 import path from "node:path";
 import { defineConfig } from "@playwright/test";
 
-const repoRoot = path.resolve(import.meta.dirname, "../..");
+const clientRoot = path.resolve(import.meta.dirname, "..");
+const repoRoot = path.resolve(clientRoot, "../..");
 const PORT = 6008;
 
 /**
@@ -13,7 +14,7 @@ const PORT = 6008;
  * 아니라 소음이 된다.
  */
 export default defineConfig({
-  testDir: path.join(repoRoot, "test/vrt"),
+  testDir: path.join(clientRoot, "vrt"),
   // 스냅샷을 스펙 옆(`*-snapshots/`)이 아니라 한곳에 모은다. 던더 폴더는 쓰지 않는다.
   snapshotPathTemplate: "{testDir}/snapshots/{arg}{ext}",
   outputDir: path.join(repoRoot, ".output/vrt/test-results"),

@@ -180,7 +180,7 @@
 - **VRT** — 스토리를 순회해 찍는다. `pnpm run vrt`(비교) / `vrt:update`(기준 갱신). **Docker에서만** 생성·비교한다.
     - **기준 이미지는 검토에서 그 스토리를 Accept할 때 만든다.** 아직 아무도 안 본 그림을 기준으로 삼으면 "검토 안 함"이 "승인됨"으로 기록된다. VRT가 잡으려는 것은 승인된 뒤의 변형이다.
     - 그래서 기준이 없는 스토리는 **실패가 아니라 건너뜀**이다. 없는 것이 정상인 기간이 있다.
-- 단위·계약·스모크·스토리는 코드 옆에, E2E는 `e2e/`, VRT는 `test/vrt/`에. 클라이언트 어댑터를 서버 앱에 직결하는 계약 실행은 `test/contract/`(`pnpm run test:contract`). 던더 폴더와 그 밖의 `tests/` 폴더는 쓰지 않는다.
+- 단위·계약·스모크·스토리는 코드 옆에, E2E는 `packages/client/e2e/`, VRT는 `packages/client/vrt/`에. 클라이언트 어댑터를 서버 앱에 직결하는 계약 실행은 `test/contract/`(`pnpm run test:contract`). 던더 폴더와 그 밖의 `tests/` 폴더는 쓰지 않는다.
 - Mock은 `Mock<Name>.ts`. **테스트와 스토리가 데이터를 공유하지 않는다** — 스토리는 그럴듯한 그림 하나를, 테스트는 단언마다 가장 작은 입력을 원한다. 억지로 합치면 둘 다 나빠진다. → [ADR 0008](docs/adr/0008-client-testing.md)
 - `toMatchSnapshot`은 쓰지 않는다 — 무비판적으로 갱신하게 된다.
 - 커버리지 목표를 두지 않는다.

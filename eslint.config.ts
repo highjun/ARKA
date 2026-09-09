@@ -163,7 +163,7 @@ export default [
         "error",
         {
           selector: "MemberExpression[property.name=/^toMatch(Inline)?Snapshot$/]",
-          message: "`toMatchSnapshot`을 쓰지 않습니다. 무엇이 왜 그래야 하는지를 단언으로 적으세요. 화면 모양은 VRT(test/vrt/)가 봅니다.",
+          message: "`toMatchSnapshot`을 쓰지 않습니다. 무엇이 왜 그래야 하는지를 단언으로 적으세요. 화면 모양은 VRT(`packages/client/vrt/`)가 봅니다.",
         },
       ],
     },
@@ -255,7 +255,7 @@ export default [
           zones: [
             // E2E와 VRT는 앱을 화면으로만 본다 — 소스를 import하면 그 테스트는 더 이상 바깥 관점이 아니다.
             {
-              target: ["./packages/client/e2e", "./test/vrt"],
+              target: ["./packages/client/e2e", "./packages/client/vrt"],
               from: ["./packages/client/src", "./packages/server/src", "./packages/contracts/src"],
               message:
                 "E2E·VRT는 소스를 import하지 않습니다. 화면에 보이는 것만으로 검사하세요 — 배선은 registerServices.test.tsx가, 계약은 test/contract/가 봅니다.",
