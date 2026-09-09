@@ -2,8 +2,10 @@ import path from "node:path";
 import { createRuleTester } from "./ruleTester";
 import { slicesAreSiblings } from "./slicesAreSiblings";
 
-const options = [{ roots: ["packages/client/src/extensions", "packages/server/src/features"] }];
-const at = (relative: string): string => path.resolve(process.cwd(), relative);
+/** 규칙은 저장소 루트 기준 경로로 판정한다 — vitest의 cwd(`ops/`)가 아니라 파일 위치에서 뽑는다. */
+const at = (relative: string): string => path.resolve(import.meta.dirname, "../..", relative);
+// 규칙은 `roots`를 `context.cwd` 기준으로 푼다. 테스트의 cwd는 `ops/`이므로 절대경로로 준다.
+const options = [{ roots: [at("packages/client/src/extensions"), at("packages/server/src/features")] }];
 
 createRuleTester().run("slices-are-siblings", slicesAreSiblings, {
   valid: [

@@ -2,7 +2,8 @@ import path from "node:path";
 import { fileNames } from "./fileNames";
 import { createRuleTester } from "./ruleTester";
 
-const at = (relative: string): string => path.resolve(process.cwd(), relative);
+/** 규칙은 저장소 루트 기준 경로로 판정한다 — vitest의 cwd(`ops/`)가 아니라 파일 위치에서 뽑는다. */
+const at = (relative: string): string => path.resolve(import.meta.dirname, "../..", relative);
 
 createRuleTester().run("file-names", fileNames, {
   valid: [

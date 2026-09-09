@@ -8,18 +8,17 @@
     "node": ">=24"
   },
   "scripts": {
-    "typecheck": "pnpm -r run typecheck && tsc -p test/contract && tsc -p tooling",
+    "typecheck": "pnpm -r run typecheck && tsc -p test/contract",
     "lint": "eslint .",
-    "test": "pnpm -r run test && pnpm run test:contract && pnpm run test:tooling",
+    "test": "pnpm -r run test && pnpm run test:contract",
     "check": "pnpm run typecheck && pnpm run lint && pnpm run lint:css && pnpm run lint:config && pnpm run test",
-    "verify": "pnpm run check && pnpm run build && pnpm --filter client test:e2e && pnpm run vrt && bash deploy/smoke.sh",
+    "verify": "pnpm run check && pnpm run build && pnpm --filter client test:e2e && pnpm run vrt && pnpm --filter ops run smoke",
     "vrt": "pnpm --filter client run build-storybook && docker run --rm --user \"$(id -u):$(id -g)\" -v \"$PWD\":/work -w /work -e HOME=/tmp mcr.microsoft.com/playwright:v1.63.0-noble node_modules/.bin/playwright test -c packages/client/vrt/vrt.config.ts",
     "vrt:update": "pnpm --filter client run build-storybook && docker run --rm --user \"$(id -u):$(id -g)\" -v \"$PWD\":/work -w /work -e HOME=/tmp mcr.microsoft.com/playwright:v1.63.0-noble node_modules/.bin/playwright test -c packages/client/vrt/vrt.config.ts --update-snapshots",
     "lint:config": "! grep -rl '\"paths\"' tsconfig.base.json packages/*/tsconfig.json || (echo 'tsconfig paths 별칭을 쓰지 않습니다 — package.json의 imports 필드를 쓰세요 (ADR 0012)' && exit 1)",
     "test:contract": "vitest run -c test/contract/vitest.config.ts",
-    "test:tooling": "vitest run -c tooling/vitest.config.ts",
     "lint:css": "stylelint \"packages/client/src/**/*.css\" --config packages/client/stylelint.config.js",
-    "task": "tsx tooling/task.ts",
+    "task": "pnpm --filter ops run task",
     "build": "pnpm --filter client build && pnpm --filter server build",
     "start": "ADE_CLIENT_ROOT=.output/dist/client node .output/dist/server/index.js",
     "prepare": "simple-git-hooks"

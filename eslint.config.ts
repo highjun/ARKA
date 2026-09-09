@@ -2,7 +2,7 @@ import js from "@eslint/js";
 import importX from "eslint-plugin-import-x";
 import reactHooks from "eslint-plugin-react-hooks";
 import tseslint from "typescript-eslint";
-import { arkaRules } from "./tooling/eslint-rules";
+import { arkaRules } from "./ops/eslint-rules";
 
 export default [
   // 산출물은 검사하지 않는다 — 번들된 코드가 규칙에 걸려도 고칠 소스가 여기가 아니다.
@@ -227,7 +227,7 @@ export default [
   },
 
   {
-    // `src/` 밖(e2e·VRT·tooling·설정 파일)도 zone의 대상이다 — 그동안 `packages/*/src/**`만 봐서
+    // `src/` 밖(e2e·VRT·ops·설정 파일)도 zone의 대상이다 — 그동안 `packages/*/src/**`만 봐서
     // E2E 스펙이 `workbench/model`을 직접 import해도 0건이었다.
     files: [
       "packages/*/src/**/*.{ts,tsx}",
@@ -235,7 +235,7 @@ export default [
       "packages/*/.storybook/*.{ts,tsx}",
       "packages/*/*.config.ts",
       "test/**/*.ts",
-      "tooling/**/*.ts",
+      "ops/**/*.ts",
       "*.config.ts",
     ],
     plugins: { "import-x": importX },

@@ -3,6 +3,8 @@
 # 깨진다(USER_NOTE §12): ① 볼륨 마운트 권한(호스트 UID/GID), ② bind mount에서 파일 watch(inotify),
 # ③ 재시작 후 데이터 유지. 이 셋만 본다.
 set -euo pipefail
+# 빌드 컨텍스트는 저장소 루트다 — 이미지 하나에 세 패키지가 다 들어간다(→ ADR 0013).
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 
 IMAGE="${IMAGE:-ade:smoke}"
 # /api/*는 프로토콜 헤더가 있어야 통과한다(→ ADR 0017).
@@ -18,7 +20,7 @@ cleanup() {
 trap cleanup EXIT
 
 echo "# build"
-docker build -q -f deploy/Dockerfile -t "$IMAGE" . >/dev/null
+docker build -q -f "$ROOT/ops/deploy/Dockerfile" -t "$IMAGE" "$ROOT" >/dev/null
 
 run() {
   docker run -d --name "$NAME" --user "$(id -u):$(id -g)" \
