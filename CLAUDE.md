@@ -1,10 +1,10 @@
 # ARKASHIC — 에이전트 작업 규칙
 
-규칙의 본문은 [CONVENTIONS.md](CONVENTIONS.md)다. 여기는 그 파일을 읽으라는 지시와, 매 라운드 반복되는 절차만 둔다.
+규칙의 본문은 [CONVENTIONS.md](docs/CONVENTIONS.md)다. 여기는 그 파일을 읽으라는 지시와, 매 라운드 반복되는 절차만 둔다.
 
 ## 시작할 때
 
-1. `CONVENTIONS.md`를 읽는다. 왜 그렇게 정했는지는 `docs/adr/`에 있다.
+1. `docs/CONVENTIONS.md`를 읽는다. 왜 그렇게 정했는지는 `docs/adr/`에 있다.
 2. 할 일은 `docs/tasks/`에 있다 — 번호 파일 하나에 하나(`0040.md`). 새 할 일은 `pnpm run task create "<제목>"`으로 남기고, 시작하면 `status: In Progress`, 끝나면 `Done`으로 옮긴다. 목록은 `pnpm run task list`가 머리말에서 **생성**한다 — 유지하는 목록은 낡는다. 산문 백로그를 다른 문서에 쌓지 않는다.
 3. 사용자만 할 수 있는 일(sudo, 클라우드 콘솔, 비밀값)은 `docs/USER_NOTE.md` 맨 위 "사용자가 해야 할 일"에 적는다. **이 파일은 추적하지 않는다** — 사용자 개인 메모라서다. 규칙이 될 내용은 `CONVENTIONS.md`나 ADR로 옮긴다.
 
