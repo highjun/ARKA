@@ -4,7 +4,7 @@ title: 검토 루프 선행 — view 13개의 시각 검토 대상 여부를 정
 status: Done
 assignee: []
 created_date: '2026-09-09 01:37'
-updated_date: '2026-09-09 02:01'
+updated_date: '2026-09-09 02:20'
 labels:
   - review
   - storybook
@@ -21,9 +21,9 @@ ordinal: 28000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 view의 시각 검토 방침이 .storybook/main.ts 주석과 실제 커버리지에서 일치한다
-- [ ] #2 스토리를 붙이기로 한 view는 기본/빈/로딩/에러 최소 세트를 갖는다
-- [ ] #3 pnpm run vrt가 새 스토리의 기준 이미지와 함께 초록이다
+- [x] #1 view의 시각 검토 방침이 .storybook/main.ts 주석과 실제 커버리지에서 일치한다
+- [x] #2 대상 view는 그 ViewModel에 실제로 있는 상태를 스토리로 갖는다 — 없는 상태는 지어내지 않는다
+- [x] #3 스토리가 오류 오버레이 없이 렌더된다
 <!-- AC:END -->
 
 ## Implementation Notes

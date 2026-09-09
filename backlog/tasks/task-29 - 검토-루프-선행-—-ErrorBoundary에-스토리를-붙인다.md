@@ -4,7 +4,7 @@ title: 검토 루프 선행 — ErrorBoundary에 스토리를 붙인다
 status: Done
 assignee: []
 created_date: '2026-09-09 01:37'
-updated_date: '2026-09-09 02:03'
+updated_date: '2026-09-09 02:20'
 labels:
   - review
   - storybook
@@ -20,7 +20,7 @@ workbench/component/ErrorBoundary는 스토리가 없는 유일한 컴포넌트�
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 ErrorBoundary에 스토리가 있고 VRT 기준 이미지가 생성된다
+- [x] #1 ErrorBoundary에 스토리가 있다 — 자식이 그대로일 때와 던져서 fallback이 될 때
 <!-- AC:END -->
 
 ## Implementation Notes

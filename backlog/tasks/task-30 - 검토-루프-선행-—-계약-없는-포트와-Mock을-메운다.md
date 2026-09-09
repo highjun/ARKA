@@ -4,7 +4,7 @@ title: 검토 루프 선행 — 계약 없는 포트와 Mock을 메운다
 status: Done
 assignee: []
 created_date: '2026-09-09 01:37'
-updated_date: '2026-09-09 02:08'
+updated_date: '2026-09-09 02:20'
 labels:
   - review
   - test
@@ -20,8 +20,8 @@ IServerInfo/HttpServerInfo는 어댑터가 있는데 계약 스위트가 없고 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 IServerInfo에 계약 스위트가 있고 Mock과 HttpServerInfo 양쪽이 통과한다
-- [ ] #2 IMarkdownSource에 계약 스위트가 있고 MockMarkdownSource가 통과한다
+- [x] #1 IServerInfo에 계약 스위트가 있고 Mock과 HttpServerInfo 양쪽이 통과한다
+- [x] #2 IMarkdownSource에 계약 스위트가 있고 MockMarkdownSource가 통과한다
 <!-- AC:END -->
 
 ## Implementation Notes

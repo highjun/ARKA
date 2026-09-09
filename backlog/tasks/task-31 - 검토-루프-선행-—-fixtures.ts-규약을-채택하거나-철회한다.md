@@ -4,7 +4,7 @@ title: 검토 루프 선행 — fixtures.ts 규약을 채택하거나 철회한�
 status: Done
 assignee: []
 created_date: '2026-09-09 01:37'
-updated_date: '2026-09-09 02:10'
+updated_date: '2026-09-09 02:20'
 labels:
   - review
   - test
@@ -20,7 +20,7 @@ CONVENTIONS "Mock은 Mock<Name>.ts, fixture는 fixtures.ts로 테스트와 스�
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 fixtures.ts가 실제로 쓰이거나, CONVENTIONS에서 해당 문장이 사라진다
+- [x] #1 fixtures.ts가 실제로 쓰이거나, CONVENTIONS에서 해당 문장이 사라진다
 <!-- AC:END -->
 
 ## Implementation Notes

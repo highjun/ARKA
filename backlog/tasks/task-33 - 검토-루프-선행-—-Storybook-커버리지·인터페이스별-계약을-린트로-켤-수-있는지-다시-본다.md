@@ -4,7 +4,7 @@ title: 검토 루프 선행 — Storybook 커버리지·인터페이스별 계�
 status: Done
 assignee: []
 created_date: '2026-09-09 01:37'
-updated_date: '2026-09-09 02:14'
+updated_date: '2026-09-09 02:20'
 labels:
   - review
   - lint
@@ -20,8 +20,8 @@ lint-plan.md가 이 둘을 "규칙으로 만들지 않는 것"으로 분류한 �
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 두 규칙의 현재 위반 수가 실측되어 lint-plan.md에 기록된다
-- [ ] #2 위반이 0인 규칙은 켜지고 tooling/eslint-rules/*.test.ts에 fixture가 있다
+- [x] #1 두 규칙의 현재 위반 수가 실측되어 lint-plan.md에 기록된다
+- [x] #2 위반이 0인 규칙은 켜지고 tooling/eslint-rules/*.test.ts에 fixture가 있다
 <!-- AC:END -->
 
 ## Implementation Notes

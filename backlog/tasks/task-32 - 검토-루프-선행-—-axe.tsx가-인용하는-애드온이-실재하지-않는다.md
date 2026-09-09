@@ -4,7 +4,7 @@ title: 검토 루프 선행 — axe.tsx가 인용하는 애드온이 실재하�
 status: Done
 assignee: []
 created_date: '2026-09-09 01:37'
-updated_date: '2026-09-09 02:11'
+updated_date: '2026-09-09 02:20'
 labels:
   - review
   - a11y
@@ -20,7 +20,7 @@ shared/utils/axe.tsx가 jsdom에서 color-contrast를 끄는 근거로 "@storybo
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 색대비를 실제로 검사하는 곳이 있거나, axe.tsx 주석이 검사하지 않는다는 사실을 정확히 적는다
+- [x] #1 색대비를 실제로 검사하는 곳이 있거나, axe.tsx 주석이 검사하지 않는다는 사실을 정확히 적는다
 <!-- AC:END -->
 
 ## Implementation Notes
