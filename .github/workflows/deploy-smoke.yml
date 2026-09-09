@@ -14,4 +14,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: bash test/deploy/anon-smoke.sh "${{ inputs.origin }}"
+      - run: bash deploy/anon-smoke.sh "${{ inputs.origin }}"

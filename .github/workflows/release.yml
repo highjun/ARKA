@@ -30,7 +30,9 @@ jobs:
             type=raw,value=latest
       - uses: docker/build-push-action@v6
         with:
+          # 컨텍스트는 리포 루트, Dockerfile만 deploy/에 있다(→ ADR 0013).
           context: .
+          file: deploy/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
