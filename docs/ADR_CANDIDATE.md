@@ -24,7 +24,11 @@
 
 ## 수렴한 것 — ADR 승격 대기
 
-2026-09-09 검토에서 논의가 끝난 것들. 셋이 서로를 지탱해서 따로 못 올린다 — A가 서려면 B가 필요하고, B가 서면 A의 스토리가 얇아지며, C가 A의 부산물을 담는다.
+2026-09-09 검토에서 논의가 끝난 것들. **열린 항목은 없다** — 셋 다 결정까지 마쳤고 ADR 승격만 남았다.
+
+셋이 서로를 지탱해서 따로 못 올린다 — A가 서려면 B가 필요하고, B가 서면 A의 스토리가 얇아지며, C가 A의 부산물을 담는다. 논의 중 실제로 그 맞물림이 문제를 풀었다: A의 유일한 경계 사례(`RootView`)가 부담스러웠던 이유가 "스텁 만드는 비용"이었는데 **C가 그 비용을 없앴다.**
+
+승격 시 함께 고쳐야 하는 것 — `CONVENTIONS.md`(현재 fixtures 문장이 C의 절반만 담고 있다), `.storybook/main.ts`(view "여섯 개만"과 제외 목록), `arka/components-have-stories`의 glob, TASK-28의 결과.
 
 ### A. `view/`도 Storybook 대상이다 — 배치를 보는 자리
 
@@ -41,8 +45,11 @@
   | VRT | 비동기라 찍는 순간이 흔들림 | 결정적 |
 
   스토리의 목적을 "배치 확인"으로 못박으면 VM이 그 상태를 *어떻게* 만들었는지는 볼 대상이 아니다 — 그건 ViewModel 자신의 단위 테스트 몫이다. 검토용으로는 **계약의 모든 상태를 세울 수 있다는 점**이 결정적이다. 스텁의 *모양*은 타입 체커가 붙든다(`satisfies I<Name>ViewModel`); 붙들지 않는 것은 *동작*인데 배치를 보는 데는 필요 없다.
-- **아직 열린 것**: 대상 기준. 제안은 **"컴포넌트를 둘 이상 배치하는 view"** 다 — `RootView`(22줄, `ErrorBoundary`로 `ShellView`를 감싸는 것뿐)처럼 배치라 할 것이 없는 view를 빼기 위해서다. 확정 필요.
-- **린트로 갈 수 있는가**: 대상 기준이 확정되면 `arka/components-have-stories`를 넓히는 형태로 가능하다. "둘 이상 배치"는 정적 판정이 어려우니 예외 목록을 규칙 옵션으로 두는 쪽이 현실적이다.
+- **대상은 모든 view다. 예외 목록을 두지 않는다.** "둘 이상 배치하는 view만"이라는 기준을 검토했다가 접었다 — 기준을 두면 그것이 다시 판단거리가 되고, 이 리포는 예외를 만드느니 문장을 실측에 맞추는 쪽을 택해 왔다(lint-plan의 파일 이름 사례).
+- **경계 사례였던 `RootView`도 포함하고 자리도 `workbench/view/` 그대로 둔다.** 처음엔 "배치가 아니라 조립 결정이니 `workbench/` 루트로 옮기자"고 제안했으나 접었다. 두 가지가 걸림돌을 없앴다.
+  - 비용: 토큰이 5개(`ErrorLog` + `ShellView`의 4개) 필요해 부담이라 봤는데, **C가 서면 `workbench/view/fixtures.ts`의 `ShellView` 스텁을 그대로 가져다 쓰므로 열 줄 남짓**이다.
+  - 중복: `Default`는 `ShellView` 스토리와 그림이 같아 중복이 맞다. 그러나 **`Crashed`(셸이 렌더 중 죽어 `CrashScreen`으로 바뀐 그림)는 다른 어디에서도 못 본다** — `ErrorBoundary` 스토리는 최소 fallback을 쓰고 `CrashScreen` 스토리는 경계 없이 혼자 뜬다. "실제 셸이 죽었을 때 앱이 어떻게 보이는가"는 여기서만 보인다.
+- **린트로 갈 수 있는가**: 예. 예외가 없으므로 `arka/components-have-stories`의 glob에 `view/`를 더하는 한 줄이면 된다. 다만 **위반이 0이 된 뒤에** 켠다.
 - **딸린 정정**: 앞서 "TASK-37(Shell 헤더 잘림)이 view 스토리 덕에 드러났다"고 적었으나 **틀렸다.** 그 잘림은 기존 `workbench-shell--default`(컴포넌트 스토리)에도 그대로 있었다. 발견의 계기는 view 스토리가 아니라 **처음으로 기준 이미지를 눈으로 본 것**이다. A의 근거로 쓸 수 없다.
 
 ### B. `view/`는 배치만 한다 — 세부는 `component/`
@@ -58,7 +65,7 @@
   `SearchView`·`SourceControlView`·`SettingsTabView`·`KeybindingsTabView`가 대표적이다 — 이 화면들은 볼 수 있는 유일한 자리가 view뿐이었다.
 - **결정할 것**: view가 그리던 세부를 `component/`로 꺼낼 것인가.
 - **결정**: **꺼낸다.** CONVENTIONS의 원칙 그대로다 — *"검토 부담이 커지면 그건 구조 문제다. 더 열심히 보는 게 아니라 구조를 조인다."* A와 맞물린다: view가 배치만 하면 view 스토리에서 볼 것이 "배치"로 좁혀져 컴포넌트 스토리와 겹치지 않는다.
-- **아직 열린 것 — 순수 변환 함수의 행선지.** "배치만"을 세우면 지금 view에 있는 이것들의 자리를 정해야 한다.
+- **순수 변환 함수는 `view/shared.ts`로 뺀다.** "배치만"을 세우면 지금 view에 있는 이것들의 자리를 정해야 한다.
 
   ```
   ShellView          mergeTabDisplay · buildTree · findLeafIdForTab · buildTabContextMenu
@@ -66,7 +73,18 @@
   ChatTabView        renderItem
   ```
 
-  배치가 아니라 **데이터 변환**이다. `renderItem`·`emptyLabelOf`는 `ReactNode`를 반환해서 ViewModel로 못 간다(ADR 0005 — Model·ViewModel은 `ReactNode`를 갖지 않는다). 나머지는 갈 수 있다. ViewModel / 슬라이스의 `shared.ts` / "ReactNode를 만드는 것은 view의 일"로 예외 — 셋 중 하나로 정해야 흐지부지되지 않는다.
+  **9개 중 6개는 애초에 view를 떠날 수 없다.**
+
+  | 함수 | 떠날 수 있나 |
+  |---|---|
+  | `toItem` | **못 떠남** — `IDirectoryTreeViewModel` 주석에 명시: *"ViewModel 계약은 `shared/components`를 알 수 없는 자리다"* |
+  | `renderItem` `emptyLabelOf` `buildTree` `buildTabContextMenu` | **못 떠남** — `ReactNode` 반환(ADR 0005: Model·ViewModel은 `ReactNode`를 갖지 않는다) |
+  | `mergeTabDisplay` | 못 떠남 — `TabContentRegistry` 조회가 필요 |
+  | `findLeafIdForTab` `deleteTitleOf` `deleteSubtitleOf` | 떠날 수 있음(순수) |
+
+  갈 수 있는 3개만 ViewModel로 보내면 변환이 두 군데로 갈라져 오히려 나빠진다. **전부 `shared.ts`로 모은다.**
+
+  이건 새 개념이 아니라 컴포넌트에서 이미 쓰던 관례를 view에 적용하는 것이다. `FileTree/shared.ts`의 TSDoc이 의도를 그대로 적어놓았다 — *"순수 함수로 뽑는다 … 여기가 녹색이면 `FileTree.tsx`는 **이 함수들을 부르는 배선일 뿐이다.**"* "배선일 뿐"이 곧 "view는 배치만"이다.
 - **린트로 갈 수 있는가**: 일부는 가능하다. `view/`에서 `@primer/react` 직접 import 금지는 `no-restricted-imports`로 바로 판정된다. 다만 **위반 9건이 먼저 0이 되어야** 켤 수 있다(lint-plan의 교훈 — 전건 위반인 규칙은 규칙이 아니라 백로그다).
 - **비용**: 이미 쓴 view 스토리 35개 중 상당수가 바뀌고, `git`·`search`에 `component/`를 새로 만들어야 한다. 작지 않다.
 
@@ -80,8 +98,26 @@
 - **왜 `Mock<Name>.ts`가 아닌가**: 이 리포에서 `Mock*`은 **계약 스위트에 걸리는 구현**을 뜻한다(8개가 전부 그렇다). VM 스텁은 그게 아니라 무해한 값 덩어리다. `MockShellViewModel.ts`로 부르면 "계약 스위트가 있어야 한다"는 잘못된 함의가 붙는다. 나누면 `Mock*` 규약이 오히려 선명해진다 — **Mock은 계약에 걸리는 것, fixture는 스토리가 쓰는 값.**
 - **어디에 두나 — 쓰는 계층 옆**(`view/fixtures.ts`, `component/<Name>/fixtures.ts`). 슬라이스 루트는 안 된다: ADR 0005가 슬라이스 루트 `tokens.ts`를 기각한 이유(*"슬라이스의 모든 계약을 import하는 역방향 허브가 된다"*)가 그대로 적용된다. 계층 간 공유도 애초에 불가능하다 — `DirectoryTreeView`가 `toItem`으로 `FileTreeRow`(viewmodel 어휘) → `FileTreeItem`(component 어휘)를 변환하듯 계층마다 어휘가 다르다.
 - **실측 — 뺄 분량**: VM 스텁이 view 스토리 파일의 **25~27%** 다(ShellView 42/153줄, DirectoryTreeView 36/143). 빼면 스토리 파일이 "어떤 상태를 보여줄지"의 목록으로 남는다.
-- **아직 열린 것**: 언제 만드나. 컴포넌트 스토리에도 데이터가 있다(`FileTree` 60줄, `Container` 36, `SessionList` 32). 전부 빼면 파일만 는다. 제안은 **"view 스토리의 VM 스텁은 항상, 그 외 데이터는 스토리 파일이 데이터로 더 길어질 때"** 다. 확정 필요.
-- **린트로 갈 수 있는가**: **아니오.** "스토리에 데이터를 두지 마라"는 판정할 수 없다. 리뷰로 본다.
+- **언제 만드나 — 컴포넌트의 내용을 채우는 값이면 전부. 임계값을 두지 않는다.** "길면 뺀다" 식의 기준을 두 번 제안했다가 접었다. 길이는 다시 판단거리가 되고, 실측해 보니 길이로 가르면 성격이 같은 것이 갈라진다.
+- **이름 붙은 const만이 아니라 인라인 `args` 안의 값도 포함한다.** 실측하니 그쪽이 더 크다.
+
+  | 어디 | 줄 수 |
+  |---|---|
+  | 이름 붙은 데이터 const | `DirectoryTreeView` 32 · `FileTree` 23 · `FileIcon` 21 · `ShellView` 19 · `Tab` 14 · 그 외 7개 |
+  | 인라인 `args` | `SearchView` 29 · `DirectoryTreeView` 21 · `SourceControlView` 19 · `ChatTabView` 19 · `FileTree` 14 · `Shell` 12 · 그 외 6개 |
+
+  영향받는 스토리 파일은 **20개 남짓**이고, view 스토리 6개는 거의 전부가 대상이다.
+- **결과로 스토리 파일은 "상태의 이름 목록"이 된다.** view 스토리는 `args`가 곧 상태라 값이 전부 빠지면 이 모양이 된다.
+
+  ```ts
+  export const Default: Story = story(FIXTURES.withResults);
+  export const Empty: Story = story(FIXTURES.noMatch);
+  export const Loading: Story = story(FIXTURES.searching);
+  ```
+
+  즉 남는 것은 상태 자체가 아니라 **상태의 이름**이고, 값은 옆 파일에 모인다. 스토리 파일이 "이 화면은 어떤 상태들을 갖는가"의 목차가 된다.
+- **작은 것도 예외 없다** — `Dialog`(6줄), `Timestamp`(한 줄짜리 `Date.UTC(...)`)도 간다. 한때 "저건 샘플 데이터가 아니라 시나리오 장치"라고 갈라 보려 했으나, **컴포넌트가 그리는 내용을 채우는 값이면 전부 데이터**라는 정의로 통일한다.
+- **린트로 갈 수 있는가**: **아니오.** "스토리에 값을 두지 마라"는 정적으로 판정할 수 없다. 리뷰로 본다.
 
 ### 곁가지 — `IShellViewModel`이 46개 멤버다
 
@@ -94,6 +130,20 @@ ISourceControlViewModel   20개
 ```
 
 C를 적용해 스텁을 빼면 그 무게가 한 파일에 드러난다. `workbench/` 검토 라운드(r3)에서 볼 후보다.
+
+### 딸린 것 — `shared.ts` 이름이 셋으로 갈려 있다
+
+B가 서면 함께 정리해야 한다. 같은 개념인데 이름이 셋이다.
+
+```
+component/FileTree/shared.ts   ← shared      (순수 함수 5개 파일)
+viewmodel/share.ts             ← share       (공유 상수 GHOST_ID)
+model/tabsShare.ts             ← <무엇>Share (공유 상수, 기본 leaf id)
+```
+
+`arka/file-names`는 셋 다 유효한 camelCase라 못 잡는다. **`shared.ts`로 통일한다** — 대상 폴더에 같은 이름이 없어 그대로 옮기면 된다.
+
+한 가지 딸린 결과: 컴포넌트 폴더의 `shared.ts`는 순수 **함수**이고 나머지 둘은 공유 **상수**다. 이름을 합치면 `shared.ts`의 뜻이 *"이 폴더 안에서 나눠 쓰는 것"* 으로 넓어진다. 그 정의를 ADR에 한 줄로 적는다.
 
 ## 열린 후보
 
