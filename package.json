@@ -18,6 +18,7 @@
     "test:contract": "vitest run -c test/contract/vitest.config.ts",
     "test:tooling": "vitest run -c tooling/vitest.config.ts",
     "lint:css": "stylelint \"packages/client/src/**/*.css\" --config packages/client/stylelint.config.js",
+    "task": "tsx tooling/task.ts",
     "build": "pnpm --filter client build && pnpm --filter server build",
     "start": "ADE_CLIENT_ROOT=dist/client node dist/server/index.js",
     "prepare": "simple-git-hooks"
