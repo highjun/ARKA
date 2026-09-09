@@ -258,7 +258,7 @@ export default [
               target: ["./packages/client/e2e", "./packages/client/vrt"],
               from: ["./packages/client/src", "./packages/server/src", "./packages/contracts/src"],
               message:
-                "E2E·VRT는 소스를 import하지 않습니다. 화면에 보이는 것만으로 검사하세요 — 배선은 registerServices.test.tsx가, 계약은 test/contract/가 봅니다.",
+                "E2E·VRT는 소스를 import하지 않습니다. 화면에 보이는 것만으로 검사하세요 — 배선은 registerServices.test.tsx가, 응답 계약은 서버의 responseContract가 봅니다.",
             },
             {
               target: "./packages/contracts/src",
