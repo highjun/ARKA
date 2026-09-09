@@ -18,6 +18,9 @@ export default defineConfig({
   snapshotPathTemplate: "{testDir}/snapshots/{arg}{ext}",
   outputDir: path.join(repoRoot, ".output/vrt/test-results"),
   reporter: [["list"], ["html", { outputFolder: path.join(repoRoot, ".output/vrt/report"), open: "never" }]],
+  // 기본값('missing')이면 기준이 없는 스토리를 **조용히 찍어 기준으로 삼는다.** 아무도 안 본 그림이
+  // 승인된 기준이 되는 것이라 정반대다 — 기준은 검토에서 Accept할 때 `--update-snapshots`로만 만든다.
+  updateSnapshots: "none",
   use: { baseURL: `http://127.0.0.1:${PORT}` },
   webServer: {
     // 이미 빌드된 정적 스토리북을 띄운다 — 빌드는 `pnpm run vrt`가 먼저 한다.

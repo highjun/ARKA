@@ -4,6 +4,7 @@ title: VRT를 실제로 강제하는 관문이 하나도 없다
 status: To Do
 assignee: []
 created_date: '2026-09-09 01:47'
+updated_date: '2026-09-09 01:52'
 labels:
   - review
   - ops
@@ -23,3 +24,9 @@ FileTree 기준 이미지가 ade9e3a(밀도 토큰) 이후로 낡아 pnpm run vr
 - [ ] #1 VRT와 E2E가 사람 손을 거치지 않고 도는 자리가 정해져 있다
 - [ ] #2 기준 이미지가 낡으면 병합 전에 드러난다
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-09-09: 기준 이미지 정책이 바뀌어 위험의 모양이 달라졌다. 기준은 검토에서 Accept할 때만 만들고(vrt.config.ts의 updateSnapshots: "none"), 기준이 없는 스토리는 건너뛴다. 그래서 지금 VRT는 "승인된 기준이 깨졌을 때"만 의미가 있다 — 승인이 쌓이기 전에는 관문이 없어도 잃을 것이 적다. 다만 승인이 쌓이기 시작하면 이 결정이 급해진다.
+<!-- SECTION:NOTES:END -->
