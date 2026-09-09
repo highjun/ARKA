@@ -1,9 +1,10 @@
 ---
 id: TASK-30
 title: 검토 루프 선행 — 계약 없는 포트와 Mock을 메운다
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-09 01:37'
+updated_date: '2026-09-09 02:03'
 labels:
   - review
   - test
