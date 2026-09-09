@@ -3,7 +3,7 @@ FROM node:24-alpine AS build
 # corepack은 Node 25에서 빠진다 — 버전을 package.json의 packageManager와 같게 직접 고정한다.
 RUN npm install -g pnpm@11.13.0
 WORKDIR /app
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .nvmrc ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/contracts/package.json packages/contracts/
 COPY packages/client/package.json packages/client/
 COPY packages/server/package.json packages/server/
