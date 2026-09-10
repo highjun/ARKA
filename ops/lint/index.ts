@@ -1,6 +1,9 @@
 import comments from "@eslint-community/eslint-plugin-eslint-comments";
 import js from "@eslint/js";
 import json from "@eslint/json";
+import jsdoc from "eslint-plugin-jsdoc";
+import sonarjs from "eslint-plugin-sonarjs";
+import tsdoc from "eslint-plugin-tsdoc";
 import importX, { createNodeResolver } from "eslint-plugin-import-x";
 import tseslint from "typescript-eslint";
 import type { Linter } from "eslint";
@@ -134,6 +137,43 @@ const base: Linter.Config[] = [
       "line-comment-position": ["error", { position: "above" }],
       // 주석 한 덩어리의 상한. 넘으면 코드가 아니라 문서라 ADR로 간다.
       "arka/max-comment-lines": ["error", { line: 4, block: 4, tsdoc: 10 }],
+    },
+  },
+
+  {
+    // **선언 위의 주석은 `/** */`다**(→ ADR 0004). 그래야 에디터 hover에 뜬다.
+    files: ["**/*.{ts,tsx}"],
+    plugins: { jsdoc, tsdoc, sonarjs },
+    rules: {
+      // **대상을 최상위 선언로 좁히고 fixer는 끈다**(2026-09-10 실측). 기본 컨텍스트를 그대로 두면
+      // 함수 본문 안 화살표까지 잡고, fixer는 **여러 줄 `//` 묶음의 마지막 줄만 바꿔** 앞 줄을
+      // 매달린 채로 남긴다. `allowedPrefixes`는 손대지 않는다 — 기본값이 지시문을 이미 뺀다.
+      "jsdoc/convert-to-jsdoc-comments": ["error", {
+        enableFixer: false,
+        contexts: [
+          "ExportNamedDeclaration > FunctionDeclaration",
+          "ExportNamedDeclaration > ClassDeclaration",
+          "ExportNamedDeclaration > TSInterfaceDeclaration",
+          "ExportNamedDeclaration > TSTypeAliasDeclaration",
+          "ExportNamedDeclaration > TSEnumDeclaration",
+          "Program > FunctionDeclaration",
+          "Program > ClassDeclaration",
+          "Program > TSInterfaceDeclaration",
+          "Program > TSTypeAliasDeclaration",
+        ],
+        contextsBeforeAndAfter: [],
+      }],
+      // 내용이 없는 문서는 자리만 채운다 — 빈 블록이 있으면 다음 사람이 채워졌다고 믿는다.
+      "jsdoc/require-description": "error",
+      "jsdoc/no-blank-blocks": "error",
+      "jsdoc/no-blank-block-descriptions": "error",
+      // `/** 이름을 돌려준다 */ getName()` 같은 동어반복. 이름이 이미 말한 것을 되풀이하지 않는다.
+      "jsdoc/informative-docs": "error",
+      // 타입은 시그니처가 말한다 — `@param {string}`은 두 벌이 되어 갈린다.
+      "jsdoc/no-types": "error",
+      "tsdoc/syntax": "error",
+      // 주석 처리된 코드는 지운다. git이 이미 영구 보관한다.
+      "sonarjs/no-commented-code": "error",
     },
   },
 ];

@@ -14,9 +14,10 @@ export type CommandPaletteItem = {
   readonly shortcut?: readonly string[];
 };
 
-// `CommandPaletteRootProps`를 참조하지 않고 필드를 그대로 되풀이한다 — `component-structure-order`
-// 규칙(검사 3)이 단일 Root 컴포넌트에서 "Props 선언은 Root 바로 앞"을 강제해서, `Root`보다 먼저
-// 오는 이 내부 헬퍼가 그 Props 타입을 앞당겨 참조하면 선언 순서 위반이 된다.
+/**
+ * `CommandPaletteRootProps`를 참조하지 않고 필드를 되풀이한다 — "Props 선언은 Root 바로 앞"이라
+ * `Root`보다 먼저 오는 이 헬퍼가 그 타입을 앞당겨 참조하면 선언 순서가 어긋난다.
+ */
 type DialogAttrs = Omit<HTMLAttributes<HTMLDivElement>, 'onSelect' | 'defaultValue'> & {
   readonly open: boolean;
   readonly onOpenChange?: (open: boolean) => void;

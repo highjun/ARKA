@@ -12,10 +12,12 @@ interface Listenable {
  * `subscribe`/`getVersion` 둘만 넘기면 되고 값 캐시도 프록시도 없다(배경은 `useViewModel.ts`).
  *
  * @example
+ * ```ts
  * class ShellViewModelImpl extends ViewModelBase implements ShellViewModel {
  *   readonly #activities = this.observe(computed([...], ...));
  *   get activities(): readonly Activity[] { return this.#activities.get(); }
  * }
+ * ```
  */
 export abstract class ViewModelBase {
   #version = 0;

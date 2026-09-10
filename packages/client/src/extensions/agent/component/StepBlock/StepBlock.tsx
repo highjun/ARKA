@@ -10,9 +10,10 @@ import { StatusIndicator } from '../StatusIndicator';
 import type { StatusIndicatorStatus } from '../StatusIndicator';
 
 // `StepBlockBaseProps`처럼 공유 베이스 인터페이스로 뽑지 않는다 — `ui/props-extends-html-attributes`
-// 는 export된 각 Props 인터페이스가 `HTMLAttributes` 계열을 직접 상속하는지만 본다(간접 상속은
-// 못 따라간다). `TabGroupProps`/`TabSplitProps`(`Tab.tsx`)도 같은 이유로 각자 직접 상속하는
-// 선례를 따른다 — `status`/`expanded`류 4개 필드가 두 인터페이스에 중복되지만 그만큼 안전하다.
+/**
+ * 각 Props 인터페이스가 `HTMLAttributes` 계열을 **직접** 상속한다 — 간접 상속은 검사가 못 따라간다.
+ * `Tab.tsx`의 `TabGroupProps`도 같은 선례다. 필드 넷이 두 인터페이스에 중복되지만 그만큼 안전하다.
+ */
 export interface StepBlockThinkingProps extends Omit<HTMLAttributes<HTMLDetailsElement>, 'title' | 'children' | 'onToggle'> {
   /** `'thinking'`이면 사고 과정 블록(점선 테두리) — 본문이 비어도 펼쳐진다. */
   readonly kind: 'thinking';

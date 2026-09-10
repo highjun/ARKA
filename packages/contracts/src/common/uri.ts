@@ -22,6 +22,8 @@ export class URI {
   }
 
   /**
+   * 허용하는 형태는 `scheme://authority/path` 하나뿐이다 — query와 fragment는 받지 않는다.
+   *
    * @throws Error
    * - query나 fragment가 있는 경우
    * - `scheme://authority/` 형태가 아닌 경우(구분자나 경로 슬래시가 없음)

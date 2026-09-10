@@ -8,7 +8,7 @@ export type GitSetup = {
 };
 
 /**
- * `IGitService`를 구현한 모든 것이 통과해야 하는 스위트. `setup`은 `a.txt`("one\n") 하나가 커밋된
+ * `IGitService`를 구현한 모든 것이 통과해야 하는 스위트. `setup`은 줄바꿈 하나로 끝나는 `a.txt`가 커밋된
  * 저장소를 준다.
  */
 export const testGitServiceContract = (name: string, setup: () => GitSetup | Promise<GitSetup>): void => {

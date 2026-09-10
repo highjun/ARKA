@@ -61,7 +61,7 @@ export class RunManager {
     return session;
   }
 
-  /** @throws AgentError `SessionNotFound` */
+  /** 보관된 세션이면 실행 중이 아니어도 돌려준다. @throws AgentError `SessionNotFound` */
   getSession(sessionId: SessionId): AgentSession {
     const session = this.#sessions.get(sessionId);
     if (session === null) throw new AgentError("SessionNotFound", `no such session: ${sessionId}`);
@@ -101,7 +101,7 @@ export class RunManager {
     return { runId, status: "running" };
   }
 
-  /** @throws AgentError `RunNotFound`, `NotWaitingInput` */
+  /** 실행이 그 `requestId`로 기다리는 동안에만 받는다. @throws AgentError `RunNotFound`, `NotWaitingInput` */
   provideInput(sessionId: SessionId, runId: RunId, requestId: string, text: string): void {
     const active = this.#requireActive(sessionId, runId);
     const pending = active.pendingInput.get(requestId);
@@ -112,7 +112,7 @@ export class RunManager {
     pending.resolve(text);
   }
 
-  /** @throws AgentError `RunNotFound` */
+  /** 실행을 끊고 대기 중인 입력 요청을 모두 거절한다. @throws AgentError `RunNotFound` */
   cancel(sessionId: SessionId, runId: RunId): void {
     const active = this.#requireActive(sessionId, runId);
     active.abort.abort();

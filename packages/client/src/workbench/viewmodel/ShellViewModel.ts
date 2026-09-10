@@ -739,7 +739,8 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     this.#tabsModel.setActiveLeafId(activeLeafId);
   }
 
-  /** 탭을 닫을 때 어느 이웃을 활성화할 것인가 — **오른쪽 먼저, 없으면 왼쪽**이다.
+  /**
+   * 탭을 닫을 때 어느 이웃을 활성화할 것인가 — **오른쪽 먼저, 없으면 왼쪽**이다.
    *
    * 브라우저·에디터가 전부 이 규칙을 쓰고, 사람이 탭을 연달아 닫을 때 손이 한 자리에 머문다.
    * 왼쪽을 먼저 고르면 닫을 때마다 활성 탭이 뒤로 밀려 순서가 뒤집힌 것처럼 느껴진다.

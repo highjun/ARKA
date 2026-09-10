@@ -8,8 +8,10 @@ import { useViewModel } from './useViewModel';
 
 const WorkspaceViewModelToken = createToken<WorkspaceViewModel>('workspaceViewModel');
 
-// ViewModel 계약 — atom은 등장하지 않는다(React 경계를 넘지 않는다). 관찰 property는 plain 값,
-// command는 메서드로 노출한다.
+/**
+ * ViewModel 계약 — atom은 등장하지 않는다(React 경계를 넘지 않는다). 관찰 property는 plain 값,
+ * command는 메서드로 노출한다.
+ */
 interface WorkspaceViewModel {
   readonly openFileId: string | null;
   readonly isDirty: boolean;
@@ -19,8 +21,10 @@ interface WorkspaceViewModel {
   markDirty(): void;
 }
 
-// 실제 앱의 모든 ViewModel처럼 `ViewModelBase`를 상속해 atom을 `observe()`로 감싸고, getter는
-// plain 값을 돌려준다 — 계약에 `ReadableAtom`이 등장하지 않는다.
+/**
+ * 실제 앱의 모든 ViewModel처럼 `ViewModelBase`를 상속해 atom을 `observe()`로 감싸고, getter는
+ * plain 값을 돌려준다 — 계약에 `ReadableAtom`이 등장하지 않는다.
+ */
 class WorkspaceViewModelImpl extends ViewModelBase implements WorkspaceViewModel {
   readonly #openFileId = this.observe(atom<string | null>(null));
   readonly #isDirty = this.observe(atom(false));
