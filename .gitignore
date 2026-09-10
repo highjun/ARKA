@@ -7,3 +7,6 @@ storybook-static/
 .env.*
 .claude
 docs/USER_NOTE.md
+
+# CI 컨테이너용 가짜 값. `.env.*` 금지의 유일한 예외다 — 여기엔 시크릿이 없다.
+!ops/deploy/.env.ci

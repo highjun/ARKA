@@ -14,7 +14,7 @@ import type { DirectoryListing, FileContent, FileEntry, FileEntryType } from '#c
  * 실제 디스크·심링크를 쓴다).
  *
  * 마운트가 `:ro` 면 쓰기·생성·이동·삭제는 전부 `EROFS` 로 실패한다 — 그건 이 파일이 아니라
- * 배포 설정(`docker-compose.yml`)이 정한다.
+ * 배포 설정(`compose.yml`)이 정한다.
  */
 
 /** 폰 브라우저에 통째로 밀어넣지 않기 위한 상한. 넘으면 잘라서 `truncated` 로 알린다. */
