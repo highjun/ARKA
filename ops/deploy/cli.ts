@@ -10,6 +10,9 @@ import type { DownOptions } from "./down.ts";
 /**
  * `up` · `down` · `status`를 실물에 잇는다.
  *
+ * **`ops/package.json`에 스크립트로 두지 않는다** — `deploy`는 pnpm의 내장 명령이라
+ * `pnpm --filter ops deploy`가 우리 것이 아니라 그것을 부른다(2026-09-11 실측). 파일을 직접 부른다.
+ *
  * ```sh
  * node ops/deploy/cli.ts up ops/deploy/ade.deploy.ts [--dry-run]
  * node ops/deploy/cli.ts down ade [--purge] [--remove-access] [--dry-run]
