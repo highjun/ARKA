@@ -25,8 +25,9 @@ export default defineConfig({
   use: { baseURL: `http://127.0.0.1:${PORT}` },
   webServer: {
     // 이미 빌드된 정적 스토리북을 띄운다 — 빌드는 `run.sh`가 먼저 한다.
-    command: `node_modules/.bin/http-server packages/client/.output/storybook-static -p ${String(PORT)} -s`,
-    cwd: repoRoot,
+    // `http-server`는 client의 devDependency다 — cwd가 이 패키지여야 바이너리를 찾는다.
+    command: `node_modules/.bin/http-server .output/storybook-static -p ${String(PORT)} -s`,
+    cwd: clientRoot,
     url: `http://127.0.0.1:${PORT}/index.json`,
     reuseExistingServer: false,
     timeout: 120_000,

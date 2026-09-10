@@ -1,4 +1,5 @@
 import js from "@eslint/js";
+import importX from "eslint-plugin-import-x";
 import tseslint from "typescript-eslint";
 import type { Linter } from "eslint";
 import { arkaRules } from "../eslint-rules";
@@ -22,6 +23,16 @@ const base: Linter.Config[] = [
   // 플러그인은 **여기서 한 번만** 등록한다. 패키지 설정이 다시 등록하면 같은 이름에 다른
   // 객체가 걸려 `Cannot redefine plugin "arka"`로 죽는다 — 정의는 배열 전체에 누적된다.
   { plugins: { arka: arkaRules } },
+  // `import-x`도 여기서 한 번만 등록한다. 세 패키지가 각자 등록하던 것을 모았다 — 같은 이름에
+  // 다른 객체가 걸리면 `Cannot redefine plugin`으로 죽는다. zone 설정은 각 패키지가 얹는다.
+  { plugins: { "import-x": importX } },
+  {
+    // **선언하지 않은 것을 import하면 잡는다.** Node와 ESLint의 해석기가 `node_modules`를 위로
+    // 걸어 올라가 저장소 루트에서 찾아 주기 때문에, 선언이 빠져도 조용히 동작한다 — 이 규칙이
+    // 없으면 패키지가 스스로 설 수 있는지 아무도 모른다.
+    files: ["**/*.{ts,tsx,js}"],
+    rules: { "import-x/no-extraneous-dependencies": "error" },
+  },
 
   js.configs.recommended as Linter.Config,
 

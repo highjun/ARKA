@@ -1,4 +1,3 @@
-import importX from "eslint-plugin-import-x";
 import ops from "ops/eslint";
 
 /**
@@ -15,7 +14,6 @@ export default [
 
   {
     files: ["src/**/*.ts", "*.config.ts"],
-    plugins: { "import-x": importX },
     rules: {
       "import-x/no-restricted-paths": [
         "error",

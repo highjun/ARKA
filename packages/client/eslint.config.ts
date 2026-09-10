@@ -1,4 +1,3 @@
-import importX from "eslint-plugin-import-x";
 import reactHooks from "eslint-plugin-react-hooks";
 import ops from "ops/eslint";
 
@@ -136,7 +135,6 @@ export default [
     // 계층 사이의 방향. `src/` 밖(test/·설정 파일)도 대상이다 — 그동안 `src/**`만 봐서
     // e2e가 소스를 import해도 통과했다.
     files: ["src/**/*.{ts,tsx}", "test/**/*.ts", ".storybook/*.{ts,tsx}", "*.config.ts"],
-    plugins: { "import-x": importX },
     rules: {
       "import-x/no-restricted-paths": [
         "error",

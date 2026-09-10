@@ -23,12 +23,15 @@ importers:
 
   .:
     devDependencies:
+      simple-git-hooks:
+        specifier: ^2.14.0
+        version: 2.14.0
+
+  ops:
+    devDependencies:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.10.0(jiti@2.7.0))
-      '@playwright/test':
-        specifier: 'catalog:'
-        version: 1.63.0
       '@types/node':
         specifier: ^26.4.1
         version: 26.4.1
@@ -38,24 +41,9 @@ importers:
       eslint-plugin-import-x:
         specifier: ^4.17.1
         version: 4.17.1(@typescript-eslint/utils@8.69.0(eslint@10.10.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.10.0(jiti@2.7.0))
-      eslint-plugin-react-hooks:
-        specifier: ^7.1.1
-        version: 7.1.1(eslint@10.10.0(jiti@2.7.0))
-      http-server:
-        specifier: ^14.1.1
-        version: 14.1.1
       jiti:
         specifier: ^2.7.0
         version: 2.7.0
-      simple-git-hooks:
-        specifier: ^2.14.0
-        version: 2.14.0
-      stylelint:
-        specifier: ^17.15.0
-        version: 17.15.0(typescript@6.0.3)
-      stylelint-config-standard:
-        specifier: ^40.0.0
-        version: 40.0.0(stylelint@17.15.0(typescript@6.0.3))
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
@@ -65,8 +53,6 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 5.0.0(@types/node@26.4.1)(jsdom@30.0.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13))
-
-  ops: {}
 
   packages/client:
     dependencies:
@@ -221,6 +207,18 @@ importers:
       axe-core:
         specifier: ^4.13.0
         version: 4.13.0
+      eslint:
+        specifier: ^10.10.0
+        version: 10.10.0(jiti@2.7.0)
+      eslint-plugin-react-hooks:
+        specifier: ^7.1.1
+        version: 7.1.1(eslint@10.10.0(jiti@2.7.0))
+      http-server:
+        specifier: ^14.1.1
+        version: 14.1.1
+      jiti:
+        specifier: ^2.7.0
+        version: 2.7.0
       jsdom:
         specifier: ^30.0.1
         version: 30.0.1
@@ -230,6 +228,15 @@ importers:
       storybook:
         specifier: ^10.6.0
         version: 10.6.0(@types/react@19.2.18)(react@19.2.8)
+      stylelint:
+        specifier: ^17.15.0
+        version: 17.15.0(typescript@6.0.3)
+      stylelint-config-standard:
+        specifier: ^40.0.0
+        version: 40.0.0(stylelint@17.15.0(typescript@6.0.3))
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
       vite:
         specifier: ^8.2.2
         version: 8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)
@@ -246,9 +253,18 @@ importers:
         specifier: 'catalog:'
         version: 4.5.4
     devDependencies:
+      eslint:
+        specifier: ^10.10.0
+        version: 10.10.0(jiti@2.7.0)
+      jiti:
+        specifier: ^2.7.0
+        version: 2.7.0
       ops:
         specifier: workspace:*
         version: link:../../ops
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
       vitest:
         specifier: 'catalog:'
         version: 5.0.0(@types/node@26.4.1)(jsdom@30.0.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13))
@@ -271,15 +287,27 @@ importers:
         specifier: 'catalog:'
         version: 4.5.4
     devDependencies:
+      '@types/node':
+        specifier: ^26.4.1
+        version: 26.4.1
       esbuild:
         specifier: ^0.28.2
         version: 0.28.2
+      eslint:
+        specifier: ^10.10.0
+        version: 10.10.0(jiti@2.7.0)
+      jiti:
+        specifier: ^2.7.0
+        version: 2.7.0
       ops:
         specifier: workspace:*
         version: link:../../ops
       tsx:
         specifier: ^4.23.13
         version: 4.23.13
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
       vitest:
         specifier: 'catalog:'
         version: 5.0.0(@types/node@26.4.1)(jsdom@30.0.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13))

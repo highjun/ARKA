@@ -18,10 +18,14 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@types/node": "^26.4.1",
     "esbuild": "^0.28.2",
+    "eslint": "^10.10.0",
+    "jiti": "^2.7.0",
+    "ops": "workspace:*",
     "tsx": "^4.23.13",
-    "vitest": "catalog:",
-    "ops": "workspace:*"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "imports": {
     "#contracts": "contracts"
