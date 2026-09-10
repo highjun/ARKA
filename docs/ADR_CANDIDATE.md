@@ -226,6 +226,6 @@ model/tabsShare.ts             ← <무엇>Share (공유 상수, 기본 leaf id)
 
 사용자만 정할 수 있는 것. 원본은 `docs/tasks/`.
 
-- **TASK-14** — [ADR 0013](adr/0013-build-and-config.md)(산출물·설정 파일의 자리)을 유지할지
+- ~~**TASK-14** — 산출물·설정 파일의 자리~~ 2026-09-10 해소. 산출물의 자리는 [ADR 0002](adr/0002-repo-root.md)로, 설정의 자리는 [ADR 0003](adr/0003-live-next-to-what-they-govern.md)으로 갈렸다
 - ~~**TASK-16** — 테스트 관련 전역 폴더 정리~~ 2026-09-09 해소. `vrt`는 `packages/client/`로, `test/contract`는 후보 F로 갈려 사라졌다
 - **TASK-17** — `index.html`을 `src/workbench`로 옮길지

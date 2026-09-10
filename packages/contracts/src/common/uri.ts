@@ -8,7 +8,6 @@
  * `path`는 어느 스킴이든 workspace 루트 기준 상대경로이며 선행 슬래시를 갖지
  * 않는다.
  *
- * @see docs/adr/0003-uri.md
  */
 export class URI {
   readonly scheme: string;

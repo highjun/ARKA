@@ -47,7 +47,7 @@ export default defineConfig({
       devOptions: { enabled: false },
     }),
   ],
-  // 배포 단위는 `.output/dist/` 하나다(→ ADR 0013) — 서버 번들(`.output/dist/server`)과 나란히 놓인다.
+  // 배포 단위는 `.output/dist/` 하나다(→ ADR 0002) — 서버 번들(`.output/dist/server`)과 나란히 놓인다.
   build: {
     outDir: path.join(clientRoot, "../../.output/dist/client"),
     emptyOutDir: true,
