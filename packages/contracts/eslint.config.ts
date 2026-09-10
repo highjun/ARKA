@@ -8,11 +8,6 @@ export default [
   ...ops.configs.base,
 
   {
-    files: ["src/**/*.ts"],
-    rules: { "arka/file-names": "error" },
-  },
-
-  {
     files: ["src/**/*.ts", "*.config.ts"],
     rules: {
       "import-x/no-restricted-paths": [

@@ -3,11 +3,11 @@ import json from "@eslint/json";
 import importX from "eslint-plugin-import-x";
 import tseslint from "typescript-eslint";
 import type { Linter } from "eslint";
-import { arkaRules } from "./rules/index.ts";
+
 import { FORBIDDEN_KEY, FORBIDDEN_MESSAGE } from "./tsconfigRules.ts";
 
 /**
- * 이 저장소의 린트 플러그인. 커스텀 규칙과 **모든 패키지가 공유하는 바탕**을 함께 낸다.
+ * 이 저장소의 린트 바탕. **모든 패키지가 공유하는 것**만 든다.
  *
  * 각 패키지가 자기 `eslint.config.ts`를 갖는다 — 규칙의 대부분이 그 패키지 전용이기 때문이다.
  * 그런데 **중첩 설정은 병합이 아니라 대체**라(ESLint 10에서 실측), 패키지 설정이 생기는 순간
@@ -17,34 +17,33 @@ import { FORBIDDEN_KEY, FORBIDDEN_MESSAGE } from "./tsconfigRules.ts";
  * import ops from "ops/lint";
  * export default [...ops.configs.base, { files: ["src/**"], rules: { … } }];
  * ```
+ *
+ * **여기 있는 규칙은 전부 ADR이 든다.** 주인 없는 규칙은 끄고 `docs/legacy/code/`에 뒀다 —
+ * 규칙은 결정이 낳는 것이라, 결정이 아직 재작성되지 않았으면 강제할 근거가 없다.
  */
 const base: Linter.Config[] = [
   // 산출물은 검사하지 않는다 — 번들된 코드가 규칙에 걸려도 고칠 소스가 여기가 아니다.
   { ignores: ["**/node_modules/**", "**/dist/**", "**/storybook-static/**", "**/.output/**"] },
 
   // 플러그인은 **여기서 한 번만** 등록한다. 패키지 설정이 다시 등록하면 같은 이름에 다른
-  // 객체가 걸려 `Cannot redefine plugin "arka"`로 죽는다 — 정의는 배열 전체에 누적된다.
-  { plugins: { arka: arkaRules } },
-  // `import-x`도 여기서 한 번만 등록한다. 세 패키지가 각자 등록하던 것을 모았다 — 같은 이름에
-  // 다른 객체가 걸리면 `Cannot redefine plugin`으로 죽는다. zone 설정은 각 패키지가 얹는다.
+  // 객체가 걸려 `Cannot redefine plugin`으로 죽는다 — 정의는 배열 전체에 누적된다.
   { plugins: { "import-x": importX } },
   {
-    // **선언하지 않은 것을 import하면 잡는다.** Node와 ESLint의 해석기가 `node_modules`를 위로
-    // 걸어 올라가 저장소 루트에서 찾아 주기 때문에, 선언이 빠져도 조용히 동작한다 — 이 규칙이
-    // 없으면 패키지가 스스로 설 수 있는지 아무도 모른다.
+    // **선언하지 않은 것을 import하면 잡는다**(→ ADR 0003). Node와 ESLint의 해석기가
+    // `node_modules`를 위로 걸어 올라가 저장소 루트에서 찾아 주기 때문에, 선언이 빠져도 조용히
+    // 동작한다 — 이 규칙이 없으면 패키지가 스스로 설 수 있는지 아무도 모른다.
     files: ["**/*.{ts,tsx,js}"],
     rules: { "import-x/no-extraneous-dependencies": "error" },
   },
 
   {
-    // **각 패키지의 `tsconfig.json`을 검사한다.** 이 블록이 없으면 `eslint .`은 `.json`을 아예
-    // 집지 않는다. 주석이 있으므로 언어는 `json/jsonc`다.
+    // **각 패키지의 `tsconfig.json`을 검사한다**(→ ADR 0001). 이 블록이 없으면 `eslint .`은
+    // `.json`을 아예 집지 않는다. 주석이 있으므로 언어는 `json/jsonc`다. 금지 키와 메시지는
+    // `tsconfigRules.ts`가 든다 — 루트를 보는 `rootConfig.test.ts`와 같은 것을 읽어야 한다.
     files: ["**/tsconfig*.json"],
     plugins: { json },
     language: "json/jsonc",
     rules: {
-      // 검사할 목록을 따로 두지 않는다 — 자기 tsconfig는 자기 린트가 본다. 금지 키와 메시지는
-      // `tsconfigRules.ts`가 든다(루트를 보는 `rootConfig.test.ts`와 같은 것을 읽어야 한다).
       "no-restricted-syntax": [
         "error",
         { selector: `Member[name.value="${FORBIDDEN_KEY}"]`, message: FORBIDDEN_MESSAGE },
@@ -82,37 +81,6 @@ const base: Linter.Config[] = [
       "@typescript-eslint/no-empty-object-type": "error",
     },
   },
-
-  // 테스트 이름은 한글로. 실패 출력이 곧 리뷰 대상이다(→ ADR 0008).
-  {
-    files: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}", "**/*.contract.ts"],
-    rules: {
-      "arka/test-names-korean": "error",
-      // 스냅샷은 변경 시 무비판적으로 갱신하게 된다. → ADR 0008
-      // `no-restricted-properties`가 아니라 selector인 것은, 그 규칙이 `expect.toMatchSnapshot`만
-      // 잡고 실제 형태인 `expect(x).toMatchSnapshot()`은 못 잡기 때문이다.
-      "no-restricted-syntax": [
-        "error",
-        {
-          selector: "MemberExpression[property.name=/^toMatch(Inline)?Snapshot$/]",
-          message: "`toMatchSnapshot`을 쓰지 않습니다. 무엇이 왜 그래야 하는지를 단언으로 적으세요. 화면 모양은 VRT(`packages/client/test/vrt/`)가 봅니다.",
-        },
-      ],
-    },
-  },
-  // 던더 폴더를 쓰지 않는다 — 같은 것을 폴더명과 파일명 두 군데로 표시하게 된다.
-  // **테스트 블록보다 뒤에 온다** — 둘 다 `no-restricted-syntax`라, `__tests__/a.test.ts`처럼
-  // 양쪽에 맞는 파일은 나중 것만 걸린다. 던더가 이겨야 한다.
-  {
-    files: ["**/__tests__/**", "**/__mocks__/**", "**/__fixtures__/**"],
-    rules: {
-      "no-restricted-syntax": [
-        "error",
-        { selector: "Program", message: "던더 폴더를 쓰지 않습니다 — 테스트는 대상 옆에 `*.test.ts`로 두세요(ADR 0008)." },
-      ],
-    },
-  },
-
 ];
 
-export default { rules: arkaRules.rules, configs: { base } };
+export default { configs: { base } };
