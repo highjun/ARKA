@@ -1,5 +1,6 @@
 import { createToken } from '#core/di';
 
+/** 화면이 그대로 쓰는 모양 — `status`가 `loading` 불리언으로 펴져 있다. */
 export type PreviewState = {
   readonly loading: boolean;
   readonly markdown: string;
@@ -9,7 +10,9 @@ export type PreviewState = {
 
 /** 미리보기 탭의 kind와 id 규약. 조립부의 `TabContentRegistry` 등록과 같아야 한다. */
 export const PREVIEW_TAB_KIND = 'markdownPreview';
+/** 경로에서 탭 id를 만든다 — 같은 파일은 언제나 같은 탭이 된다. */
 export const previewTabIdOf = (path: string): string => `preview:${path}`;
+/** 미리보기 탭이 아니면 `null` — 셸이 넘긴 아무 탭 id나 넣어도 된다. */
 export const pathOfPreviewTab = (tabId: string): string | null => (tabId.startsWith('preview:') ? tabId.slice('preview:'.length) : null);
 
 export const MarkdownPreviewViewModelToken = createToken<IMarkdownPreviewViewModel>('markdownPreviewViewModel');

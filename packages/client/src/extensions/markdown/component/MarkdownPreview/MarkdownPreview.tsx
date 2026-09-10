@@ -3,6 +3,7 @@ import type { HTMLAttributes } from 'react';
 import styles from './MarkdownPreview.module.css';
 import { renderMarkdown } from './renderMarkdown';
 
+/** 원문을 받는다 — 렌더와 정화는 이 컴포넌트가 한다. */
 export interface MarkdownPreviewProps extends HTMLAttributes<HTMLElement> {
   readonly markdown: string;
 }

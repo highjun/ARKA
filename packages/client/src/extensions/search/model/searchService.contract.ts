@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { ISearchService } from './ISearchService';
 
+/** 구현마다 다른 준비 절차를 감싼다 — 스위트는 이 모양만 알면 된다. */
 export type SearchSetup = {
   readonly service: ISearchService;
   /** 검색 대상 파일을 심는다. */

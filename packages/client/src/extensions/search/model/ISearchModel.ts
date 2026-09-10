@@ -1,6 +1,7 @@
 import { createToken, type Disposable } from '#core/di';
 import type { SearchQuery, SearchResponse } from './ISearchService';
 
+/** 빈 질의로 `run`하면 `idle`로 되돌아간다 — `done`이 아니다. */
 export type SearchStatus = 'idle' | 'searching' | 'done' | 'error';
 
 export const SearchModelToken = createToken<ISearchModel>('searchModel');

@@ -8,6 +8,7 @@ export type MarkdownFileReader = {
   read(path: string): Promise<{ readonly content: string; readonly encoding: string; readonly truncated: boolean }>;
 };
 
+/** 워크스페이스 감시 포트에서 마크다운이 쓰는 만큼만 뽑은 것 — 해지 함수를 돌려준다. */
 export type MarkdownDirectoryWatcher = {
   watch(paths: readonly string[], onChange: (changed: readonly string[]) => void): () => void;
 };

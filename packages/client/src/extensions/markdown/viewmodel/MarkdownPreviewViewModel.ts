@@ -13,6 +13,7 @@ export class MarkdownPreviewViewModel extends ViewModelBase implements IMarkdown
   readonly #activeFile: () => string | null;
   readonly #openTab: (tab: { id: string; kind: string; title: string }) => void;
 
+  /** 만들 때 커맨드와 단축키(Ctrl+Shift+V)를 스스로 등록한다 — 조립부가 따로 부르지 않는다. */
   constructor({
     previewModel,
     commandCenterRegistry,
@@ -36,11 +37,13 @@ export class MarkdownPreviewViewModel extends ViewModelBase implements IMarkdown
     commandCenterRegistry.registerKeybinding({ id: 'markdown.openPreview.keybinding', keybinding: 'ctrl+shift+v', actionId: 'markdown.openPreview' });
   }
 
+  /** 미리보기 탭이 아니면 아무 일도 안 한다. 탭이 그려질 때 불린다. */
   openPreview(tabId: string): void {
     const path = pathOfPreviewTab(tabId);
     if (path !== null) this.#model.open(path);
   }
 
+  /** 아직 없는 탭이면 `loading` 상태를 돌려준다 — 화면이 빈 값을 다루지 않아도 된다. */
   previewOf(tabId: string): PreviewState {
     const path = pathOfPreviewTab(tabId);
     const preview = path === null ? undefined : this.#previews.get()[path];
@@ -48,6 +51,7 @@ export class MarkdownPreviewViewModel extends ViewModelBase implements IMarkdown
     return { loading: preview.status === 'loading', markdown: preview.markdown, truncated: preview.truncated, failure: preview.failure };
   }
 
+  /** 활성 탭이 마크다운 파일이 아니면 아무 일도 안 한다. */
   openActivePreview(): void {
     const path = this.#activeFile();
     if (path === null || !isMarkdown(path)) return;

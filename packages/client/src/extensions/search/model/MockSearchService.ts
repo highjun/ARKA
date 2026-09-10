@@ -5,6 +5,7 @@ export class MockSearchService implements ISearchService {
   readonly #files = new Map<string, string>();
   #maxResults = 200;
 
+  /** `maxResults`를 낮춰 잘림 동작을 테스트에서 재현한다. */
   constructor(files: Readonly<Record<string, string>> = {}, { maxResults = 200 }: { maxResults?: number } = {}) {
     this.seed(files);
     this.#maxResults = maxResults;
@@ -15,6 +16,7 @@ export class MockSearchService implements ISearchService {
     for (const [path, content] of Object.entries(files)) this.#files.set(path, content);
   }
 
+  /** `regex`가 아니면 질의를 이스케이프한다 — 리터럴 검색에서 `.`이 와일드카드가 되지 않게. */
   search({ query, path, regex, caseSensitive }: SearchQuery): Promise<SearchResponse> {
     const source = regex ? query : query.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
     const pattern = new RegExp(source, caseSensitive ? 'gu' : 'giu');
