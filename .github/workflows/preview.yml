@@ -29,6 +29,9 @@ jobs:
       PREVIEW_DOMAIN: ${{ vars.PREVIEW_DOMAIN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # `cli.ts`가 zod를 쓴다. `build.ts`는 Node 내장만 써서 이것 없이도 돌아 **빌드는 통과하고
+      # 배포만 죽는다** — 어느 단계가 무엇을 요구하는지가 로그로만 드러난다(2026-09-11 실측).
+      - uses: ./.github/actions/setup
 
       - name: 값을 정한다
         id: id
