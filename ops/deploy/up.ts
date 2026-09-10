@@ -129,7 +129,9 @@ export const up = async (input: UpInput, ports: Ports): Promise<Manifest> => {
     let accessAppId: string | undefined;
     if (spec.accessEmails.length === 0) {
       ports.log(`⚠ accessEmails가 비어 있습니다 — ${spec.hostname}이 무인증으로 열립니다`);
-    } else if (!ports.dryRun) {
+    } else if (ports.dryRun) {
+      ports.log(`[dry-run] Access 앱 ${spec.hostname} → ${String(spec.accessEmails.length)}명`);
+    } else {
       const zoneId = await resolveZoneId(ports.fetch, input.token, input.zone);
       accessAppId = await ensureAccessApp(ports.fetch, input.token, zoneId, {
         hostname: spec.hostname,
