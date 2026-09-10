@@ -12,6 +12,13 @@
     "lint": "pnpm -r run lint",
     "test": "pnpm -r run test",
     "build": "pnpm -r run build",
-    "task": "pnpm --filter ops run task"
+    "task": "pnpm --filter ops run task",
+    "prepare": "simple-git-hooks"
+  },
+  "devDependencies": {
+    "simple-git-hooks": "^2.14.0"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "node ops/hooks/preCommit.ts"
   }
 }
