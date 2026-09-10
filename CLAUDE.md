@@ -15,6 +15,11 @@
 - 구조 결정은 VSCode의 대응 개념(contribution point·command·service·extension host)을 따르고 ADR로 남긴다.
 - 정해진 결정을 벗어난 판단은 커밋 메시지의 "확인 필요"에 스스로 신고한다.
 
+## `packages/*/src/` 밖
+
+- 밖은 배치·설정·결정이라 파급이 전역이다. **사용자가 명시적으로 지정하지 않으면 건드리지 않는다.** → [ADR 0003](docs/adr/0003-approval-outside-src.md)
+- **밖의 파일은 Write·Edit로 고친다.** `PreToolUse` 훅이 그 둘만 가로채므로, 셸로 고치면 게이트가 통째로 비켜간다.
+
 ## 제출 전
 
 ```
