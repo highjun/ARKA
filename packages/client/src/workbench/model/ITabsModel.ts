@@ -26,6 +26,7 @@ export type OpenTab = {
   readonly title: string;
 };
 
+/** leaf 하나를 가리키는 불투명 문자열. 탭 id와 다른 이름 공간이다. */
 export type PaneId = string;
 
 /**
@@ -51,6 +52,7 @@ export interface TabPaneSplit {
   readonly children: readonly TabPaneNode[];
   readonly size?: number;
 }
+/** `kind`로 갈리는 판별 유니온이다. */
 export type TabPaneNode = TabPaneLeaf | TabPaneSplit;
 
 export const TabsModelToken = createToken<ITabsModel>("tabsModel");

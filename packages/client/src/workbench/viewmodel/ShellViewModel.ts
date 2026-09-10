@@ -29,6 +29,7 @@ const formatBuildTime = (iso: string): string => {
   return `v${String(at.getFullYear())}.${two(at.getMonth() + 1)}.${two(at.getDate())} ${two(at.getHours())}:${two(at.getMinutes())}`;
 };
 
+/** 셸 전체가 보는 하나의 ViewModel. 탭·활동·테마·알림 Model을 구독해 화면이 쓸 값으로 편다. */
 export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   /** 트리 전체가 빈 leaf 하나로 무너졌을 때(전부 닫힘) 되돌아갈 자리 — Model 의 초기 상태와 같다. */
   static readonly #EMPTY_ROOT: TabPaneNode = { kind: 'leaf', id: ROOT_PANE_ID, tabs: [], activeTabId: null };
@@ -75,6 +76,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   readonly #theme;
   readonly #copyToClipboard: (text: string) => void;
 
+  /** Model들을 받아 각각 구독한다 — 여기서 만든 atom이 화면 갱신의 유일한 통로다. */
   constructor({
     activityModel,
     tabsModel,
@@ -174,6 +176,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     this.#activityModel.setActiveActivityId(current === id ? null : id);
   }
 
+  /** 모르는 id면 아무 일도 안 한다. 활동을 고르면 사이드바가 함께 열린다. */
   showActivity(id: string): void {
     if (!this.#isActivityId(id)) return;
     this.#activityModel.setActiveActivityId(id);
@@ -379,22 +382,27 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     return this.#buildId.get();
   }
 
+  /** 아직 서버 정보를 못 읽었으면 빈 문자열이다. */
   get workspaceName(): string {
     return this.#workspaceName.get();
   }
 
+  /** 서버 정보를 못 읽었으면 `false`다 — 모르면 낡았다고 말하지 않는다. */
   get isClientOutdated(): boolean {
     return this.#isClientOutdated.get();
   }
 
+  /** 주입받은 함수를 부른다 — 테스트가 실제 새로고침 없이 확인할 수 있게. */
   reloadApp(): void {
     this.#reloadApp();
   }
 
+  /** 화면이 그릴 최소 필드만 남긴 행이다 — `at`은 여기서 빠진다. */
   get notifications(): readonly ShellNotificationRow[] {
     return this.#notifications.get();
   }
 
+  /** 없는 id면 조용히 넘어간다. */
   dismissNotification(id: string): void {
     this.#notificationService.dismiss(id);
   }
@@ -403,6 +411,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     return this.#notificationService.notifications.map(({ id, severity, message }) => ({ id, severity, message }));
   }
 
+  /** `'light'` 또는 `'dark'`. View가 이 값을 문서에 칠한다. */
   get theme(): string {
     return this.#theme.get();
   }
@@ -428,12 +437,14 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     this.#tabsModel.setTree(nextTree);
   }
 
+  /** 활성 leaf 기준이다. 열린 탭이 없으면 `null`. */
   get activeTab(): { readonly id: string; readonly kind: string } | null {
     const leaf = this.#findLeaf(this.#tabsModel.tree, this.#tabsModel.activeLeafId);
     const active = leaf?.tabs.find((tab) => tab.id === leaf.activeTabId);
     return active === undefined ? null : { id: active.id, kind: active.kind };
   }
 
+  /** 위치 요청이 없으면 `null`. 같은 위치를 다시 요청해도 `seq`로 구분된다. */
   get reveal(): IShellViewModel['reveal'] {
     return this.#reveal.get();
   }

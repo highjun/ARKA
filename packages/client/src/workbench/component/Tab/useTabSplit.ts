@@ -18,8 +18,10 @@ import type {
 // ─────────────────────────── 계산 ───────────────────────────
 
 const clampNormalized = (size: number): number => Math.min(80, Math.max(10, size));
+/** 10~90%로 가둔다 — 한쪽이 사라져 되돌릴 수 없게 되는 것을 막는다. 소수점 둘째 자리까지. */
 export const clampSize = (size: number): number => Math.min(90, Math.max(10, Number(size.toFixed(2))));
 
+/** 합이 100이 되도록 다시 나눈다 — `size`가 없는 자식은 균등분으로 시작한다. */
 export const normalizeSizes = (nodes: readonly TabTreeNode[]): number[] => {
   if (nodes.length === 0) return [];
 
@@ -30,6 +32,7 @@ export const normalizeSizes = (nodes: readonly TabTreeNode[]): number[] => {
   return sizes.map((size) => Number(((size / total) * 100).toFixed(4)));
 };
 
+/** `onNodeResize`가 없거나 자식이 하나면 크기 조절이 꺼진다. */
 export const getSplitState = (node: TabTreeSplit, onNodeResize?: TabSplitProps['onNodeResize']): SplitState => ({
   orientation: node.orientation,
   sizes: normalizeSizes(node.children),
@@ -51,6 +54,7 @@ export const pruneVisibleTree = (node: TabTreeNode): TabTreeNode | null => {
 };
 
 // 좌/우가 우선 — 전체 높이의 양옆 22%(모서리 포함)는 항상 left/right, 가운데 폭 안에서만 상하 22%를 본다.
+/** 가장자리 22%를 방향으로, 가운데는 `center`(합치기)로 읽는다. 좌·우가 상·하보다 우선이다. */
 export const getSplitDropPosition = (event: DragEvent<HTMLElement>, rect: DOMRect): SplitDropPosition => {
   const x = (event.clientX - rect.left) / rect.width;
   const y = (event.clientY - rect.top) / rect.height;
@@ -66,6 +70,7 @@ export const getSplitDropPosition = (event: DragEvent<HTMLElement>, rect: DOMRec
 const getLeafPanelRect = (sectionEl: HTMLElement): DOMRect =>
   sectionEl.querySelector<HTMLElement>('[role="tabpanel"]')?.getBoundingClientRect() ?? sectionEl.getBoundingClientRect();
 
+/** 드롭 대상이 탭 목록 안이면 `strip`, 아니면 `panel`이다 — DOM 조상을 거슬러 판단한다. */
 export const getLeafDropZone = (event: DragEvent<HTMLElement>): TabDropZone =>
   event.target instanceof HTMLElement && event.target.closest('[role="tablist"]') ? 'strip' : 'panel';
 

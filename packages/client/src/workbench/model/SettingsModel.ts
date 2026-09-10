@@ -14,15 +14,18 @@ export class SettingsModel implements ISettingsModel {
   readonly #changed = new Emitter();
   #settings: Settings;
 
+  /** 생성 시점에 저장된 값을 복원한다 — 부팅 뒤 따로 부를 것이 없다. */
   constructor({ storage }: { storage: IStorage }) {
     this.#storage = storage;
     this.#settings = SettingsModel.#restore(storage);
   }
 
+  /** 언제나 전부 채워진 값이다 — 저장소가 비어 있으면 기본값이 온다. */
   get settings(): Settings {
     return this.#settings;
   }
 
+  /** 준 필드만 덮어쓰고 곧바로 저장한다. */
   update(patch: Partial<Settings>): void {
     const next: Settings = {
       ...this.#settings,
@@ -35,6 +38,7 @@ export class SettingsModel implements ISettingsModel {
     this.#changed.fire();
   }
 
+  /** 무엇이 바뀌었는지는 주지 않는다 — 받는 쪽이 `settings`를 다시 읽는다. */
   onDidChange(listener: () => void): Disposable {
     return this.#changed.event(listener);
   }

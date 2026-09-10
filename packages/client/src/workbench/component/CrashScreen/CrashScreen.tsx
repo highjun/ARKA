@@ -2,6 +2,7 @@ import { Button } from '@primer/react';
 import { Heading, Text } from '#components/common';
 import styles from './CrashScreen.module.css';
 
+/** `onReload`는 필수다 — 사용자가 빠져나갈 길이 없는 화면을 만들지 않는다. */
 export interface CrashScreenProps {
   /** 잡힌 오류의 메시지. 스택은 보여주지 않는다 — 사용자가 할 수 있는 일은 새로고침뿐이다. */
   readonly message: string;

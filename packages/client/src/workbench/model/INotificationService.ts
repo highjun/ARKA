@@ -1,7 +1,9 @@
 import { createToken, type Disposable } from '#core/di';
 
+/** 아이콘과 색만 가른다 — 동작은 셋 다 같다. */
 export type NotificationSeverity = 'info' | 'warning' | 'error';
 
+/** 스스로 사라지지 않는다 — `dismiss`를 부를 때까지 남는다. */
 export type Notification = {
   readonly id: string;
   readonly severity: NotificationSeverity;

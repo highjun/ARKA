@@ -11,6 +11,7 @@ import type { DescriptorMatch } from '#core';
 /** 탭 안의 특정 위치를 보여 달라는 요청. 줄·열은 1부터, `seq`는 같은 위치를 다시 요청해도 구분되게. */
 export type TabReveal = { readonly line: number; readonly column: number; readonly seq: number };
 
+/** `id`는 탭의 `kind`와 맞물린다 — 셸이 이 id로 무엇을 그릴지 찾는다. */
 export type TabContentDescriptor = {
   readonly id: string;
   readonly iconId: string;

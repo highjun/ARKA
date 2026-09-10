@@ -1,5 +1,6 @@
 import { createToken } from '#core/di';
 
+/** 부팅 때 한 번 읽는다 — 서버가 바뀌면 새로고침해야 갱신된다. */
 export type ServerInfo = {
   /** 서버가 뜬 시각(ISO). 화면 구석의 빌드 표시에 쓴다. */
   readonly builtAt: string;

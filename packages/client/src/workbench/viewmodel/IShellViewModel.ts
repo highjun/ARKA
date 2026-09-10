@@ -9,6 +9,7 @@ import type { PaneId } from '../model/ITabsModel';
  * 닿는데, 재수출 전용 statement는 `model-type-only`(`type.ts`는 타입 선언만 담는다)에 걸린다.
  */
 export type TabSplitOrientation = 'horizontal' | 'vertical';
+/** 새 분할을 만드는 넷. 합치기(`center`)는 여기 없다. */
 export type SplitEdgeDropPosition = 'left' | 'right' | 'top' | 'bottom';
 
 /** 탭 우클릭 메뉴(`menuId: 'shell.tab.context'`) 커맨드가 받는 대상 — 어느 pane의 어느 탭인지. */
@@ -52,6 +53,7 @@ export interface ShellTabPaneSplit {
   readonly children: readonly ShellTabPaneNode[];
   readonly size?: number;
 }
+/** `kind`로 갈리는 판별 유니온이다. */
 export type ShellTabPaneNode = ShellTabPaneLeaf | ShellTabPaneSplit;
 
 /**

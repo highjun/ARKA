@@ -22,6 +22,7 @@ const RESIZABLE_MAX_WIDTH = '480px';
 
 const hasContent = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
 
+/** `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다. */
 export interface ShellRootProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
   /** Primer `ThemeProvider`에 그대로 전달되는 색 모드. */
   readonly colorMode: 'light' | 'dark';

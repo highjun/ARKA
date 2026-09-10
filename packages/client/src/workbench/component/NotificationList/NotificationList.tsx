@@ -3,12 +3,14 @@ import { Icon, Text } from '#components/common';
 import type { IconId } from '#components/common';
 import styles from './NotificationList.module.css';
 
+/** `severity`가 아이콘을 정한다. 색은 CSS가 같은 값으로 고른다. */
 export type NotificationListItem = {
   readonly id: string;
   readonly severity: 'info' | 'warning' | 'error';
   readonly message: string;
 };
 
+/** 스스로 사라지지 않는다 — 닫는 것은 `onDismiss`를 받은 쪽의 몫이다. */
 export interface NotificationListProps {
   readonly items: readonly NotificationListItem[];
   readonly onDismiss: (id: string) => void;

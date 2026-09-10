@@ -9,8 +9,8 @@ export default [
 
   {
     // **공개 면에 문서가 필수다**(→ ADR 0004). 계층마다 위반이 0이 되는 대로 이 목록을 넓힌다 —
-    // 남은 곳은 `extensions`(185) · `workbench`(98)다.
-    files: ["src/core/**/*.{ts,tsx}", "src/shared/**/*.{ts,tsx}"],
+    // 남은 곳은 `extensions`(185)뿐이다.
+    files: ["src/core/**/*.{ts,tsx}", "src/shared/**/*.{ts,tsx}", "src/workbench/**/*.{ts,tsx}"],
     rules: { "jsdoc/require-jsdoc": requireJsdoc },
   },
 

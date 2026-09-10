@@ -10,6 +10,7 @@ export class ThemeModel implements IThemeModel {
   readonly #storage: IStorage;
   #theme: Theme;
 
+  /** 생성 시점에 저장된 테마를 복원한다 — View가 부팅에서 따로 되돌릴 것이 없다. */
   constructor({ storage }: { storage: IStorage }) {
     this.#storage = storage;
     this.#theme = ThemeModel.#restoreTheme(storage);

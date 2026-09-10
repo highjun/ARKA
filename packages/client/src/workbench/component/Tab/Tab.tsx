@@ -40,8 +40,10 @@ import { ContextMenu } from '#components/common/ContextMenu';
 
 // ─── 공통 도메인 ───
 
+/** 소비자가 정하는 불투명 문자열 — 이 컴포넌트는 비교만 한다. */
 export type TabId = string;
 
+/** 스트립이 그리는 데 필요한 최소 정보. 탭의 **내용물**은 여기 없다. */
 export interface TabItem {
   readonly id: TabId;
   readonly title: string;
@@ -59,14 +61,20 @@ export interface TabItem {
   readonly isPreview?: boolean;
 }
 
+/** 내용까지 든 탭 — 그룹이 활성 탭 하나만 실제로 그린다. */
 export interface TabGroupItem extends TabItem {
   readonly content?: ReactNode;
 }
 
+/** 자식이 늘어서는 방향이다 — 나누는 선의 방향이 아니다. */
 export type TabSplitOrientation = 'horizontal' | 'vertical';
+/** 스트립 안에서 대상 탭의 앞이냐 뒤냐. */
 export type StripDropPosition = 'before' | 'after';
+/** `center`는 나누지 않고 그 리프에 합친다는 뜻이다. */
 export type SplitDropPosition = 'left' | 'right' | 'top' | 'bottom' | 'center';
+/** 실제로 새 분할을 만드는 넷. `center`가 빠진다. */
 export type SplitEdgeDropPosition = Exclude<SplitDropPosition, 'center'>;
+/** 스트립에 떨구면 순서 바꾸기, 패널에 떨구면 분할이다. */
 export type TabDropZone = 'strip' | 'panel';
 
 /**
@@ -132,11 +140,13 @@ const useTabClassNames = () => useContext(ClassNamesContext);
 
 // ─── Header ───
 
+/** 헤더가 그릴 때 보는 파생 상태. prop의 `undefined`가 여기서 `false`로 굳는다. */
 export interface HeaderState {
   readonly active: boolean;
   readonly dirty: boolean;
 }
 
+/** `title`을 가로챈다 — 네이티브 툴팁이 아니라 탭 제목이다. */
 export interface TabHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'title'> {
   /** 이 탭이 지금 선택된(보이는) 탭인가. */
   readonly isActive?: boolean;
@@ -159,6 +169,7 @@ export interface TabHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'ch
   readonly title: string;
 }
 
+/** 순수 함수라 스토리와 테스트가 렌더 없이 상태 조합을 확인한다. */
 export const getHeaderState = (isActive: boolean, isDirty: boolean): HeaderState => ({
   active: Boolean(isActive),
   dirty: Boolean(isDirty),
@@ -242,6 +253,7 @@ const Header = ({
 
 // ─── Strip ───
 
+/** 콜백이 없으면 그 기능 자체가 꺼진다 — `onTabClose`가 없으면 닫기 버튼도 안 뜬다. */
 export interface TabStripProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
   /** 지금 선택된 탭의 id. */
   readonly activeTab: TabId;
@@ -269,17 +281,20 @@ export interface TabStripProps extends Omit<HTMLAttributes<HTMLDivElement>, 'chi
   readonly renderTabContextMenu?: (tab: TabItem) => ReactNode;
 }
 
+/** 목록 전체가 받는 드래그 핸들러 — 항목 단위는 `StripItemHandlers`다. */
 export interface StripListHandlers {
   readonly onDragOver: DragEventHandler<HTMLDivElement>;
   readonly onDragLeave: DragEventHandler<HTMLDivElement>;
   readonly onDrop: DragEventHandler<HTMLDivElement>;
 }
 
+/** 지금 어느 탭의 어느 쪽에 선이 그려지는가. 드래그 중에만 값이 있다. */
 export interface StripDropIndicator {
   readonly targetId: TabId;
   readonly position: StripDropPosition;
 }
 
+/** 스트립이 항목들에게 내려보내는 것 전부 — prop 드릴링 대신 Context로 간다. */
 export interface StripContextValue {
   readonly activeTab: TabId;
   readonly tabItems: readonly TabItem[];
@@ -298,6 +313,7 @@ export interface StripContextValue {
   readonly listRef: MutableRefObject<HTMLDivElement | null>;
 }
 
+/** 항목 하나에 그대로 펼쳐 붙이는 핸들러 묶음. */
 export interface StripItemHandlers {
   readonly draggable: boolean;
   readonly onClick: MouseEventHandler<HTMLDivElement>;
@@ -308,6 +324,7 @@ export interface StripItemHandlers {
   readonly onKeyDown: KeyboardEventHandler<HTMLDivElement>;
 }
 
+/** 항목 하나가 그릴 때 보는 파생 상태. Context에서 자기 몫만 뽑은 것이다. */
 export interface StripItemState {
   readonly tab: TabItem;
   readonly isActive: boolean;
@@ -462,6 +479,7 @@ const StripRootImpl = ({
 
 // ─── Group ───
 
+/** `activeTab`이 목록에 없으면 첫 탭으로 떨어진다 — 그 보정 결과가 여기 담긴다. */
 export interface GroupState {
   readonly activeTab: TabId;
   readonly selectedTab?: TabGroupItem;
@@ -471,6 +489,7 @@ export interface GroupState {
 /** 프레임(테두리·radius·배경) 유무 — 패널을 꽉 채워서 쓸 땐 `none`. `ScrollArea`와 같은 이름. */
 export type TabChrome = 'bordered' | 'none';
 
+/** `activeTab`의 유무로 controlled·uncontrolled가 갈린다. */
 export interface TabGroupProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
   /** 지금 선택된 탭의 id. 넘기면 controlled, 안 넘기면 `defaultActiveTab` 으로 컴포넌트가 자체 관리한다. */
   readonly activeTab?: TabId;
@@ -512,6 +531,7 @@ export interface TabGroupProps extends Omit<HTMLAttributes<HTMLDivElement>, 'chi
   readonly chrome?: TabChrome;
 }
 
+/** 목록이 비면 `selectedTab`이 `undefined`다 — 부르는 쪽이 빈 상태를 그린다. */
 export const getGroupState = (tabItems: readonly TabGroupItem[], activeTab: TabId): GroupState => {
   const selected = tabItems.find((tab) => tab.id === activeTab) ?? tabItems[0];
 
@@ -606,6 +626,7 @@ GroupImpl.displayName = 'Tab.Group';
 
 // ─── Split (트리) ───
 
+/** 잎은 탭 그룹 하나다. `size`는 형제 사이의 비율(%)이다. */
 export interface TabTreeLeaf {
   readonly kind: 'leaf';
   readonly id: string;
@@ -614,6 +635,7 @@ export interface TabTreeLeaf {
   readonly size?: number;
 }
 
+/** 가지는 방향과 자식만 갖는다 — 자식이 또 가지일 수 있어 재귀다. */
 export interface TabTreeSplit {
   readonly kind: 'split';
   readonly id: string;
@@ -622,8 +644,10 @@ export interface TabTreeSplit {
   readonly size?: number;
 }
 
+/** `kind`로 갈리는 판별 유니온이다. */
 export type TabTreeNode = TabTreeLeaf | TabTreeSplit;
 
+/** 드래그 핸들러를 가로챈다 — 분할·재정렬을 이 컴포넌트가 직접 다룬다. */
 export interface TabSplitProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'onDragStart' | 'onDrop'> {
   /** 분할 레이아웃 자체 — 리프(탭 그룹)와 가지(분할 방향+자식)가 재귀적으로 중첩된다. */
   readonly tree: TabTreeNode;
@@ -661,12 +685,14 @@ export interface TabSplitProps extends Omit<HTMLAttributes<HTMLDivElement>, 'chi
 /** `tree`를 주면 Split, 주지 않고 `tabItems`/`activeTab`을 주면 단일 Group으로 동작한다. */
 export type TabRootProps = TabSplitProps | (TabGroupProps & { tree?: never });
 
+/** `sizes`는 정규화를 거쳐 합이 100이다. */
 export interface SplitState {
   readonly orientation: TabSplitOrientation;
   readonly sizes: number[];
   readonly disabledResize: boolean;
 }
 
+/** 잎 하나가 받는 드래그 핸들러. `onDropCapture`인 이유는 안쪽 스트립보다 먼저 봐야 해서다. */
 export interface SplitLeafHandlers {
   readonly onDragStart: DragEventHandler<HTMLElement>;
   readonly onDragOver: DragEventHandler<HTMLElement>;
@@ -675,6 +701,7 @@ export interface SplitLeafHandlers {
   readonly onDragEnd: DragEventHandler<HTMLElement>;
 }
 
+/** 나누는 선(버튼)이 받는 핸들러 — 포인터와 키보드 둘 다로 크기를 바꾼다. */
 export interface SplitResizeHandlers {
   readonly onPointerEnter: PointerEventHandler<HTMLButtonElement>;
   readonly onPointerLeave: PointerEventHandler<HTMLButtonElement>;
@@ -684,6 +711,7 @@ export interface SplitResizeHandlers {
   readonly onKeyDown: KeyboardEventHandler<HTMLButtonElement>;
 }
 
+/** 자식 하나가 그릴 때 보는 파생 상태. `style`에 이미 계산된 비율이 들어 있다. */
 export interface SplitChildState {
   readonly node: TabTreeNode;
   readonly index: number;
@@ -699,6 +727,7 @@ export interface SplitChildState {
   readonly resizeHandlers: SplitResizeHandlers;
 }
 
+/** 가지 하나가 그릴 때 보는 파생 상태. `ref`는 크기 계산에 실제 픽셀이 필요해서 든다. */
 export interface SplitBranchState {
   readonly ref: MutableRefObject<HTMLElement | null>;
   readonly orientation: TabSplitOrientation;
@@ -706,6 +735,7 @@ export interface SplitBranchState {
   readonly childStates: readonly SplitChildState[];
 }
 
+/** 트리 전체가 잎 하나일 때 — 가지가 없어 나누는 선도 없다. */
 export interface SplitRootLeafState {
   readonly node: TabTreeLeaf;
   readonly isActive: boolean;
@@ -714,10 +744,12 @@ export interface SplitRootLeafState {
   readonly handlers: SplitLeafHandlers;
 }
 
+/** `strip`에는 위치가 없다 — 스트립 자체의 표시는 `StripDropIndicator`가 든다. */
 export type SplitDropIndicator =
   | { readonly leafId: string; readonly zone: 'panel'; readonly position: SplitDropPosition }
   | { readonly leafId: string; readonly zone: 'strip' };
 
+/** 분할이 자식들에게 내려보내는 것 전부. `visibleTree`는 드래그 중 미리보기가 반영된 트리다. */
 export interface SplitContextValue {
   readonly visibleTree: TabTreeNode;
   readonly activeLeaf?: string;

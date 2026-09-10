@@ -10,6 +10,7 @@ import { IconButton } from '#components/common/IconButton';
 import { ContextMenu } from '#components/common/ContextMenu';
 import type { IconId } from '#components/common/Icon';
 
+/** 세로 막대의 아이콘 하나. `isActive`를 직접 주면 `activeId` 계산을 건너뛴다. */
 export interface ActivityBarItem {
   readonly id: string;
   readonly iconId: IconId;
@@ -18,6 +19,7 @@ export interface ActivityBarItem {
   readonly isActive?: boolean;
 }
 
+/** `onSelect`를 가로챈다 — 표준 `onSelect`가 아니라 항목 선택이다. */
 export interface ActivityBarRootProps extends Omit<HTMLAttributes<HTMLElement>, 'onSelect'> {
   /** 세로로 나열할 아이콘 항목들. */
   readonly items: readonly ActivityBarItem[];
