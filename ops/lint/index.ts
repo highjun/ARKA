@@ -35,7 +35,7 @@ const base: Linter.Config[] = [
     settings: { "import-x/resolver-next": [createNodeResolver({ extensions: [".ts", ".tsx", ".js", ".jsx", ".json"] })] },
   },
   {
-    // **선언하지 않은 것을 import하면 잡는다**(→ ADR 0003). Node와 ESLint의 해석기가
+    // **선언하지 않은 것을 import하면 잡는다**(→ ADR 0002). Node와 ESLint의 해석기가
     // `node_modules`를 위로 걸어 올라가 저장소 루트에서 찾아 주기 때문에, 선언이 빠져도 조용히
     // 동작한다 — 이 규칙이 없으면 패키지가 스스로 설 수 있는지 아무도 모른다.
     files: ["**/*.{ts,tsx,js}"],

@@ -18,10 +18,10 @@
 `contracts`의 `main`이 빌드 산출물이 아니라 `./src/index.ts` — **TypeScript 원본**이다. 소비자가 전부 TS 도구(tsc·vite·vitest·tsx)라 지금은 조용하지만, JS만 쓰는 곳에서는 소비할 수 없고 그대로는 npm에 배포할 수도 없다. 소비자가 `contracts`의 타입 오류까지 함께 컴파일한다.
 
 ## 강제:
-- **린트** `import-x/no-restricted-paths` — 패키지 간 import 금지(`contracts`→둘, `client`↔`server`). 바탕의 `import-x/resolver-next`가 서야 확장자 없는 경로도 잡는다
-- **린트** `no-restricted-syntax`(`tsconfig*.json`) — `paths` 별칭 금지. 패키지는 각 패키지가, 루트는 루트 설정이 본다
-- **린트** `no-restricted-syntax`(`contracts` 맨이름) — `#contracts`로만 가져온다. import·export·동적 넷을 다 본다
-- **린트** `import-x/no-relative-packages` — 다른 패키지를 상대경로로 가져오는 것
+- **린트** `import-x/no-restricted-paths` — 패키지 경계를 넘는 import 금지(`contracts`→`server`/`client` , `client`↔`server`). 둘 간의 공유는 `contracts`로만 한다.
+- **린트** `no-restricted-syntax` — `tsconfig.json`의 `paths` 별칭을 금지하고, `package.json`을 통한 subpath 만을 활용한다.
+- **린트** `no-restricted-syntax`(`contracts` 맨이름) — `#contracts`로만 가져온다. import·export·동적 넷을 다 본다.
+- **린트** `import-x/no-relative-packages` — 다른 패키지를 상대경로로 **가져오지 않는다**.
 
 ## 상태:
 승인됨 (2026-09-08, 사후 기록)
