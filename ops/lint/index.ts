@@ -1,10 +1,9 @@
 import js from "@eslint/js";
 import json from "@eslint/json";
-import importX from "eslint-plugin-import-x";
+import importX, { createNodeResolver } from "eslint-plugin-import-x";
 import tseslint from "typescript-eslint";
 import type { Linter } from "eslint";
 
-import { FORBIDDEN_KEY, FORBIDDEN_MESSAGE } from "./tsconfigRules.ts";
 
 /**
  * 이 저장소의 린트 바탕. **모든 패키지가 공유하는 것**만 든다.
@@ -27,7 +26,14 @@ const base: Linter.Config[] = [
 
   // 플러그인은 **여기서 한 번만** 등록한다. 패키지 설정이 다시 등록하면 같은 이름에 다른
   // 객체가 걸려 `Cannot redefine plugin`으로 죽는다 — 정의는 배열 전체에 누적된다.
-  { plugins: { "import-x": importX } },
+  //
+  // **리졸버가 없으면 경계 규칙이 반쪽이다.** `no-restricted-paths`는 import를 실제 파일 경로로
+  // 풀어 zone과 비교하는데, 설정이 없으면 `"../../../server/src/app"`(TS 관행대로 확장자를 뺀 것)이
+  // 해석되지 않아 **비교할 것이 없어 조용히 통과한다**(2026-09-10 실측). 확장자를 알려 준다.
+  {
+    plugins: { "import-x": importX },
+    settings: { "import-x/resolver-next": [createNodeResolver({ extensions: [".ts", ".tsx", ".js", ".jsx", ".json"] })] },
+  },
   {
     // **선언하지 않은 것을 import하면 잡는다**(→ ADR 0003). Node와 ESLint의 해석기가
     // `node_modules`를 위로 걸어 올라가 저장소 루트에서 찾아 주기 때문에, 선언이 빠져도 조용히
@@ -46,7 +52,10 @@ const base: Linter.Config[] = [
     rules: {
       "no-restricted-syntax": [
         "error",
-        { selector: `Member[name.value="${FORBIDDEN_KEY}"]`, message: FORBIDDEN_MESSAGE },
+        {
+          selector: 'Member[name.value="paths"]',
+          message: "tsconfig paths 별칭을 쓰지 않습니다 — package.json의 imports 필드를 쓰세요.",
+        },
       ],
     },
   } as unknown as Linter.Config,
