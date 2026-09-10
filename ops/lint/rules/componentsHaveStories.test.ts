@@ -4,7 +4,7 @@ import { createRuleTester } from "./ruleTester";
 
 /** 스토리 존재는 실제 파일시스템으로 판정한다 — 리포 안의 진짜 경로를 fixture로 쓴다. */
 /** 규칙은 저장소 루트 기준 경로로 판정한다 — vitest의 cwd(`ops/`)가 아니라 파일 위치에서 뽑는다. */
-const at = (relative: string): string => path.resolve(import.meta.dirname, "../..", relative);
+const at = (relative: string): string => path.resolve(import.meta.dirname, "../../..", relative);
 
 createRuleTester().run("components-have-stories", componentsHaveStories, {
   valid: [

@@ -1,4 +1,4 @@
-import ops from "ops/eslint";
+import ops from "ops/lint";
 
 /**
  * contracts는 **아무도 import하지 않는다.** 양쪽이 다 필요한 코드라면 이미 여기 있어야 하고,

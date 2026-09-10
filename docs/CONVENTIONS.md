@@ -174,7 +174,7 @@
 - **`model/`은 사실과 사건을, `viewmodel/`은 화면 상태를 다룬다.** `model`→`viewmodel`은 이벤트로, `viewmodel`→`view`는 바인딩으로 잇는다. atom은 ViewModel이 소유한다. → [ADR 0005](adr/0005-client-structure.md)
 - **`model/`은 도메인 타입·규칙(순수 로직)과 `infra/`가 구현할 인터페이스 선언까지다.** React·fetch·window·전역 상태를 런타임으로 알지 않는다.
 - **`view/`가 부르는 훅은 `useViewModel` 하나뿐이다.** 로컬 상태가 필요하면 ViewModel로 옮긴다. DI 접근(`useAppContext`·`resolve`)도 하지 않는다.
-- 위 두 줄은 `ops/eslint-rules/`와 각 패키지의 `eslint.config.ts`가 강제한다 — `model/`의 상태 라이브러리·React import, `model/`·`viewmodel/`의 `fetch`·`window`·`document` 전역, `view/`의 `useViewModel` 외 훅(`React.useState()` 형태 포함)을 잡는다. 슬라이스끼리의 import는 `arka/slices-are-siblings`가 잡는다. 규칙마다 `ops/eslint-rules/*.test.ts`에 valid/invalid fixture가 있다.
+- 위 두 줄은 `ops/lint/rules/`와 각 패키지의 `eslint.config.ts`가 강제한다 — `model/`의 상태 라이브러리·React import, `model/`·`viewmodel/`의 `fetch`·`window`·`document` 전역, `view/`의 `useViewModel` 외 훅(`React.useState()` 형태 포함)을 잡는다. 슬라이스끼리의 import는 `arka/slices-are-siblings`가 잡는다. 규칙마다 `ops/lint/rules/*.test.ts`에 valid/invalid fixture가 있다.
 - CSS는 `stylelint`가 본다 — client의 `lint`가 ESLint에 이어 돌린다. — 색은 Primer 토큰만, hex·색 이름·`rgb()` 직접 지정 금지. → [ADR 0006](adr/0006-design-system.md)
 
 ## 테스트

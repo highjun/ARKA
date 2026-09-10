@@ -15,8 +15,7 @@
     "task": "node task.ts"
   },
   "exports": {
-    ".": "./eslint-rules/index.ts",
-    "./eslint": "./eslint/index.ts",
+    "./lint": "./lint/index.ts",
     "./output.json": "./output.json"
   },
   "devDependencies": {

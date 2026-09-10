@@ -3,7 +3,7 @@ import json from "@eslint/json";
 import importX from "eslint-plugin-import-x";
 import tseslint from "typescript-eslint";
 import type { Linter } from "eslint";
-import { arkaRules } from "../eslint-rules";
+import { arkaRules } from "./rules/index.ts";
 
 /**
  * 이 저장소의 린트 플러그인. 커스텀 규칙과 **모든 패키지가 공유하는 바탕**을 함께 낸다.
@@ -13,7 +13,7 @@ import { arkaRules } from "../eslint-rules";
  * 바탕까지 함께 사라진다. 그래서 바탕을 여기서 내보내고 각 설정이 앞에 펼친다.
  *
  * ```ts
- * import ops from "ops/eslint";
+ * import ops from "ops/lint";
  * export default [...ops.configs.base, { files: ["src/**"], rules: { … } }];
  * ```
  */

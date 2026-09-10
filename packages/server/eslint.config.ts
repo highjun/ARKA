@@ -1,4 +1,4 @@
-import ops from "ops/eslint";
+import ops from "ops/lint";
 
 /**
  * 서버의 구조 규칙. 계층 방향(`transport → services → domain ← infra`)과 feature 경계를 본다

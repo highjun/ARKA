@@ -1,5 +1,5 @@
 import reactHooks from "eslint-plugin-react-hooks";
-import ops from "ops/eslint";
+import ops from "ops/lint";
 
 /**
  * 클라이언트의 구조 규칙. 문서로만 있던 계층 규율을 강제한다 — ADR 0005의 의존 방향이
