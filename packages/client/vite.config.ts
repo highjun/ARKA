@@ -1,8 +1,17 @@
+import path from "node:path";
+
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import { defineConfig } from "vitest/config";
 
+const clientRoot = path.resolve(import.meta.dirname);
+
 export default defineConfig({
+  // 진입점(`index.html`)이 `src/workbench/`에 산다 — 셸을 띄우는 것은 workbench의 일이다.
+  // vite는 `index.html`을 root에서 찾으므로 root가 따라간다.
+  root: path.join(clientRoot, "src/workbench"),
+  // root가 옮겨가면 `public/`도 그 아래에서 찾는다 — 패키지 루트로 되돌린다.
+  publicDir: path.join(clientRoot, "public"),
   plugins: [
     react(),
     // 설치 가능한 PWA(→ ADR 0018). Service Worker 파일명은 `app-sw.js`다 — `/sw.js`는 이 호스트명에
@@ -42,7 +51,7 @@ export default defineConfig({
   ],
   // 배포 단위는 `.output/dist/` 하나다(→ ADR 0013) — 서버 번들(`.output/dist/server`)과 나란히 놓인다.
   build: {
-    outDir: "../../.output/dist/client",
+    outDir: path.join(clientRoot, "../../.output/dist/client"),
     emptyOutDir: true,
     // 벤더를 청크로 나눈다 — 앱 코드가 바뀌어도 CodeMirror·Primer·React 청크는 캐시에 남고, PWA 프리캐시
     // 항목 하나가 2MB를 넘지 않는다.
@@ -65,6 +74,9 @@ export default defineConfig({
     proxy: { "/api": { target: "http://localhost:3000", changeOrigin: true } },
   },
   test: {
+    // **root를 되돌린다.** 위의 `root`는 vite가 `index.html`을 찾는 자리이고, vitest에게는
+    // 테스트를 찾는 자리다 — 그대로 두면 `src/workbench` 안의 것만 집어 112개 중 28개만 돈다.
+    root: clientRoot,
     // `e2e/`·`vrt/`는 Playwright가 진짜 브라우저로 돌린다 — vitest가 집어가면 안 된다.
     exclude: ["**/node_modules/**", "**/dist/**", "e2e/**", "vrt/**"],
     environment: "jsdom",
