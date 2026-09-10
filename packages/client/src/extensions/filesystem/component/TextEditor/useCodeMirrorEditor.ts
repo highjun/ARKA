@@ -271,8 +271,7 @@ export const useCodeMirrorEditor = ({ path, content, readOnly, onChange, onSave,
       viewRef.current = null;
       readOnlyCompartmentRef.current = null;
     };
-    // 언어는 경로에서 나오므로 경로가 바뀌면 다시 만든다. 내용만 바뀌는 경우는 아래가 맡는다.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 언어는 경로에서 나오므로 경로가 바뀔 때만 다시 만든다. 내용만 바뀌는 경우는 아래 훅이 맡는다.
   }, [path]);
 
   useEffect(() => {

@@ -1,7 +1,6 @@
 import type { ComponentType } from 'react';
 
-// 서로 다른 props 모양의 컴포넌트를 전부 받아야 하는 범용 유틸이라 any가 맞다.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- 서로 다른 props 모양의 컴포넌트를 전부 받아야 하는 범용 유틸이라 any가 맞다.
 type NamedComponent = ComponentType<any> & { displayName?: string };
 
 /**

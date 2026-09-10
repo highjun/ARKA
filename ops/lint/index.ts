@@ -1,8 +1,20 @@
+import comments from "@eslint-community/eslint-plugin-eslint-comments";
 import js from "@eslint/js";
 import json from "@eslint/json";
 import importX, { createNodeResolver } from "eslint-plugin-import-x";
 import tseslint from "typescript-eslint";
 import type { Linter } from "eslint";
+
+// 주석 규칙이 자기 자신을 끄지 못하게 막을 목록(→ ADR 0004). `sonarjs/no-commented-code`만
+// 뺀다 — 주석 처리된 코드를 알아보는 휴리스틱이라 오탐이 있을 수 있다.
+const COMMENT_RULES = [
+  "jsdoc/*",
+  "tsdoc/*",
+  "arka/*",
+  "no-warning-comments",
+  "line-comment-position",
+  "@eslint-community/eslint-comments/*",
+];
 
 
 /**
@@ -88,6 +100,37 @@ const base: Linter.Config[] = [
       // 그 주석이 "쓸모없는 지시"로 남아 오히려 노이즈가 된다.
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-empty-object-type": "error",
+      // `@ts-ignore`는 왜 껐는지를 남기지 않고 타입 오류를 숨긴다(→ ADR 0004). `@ts-expect-error`는
+      // 오류가 사라지면 스스로 실패하므로 설명과 함께 허용한다.
+      "@typescript-eslint/ban-ts-comment": ["error", {
+        "ts-expect-error": "allow-with-description",
+        minimumDescriptionLength: 10,
+      }],
+    },
+  },
+
+  {
+    // **주석으로 우회하는 길을 막는다**(→ ADR 0004). 규칙을 끄는 것 자체는 막지 않고,
+    // 무엇을 왜 끄는지를 남기게 한다 — 사유 없는 `eslint-disable`은 다음 사람이 되살릴 근거가 없다.
+    files: ["**/*.{ts,tsx,js,mjs,cjs}"],
+    plugins: { "@eslint-community/eslint-comments": comments },
+    // 규칙이 고쳐져 지시문이 필요 없어졌는데도 남아 있으면 실패한다. 기본값은 `warn`이라
+    // 스크롤에 묻힌다 — 쓸모없는 지시문은 "여기 위반이 있다"는 거짓 표시로 남는다.
+    linterOptions: { reportUnusedDisableDirectives: "error" },
+    rules: {
+      // 미룬 일은 주석이 아니라 `docs/tasks/`에 쌓는다. `decoration`은 `/** * TODO */`처럼
+      // 별표로 꾸며진 줄도 같은 것으로 보게 한다.
+      "no-warning-comments": ["error", {
+        terms: ["todo", "fixme", "xxx", "hack"],
+        location: "start",
+        decoration: ["*"],
+      }],
+      "@eslint-community/eslint-comments/require-description": "error",
+      // 규칙 이름 없이 통째로 끄면 그 뒤에 생기는 위반까지 전부 묻힌다.
+      "@eslint-community/eslint-comments/no-unlimited-disable": "error",
+      // `allowWholeFile: false` — 파일 끝까지 열어 두는 `eslint-disable`을 허용하지 않는다.
+      "@eslint-community/eslint-comments/disable-enable-pair": ["error", { allowWholeFile: false }],
+      "@eslint-community/eslint-comments/no-restricted-disable": ["error", ...COMMENT_RULES],
     },
   },
 ];
