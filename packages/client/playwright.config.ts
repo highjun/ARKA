@@ -12,13 +12,13 @@ const PORT = 5199;
  * 수 없어도 `getByText`가 찾아버린다. `toBeVisible()`은 진짜 브라우저라 그것을 거른다.
  *
  * **여기서는 스크린샷을 찍지 않는다.** 필요한 것은 "보이는가" 하나다. 모양이 변했는지는
- * 스토리를 순회하는 VRT(`../vrt/`)가 따로 본다.
+ * 스토리를 순회하는 VRT(`test/vrt/`)가 따로 본다.
  *
- * 테스트가 여는 워크스페이스는 `e2e/fixture`다 — 저장소나 사용자의 실제 파일에 기대면
+ * 테스트가 여는 워크스페이스는 `test/e2e/fixture`다 — 저장소나 사용자의 실제 파일에 기대면
  * 테스트가 그 디렉터리 내용에 묶여, 파일 하나만 늘어도 깨진다.
  */
 export default defineConfig({
-  testDir: path.join(clientRoot, "e2e"),
+  testDir: path.join(clientRoot, "test/e2e"),
   timeout: 60_000,
   outputDir: path.join(clientRoot, ".output/playwright/test-results"),
   reporter: [
@@ -31,7 +31,7 @@ export default defineConfig({
     command: "pnpm --filter client build && pnpm --filter server exec tsx src/index.ts",
     cwd: repoRoot,
     env: {
-      ADE_WORKSPACE: path.join(clientRoot, "e2e/fixture"),
+      ADE_WORKSPACE: path.join(clientRoot, "test/e2e/fixture"),
       ADE_PORT: String(PORT),
       ADE_CLIENT_ROOT: path.join(repoRoot, ".output/dist/client"),
     },

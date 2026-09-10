@@ -63,7 +63,7 @@ const base: Linter.Config[] = [
         "error",
         {
           selector: "MemberExpression[property.name=/^toMatch(Inline)?Snapshot$/]",
-          message: "`toMatchSnapshot`을 쓰지 않습니다. 무엇이 왜 그래야 하는지를 단언으로 적으세요. 화면 모양은 VRT(`packages/client/vrt/`)가 봅니다.",
+          message: "`toMatchSnapshot`을 쓰지 않습니다. 무엇이 왜 그래야 하는지를 단언으로 적으세요. 화면 모양은 VRT(`packages/client/test/vrt/`)가 봅니다.",
         },
       ],
     },

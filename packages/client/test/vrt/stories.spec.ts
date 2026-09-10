@@ -11,7 +11,7 @@ import { expect, test } from "@playwright/test";
  */
 type StorybookIndex = { readonly entries: Record<string, { readonly type: string }> };
 
-const indexPath = path.resolve(import.meta.dirname, "../.output/storybook-static/index.json");
+const indexPath = path.resolve(import.meta.dirname, "../../.output/storybook-static/index.json");
 const index = JSON.parse(readFileSync(indexPath, "utf8")) as StorybookIndex;
 const storyIds = Object.entries(index.entries)
   .filter(([, entry]) => entry.type === "story")

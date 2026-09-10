@@ -133,9 +133,9 @@ export default [
   },
 
   {
-    // 계층 사이의 방향. `src/` 밖(e2e·VRT·설정 파일)도 대상이다 — 그동안 `src/**`만 봐서
+    // 계층 사이의 방향. `src/` 밖(test/·설정 파일)도 대상이다 — 그동안 `src/**`만 봐서
     // e2e가 소스를 import해도 통과했다.
-    files: ["src/**/*.{ts,tsx}", "e2e/**/*.ts", "vrt/**/*.ts", ".storybook/*.{ts,tsx}", "*.config.ts"],
+    files: ["src/**/*.{ts,tsx}", "test/**/*.ts", ".storybook/*.{ts,tsx}", "*.config.ts"],
     plugins: { "import-x": importX },
     rules: {
       "import-x/no-restricted-paths": [
@@ -144,7 +144,7 @@ export default [
           zones: [
             // E2E와 VRT는 앱을 화면으로만 본다 — 소스를 import하면 그 테스트는 더 이상 바깥 관점이 아니다.
             {
-              target: ["./e2e", "./vrt"],
+              target: ["./test"],
               from: ["./src"],
               message: "E2E·VRT는 소스를 import하지 않습니다. 화면에 보이는 것만으로 검사하세요 — 배선은 registerServices.test.tsx가, 응답 계약은 서버의 responseContract가 봅니다.",
             },

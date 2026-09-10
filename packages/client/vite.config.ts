@@ -77,8 +77,9 @@ export default defineConfig({
     // **root를 되돌린다.** 위의 `root`는 vite가 `index.html`을 찾는 자리이고, vitest에게는
     // 테스트를 찾는 자리다 — 그대로 두면 `src/workbench` 안의 것만 집어 112개 중 28개만 돈다.
     root: clientRoot,
-    // `e2e/`·`vrt/`는 Playwright가 진짜 브라우저로 돌린다 — vitest가 집어가면 안 된다.
-    exclude: ["**/node_modules/**", "**/dist/**", "e2e/**", "vrt/**"],
+    // `test/`는 Playwright가 진짜 브라우저로 돌리는 것만 산다(e2e·vrt) — vitest가 집어가면 안 된다.
+    // 단위·계약·스모크는 대상 옆에 있으므로 이 제외에 걸리지 않는다.
+    exclude: ["**/node_modules/**", "test/**"],
     environment: "jsdom",
     setupFiles: ["./vitestSetup.ts"],
     // arka-ui에서 가져온 테스트들이 전역 describe/it을 쓴다. 명시적 import도

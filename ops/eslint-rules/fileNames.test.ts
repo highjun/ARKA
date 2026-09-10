@@ -13,7 +13,7 @@ createRuleTester().run("file-names", fileNames, {
     { name: "꼬리는 소문자", filename: at("packages/client/src/a/B.stories.tsx"), code: "" },
     { name: "폴더 camelCase", filename: at("packages/client/src/core/viewmodel/useViewModel.ts"), code: "" },
     { name: "컴포넌트 폴더 PascalCase", filename: at("packages/client/src/a/component/FileTree/FileTree.tsx"), code: "" },
-    { name: "src 밖은 대상이 아니다", filename: at("packages/client/e2e/shell-spec.ts"), code: "" },
+    { name: "src 밖은 대상이 아니다", filename: at("packages/client/test/e2e/shell-spec.ts"), code: "" },
   ],
   invalid: [
     { name: "kebab-case 폴더", filename: at("packages/client/src/core/file-tree/x.ts"), code: "", errors: [{ messageId: "directory" }] },
