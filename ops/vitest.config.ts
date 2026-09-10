@@ -1,6 +1,9 @@
 import { defineConfig } from "vitest/config";
 
-/** 커스텀 린트 규칙의 fixture 테스트 — 규칙이 죽어 있어도 초록이기 때문이다. */
+/**
+ * 작업장의 테스트. 커스텀 린트 규칙의 fixture 테스트(규칙이 죽어 있어도 초록이라 필요하다)와
+ * 저장소 전체에 걸린 불변식 검사가 함께 산다.
+ */
 export default defineConfig({
-  test: { include: ["eslint-rules/**/*.test.ts"], environment: "node" },
+  test: { include: ["**/*.test.ts"], environment: "node" },
 });

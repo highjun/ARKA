@@ -140,7 +140,8 @@ export default [
         "error",
         {
           zones: [
-            // E2E와 VRT는 앱을 화면으로만 본다 — 소스를 import하면 그 테스트는 더 이상 바깥 관점이 아니다.
+            // `test/`는 **대상을 특정할 수 없는 테스트**가 사는 자리다. E2E·VRT는 앱을 화면으로만 보므로
+            // 소스를 import하면 더 이상 바깥 관점이 아니다.
             {
               target: ["./test"],
               from: ["./src"],

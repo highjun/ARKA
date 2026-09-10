@@ -12,9 +12,8 @@
     "lint": "pnpm -r run lint",
     "test": "pnpm -r run test",
     "build": "pnpm -r run build",
-    "check": "pnpm run typecheck && pnpm run lint && pnpm run lint:config && pnpm run test",
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run test",
     "verify": "pnpm run check && pnpm run build && pnpm --filter client run test:e2e && pnpm --filter client run vrt && pnpm --filter ops run smoke",
-    "lint:config": "! grep -rl '\"paths\"' tsconfig.base.json packages/*/tsconfig.json || (echo 'tsconfig paths 별칭을 쓰지 않습니다 — package.json의 imports 필드를 쓰세요 (ADR 0012)' && exit 1)",
     "task": "pnpm --filter ops run task",
     "start": "ADE_CLIENT_ROOT=.output/dist/client node .output/dist/server/index.js",
     "prepare": "simple-git-hooks"

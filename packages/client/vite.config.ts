@@ -79,7 +79,7 @@ export default defineConfig({
     // 단위·계약·스모크는 대상 옆에 있으므로 이 제외에 걸리지 않는다.
     exclude: ["**/node_modules/**", "test/**"],
     environment: "jsdom",
-    setupFiles: ["./vitestSetup.ts"],
+    setupFiles: ["./test/vitestSetup.ts"],
     // arka-ui에서 가져온 테스트들이 전역 describe/it을 쓴다. 명시적 import도
     // 그대로 동작하므로 두 방식이 공존한다.
     globals: true,

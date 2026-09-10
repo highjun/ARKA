@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     // 브라우저에서 도는 PWA라 fetch·atob·TextDecoder가 필요하다. server가
     // types: ["node"]로 Node 전역을 받는 것과 짝을 이룬다.
@@ -23,7 +23,6 @@
   "include": [
     "src",
     "test",
-    "vitestSetup.ts",
     "vite.config.ts",
     ".storybook/main.ts",
     ".storybook/preview.ts"

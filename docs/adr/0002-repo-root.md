@@ -17,7 +17,7 @@
 ├── docs/                   # 작업 기록, 구조적 결정
 ├── ops/                    # 운영 스크립트를 한 패키지로 모은다. 배포되지 않는다
 ├── packages/               # 실제 구현 코드 — 런타임에 돌고 이미지에 들어간다
-├── tsconfig.base.json
+├── tsconfig.json
 ├── pnpm-workspace.yaml
 ├── pnpm-lock.yaml
 ├── package.json
