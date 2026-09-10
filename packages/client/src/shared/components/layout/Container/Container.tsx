@@ -5,7 +5,9 @@ import { assembleCompound } from '#utils/assembleCompound';
 import styles from './Container.module.css';
 import * as Primitive from '@radix-ui/react-scroll-area';
 
+/** `none`은 테두리와 배경을 지운다 — 자리는 그대로 차지한다. */
 export type ContainerChrome = 'visible' | 'none';
+/** 마운트할 스크롤바 축을 정한다 — 안 마운트한 축은 Radix가 그 방향 스크롤 자체를 안 켠다. */
 export type ContainerScroll = 'auto' | 'none' | 'horizontal' | 'vertical';
 
 /** `headless.tsx`와 `styled.tsx` 사이의 계약이었던 것 — 조각이 다섯이라 슬롯마다 다른 클래스가

@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import { assembleCompound } from '#utils/assembleCompound';
 import styles from './Code.module.css';
 
+/** 한 줄짜리 인라인 코드. 여러 줄은 `CodeBlock`이 맡는다. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- 커스텀 필드는 필요해지면 추가한다.
 export interface CodeRootProps extends HTMLAttributes<HTMLElement> {}
 

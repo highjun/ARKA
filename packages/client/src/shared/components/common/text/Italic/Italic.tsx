@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import { assembleCompound } from '#utils/assembleCompound';
 import styles from './Italic.module.css';
 
+/** `<em>`으로 그린다 — 기울임뿐 아니라 강조를 접근성 트리에 남긴다. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- 커스텀 필드는 필요해지면 추가한다.
 export interface ItalicRootProps extends HTMLAttributes<HTMLElement> {}
 

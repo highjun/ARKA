@@ -9,8 +9,10 @@ import type { IconId } from '#components/common/Icon';
 import { IconButton } from '#components/common/IconButton';
 import * as Primitive from '@radix-ui/react-dialog';
 
+/** 확인 버튼의 색만 바꾼다 — 동작은 그대로다. */
 export type DialogTone = 'default' | 'attention' | 'danger';
 
+/** `title`을 가로챈다 — 네이티브 툴팁이 아니라 대화상자의 제목이다. */
 export interface DialogRootProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
   /** 닫힘을 요청받았다 — 배경 클릭·Escape·우상단 닫기 버튼·`Dialog.Actions` 안의 취소 버튼 전부 여기로 온다. */
   readonly onClose: () => void;
@@ -24,6 +26,7 @@ export interface DialogRootProps extends Omit<HTMLAttributes<HTMLDivElement>, 't
   readonly description: string;
 }
 
+/** 버튼이 놓이는 아래쪽 줄. 오른쪽 정렬은 이쪽이 한다. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- 커스텀 필드는 필요해지면 추가한다.
 export interface DialogActionsProps extends HTMLAttributes<HTMLDivElement> {}
 

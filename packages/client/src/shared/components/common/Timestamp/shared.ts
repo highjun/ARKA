@@ -33,8 +33,10 @@ const durationTokens = (diffMs: number): Partial<Record<DatetimeToken, string>> 
   };
 };
 
+/** 로컬 시간대로 찍는다. 알 수 없는 토큰은 리터럴로 남는다. */
 export const formatDateTime = (date: Date, format?: string): string => applyFormat(datetimeTokens(date), format ?? 'YYYY-MM-DD HH:mm');
 
+/** `HH`는 24로 나눈 나머지가 아니라 **총 시간**이다 — 30시간이면 `30`이 나온다. `YYYY`·`MM`은 없다. */
 export const formatDuration = (diffMs: number, format?: string): string => applyFormat(durationTokens(diffMs), format ?? 'HH시간 mm분');
 
 /** `date`부터 `to`까지 지난 "만" 개월 수 — ms 차이를 30일로 나누는 근사 대신 달력
@@ -46,6 +48,7 @@ const diffInCalendarMonths = (date: Date, to: Date): number => {
   return to.getDate() < date.getDate() ? months - 1 : months;
 };
 
+/** 미래는 `방금`으로 접는다 — 시계가 어긋난 기기에서 "-3분 전"이 보이지 않게. */
 export const formatRelative = (date: Date, now: number): string => {
   const diff = Math.max(0, now - date.getTime());
   if (diff < MINUTE) return '방금';
@@ -58,6 +61,7 @@ export const formatRelative = (date: Date, now: number): string => {
   return `${String(Math.floor(months / 12))}년 전`;
 };
 
+/** `mode`가 셋 중 어느 것이냐로만 갈린다 — 셋의 선택은 부르는 쪽이 한다. */
 export const formatTimestamp = (mode: TimestampMode, date: Date, now: number, format?: string): string => {
   if (mode === 'relative') return formatRelative(date, now);
   if (mode === 'duration') return formatDuration(Math.max(0, now - date.getTime()), format);

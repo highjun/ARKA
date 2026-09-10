@@ -35,9 +35,11 @@ export interface MenuTriggerProps extends HTMLAttributes<HTMLElement> {
   readonly disabled?: boolean;
 }
 
+/** 뜬 메뉴의 껍데기. 포탈로 나가므로 조상의 `overflow`에 잘리지 않는다. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- 커스텀 필드는 필요해지면 추가한다.
 export interface MenuContentProps extends HTMLAttributes<HTMLDivElement> {}
 
+/** 고를 수 있는 한 줄. `onSelect`를 가로채므로 표준 `onSelect`는 쓸 수 없다. */
 export interface MenuItemProps extends Omit<HTMLAttributes<HTMLElement>, 'onSelect'> {
   /** true면 선택할 수 없고 흐리게 표시된다. */
   readonly disabled?: boolean;
@@ -45,9 +47,11 @@ export interface MenuItemProps extends Omit<HTMLAttributes<HTMLElement>, 'onSele
   readonly onSelect?: (event: Event) => void;
 }
 
+/** 고를 수 없는 머리글. 항목 묶음에 이름을 붙일 때 쓴다. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- 커스텀 필드는 필요해지면 추가한다.
 export interface MenuLabelProps extends HTMLAttributes<HTMLElement> {}
 
+/** 묶음 사이의 줄. 포커스를 받지 않는다. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- 커스텀 필드는 필요해지면 추가한다.
 export interface MenuSeparatorProps extends HTMLAttributes<HTMLElement> {}
 

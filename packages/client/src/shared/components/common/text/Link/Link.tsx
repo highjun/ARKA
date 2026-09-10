@@ -5,8 +5,10 @@ import styles from './Link.module.css';
 import { Link as PrimerLink } from '@primer/react';
 import type { LinkProps as PrimerLinkProps } from '@primer/react';
 
+/** `plain`은 Primer에 없는 값이라 이 컴포넌트가 더한 것이다 — 본문과 같은 색이다. */
 export type LinkTone = 'accent' | 'muted' | 'plain';
 
+/** Primer의 `muted`를 막고 `tone`으로 받는다 — 색 선택지가 두 갈래로 갈리지 않게. */
 export interface LinkRootProps extends Omit<PrimerLinkProps, 'muted'> {
   /**
    * 글자 색. 기본값 `'accent'`(Primer 기본 강조색). `'muted'`는 Primer의 `muted` prop을 그대로

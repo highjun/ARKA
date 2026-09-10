@@ -21,9 +21,11 @@ export interface CollapsibleRootProps extends HTMLAttributes<HTMLDetailsElement>
   readonly onOpenChange?: (open: boolean) => void;
 }
 
+/** 눌러서 펼치고 접는 자리. 셰브론은 이쪽이 그린다 — 방향은 Context로 받는다. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- 커스텀 필드는 필요해지면 추가한다.
 export interface CollapsibleTriggerProps extends HTMLAttributes<HTMLElement> {}
 
+/** 접히는 본문. 접힌 동안에는 DOM에서 빠진다. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- 커스텀 필드는 필요해지면 추가한다.
 export interface CollapsibleContentProps extends HTMLAttributes<HTMLDivElement> {}
 

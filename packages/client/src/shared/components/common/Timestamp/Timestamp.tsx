@@ -5,11 +5,13 @@ import { assembleCompound } from '#utils/assembleCompound';
 import styles from './Timestamp.module.css';
 import { formatTimestamp } from './shared';
 
+/** `relative`·`duration`은 `now`를 기준으로 다시 계산된다 — 스스로 흐르지는 않는다. */
 export type TimestampMode = 'datetime' | 'relative' | 'duration';
 
 /** epoch ms와 Date 중 정확히 하나만 — 판별 유니온이라 컴파일 단계에서 강제된다. */
 export type TimestampInput = { readonly epoch: number; readonly date?: never } | { readonly date: Date; readonly epoch?: never };
 
+/** `style`과 `children`을 막는다 — 내용은 `mode`와 입력이 정하고 모양은 토큰이 정한다. */
 export type TimestampRootProps = TimestampInput &
   Omit<HTMLAttributes<HTMLSpanElement>, 'style' | 'children'> & {
     readonly mode: TimestampMode;

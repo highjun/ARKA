@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 
+/** `value`의 유무로 controlled·uncontrolled가 갈린다 — 렌더 도중에 바뀌면 안 된다. */
 export interface UseControlledStateOptions<T> {
   /** controlled 모드일 때 부모가 관리하는 현재 값. `undefined`면 uncontrolled로 동작한다. */
   readonly value?: T;

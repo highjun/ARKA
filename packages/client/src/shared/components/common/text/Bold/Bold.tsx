@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import { assembleCompound } from '#utils/assembleCompound';
 import styles from './Bold.module.css';
 
+/** `<strong>`으로 그린다 — 굵기뿐 아니라 중요도를 접근성 트리에 남긴다. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- 커스텀 필드는 필요해지면 추가한다.
 export interface BoldRootProps extends HTMLAttributes<HTMLElement> {}
 

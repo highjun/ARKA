@@ -7,14 +7,17 @@ import styles from './CodeBlock.module.css';
 import { IconButton } from '@primer/react';
 import { Icon } from '#components/common/Icon';
 
+/** 정규식 하나로 가르는 근사 강조다 — 파서가 아니라 언어를 가리지 않는다. */
 export type CodeBlockSyntaxTokenKind = 'plain' | 'keyword' | 'string' | 'comment' | 'number' | 'function' | 'punctuation';
 
+/** `key`는 React 목록용이라 같은 줄 안에서만 고유하면 된다. */
 export interface CodeBlockSyntaxToken {
   readonly key: string;
   readonly kind: CodeBlockSyntaxTokenKind;
   readonly text: string;
 }
 
+/** `number`는 1부터다. 빈 줄은 `text`가 공백 하나라 높이가 무너지지 않는다. */
 export interface CodeBlockLine {
   readonly key: string;
   readonly number: number;
@@ -25,8 +28,11 @@ export interface CodeBlockLine {
 const SYNTAX_PATTERN =
   /(\/\/.*$|\/\*[\s\S]*?\*\/|`(?:\\.|[^`])*`|"(?:\\.|[^"])*"|'(?:\\.|[^'])*'|\b(?:const|let|var|type|interface|export|import|from|return|function|class|extends|readonly|new|if|else|for|while|true|false|null|undefined)\b|\b\d+(?:\.\d+)?\b|\b[A-Za-z_$][\w$]*(?=\s*\()|[{}()[\].,;:<>/=+\-*])/gmu;
 
+/** 끝의 줄바꿈 **하나만** 떼어낸다 — 펜스 코드가 늘 달고 오는 것이라 빈 줄로 보이면 안 된다. */
 export const normalizeContent = (value: string) => String(value).replace(/\n$/u, '');
+/** 비었거나 공백뿐이면 `'text'`다 — 캡션이 빈 이름표를 그리지 않게. */
 export const normalizeLanguage = (value?: string) => value?.trim().toLowerCase() || 'text';
+/** 없으면 빈 문자열이다. 캡션을 그릴지 말지는 부르는 쪽이 이 값으로 정한다. */
 export const normalizeTitle = (value?: string) => value?.trim() ?? '';
 
 const getSyntaxTokenKind = (text: string): CodeBlockSyntaxTokenKind => {
@@ -62,6 +68,7 @@ const tokenizeLine = (line: string, lineNumber: number): CodeBlockSyntaxToken[] 
   return tokens;
 };
 
+/** 줄 단위로 잘라 각 줄을 따로 토큰화한다 — 여러 줄 주석은 줄을 넘어 이어지지 않는다. */
 export const getLines = (content: string): CodeBlockLine[] =>
   content.split('\n').map((text, index) => {
     const number = index + 1;
@@ -73,6 +80,7 @@ const COPY_RESET_DELAY_MS = 1400;
 // 상태가 없어 컴포넌트마다 만들 이유가 없다 — `shared.ts`의 팩토리를 모듈 스코프에서 한 번만 부른다.
 const clipboard = createTextClipboardPort();
 
+/** `children`을 막는다 — 코드는 `content`로만 들어온다. */
 export interface CodeBlockRootProps extends Omit<HTMLAttributes<HTMLElement>, 'title' | 'children'> {
   /** 표시할 코드 원문. */
   readonly content: string;

@@ -6,6 +6,7 @@ import styles from './SidebarLayout.module.css';
 
 const hasContent = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
 
+/** `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다. */
 export interface SidebarLayoutRootProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {
   /** 헤더에 표시할 제목 — 아이콘 접두어 등을 조합할 수 있도록 문자열이 아니라 `ReactNode`다. */
   readonly title?: ReactNode;

@@ -4,8 +4,10 @@ import { clsx } from 'clsx';
 import { assembleCompound } from '#utils/assembleCompound';
 import styles from './List.module.css';
 
+/** `checkbox`는 읽기 전용 표시다 — 눌러서 바꿀 수 없다. */
 export type ListVariant = 'unordered' | 'ordered' | 'checkbox';
 
+/** `variant`에 따라 `<ul>`과 `<ol>`이 갈린다 — 태그를 부르는 쪽이 고르지 않는다. */
 export interface ListRootProps extends Omit<HTMLAttributes<HTMLUListElement | HTMLOListElement>, 'children'> {
   /** 목록 종류. 기본값 `'unordered'`. */
   readonly variant?: ListVariant;
@@ -13,6 +15,7 @@ export interface ListRootProps extends Omit<HTMLAttributes<HTMLUListElement | HT
   readonly children?: ReactNode;
 }
 
+/** 자기가 어느 `variant` 안에 있는지는 Context로 받는다 — prop으로 다시 주지 않는다. */
 export interface ListItemProps extends Omit<HTMLAttributes<HTMLLIElement>, 'children'> {
   /** 이 항목만 체크박스로 강제 표시. */
   readonly checkbox?: boolean;

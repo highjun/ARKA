@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import { assembleCompound } from '#utils/assembleCompound';
 import styles from './Highlight.module.css';
 
+/** `<mark>`로 그린다 — 검색 결과처럼 "찾은 자리"를 가리킬 때 쓴다. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- 커스텀 필드는 필요해지면 추가한다.
 export interface HighlightRootProps extends HTMLAttributes<HTMLElement> {}
 

@@ -46,6 +46,7 @@ const copyByExecCommand = (text: string): boolean => {
   }
 };
 
+/** Clipboard API를 먼저 쓰고 실패하면 `execCommand`로 떨어진다 — 안전 컨텍스트가 아닌 곳 때문이다. */
 export const createTextClipboardPort = (): TextClipboardPort => ({
   copy: async (text) => (await copyByClipboardApi(text)) || copyByExecCommand(text),
 });
