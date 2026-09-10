@@ -1,9 +1,10 @@
 # 빌드 단계 — 의존성 설치와 번들. 산출물은 `.output/dist/` 하나다(client 정적 파일 + server 단일 번들).
 FROM node:24-alpine AS build
-# corepack은 Node 25에서 빠진다 — 버전을 package.json의 packageManager와 같게 직접 고정한다.
-RUN npm install -g pnpm@11.13.0
 WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+# corepack은 Node 25에서 빠지므로 직접 설치한다. **버전을 여기 적지 않는다** —
+# `packageManager`에서 읽는다. 두 곳에 적으면 갈린다(실제로 갈렸다: 11.13.0 vs 11.13.1).
+RUN npm install -g "pnpm@$(node -p "require('./package.json').packageManager.split('@')[1]")"
 COPY packages/contracts/package.json packages/contracts/
 COPY packages/client/package.json packages/client/
 COPY packages/server/package.json packages/server/
