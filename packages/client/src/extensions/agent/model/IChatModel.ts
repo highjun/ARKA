@@ -31,6 +31,7 @@ export type PendingInput = {
 /** 스트림 연결 상태. `live`는 붙어 있다는 뜻이지 Run이 돈다는 뜻이 아니다(그건 `runStatus`). */
 export type ChatConnection = 'idle' | 'connecting' | 'live' | 'error';
 
+/** 세션 하나의 대화 상태 전부. 스트림이 붙어 있는 동안 계속 갱신된다. */
 export type SessionChat = {
   readonly sessionId: SessionId;
   readonly items: readonly TranscriptItem[];
@@ -46,6 +47,7 @@ export type SessionChat = {
   readonly failure: string | null;
 };
 
+/** 세션 **목록**의 상태다 — 개별 대화는 `SessionChat.connection`이 든다. */
 export type SessionsStatus = 'idle' | 'loading' | 'loaded' | 'error';
 
 export const ChatModelToken = createToken<IChatModel>('chatModel');

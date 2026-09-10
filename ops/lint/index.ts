@@ -10,16 +10,12 @@ import type { Linter } from "eslint";
 import { arkaRules } from "./rules/index.ts";
 
 /**
- * **공개 면에는 문서가 필수다**(→ ADR 0004). 아직 전 패키지에 켜지 못해 각 패키지가 자기
- * `eslint.config.ts`에서 켠다 — 위반이 0이 된 곳부터다. 전부 켜지면 이 상수는 바탕으로 들어간다.
- *
- * 바탕에서 `files` 글롭으로 가르지 못한다: **base path가 각 패키지 루트**라
- * `packages/contracts/**`가 아무것도 매치하지 않는다(2026-09-10 실측 — 조용히 통과했다).
+ * **공개 면에는 문서가 필수다**(→ ADR 0004).
  *
  * `z.infer` 별칭은 뺀다 — 바로 위 스키마(`export const X`)가 문서를 들고 있고 이름도 같아,
  * 여기 문서를 달면 글자 그대로의 동어반복이 된다. 실측으로 476건 중 46건이 이 형태였다.
  */
-export const requireJsdoc: Linter.RuleEntry = ["error", {
+const REQUIRE_JSDOC: Linter.RuleEntry = ["error", {
   publicOnly: true,
   enableFixer: false,
   exemptOverloadedImplementations: true,
@@ -196,6 +192,7 @@ const base: Linter.Config[] = [
       "tsdoc/syntax": "error",
       // 주석 처리된 코드는 지운다. git이 이미 영구 보관한다.
       "sonarjs/no-commented-code": "error",
+      "jsdoc/require-jsdoc": REQUIRE_JSDOC,
     },
   },
 

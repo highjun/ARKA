@@ -3,6 +3,7 @@ import type { KeyboardEvent } from 'react';
 import { isApplePlatform } from './shared';
 import type { FileTreeItem, FileTreeItemId } from './FileTree';
 
+/** `level`은 들여쓰기용 깊이다. 접힌 자식은 애초에 이 목록에 없다. */
 export interface FlatTreeNode {
   readonly item: FileTreeItem;
   readonly level: number;

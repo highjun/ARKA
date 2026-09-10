@@ -50,6 +50,7 @@ const getInteractiveProps = ({ isActive = false, disabled = false, onSelect }: S
   };
 };
 
+/** `title`을 가로챈다 — 네이티브 툴팁이 아니라 세션 제목이다. */
 export interface SessionRowRootProps extends Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'children' | 'title' | 'onSelect'> {
   /** 세션 제목 — 목록의 첫 줄이자 `aria-label`로 그대로 쓰인다. */
   readonly title: string;

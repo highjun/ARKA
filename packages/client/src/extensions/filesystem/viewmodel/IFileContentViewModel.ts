@@ -9,6 +9,7 @@ import { createToken, type Disposable } from '#core/di';
  * 경로로 담는 이유는 탭이 여럿일 수 있어서다 — 어느 탭이 어느 파일인지는 Shell 이 안다.
  */
 
+/** 화면이 그대로 쓰는 모양 — 상태가 불리언으로 펴져 있다. */
 export type FileRow = {
   readonly content: string;
   /**
@@ -28,6 +29,7 @@ export type FileRow = {
   readonly loading: boolean;
 };
 
+/** 탭 id를 키로 한다 — 같은 파일을 두 탭으로 열면 두 항목이다. */
 export type FileRowMap = Readonly<Record<string, FileRow>>;
 
 export const FileContentViewModelToken = createToken<IFileContentViewModel>("fileContentViewModel");

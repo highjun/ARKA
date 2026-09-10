@@ -36,6 +36,7 @@ export interface StepBlockThinkingProps extends Omit<HTMLAttributes<HTMLDetailsE
   readonly emptyLabel?: ReactNode;
 }
 
+/** `<details>`라 펼침 상태를 브라우저가 든다 — `onToggle`을 가로채 그 변화를 알린다. */
 export interface StepBlockToolProps extends Omit<HTMLAttributes<HTMLDetailsElement>, 'title' | 'children' | 'onToggle'> {
   /** `'tool'`이면 도구 실행 블록(실선 테두리) — 입력/출력이 둘 다 없으면 펼쳐지지 않는다. */
   readonly kind: 'tool';

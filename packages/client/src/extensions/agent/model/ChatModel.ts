@@ -21,28 +21,34 @@ export class ChatModel implements IChatModel {
 
   readonly confirmWrites: () => boolean;
 
+  /** `confirmWrites`는 설정에서 온다 — 이 Model이 설정 Model을 직접 보지 않게 함수로 받는다. */
   constructor({ api, events, confirmWrites = () => true }: { api: IAgentApi; events: IAgentEvents; confirmWrites?: () => boolean }) {
     this.#api = api;
     this.#events = events;
     this.confirmWrites = confirmWrites;
   }
 
+  /** 보관된 세션도 함께 온다 — 거르는 것은 화면의 몫이다. */
   get sessions(): readonly AgentSession[] {
     return this.#sessions;
   }
 
+  /** 목록의 상태다 — 개별 대화의 연결 상태는 `chats`가 든다. */
   get sessionsStatus(): SessionsStatus {
     return this.#sessionsStatus;
   }
 
+  /** 목록 읽기의 마지막 실패. 성공하면 지워진다. */
   get sessionsFailure(): string | null {
     return this.#sessionsFailure;
   }
 
+  /** 열려 있는 세션만 키로 있다 — `close`하면 키째 사라진다. */
   get chats(): Readonly<Record<SessionId, SessionChat>> {
     return this.#chats;
   }
 
+  /** 실패해도 던지지 않는다 — `sessionsStatus`가 `error`가 되고 사유가 남는다. */
   async loadSessions(): Promise<void> {
     this.#sessionsStatus = 'loading';
     this.#changed.fire();
@@ -57,6 +63,7 @@ export class ChatModel implements IChatModel {
     this.#changed.fire();
   }
 
+  /** 목록 맨 앞에 넣는다. 실패하면 **던진다** — 부르는 쪽이 그 결과로 탭을 열기 때문이다. */
   async createSession(): Promise<AgentSession> {
     const session = await this.#api.createSession();
     this.#sessions = [session, ...this.#sessions];
@@ -64,14 +71,17 @@ export class ChatModel implements IChatModel {
     return session;
   }
 
+  /** 서버가 돌려준 세션으로 목록을 갈아 끼운다 — 낙관적 갱신을 하지 않는다. */
   async renameSession(id: SessionId, title: string): Promise<void> {
     this.#replaceSession(await this.#api.updateSession(id, { title }));
   }
 
+  /** 목록에서 지우지 않는다 — `archived` 플래그만 바뀐다. */
   async archiveSession(id: SessionId, archived: boolean): Promise<void> {
     this.#replaceSession(await this.#api.updateSession(id, { archived }));
   }
 
+  /** 이미 열려 있으면 아무 일도 안 한다. `lastSeq`부터 이어 받아 놓친 이벤트가 없다. */
   open(sessionId: SessionId): void {
     if (this.#subscriptions.has(sessionId)) return;
     const chat = this.#chats[sessionId] ?? emptyChat(sessionId);
@@ -90,6 +100,7 @@ export class ChatModel implements IChatModel {
     this.#subscriptions.set(sessionId, unsubscribe);
   }
 
+  /** 구독을 끊고 대화를 버린다 — 다시 열면 서버에서 처음부터 받는다. */
   close(sessionId: SessionId): void {
     this.#subscriptions.get(sessionId)?.();
     this.#subscriptions.delete(sessionId);
@@ -98,6 +109,7 @@ export class ChatModel implements IChatModel {
     this.#changed.fire();
   }
 
+  /** 입력 대기 중이면 그 응답으로, 아니면 새 Run으로 간다. Run이 도는 중이면 아무 일도 안 한다. */
   async send(sessionId: SessionId, text: string, mode: RunMode): Promise<void> {
     const chat = this.#chats[sessionId] ?? emptyChat(sessionId);
     if (chat.activeRunId !== null && chat.pendingInput === null) return;
@@ -113,6 +125,7 @@ export class ChatModel implements IChatModel {
     }
   }
 
+  /** 도는 Run이 없으면 아무 일도 안 한다. 실패는 던지지 않고 `failure`에 남는다. */
   async cancel(sessionId: SessionId): Promise<void> {
     const chat = this.#chats[sessionId];
     if (chat === undefined || chat.activeRunId === null) return;
@@ -124,6 +137,7 @@ export class ChatModel implements IChatModel {
     }
   }
 
+  /** 무엇이 바뀌었는지는 주지 않는다 — 받는 쪽이 다시 읽는다. */
   onDidChange(listener: () => void): Disposable {
     return this.#changed.event(listener);
   }

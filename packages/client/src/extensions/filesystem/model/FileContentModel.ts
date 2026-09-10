@@ -18,6 +18,7 @@ export class FileContentModel implements IFileContentModel {
   #unwatch: WorkspaceWatchUnsubscribe | undefined;
   #watchDebounce: ReturnType<typeof setTimeout> | undefined;
 
+  /** 만들기만 해서는 아무 파일도 열지 않는다. */
   constructor({
     workspaceFiles,
     workspaceWatch,

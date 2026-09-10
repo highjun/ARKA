@@ -10,6 +10,7 @@ import { createToken } from '#core/di';
  * 알림은 그 위에 나중에 얹히는 것이다.
  */
 
+/** 두 번 불러도 안전하다. 안 부르면 연결이 남는다. */
 export type WorkspaceWatchUnsubscribe = () => void;
 
 export const WorkspaceWatchToken = createToken<IWorkspaceWatch>("workspaceWatch");

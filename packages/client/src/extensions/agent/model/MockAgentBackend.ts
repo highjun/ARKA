@@ -39,6 +39,7 @@ export class MockAgentBackend implements IAgentApi, IAgentEvents {
   readonly #now: () => number;
   #ids = 0;
 
+  /** `script`로 Run이 낼 이벤트 순서를 바꾼다 — 실패·입력 대기 시나리오를 여기서 만든다. */
   constructor({ script = defaultScript, now = () => Date.now() }: { script?: RunScript; now?: () => number } = {}) {
     this.#script = script;
     this.#now = now;
@@ -46,10 +47,12 @@ export class MockAgentBackend implements IAgentApi, IAgentEvents {
 
   readonly #next = (): string => `id${String(++this.#ids)}`;
 
+  /** `updatedAt` 내림차순. 보관된 것도 함께 온다. */
   async listSessions(): Promise<readonly AgentSession[]> {
     return [...this.#sessions.values()].sort((a, b) => b.updatedAt - a.updatedAt);
   }
 
+  /** id는 `id1`, `id2`… 순으로 센다 — 테스트가 예측할 수 있게. */
   async createSession(title?: string): Promise<AgentSession> {
     const at = this.#now();
     const session: AgentSession = { id: this.#next(), title: title ?? '', createdAt: at, updatedAt: at, archived: false, lastRunStatus: null };
@@ -57,6 +60,7 @@ export class MockAgentBackend implements IAgentApi, IAgentEvents {
     return session;
   }
 
+  /** 없는 id면 던진다. 준 필드만 덮어쓴다. */
   async updateSession(id: SessionId, patch: { readonly title?: string; readonly archived?: boolean }): Promise<AgentSession> {
     const current = this.#require(id);
     if (patch.title !== undefined) this.#append({ sessionId: id, runId: null, type: 'session.renamed', title: patch.title });
@@ -66,6 +70,7 @@ export class MockAgentBackend implements IAgentApi, IAgentEvents {
     return next;
   }
 
+  /** 스크립트대로 이벤트를 흘린다 — 모델을 부르지 않으므로 API 키 없이 화면이 돈다. */
   async startRun(sessionId: SessionId, input: string, mode: RunMode): Promise<RunResponse> {
     const session = this.#require(sessionId);
     if (this.#active.has(sessionId)) throw new Error('이미 도는 Run이 있다.');
@@ -87,6 +92,7 @@ export class MockAgentBackend implements IAgentApi, IAgentEvents {
     return { runId, status: 'running' };
   }
 
+  /** 그 `requestId`로 기다리는 중이 아니면 던진다. */
   async provideInput(sessionId: SessionId, runId: string, requestId: string, text: string): Promise<void> {
     const active = this.#active.get(sessionId);
     if (active === undefined || active.runId !== runId) throw new Error('도는 Run이 없다.');
@@ -99,6 +105,7 @@ export class MockAgentBackend implements IAgentApi, IAgentEvents {
     return ;
   }
 
+  /** 이미 끝난 Run이면 아무 일도 안 한다. */
   async cancelRun(sessionId: SessionId, runId: string): Promise<void> {
     const active = this.#active.get(sessionId);
     if (active === undefined || active.runId !== runId) throw new Error('도는 Run이 없다.');
@@ -106,6 +113,7 @@ export class MockAgentBackend implements IAgentApi, IAgentEvents {
     return ;
   }
 
+  /** `since` 뒤의 **밀린 이벤트를 동기로 먼저 흘린다** — 재연결이 놓친 것을 이어 받는다. */
   subscribe(sessionId: SessionId, since: number, onEvent: (event: AgentEvent) => void): () => void {
     const set = this.#listeners.get(sessionId) ?? new Set();
     set.add(onEvent);

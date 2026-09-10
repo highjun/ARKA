@@ -6,6 +6,7 @@ import type { IWorkspaceWatch, WorkspaceWatchUnsubscribe } from './IWorkspaceWat
 export class MockWorkspaceWatch implements IWorkspaceWatch {
   readonly #subscriptions = new Set<{ paths: readonly string[]; onChange: (changed: readonly string[]) => void }>();
 
+  /** 빈 배열이면 아무것도 구독하지 않고 아무 일 없는 해지 함수를 준다. */
   watch(paths: readonly string[], onChange: (changed: readonly string[]) => void): WorkspaceWatchUnsubscribe {
     if (paths.length === 0) return () => undefined;
     const subscription = { paths, onChange };

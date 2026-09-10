@@ -26,6 +26,7 @@ export interface ChatRoomMessage {
   readonly content?: ReactNode;
 }
 
+/** `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다. */
 export interface ChatRoomRootProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {
   /** 헤더에 표시할 채팅방 제목. */
   readonly title?: string;

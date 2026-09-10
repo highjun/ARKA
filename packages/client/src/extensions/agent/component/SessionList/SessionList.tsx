@@ -13,6 +13,7 @@ import type { StatusIndicatorStatus } from '../StatusIndicator';
 
 const hasContent = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
 
+/** 목록이 그리는 데 필요한 최소 정보. 대화 내용은 여기 없다. */
 export interface AgentSessionItem {
   readonly id: string;
   readonly title: string;
@@ -25,6 +26,7 @@ export interface AgentSessionItem {
   readonly archived?: boolean;
 }
 
+/** `children`을 막는다 — 항목은 `sessions`로만 들어온다. */
 export interface SessionListRootProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
   /** 표시할 세션 목록. */
   readonly sessions: readonly AgentSessionItem[];

@@ -4,6 +4,7 @@ import { mergeClassNames } from '#utils/mergeClassNames';
 import styles from './Message.module.css';
 import { Timestamp } from '#components/common/Timestamp';
 
+/** 정렬과 색만 가른다 — `system`은 양쪽 어디에도 붙지 않는다. */
 export type MessageRole = 'user' | 'agent' | 'system';
 
 const isImageSource = (avatar?: unknown): avatar is string =>
@@ -21,6 +22,7 @@ const getAvatarLabel = (role: MessageRole) => {
   return 'SYS';
 };
 
+/** `style`을 막는다 — 말풍선의 폭과 색은 토큰이 정한다. */
 export interface MessageRootProps extends Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'children'> {
   /** 메시지 발신 주체 — 아바타 초기값·라벨 표시를 결정한다. */
   readonly role: MessageRole;

@@ -8,10 +8,12 @@ import type { FileIconId } from './shared';
 import { seti } from './data';
 import * as Iconify from '@iconify/react/offline';
 
+/** `Icon`의 크기 축과 같다 — 두 아이콘이 한 줄에서 어긋나지 않게. */
 export type FileIconSize = 'sm' | 'md' | 'lg';
 
 Iconify.addCollection(seti as Parameters<typeof Iconify.addCollection>[0]);
 
+/** `id`를 막는다 — 파일 이름과 헷갈려 잘못 넘기는 것을 타입에서 끊는다. */
 export interface FileIconRootProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'id'> {
   /** 파일 이름. 확장자로 아이콘을 고른다 — 어느 `FileIconId` 를 쓸지는 컴포넌트가 정한다. */
   readonly fileName: string;

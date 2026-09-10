@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useControlledState } from '#utils/useControlledState';
 import type { AgentSessionItem } from './SessionList';
 
+/** `activeId`의 유무로 controlled·uncontrolled가 갈린다. */
 export interface UseSessionListOptions {
   /** controlled 모드일 때 부모가 관리하는 활성 세션 id. */
   readonly activeId?: string;
@@ -14,6 +15,7 @@ export interface UseSessionListOptions {
   readonly onActiveIdChange?: (activeId: string) => void;
 }
 
+/** `selectSession`은 `disabled` 세션을 조용히 무시한다. */
 export interface UseSessionListResult {
   readonly activeId: string | undefined;
   readonly selectSession: (session: AgentSessionItem) => void;

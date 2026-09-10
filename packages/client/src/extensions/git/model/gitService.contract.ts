@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { IGitService } from './IGitService';
 
+/** 구현마다 다른 준비 절차를 감싼다 — 스위트는 이 모양만 알면 된다. */
 export type GitSetup = {
   readonly service: IGitService;
   /** 작업 트리에 파일을 쓴다. 커밋되지 않은 새 파일이면 추적 안 됨. */

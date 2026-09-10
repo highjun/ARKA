@@ -9,9 +9,12 @@ import styles from './FileTree.module.css';
 import { Icon } from '#components/common/Icon';
 import { FileIcon } from '../FileIcon';
 
+/** 워크스페이스 루트 기준 경로다 — 트리 안에서 유일하다. */
 export type FileTreeItemId = string;
+/** 폴더만 펼칠 수 있고 앞자리에 셰브론이 온다. */
 export type FileTreeItemType = 'folder' | 'file';
 
+/** 트리가 그리는 데 필요한 최소 정보. 자식은 `children`으로 재귀한다. */
 export interface FileTreeItem {
   readonly id: FileTreeItemId;
   readonly name: string;
@@ -271,6 +274,7 @@ const Row = ({
   );
 };
 
+/** `onSelect`·`onContextMenu`를 가로챈다 — 행 단위로 다시 정의한다. */
 export interface FileTreeRootProps extends Omit<HTMLAttributes<HTMLElement>, 'children' | 'onSelect' | 'onContextMenu'> {
   /** 트리에 표시할 항목(폴더·파일) — 계층 구조 자체가 이 목록의 `children`으로 표현된다. */
   readonly items: readonly FileTreeItem[];

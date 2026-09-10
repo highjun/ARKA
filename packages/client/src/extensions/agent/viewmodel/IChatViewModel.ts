@@ -11,6 +11,7 @@ export type ChatSessionRow = {
   readonly timestamp: number;
 };
 
+/** 입력창이 그대로 쓰는 모양 — 보낼 수 있는지 판단이 이미 `canSubmit`에 접혀 있다. */
 export type ChatComposerState = {
   readonly value: string;
   readonly mode: 'action' | 'plan';
@@ -21,6 +22,7 @@ export type ChatComposerState = {
   readonly placeholder: string;
 };
 
+/** 대화 화면이 그대로 쓰는 모양. Model의 상태를 화면 어휘로 옮긴 것이다. */
 export type ChatState = {
   readonly items: readonly TranscriptItem[];
   /** 헤더의 상태 표시. Run이 없으면 `null`. */

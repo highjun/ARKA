@@ -49,6 +49,7 @@ export class DirectoryTreeModel implements IDirectoryTreeModel {
   #unwatch: WorkspaceWatchUnsubscribe | undefined;
   #watchDebounce: ReturnType<typeof setTimeout> | undefined;
 
+  /** 만들기만 해서는 아무것도 읽지 않는다 — 루트를 펼쳐야 시작한다. */
   constructor({
     workspaceFiles,
     workspaceWatch,

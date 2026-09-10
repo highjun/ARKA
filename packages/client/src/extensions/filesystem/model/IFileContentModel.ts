@@ -7,9 +7,12 @@ import { createToken, type Disposable } from '#core/di';
  * 무엇을 열지(탭)는 Shell 의 일이고, 여기는 **연 것의 내용만** 안다.
  */
 
+/** 읽기 상태다 — 저장은 `SaveStatus`가 따로 든다. */
 export type FileStatus = 'loading' | 'loaded' | 'error';
+/** 저장에 성공하면 `idle`로 돌아온다 — `saved` 같은 상태를 따로 두지 않는다. */
 export type SaveStatus = 'idle' | 'saving' | 'error';
 
+/** 열린 파일 하나. 편집 중인 내용과 디스크의 내용이 함께 있다. */
 export type OpenFile = {
   readonly path: string;
   readonly status: FileStatus;

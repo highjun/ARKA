@@ -8,8 +8,10 @@ import { ActionList, ActionMenu, Button, SegmentedControl } from '@primer/react'
 import { Icon } from '#components/common/Icon';
 import type { IconId } from '#components/common/Icon';
 
+/** `plan`은 실행 없이 계획만 세운다 — 서버의 `RunMode`와 같은 값이다. */
 export type InputComposerMode = 'action' | 'plan';
 
+/** 고를 수 있는 모델 하나. 목록은 밖에서 주입한다. */
 export interface InputComposerModelItem {
   /** 목록·`selectedModel` 매칭에 쓰는 고유 id. */
   readonly id: string;
@@ -64,6 +66,7 @@ const getSelectedModel = (models: readonly InputComposerModelItem[], modelId?: s
   return models.find((model) => model.id === modelId) ?? models[0] ?? null;
 };
 
+/** `onSubmit`을 가로챈다 — 폼 이벤트가 아니라 입력 내용과 모드를 준다. */
 export interface InputComposerRootProps extends Omit<FormHTMLAttributes<HTMLFormElement>, 'children' | 'onSubmit'> {
   /** controlled 모드의 현재 입력값. */
   readonly value?: string;

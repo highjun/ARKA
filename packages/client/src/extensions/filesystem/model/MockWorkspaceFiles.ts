@@ -15,6 +15,7 @@ export class MockWorkspaceFiles implements IWorkspaceFiles {
   readonly #nodes = new Map<string, Node>();
   static readonly #byName = new Intl.Collator('ko').compare;
 
+  /** 값이 `null`이면 폴더, 문자열이면 파일이다. 중간 폴더는 자동으로 만들어진다. */
   constructor(seed: WorkspaceSeed = {}) {
     this.#nodes.set('', { type: 'dir' });
     for (const [path, value] of Object.entries(seed)) {
@@ -23,6 +24,7 @@ export class MockWorkspaceFiles implements IWorkspaceFiles {
     }
   }
 
+  /** 이름을 한국어 콜레이션으로 정렬한다 — 실물 서버와 같은 순서다. */
   async list(path: string): Promise<DirectoryListing> {
     const normalized = MockWorkspaceFiles.#normalize(path);
     const node = this.#nodes.get(normalized);
@@ -44,6 +46,7 @@ export class MockWorkspaceFiles implements IWorkspaceFiles {
     return { path: normalized, parent: MockWorkspaceFiles.#parentOf(normalized), entries };
   }
 
+  /** 폴더를 읽으면 던진다. 잘림(`truncated`)은 흉내내지 않는다. */
   async read(path: string): Promise<FileContent> {
     const normalized = MockWorkspaceFiles.#normalize(path);
     const node = this.#nodes.get(normalized);
@@ -52,6 +55,7 @@ export class MockWorkspaceFiles implements IWorkspaceFiles {
     return { path: normalized, content: node.content, truncated: false, encoding: 'utf8' };
   }
 
+  /** 없는 파일이면 던진다 — 만들기는 `create`의 몫이다. */
   async write(path: string, content: string): Promise<void> {
     const normalized = MockWorkspaceFiles.#normalize(path);
     const node = this.#nodes.get(normalized);
@@ -60,6 +64,7 @@ export class MockWorkspaceFiles implements IWorkspaceFiles {
     this.#nodes.set(normalized, { type: 'file', content });
   }
 
+  /** 이미 있으면 던진다. 중간 폴더는 자동으로 만들어진다. */
   async create(path: string, type: FileEntryType): Promise<void> {
     const normalized = MockWorkspaceFiles.#normalize(path);
     if (normalized === '') throw new Error('cannot create the root');
@@ -69,6 +74,7 @@ export class MockWorkspaceFiles implements IWorkspaceFiles {
     this.#nodes.set(normalized, type === 'dir' ? { type: 'dir' } : { type: 'file', content: '' });
   }
 
+  /** 폴더면 자손까지 함께 옮긴다. 대상이 이미 있으면 던진다. */
   async move(from: string, to: string): Promise<void> {
     const source = MockWorkspaceFiles.#normalize(from);
     const target = MockWorkspaceFiles.#normalize(to);
@@ -85,6 +91,7 @@ export class MockWorkspaceFiles implements IWorkspaceFiles {
     }
   }
 
+  /** 폴더면 자손까지 함께 지운다 — 비었는지 묻지 않는다. */
   async remove(path: string): Promise<void> {
     const normalized = MockWorkspaceFiles.#normalize(path);
     if (normalized === '') throw new Error('cannot remove the root');

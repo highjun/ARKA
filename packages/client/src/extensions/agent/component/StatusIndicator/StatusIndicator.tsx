@@ -6,6 +6,7 @@ import styles from './StatusIndicator.module.css';
 import { Icon } from '#components/common/Icon';
 import type { IconId } from '#components/common/Icon';
 
+/** 서버의 `RunStatus` 중 화면이 구분해 보여주는 넷만 남긴 것이다. */
 export type StatusIndicatorStatus = 'running' | 'done' | 'waitingInput' | 'error';
 
 const LABEL: Record<StatusIndicatorStatus, string> = {
@@ -23,6 +24,7 @@ const ICON_OF: Record<StatusIndicatorStatus, IconId> = {
   error: 'error',
 };
 
+/** `children`을 막는다 — 문구는 `status`가 정한다. */
 export interface StatusIndicatorRootProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'style' | 'children'> {
   /** 표시할 상태 — 아이콘·라벨·색상을 함께 결정한다. */
   readonly status: StatusIndicatorStatus;

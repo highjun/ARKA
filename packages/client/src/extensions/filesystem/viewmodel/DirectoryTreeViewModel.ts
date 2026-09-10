@@ -25,6 +25,7 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
   readonly #copyToClipboard: (text: string) => void;
   readonly #isTypingSurface: () => boolean;
 
+  /** 만들 때 파일 커맨드(삭제·이름변경·새로 만들기)를 스스로 등록한다. */
   constructor({
     directoryTreeModel,
     commandCenterRegistry,

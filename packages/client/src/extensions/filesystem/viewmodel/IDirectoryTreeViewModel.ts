@@ -9,6 +9,7 @@ import { createToken } from '#core/di';
  * 아이콘은 여기에도 없다. 이름만 있으면 컴포넌트가 알아서 고른다.
  */
 
+/** 화면이 그대로 쓰는 행 — Model의 `DirectoryNode`를 트리 컴포넌트의 어휘로 옮긴 것이다. */
 export type FileTreeRow = {
   /** 워크스페이스 루트 기준 경로. 트리에서 유일하다. */
   readonly id: string;

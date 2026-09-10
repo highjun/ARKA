@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { IWorkspaceWatch } from './IWorkspaceWatch';
 
+/** 구현마다 다른 준비 절차를 감싼다 — 스위트는 이 모양만 알면 된다. */
 export type WorkspaceWatchSetup = {
   readonly watch: IWorkspaceWatch;
   /** 그 경로(디렉터리) 안에서 무언가 바뀐다 — 실물은 파일을 실제로 쓴다. */

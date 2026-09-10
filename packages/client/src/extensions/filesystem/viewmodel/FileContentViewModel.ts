@@ -12,6 +12,7 @@ export class FileContentViewModel extends ViewModelBase implements IFileContentV
   readonly #rows;
   readonly #subscription: Disposable;
 
+  /** `pinTab`을 받는 이유는 편집이 시작되면 미리보기 탭을 고정해야 해서다. */
   constructor({ fileContentModel, pinTab }: { fileContentModel: IFileContentModel; pinTab: IPinTab }) {
     super();
     this.#model = fileContentModel;

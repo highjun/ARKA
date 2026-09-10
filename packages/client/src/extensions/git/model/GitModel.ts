@@ -17,34 +17,42 @@ export class GitModel implements IGitModel {
   #failure: string | null = null;
   #diffs: Readonly<Record<string, DiffEntry>> = {};
 
+  /** 만들기만 해서는 아무것도 읽지 않는다 — `refresh`를 불러야 한다. */
   constructor({ gitService }: { gitService: IGitService }) {
     this.#service = gitService;
   }
 
+  /** 아직 안 읽었으면 `false`다 — 모르면 저장소가 아니라고 답한다. */
   get repository(): boolean {
     return this.#repository;
   }
 
+  /** 분리 HEAD거나 아직 안 읽었으면 `null`이다. */
   get branch(): string | null {
     return this.#branch;
   }
 
+  /** 스테이지된 것과 아닌 것이 한 목록에 섞여 온다 — 가르는 것은 ViewModel의 몫이다. */
   get files(): readonly GitFileStatus[] {
     return this.#files;
   }
 
+  /** 조작(`stage`·`commit`) 중에도 `loading`이 된다 — 뒤이어 상태를 다시 읽기 때문이다. */
   get status(): GitLoadStatus {
     return this.#status;
   }
 
+  /** 마지막 실패의 메시지. 성공하면 지워진다. */
   get failure(): string | null {
     return this.#failure;
   }
 
+  /** `diffKeyOf`가 만든 키를 쓴다 — 같은 파일의 staged/worktree가 따로 산다. */
   get diffs(): Readonly<Record<string, DiffEntry>> {
     return this.#diffs;
   }
 
+  /** 실패해도 던지지 않는다 — `status`가 `error`가 되고 `failure`에 남는다. */
   async refresh(): Promise<void> {
     this.#status = 'loading';
     this.#changed.fire();
@@ -62,14 +70,17 @@ export class GitModel implements IGitModel {
     this.#changed.fire();
   }
 
+  /** 끝나면 상태를 다시 읽는다. 실패는 던지지 않고 `failure`에 남는다. */
   async stage(paths: readonly string[]): Promise<void> {
     await this.#act(() => this.#service.stage(paths));
   }
 
+  /** 끝나면 상태를 다시 읽는다. 실패는 던지지 않고 `failure`에 남는다. */
   async unstage(paths: readonly string[]): Promise<void> {
     await this.#act(() => this.#service.unstage(paths));
   }
 
+  /** 성공하면 커밋 해시, 실패하면 `null`이다 — 실패 사유는 `failure`에 있다. */
   async commit(message: string): Promise<string | null> {
     let hash: string | null = null;
     await this.#act(async () => {
@@ -78,6 +89,7 @@ export class GitModel implements IGitModel {
     return hash;
   }
 
+  /** 읽는 동안 직전 텍스트를 유지한다. 실패하면 그 항목만 `error`가 된다. */
   async loadDiff(path: string, staged: boolean): Promise<void> {
     const key = diffKeyOf(path, staged);
     this.#setDiff(key, { status: 'loading', text: this.#diffs[key]?.text ?? '', failure: null });
@@ -88,6 +100,7 @@ export class GitModel implements IGitModel {
     }
   }
 
+  /** 무엇이 바뀌었는지는 주지 않는다 — 받는 쪽이 다시 읽는다. */
   onDidChange(listener: () => void): Disposable {
     return this.#changed.event(listener);
   }

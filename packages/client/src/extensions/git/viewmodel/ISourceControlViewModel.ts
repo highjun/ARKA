@@ -1,5 +1,6 @@
 import { createToken } from '#core/di';
 
+/** 화면이 그대로 쓰는 행. `staged`로 어느 목록에 놓일지가 갈린다. */
 export type ChangeRow = {
   readonly path: string;
   /** 화면 라벨 — `M`·`A`·`D`·`R`·`U`. */
@@ -7,6 +8,7 @@ export type ChangeRow = {
   readonly staged: boolean;
 };
 
+/** 화면이 그대로 쓰는 모양 — Model의 `status`가 `loading` 불리언으로 펴져 있다. */
 export type DiffState = {
   readonly loading: boolean;
   readonly text: string;

@@ -11,8 +11,10 @@ import type { FileEntry, FileEntryType } from '../model/IWorkspaceFiles';
  * 아이콘이 여기 없는 것은 그것이 표현이기 때문이다. Model 은 `IconId` 를 알 수 없다.
  */
 
+/** `idle`은 아직 한 번도 안 읽은 폴더다 — 펼치면 `loading`으로 간다. */
 export type DirectoryStatus = 'idle' | 'loading' | 'loaded' | 'error';
 
+/** 폴더 하나의 읽기 상태. 자식 목록은 경로로만 가리키고 중첩하지 않는다. */
 export type DirectoryNode = {
   readonly status: DirectoryStatus;
   readonly entries: readonly FileEntry[];

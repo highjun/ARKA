@@ -7,17 +7,20 @@
  * 같은 규칙을 따른다 — mac은 `metaKey`가 토글, 그 외는 `ctrlKey`가 토글. `shiftKey`는 항상 범위.
  */
 
+/** 선택 계산에 필요한 것만 — 트리의 다른 필드는 보지 않는다. */
 export interface SelectableRow {
   readonly id: string;
   readonly disabled?: boolean;
 }
 
+/** 수식키가 무엇을 뜻하는지. 플랫폼 차이는 `selectionIntentOf`가 흡수한다. */
 export type SelectionIntent = 'replace' | 'toggle' | 'range';
 
 /** `navigator.platform`을 여기서만 읽는다 — 나머지는 이 값을 인자로 받아 테스트에서 양쪽을 다 본다. */
 export const isApplePlatform = (): boolean =>
   typeof navigator !== 'undefined' && /mac|iphone|ipad|ipod/iu.test(navigator.platform ?? navigator.userAgent ?? '');
 
+/** mac은 `metaKey`, 그 외는 `ctrlKey`가 토글이다. `apple`을 넘기면 테스트가 양쪽을 다 본다. */
 export const selectionIntentOf = (
   event: { readonly metaKey: boolean; readonly ctrlKey: boolean; readonly shiftKey: boolean },
   apple: boolean = isApplePlatform(),
@@ -32,6 +35,7 @@ const withoutDisabled = (order: readonly SelectableRow[], ids: readonly string[]
   return ids.filter((id) => !disabledIds.has(id));
 };
 
+/** `anchorId`는 범위 선택의 기준점 — 없으면 `targetId`가 그 자리를 맡는다. */
 export interface NextSelectionInput {
   readonly intent: SelectionIntent;
   readonly current: readonly string[];
@@ -40,6 +44,7 @@ export interface NextSelectionInput {
   readonly targetId: string;
 }
 
+/** `disabled` 행은 결과에서 빠진다. 다음 앵커도 함께 온다. */
 export interface NextSelectionResult {
   readonly ids: readonly string[];
   readonly anchorId: string;

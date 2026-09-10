@@ -61,6 +61,7 @@ const deleteTitleOf = (targets: readonly ContextMenuTarget[]) =>
 const deleteSubtitleOf = (targets: readonly ContextMenuTarget[]) =>
   targets.some((target) => target.type === 'folder') ? '안의 내용까지 전부 사라진다. 되돌릴 수 없다.' : '되돌릴 수 없다.';
 
+/** 사이드바의 파일 탐색기. 트리 컴포넌트에 ViewModel의 행을 그대로 넘기고 배치만 한다. */
 export const DirectoryTreeView = ({
   onFileOpen,
   onFileMove,

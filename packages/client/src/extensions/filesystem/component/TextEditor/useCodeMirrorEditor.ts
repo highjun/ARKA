@@ -45,6 +45,7 @@ const BY_EXTENSION: Readonly<Record<string, CodeLanguage>> = {
   py: 'python',
 };
 
+/** 모르는 확장자면 `undefined` — 강조 없이 그냥 보여준다. */
 export const languageOf = (path: string): CodeLanguage | undefined => {
   const extension = fileExtensionOf(path);
   return extension === undefined ? undefined : BY_EXTENSION[extension];
@@ -119,6 +120,7 @@ const theme = EditorView.theme({
 /** "이 위치를 보여 달라"는 요청. `seq`가 바뀔 때마다 같은 줄이어도 다시 간다. 줄·열은 1부터. */
 export type RevealPosition = { readonly line: number; readonly column: number; readonly seq: number };
 
+/** `onChange`가 없으면 편집이 꺼진다 — `readOnly`와 따로 판단하지 않는다. */
 export interface UseCodeMirrorEditorOptions {
   readonly path: string;
   readonly content: string;
@@ -128,6 +130,7 @@ export interface UseCodeMirrorEditorOptions {
   readonly revealAt?: RevealPosition | null;
 }
 
+/** CodeMirror 타입이 새지 않는다 — 부르는 컴포넌트는 이 둘만 안다. */
 export interface UseCodeMirrorEditorResult {
   /** CodeMirror 가 실제로 그려질 호스트 엘리먼트에 건다. */
   readonly hostRef: RefObject<HTMLDivElement | null>;
@@ -176,6 +179,7 @@ const readOnlyExtensions = (
       ]),
 ];
 
+/** `path`가 바뀌면 에디터를 다시 만들고, `content`만 바뀌면 dispatch로 반영한다 — 스크롤과 선택을 지키기 위해서다. */
 export const useCodeMirrorEditor = ({ path, content, readOnly, onChange, onSave, revealAt = null }: UseCodeMirrorEditorOptions): UseCodeMirrorEditorResult => {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<EditorView | null>(null);
