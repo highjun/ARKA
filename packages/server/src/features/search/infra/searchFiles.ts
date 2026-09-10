@@ -66,7 +66,8 @@ export const searchFiles = async (root: string, request: SearchRequest): Promise
     try {
       entries = await readdir(dir, { withFileTypes: true });
     } catch {
-      return; // 없거나 못 읽는 디렉터리는 건너뛴다.
+      // 없거나 못 읽는 디렉터리는 건너뛴다.
+      return;
     }
     entries.sort((a, b) => a.name.localeCompare(b.name, "en"));
     for (const entry of entries) {

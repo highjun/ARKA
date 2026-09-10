@@ -45,7 +45,8 @@ export class MarkdownPreviewModel implements IMarkdownPreviewModel {
     if (current === undefined) return;
     try {
       const document = await this.#source.read(path);
-      if (this.#previews[path] === undefined) return; // 그 사이 닫혔다
+      // 그 사이 닫혔다
+      if (this.#previews[path] === undefined) return;
       this.#set({ path, status: 'loaded', markdown: document.content, truncated: document.truncated, failure: null });
     } catch (error) {
       if (this.#previews[path] === undefined) return;

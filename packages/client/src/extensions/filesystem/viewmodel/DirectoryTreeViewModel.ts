@@ -280,20 +280,9 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
    * (`ICommandCenterRegistry.dispatchKeydown`이 `execute(undefined)`로 부른다) 그때는 현재
    * 선택으로 대신한다.
    *
-   * 2026-09-06 — 옛 `app/filesystemCommands.ts`에서 여기로 옮겼다. "이 화면이 다루는 커맨드는
-   * 이 화면의 ViewModel이 안다"로 방향을 바꿔, `commandCenterRegistry`를 생성자 DI로 받아 자기
-   * 생성 시점에 `this`로 직접 등록한다(`ShellViewModel.#registerTabCommands`와 같은 패턴).
-   *
-   * `setContextTarget`으로 알리고 `requestDelete`/`requestRename`/`requestNewFile`/
-   * `requestNewFolder`를 그대로 부르면, `DirectoryTreeView`가 이미 그리고 있는 같은 `Dialog`
-   * (삭제 확인·이름 입력)가 뜬다 — 네이티브 `window.confirm`/`prompt` 대신이라는 원칙이 진입점과
-   * 무관하게 하나로 지켜진다.
-   *
-   * **알려진 단순화**: 우클릭 메뉴는 지금 이름변경 항목을 선택 개수와 무관하게 항상 보여준다 —
-   * VSCode라면 `when` 조건에 "선택이 정확히 하나"를 파생 컨텍스트로 걸어 메뉴 자체를 숨기지만,
-   * 이 앱의 Context 축은 아직 전역 불리언 플래그만 다루고 "지금 우클릭한 대상 집합" 같은
-   * 호출별 데이터는 표현하지 못한다. 대신 안전장치는 `execute` 안에 있다 — 정확히 하나가 아니면
-   * 조용히 아무 일도 하지 않는다(VSCode도 여러 개를 동시에 같은 이름으로 바꿀 방법은 없다).
+   * **알려진 단순화**: 우클릭 메뉴는 이름변경을 선택 개수와 무관하게 보여준다 — 이 앱의 Context
+   * 축이 아직 호출별 데이터를 표현하지 못해서다. 안전장치는 `execute` 안에 있다: 정확히 하나가
+   * 아니면 조용히 아무 일도 하지 않는다.
    */
   #registerFilesystemCommands(commandCenterRegistry: ICommandCenterRegistry): void {
     const toContextMenuTarget = (row: FileTreeRow): ContextMenuTarget => ({ id: row.id, name: row.name, type: row.type });
@@ -422,11 +411,8 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
         id,
         name: entry.name,
         type: 'folder' as const,
-        // 읽는 중이면 **그 폴더 행 자체가** 돈다. 예전에는 "읽는 중…" 이라는 자식 행을 만들어
-        // 넣었는데, 그건 파일 행 흉내라 정말 그런 이름의 파일과 구분되지 않았다.
-        //
-        // **펼친 것만 돈다.** 배경에서 미리 읽는 폴더까지 돌면, 루트를 연 직후 폴더 24개가 한꺼번에
-        // 돌아 앱이 버벅이는 것처럼 보인다. 프리페치는 티가 나지 않아야 값어치가 있다.
+        // 읽는 중이면 **그 폴더 행 자체가** 돈다 — 자식 행으로 흉내내면 진짜 파일과 구분되지 않는다.
+        // **펼친 것만 돈다**: 프리페치까지 돌면 루트를 연 직후 폴더 24개가 한꺼번에 돌아 버벅여 보인다.
         loading: expanded.has(id) && directories[id]?.status === 'loading',
         children: this.#folderChildren(directories, expanded, id),
       };

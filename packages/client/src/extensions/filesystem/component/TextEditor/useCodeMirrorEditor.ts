@@ -92,26 +92,13 @@ const highlight = HighlightStyle.define([
 /**
  * 배경·선택·활성 줄도 토큰으로 — 하드코딩하면 다크에서 뜬다.
  *
- * **`.cm-cursor` 를 명시한다.** CodeMirror 의 기본 스타일은
- * `.cm-cursor { borderLeft: '1.2px solid black' }` 이고
- * `&dark .cm-cursor` 일 때만 밝은 색으로 바뀌는데, 그 분기는
- * `EditorView.theme(spec, { dark: true })` 로 직접 알려줘야 걸린다 — 우리는 다크·라이트를 CSS
- * 변수 하나로 넘나들므로 그 옵션을 안 쓴다. 그러면 캐럿이 다크 테마에서도 항상 검정으로 남는다
- * (`caretColor` 는 브라우저 네이티브 캐럿용이라 이 문제와 무관하다 — CodeMirror 가 그리는 캐럿은
- * 별개 엘리먼트다). 여기서 직접 토큰을 걸어 우선순위 문제를 피한다.
+ * **`.cm-cursor`를 명시한다.** CodeMirror의 다크 분기는 `EditorView.theme(spec, { dark: true })`
+ * 로 알려줘야 걸리는데, 우리는 CSS 변수 하나로 넘나들어 그 옵션을 안 쓴다 — 안 적으면 캐럿이
+ * 다크에서도 검정으로 남는다.
  *
- * **`@primer/primitives`가 CodeMirror 전용 토큰을 따로 낸다** — `--codeMirror-bgColor` 등
- * (`functional/themes/{light,dark}.css`). 일반 `--fgColor-*`/`--bgColor-*` 대신 이 전용 토큰을
- * 쓴다 — 선택 영역은 `--codeMirror-selection-bgColor`(다크에서도 캔버스와 구분되도록 Primer가
- * 이미 골라 둔 값)를 쓰므로, 여기서 "얼마나 진하게"를 따로 추측할 필요가 없다(2026-08-24, 예전엔
- * 존재하지 않는 `--bg-accent-muted-active`를 지어내 쓰고 있었다 — 이 파일 전체가 `--fg-default`
- * 등 실존하지 않는 이름을 참조한 죽은 토큰 버그였다).
- *
- * **`.cm-selectionBackground` 하나만 적으면 안 먹는다.** CodeMirror 의 기본 스타일에는
- * `&light.cm-focused .cm-selectionLayer .cm-selectionBackground` 처럼 **훨씬 구체적인** 선택자가
- * 있고(포커스 상태 전용 — 커서와 달리 `&light`/`&dark` 분기가 아니라 CSS 명세상의 우선순위
- * 문제다), 클래스 하나짜리 선택자로는 그 구체성을 못 이긴다(실제로 focus 를 주고 재 봤더니 저
- * 기본 배경색이 그대로 나왔다). 같은 선택자 사슬을 그대로 맞춰야 우리 값이 이긴다.
+ * **`.cm-selectionBackground` 하나만 적으면 안 먹는다** — 기본 스타일에 포커스 상태 전용의 훨씬
+ * 구체적인 선택자가 있어 같은 사슬을 맞춰야 이긴다. 색은 `@primer/primitives`의 CodeMirror
+ * 전용 토큰(`--codeMirror-*`)을 쓴다 — 일반 토큰으로 "얼마나 진하게"를 추측하지 않아도 된다.
  */
 const theme = EditorView.theme({
   '&': { backgroundColor: 'transparent', color: 'var(--codeMirror-fgColor)' },
@@ -296,7 +283,8 @@ export const useCodeMirrorEditor = ({ path, content, readOnly, onChange, onSave,
     const editor = viewRef.current;
     if (editor === null || revealAt === null || appliedRevealRef.current === revealAt.seq) return;
     const { doc } = editor.state;
-    if (revealAt.line > doc.lines) return; // 아직 내용이 덜 왔다 — 다음 content에서 다시
+    // 아직 내용이 덜 왔다 — 다음 content에서 다시
+    if (revealAt.line > doc.lines) return;
     const line = doc.line(revealAt.line);
     const pos = Math.min(line.from + Math.max(revealAt.column - 1, 0), line.to);
     appliedRevealRef.current = revealAt.seq;

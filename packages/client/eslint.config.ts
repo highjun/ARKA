@@ -24,17 +24,10 @@ export default [
   {
     files: ["src/**/*.{ts,tsx}", "test/**/*.ts", ".storybook/*.{ts,tsx}", "*.config.ts"],
     rules: {
-      // client는 server를 모른다. 공유할 코드는 contracts로 옮기고 `#contracts`로 가져온다.
-      // **`no-restricted-imports`로 쓰지 않는다** — 그 규칙은 계층별로도 쓰이는 이름이라, 같은
-      // 파일에 둘이 걸리면 나중 블록이 앞의 것을 통째로 덮는다(2026-09-09에 실제로 겪음).
       // **`#contracts`로 가져온다**(→ ADR 0001). 맨이름 `"contracts"`는 서드파티와 구분되지 않는다.
-      //
-      // `import-x` 규칙으로는 못 한다 — 그것들은 import를 파일 경로로 **해석**하는데
-      // `"contracts"`와 `"#contracts"`가 같은 파일로 풀려 구분이 사라진다. 문자열을 보는
-      // 코어 규칙이라야 갈린다.
-      //
-      // 선택자가 넷인 것은 형태가 넷이기 때문이다. `no-restricted-imports`도 되지만 **동적
-      // `import()`를 놓친다**(2026-09-10 실측).
+      // `import-x`로는 못 한다 — 둘이 같은 파일로 풀려 구분이 사라진다. 문자열을 보는 코어 규칙이라야 갈린다.
+      // `no-restricted-imports`는 **동적 `import()`를 놓치고**(2026-09-10 실측), 계층 규칙과 이름이
+      // 겹쳐 나중 블록이 앞의 것을 덮는다(2026-09-09에 겪음). 그래서 선택자가 형태별로 넷이다.
       "no-restricted-syntax": [
         "error",
         ...(["ImportDeclaration", "ExportNamedDeclaration", "ExportAllDeclaration", "ImportExpression"].map(

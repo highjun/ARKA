@@ -178,7 +178,8 @@ describe('IShellViewModel — 파일 미리보기', () => {
     const { viewModel } = make();
 
     viewModel.previewFile('a.md');
-    viewModel.previewFile('a.md'); // 고정
+    // 고정
+    viewModel.previewFile('a.md');
     viewModel.previewFile('b.md');
     viewModel.previewFile('c.md');
 
@@ -315,7 +316,8 @@ describe('IShellViewModel — closeOtherTabs', () => {
   });
 
   it('닫힌 탭이 활성이었으면 남긴 탭으로 활성을 옮긴다', () => {
-    const { viewModel } = threeTabs(); // activeTabId: 'b'
+    // activeTabId: 'b'
+    const { viewModel } = threeTabs();
 
     viewModel.closeOtherTabs(ROOT_PANE_ID, 'a');
 
@@ -372,7 +374,8 @@ describe('IShellViewModel — closeTabsToRight', () => {
   });
 
   it('닫힌 탭이 활성이었으면 기준 탭으로 활성을 옮긴다', () => {
-    const { viewModel } = threeTabs(); // activeTabId: 'c'
+    // activeTabId: 'c'
+    const { viewModel } = threeTabs();
 
     viewModel.closeTabsToRight(ROOT_PANE_ID, 'a');
 
@@ -385,7 +388,8 @@ describe('IShellViewModel — 미리보기 표시', () => {
     const { viewModel } = make();
 
     viewModel.previewFile('a.md');
-    viewModel.previewFile('a.md'); // 고정
+    // 고정
+    viewModel.previewFile('a.md');
     viewModel.previewFile('b.md');
 
     const rows = activeLeafOf(viewModel).tabs;
@@ -414,7 +418,8 @@ describe('IShellViewModel — 미리보기 표시', () => {
     const { viewModel } = make();
 
     viewModel.previewFile('a.md');
-    viewModel.previewFile('b.md'); // a.md는 밀려나 고정된다
+    // a.md는 밀려나 고정된다
+    viewModel.previewFile('b.md');
 
     viewModel.pinTab('a.md');
 
@@ -576,11 +581,15 @@ describe('IShellViewModel — 분할된 상태에서 미리보기', () => {
     });
     viewModel.splitTab(ROOT_PANE_ID, 'b', 'right');
     const otherLeafId = `${ROOT_PANE_ID}-split-b`;
-    expect(viewModel.activeLeafId).toBe(otherLeafId); // 분할 직후엔 새 pane 이 활성이다
+    // 분할 직후엔 새 pane 이 활성이다
+    expect(viewModel.activeLeafId).toBe(otherLeafId);
 
-    viewModel.previewFile('preview.md'); // otherLeafId 에서 미리보기 하나 생김
-    viewModel.selectTab(ROOT_PANE_ID, 'a'); // 다시 root 로 포커스 이동
-    viewModel.previewFile('other.md'); // root 에서 새로 미리보기
+    // otherLeafId 에서 미리보기 하나 생김
+    viewModel.previewFile('preview.md');
+    // 다시 root 로 포커스 이동
+    viewModel.selectTab(ROOT_PANE_ID, 'a');
+    // root 에서 새로 미리보기
+    viewModel.previewFile('other.md');
 
     const otherLeaf = findLeaf(viewModel.tree, otherLeafId);
     // 옛 미리보기 탭('preview.md')이 다른 pane 에 그대로 남아 있다 — 활성 pane 조작만으로 지워지지 않는다.

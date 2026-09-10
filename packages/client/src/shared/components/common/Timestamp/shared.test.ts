@@ -61,7 +61,8 @@ describe('formatDuration', () => {
   });
 
   it('같은 토큰을 경과 일/시/분으로 재해석한다', () => {
-    const diffMinutes = 26 * 60 + 5; // 1일 2시간 5분
+    // 1일 2시간 5분
+    const diffMinutes = 26 * 60 + 5;
 
     expect(formatDuration(diffMinutes * 60 * 1000, 'DD일 HH시간 mm분')).toBe('01일 02시간 05분');
   });

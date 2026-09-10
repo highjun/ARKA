@@ -50,17 +50,12 @@ const noVersion = () => 0;
  * 토큰이 계약 타입을 들고 있으므로 반환 타입이 추론된다 — 호출부가 타입 인자를 따로
  * 말할 필요가 없고, 이름과 계약이 어긋날 자리도 없다.
  *
- * ViewModel 은 항상 컨테이너가 관리하는 클래스 인스턴스다 — View 생명주기와 분리돼 mount/unmount
- * 와 무관하게 산다. **View(`<Name>View.tsx`)만** 이 hook을 호출한다.
+ * ViewModel 은 컨테이너가 관리하는 클래스 인스턴스라 View 생명주기와 분리돼 산다.
+ * **View(`<Name>View.tsx`)만** 이 hook을 호출한다.
  *
- * **atom은 React 경계를 넘지 않는다** — VM 계약은 atom을 노출하지 않고 plain 값을 주는 getter만
- * 선언하며, 구현이 `ViewModelBase.observe()`로 atom을 감싸 값을 대신 노출한다. 그래서 이 훅은
- * 값을 감싸거나 프록시로 가로챌 게 없다 — `ViewModelBase`를 상속한 VM이면 `subscribe`/`getVersion`
- * 을 구독해 값이 바뀔 때마다 재렌더시키고, 반환값은 항상 **원본 인스턴스**다(정체성이 렌더 사이에
- * 영구 안정 — DI 접근과 구독이 한 곳에 모인다는 게 이 hook 하나만 허용하는 이유다).
- *
- * `useMemo` 로 감싸지 않는다 — 컨테이너가 singleton/scoped 를 이미 캐싱해서 별도
- * 메모이제이션이 필요 없다.
+ * **atom은 React 경계를 넘지 않으므로**(→ `ViewModelBase`) 값을 감싸거나 프록시로 가로챌 게 없다 —
+ * `subscribe`/`getVersion`을 구독해 재렌더시키고 **원본 인스턴스**를 그대로 돌려준다. `useMemo`도
+ * 쓰지 않는다: 컨테이너가 이미 캐싱한다.
  */
 export function useViewModel<T extends object>(token: Token<T>): T {
   const vm = useAppContext().resolve(token);

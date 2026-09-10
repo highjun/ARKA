@@ -57,7 +57,8 @@ class DescriptorRegistry<TDescriptor extends Descriptor> implements Registry<TDe
     if (exact) matches.push({ descriptor: exact, params: {} });
 
     for (const [patternId, matcher] of this.#matchers) {
-      if (patternId === id) continue; // exact 로 이미 담았다
+      // exact 로 이미 담았다
+      if (patternId === id) continue;
       const result = matcher(id);
       if (!result) continue;
 

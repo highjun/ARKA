@@ -6,20 +6,16 @@ interface Listenable {
 /**
  * ViewModel 구현이 상속해 atom 구독 배선을 얻는 베이스 클래스.
  *
- * **atom은 React 경계를 넘지 않는다** — 이게 (C) 설계의 핵심 불변식이다. 계약(`I<Name>ViewModel.ts`)은
- * atom을 노출하지 않고 값을 주는 getter만 선언한다. 구현은 `observe()`로 atom을 등록해 값이 바뀔
- * 때마다 내부 버전을 올리고, atom 자체는 반환값으로 받아 `#private` 필드에 보관한다 — getter가
- * `.get()`한 plain 값만 밖으로 나간다.
+ * **atom은 React 경계를 넘지 않는다.** 계약(`I<Name>ViewModel.ts`)은 atom이 아니라 값을 주는
+ * getter만 선언한다. 구현은 `observe()`로 atom을 등록해 값이 바뀔 때 내부 버전을 올리고, atom은
+ * `#private` 필드에 보관한다 — getter가 `.get()`한 plain 값만 밖으로 나간다. 그래서 `useViewModel`은
+ * `subscribe`/`getVersion` 둘만 넘기면 되고 값 캐시도 프록시도 없다(배경은 `useViewModel.ts`).
  *
- * ```ts
+ * @example
  * class ShellViewModelImpl extends ViewModelBase implements ShellViewModel {
  *   readonly #activities = this.observe(computed([...], ...));
  *   get activities(): readonly Activity[] { return this.#activities.get(); }
  * }
- * ```
- *
- * `useViewModel`은 `subscribe`/`getVersion` 두 메서드만 `useSyncExternalStore`에 넘기면 되므로
- * 값 캐시도 프록시도 필요 없다(배경은 `useViewModel.ts`의 문서 주석 참고).
  */
 export abstract class ViewModelBase {
   #version = 0;

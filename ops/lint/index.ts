@@ -4,6 +4,7 @@ import json from "@eslint/json";
 import importX, { createNodeResolver } from "eslint-plugin-import-x";
 import tseslint from "typescript-eslint";
 import type { Linter } from "eslint";
+import { arkaRules } from "./rules/index.ts";
 
 // 주석 규칙이 자기 자신을 끄지 못하게 막을 목록(→ ADR 0004). `sonarjs/no-commented-code`만
 // 뺀다 — 주석 처리된 코드를 알아보는 휴리스틱이라 오탐이 있을 수 있다.
@@ -36,12 +37,9 @@ const base: Linter.Config[] = [
   // 산출물은 검사하지 않는다 — 번들된 코드가 규칙에 걸려도 고칠 소스가 여기가 아니다.
   { ignores: ["**/node_modules/**", "**/dist/**", "**/storybook-static/**", "**/.output/**"] },
 
-  // 플러그인은 **여기서 한 번만** 등록한다. 패키지 설정이 다시 등록하면 같은 이름에 다른
-  // 객체가 걸려 `Cannot redefine plugin`으로 죽는다 — 정의는 배열 전체에 누적된다.
-  //
-  // **리졸버가 없으면 경계 규칙이 반쪽이다.** `no-restricted-paths`는 import를 실제 파일 경로로
-  // 풀어 zone과 비교하는데, 설정이 없으면 `"../../../server/src/app"`(TS 관행대로 확장자를 뺀 것)이
-  // 해석되지 않아 **비교할 것이 없어 조용히 통과한다**(2026-09-10 실측). 확장자를 알려 준다.
+  // 플러그인은 **여기서 한 번만** 등록한다 — 다시 등록하면 `Cannot redefine plugin`으로 죽는다.
+  // **리졸버가 없으면 경계 규칙이 반쪽이다**: `no-restricted-paths`가 확장자 없는 import를
+  // 풀지 못해 zone과 비교할 것이 없어 **조용히 통과한다**(2026-09-10 실측).
   {
     plugins: { "import-x": importX },
     settings: { "import-x/resolver-next": [createNodeResolver({ extensions: [".ts", ".tsx", ".js", ".jsx", ".json"] })] },
@@ -113,7 +111,7 @@ const base: Linter.Config[] = [
     // **주석으로 우회하는 길을 막는다**(→ ADR 0004). 규칙을 끄는 것 자체는 막지 않고,
     // 무엇을 왜 끄는지를 남기게 한다 — 사유 없는 `eslint-disable`은 다음 사람이 되살릴 근거가 없다.
     files: ["**/*.{ts,tsx,js,mjs,cjs}"],
-    plugins: { "@eslint-community/eslint-comments": comments },
+    plugins: { "@eslint-community/eslint-comments": comments, arka: arkaRules },
     // 규칙이 고쳐져 지시문이 필요 없어졌는데도 남아 있으면 실패한다. 기본값은 `warn`이라
     // 스크롤에 묻힌다 — 쓸모없는 지시문은 "여기 위반이 있다"는 거짓 표시로 남는다.
     linterOptions: { reportUnusedDisableDirectives: "error" },
@@ -131,6 +129,11 @@ const base: Linter.Config[] = [
       // `allowWholeFile: false` — 파일 끝까지 열어 두는 `eslint-disable`을 허용하지 않는다.
       "@eslint-community/eslint-comments/disable-enable-pair": ["error", { allowWholeFile: false }],
       "@eslint-community/eslint-comments/no-restricted-disable": ["error", ...COMMENT_RULES],
+      // 주석은 대상 **위**에 둔다(→ ADR 0004). 줄 끝에 붙으면 코드가 밀려 읽기가 나빠지고,
+      // 길어질수록 가로로 흐른다.
+      "line-comment-position": ["error", { position: "above" }],
+      // 주석 한 덩어리의 상한. 넘으면 코드가 아니라 문서라 ADR로 간다.
+      "arka/max-comment-lines": ["error", { line: 4, block: 4, tsdoc: 10 }],
     },
   },
 ];

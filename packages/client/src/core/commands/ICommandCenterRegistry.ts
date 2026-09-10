@@ -30,13 +30,6 @@ export type MenuRegistry = CoreMenuRegistry;
  * `ITabsModel`·`IActivityModel`·`IThemeModel`과 성격이 달라(VSCode도 CommandService/
  * ContextKeyService/KeybindingService/MenuService를 따로 둔다) 별도 슬라이스로 뒀다.
  *
- * **옛 `CommandCenterModel`에서 분해됐다**(2026-09-05, 5-C) — 이름은 `*Model`이었지만 실제로는
- * 다른 모듈이 등록하고 View가 목록을 읽는 확장 지점 보관소였다(`IActivityBarRegistry` 등과 같은
- * 자리). `boundaries`가 이걸 예외 element(`command-registry-model`)로 빼줘야 했던 게 그 증거다 —
- * 예외 없이 표현하려면 실제로 `Registry` 역할이어야 했다. 이 폴더에 없던 유일한 atom
- * (`isPaletteOpen`/`setPaletteOpen`)은 `IShellViewModel`로 옮겼다 — 이미 `isSidebarOpen` 같은
- * 같은 성격의 shell UI 상태를 갖고 있다.
- *
  * 넷 다 `core`의 `createRegistry()`로 이 Registry가 만들고, 앱 시작 시(`registerServices.tsx`)
  * 한 번 채워진다.
  */

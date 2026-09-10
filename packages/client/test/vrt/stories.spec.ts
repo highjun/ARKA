@@ -28,12 +28,10 @@ test("스토리가 하나는 있다", () => {
 
 for (const id of storyIds) {
   test(id, async ({ page }, testInfo) => {
-    // 기준 이미지는 **검토에서 그 스토리를 Accept할 때** 만든다(`test:vrt -g "<스토리 id>" --update-snapshots`). 그때까지는
-    // 비교할 기준이 없는 것이 정상이라 실패가 아니라 건너뛴다 — 아직 아무도 안 본 그림을 기준으로
-    // 삼으면 "검토 안 함"이 "승인됨"으로 기록된다. VRT가 잡으려는 것은 승인된 뒤의 변형이다.
-    //
-    // 기준을 만들러 온 실행(`--update-snapshots`)에서는 건너뛰면 안 된다 — 건너뛰면 기준이 영영
-    // 안 생긴다. 그래서 설정의 기본값(`updateSnapshots: "none"`)일 때만 건너뛴다.
+    // 기준 이미지는 **검토에서 Accept할 때** 만든다(`test:vrt -g "<스토리 id>" --update-snapshots`).
+    // 그때까지 기준이 없는 것은 정상이라 건너뛴다 — 아무도 안 본 그림을 기준으로 삼으면 "검토 안 함"이
+    // "승인됨"으로 기록된다. 다만 기준을 만들러 온 실행에서는 건너뛰면 안 되므로,
+    // 기본값(`updateSnapshots: "none"`)일 때만 건너뛴다.
     test.skip(!existsSync(baselineOf(id)) && testInfo.config.updateSnapshots === "none", "기준 이미지 없음 — 검토에서 승인되지 않은 스토리다");
     await page.goto(`/iframe.html?id=${id}&viewMode=story`);
     await page.locator("#storybook-root").waitFor({ state: "visible" });

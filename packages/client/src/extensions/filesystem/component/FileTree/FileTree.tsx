@@ -114,23 +114,13 @@ const EditableLabel = ({ value, onCommit, onCancel }: { readonly value: string; 
 };
 
 /**
- * `@primer/react`의 `TreeView`를 여기서 더는 안 쓴다(2026-08-24) — 그 컴포넌트는 셰브론(`toggle`)과
- * 파일 아이콘(`content`)을 처음부터 별개 그리드 칸으로 나눠서, 어느 쪽으로 겹치게 옮겨도 DOM에서
- * 뒤에 있는 쪽이 클릭을 가로챘다(직접 여러 방법으로 테스트해서 확인 — 폴더를 눌러도 안 펼쳐지는
- * 회귀까지 만났다). 우리는 폴더든 파일이든 그 앞자리(셰브론 또는 아이콘)가 **정확히 같은 슬롯**에
- * 오는 게 요구사항이라, 애초에 그 둘을 경쟁하는 두 그리드 칸이 아니라 "그 자리에 뭘 그릴지 고르는
- * 조건문 하나"로 만든다 — 같은 자리, 겹칠 일 자체가 없다.
+ * **앞자리를 두 칸이 아니라 조건문 하나로 만든다.** Primer `TreeView`는 셰브론과 아이콘을 별개
+ * 그리드 칸으로 나눠, 겹치게 옮기면 뒤쪽이 클릭을 가로챘다(2026-08-24 실측). 폴더든 파일이든
+ * 같은 슬롯에 와야 하므로 무엇을 그릴지만 고른다.
  *
- * 키보드 이동(방향키·roving tabindex)은 WAI-ARIA APG의 tree 패턴을 `useTreeNavigation`에 옮겨
- * 담았다 — Primer가 갖고 있던 것과 같은 골격(포커스 가능한 항목은 하나뿐, 나머지는 tabIndex=-1)
- * 이지만 타이프어헤드(문자 입력으로 항목 찾기)는 뺐다 — 핵심 이동 기능이 아니라서 이번 범위엔
- * 안 넣는다.
- *
- * **행 전체가 하나의 클릭 대상이다.** 폴더는 펼치기+선택을 동시에 호출한다(예전 Primer 버전도
- * 실제로는 셰브론 클릭 시 이 둘을 같이 불렀다 — `onNodeSelect`가 폴더에서 no-op이라 결과는 같다).
- * 셰브론을 따로 눌러야 하는 작은 히트 타깃 대신, 행 전체가 넓은 탭 영역이 된다 — 모바일에서 더
- * 다루기 쉽다. 단, Ctrl/Shift 수식키가 있으면(다중선택 조작) 펼치기·활성화 둘 다 건너뛴다 —
- * `FileTree`의 `handleRowClick` 참고.
+ * **행 전체가 하나의 클릭 대상이다** — 폴더는 펼치기와 선택을 함께 부른다. 작은 셰브론 대신 넓은
+ * 탭 영역이 된다. Ctrl/Shift가 눌려 있으면(다중선택) 둘 다 건너뛴다. 키보드 이동은
+ * `useTreeNavigation`이 WAI-ARIA APG의 tree 패턴으로 든다(타이프어헤드는 뺐다).
  */
 const Row = ({
   node,
@@ -202,11 +192,9 @@ const Row = ({
       onDragOver={(event) => onRowDragOver(node, event)}
       onDrop={(event) => onRowDrop(node, event)}
       onDragEnd={onRowDragEnd}
-      // React의 onFocus는 (native focus와 달리) 조상까지 버블링된다 — 폴더 행 안에 자식 행이
-      // DOM으로 중첩되므로(`role="group"` 서브트리가 부모 <li>의 자식), 자식이 포커스를 받으면
-      // 그 이벤트가 부모의 onFocus까지 타고 올라와 `focusedId`를 부모 id로 덮어썼다(실측 확인 —
-      // 자식을 focus()하면 포커스 직후 조상 handler가 뒤이어 불려 상태가 조상으로 되돌아갔다).
-      // `target !== currentTarget`이면 이 행이 아니라 후손이 받은 focus가 버블링된 것이므로 무시한다.
+      // React의 onFocus는 native와 달리 조상까지 버블링된다. 자식 행이 DOM으로 중첩돼 있어,
+      // 자식이 포커스를 받으면 부모의 onFocus가 뒤이어 불려 `focusedId`를 부모 id로 덮어썼다.
+      // `target !== currentTarget`이면 후손이 받은 focus가 올라온 것이므로 무시한다.
       onFocus={(event) => {
         if (event.target !== event.currentTarget) return;
         setFocusedId(item.id);

@@ -111,7 +111,8 @@ it('해지하면 재시도 대기 중이어도 더는 연결하지 않는다', a
   }) as unknown as typeof fetch;
 
   const unsubscribe = createWorkspaceWatchPort().watch(['a.md'], () => undefined);
-  unsubscribe(); // 첫 연결이 실패로 이어지기 전에 해지한다.
+  // 첫 연결이 실패로 이어지기 전에 해지한다.
+  unsubscribe();
   await vi.advanceTimersByTimeAsync(5_000);
 
   expect(calls).toBe(1);

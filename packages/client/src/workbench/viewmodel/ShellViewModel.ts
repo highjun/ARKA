@@ -245,7 +245,8 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     if (!leaf || !leaf.tabs.some((tab) => tab.id === tabId)) return;
 
     const kept = leaf.tabs.filter((tab) => tab.id === tabId || protectedTabIds.includes(tab.id));
-    if (kept.length === leaf.tabs.length) return; // 닫을 게 없다
+    // 닫을 게 없다
+    if (kept.length === leaf.tabs.length) return;
     this.#closeMany(leafId, leaf, kept, tabId);
   }
 
@@ -447,7 +448,8 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     const tree = this.#tabsModel.tree;
     const activeLeafId = this.#tabsModel.activeLeafId;
     const leaf = this.#findLeaf(tree, activeLeafId);
-    if (!leaf) return; // activeLeafId 는 항상 존재하는 leaf 를 가리킨다(불변) — 방어적으로만 무시한다.
+    // activeLeafId 는 항상 존재하는 leaf 를 가리킨다(불변) — 방어적으로만 무시한다.
+    if (!leaf) return;
 
     const already = leaf.tabs.some((open) => open.id === tab.id);
     let nextTree: TabPaneNode;

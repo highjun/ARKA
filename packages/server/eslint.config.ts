@@ -12,13 +12,8 @@ export default [
     files: ["src/**/*.ts", "*.config.ts", "build.ts"],
     rules: {
       // **`#contracts`로 가져온다**(→ ADR 0001). 맨이름 `"contracts"`는 서드파티와 구분되지 않는다.
-      //
-      // `import-x` 규칙으로는 못 한다 — 그것들은 import를 파일 경로로 **해석**하는데
-      // `"contracts"`와 `"#contracts"`가 같은 파일로 풀려 구분이 사라진다. 문자열을 보는
-      // 코어 규칙이라야 갈린다.
-      //
-      // 선택자가 넷인 것은 형태가 넷이기 때문이다. `no-restricted-imports`도 되지만 **동적
-      // `import()`를 놓친다**(2026-09-10 실측).
+      // `import-x`로는 못 한다 — 둘이 같은 파일로 풀려 구분이 사라진다. 문자열을 보는 코어 규칙이라야 갈린다.
+      // `no-restricted-imports`는 **동적 `import()`를 놓친다**(2026-09-10 실측). 그래서 선택자가 형태별로 넷이다.
       "no-restricted-syntax": [
         "error",
         ...(["ImportDeclaration", "ExportNamedDeclaration", "ExportAllDeclaration", "ImportExpression"].map(

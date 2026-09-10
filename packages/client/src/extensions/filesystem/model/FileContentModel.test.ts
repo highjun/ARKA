@@ -118,9 +118,11 @@ describe('open', () => {
     const replies: Record<string, Reply> = {};
     const port = serving(replies);
     const files = model(port);
-    await files.open('a.md'); // 실패
+    // 실패
+    await files.open('a.md');
     replies['a.md'] = text('a.md', 'A');
-    await files.open('a.md'); // 재시도 → 성공
+    // 재시도 → 성공
+    await files.open('a.md');
 
     await files.open('a.md');
 
@@ -239,7 +241,8 @@ describe('save', () => {
     const files = model(port);
     await files.open('a.md');
 
-    await files.save('a.md'); // content === savedContent
+    // content === savedContent
+    await files.save('a.md');
 
     expect(port.seenWrites).toEqual([]);
   });
@@ -294,7 +297,8 @@ describe('save', () => {
     files.edit('a.md', '고친 내용');
 
     const first = files.save('a.md');
-    const second = files.save('a.md'); // 저장 중 — 아무 일도 하지 않는다
+    // 저장 중 — 아무 일도 하지 않는다
+    const second = files.save('a.md');
     resolveWrite?.();
     await Promise.all([first, second]);
 

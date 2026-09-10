@@ -206,14 +206,10 @@ const Header = ({
         {title}
       </span>
       {/*
-       * `isActive`일 때만 `headerActionSlot`(레이아웃 폭을 차지하는 자리)을 마운트한다 —
-       * 비활성 탭은 그 자리만큼 폭이 좁아져도 된다. 대신 비활성 탭도 닫을 수는 있어야 하므로,
-       * 아래 `headerCloseButtonHover`가 `.header` 위에 겹쳐 뜬다(레이아웃 폭에 안 낀다).
-       *
-       * 닫기 버튼은 활성·비활성·dirty 여부와 무관하게 항상 보이고 항상 눌린다(2026-09,
-       * 터치 기기에 hover가 없어 "안 보이지만 눌리는" 버튼이 탭 전환을 가로채던 버그의 수정 —
-       * hover로 숨겼다 보여주는 크로스페이드 자체를 없앴다). dirty 표시(점)도 같이 없앴다 —
-       * 닫기 버튼이 그 자리를 항상 차지하므로 둘 다 보일 자리가 없다.
+       * 활성 탭만 `headerActionSlot`(레이아웃 폭을 차지하는 자리)을 마운트한다. 비활성 탭도 닫을
+       * 수 있어야 하므로 `headerCloseButtonHover`가 `.header` 위에 겹쳐 뜬다(폭에 안 낀다).
+       * 닫기 버튼은 항상 보이고 항상 눌린다 — 터치 기기에 hover가 없어 "안 보이지만 눌리는"
+       * 버튼이 탭 전환을 가로챘다. dirty 점도 같이 없앴다: 그 자리를 닫기 버튼이 차지한다.
        */}
       {isActive ? (
         <span className={classNames.headerActionSlot}>

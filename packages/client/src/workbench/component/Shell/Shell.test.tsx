@@ -187,11 +187,9 @@ describe('Shell', () => {
       </Shell>,
     );
 
-    // 핵심 계약 — `usePortalContainer()`가 가리키는 곳이 실제로 Shell 이 만든 portalRoot(같은
-    // `ThemeProvider`/색 토큰 스코프 안)인지. 이게 어긋나면 이번 세션에서 CommandPalette/
-    // ContextMenu 가 Storybook 에서 투명하게 뜨던 것과 같은 버그(색 토큰 스코프 밖으로 포탈)가
-    // 재현된다 — `SplitPageLayout`(children 자리) 밖에서, `Shell`(data-component) 서브트리
-    // 안에서 메뉴가 잡혀야 한다.
+    // 핵심 계약 — `usePortalContainer()`가 Shell이 만든 portalRoot(색 토큰 스코프 안)를 가리키는가.
+    // 어긋나면 포탈이 토큰 스코프 밖으로 나가 메뉴가 투명하게 뜬다. `SplitPageLayout` 밖에서,
+    // `Shell` 서브트리 안에서 잡혀야 한다.
     const menu = screen.getByRole('menu');
     const layout = container.querySelector('[data-component="SplitPageLayout"]');
     const shellRoot = document.querySelector('[data-component="Shell"]');

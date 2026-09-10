@@ -51,7 +51,8 @@ export const resolveWithin = (root: string, url: string): string | undefined => 
   try {
     decoded = decodeURIComponent(rawPath);
   } catch {
-    return undefined; // 깨진 퍼센트 인코딩
+    // 깨진 퍼센트 인코딩
+    return undefined;
   }
   if (decoded.includes('\0')) return undefined;
 

@@ -61,7 +61,8 @@ export const testAgentApiContract = (name: string, setup: () => Backend | Promis
       expect(response.runId).not.toBe('');
       const events = await collect(backend, session.id, finished);
       const types = events.map((e) => e.type);
-      expect(types[0]).toBe('session.renamed'); // 제목이 비어 있었으니 첫 입력이 제목이 된다
+      // 제목이 비어 있었으니 첫 입력이 제목이 된다
+      expect(types[0]).toBe('session.renamed');
       expect(types).toContain('run.started');
       expect(types).toContain('assistant.done');
       expect(events.at(-1)).toMatchObject({ type: 'run.finished', status: 'done' });

@@ -14,16 +14,10 @@ export type TabSplitOrientation = 'horizontal' | 'vertical';
  *
  * `kind`는 `string`이다 — 무엇을 그릴지는 `ITabContentRegistry`가 안다.
  *
- * `isActive`·`isPreview`는 여기 없다 — 활성/미리보기는 "최대 하나"라는 유일성이 `activeTabId`·
- * `previewTabId` 포인터 하나면 타입 구조상 저절로 보장되는데, 필드로 흩으면 그 보장이 사라지고
- * 검증 로직을 새로 만들어야 한다.
- *
- * 탭 안의 실제 내용물 상태(파일 내용·`isDirty` 등)도 여기 없다 — 그 탭을 등록한 모듈이 스스로
- * 갖는다(내용을 소유하는 쪽이 따로 있다). Shell은 "무엇이 열려 있고 어느 게
- * 활성·미리보기인지"라는 뼈대만 안다.
- *
- * `shared/components`의 `TabGroupItem`을 그대로 쓰지 않는 것도 같은 이유다 — 그 타입은 `content`
- * (`ReactNode`)·`isDirty`·`isPreview`처럼 여기서 일부러 갖지 않기로 한 파생 필드를 갖고 있다.
+ * **파생 필드를 두지 않는다.** `isActive`·`isPreview`는 `activeTabId`·`previewTabId` 포인터
+ * 하나면 "최대 하나"가 타입 구조상 보장되고, 필드로 흩으면 그 보장 대신 검증 로직이 생긴다.
+ * 내용물 상태(파일 내용·`isDirty`)도 그 탭을 등록한 모듈이 갖는다 — Shell은 뼈대만 안다.
+ * `TabGroupItem`을 그대로 쓰지 않는 것도 같은 이유다.
  */
 export type OpenTab = {
   /** 파일은 **워크스페이스 루트 기준 경로**다. */

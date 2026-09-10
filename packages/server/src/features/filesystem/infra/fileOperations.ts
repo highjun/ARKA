@@ -47,7 +47,8 @@ export const resolveWithin = async (rootDir: string, requested: string): Promise
     if (real !== rootDir && !real.startsWith(`${rootDir}${path.sep}`)) return null;
     return real;
   } catch {
-    return null; // 없는 경로
+    // 없는 경로
+    return null;
   }
 };
 
@@ -102,7 +103,8 @@ export const listDirectory = async (rootDir: string, absDir: string): Promise<Di
     return byName(a.name, b.name);
   });
 
-  const relative = path.relative(rootDir, absDir); // 루트면 ''
+  // 루트면 ''
+  const relative = path.relative(rootDir, absDir);
   const parent = relative === '' ? null : path.dirname(relative) === '.' ? '' : path.dirname(relative);
   return { path: relative, parent, entries };
 };

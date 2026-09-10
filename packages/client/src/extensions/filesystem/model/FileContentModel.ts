@@ -117,7 +117,8 @@ export class FileContentModel implements IFileContentModel {
     try {
       await this.#files.write(path, sent);
       const latest = this.#open[path];
-      if (latest === undefined) return; // 저장 중에 탭이 닫혔다
+      // 저장 중에 탭이 닫혔다
+      if (latest === undefined) return;
       this.#write({ ...latest, savedContent: sent, saveStatus: 'idle', saveFailure: null });
     } catch (error) {
       const latest = this.#open[path];

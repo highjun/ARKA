@@ -75,7 +75,8 @@ describe('nextSelection', () => {
 
   it('range는 앵커~대상 구간을 order 순서로 자른다(정방향)', () => {
     const result = nextSelection({ intent: 'range', current: ['a'], order: ROWS, anchorId: 'a', targetId: 'd' });
-    expect(result.ids).toEqual(['a', 'b', 'd']); // c는 disabled라 제외
+    // c는 disabled라 제외
+    expect(result.ids).toEqual(['a', 'b', 'd']);
     expect(result.anchorId).toBe('a');
   });
 

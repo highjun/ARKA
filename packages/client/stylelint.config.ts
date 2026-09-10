@@ -6,11 +6,8 @@
  */
 export default {
   extends: ["stylelint-config-standard"],
-  // **검사 대상은 여기가 정한다.** 스크립트는 `"**/*.css"`(이 패키지의 모든 CSS)만 넘기고,
-  // 무엇을 빼는지는 이 목록이 든다 — 선택 규칙이 JSON에 숨지 않게.
-  //
-  // 점 폴더(`.output/`·`.storybook/`)는 stylelint가 기본으로 건너뛴다. 그래도 적어 두는 것은
-  // 그 동작이 바뀌면 번들된 CSS 수천 줄이 쏟아지기 때문이다 — 실제로 직접 주면 5122건이 뜬다.
+  // **검사 대상은 여기가 정한다** — 스크립트는 `"**/*.css"`만 넘긴다. 점 폴더는 stylelint가 기본으로
+  // 건너뛰지만 그래도 적어 둔다: 그 동작이 바뀌면 번들 CSS가 쏟아진다(직접 주면 5122건).
   ignoreFiles: ["**/node_modules/**", "**/.output/**"],
   rules: {
     "color-no-hex": [true, { message: "색을 직접 적지 마세요 — Primer 토큰(`var(--fgColor-*)`, `var(--bgColor-*)`)을 참조하세요." }],

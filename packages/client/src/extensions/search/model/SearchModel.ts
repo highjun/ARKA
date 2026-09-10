@@ -51,7 +51,8 @@ export class SearchModel implements ISearchModel {
     this.#changed.fire();
     try {
       const result = await this.#service.search(this.#query);
-      if (generation !== this.#generation) return; // 그 사이 새 검색이 나갔다.
+      // 그 사이 새 검색이 나갔다.
+      if (generation !== this.#generation) return;
       this.#result = result;
       this.#status = 'done';
       this.#failure = null;

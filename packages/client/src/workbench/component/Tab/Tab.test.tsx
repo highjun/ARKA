@@ -175,14 +175,9 @@ describe('Tab', () => {
   it('axe 접근성 위반이 없다', async () => {
     const { container } = render(<Tab activeTab="a" tabItems={ITEMS} onTabClick={noop} onMenuClick={noop} />);
 
-    // nested-interactive: 탭 헤더(role="tab")가 "..." 메뉴 버튼(진짜 <button>)을 자식으로 품는다 —
-    // VSCode 등 실제 IDE도 쓰는 알려진 패턴이다. role=tab 을 제목/아이콘에만 걸고 메뉴 버튼을
-    // 형제로 분리하면 근본적으로 고칠 수 있지만, 그러면 드래그 히트박스(getStripChildRects)와
-    // 포인터 핸들러의 closest('button') 예외 처리를 실제로 바꿔야 해서 legacy 1:1 포트 동작이
-    // 달라질 위험이 있다 — 지금은 구조를 그대로 두고 이 규칙만 알려진 한계로 제외한다.
-    //
-    // `implementsNoA11yViolations`는 이 예외 옵션을 받지 못해 여기선 못 쓴다(ui/test-implements-helpers,
-    // 의도된 예외 — draft 상태라 warn에 머문다).
+    // nested-interactive: 탭 헤더(`role="tab"`)가 메뉴 버튼을 자식으로 품는다 — 실제 IDE도 쓰는
+    // 패턴이다. 메뉴 버튼을 형제로 빼면 고칠 수 있지만 드래그 히트박스와 포인터 예외 처리를 함께
+    // 바꿔야 해 legacy 1:1 포트 동작이 달라진다. 알려진 한계로 이 규칙만 뺀다.
     await expectNoA11yViolations(container, { rules: { 'nested-interactive': { enabled: false } } });
   });
 });
