@@ -91,6 +91,42 @@ jobs:
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
 
+  deploy:
+    name: deploy
+    # **검사가 통과한 뒤에만 배포한다.** `needs`만이 워크플로 안에서 그것을 보장한다 —
+    # 파일을 갈라 `workflow_run`으로 엮으면 체크아웃 ref를 손으로 맞춰야 한다.
+    needs: [check, container, e2e]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, linux, arka]
+    concurrency:
+      group: deploy-production
+      # **배포는 중간에 자르지 않는다.** 컨테이너를 바꾸는 중에 끊기면 무엇이 떠 있는지 모른다.
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+
+      # 되돌릴 자리를 먼저 만든다. 지금 떠 있는 이미지에 이름을 붙여 둔다.
+      - name: 되돌릴 이미지를 표시한다
+        run: docker image tag ade:latest ade:previous 2>/dev/null || echo "첫 배포 — 되돌릴 것이 없습니다"
+
+      - name: 이미지를 만든다
+        run: node ops/deploy/build.ts ade:latest
+
+      - name: 올린다
+        run: node ops/deploy/cli.ts up ops/deploy/ade.deploy.ts
+
+      # **이 검사가 실질적인 자물쇠다.** ADE에는 인증이 없고 워크스페이스가 사용자의 개인
+      # 디렉터리라, Access가 살아 있지 않으면 그 전체가 인터넷에 열린다.
+      - name: 익명 접근이 막히는지 본다
+        run: node ops/deploy/anonSmoke.ts https://arka.sangjun.dev
+
+      - name: 실패하면 로그와 되돌리는 법을 남긴다
+        if: failure()
+        run: |
+          docker logs --tail 100 ade-app || true
+          echo "::error::되돌리려면: docker image tag ade:previous ade:latest && node ops/deploy/cli.ts up ops/deploy/ade.deploy.ts"
+
   secrets:
     name: secrets
     if: github.event.action != 'edited'

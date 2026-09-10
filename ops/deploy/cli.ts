@@ -14,7 +14,7 @@ import type { DownOptions } from "./down.ts";
  * `pnpm --filter ops deploy`가 우리 것이 아니라 그것을 부른다(2026-09-11 실측). 파일을 직접 부른다.
  *
  * ```sh
- * node ops/deploy/cli.ts up ops/deploy/ade.deploy.ts [--dry-run]
+ * node ops/deploy/cli.ts up ops/deploy/ade.deploy.ts [--dry-run] [--overwrite-dns]
  * node ops/deploy/cli.ts down ade [--purge] [--remove-access] [--dry-run]
  * node ops/deploy/cli.ts status ade
  * ```
@@ -89,6 +89,7 @@ const main = async (): Promise<void> => {
         token: readToken(),
         uid: process.getuid?.() ?? 1000,
         gid: process.getgid?.() ?? 1000,
+        overwriteDns: flags.includes("--overwrite-dns"),
       },
       ports,
     );

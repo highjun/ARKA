@@ -47,7 +47,14 @@ const header = (ctx: RenderContext): string =>
  */
 export const renderCompose = (spec: DeploySpec, ctx: RenderContext): string => {
   const lines = [header(ctx), `name: ${spec.name}\n`, `services:`, `  app:`];
-  lines.push(`    image: ${yamlString(spec.image)}`, `    container_name: ${spec.name}-app`, `    restart: unless-stopped`);
+  lines.push(
+    `    image: ${yamlString(spec.image)}`,
+    `    container_name: ${spec.name}-app`,
+    `    restart: unless-stopped`,
+    // **앱도 호스트 사용자로 돈다.** 안 그러면 워크스페이스에 만드는 파일이 root 소유가 되어
+    // 사람이 나중에 고치지 못한다 — 볼륨 UID 불일치는 이 배치에서 가장 흔한 버그다.
+    `    user: ${String(ctx.uid)}:${String(ctx.gid)}`,
+  );
 
   const envKeys = Object.keys(ctx.env);
   if (envKeys.length > 0) {
