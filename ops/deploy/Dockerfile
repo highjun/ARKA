@@ -5,6 +5,9 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # corepack은 Node 25에서 빠지므로 직접 설치한다. **버전을 여기 적지 않는다** —
 # `packageManager`에서 읽는다. 두 곳에 적으면 갈린다(실제로 갈렸다: 11.13.0 vs 11.13.1).
 RUN npm install -g "pnpm@$(node -p "require('./package.json').packageManager.split('@')[1]")"
+# **`ops`도 필요하다.** 세 패키지가 `ops@workspace:*`를 선언하므로 빠지면 `pnpm run build`가
+# 워크스페이스를 다시 풀 때 죽는다. 캐시가 맞으면 통과해 **빌드가 비결정적이었다**(2026-09-11 실측).
+COPY ops/package.json ops/
 COPY packages/contracts/package.json packages/contracts/
 COPY packages/client/package.json packages/client/
 COPY packages/server/package.json packages/server/
