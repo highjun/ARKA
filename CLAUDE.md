@@ -30,7 +30,18 @@ pnpm --filter ops verify     내보내기 전에
 
 **파이프라인은 `ops/pipeline/`이 든다** — `check.ts`·`verify.ts`. 루트 `package.json`에는 단일 단계만 있다: JSON이라 왜 그 순서인지 적을 자리가 없고, 타입 검사도 린트도 안 받는다. `check`는 typecheck → lint → test 순서고 앞에서 걸리면 뒤를 안 돌린다.
 
-`verify`는 `check` + 빌드 + E2E + VRT + Docker 경계 스모크다. **CI가 없으므로 이것이 유일한 관문이다** — 특히 `ops/deploy/smoke.sh`가 빈 컨테이너에서 `pnpm install --frozen-lockfile`부터 다시 하므로 "내 기계에서만 되는 것"을 잡는다. 몇 분 걸리니 라운드마다 돌리지 않는다.
+`verify`는 `check` + 빌드 + E2E + VRT + Docker 경계 스모크다. **병합 전 강제는 CI가 들고(→ [ADR 0005](docs/adr/0005-ci-gate.md)), `verify`는 내보내기 전 손에 남는다** — CI에 아직 없는 VRT와 `ops/deploy/smoke.ts`가 여기에만 있다. 특히 스모크는 빈 컨테이너에서 `pnpm install --frozen-lockfile`부터 다시 하므로 "내 기계에서만 되는 것"을 잡는다. 몇 분 걸리니 라운드마다 돌리지 않는다.
 
 - 새 실수 패턴을 발견하면 지적하지 말고 린트 규칙으로 만든다. 규칙 구현은 `ops/lint/rules/`에, 켜는 자리는 **그 규칙이 다스리는 패키지의 `eslint.config.ts`**다. 규칙에는 `message`로 대안을 적고 `ops/lint/rules/*.test.ts`에 valid/invalid를 둔다.
 - 커밋 메시지는 한글 자연문. 첫 줄은 무엇을 왜 했는지, 본문에 "결정한 것 / 확인 필요".
+
+## 작업 흐름
+
+전체는 [docs/workflow.md](docs/workflow.md)에 있다. 매번 지켜야 하는 것만 여기 둔다.
+
+- **`main`에서 직접 커밋하거나 푸시하지 않는다.** 작업마다 브랜치를 만든다(`feat/…`, `fix/…`).
+- 작업이 끝나면 브랜치를 푸시하고 `gh pr create`로 PR을 연다. **PR 제목은 Conventional Commits 형식**(`feat(client): 검색 패널을 연다`)이다 — squash merge라 이 한 줄이 `main`의 커밋 메시지가 된다.
+- PR 본문에는 무엇을 왜 바꿨는지, 어떻게 확인했는지를 쓴다.
+- **CI가 실패하면 같은 브랜치에서 고쳐 다시 푸시한다. CI 설정을 바꿔서 통과시키지 않는다.**
+- **`.github/`·`ops/deploy/`·`.env.*`는 사용자 확인 없이 수정하지 않는다.**
+- **머지는 사용자가 한다.**
