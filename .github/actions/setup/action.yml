@@ -1,0 +1,17 @@
+# 설치 순서를 한 곳에만 둔다 — 잡 셋이 같은 것을 필요로 하는데, 흩어 두면 버전이 갈린다.
+name: 워크스페이스 준비
+description: pnpm과 Node를 package.json이 정한 버전으로 세우고 의존성을 설치한다.
+
+runs:
+  using: composite
+  steps:
+    # 버전을 여기 적지 않는다 — package.json의 `packageManager`가 정본이다.
+    - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+    # `node-version-file`이 package.json의 `engines.node`를 읽는다. 그래서 .nvmrc가 없다.
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version-file: package.json
+        cache: pnpm
+    # `--frozen-lockfile`이라 lockfile이 낡으면 여기서 선다.
+    - run: pnpm install --frozen-lockfile
+      shell: bash

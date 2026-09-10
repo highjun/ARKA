@@ -1,0 +1,115 @@
+# 병합 전 관문(→ ADR 0005). **로컬의 `pnpm --filter ops check`와 같은 것을 돌린다** —
+# CI에만 있는 검사를 만들면 로컬이 초록인데 CI가 빨간 상태를 아무도 재현하지 못한다.
+#
+# 잡 이름(`check`·`container`·`pr-title`)은 브랜치 보호의 필수 체크로 등록되므로 바꾸지 않는다.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  # `edited`는 제목을 고쳤을 때 pr-title을 다시 돌리려고 넣었다. 무거운 잡은 아래에서 건너뛴다.
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# 기본은 읽기만. 더 필요한 잡이 자기 자리에서 더한다.
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: check
+    # 제목만 고친 경우 코드가 그대로라 다시 돌릴 것이 없다.
+    if: github.event.action != 'edited'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      # 순서에 이유가 있다 — 싼 것부터 돌려야 원인이 가려지지 않는다(→ ops/pipeline/check.ts).
+      #
+      # **`--if-present`가 없으면 모든 PR이 빨간불이다**: contracts와 ops에는 `build`가 없어
+      # pnpm이 `ERR_PNPM_RECURSIVE_RUN_NO_SCRIPT`로 exit 1을 낸다(2026-09-10 실측).
+      - run: pnpm -r --if-present run lint
+      - run: pnpm -r --if-present run typecheck
+      - run: pnpm -r --if-present run test
+      - run: pnpm -r --if-present run build
+
+  container:
+    name: container
+    if: github.event.action != 'edited'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # **워크스페이스가 실재해야 부팅한다** — 없으면 config가 던지고 프로세스가 죽는다.
+      # docker가 대신 만들게 두면 root 소유가 되어 컨테이너가 쓰지 못한다.
+      - run: mkdir -p /tmp/ade-ci-workspace
+      # `--wait`는 compose의 HEALTHCHECK(`/api/health`)가 통과할 때까지 기다린다.
+      # "빌드는 되는데 뜨지 않는다"를 병합 전에 잡는 것이 이 잡의 전부다.
+      - name: 컨테이너를 띄운다
+        run: |
+          ADE_UID=$(id -u) ADE_GID=$(id -g) docker compose -p ci \
+            -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci \
+            up -d --build --wait
+      - name: 실패하면 로그를 남긴다
+        if: failure()
+        run: docker compose -p ci -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci logs
+      - name: 정리
+        if: always()
+        run: docker compose -p ci -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci down -v
+
+  e2e:
+    name: e2e
+    if: github.event.action != 'edited'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      # 스펙이 `projects`를 선언하지 않아 기본 chromium으로 돈다. 그것만 받는다.
+      - run: pnpm --filter client exec playwright install --with-deps chromium
+      # webServer가 스스로 client를 빌드하고 server를 tsx로 띄운다(playwright.config.ts).
+      - run: pnpm --filter client run test:e2e
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: failure()
+        with:
+          name: playwright-report
+          path: packages/client/.output/playwright/
+          retention-days: 7
+
+  pr-title:
+    name: pr-title
+    # squash merge라 **PR 제목이 그대로 main의 커밋 메시지가 된다.** 개별 커밋이 아니라 이것을 본다.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      # 제목을 인자가 아니라 env로 넘긴다 — 제목에 든 따옴표·백틱이 셸에 해석되지 않게.
+      - run: printf '%s' "$PR_TITLE" | pnpm --filter ops exec commitlint
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+
+  secrets:
+    name: secrets
+    if: github.event.action != 'edited'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # gitleaks가 커밋 범위를 훑으려면 이력이 있어야 한다.
+          fetch-depth: 0
+      # 액션이 아니라 이미지를 직접 쓴다 — 로컬에서 같은 명령으로 재현되고, 조직 라이선스
+      # 안내를 지나지 않아도 된다. `--redact`로 값이 로그에 남지 않게 한다.
+      - name: 이번에 더해진 커밋을 훑는다
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            RANGE="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
+          else
+            RANGE="${{ github.event.before }}..${{ github.sha }}"
+          fi
+          echo "범위=$RANGE"
+          docker run --rm -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.30.1 \
+            git /repo --gitleaks-ignore-path /repo/ops/.gitleaksignore \
+            --log-opts="--no-merges $RANGE" --redact --no-banner

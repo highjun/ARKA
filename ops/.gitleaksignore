@@ -1,0 +1,10 @@
+# gitleaks가 오탐으로 잡는 자리. **fingerprint 하나가 한 줄**이고, 왜 오탐인지 위에 적는다.
+# 비워 둘 수 있다면 비워 둔다 — 여기 줄이 늘면 규칙이 아니라 예외를 관리하게 된다.
+#
+# 루트가 아니라 여기 있는 이유는 루트 항목을 늘리지 않기 위해서다(→ ADR 0002).
+# CI가 `--gitleaks-ignore-path ops/.gitleaksignore`로 가리킨다.
+
+# 번들된 CSS 모듈 클래스 이름이다. 같은 줄의 이웃이 `_itemLabel_qjdrs_83`,
+# `_shortcuts_qjdrs_90` 형태라 해시로 보일 뿐이다. 이 파일은 추적된 산출물이었고
+# 다음 커밋 9861c76에서 지워졌다 — 지금은 .gitignore가 막는다.
+96eb1e646113883683d97c946714643a99b6f755:packages/client/dist/assets/index-B7U0WmrU.js:generic-api-key:128

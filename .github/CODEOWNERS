@@ -1,0 +1,8 @@
+# 배치·설정·결정이 사는 자리. 파급이 전역이라 리뷰 요청이 자동으로 붙어야 한다(→ ADR 0003).
+# `commit-msg` 훅이 로컬에서 막는 것과 같은 자리를, 여기서는 PR에서 막는다.
+
+/.github/        @highjun
+/ops/deploy/     @highjun
+/CLAUDE.md       @highjun
+/docs/CONVENTIONS.md  @highjun
+/docs/adr/       @highjun
