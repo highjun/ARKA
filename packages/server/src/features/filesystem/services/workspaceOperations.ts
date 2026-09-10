@@ -14,6 +14,7 @@ export type WorkspaceOperations = {
   create(path: string, type: FileEntryType): Promise<void>;
 };
 
+/** 모든 경로가 `workspaceRoot` 안으로 풀리는지 먼저 본다 — 밖이면 `NotFound`다. */
 export const createWorkspaceOperations = (workspaceRoot: string): WorkspaceOperations => {
   const resolve = async (requested: string): Promise<string> => {
     const absolute = await resolveWithin(workspaceRoot, requested);

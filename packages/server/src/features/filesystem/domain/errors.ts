@@ -9,6 +9,7 @@ import type { FileErrorCode } from "#contracts";
 export class FileError extends Error {
   readonly code: FileErrorCode;
 
+  /** `message`는 로그와 응답 본문에 그대로 실린다 — 워크스페이스 밖 경로를 담지 않는다. */
   constructor(code: FileErrorCode, message: string) {
     super(message);
     this.name = "FileError";

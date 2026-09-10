@@ -24,6 +24,7 @@ const COALESCE_MS = 200;
 /** 한 연결이 감시할 수 있는 경로 수의 상한. 넘으면 클라이언트가 관심 있는 것만 보내야 한다. */
 export const MAX_WATCH_PATHS = 128;
 
+/** 감시를 끊는 손잡이. 연결이 끝나면 반드시 부른다 — 안 부르면 파일 감시자가 남는다. */
 export type WorkspaceWatchHandle = { readonly close: () => void };
 
 /**

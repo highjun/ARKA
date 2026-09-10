@@ -12,12 +12,14 @@ import { SqliteSessionStore } from "./infra/SqliteSessionStore";
 import { RunManager } from "./runtime/RunManager";
 import { createAgentRoutes } from "./transport/agentRoutes";
 
+/** 조립된 에이전트 기능. 라우트와 정리 함수만 밖으로 낸다. */
 export type AgentFeature = {
   readonly routes: Hono;
   /** 도는 Run을 끊고 DB를 닫는다. 프로세스가 내려갈 때 부른다. */
   close(): void;
 };
 
+/** 조립부가 넘기는 것. 이 기능이 스스로 만들지 않는 자원이 전부 여기 온다. */
 export type AgentFeatureOptions = {
   readonly dataDir: string;
   readonly log: Logger;

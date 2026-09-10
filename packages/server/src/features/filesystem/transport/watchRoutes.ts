@@ -14,6 +14,7 @@ import { fileErrorResponse } from "./fileErrorHandler";
  */
 const HEARTBEAT_MS = 15_000;
 
+/** SSE 하나로 워크스페이스 변경을 흘린다. 연결이 끊기면 감시도 함께 닫힌다. */
 export function createWatchRoutes(workspaceRoot: string): Hono {
   const app = new Hono();
 

@@ -4,6 +4,7 @@ import type { AgentErrorCode } from "#contracts";
 export class AgentError extends Error {
   readonly code: AgentErrorCode;
 
+  /** `message`는 로그와 응답 본문에 그대로 실린다 — 내부 경로를 담지 않는다. */
   constructor(code: AgentErrorCode, message: string) {
     super(message);
     this.name = "AgentError";

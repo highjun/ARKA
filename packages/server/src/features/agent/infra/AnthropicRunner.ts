@@ -36,6 +36,7 @@ export class AnthropicRunner implements IAgentRunner {
   readonly #tools: IAgentTools;
   readonly #newId: () => string;
 
+  /** `client`를 밖에서 받는 이유는 테스트가 실제 API를 부르지 않기 위해서다. */
   constructor({ client, model, tools, newId = () => crypto.randomUUID() }: { client: MessagesClient; model: string; tools: IAgentTools; newId?: () => string }) {
     this.#client = client;
     this.#model = model;
@@ -43,6 +44,7 @@ export class AnthropicRunner implements IAgentRunner {
     this.#newId = newId;
   }
 
+  /** 모델이 툴을 부르면 돌려주고 그 결과를 다시 넣는다 — 툴 호출이 없을 때까지 돈다. */
   async run(ctx: RunContext): Promise<void> {
     const messages: Anthropic.MessageParam[] = [...historyToMessages(ctx.history), { role: "user", content: ctx.input }];
     const tools: Anthropic.Tool[] = this.#tools.definitions.map((tool) => ({

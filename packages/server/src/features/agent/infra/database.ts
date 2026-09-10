@@ -37,6 +37,7 @@ export const openDatabase = (location: string): DatabaseSync => {
   return db;
 };
 
+/** 표가 없으면 만들고 0을 돌려준다 — 빈 파일에도 그대로 부를 수 있다. */
 export const currentVersion = (db: DatabaseSync): number => {
   db.exec("CREATE TABLE IF NOT EXISTS schema_version (version INTEGER NOT NULL)");
   const row = db.prepare("SELECT MAX(version) AS version FROM schema_version").get() as { version: number | null };

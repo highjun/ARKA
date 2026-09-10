@@ -31,6 +31,7 @@ export class RunManager {
   readonly #newId: () => string;
   readonly #active = new Map<SessionId, ActiveRun>();
 
+  /** `now`·`newId`를 받는 이유는 테스트가 시각과 식별자를 붙잡기 위해서다. */
   constructor({
     events,
     sessions,
@@ -54,6 +55,7 @@ export class RunManager {
     this.#newId = newId;
   }
 
+  /** `title`이 없으면 기본 제목이 붙는다. 만든 즉시 저장된다. */
   createSession(title: string | undefined): AgentSession {
     const at = this.#now();
     const session: AgentSession = { id: this.#newId(), title: title ?? "", createdAt: at, updatedAt: at, archived: false, lastRunStatus: null };
@@ -68,6 +70,7 @@ export class RunManager {
     return session;
   }
 
+  /** 보관된 것도 함께 온다 — 거르는 것은 화면의 몫이다. */
   listSessions(): readonly AgentSession[] {
     return this.#sessions.list();
   }

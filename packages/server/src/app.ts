@@ -13,6 +13,7 @@ import { createGitRoutes } from "./features/git";
 import { createSearchRoutes } from "./features/search";
 import { createStaticRoutes } from "./features/static";
 
+/** 조립된 앱과 그 자원. `index.ts`가 이걸 받아 포트를 연다. */
 export type Application = {
   readonly app: Hono<{ Variables: AppVariables }>;
   /** 장기 실행 자원(Run·DB)을 정리한다. 종료 경로에서 부른다. */

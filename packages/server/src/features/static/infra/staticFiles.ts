@@ -25,6 +25,7 @@ const CONTENT_TYPES: Readonly<Record<string, string>> = {
   '.webmanifest': 'application/manifest+json; charset=utf-8',
 };
 
+/** 모르는 확장자는 `application/octet-stream`이다 — 브라우저가 실행하지 않고 내려받는다. */
 export const contentTypeFor = (filePath: string): string =>
   CONTENT_TYPES[path.extname(filePath).toLowerCase()] ?? 'application/octet-stream';
 
@@ -64,6 +65,7 @@ export const resolveWithin = (root: string, url: string): string | undefined => 
   return resolved;
 };
 
+/** 실재가 확인된 파일. `relativePath`는 캐시 정책을 고를 때 쓴다. */
 export type StaticFile = { readonly filePath: string; readonly relativePath: string };
 
 const onDisk = (candidate: string): boolean => fs.existsSync(candidate) && fs.statSync(candidate).isFile();

@@ -13,6 +13,7 @@ import { z } from "zod";
 
 /** 환경변수가 잘못됐다. `message`에 어느 변수가 왜 틀렸는지 담는다. */
 export class ConfigError extends Error {
+  /** `message`는 사람이 읽고 바로 고칠 수 있어야 한다 — 변수 이름과 기대값을 담는다. */
   constructor(message: string) {
     super(message);
     this.name = "ConfigError";
@@ -39,6 +40,7 @@ const Env = z.object({
   ADE_ANTHROPIC_MODEL: z.string().min(1).default("claude-opus-5"),
 });
 
+/** 검증을 통과한 뒤의 설정. 경로는 전부 절대경로로 풀려 있다. */
 export type ServerConfig = {
   /** `realpath`를 거친 절대경로. 경로 방어(`resolveWithin`)가 이것을 전제한다. */
   readonly workspaceRoot: string;

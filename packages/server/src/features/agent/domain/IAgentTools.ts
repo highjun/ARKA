@@ -11,8 +11,10 @@ export type AgentToolDefinition = {
   readonly inputSchema: Record<string, unknown>;
 };
 
+/** `isError`는 실패를 **모델에게** 알리는 것이다 — 서버의 실패가 아니라 툴 호출의 결과다. */
 export type ToolOutcome = { readonly output: unknown; readonly isError: boolean };
 
+/** 모델이 부를 수 있는 툴 묶음. 실행기(`AnthropicRunner`)가 이것만 보고 툴을 돌린다. */
 export interface IAgentTools {
   readonly definitions: readonly AgentToolDefinition[];
   /** 없는 툴 이름이면 `isError: true`로 답한다 — 던지지 않는다. 모델이 그 결과를 보고 고친다. */

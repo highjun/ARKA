@@ -1,5 +1,5 @@
 import type { ESLint } from "eslint";
-import { maxCommentLines } from "./maxCommentLines";
+import { maxCommentLines } from "./maxCommentLines.ts";
 
 /**
  * 이 저장소의 결정을 강제하는 규칙들.

@@ -9,10 +9,12 @@ import type { MiddlewareHandler } from "hono";
  */
 export type RequestContext = { readonly userId: string };
 
+/** Hono의 `c.get("user")`가 무엇을 돌려주는지 선언한다. 라우트가 이걸로 타입을 얻는다. */
 export type AppVariables = { user: RequestContext };
 
 export const LOCAL_USER: RequestContext = { userId: "local" };
 
+/** Access 헤더가 없으면 `LOCAL_USER`로 떨어진다 — 터널 없이 로컬로 여는 것이 기본 사용법이다. */
 export const createRequestContext = (): MiddlewareHandler<{ Variables: AppVariables }> => async (c, next) => {
   const email = c.req.header("cf-access-authenticated-user-email");
   c.set("user", email === undefined || email === "" ? LOCAL_USER : { userId: email });

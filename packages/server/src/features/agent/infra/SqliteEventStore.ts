@@ -15,11 +15,16 @@ export class SqliteEventStore implements IEventStore {
   readonly #now: () => number;
   readonly #listeners = new Map<SessionId, Set<(event: AgentEvent) => void>>();
 
+  /** `now`를 받는 이유는 테스트가 시각을 붙잡기 위해서다. */
   constructor(db: DatabaseSync, { now = () => Date.now() }: { now?: () => number } = {}) {
     this.#db = db;
     this.#now = now;
   }
 
+  /**
+   * `seq` 채번과 삽입을 `BEGIN IMMEDIATE` 한 트랜잭션으로 묶는다 — 나눠 두면 같은 번호가 두 번 나온다.
+   * 구독자에게는 커밋된 뒤에 흘린다.
+   */
   append(input: AgentEventInput): AgentEvent {
     const at = this.#now();
     this.#db.exec("BEGIN IMMEDIATE");
@@ -39,6 +44,10 @@ export class SqliteEventStore implements IEventStore {
     return event;
   }
 
+  /**
+   * `since`는 **배타적**이다. 스키마가 바뀌어 파싱에 실패한 행은 **조용히 건너뛴다** — 옛 이벤트
+   * 하나 때문에 세션 전체를 못 열면 손해가 더 크다.
+   */
   listSince(sessionId: SessionId, since: number): readonly AgentEvent[] {
     const rows = this.#db.prepare("SELECT payload FROM events WHERE session_id = ? AND seq > ? ORDER BY seq").all(sessionId, since) as Row[];
     const events: AgentEvent[] = [];
@@ -49,6 +58,7 @@ export class SqliteEventStore implements IEventStore {
     return events;
   }
 
+  /** 지난 이벤트는 돌려주지 않는다 — 그건 `listSince`의 몫이다. 해지 함수를 돌려준다. */
   subscribe(sessionId: SessionId, listener: (event: AgentEvent) => void): () => void {
     const set = this.#listeners.get(sessionId) ?? new Set();
     set.add(listener);

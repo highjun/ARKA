@@ -14,11 +14,13 @@ export class ScriptedRunner implements IAgentRunner {
   readonly #chunkMs: number;
   readonly #newId: () => string;
 
+  /** `chunkMs`를 0으로 주면 기다리지 않는다 — 테스트가 그렇게 쓴다. */
   constructor({ chunkMs = DEFAULT_CHUNK_MS, newId = () => crypto.randomUUID() }: { chunkMs?: number; newId?: () => string } = {}) {
     this.#chunkMs = chunkMs;
     this.#newId = newId;
   }
 
+  /** 정해진 순서로 이벤트를 흘린다. 모델을 부르지 않으므로 API 키 없이도 화면이 돈다. */
   async run(ctx: RunContext): Promise<void> {
     const thinking = this.#newId();
     ctx.emit({ type: "thinking.delta", blockId: thinking, text: `입력을 읽는다: "${ctx.input}"` });

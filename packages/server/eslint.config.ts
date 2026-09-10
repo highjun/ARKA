@@ -1,4 +1,4 @@
-import ops from "ops/lint";
+import ops, { requireJsdoc } from "ops/lint";
 
 /**
  * 서버의 린트 설정.
@@ -8,6 +8,12 @@ import ops from "ops/lint";
  */
 export default [
   ...ops.configs.base,
+  {
+    // **공개 면에 문서가 필수다**(→ ADR 0004). 위반이 0이라 여기서 켠다.
+    files: ["src/**/*.ts"],
+    rules: { "jsdoc/require-jsdoc": requireJsdoc },
+  },
+
   {
     files: ["src/**/*.ts", "*.config.ts", "build.ts"],
     rules: {

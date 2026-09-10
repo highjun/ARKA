@@ -13,4 +13,5 @@ export interface IWorkspace {
   readonly name: string;
 }
 
+/** `root`는 이미 `realpath`를 거친 절대경로여야 한다 — 여기서 다시 풀지 않는다. */
 export const createWorkspace = (root: string): IWorkspace => ({ root, name: path.basename(root) || root });

@@ -1,5 +1,5 @@
-import { createRuleTester } from "./ruleTester";
-import { maxCommentLines } from "./maxCommentLines";
+import { createRuleTester } from "./ruleTester.ts";
+import { maxCommentLines } from "./maxCommentLines.ts";
 
 const lines = (n: number, text = "설명"): string =>
   Array.from({ length: n }, (_, i) => `// ${text} ${String(i)}`).join("\n");

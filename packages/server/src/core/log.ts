@@ -5,9 +5,13 @@
  * 로그 수집기(docker logs, journald)가 그대로 파싱한다.
  */
 
+/** `debug`는 두지 않는다 — 끄고 켤 장치가 없으면 결국 아무도 안 읽는다. */
 export type LogLevel = "info" | "warn" | "error";
+
+/** JSON 한 줄에 그대로 펼쳐진다. 키가 겹치면 뒤가 이긴다. */
 export type LogFields = Readonly<Record<string, unknown>>;
 
+/** 첫 인자는 **사건 이름**이지 문장이 아니다 — 수집기가 그걸로 묶는다. */
 export interface Logger {
   info(event: string, fields?: LogFields): void;
   warn(event: string, fields?: LogFields): void;
@@ -25,6 +29,7 @@ export const serializeError = (error: unknown): LogFields => {
   return { value: String(error) };
 };
 
+/** `write`와 `now`를 받는 이유는 테스트가 출력과 시각을 붙잡기 위해서다. */
 export const createLogger = (write: (line: string) => void, now: () => Date = () => new Date()): Logger => {
   const emit = (level: LogLevel, event: string, fields: LogFields | undefined): void => {
     write(`${JSON.stringify({ time: now().toISOString(), level, event, ...fields })}\n`);

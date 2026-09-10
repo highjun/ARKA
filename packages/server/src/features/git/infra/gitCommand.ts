@@ -5,10 +5,12 @@ import { GitError } from "../domain/errors";
 const TIMEOUT_MS = 30_000;
 const MAX_OUTPUT = 16 * 1024 * 1024;
 
+/** 한 번의 git 호출에 붙는 선택지. */
 export type GitRunOptions = {
   /** 이 종료 코드는 실패가 아니다 — `diff --no-index`는 차이가 있으면 1로 끝난다. */
   readonly okExitCodes?: readonly number[];
 };
+/** git을 부르는 유일한 통로. 이 타입을 바꿔 끼우면 테스트가 실제 git 없이 돈다. */
 export type GitRunner = (args: readonly string[], options?: GitRunOptions) => Promise<string>;
 
 /**

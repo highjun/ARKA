@@ -95,16 +95,19 @@ export const diff = async (git: GitRunner, path: string, staged: boolean): Promi
   return git(staged ? ["diff", "--cached", "--", path] : ["diff", "--", path]);
 };
 
+/** `add -A`라 지워진 파일의 삭제도 함께 올린다. */
 export const stage = async (git: GitRunner, paths: readonly string[]): Promise<string> => {
   await ensureRepository(git);
   return git(["add", "-A", "--", ...paths]);
 };
 
+/** 작업 트리는 건드리지 않는다 — 인덱스에서만 뺀다. */
 export const unstage = async (git: GitRunner, paths: readonly string[]): Promise<string> => {
   await ensureRepository(git);
   return git(["reset", "-q", "--", ...paths]);
 };
 
+/** 스테이지가 비어 있으면 `NothingToCommit`으로 던진다 — 빈 커밋을 만들지 않는다. */
 export const commit = async (git: GitRunner, message: string): Promise<string> => {
   await ensureRepository(git);
   const staged = await git(["diff", "--cached", "--name-only"]);
