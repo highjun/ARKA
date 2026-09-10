@@ -42,7 +42,7 @@ jobs:
         run: |
           # 미리보기는 호스트 이름이 다시 쓰이지 않으므로 Access 앱까지 지운다 —
           # 실배포와 반대 판단이다(거기서는 남겨야 다음 배포까지 무방비가 되지 않는다).
-          pnpm --filter ops deploy down "${{ steps.id.outputs.name }}" --purge --remove-access
+          node ops/deploy/cli.ts down "${{ steps.id.outputs.name }}" --purge --remove-access
           rm -rf "$(dirname "${{ steps.id.outputs.workspace }}")"
 
       - name: 동시에 떠 있는 수를 센다
@@ -73,7 +73,7 @@ jobs:
         env:
           ADE_PREVIEW_PR: ${{ github.event.pull_request.number }}
           ADE_PREVIEW_WORKSPACE: ${{ steps.id.outputs.workspace }}
-        run: pnpm --filter ops deploy up ops/deploy/preview.deploy.ts
+        run: node ops/deploy/cli.ts up ops/deploy/preview.deploy.ts
 
       - name: 실패하면 로그를 남긴다
         if: failure() && github.event.action != 'closed'
