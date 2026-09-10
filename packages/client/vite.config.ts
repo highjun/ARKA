@@ -10,8 +10,6 @@ export default defineConfig({
   // 진입점(`index.html`)이 `src/workbench/`에 산다 — 셸을 띄우는 것은 workbench의 일이다.
   // vite는 `index.html`을 root에서 찾으므로 root가 따라간다.
   root: path.join(clientRoot, "src/workbench"),
-  // root가 옮겨가면 `public/`도 그 아래에서 찾는다 — 패키지 루트로 되돌린다.
-  publicDir: path.join(clientRoot, "public"),
   plugins: [
     react(),
     // 설치 가능한 PWA(→ ADR 0018). Service Worker 파일명은 `app-sw.js`다 — `/sw.js`는 이 호스트명에

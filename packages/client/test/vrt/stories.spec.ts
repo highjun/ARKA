@@ -27,7 +27,7 @@ test("스토리가 하나는 있다", () => {
 
 for (const id of storyIds) {
   test(id, async ({ page }, testInfo) => {
-    // 기준 이미지는 **검토에서 그 스토리를 Accept할 때** 만든다(`pnpm run vrt:update`). 그때까지는
+    // 기준 이미지는 **검토에서 그 스토리를 Accept할 때** 만든다(`pnpm --filter client vrt:update`). 그때까지는
     // 비교할 기준이 없는 것이 정상이라 실패가 아니라 건너뛴다 — 아직 아무도 안 본 그림을 기준으로
     // 삼으면 "검토 안 함"이 "승인됨"으로 기록된다. VRT가 잡으려는 것은 승인된 뒤의 변형이다.
     //

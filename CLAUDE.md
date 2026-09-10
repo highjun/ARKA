@@ -22,7 +22,7 @@ pnpm run check      라운드마다
 pnpm run verify     내보내기 전에
 ```
 
-`check`는 typecheck → lint → lint:css → lint:config → test 순서다. 앞에서 걸리면 뒤를 안 돌린다.
+`check`는 typecheck → lint → lint:config → test 순서다. `lint`는 각 패키지의 `lint`를 부르고, client의 것은 ESLint에 이어 stylelint까지 돌린다. 앞에서 걸리면 뒤를 안 돌린다.
 
 `verify`는 `check` + 빌드 + E2E + VRT + Docker 경계 스모크다. **CI가 없으므로 이것이 유일한 관문이다** — 특히 `ops/deploy/smoke.sh`가 빈 컨테이너에서 `pnpm install --frozen-lockfile`부터 다시 하므로 "내 기계에서만 되는 것"을 잡는다. 몇 분 걸리니 라운드마다 돌리지 않는다.
 

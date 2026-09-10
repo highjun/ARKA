@@ -170,7 +170,7 @@
 - **`model/`은 도메인 타입·규칙(순수 로직)과 `infra/`가 구현할 인터페이스 선언까지다.** React·fetch·window·전역 상태를 런타임으로 알지 않는다.
 - **`view/`가 부르는 훅은 `useViewModel` 하나뿐이다.** 로컬 상태가 필요하면 ViewModel로 옮긴다. DI 접근(`useAppContext`·`resolve`)도 하지 않는다.
 - 위 두 줄은 `ops/eslint-rules/`와 각 패키지의 `eslint.config.ts`가 강제한다 — `model/`의 상태 라이브러리·React import, `model/`·`viewmodel/`의 `fetch`·`window`·`document` 전역, `view/`의 `useViewModel` 외 훅(`React.useState()` 형태 포함)을 잡는다. 슬라이스끼리의 import는 `arka/slices-are-siblings`가 잡는다. 규칙마다 `ops/eslint-rules/*.test.ts`에 valid/invalid fixture가 있다.
-- CSS는 `stylelint`(`pnpm run lint:css`)가 본다 — 색은 Primer 토큰만, hex·색 이름·`rgb()` 직접 지정 금지. → [ADR 0006](adr/0006-design-system.md)
+- CSS는 `stylelint`가 본다 — client의 `lint`가 ESLint에 이어 돌린다. — 색은 Primer 토큰만, hex·색 이름·`rgb()` 직접 지정 금지. → [ADR 0006](adr/0006-design-system.md)
 
 ## 테스트
 
@@ -185,7 +185,7 @@
     - `shared/components/`와 슬라이스의 `component/`는 **전부** 스토리를 갖는다.
     - `view/`는 **조합이 드러나는 것만** 갖는다 — 화면 한 구역을 실제로 채우는 view. 컴포넌트 하나에 값을 꽂는 얇은 바인딩은 그 컴포넌트 스토리가 이미 같은 그림을 덮는다. 대상 목록은 `.storybook/main.ts`에 있다.
 - **E2E** — `test/e2e/*.spec.ts`.
-- **VRT** — 스토리를 순회해 찍는다. `pnpm run vrt`(비교) / `vrt:update`(기준 갱신). **Docker에서만** 생성·비교한다.
+- **VRT** — 스토리를 순회해 찍는다. `pnpm --filter client vrt`(비교) / `vrt:update`(기준 갱신). **Docker에서만** 생성·비교한다.
     - **기준 이미지는 검토에서 그 스토리를 Accept할 때 만든다.** 아직 아무도 안 본 그림을 기준으로 삼으면 "검토 안 함"이 "승인됨"으로 기록된다. VRT가 잡으려는 것은 승인된 뒤의 변형이다.
     - 그래서 기준이 없는 스토리는 **실패가 아니라 건너뜀**이다. 없는 것이 정상인 기간이 있다.
 - **모든 테스트가 자기 패키지 안에 있다.** 자리는 *무엇이 돌리는가*로 갈린다 — 단위·계약·스모크·스토리는 **대상 옆**에 두고(vitest가 소스와 함께 본다), 진짜 브라우저가 돌리는 것만 패키지의 `test/` 아래로 묶는다(`test/e2e/`·`test/vrt/`). 단위 테스트를 소스에서 떼어내는 `tests/` 폴더나 던더 폴더는 쓰지 않는다.
