@@ -5,15 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:storybook": "node .storybook/run.ts dev",
+    "dev:storybook": "storybook dev --no-open",
     "build": "vite build",
-    "build:storybook": "node .storybook/run.ts build",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . && stylelint \"src/**/*.css\"",
+    "lint": "eslint . && stylelint \"**/*.css\"",
     "test": "vitest run",
     "test:e2e": "playwright test -c test/e2e/playwright.config.ts",
-    "test:vrt": "bash test/vrt/run.sh",
-    "test:vrt:update": "bash test/vrt/run.sh --update-snapshots"
+    "test:vrt": "node test/vrt/run.ts"
   },
   "dependencies": {
     "@codemirror/commands": "^6.11.0",

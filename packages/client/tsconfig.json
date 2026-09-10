@@ -10,7 +10,10 @@
     // 2026-09-10 실측: `src/`에서 `process.env`를 써도 통과한다. 브라우저 패키지에 그게 보이면
     // 안 되지만 여기서 막을 수단이 없다 — 린트(`no-restricted-globals`)의 일이다.
     "types": ["vitest/globals"],
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    // `test/vrt/run.ts`를 Node가 직접 돌린다 — 상대 import에 확장자가 필요한데 TS는 기본적으로
+    // `.ts`를 거부한다(TS5097). `noEmit`이라 켜도 된다.
+    "allowImportingTsExtensions": true
   },
   // 이 패키지의 TypeScript를 전부 본다. 여기 없으면 타입 검사가 그 파일을 아예 안 본다.
   //

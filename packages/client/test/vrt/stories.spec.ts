@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { expect, test } from "@playwright/test";
-import output from "../../output.json" with { type: "json" };
+import { STORYBOOK_STATIC } from "./vrt.config.ts";
 
 /**
  * 스토리 목록을 빌드된 `index.json`에서 읽는다 — **스토리를 추가하면 VRT가 저절로 따라온다.**
@@ -12,7 +12,7 @@ import output from "../../output.json" with { type: "json" };
  */
 type StorybookIndex = { readonly entries: Record<string, { readonly type: string }> };
 
-const indexPath = path.resolve(import.meta.dirname, "../..", output.storybook, "index.json");
+const indexPath = path.resolve(import.meta.dirname, "../..", STORYBOOK_STATIC, "index.json");
 const index = JSON.parse(readFileSync(indexPath, "utf8")) as StorybookIndex;
 const storyIds = Object.entries(index.entries)
   .filter(([, entry]) => entry.type === "story")
@@ -28,7 +28,7 @@ test("스토리가 하나는 있다", () => {
 
 for (const id of storyIds) {
   test(id, async ({ page }, testInfo) => {
-    // 기준 이미지는 **검토에서 그 스토리를 Accept할 때** 만든다(`pnpm --filter client test:vrt:update`). 그때까지는
+    // 기준 이미지는 **검토에서 그 스토리를 Accept할 때** 만든다(`test:vrt -g "<스토리 id>" --update-snapshots`). 그때까지는
     // 비교할 기준이 없는 것이 정상이라 실패가 아니라 건너뛴다 — 아직 아무도 안 본 그림을 기준으로
     // 삼으면 "검토 안 함"이 "승인됨"으로 기록된다. VRT가 잡으려는 것은 승인된 뒤의 변형이다.
     //
