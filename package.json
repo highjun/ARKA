@@ -19,6 +19,7 @@
     "simple-git-hooks": "^2.14.0"
   },
   "simple-git-hooks": {
-    "commit-msg": "node ops/hooks/commitMsg.ts $1"
+    "commit-msg": "node ops/hooks/commitMsg.ts $1",
+    "pre-push": "node ops/hooks/prePush.ts"
   }
 }
