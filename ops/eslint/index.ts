@@ -1,4 +1,5 @@
 import js from "@eslint/js";
+import json from "@eslint/json";
 import importX from "eslint-plugin-import-x";
 import tseslint from "typescript-eslint";
 import type { Linter } from "eslint";
@@ -34,7 +35,29 @@ const base: Linter.Config[] = [
     rules: { "import-x/no-extraneous-dependencies": "error" },
   },
 
-  js.configs.recommended as Linter.Config,
+  {
+    // **각 패키지의 `tsconfig.json`을 검사한다.** 이 블록이 없으면 `eslint .`은 `.json`을 아예
+    // 집지 않는다. 주석이 있으므로 언어는 `json/jsonc`다.
+    files: ["**/tsconfig*.json"],
+    plugins: { json },
+    language: "json/jsonc",
+    rules: {
+      // `paths` 별칭 금지(→ ADR 0001). tsc만 아는 별칭이라 타입 검사는 통과하는데 vitest·node가
+      // 모듈을 못 찾는다. 검사할 목록을 따로 두지 않는다 — 자기 tsconfig는 자기 린트가 본다.
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: 'Member[name.value="paths"]',
+          message: "tsconfig paths 별칭을 쓰지 않습니다 — package.json의 imports 필드를 쓰세요.",
+        },
+      ],
+    },
+  } as unknown as Linter.Config,
+
+  // **`files`로 감싼다.** 원래 `js.configs.recommended`에는 `files`가 없어 *모든* 파일에 붙는데,
+  // 위에서 JSON을 대상에 넣었으므로 `no-irregular-whitespace` 같은 JS 규칙이 JSON AST에 걸려
+  // `sourceCode.getAllComments is not a function`으로 죽는다(ESLint 10에서 실측).
+  { ...(js.configs.recommended as Linter.Config), files: ["**/*.{ts,tsx,js,mjs,cjs}"] },
 
   {
     files: ["**/*.{ts,tsx}"],
