@@ -23,6 +23,7 @@ export interface KeybindingDescriptor extends Descriptor {
   readonly when?: (ctx: ContextRegistry) => boolean;
 }
 
+/** 같은 키에 `when`이 다른 등록을 여럿 둘 수 있다 — 조회는 조건을 만족하는 것만 고른다. */
 export type KeybindingRegistry = Registry<KeybindingDescriptor>;
 
 /**

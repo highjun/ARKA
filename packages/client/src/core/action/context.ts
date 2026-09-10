@@ -15,4 +15,5 @@ export interface ContextDescriptor extends Descriptor {
   readonly atom: ReadableAtom<unknown>;
 }
 
+/** 지금 상황을 나타내는 atom들의 모음 — `when` 조건이 여기서 값을 읽는다. */
 export type ContextRegistry = Registry<ContextDescriptor>;

@@ -29,6 +29,7 @@ export interface MenuItemDescriptor extends Descriptor {
   readonly order?: number;
 }
 
+/** 한 메뉴의 항목들은 `group` 사전순, 그 안에서 `order` 순으로 나온다. */
 export type MenuRegistry = Registry<MenuItemDescriptor>;
 
 /**

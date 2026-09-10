@@ -12,6 +12,7 @@ import type {
  * "Action"보다 "Command"가 이 앱에서 부르기로 한 이름이라 여기서만 바꿔 부른다.
  */
 export type CommandDescriptor<TContext = unknown> = ActionDescriptor<TContext>;
+/** 등록된 커맨드 전부. 팔레트가 이 목록을 그대로 그린다. */
 export type CommandRegistry<TContext = unknown> = ActionRegistry<TContext>;
 
 /**
@@ -19,10 +20,15 @@ export type CommandRegistry<TContext = unknown> = ActionRegistry<TContext>;
  * (`arka/model-type-only`) 소스 없는 `export type { X }` 재export 목록 대신 별칭으로 하나씩 편다.
  */
 export type ContextDescriptor = CoreContextDescriptor;
+/** 지금 상황을 나타내는 atom들 — `when` 조건이 여기서 값을 읽는다. */
 export type ContextRegistry = CoreContextRegistry;
+/** 키 조합 하나와 그것이 부를 커맨드. `when`으로 언제 듣는지 정한다. */
 export type KeybindingDescriptor = CoreKeybindingDescriptor;
+/** 같은 키에 `when`이 다른 등록을 여럿 둘 수 있다. */
 export type KeybindingRegistry = CoreKeybindingRegistry;
+/** 어느 메뉴에 어떤 커맨드를 어느 자리로 기여할지. */
 export type MenuItemDescriptor = CoreMenuItemDescriptor;
+/** 한 메뉴의 항목들은 `group` 사전순, 그 안에서 `order` 순으로 나온다. */
 export type MenuRegistry = CoreMenuRegistry;
 
 /**
@@ -34,6 +40,7 @@ export type MenuRegistry = CoreMenuRegistry;
  * 한 번 채워진다.
  */
 export const CommandCenterRegistryToken = createToken<ICommandCenterRegistry>('commandCenterRegistry');
+/** 넷을 한데 쥔 조립부의 창구. 등록은 부팅 때 한 번, 조회는 화면이 필요할 때마다. */
 export interface ICommandCenterRegistry {
   readonly commandRegistry: CommandRegistry;
   readonly contextRegistry: ContextRegistry;

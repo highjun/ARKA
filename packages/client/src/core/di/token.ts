@@ -13,6 +13,7 @@ export interface Token<T> {
   readonly [TOKEN_TYPE]: T;
 }
 
+/** `description`은 사람이 읽는 이름일 뿐 **동일성의 근거가 아니다** — 토큰은 참조로 비교된다. */
 export function createToken<T>(description: string): Token<T> {
   return { description } as Token<T>;
 }

@@ -8,6 +8,7 @@ export interface Descriptor {
   readonly id: string;
 }
 
+/** 패턴 id(`/workspace/:fileId`)로 찾았을 때, 자리표시자에 실제로 들어온 값이 `params`에 온다. */
 export type DescriptorMatch<TDescriptor> = {
   readonly descriptor: TDescriptor;
   readonly params: Readonly<Record<string, string>>;

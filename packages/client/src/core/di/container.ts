@@ -6,13 +6,16 @@ export interface Disposable {
   dispose(): void | Promise<void>;
 }
 
+/** `singleton`은 앱에 하나, `scoped`는 스코프마다 하나, `transient`는 조회할 때마다 새로. */
 export type Lifetime = "singleton" | "scoped" | "transient";
 
+/** 무엇을 어떻게 만들지의 한 쌍. `create`는 컨테이너를 받아 자기 의존을 스스로 조회한다. */
 export interface Provider<T> {
   readonly lifetime: Lifetime;
   create(container: Container): T;
 }
 
+/** 조회는 등록된 스코프에서 시작해 부모로 거슬러 올라간다. */
 export interface Container {
   register<T>(token: Token<T>, provider: Provider<T>): void;
   resolve<T>(token: Token<T>): T;
@@ -27,18 +30,22 @@ export function createContainer(name = "root"): Container {
   return new ContainerImpl(name, undefined);
 }
 
+/** 등록한 스코프에 한 번만 만들어 붙잡는다. 루트에 등록하면 앱에 하나다. */
 export function singleton<T>(create: (c: Container) => T): Provider<T> {
   return { lifetime: "singleton", create };
 }
 
+/** **조회한** 스코프마다 따로 만든다 — 등록한 스코프가 아니다. 스코프가 정리되면 함께 dispose된다. */
 export function scoped<T>(create: (c: Container) => T): Provider<T> {
   return { lifetime: "scoped", create };
 }
 
+/** 조회할 때마다 새로 만든다. 컨테이너가 붙잡지 않으므로 **dispose도 안 부른다.** */
 export function transient<T>(create: (c: Container) => T): Provider<T> {
   return { lifetime: "transient", create };
 }
 
+/** 이미 만들어 둔 것을 그대로 등록한다 — 설정 객체나 밖에서 만든 자원에 쓴다. */
 export function value<T>(instance: T): Provider<T> {
   return { lifetime: "singleton", create: () => instance };
 }

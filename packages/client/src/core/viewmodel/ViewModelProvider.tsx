@@ -4,6 +4,7 @@ import { CoreError } from "#core/errors";
 
 /** `useAppContext`가 `ViewModelProvider` 트리 밖에서 불렸을 때. `CoreError` 계열이라 소비자가 다른 에러와 한 번에 구분해서 잡을 수 있다. */
 export class MissingViewModelProviderError extends CoreError {
+  /** 인자가 없다 — 원인이 하나뿐이라 더 담을 것이 없다. */
   constructor() {
     super("useAppContext must be used within a ViewModelProvider.");
   }

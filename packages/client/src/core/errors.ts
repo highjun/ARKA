@@ -8,6 +8,7 @@
  * 우리가 만들지 않은 것을 우리 이름으로 감싸지 않는다.
  */
 export class CoreError extends Error {
+  /** `name`은 `new.target`에서 온다 — 하위 클래스가 자기 이름을 따로 적지 않아도 된다. */
   constructor(message: string) {
     super(message);
     this.name = new.target.name;

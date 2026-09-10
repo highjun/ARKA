@@ -7,6 +7,7 @@ import { CoreError } from '#core/errors';
  */
 export class DescriptorNotFoundError extends CoreError {
   readonly id: string;
+  /** `id`를 필드로도 남긴다 — 잡는 쪽이 메시지를 다시 파싱하지 않게. */
   constructor(id: string) {
     super(`No descriptor registered for id "${id}".`);
     this.id = id;
@@ -16,6 +17,7 @@ export class DescriptorNotFoundError extends CoreError {
 /** `Registry.add()`가 이미 등록된 id로 다시 불렸을 때 — 덮어쓰기를 허용하지 않는다. */
 export class DuplicateDescriptorError extends CoreError {
   readonly id: string;
+  /** `id`를 필드로도 남긴다 — 잡는 쪽이 메시지를 다시 파싱하지 않게. */
   constructor(id: string) {
     super(`A descriptor is already registered for id "${id}".`);
     this.id = id;

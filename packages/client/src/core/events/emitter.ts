@@ -1,5 +1,6 @@
 import type { Disposable } from "#core/di";
 
+/** 돌려주는 값은 무시된다 — 비동기로 하고 싶으면 리스너 안에서 스스로 띄운다. */
 export type Listener<T> = (value: T) => void;
 
 /**
@@ -32,6 +33,7 @@ export class Emitter<T = void> {
     }
   }
 
+  /** 남은 구독을 전부 끊는다. 이 뒤에 `fire`를 불러도 아무도 안 듣는다. */
   dispose(): void {
     this.#listeners.clear();
   }

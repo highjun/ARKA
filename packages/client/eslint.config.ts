@@ -1,11 +1,18 @@
 import reactHooks from "eslint-plugin-react-hooks";
-import ops from "ops/lint";
+import ops, { requireJsdoc } from "ops/lint";
 
 /**
  * 클라이언트의 린트 설정.
  */
 export default [
   ...ops.configs.base,
+
+  {
+    // **공개 면에 문서가 필수다**(→ ADR 0004). 계층마다 위반이 0이 되는 대로 이 목록을 넓힌다 —
+    // 남은 곳은 `extensions`(185) · `workbench`(98) · `shared`(62)다.
+    files: ["src/core/**/*.{ts,tsx}"],
+    rules: { "jsdoc/require-jsdoc": requireJsdoc },
+  },
 
   {
     // 훅 규칙. 의존성 배열을 일부러 좁힌 자리(CodeMirror 에디터)를 eslint-disable로 여는데,

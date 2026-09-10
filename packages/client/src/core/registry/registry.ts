@@ -75,5 +75,6 @@ class DescriptorRegistry<TDescriptor extends Descriptor> implements Registry<TDe
   }
 }
 
+/** 빈 채로 시작한다. 등록 순서는 보존되지만 조회 순서를 보장하지는 않는다. */
 export const createRegistry = <TDescriptor extends Descriptor>(): Registry<TDescriptor> =>
   new DescriptorRegistry<TDescriptor>();

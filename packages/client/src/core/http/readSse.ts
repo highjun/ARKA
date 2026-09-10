@@ -9,12 +9,17 @@
  */
 export const DEFAULT_IDLE_TIMEOUT_MS = 45_000;
 
+/** `signal`은 필수다 — 끊을 수 없는 스트림을 열지 않는다. */
 export type SseOptions = {
   readonly headers?: Record<string, string>;
   readonly signal: AbortSignal;
   readonly idleTimeoutMs?: number;
 };
 
+/**
+ * `data:` 줄만 골라 `onData`로 넘긴다 — 이벤트 이름과 주석 줄은 버린다.
+ * 조용한 채로 `idleTimeoutMs`가 지나면 던진다: 끊긴 연결은 열린 채로 남기 때문이다.
+ */
 export const readSse = async (url: string, { headers, signal, idleTimeoutMs = DEFAULT_IDLE_TIMEOUT_MS }: SseOptions, onData: (data: string) => void): Promise<void> => {
   const response = await fetch(url, { headers, signal });
   if (!response.ok) throw new Error(`stream failed (${String(response.status)})`);
