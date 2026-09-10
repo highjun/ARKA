@@ -7,16 +7,14 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:smoke": "bash deploy/smoke.sh",
-    "test:smoke:anon": "bash deploy/anon-smoke.sh",
+    "test:smoke": "node deploy/smoke.ts",
+    "test:smoke:anon": "node deploy/anonSmoke.ts",
     "check": "node pipeline/check.ts",
     "verify": "node pipeline/verify.ts",
-    "start": "node pipeline/start.ts",
-    "task": "node task.ts"
+    "task": "node tasks/main.ts"
   },
   "exports": {
-    "./lint": "./lint/index.ts",
-    "./output.json": "./output.json"
+    "./lint": "./lint/index.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

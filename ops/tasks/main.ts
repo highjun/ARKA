@@ -6,7 +6,7 @@ import path from "node:path";
  * 되풀이해 겪은 병(유지하는 목록이 낡는다)의 해독제라서 도구를 두는 것이지, 도구 자체가
  * 목적이 아니다. 파일은 그냥 YAML 머리말이 붙은 마크다운이라 `grep`으로도 다 된다.
  */
-const DIR = path.resolve(import.meta.dirname, "../docs/tasks");
+const DIR = path.resolve(import.meta.dirname, "../../docs/tasks");
 const STATUSES = ["To Do", "In Progress", "Done"] as const;
 
 type Task = { readonly num: number; readonly title: string; readonly status: string; readonly priority: string; readonly labels: readonly string[] };

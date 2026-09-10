@@ -7,8 +7,6 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/contracts/package.json packages/contracts/
 COPY packages/client/package.json packages/client/
 COPY packages/server/package.json packages/server/
-# ops도 워크스페이스 멤버다. 빌드가 `ops/output.json`(산출물 자리)을 읽으므로 링크가 있어야 한다.
-COPY ops/package.json ops/
 RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm run build

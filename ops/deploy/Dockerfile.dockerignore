@@ -12,7 +12,3 @@ docs
 test
 *.md
 ops
-# ops는 배포되지 않는 작업장이라 이미지에 넣지 않는다. 다만 **빌드 단계**가 둘을 읽는다 —
-# 워크스페이스 링크(package.json)와 산출물이 놓일 자리(output.json). 실행 이미지에는 안 들어간다.
-!ops/package.json
-!ops/output.json

@@ -12,7 +12,6 @@
     "lint": "pnpm -r run lint",
     "test": "pnpm -r run test",
     "build": "pnpm -r run build",
-    "task": "pnpm --filter ops run task",
-    "start": "pnpm --filter ops run start"
+    "task": "pnpm --filter ops run task"
   }
 }

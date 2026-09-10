@@ -2,12 +2,13 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
+import { FORBIDDEN_KEY, FORBIDDEN_MESSAGE } from "./tsconfigRules.ts";
 
 /**
- * **저장소 루트의** tsconfig에서 `paths` 별칭을 금지한다(→ ADR 0001).
+ * **린트가 닿지 못하는 저장소 루트의 설정**을 본다.
  *
- * tsc만 아는 별칭이라 타입 검사는 통과하는데 vitest·node가 모듈을 못 찾는다. 루트의 것은
- * 세 패키지가 전부 `extends` 하므로 가장 파급이 크다.
+ * 루트의 tsconfig는 세 패키지가 전부 `extends` 하므로 파급이 가장 큰데, 어느 패키지의
+ * `eslint .`에도 안 잡힌다. 금지하는 것이 무엇인지는 `tsconfigRules.ts`가 든다.
  *
  * **각 패키지의 tsconfig는 그 패키지의 ESLint가 본다**(`ops/lint`의 `json/jsonc` 블록).
  * 여기가 루트만 맡는 것은 ESLint가 닿을 수 없어서다 — ESLint 10의 base path가 설정 파일이
@@ -30,17 +31,14 @@ const compilerOptionsOf = (name: string): Record<string, unknown> => {
   return ((config as Record<string, unknown> | undefined)?.["compilerOptions"] ?? {}) as Record<string, unknown>;
 };
 
-describe("루트 tsconfig", () => {
+describe("루트 설정", () => {
   const names = rootTsconfigs();
 
   it("루트에서 tsconfig를 찾는다 — 못 찾으면 이 검사는 죽은 채로 초록이다", () => {
     expect(names).not.toHaveLength(0);
   });
 
-  it.each(names)("%s에 paths 별칭이 없다", (name) => {
-    expect(
-      compilerOptionsOf(name)["paths"],
-      "tsconfig paths 별칭을 쓰지 않습니다 — package.json의 imports 필드를 쓰세요",
-    ).toBeUndefined();
+  it.each(names)(`%s에 ${FORBIDDEN_KEY} 별칭이 없다`, (name) => {
+    expect(compilerOptionsOf(name)[FORBIDDEN_KEY], FORBIDDEN_MESSAGE).toBeUndefined();
   });
 });

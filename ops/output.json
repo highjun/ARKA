@@ -1,5 +1,0 @@
-{
-  "clientDir": ".output/dist/client",
-  "serverDir": ".output/dist/server",
-  "serverEntry": ".output/dist/server/index.js"
-}

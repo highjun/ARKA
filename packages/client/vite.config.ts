@@ -1,12 +1,19 @@
 import path from "node:path";
 
-import output from "ops/output.json" with { type: "json" };
-
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import { defineConfig } from "vitest/config";
 
 const clientRoot = path.resolve(import.meta.dirname);
+
+/**
+ * 빌드된 클라이언트가 놓이는 자리(저장소 루트 기준).
+ *
+ * **여기가 이 값의 유일한 출처다.** 서버가 이것을 정적으로 서빙하므로 E2E가 같은 값을
+ * `ADE_CLIENT_ROOT`로 넘긴다(`test/e2e/playwright.config.ts`). 이미지 안에서는 `/app/dist/client`라
+ * 다르다 — `ops/deploy/Dockerfile`이 `.output/dist`를 `dist`로 펴기 때문이다.
+ */
+export const CLIENT_DIST = ".output/dist/client";
 
 export default defineConfig({
   // 진입점(`index.html`)이 `src/workbench/`에 산다 — 셸을 띄우는 것은 workbench의 일이다.
@@ -49,10 +56,9 @@ export default defineConfig({
       devOptions: { enabled: false },
     }),
   ],
-  // 배포 단위는 `.output/dist/` 하나다(→ ADR 0002). 자리는 `ops/output.json`이 정한다 — 서버
-  // 번들·E2E·`start`가 같은 값을 봐야 해서다.
+  // 배포 단위는 `.output/dist/` 하나다(→ ADR 0002) — 서버 번들과 나란히 놓인다.
   build: {
-    outDir: path.join(clientRoot, "../..", output.clientDir),
+    outDir: path.join(clientRoot, "../..", CLIENT_DIST),
     emptyOutDir: true,
     // 벤더를 청크로 나눈다 — 앱 코드가 바뀌어도 CodeMirror·Primer·React 청크는 캐시에 남고, PWA 프리캐시
     // 항목 하나가 2MB를 넘지 않는다.

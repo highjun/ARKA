@@ -4,6 +4,7 @@ import importX from "eslint-plugin-import-x";
 import tseslint from "typescript-eslint";
 import type { Linter } from "eslint";
 import { arkaRules } from "./rules/index.ts";
+import { FORBIDDEN_KEY, FORBIDDEN_MESSAGE } from "./tsconfigRules.ts";
 
 /**
  * 이 저장소의 린트 플러그인. 커스텀 규칙과 **모든 패키지가 공유하는 바탕**을 함께 낸다.
@@ -42,14 +43,11 @@ const base: Linter.Config[] = [
     plugins: { json },
     language: "json/jsonc",
     rules: {
-      // `paths` 별칭 금지(→ ADR 0001). tsc만 아는 별칭이라 타입 검사는 통과하는데 vitest·node가
-      // 모듈을 못 찾는다. 검사할 목록을 따로 두지 않는다 — 자기 tsconfig는 자기 린트가 본다.
+      // 검사할 목록을 따로 두지 않는다 — 자기 tsconfig는 자기 린트가 본다. 금지 키와 메시지는
+      // `tsconfigRules.ts`가 든다(루트를 보는 `rootConfig.test.ts`와 같은 것을 읽어야 한다).
       "no-restricted-syntax": [
         "error",
-        {
-          selector: 'Member[name.value="paths"]',
-          message: "tsconfig paths 별칭을 쓰지 않습니다 — package.json의 imports 필드를 쓰세요.",
-        },
+        { selector: `Member[name.value="${FORBIDDEN_KEY}"]`, message: FORBIDDEN_MESSAGE },
       ],
     },
   } as unknown as Linter.Config,
