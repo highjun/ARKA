@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseDownFlags } from "./cli.ts";
+import { parseArgs, parseDownFlags } from "./cli.ts";
 
 /**
  * 플래그 조합만 본다. 실제 배포는 CLI를 손으로 돌려 확인한다.
@@ -30,5 +30,25 @@ describe("down 플래그", () => {
 
   it("개별 플래그만으로도 켜진다 — purge 없이 DNS만 지울 수 있다", () => {
     expect(parseDownFlags(["--remove-dns"])).toMatchObject({ dns: true, tunnel: false, image: false });
+  });
+});
+
+describe("인자 가르기 — 위치로 가르면 대상 없는 명령이 깨진다", () => {
+  it("대상이 없는 명령에서 --dry-run이 대상으로 먹히지 않는다", () => {
+    expect(parseArgs(["sweep", "--dry-run"])).toEqual({ command: "sweep", target: undefined, flags: ["--dry-run"] });
+  });
+
+  it("대상이 있으면 그대로 읽는다", () => {
+    expect(parseArgs(["up", "ops/deploy/ade.deploy.ts", "--dry-run"]))
+      .toEqual({ command: "up", target: "ops/deploy/ade.deploy.ts", flags: ["--dry-run"] });
+  });
+
+  it("플래그가 대상 앞에 와도 된다", () => {
+    expect(parseArgs(["down", "--purge", "pr-12"]))
+      .toMatchObject({ command: "down", target: "pr-12", flags: ["--purge"] });
+  });
+
+  it("빈 인자에 죽지 않는다", () => {
+    expect(parseArgs([])).toEqual({ command: undefined, target: undefined, flags: [] });
   });
 });

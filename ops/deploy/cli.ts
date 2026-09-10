@@ -4,6 +4,7 @@ import { DEFAULT, PURGE, down } from "./down.ts";
 import { nodePorts, nodeFs } from "./nodePorts.ts";
 import { parseEnvFile, up } from "./up.ts";
 import { formatStatus, status } from "./status.ts";
+import { pickAbandoned, sweep } from "./sweep.ts";
 import { DeploySpec } from "./spec.ts";
 import type { DownOptions } from "./down.ts";
 
@@ -17,6 +18,7 @@ import type { DownOptions } from "./down.ts";
  * node ops/deploy/cli.ts up ops/deploy/ade.deploy.ts [--dry-run]
  * node ops/deploy/cli.ts down ade [--purge] [--remove-access] [--dry-run]
  * node ops/deploy/cli.ts status ade
+ * node ops/deploy/cli.ts sweep [--dry-run]
  * ```
  */
 
@@ -30,6 +32,9 @@ const CREDENTIALS_DIR = process.env["ADE_CREDENTIALS_DIR"] ?? path.join(os.homed
 const CLOUDFLARE_ENV = process.env["ADE_CLOUDFLARE_ENV"] ?? path.join(os.homedir(), "ARKA/secure/env/cloudflare.env");
 
 const ZONE = process.env["ADE_ZONE"] ?? "sangjun.dev";
+
+/** PR 상태를 물어볼 저장소. */
+const REPO = process.env["ADE_REPO"] ?? "highjun/ARKASHIC";
 
 /**
  * 토큰을 파일에서 읽는다. **환경변수를 먼저 보지 않는다** — 셸 이력에 남는 경로를 열어 두면
@@ -66,23 +71,57 @@ const loadSpec = async (file: string): Promise<DeploySpec> => {
   return DeploySpec.parse(found);
 };
 
+/**
+ * 인자를 명령·대상·플래그로 가른다.
+ *
+ * **위치로 가르지 않는다.** `sweep`처럼 대상이 없는 명령에서 `--dry-run`이 대상 자리로
+ * 먹혀 **dry-run이 조용히 꺼진 적이 있다**(2026-09-11 실측).
+ */
+export const parseArgs = (argv: readonly string[]): { command?: string; target?: string; flags: string[] } => {
+  const positional = argv.filter((arg) => !arg.startsWith("-"));
+  return { command: positional[0], target: positional[1], flags: argv.filter((arg) => arg.startsWith("-")) };
+};
+
 const main = async (): Promise<void> => {
-  const [command, target, ...flags] = process.argv.slice(2);
+  const { command, target, flags } = parseArgs(process.argv.slice(2));
   const dryRun = flags.includes("--dry-run");
   const ports = nodePorts(dryRun);
-  if (target === undefined) throw new Error(`대상이 필요합니다 — 스펙 파일 또는 배포 이름`);
+  /** `sweep`을 뺀 나머지는 대상이 필수다. 여기서 좁혀 두면 아래에서 다시 묻지 않는다. */
+  const required = (): string => {
+    if (target === undefined) throw new Error(`대상이 필요합니다 — 스펙 파일 또는 배포 이름`);
+    return target;
+  };
+
+  if (command === "sweep") {
+    const listed = await ports.exec("docker", ["compose", "ls", "--format", "json"]);
+    const projects = JSON.parse(listed.stdout) as { Name: string }[];
+    // PR 상태는 `gh`에게 묻는다 — 토큰을 하나 더 두지 않는다. 못 물으면 살아 있는 것으로 친다.
+    const open = new Set(
+      (await ports.exec("gh", ["pr", "list", "--repo", REPO, "--state", "open", "--json", "number", "--jq", ".[].number"]))
+        .stdout.split("\n").filter(Boolean).map(Number),
+    );
+    const reachable = (await ports.exec("gh", ["auth", "status"])).code === 0;
+    const swept = await sweep(
+      pickAbandoned(projects, (pr) => (reachable ? open.has(pr) : undefined)),
+      { stateDir: STATE_DIR, credentialsDir: CREDENTIALS_DIR, zone: ZONE, token: readToken() },
+      ports,
+    );
+    console.log(JSON.stringify({ swept }, null, 2));
+    return;
+  }
 
   if (command === "status") {
-    console.log(formatStatus(await status(target, STATE_DIR, ports)));
+    console.log(formatStatus(await status(required(), STATE_DIR, ports)));
     return;
   }
 
   if (command === "up") {
-    const spec = await loadSpec(target);
+    const specFile = required();
+    const spec = await loadSpec(specFile);
     const manifest = await up(
       {
         spec,
-        sourceFile: path.resolve(target),
+        sourceFile: path.resolve(specFile),
         stateDir: STATE_DIR,
         credentialsDir: CREDENTIALS_DIR,
         zone: ZONE,
@@ -99,7 +138,7 @@ const main = async (): Promise<void> => {
   if (command === "down") {
     const options = parseDownFlags(flags);
     const result = await down(
-      { name: target, stateDir: STATE_DIR, credentialsDir: CREDENTIALS_DIR, zone: ZONE, token: readToken() },
+      { name: required(), stateDir: STATE_DIR, credentialsDir: CREDENTIALS_DIR, zone: ZONE, token: readToken() },
       options,
       ports,
     );
@@ -107,7 +146,7 @@ const main = async (): Promise<void> => {
     return;
   }
 
-  throw new Error(`모르는 명령입니다: ${String(command)} — up · down · status 중 하나입니다`);
+  throw new Error(`모르는 명령입니다: ${String(command)} — up · down · status · sweep 중 하나입니다`);
 };
 
 if (process.argv[1] === import.meta.filename) {
