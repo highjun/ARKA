@@ -125,6 +125,7 @@ export const AgentEvent = z.discriminatedUnion("type", [
   SessionArchivedEvent,
 ]);
 export type AgentEvent = z.infer<typeof AgentEvent>;
+/** 판별자만 뽑은 것. 이벤트 본문 없이 종류로만 거를 때 쓴다. */
 export type AgentEventType = AgentEvent["type"];
 
 /**

@@ -10,6 +10,7 @@ RuleTester.describe = describe;
 RuleTester.it = it;
 RuleTester.itOnly = it.only;
 
+/** 케이스마다 새로 만든다 — `RuleTester`는 한 번 `run`하면 재사용을 전제하지 않는다. */
 export const createRuleTester = (): RuleTester =>
   new RuleTester({
     languageOptions: {

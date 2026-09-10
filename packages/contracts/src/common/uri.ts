@@ -55,6 +55,7 @@ export class URI {
     return new URI("file", "", path.startsWith("/") ? path.slice(1) : path);
   }
 
+  /** `Map`·`Set` 키로 쓸 때 이 값을 쓴다 — 같은 자원이면 같은 문자열이 나온다. */
   toString(): string {
     return `${this.scheme}://${this.authority}/${this.path}`;
   }

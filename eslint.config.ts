@@ -3,13 +3,6 @@ import type { Linter } from "eslint";
 
 /**
  * **저장소 루트의 파일을 검사한다.** 패키지는 각자 자기 `eslint.config.ts`가 본다.
- *
- * 이 파일이 루트에 있어야 하는 이유는 ESLint의 base path가 **설정 파일이 있는 디렉터리**이기
- * 때문이다(2026-09-10 실측). `ops/`에 두고 `--config`로 가리켜도 루트 파일은 "outside of base
- * path"로 건너뛴다. `basePath` 설정도 좁히기만 하고 넓히지 못한다.
- *
- * 실행체는 ops의 것을 빌린다 — `pnpm --filter ops run lint:root`. 그래서 루트
- * `devDependencies`는 비어 있는 채로 둔다.
  */
 export default [
   { ignores: ["packages/**", "ops/**", "docs/**", "node_modules/**", ".output/**", ".claude/**"] },

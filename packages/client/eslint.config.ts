@@ -3,12 +3,6 @@ import ops from "ops/lint";
 
 /**
  * 클라이언트의 린트 설정.
- *
- * **구조 규칙이 지금 비어 있다.** 계층 금지(`model/`의 전역, `component/`의 DI, `view/`의 훅…)와
- * 슬라이스 방향을 강제하던 것들은 `docs/legacy/code/`로 옮겨 껐다 — 그 규칙을 낳은 ADR이 아직
- * 새 번호로 옮겨지지 않아서다. 클라이언트 구조 ADR이 재작성될 때 함께 돌아온다.
- *
- * 남은 zone은 [ADR 0001](../../docs/adr/0001-monorepo-pnpm.md)의 것 하나뿐이다.
  */
 export default [
   ...ops.configs.base,
