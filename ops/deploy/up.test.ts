@@ -63,6 +63,12 @@ describe("순서 — DNS를 연 바로 다음에 Access를 붙인다", () => {
     expect(dns).toBeLessThan(compose);
   });
 
+  it("켜면 덮어쓴다 — 승계처럼 사람이 그러기로 정한 자리에서만", async () => {
+    const calls: string[][] = [];
+    await up({ ...input(), overwriteDns: true }, happy(calls));
+    expect(calls.find((c) => c.join(" ").includes("route dns"))).toContain("--overwrite-dns");
+  });
+
   it("DNS를 덮어쓰지 않는다 — 다른 터널이 그 이름을 쓰고 있으면 서야 한다", async () => {
     const calls: string[][] = [];
     await up(input(), happy(calls));

@@ -30,6 +30,12 @@ describe("compose 골격 — 셋 다 실제 사고 하나씩에 대응한다", (
     expect(renderCompose(spec(), ctx({ uid: 1001, gid: 1002 }))).toContain("user: 1001:1002");
   });
 
+  it("앱도 호스트 사용자로 돈다 — root면 워크스페이스에 만드는 파일을 사람이 못 고친다", () => {
+    const out = renderCompose(spec(), ctx({ uid: 1000, gid: 1000 }));
+    const appBlock = out.slice(out.indexOf("  app:"), out.indexOf("  tunnel:"));
+    expect(appBlock).toContain("user: 1000:1000");
+  });
+
   it("앱이 healthy가 된 뒤에 터널이 뜬다", () => {
     expect(renderCompose(spec(), ctx())).toContain("condition: service_healthy");
   });

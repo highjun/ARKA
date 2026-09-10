@@ -27,6 +27,13 @@ export interface UpInput {
   readonly token: string;
   readonly uid: number;
   readonly gid: number;
+  /**
+   * 이미 다른 터널이 쓰는 호스트 이름을 **빼앗는다.**
+   *
+   * 기본은 꺼져 있다 — 남의 서비스를 조용히 가로채는 것이 이 도구가 할 수 있는 가장 나쁜 일이다.
+   * 승계처럼 사람이 그러기로 정한 자리에서만 켠다.
+   */
+  readonly overwriteDns?: boolean;
 }
 
 const LOCK_SUBDIR = ".locks";
@@ -136,9 +143,9 @@ export const up = async (input: UpInput, ports: Ports): Promise<Manifest> => {
     if (ports.dryRun) {
       ports.log(`[dry-run] DNS ${spec.hostname} → 터널 ${tunnelId}`);
     } else {
-      // 덮어쓰기를 켜지 않는다 — 다른 터널이 그 이름을 쓰고 있으면 서야 한다.
-      await routeDns(ports.exec, tunnelId, spec.hostname);
-      ports.log(`DNS ${spec.hostname} → ${tunnelId}`);
+      // 기본은 덮어쓰지 않는다 — 다른 터널이 그 이름을 쓰고 있으면 서야 한다.
+      await routeDns(ports.exec, tunnelId, spec.hostname, input.overwriteDns === true);
+      ports.log(`DNS ${spec.hostname} → ${tunnelId}${input.overwriteDns === true ? " (덮어씀)" : ""}`);
     }
 
     let accessAppId: string | undefined;
