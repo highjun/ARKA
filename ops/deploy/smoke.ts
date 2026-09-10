@@ -52,7 +52,9 @@ const data = mkdtempSync(path.join(tmpdir(), "ade-data-"));
 
 try {
   console.log("# build");
-  docker("build", "-q", "-f", `${REPO_ROOT}/ops/deploy/Dockerfile`, "-t", IMAGE, REPO_ROOT);
+  // **`build.ts`를 통한다** — 직접 `docker build`를 부르면 회수 단계를 비껴가고, 그렇게 쌓인
+  // 중간 이미지가 656개까지 간 적이 있다. 빌드하는 길은 저장소에 하나뿐이어야 한다.
+  spawnSync("node", [`${REPO_ROOT}/ops/deploy/build.ts`, IMAGE], { stdio: "inherit" });
   docker("run", "-d", "--name", NAME,
     "--user", `${String(process.getuid?.() ?? 0)}:${String(process.getgid?.() ?? 0)}`,
     "-p", `127.0.0.1:${String(PORT)}:3000`,
