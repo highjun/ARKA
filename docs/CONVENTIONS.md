@@ -215,4 +215,4 @@ E2E는 `pnpm --filter client test:e2e`로 돌린다. 조립이 맞물리는지�
 - [ ] `pnpm --filter ops check` 통과 (typecheck → lint → test)
 - [ ] 이번 라운드가 한 가지 관심사인가
 - [ ] 스스로 판단한 지점을 신고했는가
-- [ ] 패키지의 `src/` 밖을 건드렸다면 **그것이 이번 라운드의 관심사였는가** → [ADR 0003](adr/0003-approval-outside-src.md)
+- [ ] 패키지의 `src/` 밖을 건드렸다면 **사용자에게 검토를 요청했는가** — 승인받았으면 `--trailer "Reviewed-by-human: <이름>"`으로 커밋한다 → [ADR 0003](adr/0003-approval-outside-src.md)
