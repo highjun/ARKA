@@ -7,6 +7,8 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/contracts/package.json packages/contracts/
 COPY packages/client/package.json packages/client/
 COPY packages/server/package.json packages/server/
+# ops도 워크스페이스 멤버다. 빌드가 `ops/output.json`(산출물 자리)을 읽으므로 링크가 있어야 한다.
+COPY ops/package.json ops/
 RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm run build
@@ -21,6 +23,7 @@ ENV NODE_ENV=production \
     ADE_WORKSPACE=/workspace \
     ADE_DATA_DIR=/data \
     ADE_CLIENT_ROOT=/app/dist/client
+# 위 경로는 저장소의 `ops/output.json`과 다르다 — 아래 COPY가 `.output/dist`를 `dist`로 펴기 때문이다.
 WORKDIR /app
 # 저장소에서는 생성물을 `.output/` 아래로 숨기지만, 이미지 안에서는 숨길 이유가 없다.
 COPY --from=build /app/.output/dist ./dist

@@ -1,5 +1,6 @@
 import path from "node:path";
 import { defineConfig } from "@playwright/test";
+import output from "../../output.json" with { type: "json" };
 
 const clientRoot = path.resolve(import.meta.dirname, "../..");
 const repoRoot = path.resolve(clientRoot, "../..");
@@ -9,7 +10,7 @@ const PORT = 6008;
  * 스토리 하나하나를 그려 **이전과 같은 그림인지** 본다. E2E(`../e2e/`)와 목적이 다르다 —
  * 저쪽은 "동작하는가", 여기는 "모양이 변했는가"다.
  *
- * **Docker에서만 돌린다**(`pnpm --filter client vrt` → `run.sh`). 폰트 렌더링과 서브픽셀이 기계마다 달라
+ * **Docker에서만 돌린다**(`pnpm --filter client test:vrt` → `run.sh`). 폰트 렌더링과 서브픽셀이 기계마다 달라
  * 호스트에서 만든 기준 이미지는 다른 기계에서 무조건 깨진다 — 고정하지 않으면 기준이
  * 아니라 소음이 된다.
  */
@@ -26,7 +27,7 @@ export default defineConfig({
   webServer: {
     // 이미 빌드된 정적 스토리북을 띄운다 — 빌드는 `run.sh`가 먼저 한다.
     // `http-server`는 client의 devDependency다 — cwd가 이 패키지여야 바이너리를 찾는다.
-    command: `node_modules/.bin/http-server .output/storybook-static -p ${String(PORT)} -s`,
+    command: `node_modules/.bin/http-server ${output.storybook} -p ${String(PORT)} -s`,
     cwd: clientRoot,
     url: `http://127.0.0.1:${PORT}/index.json`,
     reuseExistingServer: false,

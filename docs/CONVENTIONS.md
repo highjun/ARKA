@@ -190,7 +190,7 @@
     - `shared/components/`와 슬라이스의 `component/`는 **전부** 스토리를 갖는다.
     - `view/`는 **조합이 드러나는 것만** 갖는다 — 화면 한 구역을 실제로 채우는 view. 컴포넌트 하나에 값을 꽂는 얇은 바인딩은 그 컴포넌트 스토리가 이미 같은 그림을 덮는다. 대상 목록은 `.storybook/main.ts`에 있다.
 - **E2E** — `test/e2e/*.spec.ts`.
-- **VRT** — 스토리를 순회해 찍는다. `pnpm --filter client vrt`(비교) / `vrt:update`(기준 갱신). **Docker에서만** 생성·비교한다.
+- **VRT** — 스토리를 순회해 찍는다. `pnpm --filter client test:vrt`(비교) / `test:vrt:update`(기준 갱신). **Docker에서만** 생성·비교한다.
     - **기준 이미지는 검토에서 그 스토리를 Accept할 때 만든다.** 아직 아무도 안 본 그림을 기준으로 삼으면 "검토 안 함"이 "승인됨"으로 기록된다. VRT가 잡으려는 것은 승인된 뒤의 변형이다.
     - 그래서 기준이 없는 스토리는 **실패가 아니라 건너뜀**이다. 없는 것이 정상인 기간이 있다.
 - **모든 테스트가 자기 패키지 안에 있다.** 자리는 *무엇이 돌리는가*로 갈린다 — 단위·계약·스모크·스토리는 **대상 옆**에 두고(vitest가 소스와 함께 본다), **대상을 특정할 수 없는 것**만 패키지의 `test/` 아래로 묶는다 — 앱 전체를 보는 E2E(`test/e2e/`), 스토리 전부를 도는 VRT(`test/vrt/`), 테스트 환경 자체를 세우는 설정(`test/vitestSetup.ts`). 단위 테스트를 소스에서 떼어내는 `tests/` 폴더나 던더 폴더는 쓰지 않는다.
@@ -209,6 +209,6 @@ E2E는 `pnpm --filter client test:e2e`로 돌린다. 조립이 맞물리는지�
 
 ## 제출 전 확인
 
-- [ ] `pnpm run check` 통과 (typecheck → lint → test)
+- [ ] `pnpm --filter ops check` 통과 (typecheck → lint → test)
 - [ ] 이번 라운드가 한 가지 관심사인가
 - [ ] 스스로 판단한 지점을 신고했는가

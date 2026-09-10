@@ -1,5 +1,6 @@
 import path from "node:path";
 import { defineConfig } from "@playwright/test";
+import output from "ops/output.json" with { type: "json" };
 
 const clientRoot = path.resolve(import.meta.dirname, "../..");
 const repoRoot = path.resolve(clientRoot, "../..");
@@ -32,7 +33,7 @@ export default defineConfig({
     env: {
       ADE_WORKSPACE: path.join(import.meta.dirname, "fixture"),
       ADE_PORT: String(PORT),
-      ADE_CLIENT_ROOT: path.join(repoRoot, ".output/dist/client"),
+      ADE_CLIENT_ROOT: path.join(repoRoot, output.clientDir),
     },
     url: `http://127.0.0.1:${PORT}/`,
     reuseExistingServer: false,

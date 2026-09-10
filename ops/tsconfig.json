@@ -1,7 +1,10 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "types": ["node"]
+    "types": ["node"],
+    // **Node가 TypeScript를 직접 돌린다**(24부터 타입 제거가 기본) — 그래서 상대 import에
+    // 확장자가 필요한데, TS는 기본적으로 `.ts` 확장자를 거부한다(TS5097). `noEmit`이라 켜도 된다.
+    "allowImportingTsExtensions": true
   },
   "include": ["./**/*.ts"]
 }

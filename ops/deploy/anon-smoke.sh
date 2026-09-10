@@ -3,7 +3,7 @@
 # 앱에는 인증이 0이므로 Cloudflare Access가 유일한 게이트다. 익명 요청이 200을 받으면 워크스페이스
 # 전체가 공개된 것이다 — 그 경우 이 스크립트가 실패한다.
 #
-#   pnpm --filter ops run anon-smoke https://arka.sangjun.dev
+#   pnpm --filter ops run test:smoke:anon https://arka.sangjun.dev
 set -euo pipefail
 
 ORIGIN="${1:?origin url required, e.g. https://arka.sangjun.dev}"

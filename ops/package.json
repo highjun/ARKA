@@ -5,15 +5,19 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
     "test": "vitest run",
-    "task": "tsx task.ts",
-    "smoke": "bash deploy/smoke.sh",
-    "anon-smoke": "bash deploy/anon-smoke.sh",
-    "lint": "eslint ."
+    "test:smoke": "bash deploy/smoke.sh",
+    "test:smoke:anon": "bash deploy/anon-smoke.sh",
+    "check": "node pipeline/check.ts",
+    "verify": "node pipeline/verify.ts",
+    "start": "node pipeline/start.ts",
+    "task": "node task.ts"
   },
   "exports": {
     ".": "./eslint-rules/index.ts",
-    "./eslint": "./eslint/index.ts"
+    "./eslint": "./eslint/index.ts",
+    "./output.json": "./output.json"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

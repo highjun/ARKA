@@ -11,7 +11,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../../../.." && pwd)"
 IMAGE="mcr.microsoft.com/playwright:v1.63.0-noble"
 
-pnpm --filter client run build-storybook
+pnpm --filter client run build:storybook
 # 바이너리는 이 패키지의 것이다(`@playwright/test`는 client의 devDependency), 작업 디렉터리는
 # 저장소 루트다(심볼릭 링크가 루트의 `.pnpm` 저장소를 가리킨다).
 docker run --rm --user "$(id -u):$(id -g)" -v "$ROOT":/work -w /work -e HOME=/tmp "$IMAGE" \

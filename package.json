@@ -12,16 +12,7 @@
     "lint": "pnpm -r run lint",
     "test": "pnpm -r run test",
     "build": "pnpm -r run build",
-    "check": "pnpm run typecheck && pnpm run lint && pnpm run test",
-    "verify": "pnpm run check && pnpm run build && pnpm --filter client run test:e2e && pnpm --filter client run vrt && pnpm --filter ops run smoke",
     "task": "pnpm --filter ops run task",
-    "start": "ADE_CLIENT_ROOT=.output/dist/client node .output/dist/server/index.js",
-    "prepare": "simple-git-hooks"
-  },
-  "devDependencies": {
-    "simple-git-hooks": "^2.14.0"
-  },
-  "simple-git-hooks": {
-    "pre-push": "pnpm run check"
+    "start": "pnpm --filter ops run start"
   }
 }
