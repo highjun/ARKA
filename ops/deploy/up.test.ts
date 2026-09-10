@@ -40,6 +40,7 @@ const happy = (calls: string[][], over: Partial<Ports> = {}): Ports =>
     fs: makeFakeFs({ "/secure/a35b3f82.json": "{}" }),
     exec: routeExec(calls, {
       "cloudflared tunnel list": () => execResult({ stdout: TUNNEL }),
+      "docker inspect -f {{.State.Status}}": () => execResult({ stdout: "running\n" }),
       "docker inspect -f": () => execResult({ stdout: "healthy\n" }),
       "docker inspect": () => execResult({ code: 1 }),
     }),
@@ -74,6 +75,27 @@ describe("순서 — DNS를 연 바로 다음에 Access를 붙인다", () => {
     const composeCall = calls.find((c) => c.includes("compose"));
     expect(composeCall?.at(-1)).toBe("app");
     expect(composeCall).toContain("--force-recreate");
+  });
+
+  it("compose를 두 번 부른다 — `up app`은 app만 띄워서 터널이 아예 안 뜬다", async () => {
+    const calls: string[][] = [];
+    await up(input(), happy(calls));
+    const composeCalls = calls.filter((c) => c.includes("compose"));
+    expect(composeCalls).toHaveLength(2);
+    expect(composeCalls[1]).toContain("--no-recreate");
+  });
+
+  it("터널이 뜨지 않으면 던진다 — Access가 엣지에서 302를 주어 겉보기에는 멀쩡하다", async () => {
+    const calls: string[][] = [];
+    const ports = happy(calls, {
+      exec: routeExec(calls, {
+        "cloudflared tunnel list": () => execResult({ stdout: TUNNEL }),
+        "docker inspect -f {{.State.Status}}": () => execResult({ stdout: "created\n" }),
+        "docker inspect -f": () => execResult({ stdout: "healthy\n" }),
+        "docker inspect": () => execResult({ code: 1 }),
+      }),
+    });
+    await expect(up(input(), ports)).rejects.toThrow("ade-tunnel이 뜨지 않았습니다");
   });
 });
 
@@ -113,6 +135,7 @@ describe("되돌리기 어려운 단계 전에 선다", () => {
     const ports = happy(calls, {
       exec: routeExec(calls, {
         "cloudflared tunnel list": () => execResult({ stdout: TUNNEL }),
+        "docker inspect -f {{.State.Status}}": () => execResult({ stdout: "running\n" }),
         "docker inspect -f": () => execResult({ stdout: "starting\n" }),
         "docker inspect": () => execResult({ code: 1 }),
       }),
