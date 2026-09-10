@@ -10,7 +10,11 @@ const DIRECTORY = /^[a-zA-Z][a-zA-Z0-9]*$/u;
 const FILE = /^(?:[A-Z][A-Za-z0-9]*|[a-z][A-Za-z0-9]*)(?:\.[a-z][a-z0-9]*)*\.(?:ts|tsx|css|json)$/u;
 
 /**
- * 파일·폴더 이름 규칙(→ ADR 0005·0007, lint-plan "문장을 실측에 맞춘 것").
+ * 파일·폴더 이름 규칙(→ ADR 0005·0007).
+ *
+ * 문장을 실측에 맞춰 만든 규칙이다 — "camelCase, React 컴포넌트만 PascalCase"는 위반이 55건이었는데
+ * 규칙성이 있었다(클래스 파일은 PascalCase, 계약은 `I<Name>.ts`, 함수 모듈은 camelCase). 코드
+ * 36건을 고치는 것보다 문장을 고치는 쪽이 맞았다.
  *
  * 실측: `model/`·`viewmodel/`·`infra/`의 클래스 파일은 PascalCase, 계약은 `I<Name>.ts`, 함수 모듈은
  * camelCase였다 — kebab-case와 snake_case만 없었다. 그 관행을 그대로 규칙으로 만든다.

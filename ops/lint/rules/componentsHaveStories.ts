@@ -12,7 +12,7 @@ const isComponentPath = (segments: readonly string[]): boolean =>
  * `view/`는 대상이 아니다 — 조합이 드러나는 것만 고르기로 했고 그 목록은 `.storybook/main.ts`에
  * 있다(CONVENTIONS "테스트"). 폴더의 곁다리 파일(`shared.ts`, 훅)도 대상이 아니다. 주인 파일만 본다.
  *
- * 2026-09-09에 켰다 — lint-plan이 "전건 위반이라 규칙이 아니라 백로그"라고 미뤄 둔 것을 실측해
+ * 2026-09-09에 켰다 — "전건 위반인 규칙은 규칙이 아니라 백로그"라 미뤄 뒀던 것을 실측해
  * 위반 0을 확인한 뒤다. 스토리가 3개일 때 켰으면 전면 빨간불이었다.
  */
 export const componentsHaveStories: Rule.RuleModule = {

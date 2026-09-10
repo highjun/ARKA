@@ -11,7 +11,9 @@
 
 ## 검토
 
-사용자가 코드를 읽고 의도대로 되었는지 판정하는 절차다. 진행 상황은 `docs/REVIEW_CHECKLIST.md`, 거기서 나온 구조적 결정은 `docs/ADR_CANDIDATE.md`에 쌓는다. 판정은 사용자만 한다 — 에이전트는 자료를 준비할 뿐 Accept/Reject를 스스로 정하지 않는다.
+사용자가 코드를 읽고 의도대로 되었는지 판정하는 절차다. 판정은 사용자만 한다 — 에이전트는 자료를 준비할 뿐 Accept/Reject를 스스로 정하지 않는다.
+
+거기서 나온 것은 **둘 중 하나로만** 나간다 — 결정이면 `docs/adr/`, 할 일이면 `docs/tasks/`. **중간 문서를 두지 않는다.** 진행 상황·후보·계획을 담는 산문 문서를 세 번 만들었다가 세 번 다 낡혔다(`REVIEW_CHECKLIST`·`ADR_CANDIDATE`·`lint-plan`). 낡는 이유는 같다 — 아무도 검사하지 않는 목록이라서다.
 
 ### 계약 우선 리뷰
 
@@ -61,7 +63,7 @@
 
 ## ADR
 
-구조 결정의 **정본**이다. `docs/adr/NNNN-kebab-case.md`. 후보는 `docs/ADR_CANDIDATE.md`에 쌓이고 **승격 전까지 구속력이 없다** — 두 문서가 다른 말을 하면 ADR이 이긴다.
+구조 결정의 **정본이자 유일한 자리**다. `docs/adr/NNNN-kebab-case.md`. 아직 못 정한 것은 ADR이 아니라 **할 일**이므로 `docs/tasks/`로 간다 — 결정을 반쯤 적어 둔 문서를 따로 만들지 않는다.
 
 ### 형식 — 6절 고정
 
@@ -109,7 +111,7 @@
 폐기됨 (2026-09-08 → 2026-09-09, 이유 한 줄)
 ```
 
-`제안됨`은 없다 — 제안은 `ADR_CANDIDATE.md`가 담고 ADR 파일은 결정된 뒤에만 생긴다. `사후 기록`은 결정과 함께 쓰이지 않았다는 표시로, 도입 커밋 제목에 ADR 번호가 없으면 그렇다.
+`제안됨`은 없다 — **ADR 파일은 결정된 뒤에만 생긴다.** 정하는 중인 것은 `docs/tasks/`에 있다. `사후 기록`은 결정과 함께 쓰이지 않았다는 표시로, 도입 커밋 제목에 ADR 번호가 없으면 그렇다.
 
 ### 쓰지 않는 것
 
@@ -157,7 +159,7 @@
 - `contracts`는 `client`·`server`를 import하지 않는다.
 - `client`와 `server`는 서로 import하지 않는다.
 - 공유가 필요하면 `contracts`에 두고 패키지명으로 가져온다 — `import { URI } from "contracts"`. tsconfig `paths` 별칭은 쓰지 않는다(tsc만 알아서 vitest·node에서 깨진다).
-- 위 **두 줄**(`contracts`·`client`↔`server`)은 `eslint.config.ts`의 `import-x/no-restricted-paths`가 강제한다. 위반하면 어디로 옮기라는 안내가 함께 나온다. **셋째 줄(패키지명 import·`paths` 금지)은 아직 강제되지 않는다** — 리뷰로 본다. → [린트 설계](lint-plan.md)
+- 위 **두 줄**(`contracts`·`client`↔`server`)은 `eslint.config.ts`의 `import-x/no-restricted-paths`가 강제한다. 위반하면 어디로 옮기라는 안내가 함께 나온다. **셋째 줄(패키지명 import·`paths` 금지)은 아직 강제되지 않는다** — 리뷰로 본다.
 
 ## 코드 구조
 
