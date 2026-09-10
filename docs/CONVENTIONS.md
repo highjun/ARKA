@@ -138,10 +138,13 @@
 ## 주석·문서
 
 - 한글로 쓴다. 코드 식별자와 런타임 문자열(`throw new Error(...)` 등)만 영문.
-- 주석은 네 가지만 쓴다 — 계약 / 왜 / 비자명한 로직 / 외부 사정. → [ADR 0004](adr/0004-comment-rules.md)
-    - 계약은 TSDoc으로, 나머지 셋은 인라인으로 쓴다.
-    - "무엇을 하는지"와 타입이 이미 말하는 것은 쓰지 않는다.
-    - 배경 설명이 길어지면 ADR로 옮기고 링크만 남긴다.
+- **주석은 자리가 형태와 필수 여부를 정한다.** → [ADR 0004](adr/0004-comment-rules.md)
+    - **공개 선언에는 `/** */`가 필수다** — export function·최상위 화살표·export class·public 메서드·export interface/type/enum. `private`·`protected`·`#private`·constructor는 제외.
+    - 그 밖의 선언 위도 `/** */`다. `//`·`/* */`는 전환한다.
+    - 함수 본문 안에서만 `//`를 쓴다 — 연속 4줄까지, 코드 줄 끝에는 달지 않는다.
+    - 타입 표기(`@param {T}`)는 하지 않는다. 시그니처가 말한다.
+    - 주석 처리된 코드와 `TODO`·`FIXME`·`XXX`·`HACK`은 남기지 않는다. 미룬 일은 `docs/tasks/`에.
+    - 배경 설명은 ADR로 옮기고 `(→ ADR NNNN)` 링크만 남긴다.
 
 ## 자리
 
