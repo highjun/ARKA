@@ -85,6 +85,21 @@ const inspect = async (name: string, ports: Ports): Promise<readonly Inspected[]
   return JSON.parse(result.stdout) as readonly Inspected[];
 };
 
+/**
+ * 컨테이너가 running이 될 때까지. 터널에는 healthcheck가 없어 이쪽으로 본다.
+ *
+ * **터널이 안 뜨면 Access가 엣지에서 302를 주므로 겉보기에는 멀쩡하다.** 실제로 지나가는
+ * 요청만 530을 받는데, 그건 배포한 사람이 아니라 사용자가 먼저 만난다.
+ */
+const waitRunning = async (container: string, ports: Ports, tries = 30): Promise<void> => {
+  for (let i = 0; i < tries; i += 1) {
+    const { stdout } = await ports.exec("docker", ["inspect", "-f", "{{.State.Status}}", container]);
+    if (stdout.trim() === "running") return;
+    await ports.sleep(1000);
+  }
+  throw new Error(`${container}이 뜨지 않았습니다`);
+};
+
 /** 앱이 healthy가 될 때까지. 안 되면 던진다 — 뜨지 않은 배포를 성공으로 적지 않는다. */
 const waitHealthy = async (name: string, ports: Ports, tries = 60): Promise<void> => {
   for (let i = 0; i < tries; i += 1) {
@@ -188,13 +203,21 @@ export const up = async (input: UpInput, ports: Ports): Promise<Manifest> => {
       throw new Error(`뜨기 전에 섭니다 — 컨테이너가 어긋나 있습니다:\n${violations.map((v) => `  ${v.container}: ${v.detail}`).join("\n")}`);
     }
 
-    // 서비스 이름 `app`을 붙인다 — 그것만 강제 재생성해 터널이 불필요하게 재연결하지 않게.
-    const result = await ports.exec("docker", [
+    // **두 번 부른다.** 첫 번째는 `app`만 강제 재생성한다 — 터널이 불필요하게 재연결하지 않게.
+    // 두 번째가 나머지(터널)를 띄운다. `compose up app`은 app만 띄우므로 이게 없으면
+    // **터널이 아예 안 뜨는데 배포는 성공으로 보고된다**(2026-09-11 리허설에서 실측).
+    const recreated = await ports.exec("docker", [
       "compose", "-p", spec.name, "-f", composeFile, "up", "-d", "--remove-orphans", "--force-recreate", "app",
     ]);
-    if (result.code !== 0) throw new Error(`compose up 실패\n${result.stderr}`);
+    if (recreated.code !== 0) throw new Error(`compose up 실패\n${recreated.stderr}`);
 
     await waitHealthy(spec.name, ports);
+
+    const rest = await ports.exec("docker", [
+      "compose", "-p", spec.name, "-f", composeFile, "up", "-d", "--no-recreate",
+    ]);
+    if (rest.code !== 0) throw new Error(`터널 기동 실패\n${rest.stderr}`);
+    await waitRunning(`${spec.name}-tunnel`, ports);
     ports.log(`${spec.hostname} 떴습니다`);
     return manifest;
   } finally {
