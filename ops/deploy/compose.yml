@@ -25,7 +25,10 @@ services:
     # `KEY: "${KEY:-}"`로 쓰면 **빈 문자열**이 들어가는데, 서버 스키마가 `min(1)`이라
     # "없음"이 아니라 "너무 짧음"으로 읽혀 부팅에서 죽고 재시작 루프에 빠진다(2026-09-10 실측).
     environment:
-      # 있으면 실제 LLM 실행기, 없으면 스크립트 실행기(ADR 0019). 값은 .env에 두고 리포에 넣지 않는다.
+      # **켜는 것은 이 스위치고 키가 아니다**(→ ADR 0007). 비우면 스크립트 실행기.
+      # `anthropic`으로 켜 놓고 키가 없으면 부팅에서 죽는다 — 조용히 꺼진 채 뜨지 않는다.
+      - ADE_AGENT_RUNNER=${ADE_AGENT_RUNNER:-scripted}
+      # 값은 .env에 두고 리포에 넣지 않는다.
       - ADE_ANTHROPIC_API_KEY
       - ADE_ANTHROPIC_MODEL=${ADE_ANTHROPIC_MODEL:-claude-opus-5}
     volumes:

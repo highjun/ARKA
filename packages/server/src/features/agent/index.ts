@@ -2,6 +2,7 @@ import path from "node:path";
 import Anthropic from "@anthropic-ai/sdk";
 import type { Hono } from "hono";
 import type { Logger } from "../../core/log";
+import type { AgentConfig } from "./config";
 import type { IAgentRunner } from "./domain/IAgentRunner";
 import { AnthropicRunner } from "./infra/AnthropicRunner";
 import { openDatabase } from "./infra/database";
@@ -25,8 +26,8 @@ export type AgentFeatureOptions = {
   readonly log: Logger;
   /** 워크스페이스 유스케이스 — 툴이 이것으로 파일을 다룬다. 조립부가 filesystem feature에서 가져온다. */
   readonly workspace: WorkspaceAccess;
-  /** 없으면 스크립트 실행기다(→ ADR 0019). */
-  readonly anthropic?: { readonly apiKey: string; readonly model: string };
+  /** 어느 실행기를 조립할지. `core/config.ts`가 이미 검증했다(→ ADR 0007). */
+  readonly agent: AgentConfig;
 };
 
 /**
@@ -34,15 +35,16 @@ export type AgentFeatureOptions = {
  *
  * `dataDir`가 `":memory:"`면 메모리 DB다 — 테스트용.
  */
-export const createAgentFeature = ({ dataDir, log, workspace, anthropic }: AgentFeatureOptions): AgentFeature => {
+export const createAgentFeature = ({ dataDir, log, workspace, agent }: AgentFeatureOptions): AgentFeature => {
   const db = openDatabase(dataDir === ":memory:" ? dataDir : path.join(dataDir, "data.db"));
   const events = new SqliteEventStore(db);
   const sessions = new SqliteSessionStore(db);
+  // 키의 유무가 아니라 **고른 값**으로 가른다 — 키 이름 오타가 모드를 바꾸지 못한다(→ ADR 0007).
   const runner: IAgentRunner =
-    anthropic === undefined
+    agent.runner === "scripted"
       ? new ScriptedRunner()
-      : new AnthropicRunner({ client: new Anthropic({ apiKey: anthropic.apiKey }), model: anthropic.model, tools: createWorkspaceTools(workspace) });
-  log.info("agent.runner", { kind: anthropic === undefined ? "scripted" : "anthropic", model: anthropic?.model ?? null });
+      : new AnthropicRunner({ client: new Anthropic({ apiKey: agent.apiKey }), model: agent.model, tools: createWorkspaceTools(workspace) });
+  log.info("agent.runner", { kind: agent.runner, model: agent.runner === "anthropic" ? agent.model : null });
   const runManager = new RunManager({ events, sessions, runner, log });
   return {
     routes: createAgentRoutes({ runManager, events }),

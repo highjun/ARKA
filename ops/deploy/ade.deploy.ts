@@ -34,6 +34,6 @@ export const adeDeploy: DeploySpec = DeploySpec.parse({
   // 여기 이메일만 들어온다. **비우면 인터넷에 무인증으로 열린다.**
   accessEmails: ["highjun10170@gmail.com"],
 
-  // `envFile`은 아직 두지 않는다 — `ADE_ANTHROPIC_API_KEY`가 없으면 스크립트 실행기로 폴백하므로
-  // 앱이 뜨는 데 지장이 없고, 없는 파일을 가리키면 `up`이 선다.
+  // `envFile`은 아직 두지 않는다 — `ADE_AGENT_RUNNER`가 기본 `scripted`라 비밀 없이 뜨고,
+  // 없는 파일을 가리키면 `up`이 선다. 실제 실행기를 켜는 날 이 줄과 그 파일이 같이 생긴다.
 });

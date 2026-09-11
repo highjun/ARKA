@@ -23,12 +23,17 @@ const env = (overrides: Record<string, string>) => ({ ADE_DATA_DIR: path.join(ba
 describe("loadConfig", () => {
   it("기본값은 포트 3000, 루프백, 정적 서빙 없음이다", async () => {
     const config = await loadConfig({ ADE_WORKSPACE: path.join(base, "ws"), ADE_DATA_DIR: path.join(base, "data") });
-    expect(config).toEqual({ workspaceRoot: path.join(base, "ws"), port: 3000, host: "127.0.0.1", clientRoot: undefined, dataDir: path.join(base, "data"), anthropic: undefined });
+    expect(config).toEqual({ workspaceRoot: path.join(base, "ws"), port: 3000, host: "127.0.0.1", clientRoot: undefined, dataDir: path.join(base, "data"), agent: { runner: "scripted" } });
   });
 
-  it("API 키가 있으면 anthropic 설정이 생기고 모델 기본값은 claude-opus-5다", async () => {
-    const config = await loadConfig(env({ ADE_WORKSPACE: path.join(base, "ws"), ADE_ANTHROPIC_API_KEY: "sk-test" }));
-    expect(config.anthropic).toEqual({ apiKey: "sk-test", model: "claude-opus-5" });
+  it("기능 조각의 오류도 같은 ConfigError로 나온다 — 관문이 하나다", async () => {
+    await expect(loadConfig(env({ ADE_WORKSPACE: path.join(base, "ws"), ADE_AGENT_RUNNER: "anthropic" }))).rejects.toThrow(ConfigError);
+    await expect(loadConfig(env({ ADE_WORKSPACE: path.join(base, "ws"), ADE_AGENT_RUNNER: "anthropic" }))).rejects.toThrow(/ADE_ANTHROPIC_API_KEY/u);
+  });
+
+  it("기능 조각이 합쳐진다 — 실행기를 켜면 설정에 실려 나온다", async () => {
+    const config = await loadConfig(env({ ADE_WORKSPACE: path.join(base, "ws"), ADE_AGENT_RUNNER: "anthropic", ADE_ANTHROPIC_API_KEY: "sk-test" }));
+    expect(config.agent).toEqual({ runner: "anthropic", apiKey: "sk-test", model: "claude-opus-5" });
   });
 
   it("데이터 디렉터리가 없으면 만든다", async () => {
@@ -84,13 +89,14 @@ describe("빈 문자열은 없음이다", () => {
     const config = await loadConfig({ ADE_WORKSPACE: path.join(base, "ws"), ADE_GIT_SHA: "", ADE_ANTHROPIC_API_KEY: "" });
 
     expect(config.gitSha).toBeUndefined();
-    expect(config.anthropic).toBeUndefined();
+    expect(config.agent).toEqual({ runner: "scripted" });
   });
 
   it("기본값이 있는 것도 빈 값이면 기본으로 떨어진다", async () => {
-    const config = await loadConfig({ ADE_WORKSPACE: path.join(base, "ws"), ADE_PORT: "", ADE_HOST: "" });
+    const config = await loadConfig({ ADE_WORKSPACE: path.join(base, "ws"), ADE_PORT: "", ADE_HOST: "", ADE_AGENT_RUNNER: "" });
 
     expect(config.port).toBe(3000);
     expect(config.host).toBe("127.0.0.1");
+    expect(config.agent).toEqual({ runner: "scripted" });
   });
 });
