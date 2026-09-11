@@ -79,12 +79,22 @@ const resolveDirectory = async (name: string, value: string): Promise<string> =>
 };
 
 /**
+ * **빈 문자열은 "없음"이다.**
+ *
+ * docker의 `ENV X=$ARG`는 인자를 안 주면 빈 문자열을 넣고, compose의 `X: "${X:-}"`도 그렇다.
+ * 그것을 값으로 보면 `.min(1)`이 "너무 짧음"으로 잡아 **부팅이 죽고 재시작 루프에 빠진다** —
+ * `ADE_ANTHROPIC_API_KEY`와 `ADE_GIT_SHA`에서 두 번 당했다. 여기서 한 번에 걷는다.
+ */
+const withoutEmpty = (env: Readonly<Record<string, string | undefined>>): Record<string, string | undefined> =>
+  Object.fromEntries(Object.entries(env).filter(([, value]) => value !== ""));
+
+/**
  * 환경변수에서 설정을 만든다.
  *
  * @throws ConfigError 값이 스키마에 맞지 않거나, 가리키는 디렉터리가 없거나 디렉터리가 아닐 때.
  */
 export const loadConfig = async (env: Readonly<Record<string, string | undefined>> = process.env): Promise<ServerConfig> => {
-  const parsed = Env.safeParse(env);
+  const parsed = Env.safeParse(withoutEmpty(env));
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
     const field = issue?.path.join(".") ?? "env";

@@ -78,3 +78,19 @@ describe("loadConfig", () => {
     ).rejects.toThrow(/ADE_CLIENT_ROOT/u);
   });
 });
+
+describe("빈 문자열은 없음이다", () => {
+  it("빈 값을 준 옵셔널 변수가 부팅을 막지 않는다 — docker의 `ENV X=$ARG`가 그렇게 준다", async () => {
+    const config = await loadConfig({ ADE_WORKSPACE: path.join(base, "ws"), ADE_GIT_SHA: "", ADE_ANTHROPIC_API_KEY: "" });
+
+    expect(config.gitSha).toBeUndefined();
+    expect(config.anthropic).toBeUndefined();
+  });
+
+  it("기본값이 있는 것도 빈 값이면 기본으로 떨어진다", async () => {
+    const config = await loadConfig({ ADE_WORKSPACE: path.join(base, "ws"), ADE_PORT: "", ADE_HOST: "" });
+
+    expect(config.port).toBe(3000);
+    expect(config.host).toBe("127.0.0.1");
+  });
+});
