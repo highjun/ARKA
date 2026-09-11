@@ -32,6 +32,10 @@ COPY --from=build /app/.output/dist ./dist
 # 워크스페이스와 데이터(SQLite)는 볼륨이다. compose가 호스트 UID로 실행하므로 여기서 사용자를 고정하지
 # 않는다. /data는 어떤 UID로 돌아도 쓸 수 있어야 하므로 미리 만들고 열어 둔다.
 RUN mkdir -p /data && chmod 777 /data
+# **맨 끝에 둔다.** 커밋마다 값이 바뀌므로, 위에 두면 그 아래 레이어가 매번 다시 만들어진다.
+# `ARG`는 스테이지마다 다시 선언해야 한다 — 빌드 단계의 것이 여기로 넘어오지 않는다.
+ARG ADE_GIT_SHA=""
+ENV ADE_GIT_SHA=$ADE_GIT_SHA
 VOLUME ["/workspace", "/data"]
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
