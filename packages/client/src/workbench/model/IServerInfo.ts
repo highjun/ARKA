@@ -8,6 +8,8 @@ export type ServerInfo = {
   readonly protocolVersion: number;
   /** 워크스페이스 루트 디렉터리 이름. 창 제목처럼 보여 준다. */
   readonly workspaceName: string;
+  /** 이 이미지를 만든 커밋. 소스에서 바로 띄우면 없다. 더러운 트리면 `-dirty`가 붙는다. */
+  readonly gitSha?: string;
 };
 
 export const ServerInfoToken = createToken<IServerInfo>('serverInfo');

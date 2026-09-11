@@ -19,5 +19,11 @@ export const VersionResponse = z.object({
   protocolVersion: z.number().int().positive(),
   /** 워크스페이스 루트 디렉터리 이름. 경로 전체는 주지 않는다 — 서버가 어디에 뿌리내렸는지가 화면에 새지 않게. */
   workspaceName: z.string(),
+  /**
+   * 이 이미지를 만든 커밋. **없을 수 있다** — 소스에서 바로 띄우면 이미지가 없다.
+   *
+   * 더러운 트리에서 빌드하면 `-dirty`가 붙는다. 배포된 것이 이력의 어느 지점인지 묻는 유일한 길이다.
+   */
+  gitSha: z.string().min(1).optional(),
 });
 export type VersionResponse = z.infer<typeof VersionResponse>;
