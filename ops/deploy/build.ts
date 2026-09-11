@@ -32,11 +32,30 @@ export interface Command {
  * 빌드 명령. **`DOCKER_BUILDKIT=1`을 여기서 못박는다** — 레거시 빌더가 중간 단계를 이미지로
  * 커밋하는 것이 656개 사태의 직접 원인이라, 환경변수에 맡기지 않는다.
  */
-export const buildCommand = (tag: string): Command => ({
+export const buildCommand = (tag: string, gitSha: string): Command => ({
   file: "docker",
-  args: ["build", "-f", "ops/deploy/Dockerfile", "-t", tag, "."],
+  args: ["build", "-f", "ops/deploy/Dockerfile", "--build-arg", `ADE_GIT_SHA=${gitSha}`, "-t", tag, "."],
   env: { DOCKER_BUILDKIT: "1" },
 });
+
+/**
+ * 이 빌드가 어느 커밋인지. **더러운 트리면 `-dirty`를 붙인다.**
+ *
+ * 커밋 안 된 것에서 배포하면 떠 있는 것이 이력의 어느 지점도 아니게 된다 — 실제로 한 번
+ * 그랬다. 막지는 않되 **그 사실이 이미지에 남게** 한다.
+ */
+export const describeCommit = (rev: string, dirty: boolean): string => `${rev.slice(0, 12)}${dirty ? "-dirty" : ""}`;
+
+const gitSha = (): string => {
+  try {
+    const rev = execFileSync("git", ["rev-parse", "HEAD"], { cwd: REPO_ROOT, encoding: "utf8" }).trim();
+    const dirty = execFileSync("git", ["status", "--porcelain"], { cwd: REPO_ROOT, encoding: "utf8" }).trim() !== "";
+    return describeCommit(rev, dirty);
+  } catch {
+    // git이 없거나 저장소가 아니면 빈 값이다 — 빌드를 막을 이유는 없다.
+    return "";
+  }
+};
 
 /**
  * 회수 명령들. **`-a`를 쓰지 않는다** — 그러면 태그가 있지만 지금 안 도는 것까지 지워
@@ -76,7 +95,7 @@ if (process.argv[1] === import.meta.filename) {
   }
 
   try {
-    run(buildCommand(tag));
+    run(buildCommand(tag, gitSha()));
   } finally {
     // **실패해도 돈다.** 실패한 빌드도 캐시를 남긴다.
     for (const command of pruneCommands(CACHE_BUDGET)) run(command);

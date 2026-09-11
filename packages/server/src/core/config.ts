@@ -38,6 +38,8 @@ const Env = z.object({
   /** 있으면 실제 LLM 실행기를 쓴다. 없으면 스크립트 실행기(→ ADR 0019). 리포에 넣지 않는다. */
   ADE_ANTHROPIC_API_KEY: z.string().min(1).optional(),
   ADE_ANTHROPIC_MODEL: z.string().min(1).default("claude-opus-5"),
+  /** 이 이미지를 만든 커밋. 이미지가 구워 넣는다 — 소스에서 바로 띄우면 없다. */
+  ADE_GIT_SHA: z.string().min(1).optional(),
 });
 
 /** 검증을 통과한 뒤의 설정. 경로는 전부 절대경로로 풀려 있다. */
@@ -52,6 +54,8 @@ export type ServerConfig = {
   readonly dataDir: string;
   /** 키가 없으면 `undefined` — 스크립트 실행기. */
   readonly anthropic: { readonly apiKey: string; readonly model: string } | undefined;
+  /** 이 이미지를 만든 커밋. 소스에서 바로 띄우면 `undefined`. */
+  readonly gitSha: string | undefined;
 };
 
 /**
@@ -86,7 +90,7 @@ export const loadConfig = async (env: Readonly<Record<string, string | undefined
     const field = issue?.path.join(".") ?? "env";
     throw new ConfigError(`${field}: ${issue?.message ?? "invalid"}`);
   }
-  const { ADE_WORKSPACE, ADE_PORT, ADE_HOST, ADE_CLIENT_ROOT, ADE_DATA_DIR, ADE_ANTHROPIC_API_KEY, ADE_ANTHROPIC_MODEL } = parsed.data;
+  const { ADE_WORKSPACE, ADE_PORT, ADE_HOST, ADE_CLIENT_ROOT, ADE_DATA_DIR, ADE_ANTHROPIC_API_KEY, ADE_ANTHROPIC_MODEL, ADE_GIT_SHA } = parsed.data;
 
   // 데이터 디렉터리는 워크스페이스와 달리 우리가 소유한다 — 없으면 만든다.
   const dataDir = path.resolve(ADE_DATA_DIR ?? path.join(os.homedir(), ".ade"));
@@ -103,5 +107,6 @@ export const loadConfig = async (env: Readonly<Record<string, string | undefined
     clientRoot: ADE_CLIENT_ROOT === undefined ? undefined : await resolveDirectory("ADE_CLIENT_ROOT", ADE_CLIENT_ROOT),
     dataDir: await resolveDirectory("ADE_DATA_DIR", dataDir),
     anthropic: ADE_ANTHROPIC_API_KEY === undefined ? undefined : { apiKey: ADE_ANTHROPIC_API_KEY, model: ADE_ANTHROPIC_MODEL },
+    gitSha: ADE_GIT_SHA,
   };
 };

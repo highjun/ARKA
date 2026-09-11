@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCommand, pruneCommands } from "./build.ts";
+import { buildCommand, describeCommit, pruneCommands } from "./build.ts";
 
 /**
  * **함정마다 케이스 하나.** 이 저장소에 `<none>` 이미지 656개가 쌓여 디스크를 86%까지
@@ -7,11 +7,17 @@ import { buildCommand, pruneCommands } from "./build.ts";
  */
 describe("빌드 명령", () => {
   it("BuildKit을 강제한다 — 레거시 빌더가 중간 단계를 이미지로 커밋한 것이 656개의 원인이다", () => {
-    expect(buildCommand("ade:latest").env?.["DOCKER_BUILDKIT"]).toBe("1");
+    expect(buildCommand("ade:latest", "abc").env?.["DOCKER_BUILDKIT"]).toBe("1");
   });
 
   it("저장소의 Dockerfile과 태그를 쓴다", () => {
-    expect(buildCommand("ade:pr-12").args).toEqual(["build", "-f", "ops/deploy/Dockerfile", "-t", "ade:pr-12", "."]);
+    expect(buildCommand("ade:pr-12", "abc1234").args).toEqual([
+      "build", "-f", "ops/deploy/Dockerfile", "--build-arg", "ADE_GIT_SHA=abc1234", "-t", "ade:pr-12", ".",
+    ]);
+  });
+
+  it("커밋 SHA를 이미지에 굽는다 — 이것이 없으면 무엇이 떠 있는지 물을 길이 없다", () => {
+    expect(buildCommand("ade:latest", "deadbeef").args).toContain("ADE_GIT_SHA=deadbeef");
   });
 });
 
@@ -40,5 +46,15 @@ describe("회수 명령", () => {
 
   it("확인 없이 지운다 — CI에는 답할 사람이 없다", () => {
     for (const c of pruneCommands("20GB")) expect(c.args).toContain("-f");
+  });
+});
+
+describe("커밋을 어떻게 적는가", () => {
+  it("앞 12자만 쓴다 — 사람이 읽고 옮겨 적을 수 있는 길이다", () => {
+    expect(describeCommit("0123456789abcdef0123456789abcdef01234567", false)).toBe("0123456789ab");
+  });
+
+  it("더러운 트리면 -dirty를 붙인다 — 이력의 어느 지점도 아니라는 뜻이다", () => {
+    expect(describeCommit("0123456789abcdef", true)).toBe("0123456789ab-dirty");
   });
 });

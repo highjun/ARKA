@@ -22,7 +22,7 @@ const log: Logger = {
 
 const buildApp = () =>
   createApp({
-    config: { workspaceRoot, port: 0, host: "127.0.0.1", clientRoot: undefined, dataDir: ":memory:", anthropic: undefined },
+    config: { workspaceRoot, port: 0, host: "127.0.0.1", clientRoot: undefined, dataDir: ":memory:", anthropic: undefined, gitSha: undefined },
     log,
     startedAt: "2026-09-09T00:00:00.000Z",
   }).app;
@@ -41,6 +41,18 @@ describe("createApp", () => {
     const response = await buildApp().request("/api/health");
     expect(response.status).toBe(200);
     expect(HealthResponse.parse(await response.json())).toEqual({ status: "ok" });
+  });
+
+  it("/api/version은 이미지가 구운 커밋 SHA를 준다 — 무엇이 떠 있는지 묻는 유일한 길이다", async () => {
+    const app = createApp({
+      config: { workspaceRoot, port: 0, host: "127.0.0.1", clientRoot: undefined, dataDir: ":memory:", anthropic: undefined, gitSha: "abc1234-dirty" },
+      log,
+      startedAt: "2026-09-09T00:00:00.000Z",
+    }).app;
+
+    const body = VersionResponse.parse(await (await app.request("/api/version")).json());
+
+    expect(body.gitSha).toBe("abc1234-dirty");
   });
 
   it("/api/version은 시작 시각·프로토콜 버전·워크스페이스 이름을 헤더 없이도 준다", async () => {

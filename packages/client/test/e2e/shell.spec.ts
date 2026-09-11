@@ -75,7 +75,8 @@ test.describe("데스크톱", () => {
     await page.goto("/");
 
     // 서버가 주는 ISO를 보는 사람의 시간대로 서식한 결과라, 형식만 확인한다.
-    await expect(page.getByText(/^v\d{4}\.\d{2}\.\d{2} \d{2}:\d{2}$/u)).toBeVisible();
+    // 커밋 SHA는 이미지가 구워 넣으므로 여기(소스로 띄운 서버)에는 없다.
+    await expect(page.getByText(/^v\d{4}\.\d{2}\.\d{2} \d{2}:\d{2}( · [0-9a-f]{7}(-dirty)?)?$/u)).toBeVisible();
   });
 
   /**

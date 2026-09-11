@@ -25,7 +25,7 @@ const silent = { info: () => undefined, warn: () => undefined, error: () => unde
 export const probeApp = async (): Promise<RouteProbe & { dispose: () => Promise<void> }> => {
   const workspaceRoot = realpathSync(await mkdtemp(path.join(os.tmpdir(), "ade-response-")));
   const { app } = createApp({
-    config: { workspaceRoot, port: 0, host: "127.0.0.1", clientRoot: undefined, dataDir: ":memory:", anthropic: undefined },
+    config: { workspaceRoot, port: 0, host: "127.0.0.1", clientRoot: undefined, dataDir: ":memory:", anthropic: undefined, gitSha: undefined },
     log: silent,
     startedAt: "2026-09-09T00:00:00.000Z",
   });
