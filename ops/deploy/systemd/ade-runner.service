@@ -1,0 +1,23 @@
+# GitHub Actions self-hosted 러너. **사용자 유닛이다** — sudo가 필요 없다.
+# 공식 `svc.sh`는 시스템 systemd를 쓰므로 쓰지 않는다. 설치 절차는 docs/operations.md.
+#
+# `PATH`를 박아 두는 이유: 사용자 유닛은 로그인 셸을 거치지 않아 nvm의 node도 pnpm도 안 보인다.
+[Unit]
+Description=GitHub Actions runner (ARKASHIC)
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/actions-runner
+ExecStart=%h/actions-runner/run.sh
+Restart=always
+RestartSec=5
+KillMode=process
+KillSignal=SIGTERM
+TimeoutStopSec=5min
+Environment=HOME=%h
+Environment=PATH=%h/.nvm/versions/node/v24.15.0/bin:%h/.local/bin:%h/.local/share/pnpm:/usr/local/bin:/usr/bin:/bin
+
+[Install]
+WantedBy=default.target
