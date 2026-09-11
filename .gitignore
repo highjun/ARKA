@@ -8,5 +8,12 @@ storybook-static/
 .claude
 docs/USER_NOTE.md
 
+# 키·인증서 파일. 이름만 봐도 비밀인 것은 손이 닿기 전에 막는다(→ ADR 0007).
+*.pem
+*.key
+*.p12
+*.pfx
+*credential*
+
 # CI 컨테이너용 가짜 값. `.env.*` 금지의 유일한 예외다 — 여기엔 시크릿이 없다.
 !ops/deploy/.env.ci

@@ -163,6 +163,37 @@ describe("멱등 — 두 번째 실행이 첫 번째와 같아야 한다", () =>
   });
 });
 
+describe("생성물은 남에게 열지 않는다", () => {
+  it("상태 디렉터리를 0700으로 만든다 — 경로·터널 ID·이미지 태그가 거기 있다", async () => {
+    const fs = makeFakeFs({ "/secure/a35b3f82.json": "{}" });
+    await up(input(), happy([], { fs }));
+
+    expect(fs.modes.get(path.join(stateDir, "ade"))).toBe(0o700);
+  });
+
+  it("자격증명 디렉터리도 0700이다 — 터널을 새로 팔 때 만들어진다", async () => {
+    const fs = makeFakeFs();
+    // 만들기 전에는 목록이 비어 있고, 만든 뒤에는 있다. 그래야 create 경로를 탄다.
+    let created = false;
+    const exec = routeExec([], {
+      "cloudflared tunnel create": () => {
+        created = true;
+        // 자격증명 파일은 CLI가 만든다 — 가짜에서는 여기서 흉내낸다.
+        fs.files.set(path.join(stateDir, "ade", ".new-tunnel-creds.json"), "{}");
+        return execResult();
+      },
+      "cloudflared tunnel list": () => execResult({ stdout: created ? TUNNEL : "[]" }),
+      "docker inspect -f {{.State.Status}}": () => execResult({ stdout: "running\n" }),
+      "docker inspect -f": () => execResult({ stdout: "healthy\n" }),
+      "docker inspect": () => execResult({ code: 1 }),
+    });
+
+    await up(input(), happy([], { fs, exec }));
+
+    expect(fs.modes.get("/secure")).toBe(0o700);
+  });
+});
+
 describe("Access가 비면 경고한다", () => {
   it("accessEmails가 비어 있으면 로그로 알린다 — 무인증으로 열린다는 뜻이다", async () => {
     const log = vi.fn();

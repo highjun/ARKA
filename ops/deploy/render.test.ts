@@ -13,7 +13,6 @@ const ctx = (over: Partial<RenderContext> = {}): RenderContext => ({
   credentialsPath: "/home/x/secure/a35b3f82.json",
   uid: 1000,
   gid: 1000,
-  env: {},
   ...over,
 });
 
@@ -59,8 +58,16 @@ describe("compose 골격 — 셋 다 실제 사고 하나씩에 대응한다", (
     expect(out).toContain("- /b:/b");
   });
 
-  it("환경변수가 없으면 environment 키 자체가 없다", () => {
-    expect(renderCompose(spec(), ctx())).not.toContain("environment:");
+  it("envFile이 없으면 env_file 키 자체가 없다", () => {
+    expect(renderCompose(spec(), ctx())).not.toContain("env_file:");
+  });
+
+  it("비밀을 굽지 않고 경로로 가리킨다 — 구우면 생성물이 비밀의 사본이 된다", () => {
+    const out = renderCompose(spec(), ctx({ envFile: "/home/x/secure/env/ade.env" }));
+
+    expect(out).toContain("env_file:");
+    expect(out).toContain("- /home/x/secure/env/ade.env");
+    expect(out).not.toContain("environment:");
   });
 });
 
@@ -83,12 +90,8 @@ describe("YAML 값 인용 — 인용을 빼서 0000이 0으로 접혀 로그인�
     for (const bad of ['a"b', "a\nb", "a$b"]) expect(() => yamlString(bad)).toThrow();
   });
 
-  it("비밀값이 숫자여도 문자열로 남는다", () => {
-    expect(renderCompose(spec(), ctx({ env: { ADE_TOKEN: "0000" } }))).toContain(`ADE_TOKEN: "0000"`);
-  });
-
-  it("환경변수 이름이 아니면 던진다", () => {
-    expect(() => renderCompose(spec(), ctx({ env: { "not-a-key": "x" } }))).toThrow();
+  it("envFile 경로에 따옴표가 필요하면 인용한다", () => {
+    expect(renderCompose(spec(), ctx({ envFile: "/home/x/my env/ade.env" }))).toContain(`"/home/x/my env/ade.env"`);
   });
 });
 

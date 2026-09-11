@@ -39,6 +39,12 @@ export interface UpInput {
 const LOCK_SUBDIR = ".locks";
 const CRED_MODE = 0o600;
 
+/**
+ * 상태 디렉터리의 권한. 비밀 자체는 여기 없지만(→ 결정 3) **경로·터널 ID·이미지 태그가 있다.**
+ * 배포의 모양을 남에게 보여 줄 이유가 없고, `secure/`와 같은 기준을 쓰는 편이 헷갈리지 않는다.
+ */
+const STATE_MODE = 0o700;
+
 const lockKeys = (spec: DeploySpec): readonly string[] => [
   `tunnel-${spec.name}`,
   `dns-${spec.hostname}`,
@@ -74,11 +80,13 @@ const ensureTunnel = async (input: UpInput, ports: Ports): Promise<string> => {
 
   const temp = path.join(input.stateDir, input.spec.name, ".new-tunnel-creds.json");
   ports.fs.mkdir(path.dirname(temp));
+  ports.fs.chmod(path.dirname(temp), STATE_MODE);
   const id = await createTunnel(ports.exec, input.spec.name, temp);
 
   const final = path.join(input.credentialsDir, `${id}.json`);
   if (ports.fs.exists(final)) throw new Error(`자격증명이 이미 있습니다: ${final} — 덮어쓰지 않습니다`);
   ports.fs.mkdir(input.credentialsDir);
+  ports.fs.chmod(input.credentialsDir, STATE_MODE);
   ports.fs.rename(temp, final);
   ports.fs.chmod(final, CRED_MODE);
   ports.log(`터널 ${input.spec.name} 생성 (${id})`);
@@ -169,7 +177,10 @@ export const up = async (input: UpInput, ports: Ports): Promise<Manifest> => {
       }
     }
 
-    const env = spec.envFile === undefined || ports.dryRun ? {} : parseEnvFile(ports.fs.readFile(spec.envFile));
+    // **읽지 않는다.** 있는지만 본다 — 값은 compose가 뜰 때 직접 읽는다(→ ADR 0007).
+    if (spec.envFile !== undefined && !ports.dryRun && !ports.fs.exists(spec.envFile)) {
+      throw new Error(`envFile이 없습니다: ${spec.envFile}`);
+    }
 
     const dir = path.join(input.stateDir, spec.name);
     const composeFile = path.join(dir, "compose.yml");
@@ -180,7 +191,7 @@ export const up = async (input: UpInput, ports: Ports): Promise<Manifest> => {
       credentialsPath,
       uid: input.uid,
       gid: input.gid,
-      env,
+      envFile: spec.envFile,
     };
     const manifest: Manifest = {
       sourceFile: input.sourceFile,
@@ -198,6 +209,7 @@ export const up = async (input: UpInput, ports: Ports): Promise<Manifest> => {
     }
 
     ports.fs.mkdir(dir);
+    ports.fs.chmod(dir, STATE_MODE);
     ports.fs.writeFile(composeFile, renderCompose(spec, renderCtx));
     ports.fs.writeFile(path.join(dir, "cloudflared.yml"), renderCloudflared(spec, renderCtx));
     ports.fs.writeFile(path.join(dir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);

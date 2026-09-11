@@ -7,10 +7,14 @@ import type { ExecResult } from "./cloudflared.ts";
  * 심링크를 다루는 테스트가 없으므로 `exists`와 `realpath`가 같은 집합을 본다. 그 단순화가
  * 정확한 범위에서만 쓴다.
  */
-export const makeFakeFs = (initial: Readonly<Record<string, string>> = {}): FsPort & { files: Map<string, string> } => {
+export const makeFakeFs = (
+  initial: Readonly<Record<string, string>> = {},
+): FsPort & { files: Map<string, string>; modes: Map<string, number> } => {
   const files = new Map(Object.entries(initial));
+  const modes = new Map<string, number>();
   return {
     files,
+    modes,
     exists: (p) => files.has(p),
     realpath: (p) => (files.has(p) ? p : undefined),
     readFile: (p) => files.get(p) ?? "",
@@ -20,7 +24,7 @@ export const makeFakeFs = (initial: Readonly<Record<string, string>> = {}): FsPo
       files.set(to, files.get(from) ?? "");
       files.delete(from);
     },
-    chmod: () => undefined,
+    chmod: (p, mode) => void modes.set(p, mode),
     rm: (p) => void files.delete(p),
   };
 };
