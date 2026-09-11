@@ -50,21 +50,49 @@ printf '%s' "feat(client): 검색 패널을 연다" | pnpm --filter ops exec com
 
 ## CI가 하는 일
 
-PR을 열면 다섯 잡이 돈다. 전부 로컬에서 부를 수 있는 명령이다 — **CI에만 있는 검사를 만들지 않는다.**
+PR을 열면 여섯 잡이 돈다. 검사 다섯은 전부 로컬에서 부를 수 있는 명령이다 —
+**CI에만 있는 검사를 만들지 않는다.**
 
 | 잡 | 하는 일 | 로컬에서 같은 것 |
 |---|---|---|
 | `check` | lint → typecheck → test → build | `pnpm --filter ops check` + `pnpm -r --if-present run build` |
-| `container` | 이미지를 빌드해 실제로 띄우고 `/api/health`를 기다린다 | `ADE_UID=$(id -u) ADE_GID=$(id -g) docker compose -p ci -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci up -d --build --wait` |
+| `container` | 이미지를 빌드해 띄우고 `/api/health`를 기다린다 | `ADE_UID=$(id -u) ADE_GID=$(id -g) docker compose -p ci -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci up -d --build --wait` |
 | `e2e` | Playwright 13개 | `pnpm --filter client run test:e2e` |
-| `pr-title` | 제목 형식 | 위의 `commitlint` 한 줄 |
-| `secrets` | 새 커밋에 시크릿이 있는지 | `docker run --rm -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.30.1 git /repo -i /repo/ops/.gitleaksignore --redact` |
+| `pr-title` | 제목 형식 | `printf '%s' "제목" \| pnpm --filter ops exec commitlint` |
+| `secrets` | 새 커밋에 시크릿이 있는지 | `docker run --rm -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.30.1 git /repo --gitleaks-ignore-path /repo/ops/.gitleaksignore --redact --no-banner` |
+| `preview` | **미리보기를 띄운다**(아래) | `node ops/deploy/cli.ts up ops/deploy/preview.deploy.ts` |
 
 **CI가 실패하면 같은 브랜치에서 고쳐 다시 푸시한다. CI 설정을 바꿔서 통과시키지 않는다.**
 
+`check`의 순서는 `ops/pipeline/check.ts`(typecheck → lint → test)와 다르다. CI는 **싼 것부터**
+돌려 원인이 가려지지 않게 하고, 로컬은 타입이 먼저 서야 나머지 결과가 읽힌다는 판단이다.
+
+## 미리보기
+
+PR을 열면 **사용자의 기계에** 그 PR의 ADE가 뜬다.
+
+- 주소는 `pr-<번호>-arka.<PREVIEW_DOMAIN>`. 봇이 PR에 코멘트 하나를 달고 **갱신**한다.
+- 워크스페이스는 그 PR의 체크아웃 사본이다 — 파일 트리와 소스 제어 탭이 실제로 동작한다.
+  **실배포의 개인 디렉터리는 붙지 않는다.**
+- **PR을 닫으면 사라진다** — 컨테이너·터널·DNS·Access 앱·이미지까지. 놓친 것은 하루 한 번 청소가 줍는다.
+- 동시에 `PREVIEW_MAX`(5)개까지. 넘으면 배포하지 않고 실패한다.
+- **포크에서 온 PR은 뜨지 않는다.** 그 기계에 실배포와 개인 디렉터리가 있다.
+
+## 배포
+
+**`main`에 머지하면 `arka.sangjun.dev`에 배포된다.** 머지가 곧 배포다.
+
+검사(`check`·`container`·`e2e`)가 통과한 뒤에만 돌고, 마지막에 익명 접근이 Access에 막히는지
+확인한다. 실패하면 로그와 되돌리는 명령이 함께 남는다.
+
+서버를 다시 세우거나 장애를 짚는 절차는 [operations.md](operations.md)에 있다.
+왜 이 모양인지는 [ADR 0006](adr/0006-deploy-shape.md)에 있다.
+
 ### 아직 CI에 없는 것
 
-- **VRT** — 기준 이미지가 낡아 빨간 상태다([TASK-35](tasks/0035.md)). 초록으로 만든 뒤에 넣는다.
+- **VRT** — 기준 이미지는 **검토에서 그 스토리를 Accept할 때 하나씩** 만든다
+  (`CONVENTIONS.md`의 테스트 절). 아직 승인된 것이 없어 전부 건너뛴다. 승인이 쌓이면
+  관문으로 올린다([TASK-53](tasks/0053.md)).
 - **Docker 경계 스모크**(`pnpm --filter ops test:smoke`) — `container` 잡과 겹치면서 느리다.
 
-둘 다 `pnpm --filter ops verify`에는 그대로 들어 있다. **내보내기 전에는 여전히 손으로 한 번 돈다.**
+둘 다 `pnpm --filter ops verify`에는 그대로 들어 있다.
