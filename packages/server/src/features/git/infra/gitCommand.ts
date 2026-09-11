@@ -14,6 +14,23 @@ export type GitRunOptions = {
 export type GitRunner = (args: readonly string[], options?: GitRunOptions) => Promise<string>;
 
 /**
+ * git에게 넘길 환경. **부모의 것을 통째로 넘기지 않는다**(→ ADR 0007).
+ *
+ * git은 사용자 워크스페이스 **안에서** 돌고, 그 안의 `.git/config`는 워크스페이스 내용이다 —
+ * 훅이나 credential helper가 붙으면 환경을 읽는다. 비밀이 거기 있을 이유가 없다.
+ */
+const gitEnv = (): NodeJS.ProcessEnv => {
+  // `PATH`는 실행 파일을 찾는 데, `HOME`은 `~/.gitconfig`를 읽는 데 필요하다.
+  const passed: NodeJS.ProcessEnv = {};
+  for (const key of ["PATH", "HOME", "TZ"]) {
+    const value = process.env[key];
+    if (value !== undefined) passed[key] = value;
+  }
+  // 프롬프트를 띄우지 않는다(멈춘다). 출력 로케일을 고정한다(파싱이 언어를 타지 않게).
+  return { ...passed, GIT_TERMINAL_PROMPT: "0", LC_ALL: "C" };
+};
+
+/**
  * `git -C <root> …`를 셸 없이 실행한다 — 인자가 배열로 가므로 경로에 공백·따옴표가 있어도 그대로다.
  * 실패는 `GitError`로: 저장소 아님 → `NotARepository`, git 없음 → `Unavailable`, 나머지 → `CommandFailed`.
  */
@@ -22,7 +39,7 @@ export const createGitRunner = (root: string): GitRunner => (args, { okExitCodes
     execFile(
       "git",
       ["-C", root, ...args],
-      { timeout: TIMEOUT_MS, maxBuffer: MAX_OUTPUT, env: { ...process.env, GIT_TERMINAL_PROMPT: "0", LC_ALL: "C" } },
+      { timeout: TIMEOUT_MS, maxBuffer: MAX_OUTPUT, env: gitEnv() },
       (error, stdout, stderr) => {
         if (error === null) {
           resolve(stdout);
