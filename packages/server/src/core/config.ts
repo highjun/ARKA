@@ -2,6 +2,7 @@ import { mkdir, realpath, stat } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { z } from "zod";
+import { type AgentConfig, AgentEnv } from "../features/agent/config";
 
 /**
  * 서버 설정. 도메인을 모르므로 `core/`에 둔다 — 워크스페이스 루트는
@@ -20,7 +21,7 @@ export class ConfigError extends Error {
   }
 }
 
-const Env = z.object({
+const CoreEnv = z.object({
   /** 워크스페이스 루트. 없으면 현재 작업 디렉터리. */
   ADE_WORKSPACE: z.string().min(1).optional(),
   /** 1~65535. 없으면 3000. */
@@ -35,9 +36,6 @@ const Env = z.object({
   ADE_CLIENT_ROOT: z.string().min(1).optional(),
   /** 데이터 디렉터리(SQLite 등). 없으면 `~/.ade`. 없는 디렉터리는 만든다. */
   ADE_DATA_DIR: z.string().min(1).optional(),
-  /** 있으면 실제 LLM 실행기를 쓴다. 없으면 스크립트 실행기(→ ADR 0019). 리포에 넣지 않는다. */
-  ADE_ANTHROPIC_API_KEY: z.string().min(1).optional(),
-  ADE_ANTHROPIC_MODEL: z.string().min(1).default("claude-opus-5"),
   /** 이 이미지를 만든 커밋. 이미지가 구워 넣는다 — 소스에서 바로 띄우면 없다. */
   ADE_GIT_SHA: z.string().min(1).optional(),
 });
@@ -52,8 +50,8 @@ export type ServerConfig = {
   readonly clientRoot: string | undefined;
   /** 절대경로. `data.db`가 여기 산다. */
   readonly dataDir: string;
-  /** 키가 없으면 `undefined` — 스크립트 실행기. */
-  readonly anthropic: { readonly apiKey: string; readonly model: string } | undefined;
+  /** 어느 실행기를 조립할지. 기능이 자기 변수를 소유한다(→ features/agent/config.ts). */
+  readonly agent: AgentConfig;
   /** 이 이미지를 만든 커밋. 소스에서 바로 띄우면 `undefined`. */
   readonly gitSha: string | undefined;
 };
@@ -89,18 +87,25 @@ const withoutEmpty = (env: Readonly<Record<string, string | undefined>>): Record
   Object.fromEntries(Object.entries(env).filter(([, value]) => value !== ""));
 
 /**
+ * 조각 하나를 같은 환경에 대고 돌린다. **실패는 전부 여기서 `ConfigError`가 된다** — 조각이
+ * 여럿이어도 사람이 보는 오류 꼴은 하나다. 조각끼리 순서를 타지 않게 각각 따로 판다.
+ */
+const parseEnv = <T>(schema: z.ZodType<T>, env: Readonly<Record<string, string | undefined>>): T => {
+  const parsed = schema.safeParse(env);
+  if (parsed.success) return parsed.data;
+  const issue = parsed.error.issues[0];
+  throw new ConfigError(`${issue?.path.join(".") ?? "env"}: ${issue?.message ?? "invalid"}`);
+};
+
+/**
  * 환경변수에서 설정을 만든다.
  *
  * @throws ConfigError 값이 스키마에 맞지 않거나, 가리키는 디렉터리가 없거나 디렉터리가 아닐 때.
  */
 export const loadConfig = async (env: Readonly<Record<string, string | undefined>> = process.env): Promise<ServerConfig> => {
-  const parsed = Env.safeParse(withoutEmpty(env));
-  if (!parsed.success) {
-    const issue = parsed.error.issues[0];
-    const field = issue?.path.join(".") ?? "env";
-    throw new ConfigError(`${field}: ${issue?.message ?? "invalid"}`);
-  }
-  const { ADE_WORKSPACE, ADE_PORT, ADE_HOST, ADE_CLIENT_ROOT, ADE_DATA_DIR, ADE_ANTHROPIC_API_KEY, ADE_ANTHROPIC_MODEL, ADE_GIT_SHA } = parsed.data;
+  const present = withoutEmpty(env);
+  const { ADE_WORKSPACE, ADE_PORT, ADE_HOST, ADE_CLIENT_ROOT, ADE_DATA_DIR, ADE_GIT_SHA } = parseEnv(CoreEnv, present);
+  const agent = parseEnv(AgentEnv, present);
 
   // 데이터 디렉터리는 워크스페이스와 달리 우리가 소유한다 — 없으면 만든다.
   const dataDir = path.resolve(ADE_DATA_DIR ?? path.join(os.homedir(), ".ade"));
@@ -116,7 +121,7 @@ export const loadConfig = async (env: Readonly<Record<string, string | undefined
     host: ADE_HOST,
     clientRoot: ADE_CLIENT_ROOT === undefined ? undefined : await resolveDirectory("ADE_CLIENT_ROOT", ADE_CLIENT_ROOT),
     dataDir: await resolveDirectory("ADE_DATA_DIR", dataDir),
-    anthropic: ADE_ANTHROPIC_API_KEY === undefined ? undefined : { apiKey: ADE_ANTHROPIC_API_KEY, model: ADE_ANTHROPIC_MODEL },
+    agent,
     gitSha: ADE_GIT_SHA,
   };
 };

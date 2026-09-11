@@ -34,7 +34,7 @@ export const createApp = ({ config, log, startedAt }: { config: ServerConfig; lo
     dataDir: config.dataDir,
     log,
     workspace: createWorkspaceOperations(workspace.root),
-    anthropic: config.anthropic,
+    agent: config.agent,
   });
 
   // 맨 앞이다 — 인증 컨텍스트가 먼저 실리고, 뒤의 어떤 핸들러가 답하든 로그 한 줄이 남는다.

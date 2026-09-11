@@ -5,6 +5,7 @@ import path from "node:path";
 import { HealthResponse, PROTOCOL_HEADER, PROTOCOL_VERSION, VersionResponse } from "#contracts";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createApp } from "./app";
+import { makeConfig } from "./core/config.testing";
 import type { LogFields, Logger } from "./core/log";
 
 let workspaceRoot: string;
@@ -22,7 +23,7 @@ const log: Logger = {
 
 const buildApp = () =>
   createApp({
-    config: { workspaceRoot, port: 0, host: "127.0.0.1", clientRoot: undefined, dataDir: ":memory:", anthropic: undefined, gitSha: undefined },
+    config: makeConfig({ workspaceRoot }),
     log,
     startedAt: "2026-09-09T00:00:00.000Z",
   }).app;
@@ -45,7 +46,7 @@ describe("createApp", () => {
 
   it("/api/version은 이미지가 구운 커밋 SHA를 준다 — 무엇이 떠 있는지 묻는 유일한 길이다", async () => {
     const app = createApp({
-      config: { workspaceRoot, port: 0, host: "127.0.0.1", clientRoot: undefined, dataDir: ":memory:", anthropic: undefined, gitSha: "abc1234-dirty" },
+      config: makeConfig({ workspaceRoot, gitSha: "abc1234-dirty" }),
       log,
       startedAt: "2026-09-09T00:00:00.000Z",
     }).app;

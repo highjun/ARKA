@@ -5,6 +5,7 @@ import path from "node:path";
 import type { ZodType } from "zod";
 import { PROTOCOL_HEADER, PROTOCOL_VERSION } from "#contracts";
 import { createApp } from "./app";
+import { makeConfig } from "./core/config.testing";
 
 /**
  * 라우트 응답이 `contracts`의 스키마를 통과하는지 보는 도구.
@@ -25,7 +26,7 @@ const silent = { info: () => undefined, warn: () => undefined, error: () => unde
 export const probeApp = async (): Promise<RouteProbe & { dispose: () => Promise<void> }> => {
   const workspaceRoot = realpathSync(await mkdtemp(path.join(os.tmpdir(), "ade-response-")));
   const { app } = createApp({
-    config: { workspaceRoot, port: 0, host: "127.0.0.1", clientRoot: undefined, dataDir: ":memory:", anthropic: undefined, gitSha: undefined },
+    config: makeConfig({ workspaceRoot }),
     log: silent,
     startedAt: "2026-09-09T00:00:00.000Z",
   });
