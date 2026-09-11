@@ -15,15 +15,19 @@ export interface RenderContext {
   readonly credentialsPath: string;
   readonly uid: number;
   readonly gid: number;
-  /** `envFile`에서 읽은 값. 비어 있으면 `environment:` 키 자체를 내지 않는다. */
-  readonly env: Readonly<Record<string, string>>;
+  /**
+   * 비밀이 든 파일의 **호스트 경로**. 값이 아니라 경로다(→ ADR 0007).
+   *
+   * 값을 여기 담아 `environment:`로 구우면 생성물이 비밀의 사본이 된다 — 그 디렉터리 권한이
+   * 곧 비밀의 권한이 된다. compose가 자기 손으로 읽게 두면 사본이 생기지 않는다.
+   */
+  readonly envFile?: string;
 }
 
 /** YAML이 다른 뜻으로 읽는 값들. `0000`이 정수 `0`으로 접혀 로그인이 늘 실패한 적이 있다. */
 const AMBIGUOUS =
   /^([-+]?[0-9]+|[-+]?0[xo][0-9a-f]+|[-+]?(\.[0-9]+|[0-9]+\.[0-9]*)(e[-+]?[0-9]+)?|true|false|yes|no|on|off|null|~)$/iu;
 const BARE = /^[A-Za-z0-9._/:@-]+$/u;
-const ENV_KEY = /^[A-Za-z_][A-Za-z0-9_]*$/u;
 
 /**
  * 값을 YAML에 안전하게 놓는다. 모호하면 따옴표로 싸고, 쌀 수 없는 것은 **던진다.**
@@ -56,13 +60,9 @@ export const renderCompose = (spec: DeploySpec, ctx: RenderContext): string => {
     `    user: ${String(ctx.uid)}:${String(ctx.gid)}`,
   );
 
-  const envKeys = Object.keys(ctx.env);
-  if (envKeys.length > 0) {
-    lines.push(`    environment:`);
-    for (const key of envKeys.sort()) {
-      if (!ENV_KEY.test(key)) throw new Error(`환경변수 이름이 아닙니다: ${key}`);
-      lines.push(`      ${key}: ${yamlString(ctx.env[key] ?? "")}`);
-    }
+  if (ctx.envFile !== undefined) {
+    // **값이 아니라 경로다.** compose가 뜰 때 직접 읽으므로 생성물에 비밀이 남지 않는다.
+    lines.push(`    env_file:`, `      - ${yamlString(ctx.envFile)}`);
   }
 
   if (spec.mounts.length > 0) {
