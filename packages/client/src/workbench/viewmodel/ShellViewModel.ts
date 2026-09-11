@@ -16,17 +16,21 @@ import type { ShellActivityRow, ShellTabPaneNode, ShellTabRow, IShellViewModel, 
 
 /** `IShellViewModel`의 유일한 구현체 — `IActivityModel`·`ITabsModel`·`IThemeModel`을 조합해 화면 상태를 파생시킨다. */
 /**
- * 빌드 시각을 화면에 띄울 한 줄로 바꾼다.
+ * 빌드 표시 한 줄을 만든다 — 시각과, 있으면 커밋.
  *
- * 서버는 ISO로만 주고 형식은 여기서 정한다 — **보는 사람의 시간대로** 읽혀야 하기 때문이다.
- * 서버가 UTC로 굳혀 보내면 폰에서 시차를 머릿속으로 빼야 한다.
+ * 시각은 서버가 ISO로만 주고 형식은 여기서 정한다 — **보는 사람의 시간대로** 읽혀야 하기
+ * 때문이다. 서버가 UTC로 굳혀 보내면 폰에서 시차를 머릿속으로 빼야 한다.
+ *
+ * 커밋은 **없을 수 있다**(소스에서 바로 띄운 서버). 없으면 시각만 남는다.
  */
-const formatBuildTime = (iso: string): string => {
+const formatBuildLabel = (iso: string, gitSha?: string): string => {
   const at = new Date(iso);
   if (Number.isNaN(at.getTime())) return '';
 
   const two = (value: number): string => String(value).padStart(2, '0');
-  return `v${String(at.getFullYear())}.${two(at.getMonth() + 1)}.${two(at.getDate())} ${two(at.getHours())}:${two(at.getMinutes())}`;
+  const time = `v${String(at.getFullYear())}.${two(at.getMonth() + 1)}.${two(at.getDate())} ${two(at.getHours())}:${two(at.getMinutes())}`;
+  // 앞 7자는 사람이 눈으로 옮겨 적는 길이다. `-dirty`는 그대로 남긴다 — 그게 신호다.
+  return gitSha === undefined ? time : `${time} · ${gitSha.replace(/^([0-9a-f]{7})[0-9a-f]*/u, '$1')}`;
 };
 
 /** 셸 전체가 보는 하나의 ViewModel. 탭·활동·테마·알림 Model을 구독해 화면이 쓸 값으로 편다. */
@@ -141,7 +145,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   onMount(): void {
     this.#startup.start();
     void this.#serverInfo.load().then((info) => {
-      this.#buildId.set(info === null ? '' : formatBuildTime(info.builtAt));
+      this.#buildId.set(info === null ? '' : formatBuildLabel(info.builtAt, info.gitSha));
       this.#workspaceName.set(info?.workspaceName ?? '');
       this.#isClientOutdated.set(info !== null && info.protocolVersion !== PROTOCOL_VERSION);
     });
