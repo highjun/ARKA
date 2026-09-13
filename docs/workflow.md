@@ -56,7 +56,7 @@ PR을 열면 다섯 잡이 돈다. 전부 로컬에서 부를 수 있는 명령�
 | 잡 | 하는 일 | 로컬에서 같은 것 |
 |---|---|---|
 | `check` | lint → typecheck → test → build | `pnpm --filter ops check` + `pnpm -r --if-present run build` |
-| `container` | 이미지를 빌드해 띄우고 `/api/health`를 기다린다 | `ADE_UID=$(id -u) ADE_GID=$(id -g) docker compose -p ci -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci up -d --build --wait` |
+| `container` | 이미지를 빌드해 띄우고 `/api/health`를 기다린다 | `ADE_UID=$(id -u) ADE_GID=$(id -g) docker compose -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci up -d --build --wait` |
 | `e2e` | Playwright 13개 | `pnpm --filter client run test:e2e` |
 | `pr-title` | 제목 형식 | `printf '%s' "제목" \| pnpm --filter ops exec commitlint` |
 | `secrets` | 새 커밋에 시크릿이 있는지 | `docker run --rm -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.30.1 git /repo --gitleaks-ignore-path /repo/ops/.gitleaksignore --redact --no-banner` |
@@ -77,6 +77,9 @@ PR별 미리보기는 **없다.** 2026-09-13에 걷어냈다 — PR마다 이 �
 
 검사(`check`·`container`·`e2e`)가 통과한 뒤에만 돌고, 마지막에 익명 접근이 Access에 막히는지
 확인한다. 실패하면 로그와 되돌리는 명령이 함께 남는다.
+
+배포 잡이 하는 것은 셋이다 — 이미지를 굽고(`build.ts`), **CI가 검사한 것과 같은 compose 파일**로
+올리고, 익명 스모크를 돌린다. 터널·인그레스·DNS는 코드가 아니라 Cloudflare 대시보드가 든다.
 
 서버를 다시 세우거나 장애를 짚는 절차는 [operations.md](operations.md)에 있다.
 왜 이 모양인지는 [ADR 0006](adr/0006-deploy-shape.md)에 있다.
