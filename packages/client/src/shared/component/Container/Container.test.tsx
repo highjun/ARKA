@@ -1,7 +1,7 @@
 import { createRef } from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { implementsClassName, implementsDataComponent, implementsForwardRef, implementsNoA11yViolations } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from '#utils/testing';
 import { Container } from './Container';
 
 /** 다섯 조각을 감싼 구조가 계약대로 동작하는지 본다 — 내용은 Viewport 안에 들어가고 ref 도 거기 꽂힌다. */
@@ -18,7 +18,7 @@ describe('Container', () => {
   implementsClassName((extra) => <Container {...extra}>content</Container>);
   implementsDataComponent((extra) => <Container {...extra}>content</Container>, 'Container');
   implementsNoA11yViolations(() => <Container>content</Container>);
-  implementsForwardRef((extra) => <Container {...extra}>content</Container>, HTMLDivElement);
+  implementsRef((extra) => <Container {...extra}>content</Container>, HTMLDivElement);
 
   it('chrome 을 data-chrome 으로 노출한다', () => {
     const { container } = render(<Container chrome="none">content</Container>);

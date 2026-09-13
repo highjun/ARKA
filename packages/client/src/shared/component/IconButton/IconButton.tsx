@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import type { Ref } from 'react';
 import { clsx } from 'clsx';
 import styles from './IconButton.module.css';
 import { IconButton as PrimerIconButton } from '@primer/react';
@@ -7,7 +7,10 @@ import type { IconButtonProps as PrimerIconButtonProps } from '@primer/react';
 /** Primer `IconButtonProps` 계약을 그대로 재수출한다 — "다른 API의 아이콘 버튼"이 아니라
  *  "그 API 그대로에 CSS 한 줄만 더한 아이콘 버튼"이라, 계약을 새로 선언하면 오히려 둘이
  *  갈라진다. */
-export type IconButtonProps = PrimerIconButtonProps;
+export type IconButtonProps = PrimerIconButtonProps & {
+  /** 루트 버튼으로 그대로 통과한다 — Primer 쪽이 `forwardRef`라 여기서 prop으로 받아 넘긴다. */
+  readonly ref?: Ref<HTMLButtonElement>;
+};
 
 /**
  * Primer `IconButton`을 그대로 감싼다 — `variant`·`size`·hover/focus 배경·(호버 시) 툴팁까지
@@ -19,12 +22,12 @@ export type IconButtonProps = PrimerIconButtonProps;
  * 컴포넌트로 바꾸기만 하면 똑같이 커진다(2026-09-02, 사용자 피드백 "모바일에서 버튼이 작다"
  * 대응 — 컴포넌트마다 반복하던 걸 여기 하나로 모았다).
  */
-export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>((props, ref) => (
+export const IconButton = ({ ref, ...props }: IconButtonProps) => (
   <PrimerIconButton
     {...props}
     ref={ref}
     data-component="IconButton"
     className={clsx(props.className, styles['root'])}
   />
-));
+);
 

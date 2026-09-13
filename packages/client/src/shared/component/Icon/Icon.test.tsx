@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   implementsClassName,
   implementsDataComponent,
-  implementsForwardRef,
+  implementsRef,
   implementsNoA11yViolations,
 } from '#utils/testing';
 import { ICON_MAP, Icon } from './Icon';
@@ -24,7 +24,7 @@ describe('Icon', () => {
 
   implementsClassName((extra) => <Icon iconId="check" {...extra} />);
   implementsDataComponent((extra) => <Icon iconId="check" {...extra} />, 'Icon');
-  implementsForwardRef((extra) => <Icon iconId="check" {...extra} />, HTMLSpanElement);
+  implementsRef((extra) => <Icon iconId="check" {...extra} />, HTMLSpanElement);
   implementsNoA11yViolations(() => <Icon iconId="check" />);
 
   it('size 를 data-size 로 노출한다', () => {

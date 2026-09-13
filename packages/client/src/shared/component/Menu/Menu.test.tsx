@@ -3,7 +3,7 @@ import type { ComponentProps } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { expectNoA11yViolations } from '#utils/axe';
-import { implementsClassName, implementsDataComponent, implementsForwardRef, implementsNoA11yViolations } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from '#utils/testing';
 import { Menu } from './Menu';
 
 const Demo = (
@@ -92,7 +92,7 @@ describe('Menu', () => {
     </Menu>
   ));
 
-  implementsForwardRef(
+  implementsRef(
     (extra) => (
       <Menu open>
         <Menu.Trigger>더보기</Menu.Trigger>
@@ -104,7 +104,7 @@ describe('Menu', () => {
     HTMLDivElement,
   );
 
-  it('forwardRef 로 Content DOM 노드에 접근할 수 있다', () => {
+  it('ref 로 Content DOM 노드에 접근할 수 있다', () => {
     const ref = createRef<HTMLDivElement>();
 
     render(

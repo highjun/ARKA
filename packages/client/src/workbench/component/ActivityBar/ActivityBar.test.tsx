@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { implementsClassName, implementsDataComponent, implementsForwardRef, implementsNoA11yViolations } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from '#utils/testing';
 import { ActivityBar } from './ActivityBar';
 import type { ActivityBarItem } from './ActivityBar';
 
@@ -29,7 +29,7 @@ describe('ActivityBar', () => {
   implementsDataComponent((extra) => <ActivityBar items={ITEMS} onSelect={() => {}} {...extra} />, 'ActivityBar');
 
   implementsClassName((extra) => <ActivityBar items={ITEMS} onSelect={() => {}} {...extra} />);
-  implementsForwardRef((extra) => <ActivityBar items={ITEMS} onSelect={() => {}} {...extra} />, HTMLElement);
+  implementsRef((extra) => <ActivityBar items={ITEMS} onSelect={() => {}} {...extra} />, HTMLElement);
   implementsNoA11yViolations(() => <ActivityBar items={ITEMS} onSelect={() => {}} />);
 
   describe('State', () => {

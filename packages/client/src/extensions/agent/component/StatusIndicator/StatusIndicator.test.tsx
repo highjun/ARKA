@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   implementsClassName,
   implementsDataComponent,
-  implementsForwardRef,
+  implementsRef,
   implementsNoA11yViolations,
 } from '#utils/testing';
 import { StatusIndicator } from './StatusIndicator';
@@ -31,6 +31,6 @@ describe('StatusIndicator', () => {
 
   implementsClassName((extra) => <StatusIndicator status="running" {...extra} />);
   implementsDataComponent((extra) => <StatusIndicator status="running" {...extra} />, 'StatusIndicator');
-  implementsForwardRef((extra) => <StatusIndicator status="running" {...extra} />, HTMLSpanElement);
+  implementsRef((extra) => <StatusIndicator status="running" {...extra} />, HTMLSpanElement);
   implementsNoA11yViolations(() => <StatusIndicator status="running" />);
 });

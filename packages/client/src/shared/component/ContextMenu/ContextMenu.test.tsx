@@ -2,7 +2,7 @@ import type { ComponentProps } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { expectNoA11yViolations } from '#utils/axe';
-import { implementsClassName, implementsDataComponent, implementsForwardRef, implementsNoA11yViolations } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from '#utils/testing';
 import { ContextMenu } from './ContextMenu';
 
 const Demo = (
@@ -75,7 +75,7 @@ describe('ContextMenu', () => {
     </ContextMenu>
   ));
 
-  implementsForwardRef(
+  implementsRef(
     (extra) => (
       <ContextMenu open>
         <ContextMenu.Trigger>영역</ContextMenu.Trigger>

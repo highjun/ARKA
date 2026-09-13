@@ -1,12 +1,13 @@
 import { clsx } from 'clsx';
-import { forwardRef } from 'react';
-import type { HTMLAttributes, ReactNode } from 'react';
+import type { HTMLAttributes, ReactNode, Ref } from 'react';
 import styles from './SidebarLayout.module.css';
 
 const hasContent = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
 
 /** `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다. */
 export interface SidebarLayoutProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLDivElement>;
   /** 헤더에 표시할 제목 — 아이콘 접두어 등을 조합할 수 있도록 문자열이 아니라 `ReactNode`다. */
   readonly title?: ReactNode;
   /** 헤더 오른쪽에 놓을 액션(버튼·`Menu` 등) — 어떤 조합이든 소비처가 직접 조립해 넘긴다. */
@@ -21,21 +22,19 @@ export interface SidebarLayoutProps extends Omit<HTMLAttributes<HTMLDivElement>,
  * `title`·`actions` 둘 다 없으면 헤더 행 자체를 렌더하지 않는다(`Shell`의 `panelTitle`/
  * `panelActions` 없을 때 규칙과 같다).
  */
-export const SidebarLayout = forwardRef<HTMLDivElement, SidebarLayoutProps>(
-  ({ title, actions, children, className, ...props }, ref) => {
-    const hasHeader = title !== undefined || hasContent(actions);
+export const SidebarLayout = ({ title, actions, children, className, ref, ...props }: SidebarLayoutProps) => {
+  const hasHeader = title !== undefined || hasContent(actions);
 
-    return (
-      <div ref={ref} {...props} data-component="SidebarLayout" className={clsx(className, styles['root'])}>
-        {hasHeader ? (
-          <header className={styles['header']}>
-            <div className={styles['title']}>{title}</div>
-            {hasContent(actions) ? <div className={styles['actions']}>{actions}</div> : null}
-          </header>
-        ) : null}
-        <div className={styles['body']}>{children}</div>
-      </div>
-    );
-  },
-);
+  return (
+    <div ref={ref} {...props} data-component="SidebarLayout" className={clsx(className, styles['root'])}>
+      {hasHeader ? (
+        <header className={styles['header']}>
+          <div className={styles['title']}>{title}</div>
+          {hasContent(actions) ? <div className={styles['actions']}>{actions}</div> : null}
+        </header>
+      ) : null}
+      <div className={styles['body']}>{children}</div>
+    </div>
+  );
+};
 

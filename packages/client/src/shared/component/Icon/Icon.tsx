@@ -1,5 +1,4 @@
-import { forwardRef } from 'react';
-import type { HTMLAttributes } from 'react';
+import type { HTMLAttributes, Ref } from 'react';
 import { clsx } from 'clsx';
 import styles from './Icon.module.css';
 import { icons } from './data';
@@ -21,25 +20,26 @@ Iconify.addCollection(octicon as Parameters<typeof Iconify.addCollection>[0]);
 
 /** `id`를 막는다 — `iconId`와 헷갈려 잘못 넘기는 것을 타입에서 끊는다. */
 export interface IconProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'id'> {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLSpanElement>;
   /** 표시할 아이콘. */
   readonly iconId: IconId;
   /** Icon의 크기. sm, md, lg 중 하나로 기본값은 md. */
   readonly size?: IconSize;
 }
 
-export const Icon = forwardRef<HTMLSpanElement, IconProps>(
-  ({ className, iconId, size = 'md', ...props }, ref) => (
-    <span
-      ref={ref}
-      aria-hidden="true"
-      data-icon={iconId}
-      data-size={size}
-      className={clsx(className, styles['Icon'])}
-      {...props}
-      data-component="Icon"
-    >
-      <Iconify.Icon aria-hidden="true" focusable="false" height="100%" width="100%" icon={ICON_MAP[iconId]} />
-    </span>
-  ),
+/** `ICON_MAP`의 아이콘 하나를 그린다 — 장식이라 스크린리더에서 숨긴다. */
+export const Icon = ({ className, iconId, size = 'md', ref, ...props }: IconProps) => (
+  <span
+    ref={ref}
+    aria-hidden="true"
+    data-icon={iconId}
+    data-size={size}
+    className={clsx(className, styles['Icon'])}
+    {...props}
+    data-component="Icon"
+  >
+    <Iconify.Icon aria-hidden="true" focusable="false" height="100%" width="100%" icon={ICON_MAP[iconId]} />
+  </span>
 );
 

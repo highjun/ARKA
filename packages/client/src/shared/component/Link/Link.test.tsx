@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { implementsClassName, implementsDataComponent, implementsForwardRef, implementsNoA11yViolations } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from '#utils/testing';
 import { Link } from './Link';
 
 describe('Link', () => {
@@ -17,7 +17,7 @@ describe('Link', () => {
     ),
     'Link',
   );
-  implementsForwardRef(
+  implementsRef(
     (extra) => (
       <Link href="#" {...extra}>
         링크

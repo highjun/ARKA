@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { implementsClassName, implementsDataComponent, implementsForwardRef, implementsNoA11yViolations } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from '#utils/testing';
 import { Icon } from '#component/Icon';
 import { IconButton } from './IconButton';
 
@@ -9,7 +9,7 @@ const icon = () => <Icon iconId="settingsGear" size="sm" />;
 describe('IconButton', () => {
   implementsClassName((extra) => <IconButton aria-label="설정" icon={icon} {...extra} />);
   implementsDataComponent((extra) => <IconButton aria-label="설정" icon={icon} {...extra} />, 'IconButton');
-  implementsForwardRef((extra) => <IconButton aria-label="설정" icon={icon} {...extra} />, HTMLButtonElement);
+  implementsRef((extra) => <IconButton aria-label="설정" icon={icon} {...extra} />, HTMLButtonElement);
   implementsNoA11yViolations(() => <IconButton aria-label="설정" icon={icon} />);
 
   it('클릭하면 onClick이 호출된다 — 계약을 재선언 없이 그대로 통과시킨다', () => {

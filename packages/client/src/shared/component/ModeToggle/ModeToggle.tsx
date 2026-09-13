@@ -1,5 +1,5 @@
-import { forwardRef, useState } from 'react';
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { useState } from 'react';
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react';
 import { clsx } from 'clsx';
 import styles from './ModeToggle.module.css';
 import { IconButton } from '@primer/react';
@@ -39,12 +39,13 @@ const getLabel = (labels: ModeToggleLabels | undefined, currentIndex: number, fa
  * `<button>`이라 `appearance: none`을 빠뜨려 브라우저 기본 테두리/음영이 남아있던 버그가 있었다).
  * `.root`에 남은 CSS는 터치 타겟 확장(`::after`)뿐이다.
  *
- * `forwardRef` — `IconButton` 자신이 forwardRef(`ForwardRefComponent<"button" | "a", IconButtonProps>`,
- * `IconButton.d.ts` 확인)다. 우리가 감싸면서 그 ref 접근을 잃으면 raw `IconButton`을 쓸 때보다
- * 기능이 줄어든다.
+ * `ref`는 그대로 통과시킨다 — 감싸면서 ref 접근을 잃으면 raw `IconButton`을 쓸 때보다 기능이
+ * 줄어든다.
  */
 export interface ModeToggleProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'aria-labelledby' | 'children' | 'onClick' | 'value'> {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLButtonElement>;
   /** 두 상태 각각에 표시할 아이콘 — `[values[0]일 때, values[1]일 때]` 순서로 짝을 맞춘다. */
   readonly children: ModeToggleChildren;
   /** 두 상태 각각의 접근성 이름 — 없으면 `aria-label`을 쓴다. */
@@ -63,45 +64,42 @@ export interface ModeToggleProps
   readonly disabled?: boolean;
 }
 
-export const ModeToggle = forwardRef<HTMLButtonElement, ModeToggleProps>(
-  (
-    {
-      'aria-label': ariaLabel,
-      children,
-      className,
-      defaultValue,
-      disabled = false,
-      labels,
-      onValueChange,
-      value,
-      values,
-      ...props
-    },
-    ref,
-  ) => {
-    const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue ?? values[0]);
-    const resolvedValue = value ?? uncontrolledValue;
-    const handleChange = (next: string) => {
-      if (value === undefined) setUncontrolledValue(next);
-      onValueChange?.(next);
-    };
+/** 두 값 사이를 오가는 아이콘 버튼 — 어느 쪽인지는 `value`가 없으면 스스로 든다. */
+export const ModeToggle = ({
+  'aria-label': ariaLabel,
+  children,
+  className,
+  defaultValue,
+  disabled = false,
+  labels,
+  onValueChange,
+  value,
+  values,
+  ref,
+  ...props
+}: ModeToggleProps) => {
+  const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue ?? values[0]);
+  const resolvedValue = value ?? uncontrolledValue;
+  const handleChange = (next: string) => {
+    if (value === undefined) setUncontrolledValue(next);
+    onValueChange?.(next);
+  };
 
-    const { currentIndex, ...toggleProps } = getToggleProps(values, resolvedValue, disabled, handleChange);
-    const icon = () => children[currentIndex];
+  const { currentIndex, ...toggleProps } = getToggleProps(values, resolvedValue, disabled, handleChange);
+  const icon = () => children[currentIndex];
 
-    return (
-      <IconButton
-        ref={ref}
-        {...props}
-        {...toggleProps}
-        icon={icon}
-        aria-label={getLabel(labels, currentIndex, ariaLabel)}
-        disabled={disabled}
-        variant="invisible"
-        data-component="ModeToggle"
-        className={clsx(className, styles['root'])}
-      />
-    );
-  },
-);
+  return (
+    <IconButton
+      ref={ref}
+      {...props}
+      {...toggleProps}
+      icon={icon}
+      aria-label={getLabel(labels, currentIndex, ariaLabel)}
+      disabled={disabled}
+      variant="invisible"
+      data-component="ModeToggle"
+      className={clsx(className, styles['root'])}
+    />
+  );
+};
 

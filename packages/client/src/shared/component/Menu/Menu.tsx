@@ -1,5 +1,4 @@
-import { forwardRef } from 'react';
-import type { HTMLAttributes } from 'react';
+import type { HTMLAttributes, Ref } from 'react';
 import { clsx } from 'clsx';
 import { usePortalContainer } from '#utils/portal';
 import styles from './Menu.module.css';
@@ -28,6 +27,8 @@ export interface MenuProps extends Omit<HTMLAttributes<HTMLElement>, 'dir'> {
  * `asChild`를 켜면 Radix가 이 Trigger의 속성을 자식에 병합만 하고 자기 태그를 안 그린다.
  */
 export interface MenuTriggerProps extends HTMLAttributes<HTMLElement> {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLButtonElement>;
   /** true면 Radix가 이 Trigger의 속성을 자식에 병합만 하고 자기 태그는 안 그린다. */
   readonly asChild?: boolean;
   /** true면 눌러도 메뉴가 뜨지 않는다. */
@@ -35,8 +36,10 @@ export interface MenuTriggerProps extends HTMLAttributes<HTMLElement> {
 }
 
 /** 뜬 메뉴의 껍데기. 포탈로 나가므로 조상의 `overflow`에 잘리지 않는다. */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- 커스텀 필드는 필요해지면 추가한다.
-export interface MenuContentProps extends HTMLAttributes<HTMLDivElement> {}
+export interface MenuContentProps extends HTMLAttributes<HTMLDivElement> {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLDivElement>;
+}
 
 /** 고를 수 있는 한 줄. `onSelect`를 가로채므로 표준 `onSelect`는 쓸 수 없다. */
 export interface MenuItemProps extends Omit<HTMLAttributes<HTMLElement>, 'onSelect'> {
@@ -57,11 +60,12 @@ export interface MenuSeparatorProps extends HTMLAttributes<HTMLElement> {}
 /** 메뉴의 열림 상태를 든다 — 자기 DOM은 그리지 않는다. 보이는 것은 `Trigger`와 `Content`다. */
 export const MenuRoot = ({ children, ...props }: MenuProps) => <Primitive.Root {...props}>{children}</Primitive.Root>;
 
-export const MenuTrigger = forwardRef<HTMLButtonElement, MenuTriggerProps>(({ className, children, ...props }, ref) => (
+/** 메뉴를 여는 버튼. 자기 모양을 강제하지 않아 어떤 버튼이든 자식으로 둘 수 있다. */
+export const MenuTrigger = ({ className, children, ref, ...props }: MenuTriggerProps) => (
   <Primitive.Trigger ref={ref} className={className} {...props}>
     {children}
   </Primitive.Trigger>
-));
+);
 
 /**
  * 메뉴 항목을 담는 컨테이너 — `Portal`로 렌더링돼 트리거 바로 아래-끝에 붙는다.
@@ -70,7 +74,7 @@ export const MenuTrigger = forwardRef<HTMLButtonElement, MenuTriggerProps>(({ cl
  * 와 같은 이유). 트리거 바로 아래-끝에 붙인다(`align="end"`) — "더보기" 버튼이 대개 영역 오른쪽
  * 끝에 있으니 메뉴가 그 아래에서 왼쪽으로 펼쳐지는 게 자연스럽다.
  */
-export const MenuContent = forwardRef<HTMLDivElement, MenuContentProps>(({ className, children, ...props }, ref) => {
+export const MenuContent = ({ className, children, ref, ...props }: MenuContentProps) => {
   const container = usePortalContainer();
 
   return (
@@ -87,7 +91,7 @@ export const MenuContent = forwardRef<HTMLDivElement, MenuContentProps>(({ class
       </Primitive.Content>
     </Primitive.Portal>
   );
-});
+};
 
 /** 클릭·키보드로 선택 가능한 메뉴 항목 하나. */
 export const MenuItem = ({ className, ...props }: MenuItemProps) => <Primitive.Item className={clsx(className, styles['item'])} {...props} />;

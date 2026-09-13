@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { implementsClassName, implementsDataComponent, implementsForwardRef, implementsNoA11yViolations } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from '#utils/testing';
 import { SidebarLayout } from './SidebarLayout';
 
 describe('SidebarLayout', () => {
   implementsClassName((extra) => <SidebarLayout {...extra}>content</SidebarLayout>);
   implementsDataComponent((extra) => <SidebarLayout {...extra}>content</SidebarLayout>, 'SidebarLayout');
-  implementsForwardRef((extra) => <SidebarLayout {...extra}>content</SidebarLayout>, HTMLDivElement);
+  implementsRef((extra) => <SidebarLayout {...extra}>content</SidebarLayout>, HTMLDivElement);
   implementsNoA11yViolations(() => (
     <SidebarLayout title="Sessions" actions={<button type="button">더 보기</button>}>
       content

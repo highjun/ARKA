@@ -1,5 +1,4 @@
-import { forwardRef } from 'react';
-import type { HTMLAttributes, ReactNode } from 'react';
+import type { HTMLAttributes, ReactNode, Ref } from 'react';
 import { clsx } from 'clsx';
 import styles from './Container.module.css';
 import * as Primitive from '@radix-ui/react-scroll-area';
@@ -15,6 +14,8 @@ export type ContainerScroll = 'auto' | 'none' | 'horizontal' | 'vertical';
  * 훑는데, 이건 공개 Props가 아니라 `Container` 내부에서만 쓰는 조립 계약이라 그 탐지 대상에서
  * 빠져야 한다. */
 interface ScrollAreaRootConfig {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLDivElement>;
   readonly className?: string;
   readonly children?: ReactNode;
   /** 마운트할 Scrollbar 축 — 마운트 안 한 축은 Radix가 애초에 그 방향 스크롤 자체를 안 켠다. */
@@ -36,25 +37,23 @@ interface ScrollAreaRootConfig {
  * ref 는 Viewport 로 보낸다 — 스크롤 위치를 읽거나 옮기는 대상이 항상 Viewport 이기 때문이다
  * (client-architecture.md 1.3 Component "DOM 접근").
  */
-const ScrollAreaRoot = forwardRef<HTMLDivElement, ScrollAreaRootConfig>(
-  ({ className, classNames, children, scrollbars, ...props }, ref) => (
-    <Primitive.Root className={className} {...props} data-component="Container">
-      <Primitive.Viewport ref={ref} className={classNames?.viewport}>
-        {children}
-      </Primitive.Viewport>
-      {scrollbars.includes('vertical') && (
-        <Primitive.Scrollbar orientation="vertical" className={classNames?.scrollbarVertical}>
-          <Primitive.Thumb className={classNames?.thumb} />
-        </Primitive.Scrollbar>
-      )}
-      {scrollbars.includes('horizontal') && (
-        <Primitive.Scrollbar orientation="horizontal" className={classNames?.scrollbarHorizontal}>
-          <Primitive.Thumb className={classNames?.thumb} />
-        </Primitive.Scrollbar>
-      )}
-      <Primitive.Corner className={classNames?.corner} />
-    </Primitive.Root>
-  ),
+const ScrollAreaRoot = ({ className, classNames, children, scrollbars, ref, ...props }: ScrollAreaRootConfig) => (
+  <Primitive.Root className={className} {...props} data-component="Container">
+    <Primitive.Viewport ref={ref} className={classNames?.viewport}>
+      {children}
+    </Primitive.Viewport>
+    {scrollbars.includes('vertical') && (
+      <Primitive.Scrollbar orientation="vertical" className={classNames?.scrollbarVertical}>
+        <Primitive.Thumb className={classNames?.thumb} />
+      </Primitive.Scrollbar>
+    )}
+    {scrollbars.includes('horizontal') && (
+      <Primitive.Scrollbar orientation="horizontal" className={classNames?.scrollbarHorizontal}>
+        <Primitive.Thumb className={classNames?.thumb} />
+      </Primitive.Scrollbar>
+    )}
+    <Primitive.Corner className={classNames?.corner} />
+  </Primitive.Root>
 );
 ScrollAreaRoot.displayName = 'Container.ScrollAreaRoot';
 
@@ -69,6 +68,8 @@ const SCROLLBARS_BY_AXIS: Record<Exclude<ContainerScroll, 'none'>, readonly ('ho
  * 따라 바뀐다.
  */
 export interface ContainerProps extends HTMLAttributes<HTMLDivElement> {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLDivElement>;
   /** 테두리·배경·radius. 프레임 안쪽 우물로 쓸 때는 `none`. */
   readonly chrome?: ContainerChrome;
   /**
@@ -94,34 +95,32 @@ export interface ContainerProps extends HTMLAttributes<HTMLDivElement> {
  * 명령형 접근이 필요할 때 쓰는 대상은 항상 Viewport다(client-architecture.md 1.3 Component
  * "DOM 접근" 참고).
  */
-export const Container = forwardRef<HTMLDivElement, ContainerProps>(
-  ({ children, chrome = 'visible', scroll = 'auto', className, ...props }, ref) => {
-    if (scroll === 'none') {
-      return (
-        <div {...props} ref={ref} data-component="Container" data-chrome={chrome} data-scroll="none" className={clsx(className, styles['root'])}>
-          {children}
-        </div>
-      );
-    }
+export const Container = ({ children, chrome = 'visible', scroll = 'auto', className, ref, ...props }: ContainerProps) => {
+  if (scroll === 'none') {
     return (
-      <ScrollAreaRoot
-        {...props}
-        ref={ref}
-        data-chrome={chrome}
-        data-scroll={scroll}
-        scrollbars={SCROLLBARS_BY_AXIS[scroll]}
-        className={clsx(className, styles['root'])}
-        classNames={{
-          viewport: styles['viewport'],
-          scrollbarVertical: styles['scrollbarVertical'],
-          scrollbarHorizontal: styles['scrollbarHorizontal'],
-          thumb: styles['thumb'],
-          corner: styles['corner'],
-        }}
-      >
+      <div {...props} ref={ref} data-component="Container" data-chrome={chrome} data-scroll="none" className={clsx(className, styles['root'])}>
         {children}
-      </ScrollAreaRoot>
+      </div>
     );
-  },
-);
+  }
+  return (
+    <ScrollAreaRoot
+      {...props}
+      ref={ref}
+      data-chrome={chrome}
+      data-scroll={scroll}
+      scrollbars={SCROLLBARS_BY_AXIS[scroll]}
+      className={clsx(className, styles['root'])}
+      classNames={{
+        viewport: styles['viewport'],
+        scrollbarVertical: styles['scrollbarVertical'],
+        scrollbarHorizontal: styles['scrollbarHorizontal'],
+        thumb: styles['thumb'],
+        corner: styles['corner'],
+      }}
+    >
+      {children}
+    </ScrollAreaRoot>
+  );
+};
 

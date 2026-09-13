@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { expectNoA11yViolations } from '#utils/axe';
-import { implementsClassName, implementsDataComponent, implementsForwardRef, implementsNoA11yViolations } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from '#utils/testing';
 import { Shell } from './Shell';
 import { ContextMenu } from '#component/ContextMenu';
 
@@ -197,7 +197,7 @@ describe('Shell', () => {
     expect(shellRoot?.contains(menu)).toBe(true);
   });
 
-  implementsForwardRef(
+  implementsRef(
     (extra) => (
       <Shell colorMode="light" {...extra}>
         본문

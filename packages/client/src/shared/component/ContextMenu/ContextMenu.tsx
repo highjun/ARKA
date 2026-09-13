@@ -1,5 +1,4 @@
-import { forwardRef } from 'react';
-import type { HTMLAttributes } from 'react';
+import type { HTMLAttributes, Ref } from 'react';
 import { clsx } from 'clsx';
 import { usePortalContainer } from '#utils/portal';
 import { useControllableState } from '@radix-ui/react-use-controllable-state';
@@ -38,8 +37,10 @@ export interface ContextMenuTriggerProps extends HTMLAttributes<HTMLElement> {
 }
 
 /** 뜬 메뉴의 껍데기. 포탈로 나가므로 조상의 `overflow`에 잘리지 않는다. */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- 커스텀 필드는 필요해지면 추가한다.
-export interface ContextMenuContentProps extends HTMLAttributes<HTMLDivElement> {}
+export interface ContextMenuContentProps extends HTMLAttributes<HTMLDivElement> {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLDivElement>;
+}
 
 /** 고를 수 있는 한 줄. `onSelect`를 가로채므로 표준 `onSelect`는 쓸 수 없다. */
 export interface ContextMenuItemProps extends Omit<HTMLAttributes<HTMLElement>, 'onSelect'> {
@@ -84,24 +85,22 @@ export const ContextMenuTrigger = ({ className, children, ...props }: ContextMen
  * (`ContextMenu.module.css`). Shell 없이 `document.body`로 포탈될 때(Storybook 등)는 조상에
  * `pointer-events: none`가 없어 무해하다.
  */
-export const ContextMenuContent = forwardRef<HTMLDivElement, ContextMenuContentProps>(
-  ({ className, children, ...props }, ref) => {
-    const container = usePortalContainer();
+export const ContextMenuContent = ({ className, children, ref, ...props }: ContextMenuContentProps) => {
+  const container = usePortalContainer();
 
-    return (
-      <Primitive.Portal container={container}>
-        <Primitive.Content
-          {...props}
-          ref={ref}
-          data-component="ContextMenu"
-          className={clsx(className, styles['content'])}
-        >
-          {children}
-        </Primitive.Content>
-      </Primitive.Portal>
-    );
-  },
-);
+  return (
+    <Primitive.Portal container={container}>
+      <Primitive.Content
+        {...props}
+        ref={ref}
+        data-component="ContextMenu"
+        className={clsx(className, styles['content'])}
+      >
+        {children}
+      </Primitive.Content>
+    </Primitive.Portal>
+  );
+};
 
 /** 클릭·키보드로 선택 가능한 메뉴 항목 하나. */
 export const ContextMenuItem = ({ className, ...props }: ContextMenuItemProps) => (

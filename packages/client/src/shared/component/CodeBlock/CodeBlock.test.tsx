@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { implementsClassName, implementsDataComponent, implementsForwardRef, implementsNoA11yViolations } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from '#utils/testing';
 import { CodeBlock } from './CodeBlock';
 
 describe('CodeBlock', () => {
@@ -22,7 +22,7 @@ describe('CodeBlock', () => {
 
     implementsClassName((extra) => <CodeBlock content="hello" {...extra} />);
     implementsDataComponent((extra) => <CodeBlock content="hello" {...extra} />, 'CodeBlock');
-    implementsForwardRef((extra) => <CodeBlock content="hello" {...extra} />, HTMLElement);
+    implementsRef((extra) => <CodeBlock content="hello" {...extra} />, HTMLElement);
     implementsNoA11yViolations(() => <CodeBlock content="const x = 1;" language="ts" />);
   });
 

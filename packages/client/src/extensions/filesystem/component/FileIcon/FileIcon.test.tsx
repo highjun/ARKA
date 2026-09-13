@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   implementsClassName,
   implementsDataComponent,
-  implementsForwardRef,
+  implementsRef,
   implementsNoA11yViolations,
 } from '#utils/testing';
 import { FileIcon } from './FileIcon';
@@ -17,7 +17,7 @@ describe('FileIcon', () => {
 
   implementsClassName((extra) => <FileIcon fileName="main.ts" {...extra} />);
   implementsDataComponent((extra) => <FileIcon fileName="main.ts" {...extra} />, 'FileIcon');
-  implementsForwardRef((extra) => <FileIcon fileName="main.ts" {...extra} />, HTMLSpanElement);
+  implementsRef((extra) => <FileIcon fileName="main.ts" {...extra} />, HTMLSpanElement);
   implementsNoA11yViolations(() => <FileIcon fileName="main.ts" />);
 
   it('size 를 data-size 로 노출한다', () => {

@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   implementsClassName,
   implementsDataComponent,
-  implementsForwardRef,
+  implementsRef,
   implementsNoA11yViolations,
 } from '#utils/testing';
 import { ModeToggle } from './ModeToggle';
@@ -25,7 +25,7 @@ describe('ModeToggle', () => {
     ),
     'ModeToggle',
   );
-  implementsForwardRef(
+  implementsRef(
     (extra) => (
       <ModeToggle aria-label="전환" values={values} value="light" onValueChange={vi.fn()} {...extra}>
         {children}
