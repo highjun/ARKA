@@ -1,5 +1,5 @@
-import { forwardRef, useState } from 'react';
-import type { HTMLAttributes, ReactNode } from 'react';
+import { useState } from 'react';
+import type { HTMLAttributes, ReactNode, Ref } from 'react';
 import { clsx } from 'clsx';
 import { usePortalContainer } from '#utils/portal';
 import styles from './CommandPalette.module.css';
@@ -38,38 +38,36 @@ type DialogAttrs = Omit<HTMLAttributes<HTMLDivElement>, 'onSelect' | 'defaultVal
  *
  * 검색·필터링은 `cmdk` 내장(fuzzy substring match)이라 직접 구현하지 않는다.
  */
-const Dialog = forwardRef<HTMLDivElement, DialogAttrs>(
-  ({ open, onOpenChange, items, onSelect, placeholder, emptyMessage, className, overlayClassName, container, ...props }, ref) => (
-    <Command.Dialog
-      {...props}
-      ref={ref}
-      open={open}
-      onOpenChange={onOpenChange}
-      label="커맨드 팔레트"
-      contentClassName={className}
-      overlayClassName={overlayClassName}
-      container={container}
-    >
-      <Command.Input placeholder={placeholder} />
-      <Command.List>
-        <Command.Empty>{emptyMessage}</Command.Empty>
-        {items.map((item) => (
-          <Command.Item key={item.id} value={item.label} onSelect={() => onSelect(item.id)}>
-            <span className={styles['itemLabel']}>{item.label}</span>
-            {item.shortcut !== undefined && item.shortcut.length > 0 && (
-              <span className={styles['shortcuts']}>
-                {item.shortcut.map((key) => (
-                  <kbd key={key} className={styles['shortcutKey']}>
-                    {key}
-                  </kbd>
-                ))}
-              </span>
-            )}
-          </Command.Item>
-        ))}
-      </Command.List>
-    </Command.Dialog>
-  ),
+const Dialog = ({ open, onOpenChange, items, onSelect, placeholder, emptyMessage, className, overlayClassName, container, ref, ...props }: DialogAttrs & { readonly ref?: Ref<HTMLDivElement> }) => (
+  <Command.Dialog
+    {...props}
+    ref={ref}
+    open={open}
+    onOpenChange={onOpenChange}
+    label="커맨드 팔레트"
+    contentClassName={className}
+    overlayClassName={overlayClassName}
+    container={container}
+  >
+    <Command.Input placeholder={placeholder} />
+    <Command.List>
+      <Command.Empty>{emptyMessage}</Command.Empty>
+      {items.map((item) => (
+        <Command.Item key={item.id} value={item.label} onSelect={() => onSelect(item.id)}>
+          <span className={styles['itemLabel']}>{item.label}</span>
+          {item.shortcut !== undefined && item.shortcut.length > 0 && (
+            <span className={styles['shortcuts']}>
+              {item.shortcut.map((key) => (
+                <kbd key={key} className={styles['shortcutKey']}>
+                  {key}
+                </kbd>
+              ))}
+            </span>
+          )}
+        </Command.Item>
+      ))}
+    </Command.List>
+  </Command.Dialog>
 );
 
 /**
@@ -80,6 +78,8 @@ const Dialog = forwardRef<HTMLDivElement, DialogAttrs>(
  * 지금도 쓰고 있어 지우지는 않았지만, 새 코드에서 이걸 골라 쓰기 전에 정말 필요한지부터 확인할 것.
  */
 export interface CommandPaletteProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect' | 'defaultValue'> {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLDivElement>;
   /** 열림 여부(제어). */
   readonly open?: boolean;
   /**
@@ -108,33 +108,29 @@ export interface CommandPaletteProps extends Omit<HTMLAttributes<HTMLDivElement>
   readonly container?: HTMLElement;
 }
 
-export const CommandPalette = forwardRef<HTMLDivElement, CommandPaletteProps>(
-  (
-    { open, defaultOpen, onOpenChange, className, overlayClassName, emptyMessage, placeholder, container, ...props },
-    ref,
-  ) => {
-    const portalContainer = usePortalContainer();
-    const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen ?? false);
-    const resolvedOpen = open ?? uncontrolledOpen;
-    const handleOpenChange = (next: boolean) => {
-      setUncontrolledOpen(next);
-      onOpenChange?.(next);
-    };
+/** 명령을 검색해 실행하는 모달 — 열림 상태는 넘기면 그 값을, 안 넘기면 스스로 든다. */
+export const CommandPalette = ({ open, defaultOpen, onOpenChange, className, overlayClassName, emptyMessage, placeholder, container, ref, ...props }: CommandPaletteProps) => {
+  const portalContainer = usePortalContainer();
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen ?? false);
+  const resolvedOpen = open ?? uncontrolledOpen;
+  const handleOpenChange = (next: boolean) => {
+    setUncontrolledOpen(next);
+    onOpenChange?.(next);
+  };
 
-    return (
-      <Dialog
-        {...props}
-        ref={ref}
-        open={resolvedOpen}
-        onOpenChange={handleOpenChange}
-        container={container ?? portalContainer}
-        className={clsx(className, styles['content'])}
-        overlayClassName={clsx(overlayClassName, styles['overlay'])}
-        placeholder={placeholder ?? '커맨드 검색...'}
-        emptyMessage={emptyMessage ?? '결과가 없다.'}
-        data-component="CommandPalette"
-      />
-    );
-  },
-);
+  return (
+    <Dialog
+      {...props}
+      ref={ref}
+      open={resolvedOpen}
+      onOpenChange={handleOpenChange}
+      container={container ?? portalContainer}
+      className={clsx(className, styles['content'])}
+      overlayClassName={clsx(overlayClassName, styles['overlay'])}
+      placeholder={placeholder ?? '커맨드 검색...'}
+      emptyMessage={emptyMessage ?? '결과가 없다.'}
+      data-component="CommandPalette"
+    />
+  );
+};
 

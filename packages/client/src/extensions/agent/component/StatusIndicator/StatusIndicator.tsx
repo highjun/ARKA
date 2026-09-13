@@ -1,5 +1,4 @@
-import type { HTMLAttributes } from 'react';
-import { forwardRef } from 'react';
+import type { HTMLAttributes, Ref } from 'react';
 import { clsx } from 'clsx';
 import styles from './StatusIndicator.module.css';
 import { Icon } from '#component/Icon';
@@ -25,13 +24,14 @@ const ICON_OF: Record<StatusIndicatorStatus, IconId> = {
 
 /** `children`을 막는다 — 문구는 `status`가 정한다. */
 export interface StatusIndicatorProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLSpanElement>;
   /** 표시할 상태 — 아이콘·라벨·색상을 함께 결정한다. */
   readonly status: StatusIndicatorStatus;
 }
 
-/** `forwardRef` — `Icon`/`FileIcon`/`Timestamp`와 같은 근거(Primer 자신의 순수 표시용 컴포넌트도
- * 전부 forwardRef). */
-export const StatusIndicator = forwardRef<HTMLSpanElement, StatusIndicatorProps>(({ status, className, ...props }, ref) => (
+/** `ref`를 통과시킨다 — `Icon`/`FileIcon`/`Timestamp`와 같은 근거다. */
+export const StatusIndicator = ({ status, className, ref, ...props }: StatusIndicatorProps) => (
   <span
     ref={ref}
     role="img"
@@ -44,5 +44,5 @@ export const StatusIndicator = forwardRef<HTMLSpanElement, StatusIndicatorProps>
   >
     <Icon iconId={ICON_OF[status]} size="sm" />
   </span>
-));
+);
 

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   implementsClassName,
   implementsDataComponent,
-  implementsForwardRef,
+  implementsRef,
   implementsNoA11yViolations,
 } from '#utils/testing';
 import { Timestamp } from './Timestamp';
@@ -19,7 +19,7 @@ const expectedDate = (epoch: number) => {
 describe('Timestamp', () => {
   implementsClassName((extra) => <Timestamp epoch={FIXED_NOW} mode="datetime" {...extra} />);
   implementsDataComponent((extra) => <Timestamp epoch={FIXED_NOW} mode="datetime" {...extra} />, 'Timestamp');
-  implementsForwardRef((extra) => <Timestamp epoch={FIXED_NOW} mode="datetime" {...extra} />, HTMLSpanElement);
+  implementsRef((extra) => <Timestamp epoch={FIXED_NOW} mode="datetime" {...extra} />, HTMLSpanElement);
   implementsNoA11yViolations(() => <Timestamp epoch={FIXED_NOW} mode="relative" now={FIXED_NOW} />);
 
   it('포맷된 텍스트를 화면과 aria-label 양쪽에 싣는다', () => {

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { implementsClassName, implementsDataComponent, implementsForwardRef, implementsNoA11yViolations } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from '#utils/testing';
 import { Heading } from './Heading';
 
 describe('Heading', () => {
@@ -17,7 +17,7 @@ describe('Heading', () => {
     ),
     'Heading',
   );
-  implementsForwardRef(
+  implementsRef(
     (extra) => (
       <Heading level={2} {...extra}>
         내용

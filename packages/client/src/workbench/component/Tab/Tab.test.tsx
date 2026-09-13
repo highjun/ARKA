@@ -2,7 +2,7 @@ import { createRef } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { expectNoA11yViolations } from '#utils/axe';
-import { implementsClassName, implementsDataComponent, implementsForwardRef } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsRef } from '#utils/testing';
 import { Tab } from './Tab';
 import type { TabGroupItem, TabTreeLeaf, TabTreeSplit } from './Tab';
 
@@ -52,9 +52,9 @@ describe('Tab', () => {
   });
 
   implementsClassName((extra) => <Tab activeTab="a" tabItems={ITEMS} onTabClick={noop} onMenuClick={noop} {...extra} />);
-  implementsForwardRef((extra) => <Tab activeTab="a" tabItems={ITEMS} onTabClick={noop} onMenuClick={noop} {...extra} />, HTMLElement);
+  implementsRef((extra) => <Tab activeTab="a" tabItems={ITEMS} onTabClick={noop} onMenuClick={noop} {...extra} />, HTMLElement);
 
-  it('forwardRef 로 루트 DOM 노드에 접근할 수 있다(Split, 분기 트리)', () => {
+  it('ref 로 루트 DOM 노드에 접근할 수 있다(Split, 분기 트리)', () => {
     const ref = createRef<HTMLElement>();
     const tree: TabTreeSplit = {
       kind: 'split',

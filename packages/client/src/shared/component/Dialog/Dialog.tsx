@@ -1,5 +1,4 @@
-import { forwardRef } from 'react';
-import type { HTMLAttributes } from 'react';
+import type { HTMLAttributes, Ref } from 'react';
 import { clsx } from 'clsx';
 import { usePortalContainer } from '#utils/portal';
 import styles from './Dialog.module.css';
@@ -13,6 +12,8 @@ export type DialogTone = 'default' | 'attention' | 'danger';
 
 /** `title`을 가로챈다 — 네이티브 툴팁이 아니라 대화상자의 제목이다. */
 export interface DialogProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLDivElement>;
   /** 닫힘을 요청받았다 — 배경 클릭·Escape·우상단 닫기 버튼·`Dialog.Actions` 안의 취소 버튼 전부 여기로 온다. */
   readonly onClose: () => void;
   /** 좌상단에 그릴 아이콘. */
@@ -40,42 +41,40 @@ export interface DialogActionsProps extends HTMLAttributes<HTMLDivElement> {}
  * 마운트하는 것이었고(Primer `Dialog`도 같은 방식이었다), 마운트돼 있으면 열려 있다는 뜻으로
  * 그대로 이어받는다.
  */
-export const DialogRoot = forwardRef<HTMLDivElement, DialogProps>(
-  ({ onClose, iconId, tone = 'default', title, description, children, className, ...props }, ref) => {
-    const container = usePortalContainer();
+export const DialogRoot = ({ onClose, iconId, tone = 'default', title, description, children, className, ref, ...props }: DialogProps) => {
+  const container = usePortalContainer();
 
-    return (
-      <Primitive.Root
-        open
-        onOpenChange={(open) => {
-          if (!open) onClose();
-        }}
-      >
-        <Primitive.Portal container={container}>
-          <Primitive.Overlay className={styles['overlay']} />
-          <Primitive.Content {...props} ref={ref} data-component="Dialog" className={clsx(className, styles['content'])}>
-            <div className={styles['header']}>
-              <span className={styles['icon']} data-tone={tone}>
-                <Icon iconId={iconId} size="md" />
-              </span>
-              <Primitive.Title className={styles['title']}>{title}</Primitive.Title>
-              <IconButton
-                variant="invisible"
-                size="small"
-                aria-label="대화상자 닫기"
-                icon={() => <Icon iconId="close" size="sm" />}
-                onClick={onClose}
-                className={styles['closeButton']}
-              />
-            </div>
-            <Primitive.Description className={styles['description']}>{description}</Primitive.Description>
-            {children}
-          </Primitive.Content>
-        </Primitive.Portal>
-      </Primitive.Root>
-    );
-  },
-);
+  return (
+    <Primitive.Root
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <Primitive.Portal container={container}>
+        <Primitive.Overlay className={styles['overlay']} />
+        <Primitive.Content {...props} ref={ref} data-component="Dialog" className={clsx(className, styles['content'])}>
+          <div className={styles['header']}>
+            <span className={styles['icon']} data-tone={tone}>
+              <Icon iconId={iconId} size="md" />
+            </span>
+            <Primitive.Title className={styles['title']}>{title}</Primitive.Title>
+            <IconButton
+              variant="invisible"
+              size="small"
+              aria-label="대화상자 닫기"
+              icon={() => <Icon iconId="close" size="sm" />}
+              onClick={onClose}
+              className={styles['closeButton']}
+            />
+          </div>
+          <Primitive.Description className={styles['description']}>{description}</Primitive.Description>
+          {children}
+        </Primitive.Content>
+      </Primitive.Portal>
+    </Primitive.Root>
+  );
+};
 
 /** 우측 정렬 버튼 행 — 취소/확인 등 액션은 전부 여기 자식으로 둔다. */
 export const DialogActions = ({ className, ...props }: DialogActionsProps) => <div className={clsx(className, styles['actions'])} {...props} />;

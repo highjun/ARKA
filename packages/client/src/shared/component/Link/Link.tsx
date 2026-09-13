@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import type { Ref } from 'react';
 import { clsx } from 'clsx';
 import styles from './Link.module.css';
 import { Link as PrimerLink } from '@primer/react';
@@ -9,6 +9,8 @@ export type LinkTone = 'accent' | 'muted' | 'plain';
 
 /** Primer의 `muted`를 막고 `tone`으로 받는다 — 색 선택지가 두 갈래로 갈리지 않게. */
 export interface LinkProps extends Omit<PrimerLinkProps, 'muted'> {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLAnchorElement>;
   /**
    * 글자 색. 기본값 `'accent'`(Primer 기본 강조색). `'muted'`는 Primer의 `muted` prop을 그대로
    * 전달한다. `'plain'`은 Primer에 없는 값이라 이 컴포넌트가 새로 추가한다 — 본문과 같은 색으로
@@ -21,7 +23,7 @@ export interface LinkProps extends Omit<PrimerLinkProps, 'muted'> {
  * Primer `Link`를 그대로 감싼다 — `tone="accent"`/`"muted"`는 Primer가 이미 갖고 있어 다시
  * 구현하지 않는다(`IconButton`과 같은 이유). `tone="plain"`만 이 컴포넌트가 새로 더한다.
  */
-export const Link = forwardRef<HTMLAnchorElement, LinkProps>(({ tone = 'accent', className, ...props }, ref) => (
+export const Link = ({ tone = 'accent', className, ref, ...props }: LinkProps) => (
   <PrimerLink
     {...props}
     ref={ref}
@@ -30,5 +32,5 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(({ tone = 'accent',
     data-component="Link"
     className={clsx(className, styles['Link'])}
   />
-));
+);
 

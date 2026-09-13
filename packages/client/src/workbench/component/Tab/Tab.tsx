@@ -10,7 +10,7 @@
  * TabStrip·TabGroup·Split과 그 조립 전부)은 이 파일 하나로 합쳤다. 파일이 커지는 건 감수한다.
  */
 import { clsx } from 'clsx';
-import { createContext, forwardRef, useContext, useRef } from 'react';
+import { createContext, useContext, useRef } from 'react';
 import type {
   CSSProperties,
   Dispatch,
@@ -490,6 +490,8 @@ export type TabChrome = 'bordered' | 'none';
 
 /** `activeTab`의 유무로 controlled·uncontrolled가 갈린다. */
 export interface TabGroupProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLElement>;
   /** 지금 선택된 탭의 id. 넘기면 controlled, 안 넘기면 `defaultActiveTab` 으로 컴포넌트가 자체 관리한다. */
   readonly activeTab?: TabId;
   /** uncontrolled 모드의 초깃값. */
@@ -544,83 +546,79 @@ export const getGroupState = (tabItems: readonly TabGroupItem[], activeTab: TabI
 const GroupContext = createContext<GroupState | null>(null);
 
 /** 실제 구현 — `data-component`를 스스로 찍지 않는다(공개 `Tab.Group`과 Split의 leaf 양쪽에서 재사용한다). */
-const GroupImpl = forwardRef<HTMLElement, TabGroupProps & { readonly classNames?: TabClassNames }>(
-  (
-    {
-      activeTab,
-      defaultActiveTab = '',
-      onActiveTabChange,
-      tabItems,
-      onTabClick,
-      onMenuClick,
-      onTabClose,
-      onTabReorder,
-      onTabPin,
-      emptyMessage = 'No selected tab',
-      stripEmptyLabel,
-      panelLabel = 'Tab panel',
-      renderPanel,
-      panelOverlay,
-      stripOverlay,
-      renderTabContextMenu,
-      className,
-      classNames: providedClassNames,
-      ...props
-    },
-    ref,
-  ) => {
-    const inherited = useTabClassNames();
-    const classNames = providedClassNames ?? inherited;
-    const [currentActiveTab, setActiveTab] = useControllableState({ prop: activeTab, defaultProp: defaultActiveTab, onChange: onActiveTabChange, caller: 'Tab' });
-    const state = getGroupState(tabItems, currentActiveTab);
-    const handleTabClick = (tabId: TabId) => {
-      setActiveTab(tabId);
-      onTabClick(tabId);
-    };
+const GroupImpl = ({
+  activeTab,
+  defaultActiveTab = '',
+  onActiveTabChange,
+  tabItems,
+  onTabClick,
+  onMenuClick,
+  onTabClose,
+  onTabReorder,
+  onTabPin,
+  emptyMessage = 'No selected tab',
+  stripEmptyLabel,
+  panelLabel = 'Tab panel',
+  renderPanel,
+  panelOverlay,
+  stripOverlay,
+  renderTabContextMenu,
+  className,
+  classNames: providedClassNames,
+  ref,
+  ...props
+}: TabGroupProps & { readonly classNames?: TabClassNames } & { readonly ref?: Ref<HTMLElement> }) => {
+  const inherited = useTabClassNames();
+  const classNames = providedClassNames ?? inherited;
+  const [currentActiveTab, setActiveTab] = useControllableState({ prop: activeTab, defaultProp: defaultActiveTab, onChange: onActiveTabChange, caller: 'Tab' });
+  const state = getGroupState(tabItems, currentActiveTab);
+  const handleTabClick = (tabId: TabId) => {
+    setActiveTab(tabId);
+    onTabClick(tabId);
+  };
 
-    return (
-      <ClassNamesContext.Provider value={classNames}>
-        <GroupContext.Provider value={state}>
-          <div {...props} ref={ref as Ref<HTMLDivElement>} className={clsx(className, classNames.group)}>
-            {/* 탭이 하나도 없으면 TabStrip 자체를 렌더하지 않는다 — `stripEmptyLabel`은 빈 슬롯의
-                문구만 바꿀 뿐(테두리·배경·항상 뜨는 "..." 메뉴는 그대로 남아) Strip을 못
-                숨긴다(2026-08-31, 실제로 그렇게 오해하고 쓰인 소비처가 있었다). 빈 상태는
-                `emptyMessage` 하나로만 말한다. */}
-            {tabItems.length > 0 ? (
-              <StripRootImpl
-                className={classNames.groupStrip}
-                activeTab={state.activeTab}
-                tabItems={tabItems}
-                stripEmptyLabel={stripEmptyLabel}
-                overlay={stripOverlay}
-                onTabClick={handleTabClick}
-                onMenuClick={onMenuClick}
-                onTabClose={onTabClose}
-                onTabReorder={onTabReorder}
-                onTabPin={onTabPin}
-                renderTabContextMenu={renderTabContextMenu}
-              />
-            ) : null}
-            <div className={classNames.groupPanelWrapper}>
-              {state.selectedTab ? (
-                <Container chrome="none" className={classNames.groupPanel}>
-                  <div className={classNames.groupPanelContent} role="tabpanel" aria-label={panelLabel}>
-                    {renderPanel ? renderPanel(state.selectedTab) : (state.selectedTab.content ?? null)}
-                  </div>
-                </Container>
-              ) : (
-                <div className={classNames.groupPanelEmpty} role="tabpanel" aria-label={panelLabel}>
-                  {emptyMessage}
+  return (
+    <ClassNamesContext.Provider value={classNames}>
+      <GroupContext.Provider value={state}>
+        <div {...props} ref={ref as Ref<HTMLDivElement>} className={clsx(className, classNames.group)}>
+          {/* 탭이 하나도 없으면 TabStrip 자체를 렌더하지 않는다 — `stripEmptyLabel`은 빈 슬롯의
+              문구만 바꿀 뿐(테두리·배경·항상 뜨는 "..." 메뉴는 그대로 남아) Strip을 못
+              숨긴다(2026-08-31, 실제로 그렇게 오해하고 쓰인 소비처가 있었다). 빈 상태는
+              `emptyMessage` 하나로만 말한다. */}
+          {tabItems.length > 0 ? (
+            <StripRootImpl
+              className={classNames.groupStrip}
+              activeTab={state.activeTab}
+              tabItems={tabItems}
+              stripEmptyLabel={stripEmptyLabel}
+              overlay={stripOverlay}
+              onTabClick={handleTabClick}
+              onMenuClick={onMenuClick}
+              onTabClose={onTabClose}
+              onTabReorder={onTabReorder}
+              onTabPin={onTabPin}
+              renderTabContextMenu={renderTabContextMenu}
+            />
+          ) : null}
+          <div className={classNames.groupPanelWrapper}>
+            {state.selectedTab ? (
+              <Container chrome="none" className={classNames.groupPanel}>
+                <div className={classNames.groupPanelContent} role="tabpanel" aria-label={panelLabel}>
+                  {renderPanel ? renderPanel(state.selectedTab) : (state.selectedTab.content ?? null)}
                 </div>
-              )}
-              {panelOverlay}
-            </div>
+              </Container>
+            ) : (
+              <div className={classNames.groupPanelEmpty} role="tabpanel" aria-label={panelLabel}>
+                {emptyMessage}
+              </div>
+            )}
+            {panelOverlay}
           </div>
-        </GroupContext.Provider>
-      </ClassNamesContext.Provider>
-    );
-  },
-);
+        </div>
+      </GroupContext.Provider>
+    </ClassNamesContext.Provider>
+  );
+};
 GroupImpl.displayName = 'Tab.Group';
 
 // ─── TabSplit (트리) ───
@@ -648,6 +646,8 @@ export type TabTreeNode = TabTreeLeaf | TabTreeSplit;
 
 /** 드래그 핸들러를 가로챈다 — 분할·재정렬을 이 컴포넌트가 직접 다룬다. */
 export interface TabSplitProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'onDragStart' | 'onDrop'> {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLElement>;
   /** 분할 레이아웃 자체 — 리프(탭 그룹)와 가지(분할 방향+자식)가 재귀적으로 중첩된다. */
   readonly tree: TabTreeNode;
   /** 지금 포커스/활성 상태인 리프의 id. */
@@ -682,7 +682,10 @@ export interface TabSplitProps extends Omit<HTMLAttributes<HTMLDivElement>, 'chi
 }
 
 /** `tree`를 주면 TabSplit, 주지 않고 `tabItems`/`activeTab`을 주면 단일 Group으로 동작한다. */
-export type TabProps = TabSplitProps | (TabGroupProps & { tree?: never });
+export type TabProps = (TabSplitProps | (TabGroupProps & { tree?: never })) & {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLElement>;
+};
 
 /** `sizes`는 정규화를 거쳐 합이 100이다. */
 export interface SplitState {
@@ -870,195 +873,178 @@ const LeafSection = ({
   );
 };
 
-const SplitBranch = forwardRef<
-  HTMLElement,
-  {
-    node: TabTreeSplit;
-    isRoot?: boolean;
-    rootProps?: Omit<HTMLAttributes<HTMLDivElement>, 'children'>;
-    className?: string;
-    childState?: SplitChildState;
-  } & LeafPassthrough
->(
-  (
-    {
-      node,
-      isRoot = false,
-      rootProps,
-      className,
-      childState,
-      onTabClick,
-      onMenuClick,
-      onTabClose,
-      onTabReorder,
-      onTabPin,
-      emptyMessage,
-      stripEmptyLabel,
-      renderTabContextMenu,
-    },
-    ref,
-  ) => {
-    const classNames = useTabClassNames();
-    const shared = useSplitContext();
-    const branch = useSplitBranch(node, shared);
-    const isHorizontal = branch.orientation === 'horizontal';
-    const showDivider = Boolean(childState && !childState.isLast);
+const SplitBranch = ({
+  node,
+  isRoot = false,
+  rootProps,
+  className,
+  childState,
+  onTabClick,
+  onMenuClick,
+  onTabClose,
+  onTabReorder,
+  onTabPin,
+  emptyMessage,
+  stripEmptyLabel,
+  renderTabContextMenu, ref }: {
+  node: TabTreeSplit;
+  isRoot?: boolean;
+  rootProps?: Omit<HTMLAttributes<HTMLDivElement>, 'children'>;
+  className?: string;
+  childState?: SplitChildState;
+  } & LeafPassthrough & { readonly ref?: Ref<HTMLElement> }) => {
+  const classNames = useTabClassNames();
+  const shared = useSplitContext();
+  const branch = useSplitBranch(node, shared);
+  const isHorizontal = branch.orientation === 'horizontal';
+  const showDivider = Boolean(childState && !childState.isLast);
 
-    return (
-      <div
-        {...(isRoot ? rootProps : {})}
-        ref={mergeRefs<HTMLElement>(branch.ref, isRoot ? ref : null)}
-        data-orientation={branch.orientation}
-        style={isRoot ? undefined : childState?.style}
-        className={clsx(
-          isRoot ? className : undefined,
-          isRoot
-            ? isHorizontal
-              ? classNames.splitRootHorizontal
-              : classNames.splitRootVertical
-            : isHorizontal
-              ? classNames.splitBranchHorizontal
-              : classNames.splitBranchVertical,
-          showDivider &&
-            (childState?.orientation === 'horizontal'
-              ? classNames.splitBranchDividerHorizontal
-              : classNames.splitBranchDividerVertical),
-        )}
-      >
-        {branch.childStates.map((state) =>
-          state.node.kind === 'leaf' ? (
-            <LeafSection
-              key={state.node.id}
-              state={state}
-              onTabClick={onTabClick}
-              onMenuClick={onMenuClick}
-              onTabClose={onTabClose}
-              onTabReorder={onTabReorder}
-              onTabPin={onTabPin}
-              emptyMessage={emptyMessage}
-              stripEmptyLabel={stripEmptyLabel}
-              renderTabContextMenu={renderTabContextMenu}
-            />
-          ) : (
-            <SplitBranch
-              key={state.node.id}
-              node={state.node}
-              childState={state}
-              onTabClick={onTabClick}
-              onMenuClick={onMenuClick}
-              onTabClose={onTabClose}
-              onTabReorder={onTabReorder}
-              onTabPin={onTabPin}
-              emptyMessage={emptyMessage}
-              stripEmptyLabel={stripEmptyLabel}
-              renderTabContextMenu={renderTabContextMenu}
-            />
-          ),
-        )}
-        {!isRoot && childState ? <ResizeHandle state={childState} /> : null}
-      </div>
-    );
-  },
-);
-SplitBranch.displayName = 'Tab.Split.Branch';
+  return (
+  <div
+  {...(isRoot ? rootProps : {})}
+  ref={mergeRefs<HTMLElement>(branch.ref, isRoot ? ref : null)}
+  data-orientation={branch.orientation}
+  style={isRoot ? undefined : childState?.style}
+  className={clsx(
+  isRoot ? className : undefined,
+  isRoot
+  ? isHorizontal
+  ? classNames.splitRootHorizontal
+  : classNames.splitRootVertical
+  : isHorizontal
+  ? classNames.splitBranchHorizontal
+  : classNames.splitBranchVertical,
+  showDivider &&
+  (childState?.orientation === 'horizontal'
+  ? classNames.splitBranchDividerHorizontal
+  : classNames.splitBranchDividerVertical),
+  )}
+  >
+  {branch.childStates.map((state) =>
+  state.node.kind === 'leaf' ? (
+  <LeafSection
+  key={state.node.id}
+  state={state}
+  onTabClick={onTabClick}
+  onMenuClick={onMenuClick}
+  onTabClose={onTabClose}
+  onTabReorder={onTabReorder}
+  onTabPin={onTabPin}
+  emptyMessage={emptyMessage}
+  stripEmptyLabel={stripEmptyLabel}
+  renderTabContextMenu={renderTabContextMenu}
+  />
+  ) : (
+  <SplitBranch
+  key={state.node.id}
+  node={state.node}
+  childState={state}
+  onTabClick={onTabClick}
+  onMenuClick={onMenuClick}
+  onTabClose={onTabClose}
+  onTabReorder={onTabReorder}
+  onTabPin={onTabPin}
+  emptyMessage={emptyMessage}
+  stripEmptyLabel={stripEmptyLabel}
+  renderTabContextMenu={renderTabContextMenu}
+  />
+  ),
+  )}
+  {!isRoot && childState ? <ResizeHandle state={childState} /> : null}
+  </div>
+  );
+  };
+  SplitBranch.displayName = 'Tab.Split.Branch';
 
-const RootLeafSection = forwardRef<
-  HTMLElement,
-  {
-    leaf: TabTreeLeaf;
-    rootProps: Omit<HTMLAttributes<HTMLDivElement>, 'children'>;
-    className?: string;
-  } & LeafPassthrough
->(({ leaf, rootProps, className, onTabClick, onMenuClick, onTabClose, onTabReorder, onTabPin, emptyMessage, stripEmptyLabel, renderTabContextMenu }, ref) => {
+  const RootLeafSection = ({ leaf, rootProps, className, onTabClick, onMenuClick, onTabClose, onTabReorder, onTabPin, emptyMessage, stripEmptyLabel, renderTabContextMenu, ref }: {
+  leaf: TabTreeLeaf;
+  rootProps: Omit<HTMLAttributes<HTMLDivElement>, 'children'>;
+  className?: string;
+  } & LeafPassthrough & { readonly ref?: Ref<HTMLElement> }) => {
   const classNames = useTabClassNames();
   const shared = useSplitContext();
   const state = getRootLeafState(leaf, shared);
 
   return (
-    <section
-      {...rootProps}
-      {...state.handlers}
-      ref={ref}
-      className={clsx(className, classNames.rootLeafSection)}
-    >
-      <GroupImpl
-        activeTab={leaf.activeTab}
-        tabItems={leaf.tabItems}
-        onTabClick={handleLeafTabClick(onTabClick, leaf.id)}
-        onMenuClick={handleLeafMenuClick(onMenuClick, leaf.id)}
-        onTabClose={handleLeafTabClose(onTabClose, leaf.id)}
-        onTabReorder={handleLeafTabReorder(onTabReorder, leaf.id)}
-        onTabPin={handleLeafTabPin(onTabPin, leaf.id)}
-        emptyMessage={emptyMessage}
-        stripEmptyLabel={stripEmptyLabel}
-        renderTabContextMenu={renderTabContextMenu}
-        className={classNames.rootLeafGroup}
-        panelLabel={`Tab group ${leaf.id}`}
-        panelOverlay={
-          state.dropZone === 'panel' && state.dropPosition ? (
-            <span aria-hidden="true" data-position={state.dropPosition} className={classNames.panelDropIndicator} />
-          ) : undefined
-        }
-        stripOverlay={state.dropZone === 'strip' ? <span aria-hidden="true" className={classNames.stripDropOverlay} /> : undefined}
-      />
-    </section>
+  <section
+  {...rootProps}
+  {...state.handlers}
+  ref={ref}
+  className={clsx(className, classNames.rootLeafSection)}
+  >
+  <GroupImpl
+  activeTab={leaf.activeTab}
+  tabItems={leaf.tabItems}
+  onTabClick={handleLeafTabClick(onTabClick, leaf.id)}
+  onMenuClick={handleLeafMenuClick(onMenuClick, leaf.id)}
+  onTabClose={handleLeafTabClose(onTabClose, leaf.id)}
+  onTabReorder={handleLeafTabReorder(onTabReorder, leaf.id)}
+  onTabPin={handleLeafTabPin(onTabPin, leaf.id)}
+  emptyMessage={emptyMessage}
+  stripEmptyLabel={stripEmptyLabel}
+  renderTabContextMenu={renderTabContextMenu}
+  className={classNames.rootLeafGroup}
+  panelLabel={`Tab group ${leaf.id}`}
+  panelOverlay={
+  state.dropZone === 'panel' && state.dropPosition ? (
+  <span aria-hidden="true" data-position={state.dropPosition} className={classNames.panelDropIndicator} />
+  ) : undefined
+  }
+  stripOverlay={state.dropZone === 'strip' ? <span aria-hidden="true" className={classNames.stripDropOverlay} /> : undefined}
+  />
+  </section>
   );
-});
-RootLeafSection.displayName = 'Tab.Split.RootLeafSection';
+  };
+  RootLeafSection.displayName = 'Tab.Split.RootLeafSection';
 
-/** 실제 구현 — `data-component`를 스스로 찍지 않는다(공개 `Tab.Split`이 필요하면 감싸서 찍는다). */
-const SplitRootImpl = forwardRef<HTMLElement, TabSplitProps & { readonly classNames?: TabClassNames }>(
-  (
-    {
-      tree,
-      activeLeaf,
-      onTabClick,
-      onMenuClick,
-      onTabClose,
-      onTabReorder,
-      onTabPin,
-      onTabMove,
-      onTabSplit,
-      onNodeResize,
-      emptyMessage,
-      stripEmptyLabel,
-      renderTabContextMenu,
-      className,
-      classNames: providedClassNames,
-      ...rootProps
-    },
-    ref,
-  ) => {
-    const inherited = useTabClassNames();
-    const classNames = providedClassNames ?? inherited;
-    const { visibleTree, context } = useTabSplit({
-      tree,
-      activeLeaf,
-      onTabClick,
-      onMenuClick,
-      onTabClose,
-      onTabReorder,
-      onTabMove,
-      onTabSplit,
-      onNodeResize,
-    });
+  /** 실제 구현 — `data-component`를 스스로 찍지 않는다(공개 `Tab.Split`이 필요하면 감싸서 찍는다). */
+  const SplitRootImpl = ({ tree,
+  activeLeaf,
+  onTabClick,
+  onMenuClick,
+  onTabClose,
+  onTabReorder,
+  onTabPin,
+  onTabMove,
+  onTabSplit,
+  onNodeResize,
+  emptyMessage,
+  stripEmptyLabel,
+  renderTabContextMenu,
+  className,
+  classNames: providedClassNames,
+  ref,
+  ...rootProps
+}: TabSplitProps & { readonly classNames?: TabClassNames } & { readonly ref?: Ref<HTMLElement> }) => {
+  const inherited = useTabClassNames();
+  const classNames = providedClassNames ?? inherited;
+  const { visibleTree, context } = useTabSplit({
+    tree,
+    activeLeaf,
+    onTabClick,
+    onMenuClick,
+    onTabClose,
+    onTabReorder,
+    onTabMove,
+    onTabSplit,
+    onNodeResize,
+  });
 
-    const passthrough = { onTabClick, onMenuClick, onTabClose, onTabReorder, onTabPin, emptyMessage, stripEmptyLabel, renderTabContextMenu };
-    const rootPropsWithData = { ...rootProps, 'data-component': 'Tab' };
+  const passthrough = { onTabClick, onMenuClick, onTabClose, onTabReorder, onTabPin, emptyMessage, stripEmptyLabel, renderTabContextMenu };
+  const rootPropsWithData = { ...rootProps, 'data-component': 'Tab' };
 
-    return (
-      <ClassNamesContext.Provider value={classNames}>
-        <SplitContext.Provider value={context}>
-          {visibleTree.kind === 'leaf' ? (
-            <RootLeafSection ref={ref} leaf={visibleTree} rootProps={rootPropsWithData} className={className} {...passthrough} />
-          ) : (
-            <SplitBranch ref={ref} node={visibleTree} isRoot rootProps={rootPropsWithData} className={className} {...passthrough} />
-          )}
-        </SplitContext.Provider>
-      </ClassNamesContext.Provider>
-    );
-  },
-);
+  return (
+    <ClassNamesContext.Provider value={classNames}>
+      <SplitContext.Provider value={context}>
+        {visibleTree.kind === 'leaf' ? (
+          <RootLeafSection ref={ref} leaf={visibleTree} rootProps={rootPropsWithData} className={className} {...passthrough} />
+        ) : (
+          <SplitBranch ref={ref} node={visibleTree} isRoot rootProps={rootPropsWithData} className={className} {...passthrough} />
+        )}
+      </SplitContext.Provider>
+    </ClassNamesContext.Provider>
+  );
+};
 SplitRootImpl.displayName = 'Tab.Split';
 
 // ─── 조립 ───
@@ -1142,24 +1128,23 @@ export const TabStrip = Object.assign(StripRoot, { Items: StripItems, Menu: Stri
  * `data-component` 는 여기서 리터럴로 정한다 — 실제 DOM에 닿는 자리(`GroupImpl`)가 하나뿐이라
  * 다른 컴포넌트와 같은 자리다.
  */
-export const TabGroup = forwardRef<HTMLElement, TabGroupProps>(({ className, chrome, ...props }, ref) => (
+export const TabGroup = ({ className, chrome, ref, ...props }: TabGroupProps) => (
   <GroupImpl {...props} ref={ref} classNames={buildClassNames(chrome)} className={className} data-component="Tab" />
-));
+);
 TabGroup.displayName = 'Tab.Group';
 
 /**
  * TabSplit 은 leaf 하나뿐일 때와 branch 가 있을 때 렌더되는 태그가 다르다(`section`/`div`) —
  * `SplitRootImpl`이 안다.
  */
-export const TabSplit = forwardRef<HTMLElement, TabSplitProps>(({ className, chrome, ...props }, ref) => (
+export const TabSplit = ({ className, chrome, ref, ...props }: TabSplitProps) => (
   <SplitRootImpl {...props} ref={ref} classNames={buildClassNames(chrome)} className={className} data-component="Tab" />
-));
+);
 TabSplit.displayName = 'Tab.Split';
 
 /** `tree`가 있으면 TabSplit, 없으면 단일 Group으로 동작한다. */
-export const TabRoot = forwardRef<HTMLElement, TabProps>((props, ref) =>
-  props.tree ? <TabSplit {...props} ref={ref} /> : <TabGroup {...props} ref={ref} />,
-);
+export const TabRoot = ({ ref, ...props }: TabProps) =>
+  props.tree ? <TabSplit {...props} ref={ref} /> : <TabGroup {...props} ref={ref} />;
 TabRoot.displayName = 'Tab';
 
 /**

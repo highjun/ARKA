@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { implementsClassName, implementsDataComponent, implementsForwardRef, implementsNoA11yViolations } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from '#utils/testing';
 import { Text } from './Text';
 
 describe('Text', () => {
   implementsClassName((extra) => <Text {...extra} />);
   implementsDataComponent((extra) => <Text {...extra} />, 'Text');
-  implementsForwardRef((extra) => <Text {...extra} />, HTMLSpanElement);
+  implementsRef((extra) => <Text {...extra} />, HTMLSpanElement);
   implementsNoA11yViolations(() => <Text>안내 문구</Text>);
 
   it('variant="body", size="medium", tone="default" 가 기본값이다', () => {

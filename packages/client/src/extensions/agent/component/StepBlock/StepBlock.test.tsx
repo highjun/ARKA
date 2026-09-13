@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { implementsClassName, implementsDataComponent, implementsForwardRef, implementsNoA11yViolations } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from '#utils/testing';
 import { StepBlock } from './StepBlock';
 import type { StatusIndicatorStatus } from '../StatusIndicator';
 
@@ -12,7 +12,7 @@ import type { StatusIndicatorStatus } from '../StatusIndicator';
 describe('StepBlock', () => {
   implementsClassName((extra) => <StepBlock kind="thinking" {...extra} defaultExpanded />);
   implementsDataComponent((extra) => <StepBlock kind="thinking" {...extra} defaultExpanded />, 'StepBlock');
-  implementsForwardRef((extra) => <StepBlock kind="thinking" {...extra} defaultExpanded />, HTMLDetailsElement);
+  implementsRef((extra) => <StepBlock kind="thinking" {...extra} defaultExpanded />, HTMLDetailsElement);
   implementsNoA11yViolations(() => <StepBlock kind="thinking" defaultExpanded summary="내용" />);
 
   describe('kind="thinking"', () => {

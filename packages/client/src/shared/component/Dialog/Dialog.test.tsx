@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { expectNoA11yViolations } from '#utils/axe';
-import { implementsClassName, implementsDataComponent, implementsForwardRef } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsRef } from '#utils/testing';
 import { Dialog } from './Dialog';
 
 const Demo = (extra: Record<string, unknown> = {}) => (
@@ -59,7 +59,7 @@ describe('Dialog', () => {
 
   implementsDataComponent(Demo, 'Dialog');
   implementsClassName(Demo);
-  implementsForwardRef(Demo, HTMLDivElement);
+  implementsRef(Demo, HTMLDivElement);
 
   it('axe 접근성 위반이 없다(Portal로 빠져나간 실제 내용)', async () => {
     render(<Demo />);

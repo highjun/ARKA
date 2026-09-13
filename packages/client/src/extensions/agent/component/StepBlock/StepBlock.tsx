@@ -1,6 +1,5 @@
 import { clsx } from 'clsx';
-import { forwardRef } from 'react';
-import type { FormEvent, HTMLAttributes, ReactNode } from 'react';
+import type { FormEvent, HTMLAttributes, ReactNode, Ref } from 'react';
 import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import styles from './StepBlock.module.css';
 import { Details } from '@primer/react';
@@ -68,7 +67,10 @@ const formatBody = (value: unknown): string => {
  * `title`(ReactNode, 선택)과 `toolId`(string, 필수)는 타입·필수 여부가 달라 하나로 합치지
  * 않는다.
  */
-export type StepBlockProps = StepBlockThinkingProps | StepBlockToolProps;
+export type StepBlockProps = (StepBlockThinkingProps | StepBlockToolProps) & {
+  /** 루트 `details`로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLDetailsElement>;
+};
 
 /**
  * `@primer/react`의 `Details`(네이티브 `<details>`)를 직접 쓴다. 한때 공유 `Collapsible`을
@@ -78,7 +80,7 @@ export type StepBlockProps = StepBlockThinkingProps | StepBlockToolProps;
  * `ThinkingBlock`이 이미 쓰던 방식(`useControllableState` + `Details`)을 그대로 가져와 두
  * 컴포넌트를 합치면서 그 우회 래퍼를 없앤다.
  */
-export const StepBlock = forwardRef<HTMLDetailsElement, StepBlockProps>((props, ref) => {
+export const StepBlock = ({ ref, ...props }: StepBlockProps) => {
   const { status = 'done', expanded, defaultExpanded = false, onExpandedChange, className, ...rest } = props;
   const [isExpanded, setExpanded] = useControllableState({ prop: expanded, defaultProp: defaultExpanded, onChange: onExpandedChange, caller: 'StepBlock' });
   const handleToggle = (event: FormEvent<HTMLDetailsElement>) => setExpanded(event.currentTarget.open);
@@ -143,5 +145,5 @@ export const StepBlock = forwardRef<HTMLDetailsElement, StepBlockProps>((props, 
       ) : null}
     </Details>
   );
-});
+};
 

@@ -1,5 +1,5 @@
-import { forwardRef, useState } from 'react';
-import type { HTMLAttributes } from 'react';
+import { useState } from 'react';
+import type { HTMLAttributes, Ref } from 'react';
 import { clsx } from 'clsx';
 import { createTextClipboardPort } from './shared';
 import styles from './CodeBlock.module.css';
@@ -81,6 +81,8 @@ const clipboard = createTextClipboardPort();
 
 /** `children`을 막는다 — 코드는 `content`로만 들어온다. */
 export interface CodeBlockProps extends Omit<HTMLAttributes<HTMLElement>, 'title' | 'children'> {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLElement>;
   /** 표시할 코드 원문. */
   readonly content: string;
   /** 캡션에 표시할 언어 이름표(예: `'typescript'`) — 문법 강조 자체와는 무관하다. */
@@ -97,73 +99,69 @@ export interface CodeBlockProps extends Omit<HTMLAttributes<HTMLElement>, 'title
  * 토큰 종류를 클래스로 갈라 받지 않고 `data-token` 으로 드러낸다 — 종류마다 어느 색을 쓸지는
  * 스타일 결정이라 CSS 가 `[data-token=…]` 로 받는다.
  */
-export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
-  (
-    {
-      content,
-      language,
-      title,
-      className,
-      copyLabel = 'Copy code',
-      copiedLabel = 'Copied',
-      ...props
-    },
-    ref,
-  ) => {
-    const [copied, setCopied] = useState(false);
+export const CodeBlock = ({
+  content,
+  language,
+  title,
+  className,
+  copyLabel = 'Copy code',
+  copiedLabel = 'Copied',
+  ref,
+  ...props
+}: CodeBlockProps) => {
+  const [copied, setCopied] = useState(false);
 
-    const normalizedContent = normalizeContent(content);
-    const normalizedLanguage = normalizeLanguage(language);
-    const normalizedTitle = normalizeTitle(title);
-    const lines = getLines(normalizedContent);
+  const normalizedContent = normalizeContent(content);
+  const normalizedLanguage = normalizeLanguage(language);
+  const normalizedTitle = normalizeTitle(title);
+  const lines = getLines(normalizedContent);
 
-    const copyCode = async () => {
-      // 복사에 실패하면 "복사됨"을 띄우지 않는다 — 클립보드가 없는 환경은 예외가 아니라 정상 경로다.
-      if (!(await clipboard.copy(normalizedContent))) return;
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), COPY_RESET_DELAY_MS);
-    };
+  const copyCode = async () => {
+    // 복사에 실패하면 "복사됨"을 띄우지 않는다 — 클립보드가 없는 환경은 예외가 아니라 정상 경로다.
+    if (!(await clipboard.copy(normalizedContent))) return;
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), COPY_RESET_DELAY_MS);
+  };
 
-    return (
-      <figure
-        ref={ref}
-        {...props}
-        data-component="CodeBlock"
-        className={clsx(className, styles['root'])}
-      >
-        <figcaption className={styles['caption']}>
-          <span className={styles['meta']}>
-            <span className={styles['language']}>{normalizedLanguage}</span>
-            {normalizedTitle ? <span className={styles['title']}>{normalizedTitle}</span> : null}
-          </span>
-          <IconButton
-            variant="invisible"
-            size="small"
-            onClick={copyCode}
-            aria-label={copied ? copiedLabel : copyLabel}
-            icon={() => <Icon iconId={copied ? 'check' : 'copy'} size="sm" />}
-          />
-        </figcaption>
-        <pre className={styles['body']} data-language={normalizedLanguage}>
-          <code>
-            {lines.map((line) => (
-              <span key={line.key} className={styles['line']}>
-                <span className={styles['lineNumber']} aria-hidden="true">
-                  {line.number}
-                </span>
-                <span className={styles['lineText']}>
-                  {line.tokens.map((token) => (
-                    <span key={token.key} className={styles['token']} data-token={token.kind}>
-                      {token.text}
-                    </span>
-                  ))}
-                </span>
+  return (
+    <figure
+      ref={ref}
+      {...props}
+      data-component="CodeBlock"
+      className={clsx(className, styles['root'])}
+    >
+      <figcaption className={styles['caption']}>
+        <span className={styles['meta']}>
+          <span className={styles['language']}>{normalizedLanguage}</span>
+          {normalizedTitle ? <span className={styles['title']}>{normalizedTitle}</span> : null}
+        </span>
+        <IconButton
+          variant="invisible"
+          size="small"
+          onClick={copyCode}
+          aria-label={copied ? copiedLabel : copyLabel}
+          icon={() => <Icon iconId={copied ? 'check' : 'copy'} size="sm" />}
+        />
+      </figcaption>
+      <pre className={styles['body']} data-language={normalizedLanguage}>
+        <code>
+          {lines.map((line) => (
+            <span key={line.key} className={styles['line']}>
+              <span className={styles['lineNumber']} aria-hidden="true">
+                {line.number}
               </span>
-            ))}
-          </code>
-        </pre>
-      </figure>
-    );
-  },
-);
+              <span className={styles['lineText']}>
+                {line.tokens.map((token) => (
+                  <span key={token.key} className={styles['token']} data-token={token.kind}>
+                    {token.text}
+                  </span>
+                ))}
+              </span>
+            </span>
+          ))}
+        </code>
+      </pre>
+    </figure>
+  );
+};
 

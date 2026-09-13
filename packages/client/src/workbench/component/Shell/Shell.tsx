@@ -1,5 +1,5 @@
-import { forwardRef, useState } from 'react';
-import type { HTMLAttributes, ReactNode } from 'react';
+import { useState } from 'react';
+import type { HTMLAttributes, ReactNode, Ref } from 'react';
 import { clsx } from 'clsx';
 import { PortalProvider } from '#utils/portal';
 import styles from './Shell.module.css';
@@ -23,6 +23,8 @@ const hasContent = (node: ReactNode): boolean => node !== null && node !== undef
 
 /** `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다. */
 export interface ShellProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLDivElement>;
   /** Primer `ThemeProvider`에 그대로 전달되는 색 모드. */
   readonly colorMode: 'light' | 'dark';
 
@@ -83,133 +85,129 @@ export interface ShellProps extends Omit<HTMLAttributes<HTMLDivElement>, 'childr
  * `SplitPageLayout`도 `ThemeProvider`도 forwardRef가 아니라서(둘 다 컴파일된 소스로 확인 —
  * plain 함수), ref는 우리가 직접 렌더하는 wrapper div로 보낸다.
  */
-export const Shell = forwardRef<HTMLDivElement, ShellProps>(
-  (
-    {
-      colorMode,
-      brand,
-      actions,
-      activityItems,
-      onActivitySelect,
-      panelContent,
-      panelTitle,
-      panelActions,
-      sidebarResizable,
-      sidebarMinWidth,
-      sidebarWidthStorageKey,
-      sidebarOpen,
-      defaultSidebarOpen,
-      onSidebarOpenChange,
-      sidebarAriaLabel,
-      children,
-      overlays,
-      className,
-      ...props
-    },
-    ref,
-  ) => {
-    const [portalRoot, setPortalRoot] = useState<HTMLDivElement | null>(null);
-    const [uncontrolledSidebarOpen, setUncontrolledSidebarOpen] = useState(defaultSidebarOpen ?? false);
-    const resolvedSidebarOpen = sidebarOpen ?? uncontrolledSidebarOpen;
-    const setSidebarOpen = (next: boolean) => {
-      setUncontrolledSidebarOpen(next);
-      onSidebarOpenChange?.(next);
-    };
-    const hasSidebar = activityItems !== undefined;
-    const expanded = hasContent(panelContent);
+export const Shell = ({
+  colorMode,
+  brand,
+  actions,
+  activityItems,
+  onActivitySelect,
+  panelContent,
+  panelTitle,
+  panelActions,
+  sidebarResizable,
+  sidebarMinWidth,
+  sidebarWidthStorageKey,
+  sidebarOpen,
+  defaultSidebarOpen,
+  onSidebarOpenChange,
+  sidebarAriaLabel,
+  children,
+  overlays,
+  className,
+  ref,
+  ...props
+}: ShellProps) => {
+  const [portalRoot, setPortalRoot] = useState<HTMLDivElement | null>(null);
+  const [uncontrolledSidebarOpen, setUncontrolledSidebarOpen] = useState(defaultSidebarOpen ?? false);
+  const resolvedSidebarOpen = sidebarOpen ?? uncontrolledSidebarOpen;
+  const setSidebarOpen = (next: boolean) => {
+    setUncontrolledSidebarOpen(next);
+    onSidebarOpenChange?.(next);
+  };
+  const hasSidebar = activityItems !== undefined;
+  const expanded = hasContent(panelContent);
 
-    return (
-      <ThemeProvider colorMode={colorMode}>
-        <div {...props} ref={ref} data-component="Shell" className={clsx(className, styles['root'])}>
-          <PortalProvider container={portalRoot ?? undefined}>
-            <SplitPageLayout className={styles['layout']}>
-              <SplitPageLayout.Header padding="none" divider="line">
-                <div className={styles['headerRow']}>
-                  <span className={styles['headerGroup']}>
-                    {hasSidebar && (
-                      <IconButton
-                        variant="invisible"
-                        size="small"
-                        className={styles['sidebarToggle']}
-                        aria-label="사이드바 열기"
-                        onClick={() => setSidebarOpen(true)}
-                        icon={() => <Icon iconId="layoutSidebarLeft" size="sm" />}
-                      />
-                    )}
-                    {brand}
-                  </span>
-                  <span className={styles['headerGroup']}>{actions}</span>
-                </div>
-              </SplitPageLayout.Header>
-              {hasSidebar && (
-                <SplitPageLayout.Sidebar
-                  padding="none"
-                  divider="line"
-                  responsiveVariant="fullscreen"
-                  width={
-                    !expanded
-                      ? COLLAPSED_WIDTH
-                      : sidebarResizable
-                        ? { min: sidebarMinWidth ?? RESIZABLE_DEFAULT_MIN_WIDTH, default: EXPANDED_WIDTH.default, max: RESIZABLE_MAX_WIDTH }
-                        : EXPANDED_WIDTH
-                  }
-                  resizable={expanded && sidebarResizable}
-                  widthStorageKey={sidebarResizable ? sidebarWidthStorageKey : undefined}
-                  aria-label={sidebarAriaLabel}
-                  data-component="ShellSidebar"
-                  className={clsx(styles['sidebar'], resolvedSidebarOpen && styles['sidebarOpen'])}
-                >
-                  <div className={styles['sidebarInner']} data-state={resolvedSidebarOpen ? 'open' : 'closed'}>
-                    <div className={styles['sidebarCloseButtonRow']}>
-                      <IconButton
-                        variant="invisible"
-                        size="small"
-                        aria-label="사이드바 닫기"
-                        onClick={() => setSidebarOpen(false)}
-                        icon={() => <Icon iconId="close" size="sm" />}
-                      />
-                    </div>
-                    <div className={styles['sidebarBody']}>
-                      <ActivityBar items={activityItems} onSelect={onActivitySelect} />
-                      {expanded && (
-                        <div className={styles['sidebarPanel']}>
-                          {(panelTitle !== undefined || hasContent(panelActions)) && (
-                            <div className={styles['sidebarPanelHeader']}>
-                              <span className={styles['sidebarPanelTitle']}>{panelTitle}</span>
-                              {hasContent(panelActions) && (
-                                <Menu>
-                                  <Menu.Trigger asChild>
-                                    <IconButton
-                                      variant="invisible"
-                                      size="small"
-                                      aria-label="더 보기"
-                                      icon={() => <Icon iconId="ellipsis" size="sm" />}
-                                    />
-                                  </Menu.Trigger>
-                                  <Menu.Content>{panelActions}</Menu.Content>
-                                </Menu>
-                              )}
-                            </div>
-                          )}
-                          <Container chrome="none" className={styles['sidebarPanelBody']}>
-                            {panelContent}
-                          </Container>
-                        </div>
-                      )}
-                    </div>
+  return (
+    <ThemeProvider colorMode={colorMode}>
+      <div {...props} ref={ref} data-component="Shell" className={clsx(className, styles['root'])}>
+        <PortalProvider container={portalRoot ?? undefined}>
+          <SplitPageLayout className={styles['layout']}>
+            <SplitPageLayout.Header padding="none" divider="line">
+              <div className={styles['headerRow']}>
+                <span className={styles['headerGroup']}>
+                  {hasSidebar && (
+                    <IconButton
+                      variant="invisible"
+                      size="small"
+                      className={styles['sidebarToggle']}
+                      aria-label="사이드바 열기"
+                      onClick={() => setSidebarOpen(true)}
+                      icon={() => <Icon iconId="layoutSidebarLeft" size="sm" />}
+                    />
+                  )}
+                  {brand}
+                </span>
+                <span className={styles['headerGroup']}>{actions}</span>
+              </div>
+            </SplitPageLayout.Header>
+            {hasSidebar && (
+              <SplitPageLayout.Sidebar
+                padding="none"
+                divider="line"
+                responsiveVariant="fullscreen"
+                width={
+                  !expanded
+                    ? COLLAPSED_WIDTH
+                    : sidebarResizable
+                      ? { min: sidebarMinWidth ?? RESIZABLE_DEFAULT_MIN_WIDTH, default: EXPANDED_WIDTH.default, max: RESIZABLE_MAX_WIDTH }
+                      : EXPANDED_WIDTH
+                }
+                resizable={expanded && sidebarResizable}
+                widthStorageKey={sidebarResizable ? sidebarWidthStorageKey : undefined}
+                aria-label={sidebarAriaLabel}
+                data-component="ShellSidebar"
+                className={clsx(styles['sidebar'], resolvedSidebarOpen && styles['sidebarOpen'])}
+              >
+                <div className={styles['sidebarInner']} data-state={resolvedSidebarOpen ? 'open' : 'closed'}>
+                  <div className={styles['sidebarCloseButtonRow']}>
+                    <IconButton
+                      variant="invisible"
+                      size="small"
+                      aria-label="사이드바 닫기"
+                      onClick={() => setSidebarOpen(false)}
+                      icon={() => <Icon iconId="close" size="sm" />}
+                    />
                   </div>
-                </SplitPageLayout.Sidebar>
-              )}
-              <SplitPageLayout.Content padding="none" className={styles['content']}>
-                <div className={styles['contentFill']}>{children}</div>
-              </SplitPageLayout.Content>
-            </SplitPageLayout>
-            {overlays}
-          </PortalProvider>
-          <div ref={setPortalRoot} className={styles['portalRoot']} />
-        </div>
-      </ThemeProvider>
-    );
-  },
-);
+                  <div className={styles['sidebarBody']}>
+                    <ActivityBar items={activityItems} onSelect={onActivitySelect} />
+                    {expanded && (
+                      <div className={styles['sidebarPanel']}>
+                        {(panelTitle !== undefined || hasContent(panelActions)) && (
+                          <div className={styles['sidebarPanelHeader']}>
+                            <span className={styles['sidebarPanelTitle']}>{panelTitle}</span>
+                            {hasContent(panelActions) && (
+                              <Menu>
+                                <Menu.Trigger asChild>
+                                  <IconButton
+                                    variant="invisible"
+                                    size="small"
+                                    aria-label="더 보기"
+                                    icon={() => <Icon iconId="ellipsis" size="sm" />}
+                                  />
+                                </Menu.Trigger>
+                                <Menu.Content>{panelActions}</Menu.Content>
+                              </Menu>
+                            )}
+                          </div>
+                        )}
+                        <Container chrome="none" className={styles['sidebarPanelBody']}>
+                          {panelContent}
+                        </Container>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </SplitPageLayout.Sidebar>
+            )}
+            <SplitPageLayout.Content padding="none" className={styles['content']}>
+              <div className={styles['contentFill']}>{children}</div>
+            </SplitPageLayout.Content>
+          </SplitPageLayout>
+          {overlays}
+        </PortalProvider>
+        <div ref={setPortalRoot} className={styles['portalRoot']} />
+      </div>
+    </ThemeProvider>
+  );
+};
 

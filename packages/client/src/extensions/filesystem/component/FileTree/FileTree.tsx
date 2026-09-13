@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { DragEvent, HTMLAttributes, KeyboardEvent, MouseEvent, ReactNode, Ref } from 'react';
 import { clsx } from 'clsx';
 import { useTreeNavigation, flattenVisible } from './useTreeNavigation';
@@ -275,6 +275,8 @@ const Row = ({
 
 /** `onSelect`·`onContextMenu`를 가로챈다 — 행 단위로 다시 정의한다. */
 export interface FileTreeProps extends Omit<HTMLAttributes<HTMLElement>, 'children' | 'onSelect' | 'onContextMenu'> {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLElement>;
   /** 트리에 표시할 항목(폴더·파일) — 계층 구조 자체가 이 목록의 `children`으로 표현된다. */
   readonly items: readonly FileTreeItem[];
   /** 프레임(테두리·radius·배경) 유무. */
@@ -362,254 +364,250 @@ export interface FileTreeProps extends Omit<HTMLAttributes<HTMLElement>, 'childr
  * 다중선택의 "앵커"(Shift+클릭·Shift+화살표가 범위를 재는 기준점)는 `useRef`로 둔다 — 렌더에
  * 안 쓰이는 값이라 `useState`로 두면 Ctrl+클릭마다 불필요한 리렌더가 하나 더 는다.
  */
-export const FileTree = forwardRef<HTMLElement, FileTreeProps>(
-  (
-    {
-      items,
-      chrome = 'none',
-      expandedIds,
-      defaultExpandedIds,
-      selectedIds,
-      defaultSelectedIds,
-      emptyLabel = '파일이 없습니다',
-      onToggleFolder,
-      onExpandedIdsChange,
-      onSelectedIdsChange,
-      onActivate,
-      onRowDoubleClick,
-      onContextMenu,
-      onItemDrop,
-      editingId,
-      onEditCommit = () => {},
-      onEditCancel = () => {},
-      className,
-      ...props
-    },
-    ref,
-  ) => {
-    const [uncontrolledExpandedIds, setUncontrolledExpandedIds] = useState<readonly FileTreeItemId[]>(defaultExpandedIds ?? []);
-    const resolvedExpandedIds = expandedIds ?? uncontrolledExpandedIds;
-    const [uncontrolledSelectedIds, setUncontrolledSelectedIds] = useState<readonly FileTreeItemId[]>(defaultSelectedIds ?? []);
-    const resolvedSelectedIds = selectedIds ?? uncontrolledSelectedIds;
-    const anchorRef = useRef<FileTreeItemId | undefined>(resolvedSelectedIds[0]);
-    // VSCode의 `explorer.compactFolders`처럼, 폴더 하나만 자식으로 둔 체인을 한 행("a/b/c")으로
-    // 합친다 — 아래 전부(포커스/선택/펼침/렌더)가 이 압축된 트리를 기준으로 동작한다.
-    const compactedItems = useMemo(() => compactFolderChains(items), [items]);
-    /**
-     * 드래그 중인 항목은 `state`가 아니라 `ref`로 둔다 — `dragstart`·`dragenter`·`dragover`가
-     * 브라우저에서 한 이벤트 루프 틱 안에 연달아 발생할 수 있고(실측: `dispatchEvent`로 세 이벤트를
-     * 동기적으로 잇달아 쏘는 테스트에서 재현됨), `state`로 두면 `dragstart`의 `setState`가 아직
-     * 리렌더로 반영되기 전에 `dragenter`가 옛 클로저(`draggedId === undefined`)를 읽어 조용히
-     * 무시해 버린다. `ref`는 같은 틱에서도 즉시 최신값이라 이 경합이 없다. `dropTargetId`는
-     * `data-drop` 렌더에 실제로 쓰이므로 `state`로 둔다 — 이건 리렌더 한 사이클 지연이 있어도
-     * 된다(소비처가 `dragover` 뒤 폴링으로 기다린다, `FileTreeProps.onItemDrop` 참고).
-     */
-    const draggedIdRef = useRef<FileTreeItemId | undefined>(undefined);
-    const [dropTargetId, setDropTargetId] = useState<FileTreeItemId | undefined>(undefined);
+export const FileTree = ({
+  items,
+  chrome = 'none',
+  expandedIds,
+  defaultExpandedIds,
+  selectedIds,
+  defaultSelectedIds,
+  emptyLabel = '파일이 없습니다',
+  onToggleFolder,
+  onExpandedIdsChange,
+  onSelectedIdsChange,
+  onActivate,
+  onRowDoubleClick,
+  onContextMenu,
+  onItemDrop,
+  editingId,
+  onEditCommit = () => {},
+  onEditCancel = () => {},
+  className,
+  ref,
+  ...props
+}: FileTreeProps) => {
+  const [uncontrolledExpandedIds, setUncontrolledExpandedIds] = useState<readonly FileTreeItemId[]>(defaultExpandedIds ?? []);
+  const resolvedExpandedIds = expandedIds ?? uncontrolledExpandedIds;
+  const [uncontrolledSelectedIds, setUncontrolledSelectedIds] = useState<readonly FileTreeItemId[]>(defaultSelectedIds ?? []);
+  const resolvedSelectedIds = selectedIds ?? uncontrolledSelectedIds;
+  const anchorRef = useRef<FileTreeItemId | undefined>(resolvedSelectedIds[0]);
+  // VSCode의 `explorer.compactFolders`처럼, 폴더 하나만 자식으로 둔 체인을 한 행("a/b/c")으로
+  // 합친다 — 아래 전부(포커스/선택/펼침/렌더)가 이 압축된 트리를 기준으로 동작한다.
+  const compactedItems = useMemo(() => compactFolderChains(items), [items]);
+  /**
+   * 드래그 중인 항목은 `state`가 아니라 `ref`로 둔다 — `dragstart`·`dragenter`·`dragover`가
+   * 브라우저에서 한 이벤트 루프 틱 안에 연달아 발생할 수 있고(실측: `dispatchEvent`로 세 이벤트를
+   * 동기적으로 잇달아 쏘는 테스트에서 재현됨), `state`로 두면 `dragstart`의 `setState`가 아직
+   * 리렌더로 반영되기 전에 `dragenter`가 옛 클로저(`draggedId === undefined`)를 읽어 조용히
+   * 무시해 버린다. `ref`는 같은 틱에서도 즉시 최신값이라 이 경합이 없다. `dropTargetId`는
+   * `data-drop` 렌더에 실제로 쓰이므로 `state`로 둔다 — 이건 리렌더 한 사이클 지연이 있어도
+   * 된다(소비처가 `dragover` 뒤 폴링으로 기다린다, `FileTreeProps.onItemDrop` 참고).
+   */
+  const draggedIdRef = useRef<FileTreeItemId | undefined>(undefined);
+  const [dropTargetId, setDropTargetId] = useState<FileTreeItemId | undefined>(undefined);
 
-    const handleToggleFolder = (item: FileTreeItem, expanded: boolean) => {
-      const nextExpandedIds = expanded ? [...resolvedExpandedIds, item.id] : resolvedExpandedIds.filter((id) => id !== item.id);
-      if (expandedIds === undefined) setUncontrolledExpandedIds(nextExpandedIds);
-      onToggleFolder?.(item, expanded);
-      onExpandedIdsChange?.(nextExpandedIds);
-    };
+  const handleToggleFolder = (item: FileTreeItem, expanded: boolean) => {
+    const nextExpandedIds = expanded ? [...resolvedExpandedIds, item.id] : resolvedExpandedIds.filter((id) => id !== item.id);
+    if (expandedIds === undefined) setUncontrolledExpandedIds(nextExpandedIds);
+    onToggleFolder?.(item, expanded);
+    onExpandedIdsChange?.(nextExpandedIds);
+  };
 
-    const commitSelection = (ids: readonly FileTreeItemId[]) => {
-      if (selectedIds === undefined) setUncontrolledSelectedIds(ids);
-      onSelectedIdsChange?.(ids);
-    };
+  const commitSelection = (ids: readonly FileTreeItemId[]) => {
+    if (selectedIds === undefined) setUncontrolledSelectedIds(ids);
+    onSelectedIdsChange?.(ids);
+  };
 
-    // `resolvedExpandedIds`/`resolvedSelectedIds`가 안정된 참조로 오면, 매 렌더 새 `Set`을 만들던
-    // 이전 구현과 달리 아래 `flat` useMemo와 `useTreeNavigation` 내부의 것이 실제로 캐시를 탄다.
-    const expandedSet = useMemo(() => new Set(resolvedExpandedIds), [resolvedExpandedIds]);
-    const selectedSet = useMemo(() => new Set(resolvedSelectedIds), [resolvedSelectedIds]);
-    // `useTreeNavigation`도 똑같은 입력(items, expandedSet)으로 자기 몫의 `flat`을 다시 계산한다 —
-    // 두 번 계산되지만 트리 크기에 선형이라 무시할 비용이고, 그 대가로 각 층이 자기 관심사(포커스/키
-    // 라우팅 vs 선택)만 갖는다.
-    const flat = useMemo(() => flattenVisible(compactedItems, expandedSet), [compactedItems, expandedSet]);
-    const orderRows = useMemo(() => flat.map((node) => node.item), [flat]);
+  // `resolvedExpandedIds`/`resolvedSelectedIds`가 안정된 참조로 오면, 매 렌더 새 `Set`을 만들던
+  // 이전 구현과 달리 아래 `flat` useMemo와 `useTreeNavigation` 내부의 것이 실제로 캐시를 탄다.
+  const expandedSet = useMemo(() => new Set(resolvedExpandedIds), [resolvedExpandedIds]);
+  const selectedSet = useMemo(() => new Set(resolvedSelectedIds), [resolvedSelectedIds]);
+  // `useTreeNavigation`도 똑같은 입력(items, expandedSet)으로 자기 몫의 `flat`을 다시 계산한다 —
+  // 두 번 계산되지만 트리 크기에 선형이라 무시할 비용이고, 그 대가로 각 층이 자기 관심사(포커스/키
+  // 라우팅 vs 선택)만 갖는다.
+  const flat = useMemo(() => flattenVisible(compactedItems, expandedSet), [compactedItems, expandedSet]);
+  const orderRows = useMemo(() => flat.map((node) => node.item), [flat]);
 
-    const activateNode = (node: FlatTreeNode) => {
-      const { item } = node;
-      if (item.disabled) return;
-      anchorRef.current = item.id;
-      commitSelection([item.id]);
-      if (item.type === 'folder') handleToggleFolder(item, !expandedSet.has(item.id));
-      item.onClick?.();
-      onActivate?.(item);
-    };
+  const activateNode = (node: FlatTreeNode) => {
+    const { item } = node;
+    if (item.disabled) return;
+    anchorRef.current = item.id;
+    commitSelection([item.id]);
+    if (item.type === 'folder') handleToggleFolder(item, !expandedSet.has(item.id));
+    item.onClick?.();
+    onActivate?.(item);
+  };
 
-    const handleExtendSelection = (node: FlatTreeNode) => {
-      const { ids, anchorId } = nextSelection({
-        intent: 'range',
-        current: resolvedSelectedIds,
-        order: orderRows,
-        anchorId: anchorRef.current,
-        targetId: node.item.id,
-      });
-      anchorRef.current = anchorId;
-      commitSelection(ids);
-    };
+  const handleExtendSelection = (node: FlatTreeNode) => {
+    const { ids, anchorId } = nextSelection({
+      intent: 'range',
+      current: resolvedSelectedIds,
+      order: orderRows,
+      anchorId: anchorRef.current,
+      targetId: node.item.id,
+    });
+    anchorRef.current = anchorId;
+    commitSelection(ids);
+  };
 
-    const handleSelectAll = () => commitSelection(selectAll(orderRows));
+  const handleSelectAll = () => commitSelection(selectAll(orderRows));
 
-    const handleFocusMoved = (id: FileTreeItemId) => {
-      anchorRef.current = id;
-    };
+  const handleFocusMoved = (id: FileTreeItemId) => {
+    anchorRef.current = id;
+  };
 
-    const { effectiveFocusedId, registerNode, onRowKeyDown, setFocusedId } = useTreeNavigation(
-      compactedItems,
-      expandedSet,
-      resolvedSelectedIds[0],
-      handleToggleFolder,
-      activateNode,
-      handleExtendSelection,
-      handleSelectAll,
-      handleFocusMoved,
-    );
+  const { effectiveFocusedId, registerNode, onRowKeyDown, setFocusedId } = useTreeNavigation(
+    compactedItems,
+    expandedSet,
+    resolvedSelectedIds[0],
+    handleToggleFolder,
+    activateNode,
+    handleExtendSelection,
+    handleSelectAll,
+    handleFocusMoved,
+  );
 
-    /**
-     * mac에서 Ctrl+클릭은 보조 클릭(컨텍스트 메뉴)이다 — Safari 등에서 `contextmenu`와 `click`이
-     * 둘 다 발생할 수 있어, 여기서 걸러 두지 않으면 "선택 교체 + 메뉴"가 한 번에 겹쳐 뜬다.
-     */
-    const handleRowClick = (node: FlatTreeNode, event: MouseEvent<HTMLElement>) => {
-      const { item } = node;
-      if (item.disabled) return;
-      if (isApplePlatform() && event.ctrlKey) return;
+  /**
+   * mac에서 Ctrl+클릭은 보조 클릭(컨텍스트 메뉴)이다 — Safari 등에서 `contextmenu`와 `click`이
+   * 둘 다 발생할 수 있어, 여기서 걸러 두지 않으면 "선택 교체 + 메뉴"가 한 번에 겹쳐 뜬다.
+   */
+  const handleRowClick = (node: FlatTreeNode, event: MouseEvent<HTMLElement>) => {
+    const { item } = node;
+    if (item.disabled) return;
+    if (isApplePlatform() && event.ctrlKey) return;
 
-      const intent = selectionIntentOf(event);
-      if (intent === 'replace') {
-        activateNode(node);
-        setFocusedId(item.id);
-        return;
-      }
-
-      const { ids, anchorId } = nextSelection({ intent, current: resolvedSelectedIds, order: orderRows, anchorId: anchorRef.current, targetId: item.id });
-      anchorRef.current = anchorId;
-      commitSelection(ids);
-      // jsdom의 `fireEvent.click`은 실제 포커스를 옮기지 않는다 — roving tabindex와 다음 키보드
-      // 조작(Shift+화살표 등)이 이 행을 기준으로 이어지려면 명시적으로 불러야 한다.
+    const intent = selectionIntentOf(event);
+    if (intent === 'replace') {
+      activateNode(node);
       setFocusedId(item.id);
-    };
-
-    const handleRowDoubleClick = (node: FlatTreeNode) => {
-      if (node.item.disabled) return;
-      onRowDoubleClick?.(node.item);
-    };
-
-    /**
-     * 우클릭한 행이 선택 밖이면 선택을 그 행 하나로 정규화한다(VSCode `ExplorerView.onContextMenu`와
-     * 같은 규칙) — "메뉴의 대상 = 지금 하이라이트된 것"이 항상 참이 되게 한다. 안 그러면 3개가
-     * 하이라이트된 채로 실제 대상은 우클릭한 1개뿐인, 화면이 거짓말하는 상태가 만들어진다.
-     */
-    const handleRowContextMenu = (node: FlatTreeNode, event: MouseEvent<HTMLElement>) => {
-      const { item } = node;
-      const ids = selectionIncluding(resolvedSelectedIds, item.id);
-      if (ids !== resolvedSelectedIds) {
-        anchorRef.current = item.id;
-        commitSelection(ids);
-      }
-      setFocusedId(item.id);
-      onContextMenu?.(item, event);
-    };
-
-    /**
-     * 진짜 HTML5 드래그(`dragstart`/`dragover`/`drop`) 이벤트를 쓴다 — `onItemDrop`이 없으면
-     * 항목 자체가 `draggable`이 아니라 여기까지 안 온다(`Row`의 `draggable={dndEnabled && ...}`).
-     *
-     * **셋 다 `stopPropagation`으로 시작한다.** 펼친 폴더는 자식 행을 부모 `<li>` 안에 그대로
-     * 중첩해 그리므로(`Row`), 안쪽 행에서 쏜 드래그 이벤트가 막지 않으면 조상 행들의 핸들러까지
-     * 순서대로(안쪽→바깥) 다시 불린다 — 그러면 마지막(가장 바깥) 조상의 `item.id`가 실제
-     * 대상을 덮어써 버린다(실측 확인: 중첩 파일을 중첩 폴더 위로 끌면 `dropTargetId`가 항상
-     * 최상위 조상으로 튀었다). 딱 이 행 하나만 반응하게 막는다 — "조상까지 버블돼 대상이
-     * 되는" 기능은 이번 범위에 없다.
-     */
-    const handleRowDragStart = (node: FlatTreeNode, event: DragEvent<HTMLElement>) => {
-      event.stopPropagation();
-      event.dataTransfer.effectAllowed = 'move';
-      draggedIdRef.current = node.item.id;
-    };
-
-    /** 폴더 위에서만 드롭을 허용한다 — `preventDefault`가 그 신호다(안 부르면 브라우저가
-     * `drop` 자체를 안 낸다). 자기 자신 위로는 드롭 대상이 되지 않는다. */
-    const handleRowDragOver = (node: FlatTreeNode, event: DragEvent<HTMLElement>) => {
-      event.stopPropagation();
-      const draggedId = draggedIdRef.current;
-      if (draggedId === undefined || node.item.type !== 'folder' || node.item.id === draggedId) return;
-      event.preventDefault();
-      setDropTargetId((current) => (current === node.item.id ? current : node.item.id));
-    };
-
-    const handleRowDrop = (node: FlatTreeNode, event: DragEvent<HTMLElement>) => {
-      event.stopPropagation();
-      event.preventDefault();
-      const draggedId = draggedIdRef.current;
-      if (draggedId !== undefined && node.item.type === 'folder' && node.item.id !== draggedId) {
-        const source = flat.find((flatNode) => flatNode.item.id === draggedId)?.item;
-        if (source) onItemDrop?.(source, node.item);
-      }
-      draggedIdRef.current = undefined;
-      setDropTargetId(undefined);
-    };
-
-    const handleRowDragEnd = () => {
-      draggedIdRef.current = undefined;
-      setDropTargetId(undefined);
-    };
-
-    if (compactedItems.length === 0) {
-      return (
-        <div
-          // 빈 상태는 <div>, 아니면 <ul>이라 실제 DOM 타입이 갈린다 — 공개 계약은 공통 조상
-          // HTMLElement로 두므로(위 FileTreeProps 주석), 각 분기에서 실제 태그에 맞춰 좁힌다.
-          ref={ref as Ref<HTMLDivElement>}
-          data-chrome={chrome}
-          className={clsx(className, styles['root'])}
-          {...props}
-          data-component="FileTree"
-        >
-          <div className={styles['empty']}>{emptyLabel}</div>
-        </div>
-      );
+      return;
     }
 
+    const { ids, anchorId } = nextSelection({ intent, current: resolvedSelectedIds, order: orderRows, anchorId: anchorRef.current, targetId: item.id });
+    anchorRef.current = anchorId;
+    commitSelection(ids);
+    // jsdom의 `fireEvent.click`은 실제 포커스를 옮기지 않는다 — roving tabindex와 다음 키보드
+    // 조작(Shift+화살표 등)이 이 행을 기준으로 이어지려면 명시적으로 불러야 한다.
+    setFocusedId(item.id);
+  };
+
+  const handleRowDoubleClick = (node: FlatTreeNode) => {
+    if (node.item.disabled) return;
+    onRowDoubleClick?.(node.item);
+  };
+
+  /**
+   * 우클릭한 행이 선택 밖이면 선택을 그 행 하나로 정규화한다(VSCode `ExplorerView.onContextMenu`와
+   * 같은 규칙) — "메뉴의 대상 = 지금 하이라이트된 것"이 항상 참이 되게 한다. 안 그러면 3개가
+   * 하이라이트된 채로 실제 대상은 우클릭한 1개뿐인, 화면이 거짓말하는 상태가 만들어진다.
+   */
+  const handleRowContextMenu = (node: FlatTreeNode, event: MouseEvent<HTMLElement>) => {
+    const { item } = node;
+    const ids = selectionIncluding(resolvedSelectedIds, item.id);
+    if (ids !== resolvedSelectedIds) {
+      anchorRef.current = item.id;
+      commitSelection(ids);
+    }
+    setFocusedId(item.id);
+    onContextMenu?.(item, event);
+  };
+
+  /**
+   * 진짜 HTML5 드래그(`dragstart`/`dragover`/`drop`) 이벤트를 쓴다 — `onItemDrop`이 없으면
+   * 항목 자체가 `draggable`이 아니라 여기까지 안 온다(`Row`의 `draggable={dndEnabled && ...}`).
+   *
+   * **셋 다 `stopPropagation`으로 시작한다.** 펼친 폴더는 자식 행을 부모 `<li>` 안에 그대로
+   * 중첩해 그리므로(`Row`), 안쪽 행에서 쏜 드래그 이벤트가 막지 않으면 조상 행들의 핸들러까지
+   * 순서대로(안쪽→바깥) 다시 불린다 — 그러면 마지막(가장 바깥) 조상의 `item.id`가 실제
+   * 대상을 덮어써 버린다(실측 확인: 중첩 파일을 중첩 폴더 위로 끌면 `dropTargetId`가 항상
+   * 최상위 조상으로 튀었다). 딱 이 행 하나만 반응하게 막는다 — "조상까지 버블돼 대상이
+   * 되는" 기능은 이번 범위에 없다.
+   */
+  const handleRowDragStart = (node: FlatTreeNode, event: DragEvent<HTMLElement>) => {
+    event.stopPropagation();
+    event.dataTransfer.effectAllowed = 'move';
+    draggedIdRef.current = node.item.id;
+  };
+
+  /** 폴더 위에서만 드롭을 허용한다 — `preventDefault`가 그 신호다(안 부르면 브라우저가
+   * `drop` 자체를 안 낸다). 자기 자신 위로는 드롭 대상이 되지 않는다. */
+  const handleRowDragOver = (node: FlatTreeNode, event: DragEvent<HTMLElement>) => {
+    event.stopPropagation();
+    const draggedId = draggedIdRef.current;
+    if (draggedId === undefined || node.item.type !== 'folder' || node.item.id === draggedId) return;
+    event.preventDefault();
+    setDropTargetId((current) => (current === node.item.id ? current : node.item.id));
+  };
+
+  const handleRowDrop = (node: FlatTreeNode, event: DragEvent<HTMLElement>) => {
+    event.stopPropagation();
+    event.preventDefault();
+    const draggedId = draggedIdRef.current;
+    if (draggedId !== undefined && node.item.type === 'folder' && node.item.id !== draggedId) {
+      const source = flat.find((flatNode) => flatNode.item.id === draggedId)?.item;
+      if (source) onItemDrop?.(source, node.item);
+    }
+    draggedIdRef.current = undefined;
+    setDropTargetId(undefined);
+  };
+
+  const handleRowDragEnd = () => {
+    draggedIdRef.current = undefined;
+    setDropTargetId(undefined);
+  };
+
+  if (compactedItems.length === 0) {
     return (
-      <ul
-        ref={ref as Ref<HTMLUListElement>}
-        aria-label="파일 탐색기"
-        role="tree"
-        aria-multiselectable="true"
+      <div
+        // 빈 상태는 <div>, 아니면 <ul>이라 실제 DOM 타입이 갈린다 — 공개 계약은 공통 조상
+        // HTMLElement로 두므로(위 FileTreeProps 주석), 각 분기에서 실제 태그에 맞춰 좁힌다.
+        ref={ref as Ref<HTMLDivElement>}
         data-chrome={chrome}
         className={clsx(className, styles['root'])}
         {...props}
         data-component="FileTree"
       >
-        {compactedItems.map((item) => (
-          <Row
-            key={item.id}
-            node={{ item, level: 1, parentId: null }}
-            expandedIds={expandedSet}
-            selectedIds={selectedSet}
-            focusedId={effectiveFocusedId}
-            onRowClick={handleRowClick}
-            onRowDoubleClick={handleRowDoubleClick}
-            onRowContextMenu={handleRowContextMenu}
-            onKeyDown={onRowKeyDown}
-            registerNode={registerNode}
-            setFocusedId={setFocusedId}
-            dndEnabled={onItemDrop !== undefined}
-            dropTargetId={dropTargetId}
-            onRowDragStart={handleRowDragStart}
-            onRowDragOver={handleRowDragOver}
-            onRowDrop={handleRowDrop}
-            onRowDragEnd={handleRowDragEnd}
-            editingId={editingId}
-            onEditCommit={onEditCommit}
-            onEditCancel={onEditCancel}
-          />
-        ))}
-      </ul>
+        <div className={styles['empty']}>{emptyLabel}</div>
+      </div>
     );
-  },
-);
+  }
+
+  return (
+    <ul
+      ref={ref as Ref<HTMLUListElement>}
+      aria-label="파일 탐색기"
+      role="tree"
+      aria-multiselectable="true"
+      data-chrome={chrome}
+      className={clsx(className, styles['root'])}
+      {...props}
+      data-component="FileTree"
+    >
+      {compactedItems.map((item) => (
+        <Row
+          key={item.id}
+          node={{ item, level: 1, parentId: null }}
+          expandedIds={expandedSet}
+          selectedIds={selectedSet}
+          focusedId={effectiveFocusedId}
+          onRowClick={handleRowClick}
+          onRowDoubleClick={handleRowDoubleClick}
+          onRowContextMenu={handleRowContextMenu}
+          onKeyDown={onRowKeyDown}
+          registerNode={registerNode}
+          setFocusedId={setFocusedId}
+          dndEnabled={onItemDrop !== undefined}
+          dropTargetId={dropTargetId}
+          onRowDragStart={handleRowDragStart}
+          onRowDragOver={handleRowDragOver}
+          onRowDrop={handleRowDrop}
+          onRowDragEnd={handleRowDragEnd}
+          editingId={editingId}
+          onEditCommit={onEditCommit}
+          onEditCancel={onEditCancel}
+        />
+      ))}
+    </ul>
+  );
+};
 

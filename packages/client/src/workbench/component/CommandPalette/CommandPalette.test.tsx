@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { implementsDataComponent, implementsForwardRef, implementsNoA11yViolations } from '#utils/testing';
+import { implementsDataComponent, implementsRef, implementsNoA11yViolations } from '#utils/testing';
 import { CommandPalette } from './CommandPalette';
 
 const ITEMS = [
@@ -81,7 +81,7 @@ describe('CommandPalette', () => {
     expect(document.querySelector('[cmdk-dialog]')?.className).toContain('extra');
   });
 
-  implementsForwardRef(
+  implementsRef(
     (extra) => <CommandPalette open onOpenChange={() => {}} items={ITEMS} onSelect={() => {}} {...extra} />,
     HTMLDivElement,
   );

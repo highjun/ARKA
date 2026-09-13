@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { implementsClassName, implementsDataComponent, implementsForwardRef, implementsNoA11yViolations } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from '#utils/testing';
 import { FileTree } from './FileTree';
 
 const ITEMS = [
@@ -47,7 +47,7 @@ const isSelected = (name: string) => screen.getByRole('treeitem', { name }).getA
 describe('FileTree', () => {
   implementsClassName((extra) => <FileTree items={ITEMS} {...extra} />);
   implementsDataComponent((extra) => <FileTree items={ITEMS} {...extra} />, 'FileTree');
-  implementsForwardRef((extra) => <FileTree items={ITEMS} {...extra} />, HTMLUListElement);
+  implementsRef((extra) => <FileTree items={ITEMS} {...extra} />, HTMLUListElement);
   implementsNoA11yViolations(() => <FileTree items={ITEMS} expandedIds={['src']} selectedIds={['main']} />);
 
   describe('Markup', () => {
