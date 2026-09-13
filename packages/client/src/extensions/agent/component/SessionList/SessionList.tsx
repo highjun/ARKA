@@ -1,7 +1,6 @@
+import { clsx } from 'clsx';
 import { useState } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
-import { assembleCompound } from '#utils/assembleCompound';
-import { mergeClassNames } from '#utils/mergeClassNames';
 import { useSessionList } from './useSessionList';
 import styles from './SessionList.module.css';
 import { IconButton } from '@primer/react';
@@ -27,7 +26,7 @@ export interface AgentSessionItem {
 }
 
 /** `children`을 막는다 — 항목은 `sessions`로만 들어온다. */
-export interface SessionListRootProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+export interface SessionListProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
   /** 표시할 세션 목록. */
   readonly sessions: readonly AgentSessionItem[];
   /** 넘기면 controlled, 안 넘기면 `defaultActiveId`로 컴포넌트가 자체 관리한다. */
@@ -56,7 +55,7 @@ export interface SessionListRootProps extends Omit<HTMLAttributes<HTMLDivElement
  * 에이전트 세션 목록 — 헤더(제목 + 생성 버튼)와 세션 행(`SessionRow`)들을 그린다. 활성 세션 선택은
  * `useSessionList`가 controlled/uncontrolled 하이브리드로 관리하며, disabled 세션은 선택되지 않는다.
  */
-const Root = ({
+export const SessionList = ({
   sessions,
   activeId,
   defaultActiveId,
@@ -69,7 +68,7 @@ const Root = ({
   moreActions,
   className,
   ...props
-}: SessionListRootProps) => {
+}: SessionListProps) => {
   const { activeId: currentActiveId, selectSession } = useSessionList({ activeId, defaultActiveId, onActiveChange, onActiveIdChange });
   const [showArchived, setShowArchived] = useState(false);
   const visibleSessions = showArchived ? sessions : sessions.filter((session) => !session.archived);
@@ -102,7 +101,7 @@ const Root = ({
   );
 
   return (
-    <div className={mergeClassNames(className, styles['root'])} {...props} data-component="SessionList">
+    <div className={clsx(className, styles['root'])} {...props} data-component="SessionList">
       <SidebarLayout title={<span className={styles['heading']}>{heading}</span>} actions={actions}>
         {visibleSessions.length === 0 ? (
           <div className={styles['empty']}>{emptyLabel}</div>
@@ -127,7 +126,4 @@ const Root = ({
     </div>
   );
 };
-Root.displayName = 'SessionList';
 
-export type { SessionListRootProps as SessionListProps };
-export const SessionList = assembleCompound('SessionList', Root, {});

@@ -2,7 +2,6 @@ import { forwardRef, useState } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { clsx } from 'clsx';
 import { usePortalContainer } from '#utils/portal';
-import { assembleCompound } from '#utils/assembleCompound';
 import styles from './CommandPalette.module.css';
 import { Command } from 'cmdk';
 
@@ -15,8 +14,8 @@ export type CommandPaletteItem = {
 };
 
 /**
- * `CommandPaletteRootProps`를 참조하지 않고 필드를 되풀이한다 — "Props 선언은 Root 바로 앞"이라
- * `Root`보다 먼저 오는 이 헬퍼가 그 타입을 앞당겨 참조하면 선언 순서가 어긋난다.
+ * `CommandPaletteProps`를 참조하지 않고 필드를 되풀이한다 — "Props 선언은 CommandPalette 바로 앞"이라
+ * `CommandPalette`보다 먼저 오는 이 헬퍼가 그 타입을 앞당겨 참조하면 선언 순서가 어긋난다.
  */
 type DialogAttrs = Omit<HTMLAttributes<HTMLDivElement>, 'onSelect' | 'defaultValue'> & {
   readonly open: boolean;
@@ -80,7 +79,7 @@ const Dialog = forwardRef<HTMLDivElement, DialogAttrs>(
  * @deprecated `shell/` 컴포넌트 스코프 재정리(2026-08-25)에서 정식 스코프 밖으로 뺐다 — 워크벤치가
  * 지금도 쓰고 있어 지우지는 않았지만, 새 코드에서 이걸 골라 쓰기 전에 정말 필요한지부터 확인할 것.
  */
-export interface CommandPaletteRootProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect' | 'defaultValue'> {
+export interface CommandPaletteProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect' | 'defaultValue'> {
   /** 열림 여부(제어). */
   readonly open?: boolean;
   /**
@@ -109,7 +108,7 @@ export interface CommandPaletteRootProps extends Omit<HTMLAttributes<HTMLDivElem
   readonly container?: HTMLElement;
 }
 
-const Root = forwardRef<HTMLDivElement, CommandPaletteRootProps>(
+export const CommandPalette = forwardRef<HTMLDivElement, CommandPaletteProps>(
   (
     { open, defaultOpen, onOpenChange, className, overlayClassName, emptyMessage, placeholder, container, ...props },
     ref,
@@ -139,5 +138,3 @@ const Root = forwardRef<HTMLDivElement, CommandPaletteRootProps>(
   },
 );
 
-export type { CommandPaletteRootProps as CommandPaletteProps };
-export const CommandPalette = assembleCompound('CommandPalette', Root, {});

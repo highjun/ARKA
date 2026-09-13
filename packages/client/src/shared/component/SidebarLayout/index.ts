@@ -1,2 +1,2 @@
 export { SidebarLayout } from './SidebarLayout';
-export type { SidebarLayoutProps, SidebarLayoutRootProps } from './SidebarLayout';
+export type { SidebarLayoutProps } from './SidebarLayout';

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useControlledState } from '#utils/useControlledState';
+import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import type { AgentSessionItem } from './SessionList';
 
 /** `activeId`의 유무로 controlled·uncontrolled가 갈린다. */
@@ -23,18 +23,19 @@ export interface UseSessionListResult {
 
 /**
  * 활성 세션 하나를 controlled/uncontrolled 하이브리드로 관리한다. 값 자체의 controlled/uncontrolled
- * 분기는 `useControlledState`가 맡고, 이 훅은 그 위에 "disabled 세션은 선택되지 않는다"는 도메인
- * 규칙만 얹는다. `onActiveIdChange`는 `useControlledState`의 `onChange`로 그대로 연결하고,
+ * 분기는 `useControllableState`가 맡고, 이 훅은 그 위에 "disabled 세션은 선택되지 않는다"는 도메인
+ * 규칙만 얹는다. `onActiveIdChange`는 `useControllableState`의 `onChange`로 그대로 연결하고,
  * 세션 객체 전체가 필요한 `onActiveChange`는 id만 받는 그 콜백 모양과 안 맞아 `selectSession`에서
  * 별도로 호출한다(둘 다 같은 시점에 함께 불린다).
  */
 export function useSessionList({ activeId, defaultActiveId, onActiveChange, onActiveIdChange }: UseSessionListOptions): UseSessionListResult {
-  const [currentActiveId, setActiveId] = useControlledState<string | undefined>({
-    value: activeId,
-    defaultValue: defaultActiveId,
+  const [currentActiveId, setActiveId] = useControllableState<string | undefined>({
+    prop: activeId,
+    defaultProp: defaultActiveId,
     onChange: (nextActiveId) => {
       if (nextActiveId !== undefined) onActiveIdChange?.(nextActiveId);
     },
+    caller: 'useSessionList',
   });
 
   const selectSession = useCallback(

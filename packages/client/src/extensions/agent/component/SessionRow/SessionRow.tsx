@@ -1,6 +1,5 @@
+import { clsx } from 'clsx';
 import type { HTMLAttributes, KeyboardEvent } from 'react';
-import { assembleCompound } from '#utils/assembleCompound';
-import { mergeClassNames } from '#utils/mergeClassNames';
 import styles from './SessionRow.module.css';
 import { CounterLabel } from '@primer/react';
 import { StatusIndicator } from '../StatusIndicator';
@@ -51,7 +50,7 @@ const getInteractiveProps = ({ isActive = false, disabled = false, onSelect }: S
 };
 
 /** `title`을 가로챈다 — 네이티브 툴팁이 아니라 세션 제목이다. */
-export interface SessionRowRootProps extends Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'children' | 'title' | 'onSelect'> {
+export interface SessionRowProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'title' | 'onSelect'> {
   /** 세션 제목 — 목록의 첫 줄이자 `aria-label`로 그대로 쓰인다. */
   readonly title: string;
   /** 마지막 메시지 등 미리보기 한 줄. 없으면 빈 자리로 남는다. */
@@ -70,7 +69,8 @@ export interface SessionRowRootProps extends Omit<HTMLAttributes<HTMLDivElement>
   readonly onSelect?: () => void;
 }
 
-const Root = ({
+/** 세션 목록의 행 하나 — 제목·미리보기·시각·안 읽은 수를 담고 클릭과 Enter/Space로 선택된다. */
+export const SessionRow = ({
   title,
   excerpt,
   status = 'done',
@@ -81,7 +81,7 @@ const Root = ({
   onSelect,
   className,
   ...props
-}: SessionRowRootProps) => {
+}: SessionRowProps) => {
   const unreadText = formatUnread(unread ?? 0);
   return (
     <div
@@ -91,7 +91,7 @@ const Root = ({
       data-active={isActive}
       data-disabled={disabled}
       data-component="SessionRow"
-      className={mergeClassNames(className, styles['root'])}
+      className={clsx(className, styles['root'])}
     >
       <div className={styles['headerRow']}>
         <div className={styles['title']}>{title}</div>
@@ -111,7 +111,4 @@ const Root = ({
     </div>
   );
 };
-Root.displayName = 'SessionRow';
 
-export type { SessionRowRootProps as SessionRowProps };
-export const SessionRow = assembleCompound('SessionRow', Root, {});

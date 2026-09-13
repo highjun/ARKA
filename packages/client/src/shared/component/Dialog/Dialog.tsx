@@ -2,7 +2,6 @@ import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 import { clsx } from 'clsx';
 import { usePortalContainer } from '#utils/portal';
-import { assembleCompound } from '#utils/assembleCompound';
 import styles from './Dialog.module.css';
 import { Icon } from '#component/Icon';
 import type { IconId } from '#component/Icon';
@@ -13,7 +12,7 @@ import * as Primitive from '@radix-ui/react-dialog';
 export type DialogTone = 'default' | 'attention' | 'danger';
 
 /** `title`을 가로챈다 — 네이티브 툴팁이 아니라 대화상자의 제목이다. */
-export interface DialogRootProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
+export interface DialogProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
   /** 닫힘을 요청받았다 — 배경 클릭·Escape·우상단 닫기 버튼·`Dialog.Actions` 안의 취소 버튼 전부 여기로 온다. */
   readonly onClose: () => void;
   /** 좌상단에 그릴 아이콘. */
@@ -41,7 +40,7 @@ export interface DialogActionsProps extends HTMLAttributes<HTMLDivElement> {}
  * 마운트하는 것이었고(Primer `Dialog`도 같은 방식이었다), 마운트돼 있으면 열려 있다는 뜻으로
  * 그대로 이어받는다.
  */
-const Root = forwardRef<HTMLDivElement, DialogRootProps>(
+export const DialogRoot = forwardRef<HTMLDivElement, DialogProps>(
   ({ onClose, iconId, tone = 'default', title, description, children, className, ...props }, ref) => {
     const container = usePortalContainer();
 
@@ -79,7 +78,11 @@ const Root = forwardRef<HTMLDivElement, DialogRootProps>(
 );
 
 /** 우측 정렬 버튼 행 — 취소/확인 등 액션은 전부 여기 자식으로 둔다. */
-const Actions = ({ className, ...props }: DialogActionsProps) => <div className={clsx(className, styles['actions'])} {...props} />;
+export const DialogActions = ({ className, ...props }: DialogActionsProps) => <div className={clsx(className, styles['actions'])} {...props} />;
 
-export type { DialogRootProps as DialogProps };
-export const Dialog = assembleCompound('Dialog', Root, { Actions });
+/**
+ * 부품을 `Object.assign`으로 네임스페이스에 붙인다. 부품 함수의 이름이 `Dialog<부품>`인 것은
+ * react-docgen-typescript가 파일의 최상위 export만 컴포넌트로 인식해서다 — Docs 페이지의
+ * 서브컴포넌트 Props 표가 그 이름으로 붙는다(2026-09-06 실측).
+ */
+export const Dialog = Object.assign(DialogRoot, { Actions: DialogActions });

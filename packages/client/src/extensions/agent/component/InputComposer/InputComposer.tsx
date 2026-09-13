@@ -1,8 +1,7 @@
+import { clsx } from 'clsx';
 import { useCallback, useMemo, useState } from 'react';
 import type { ChangeEvent, FormHTMLAttributes, KeyboardEvent } from 'react';
-import { assembleCompound } from '#utils/assembleCompound';
-import { useControlledState } from '#utils/useControlledState';
-import { mergeClassNames } from '#utils/mergeClassNames';
+import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import styles from './InputComposer.module.css';
 import { ActionList, ActionMenu, Button, SegmentedControl } from '@primer/react';
 import { Icon } from '#component/Icon';
@@ -67,7 +66,7 @@ const getSelectedModel = (models: readonly InputComposerModelItem[], modelId?: s
 };
 
 /** `onSubmit`을 가로챈다 — 폼 이벤트가 아니라 입력 내용과 모드를 준다. */
-export interface InputComposerRootProps extends Omit<FormHTMLAttributes<HTMLFormElement>, 'children' | 'onSubmit'> {
+export interface InputComposerProps extends Omit<FormHTMLAttributes<HTMLFormElement>, 'children' | 'onSubmit'> {
   /** controlled 모드의 현재 입력값. */
   readonly value?: string;
   /** uncontrolled 모드의 초깃값. */
@@ -109,14 +108,14 @@ export interface InputComposerRootProps extends Omit<FormHTMLAttributes<HTMLForm
  * 값·모드·모델 선택과 submit-on-enter 를 소유하고 그린다. controlled/uncontrolled 3축(값·모드·모델)을
  * 각각 독립적으로 지원한다 — 셋 다 렌더링에 직접 쓰이는 상태라 별도 훅으로 뽑지 않고 이 파일 안에 둔다.
  *
- * `value`만 `useControlledState`를 그대로 쓰지 않는다 — 제출 후 입력을 비우는 동작은
+ * `value`만 `useControllableState`를 그대로 쓰지 않는다 — 제출 후 입력을 비우는 동작은
  * "사용자가 값을 바꿨다"는 신호가 아니라서 uncontrolled일 때 `onValueChange`를 호출하지 않아야
  * 한다(제출 콜백 `onSubmitValue`가 이미 그 값을 받는다). `mode`/`modelId`는 그런 예외가 없어
- * `useControlledState`를 그대로 쓴다 — `modelId`는 `onChange`를 `onModelIdChange`로 연결해
+ * `useControllableState`를 그대로 쓴다 — `modelId`는 `onChange`를 `onModelIdChange`로 연결해
  * <state>/default<State>/on<State>Change 삼종을 완성하고, 모델 객체 전체가 필요한 소비자를
  * 위해 `onModelSelect`도 `selectModel`에서 별도로 호출한다(둘 다 같은 시점에 함께 불린다).
  */
-const Root = ({
+export const InputComposer = ({
   value,
   defaultValue = '',
   disabled = false,
@@ -136,17 +135,18 @@ const Root = ({
   rows = 3,
   className,
   ...rest
-}: InputComposerRootProps) => {
+}: InputComposerProps) => {
   const [internalValue, setInternalValue] = useState(defaultValue);
   const isValueControlled = value !== undefined;
   const currentValue = isValueControlled ? value : internalValue;
-  const [currentMode, setMode] = useControlledState<InputComposerMode>({ value: mode, defaultValue: defaultMode, onChange: onModeChange });
-  const [currentModelId, setModelId] = useControlledState<string | undefined>({
-    value: modelId,
-    defaultValue: defaultModelId,
+  const [currentMode, setMode] = useControllableState<InputComposerMode>({ prop: mode, defaultProp: defaultMode, onChange: onModeChange, caller: 'InputComposer' });
+  const [currentModelId, setModelId] = useControllableState<string | undefined>({
+    prop: modelId,
+    defaultProp: defaultModelId,
     onChange: (nextModelId) => {
       if (nextModelId !== undefined) onModelIdChange?.(nextModelId);
     },
+    caller: 'InputComposer',
   });
   const selectedModel = useMemo(() => getSelectedModel(models, currentModelId), [currentModelId, models]);
   const canSubmit = !disabled && !loading && currentValue.trim().length > 0;
@@ -212,7 +212,7 @@ const Root = ({
 
   return (
     <form
-      className={mergeClassNames(className, styles['root'])}
+      className={clsx(className, styles['root'])}
       onSubmit={(event) => {
         event.preventDefault();
         state.submit();
@@ -295,7 +295,4 @@ const Root = ({
     </form>
   );
 };
-Root.displayName = 'InputComposer';
 
-export type { InputComposerRootProps as InputComposerProps };
-export const InputComposer = assembleCompound('InputComposer', Root, {});

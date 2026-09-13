@@ -1,7 +1,6 @@
 import { forwardRef } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { clsx } from 'clsx';
-import { assembleCompound } from '#utils/assembleCompound';
 import styles from './Container.module.css';
 import * as Primitive from '@radix-ui/react-scroll-area';
 
@@ -13,7 +12,7 @@ export type ContainerScroll = 'auto' | 'none' | 'horizontal' | 'vertical';
 /** `headless.tsx`와 `styled.tsx` 사이의 계약이었던 것 — 조각이 다섯이라 슬롯마다 다른 클래스가
  * 필요해 `classNames`로 묶는다. 이름을 `*Props`로 안 끝내는 건 의도적이다 — `scrollbars`가
  * 리터럴 유니언 배열이라 lint의 "컨트롤 가능한 prop 탐지"가 `*Props`로 끝나는 선언을 전부
- * 훑는데, 이건 공개 Props가 아니라 `Root` 내부에서만 쓰는 조립 계약이라 그 탐지 대상에서
+ * 훑는데, 이건 공개 Props가 아니라 `Container` 내부에서만 쓰는 조립 계약이라 그 탐지 대상에서
  * 빠져야 한다. */
 interface ScrollAreaRootConfig {
   readonly className?: string;
@@ -31,7 +30,7 @@ interface ScrollAreaRootConfig {
 
 /**
  * `@radix-ui/react-scroll-area`를 아는 유일한 함수 — 이 파일에서 이 라이브러리를 직접 참조하는
- * 곳은 여기뿐이다. Root·Viewport·Scrollbar·Thumb·Corner 다섯 조각을 여기서 조립해 감추고, 밖에는
+ * 곳은 여기뿐이다. Container·Viewport·Scrollbar·Thumb·Corner 다섯 조각을 여기서 조립해 감추고, 밖에는
  * `<Container>{children}</Container>` 하나로 보인다.
  *
  * ref 는 Viewport 로 보낸다 — 스크롤 위치를 읽거나 옮기는 대상이 항상 Viewport 이기 때문이다
@@ -69,7 +68,7 @@ const SCROLLBARS_BY_AXIS: Record<Exclude<ContainerScroll, 'none'>, readonly ('ho
  * props 를 라이브러리 타입에서 파생시키지 않고 직접 선언한다 — 파생시키면 계약이 그 라이브러리를
  * 따라 바뀐다.
  */
-export interface ContainerRootProps extends HTMLAttributes<HTMLDivElement> {
+export interface ContainerProps extends HTMLAttributes<HTMLDivElement> {
   /** 테두리·배경·radius. 프레임 안쪽 우물로 쓸 때는 `none`. */
   readonly chrome?: ContainerChrome;
   /**
@@ -95,7 +94,7 @@ export interface ContainerRootProps extends HTMLAttributes<HTMLDivElement> {
  * 명령형 접근이 필요할 때 쓰는 대상은 항상 Viewport다(client-architecture.md 1.3 Component
  * "DOM 접근" 참고).
  */
-const Root = forwardRef<HTMLDivElement, ContainerRootProps>(
+export const Container = forwardRef<HTMLDivElement, ContainerProps>(
   ({ children, chrome = 'visible', scroll = 'auto', className, ...props }, ref) => {
     if (scroll === 'none') {
       return (
@@ -125,7 +124,4 @@ const Root = forwardRef<HTMLDivElement, ContainerRootProps>(
     );
   },
 );
-Root.displayName = 'Container';
 
-export type { ContainerRootProps as ContainerProps };
-export const Container = assembleCompound('Container', Root, {});

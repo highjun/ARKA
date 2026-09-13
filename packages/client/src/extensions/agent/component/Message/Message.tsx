@@ -1,6 +1,5 @@
+import { clsx } from 'clsx';
 import type { HTMLAttributes, ReactNode } from 'react';
-import { assembleCompound } from '#utils/assembleCompound';
-import { mergeClassNames } from '#utils/mergeClassNames';
 import styles from './Message.module.css';
 import { Timestamp } from '#component/Timestamp';
 
@@ -22,8 +21,8 @@ const getAvatarLabel = (role: MessageRole) => {
   return 'SYS';
 };
 
-/** `style`을 막는다 — 말풍선의 폭과 색은 토큰이 정한다. */
-export interface MessageRootProps extends Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'children'> {
+/** `children`을 막는다 — 본문은 `children` 대신 정해진 슬롯으로 받는다. */
+export interface MessageProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
   /** 메시지 발신 주체 — 아바타 초기값·라벨 표시를 결정한다. */
   readonly role: MessageRole;
   /** 발신 시각(epoch ms). 없으면 타임스탬프 자리를 빈 상태로 남겨 레이아웃을 유지한다. */
@@ -34,12 +33,13 @@ export interface MessageRootProps extends Omit<HTMLAttributes<HTMLDivElement>, '
   readonly children?: ReactNode;
 }
 
-const Root = ({ role, timestamp, avatar, children, className, ...props }: MessageRootProps) => {
+/** 말풍선 한 개 — 아바타·역할 라벨·시각을 곁들여 본문을 그린다. 정렬과 색은 `role`이 정한다. */
+export const Message = ({ role, timestamp, avatar, children, className, ...props }: MessageProps) => {
   const roleLabel = getRoleLabel(role);
   const avatarLabel = getAvatarLabel(role);
 
   return (
-    <article {...props} data-role={role} data-component="Message" className={mergeClassNames(className, styles['root'])}>
+    <article {...props} data-role={role} data-component="Message" className={clsx(className, styles['root'])}>
       <div className={styles['headerRow']}>
         <span data-role={role} className={styles['avatar']} aria-hidden="true">
           {isImageSource(avatar) ? <img src={avatar} alt="" className={styles['avatarImage']} /> : (avatar ?? avatarLabel)}
@@ -59,7 +59,4 @@ const Root = ({ role, timestamp, avatar, children, className, ...props }: Messag
     </article>
   );
 };
-Root.displayName = 'Message';
 
-export type { MessageRootProps as MessageProps };
-export const Message = assembleCompound('Message', Root, {});

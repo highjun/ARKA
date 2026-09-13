@@ -1,8 +1,2 @@
 export { ModeToggle } from './ModeToggle';
-export type {
-  ModeToggleChildren,
-  ModeToggleLabels,
-  ModeToggleProps,
-  ModeToggleRootProps,
-  ModeToggleValues,
-} from './ModeToggle';
+export type { ModeToggleChildren, ModeToggleLabels, ModeToggleProps, ModeToggleValues } from './ModeToggle';

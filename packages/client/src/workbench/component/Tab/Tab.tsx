@@ -3,12 +3,13 @@
  * 압도적으로 크지만(legacy 3233줄) 축소하지 않기로 결정했다.
  *
  * 한때는 구현을 `headless/`(관심사별로 나뉜 폴더 — context/header/strip/group/split)로 따로 뒀다 —
- * 컴파운드가 3중첩(Root → Split → Branch → Leaf → Group → Strip)이고 분기 렌더가 재귀라, 다른 5개
+ * 컴파운드가 3중첩(TabRoot → TabSplit → Branch → Leaf → TabGroup → TabStrip)이고 분기 렌더가 재귀라, 다른 5개
  * 컴포넌트처럼 구현까지 파일 하나로 접으면 오히려 읽기 어렵다는 이유였다. 지금은 컴포넌트 폴더에
  * 서브디렉터리를 금지하는 화이트리스트(`tooling/lint/treelint/component.ts`) 때문에 그 구조를
- * 유지할 수 없다 — 상태 로직(훅)은 `useTabStrip.ts`/`useTabSplit.ts`로 뽑고, JSX 렌더링(Header·
- * Strip·Group·Split과 그 조립 전부)은 이 파일 하나로 합쳤다. 파일이 커지는 건 감수한다.
+ * 유지할 수 없다 — 상태 로직(훅)은 `useTabStrip.ts`/`useTabSplit.ts`로 뽑고, JSX 렌더링(TabHeader·
+ * TabStrip·TabGroup·Split과 그 조립 전부)은 이 파일 하나로 합쳤다. 파일이 커지는 건 감수한다.
  */
+import { clsx } from 'clsx';
 import { createContext, forwardRef, useContext, useRef } from 'react';
 import type {
   CSSProperties,
@@ -26,9 +27,7 @@ import type {
   RefCallback,
   SetStateAction,
 } from 'react';
-import { assembleCompound } from '#utils/assembleCompound';
-import { mergeClassNames } from '#utils/mergeClassNames';
-import { useControlledState } from '#utils/useControlledState';
+import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import styles from './Tab.module.css';
 import { getStripItemStates, useStripScrollHandle, useTabStrip } from './useTabStrip';
 import { getRootLeafState, useSplitBranch, useTabSplit } from './useTabSplit';
@@ -80,7 +79,7 @@ export type TabDropZone = 'strip' | 'panel';
 /**
  * 슬롯별 클래스 조립 계약.
  *
- * Tab 은 컴파운드가 3중첩(Root → Split → Branch → Leaf → Group → Strip)이고 분기 렌더가 재귀라,
+ * Tab 은 컴파운드가 3중첩(TabRoot → TabSplit → Branch → Leaf → TabGroup → TabStrip)이고 분기 렌더가 재귀라,
  * 슬롯을 props 로 내리면 모든 내부 컴포넌트 시그니처에 같은 인자가 붙는다. 그래서 클래스 전용
  * context 를 따로 두고 공개 루트에서 한 번만 주입한다 — 상태 context 와 섞지 않는다.
  */
@@ -132,13 +131,13 @@ export interface TabClassNames {
 }
 
 /**
- * 클래스 전용 context. 공개 루트(`Strip`/`Group`/`Split`)에서 한 번만 주입하고 나머지는 여기서
+ * 클래스 전용 context. 공개 루트(`TabStrip`/`TabGroup`/`TabSplit`)에서 한 번만 주입하고 나머지는 여기서
  * 읽는다 — 상태 context 와 섞지 않는다.
  */
 const ClassNamesContext = createContext<TabClassNames>({});
 const useTabClassNames = () => useContext(ClassNamesContext);
 
-// ─── Header ───
+// ─── TabHeader ───
 
 /** 헤더가 그릴 때 보는 파생 상태. prop의 `undefined`가 여기서 `false`로 굳는다. */
 export interface HeaderState {
@@ -185,7 +184,7 @@ const handleHeaderCloseClick = (onClose: () => void) => (event: { stopPropagatio
 const preventDragStart = (event: { preventDefault: () => void }) => event.preventDefault();
 
 /** 탭 하나의 제목 줄 — 아이콘·제목·닫기 버튼을 담는다. `Tab.Group`/`Tab.Strip`이 내부에서 쓴다. */
-const Header = ({
+export const TabHeader = ({
   isActive = false,
   isDirty = false,
   isPreview = false,
@@ -206,7 +205,7 @@ const Header = ({
       data-active={isActive ? '' : undefined}
       data-dirty={isDirty ? '' : undefined}
       data-component="Tab.Header"
-      className={mergeClassNames(className, classNames.header)}
+      className={clsx(className, classNames.header)}
     >
       {icon ? (
         <span className={classNames.headerIcon}>{icon()}</span>
@@ -251,7 +250,7 @@ const Header = ({
   );
 };
 
-// ─── Strip ───
+// ─── TabStrip ───
 
 /** 콜백이 없으면 그 기능 자체가 꺼진다 — `onTabClose`가 없으면 닫기 버튼도 안 뜬다. */
 export interface TabStripProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
@@ -352,7 +351,7 @@ const StripItems = () => {
     <>
       {items.map(({ tab, isActive, isDraggable, isDragging, indicatorPosition, onClose, handlers }) => {
         const header = (
-          <Header
+          <TabHeader
             {...handlers}
             iconId={tab.iconId}
             icon={tab.icon}
@@ -452,7 +451,7 @@ const StripRootImpl = ({
             `stripTail`의 "더보기" 버튼이 presentation 래퍼를 뚫고 tablist 의 허용되지 않는
             자식(role=button)으로 잡힌다(axe `aria-required-children`). tablist 의 유일한 실제
             자식은 role=tab 뿐이어야 한다. */}
-        <div {...props} className={mergeClassNames(className, classNames.stripRoot)}>
+        <div {...props} className={clsx(className, classNames.stripRoot)}>
           <Container ref={viewportRef} chrome="none" scroll="horizontal" className={classNames.stripListContainer}>
             <div ref={listRef} role="tablist" aria-orientation="horizontal" className={classNames.stripList} {...listHandlers}>
               {tabItems.length > 0 ? <StripItems /> : <div className={classNames.stripEmpty}>{stripEmptyLabel}</div>}
@@ -477,7 +476,7 @@ const StripRootImpl = ({
   );
 };
 
-// ─── Group ───
+// ─── TabGroup ───
 
 /** `activeTab`이 목록에 없으면 첫 탭으로 떨어진다 — 그 보정 결과가 여기 담긴다. */
 export interface GroupState {
@@ -572,7 +571,7 @@ const GroupImpl = forwardRef<HTMLElement, TabGroupProps & { readonly classNames?
   ) => {
     const inherited = useTabClassNames();
     const classNames = providedClassNames ?? inherited;
-    const [currentActiveTab, setActiveTab] = useControlledState({ value: activeTab, defaultValue: defaultActiveTab, onChange: onActiveTabChange });
+    const [currentActiveTab, setActiveTab] = useControllableState({ prop: activeTab, defaultProp: defaultActiveTab, onChange: onActiveTabChange, caller: 'Tab' });
     const state = getGroupState(tabItems, currentActiveTab);
     const handleTabClick = (tabId: TabId) => {
       setActiveTab(tabId);
@@ -582,8 +581,8 @@ const GroupImpl = forwardRef<HTMLElement, TabGroupProps & { readonly classNames?
     return (
       <ClassNamesContext.Provider value={classNames}>
         <GroupContext.Provider value={state}>
-          <div {...props} ref={ref as Ref<HTMLDivElement>} className={mergeClassNames(className, classNames.group)}>
-            {/* 탭이 하나도 없으면 Strip 자체를 렌더하지 않는다 — `stripEmptyLabel`은 빈 슬롯의
+          <div {...props} ref={ref as Ref<HTMLDivElement>} className={clsx(className, classNames.group)}>
+            {/* 탭이 하나도 없으면 TabStrip 자체를 렌더하지 않는다 — `stripEmptyLabel`은 빈 슬롯의
                 문구만 바꿀 뿐(테두리·배경·항상 뜨는 "..." 메뉴는 그대로 남아) Strip을 못
                 숨긴다(2026-08-31, 실제로 그렇게 오해하고 쓰인 소비처가 있었다). 빈 상태는
                 `emptyMessage` 하나로만 말한다. */}
@@ -624,7 +623,7 @@ const GroupImpl = forwardRef<HTMLElement, TabGroupProps & { readonly classNames?
 );
 GroupImpl.displayName = 'Tab.Group';
 
-// ─── Split (트리) ───
+// ─── TabSplit (트리) ───
 
 /** 잎은 탭 그룹 하나다. `size`는 형제 사이의 비율(%)이다. */
 export interface TabTreeLeaf {
@@ -682,8 +681,8 @@ export interface TabSplitProps extends Omit<HTMLAttributes<HTMLDivElement>, 'chi
   readonly chrome?: TabChrome;
 }
 
-/** `tree`를 주면 Split, 주지 않고 `tabItems`/`activeTab`을 주면 단일 Group으로 동작한다. */
-export type TabRootProps = TabSplitProps | (TabGroupProps & { tree?: never });
+/** `tree`를 주면 TabSplit, 주지 않고 `tabItems`/`activeTab`을 주면 단일 Group으로 동작한다. */
+export type TabProps = TabSplitProps | (TabGroupProps & { tree?: never });
 
 /** `sizes`는 정규화를 거쳐 합이 100이다. */
 export interface SplitState {
@@ -780,9 +779,9 @@ const mergeRefs =
     }
   };
 
-// ─────────────────────────── Split leaf → Group 콜백 바인딩 ───────────────────────────
+// ─────────────────────────── TabSplit leaf → TabGroup 콜백 바인딩 ───────────────────────────
 
-/** Split 의 leaf 하나가 자기 id 를 미리 채운 채로 안쪽 Group 에 콜백을 넘긴다(LeafSection/RootLeafSection 공용). */
+/** TabSplit 의 leaf 하나가 자기 id 를 미리 채운 채로 안쪽 TabGroup 에 콜백을 넘긴다(LeafSection/RootLeafSection 공용). */
 const handleLeafTabClick = (onTabClick: (leafId: string, tabId: TabId) => void, leafId: string) => (tabId: TabId) => onTabClick(leafId, tabId);
 
 const handleLeafMenuClick = (onMenuClick: (leafId: string) => void, leafId: string) => () => onMenuClick(leafId);
@@ -843,7 +842,7 @@ const LeafSection = ({
     <section
       {...state.handlers}
       data-active={state.isActive ? '' : undefined}
-      className={mergeClassNames(undefined, classNames.leafSection, state.isActive && classNames.leafSectionActive)}
+      className={clsx(undefined, classNames.leafSection, state.isActive && classNames.leafSectionActive)}
       style={state.style}
     >
       <GroupImpl
@@ -911,7 +910,7 @@ const SplitBranch = forwardRef<
         ref={mergeRefs<HTMLElement>(branch.ref, isRoot ? ref : null)}
         data-orientation={branch.orientation}
         style={isRoot ? undefined : childState?.style}
-        className={mergeClassNames(
+        className={clsx(
           isRoot ? className : undefined,
           isRoot
             ? isHorizontal
@@ -980,7 +979,7 @@ const RootLeafSection = forwardRef<
       {...rootProps}
       {...state.handlers}
       ref={ref}
-      className={mergeClassNames(className, classNames.rootLeafSection)}
+      className={clsx(className, classNames.rootLeafSection)}
     >
       <GroupImpl
         activeTab={leaf.activeTab}
@@ -1104,7 +1103,7 @@ const buildClassNames = (chrome?: TabChrome): TabClassNames => {
     stripDropOverlay: styles['stripDropOverlay'],
     stripScrollHandle: styles['stripScrollHandle'],
 
-    group: mergeClassNames(undefined, styles['group'], frame),
+    group: clsx(undefined, styles['group'], frame),
     groupStrip: styles['groupStrip'],
     groupPanelWrapper: styles['groupPanelWrapper'],
     // 패널은 여백을 두지 않는다 — 여백을 주면 안에 놓인 것이 영역을 채우지 못하고 카드처럼 뜬다.
@@ -1114,8 +1113,8 @@ const buildClassNames = (chrome?: TabChrome): TabClassNames => {
     groupPanelEmpty: styles['groupPanelEmpty'],
     panelDropIndicator: styles['panelDropIndicator'],
 
-    splitRootHorizontal: mergeClassNames(undefined, styles['splitRootHorizontal'], frame),
-    splitRootVertical: mergeClassNames(undefined, styles['splitRootVertical'], frame),
+    splitRootHorizontal: clsx(undefined, styles['splitRootHorizontal'], frame),
+    splitRootVertical: clsx(undefined, styles['splitRootVertical'], frame),
     splitBranchHorizontal: styles['splitBranchHorizontal'],
     splitBranchVertical: styles['splitBranchVertical'],
     splitBranchDividerHorizontal: styles['splitBranchDividerHorizontal'],
@@ -1134,7 +1133,7 @@ const StripRoot = ({ className, ...props }: TabStripProps) => (
 );
 
 /** 탭 헤더들을 가로로 늘어놓는 띠 — 넘치면 스크롤하고, 다 안 보이는 탭은 오버플로 메뉴로 묶는다. */
-const Strip = assembleCompound('Tab.Strip', StripRoot, { Items: StripItems, Menu: StripMenu });
+export const TabStrip = Object.assign(StripRoot, { Items: StripItems, Menu: StripMenu });
 
 /**
  * Strip과 활성 탭의 내용(`children`)을 세로로 붙인 패널 하나 — 분할이 없을 때 `Tab`이 렌더하는
@@ -1143,40 +1142,29 @@ const Strip = assembleCompound('Tab.Strip', StripRoot, { Items: StripItems, Menu
  * `data-component` 는 여기서 리터럴로 정한다 — 실제 DOM에 닿는 자리(`GroupImpl`)가 하나뿐이라
  * 다른 컴포넌트와 같은 자리다.
  */
-const Group = forwardRef<HTMLElement, TabGroupProps>(({ className, chrome, ...props }, ref) => (
+export const TabGroup = forwardRef<HTMLElement, TabGroupProps>(({ className, chrome, ...props }, ref) => (
   <GroupImpl {...props} ref={ref} classNames={buildClassNames(chrome)} className={className} data-component="Tab" />
 ));
-Group.displayName = 'Tab.Group';
+TabGroup.displayName = 'Tab.Group';
 
 /**
- * Split 은 leaf 하나뿐일 때와 branch 가 있을 때 렌더되는 태그가 다르다(`section`/`div`) —
+ * TabSplit 은 leaf 하나뿐일 때와 branch 가 있을 때 렌더되는 태그가 다르다(`section`/`div`) —
  * `SplitRootImpl`이 안다.
  */
-const SplitRoot = forwardRef<HTMLElement, TabSplitProps>(({ className, chrome, ...props }, ref) => (
+export const TabSplit = forwardRef<HTMLElement, TabSplitProps>(({ className, chrome, ...props }, ref) => (
   <SplitRootImpl {...props} ref={ref} classNames={buildClassNames(chrome)} className={className} data-component="Tab" />
 ));
-SplitRoot.displayName = 'Tab.Split';
+TabSplit.displayName = 'Tab.Split';
 
-/**
- * `Group` 여러 개를 리사이즈 가능한 트리로 나눠 담는 컨테이너 — `tree`가 leaf 하나뿐이면 `Group`
- * 하나와 동일하게 보인다.
- */
-const Split = assembleCompound('Tab.Split', SplitRoot, {});
-
-/** `tree`가 있으면 Split, 없으면 단일 Group으로 동작한다. */
-const Root = forwardRef<HTMLElement, TabRootProps>((props, ref) =>
-  props.tree ? <Split {...props} ref={ref} /> : <Group {...props} ref={ref} />,
+/** `tree`가 있으면 TabSplit, 없으면 단일 Group으로 동작한다. */
+export const TabRoot = forwardRef<HTMLElement, TabProps>((props, ref) =>
+  props.tree ? <TabSplit {...props} ref={ref} /> : <TabGroup {...props} ref={ref} />,
 );
-Root.displayName = 'Tab';
-
-export type { TabRootProps as TabProps };
+TabRoot.displayName = 'Tab';
 
 /**
- * Storybook Docs 서브컴포넌트 섹션 전용 재노출 — 공개 API는 `Tab.Header`/`Tab.Strip`/
- * `Tab.Group`/`Tab.Split`으로만 접근한다(`index.ts`엔 안 싣는다). react-docgen-typescript가
- * 파일의 최상위 export만 컴포넌트로 인식해서, 비export 지역 함수엔 `__docgenInfo`가 안 붙는다
- * (2026-09-06 실측 확인) — Docs 페이지의 서브컴포넌트 Props 표를 뽑으려면 이 재노출이 필요하다.
+ * 부품을 `Object.assign`으로 네임스페이스에 붙인다. 부품 함수의 이름이 `Tab<부품>`인 것은
+ * react-docgen-typescript가 파일의 최상위 export만 컴포넌트로 인식해서다 — Docs 페이지의
+ * 서브컴포넌트 Props 표가 그 이름으로 붙는다(2026-09-06 실측).
  */
-export { Header as TabHeaderDoc, Strip as TabStripDoc, Group as TabGroupDoc, Split as TabSplitDoc };
-
-export const Tab = assembleCompound('Tab', Root, { Header, Strip, Group, Split });
+export const Tab = Object.assign(TabRoot, { Header: TabHeader, Strip: TabStrip, Group: TabGroup, Split: TabSplit });

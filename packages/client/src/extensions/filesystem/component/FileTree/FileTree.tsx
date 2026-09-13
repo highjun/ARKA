@@ -1,7 +1,6 @@
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import type { DragEvent, HTMLAttributes, KeyboardEvent, MouseEvent, ReactNode, Ref } from 'react';
 import { clsx } from 'clsx';
-import { assembleCompound } from '#utils/assembleCompound';
 import { useTreeNavigation, flattenVisible } from './useTreeNavigation';
 import { compactFolderChains, isApplePlatform, nextSelection, selectAll, selectionIncluding, selectionIntentOf } from './shared';
 import type { FlatTreeNode } from './useTreeNavigation';
@@ -275,7 +274,7 @@ const Row = ({
 };
 
 /** `onSelect`·`onContextMenu`를 가로챈다 — 행 단위로 다시 정의한다. */
-export interface FileTreeRootProps extends Omit<HTMLAttributes<HTMLElement>, 'children' | 'onSelect' | 'onContextMenu'> {
+export interface FileTreeProps extends Omit<HTMLAttributes<HTMLElement>, 'children' | 'onSelect' | 'onContextMenu'> {
   /** 트리에 표시할 항목(폴더·파일) — 계층 구조 자체가 이 목록의 `children`으로 표현된다. */
   readonly items: readonly FileTreeItem[];
   /** 프레임(테두리·radius·배경) 유무. */
@@ -363,7 +362,7 @@ export interface FileTreeRootProps extends Omit<HTMLAttributes<HTMLElement>, 'ch
  * 다중선택의 "앵커"(Shift+클릭·Shift+화살표가 범위를 재는 기준점)는 `useRef`로 둔다 — 렌더에
  * 안 쓰이는 값이라 `useState`로 두면 Ctrl+클릭마다 불필요한 리렌더가 하나 더 는다.
  */
-const Root = forwardRef<HTMLElement, FileTreeRootProps>(
+export const FileTree = forwardRef<HTMLElement, FileTreeProps>(
   (
     {
       items,
@@ -403,7 +402,7 @@ const Root = forwardRef<HTMLElement, FileTreeRootProps>(
      * 리렌더로 반영되기 전에 `dragenter`가 옛 클로저(`draggedId === undefined`)를 읽어 조용히
      * 무시해 버린다. `ref`는 같은 틱에서도 즉시 최신값이라 이 경합이 없다. `dropTargetId`는
      * `data-drop` 렌더에 실제로 쓰이므로 `state`로 둔다 — 이건 리렌더 한 사이클 지연이 있어도
-     * 된다(소비처가 `dragover` 뒤 폴링으로 기다린다, `FileTreeRootProps.onItemDrop` 참고).
+     * 된다(소비처가 `dragover` 뒤 폴링으로 기다린다, `FileTreeProps.onItemDrop` 참고).
      */
     const draggedIdRef = useRef<FileTreeItemId | undefined>(undefined);
     const [dropTargetId, setDropTargetId] = useState<FileTreeItemId | undefined>(undefined);
@@ -562,7 +561,7 @@ const Root = forwardRef<HTMLElement, FileTreeRootProps>(
       return (
         <div
           // 빈 상태는 <div>, 아니면 <ul>이라 실제 DOM 타입이 갈린다 — 공개 계약은 공통 조상
-          // HTMLElement로 두므로(위 FileTreeRootProps 주석), 각 분기에서 실제 태그에 맞춰 좁힌다.
+          // HTMLElement로 두므로(위 FileTreeProps 주석), 각 분기에서 실제 태그에 맞춰 좁힌다.
           ref={ref as Ref<HTMLDivElement>}
           data-chrome={chrome}
           className={clsx(className, styles['root'])}
@@ -613,7 +612,4 @@ const Root = forwardRef<HTMLElement, FileTreeRootProps>(
     );
   },
 );
-Root.displayName = 'FileTree';
 
-export type { FileTreeRootProps as FileTreeProps };
-export const FileTree = assembleCompound('FileTree', Root, {});

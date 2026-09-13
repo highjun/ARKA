@@ -1,6 +1,5 @@
+import { clsx } from 'clsx';
 import type { HTMLAttributes, ReactNode } from 'react';
-import { assembleCompound } from '#utils/assembleCompound';
-import { mergeClassNames } from '#utils/mergeClassNames';
 import styles from './ChatRoom.module.css';
 import { IconButton } from '@primer/react';
 import { Icon } from '#component/Icon';
@@ -27,7 +26,7 @@ export interface ChatRoomMessage {
 }
 
 /** `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다. */
-export interface ChatRoomRootProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {
+export interface ChatRoomProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {
   /** 헤더에 표시할 채팅방 제목. */
   readonly title?: string;
   /** 헤더의 상태 인디케이터. */
@@ -57,7 +56,8 @@ export interface ChatRoomRootProps extends Omit<HTMLAttributes<HTMLDivElement>, 
   readonly actions?: ReactNode;
 }
 
-const Root = ({
+/** 헤더·로그·작성창을 세로로 쌓은 대화 한 판. 로그는 `messages` 또는 `children`으로 채운다. */
+export const ChatRoom = ({
   title = 'Agent chat',
   status = 'running',
   messages = [],
@@ -73,7 +73,7 @@ const Root = ({
   actions,
   className,
   ...props
-}: ChatRoomRootProps) => {
+}: ChatRoomProps) => {
   const isEmpty = messages.length === 0;
   const defaultActions = (
     <>
@@ -90,7 +90,7 @@ const Root = ({
   );
 
   return (
-    <section className={mergeClassNames(className, styles['root'])} {...props} data-component="ChatRoom">
+    <section className={clsx(className, styles['root'])} {...props} data-component="ChatRoom">
       <SidebarLayout
         title={
           <div className={styles['titleGroup']}>
@@ -119,7 +119,4 @@ const Root = ({
     </section>
   );
 };
-Root.displayName = 'ChatRoom';
 
-export type { ChatRoomRootProps as ChatRoomProps };
-export const ChatRoom = assembleCompound('ChatRoom', Root, {});

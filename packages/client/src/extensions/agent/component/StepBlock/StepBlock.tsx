@@ -1,8 +1,7 @@
+import { clsx } from 'clsx';
 import { forwardRef } from 'react';
 import type { FormEvent, HTMLAttributes, ReactNode } from 'react';
-import { assembleCompound } from '#utils/assembleCompound';
-import { useControlledState } from '#utils/useControlledState';
-import { mergeClassNames } from '#utils/mergeClassNames';
+import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import styles from './StepBlock.module.css';
 import { Details } from '@primer/react';
 import { Icon } from '#component/Icon';
@@ -69,19 +68,19 @@ const formatBody = (value: unknown): string => {
  * `title`(ReactNode, 선택)과 `toolId`(string, 필수)는 타입·필수 여부가 달라 하나로 합치지
  * 않는다.
  */
-export type StepBlockRootProps = StepBlockThinkingProps | StepBlockToolProps;
+export type StepBlockProps = StepBlockThinkingProps | StepBlockToolProps;
 
 /**
  * `@primer/react`의 `Details`(네이티브 `<details>`)를 직접 쓴다. 한때 공유 `Collapsible`을
  * 감쌌는데 그것이 props를 닫아 두어(`data-component`도 `HTMLAttributes`도 통과시키지 않았다)
  * 이 컴포넌트의 계약을 못 채웠다 — 옛 `ToolBlock`이 바깥에 래퍼 `div`를 하나 더 씌워 우회하던
  * 이유이기도 했다. `Collapsible`은 2026-09-14에 지웠다(아무도 쓰지 않았다).
- * `ThinkingBlock`이 이미 쓰던 방식(`useControlledState` + `Details`)을 그대로 가져와 두
+ * `ThinkingBlock`이 이미 쓰던 방식(`useControllableState` + `Details`)을 그대로 가져와 두
  * 컴포넌트를 합치면서 그 우회 래퍼를 없앤다.
  */
-const Root = forwardRef<HTMLDetailsElement, StepBlockRootProps>((props, ref) => {
+export const StepBlock = forwardRef<HTMLDetailsElement, StepBlockProps>((props, ref) => {
   const { status = 'done', expanded, defaultExpanded = false, onExpandedChange, className, ...rest } = props;
-  const [isExpanded, setExpanded] = useControlledState({ value: expanded, defaultValue: defaultExpanded, onChange: onExpandedChange });
+  const [isExpanded, setExpanded] = useControllableState({ prop: expanded, defaultProp: defaultExpanded, onChange: onExpandedChange, caller: 'StepBlock' });
   const handleToggle = (event: FormEvent<HTMLDetailsElement>) => setExpanded(event.currentTarget.open);
 
   if (rest.kind === 'thinking') {
@@ -97,7 +96,7 @@ const Root = forwardRef<HTMLDetailsElement, StepBlockRootProps>((props, ref) => 
         onToggle={handleToggle}
         data-kind="thinking"
         data-component="StepBlock"
-        className={mergeClassNames(className, styles['root'])}
+        className={clsx(className, styles['root'])}
       >
         <Details.Summary className={styles['trigger']}>
           <span data-chevron className={styles['chevron']}>
@@ -125,14 +124,14 @@ const Root = forwardRef<HTMLDetailsElement, StepBlockRootProps>((props, ref) => 
       onToggle={handleToggle}
       data-kind="tool"
       data-component="StepBlock"
-      className={mergeClassNames(className, styles['root'])}
+      className={clsx(className, styles['root'])}
     >
       <Details.Summary className={styles['trigger']}>
         <span data-chevron className={styles['chevron']}>
           <Icon iconId="chevronRight" size="sm" />
         </span>
         <span className={styles['header']}>
-          <span className={mergeClassNames(undefined, styles['title'], styles['toolId'])}>{toolId}</span>
+          <span className={clsx(undefined, styles['title'], styles['toolId'])}>{toolId}</span>
           <StatusIndicator status={status} />
         </span>
       </Details.Summary>
@@ -145,7 +144,4 @@ const Root = forwardRef<HTMLDetailsElement, StepBlockRootProps>((props, ref) => 
     </Details>
   );
 });
-Root.displayName = 'StepBlock';
 
-export type { StepBlockRootProps as StepBlockProps };
-export const StepBlock = assembleCompound('StepBlock', Root, {});
