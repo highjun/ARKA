@@ -4,7 +4,7 @@
 안정적인 운영/DevOps를 위해서는 결국 CI가 필요하다.
 
 ## 결정:
-- **병합 전 강제는 CI가 든다.** PR마다 `check`·`container`·`e2e`·`pr-title`·`secrets`가 돈다.
+- **병합 전 강제는 CI가 든다.** PR마다 `check` 하나가 돌고 그 안에서 lint·typecheck·test·build·PR 제목·시크릿·컨테이너·E2E가 **순서대로** 지나간다(2026-09-13 개정 — 잡을 다섯으로 갈랐다가 하나로 모았다. 설치가 다섯 번 돌고 빌드가 세 번 돌았다).
 - **`main` 머지가 곧 배포다.** `needs`로 검사를 강제한다 — 그것만이 워크플로 안에서 통과를 보장한다.
 - **PR마다 미리보기를 띄운다.** 배포의 모양은 → [ADR 0006](0006-deploy-shape.md).
 - **CI에만 있는 검사를 만들지 않는다.** CI는 로컬에서 부를 수 있는 명령만 부른다 — 그래야 빨간불을 재현할 수 있다.
@@ -25,12 +25,13 @@
 - **`.github/`가 루트 항목을 하나 늘린다**(→ ADR 0002). 위치를 고를 수 없는 자리라 예외로 둔다.
 
 ## 강제:
-- **워크플로** `.github/workflows/ci.yml` — 검사 다섯 + `deploy`. (미리보기는 2026-09-13에 걷어냈다.)
-- **필수 체크 등록은 못 한다** — Free 요금제 + 비공개 저장소는 룰셋이 403이다(2026-09-10 실측).
-  `main` 직접 푸시는 `ops/hooks/prePush.ts`가 로컬에서만 막는다.
-- **commitlint** `ops/commitlint.config.ts` — PR 제목의 타입·scope·길이.
+- **워크플로** `.github/workflows/ci.yml` — 잡 둘(`check`·`deploy`). (미리보기는 2026-09-13에 걷어냈다.)
+- **룰셋** `main` — PR 필수, 승인 1, 코드 오너 리뷰, **필수 검사 `check`**, 강제 push·삭제 금지
+  (2026-09-13, 저장소를 공개로 바꾼 뒤에 걸 수 있게 됐다). 그래서 `check`라는 **이름이 계약이다.**
+  `ops/hooks/prePush.ts`의 로컬 차단은 그 앞의 미끄럼 방지턱으로 남는다.
+- **commitlint** `ops/commitlint.config.ts` — PR 제목의 타입·scope·길이. `check`의 한 단계다.
 - **gitleaks** `ops/.gitleaksignore` — 새로 더해지는 커밋만 훑는다.
 - **CODEOWNERS** `.github/CODEOWNERS` — 배치·설정·결정이 사는 자리에 리뷰가 자동으로 붙는다.
 
 ## 상태:
-승인됨 (2026-09-10)
+승인됨 (2026-09-10). 2026-09-13 개정 — 검사 잡을 `check` 하나로 모으고 `edited` 트리거를 걷었다.
