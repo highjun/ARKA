@@ -212,7 +212,7 @@
 - **단위** — 계약이 못 잡는 것만. 대상 옆 `*.test.ts`. 적을수록 좋은 신호다.
 - **스모크** — view가 렌더되고 이벤트가 연결되는지만. 스타일은 Storybook 담당.
 - **Storybook** — 시각 검증. 최소 세트는 기본 / 빈 / 로딩 / 에러 — **그 상태가 실제로 있는 것만**이다. `SettingsTabView`처럼 ViewModel에 로딩·실패가 없는 화면에 그 스토리를 만들면 일어날 수 없는 상태를 그리게 된다.
-    - `shared/components/`와 슬라이스의 `component/`는 **전부** 스토리를 갖는다. → [ADR 0010](adr/0010-ui-verification.md)
+    - `shared/component/`와 슬라이스의 `component/`는 **전부** 스토리를 갖는다. → [ADR 0010](adr/0010-ui-verification.md)
     - `view/`는 **조합이 드러나는 것만** 갖는다 — 화면 한 구역을 실제로 채우는 view. 컴포넌트 하나에 값을 꽂는 얇은 바인딩은 그 컴포넌트 스토리가 이미 같은 그림을 덮는다. 대상 목록은 `.storybook/main.ts`에 있다.
 - **E2E** — `test/e2e/*.spec.ts`.
 - **VRT** — 스토리를 순회해 찍는다. `pnpm --filter client test:vrt`(비교). 기준을 만들 때는 **스토리를 골라** 인자를 넘긴다 — `test:vrt -g "<스토리 id>" --update-snapshots`. **Docker에서만** 생성·비교한다.

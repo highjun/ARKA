@@ -3,7 +3,7 @@ import type { StorybookConfig } from '@storybook/react-vite';
 /**
  * 스토리는 대상 옆에 둔다 — 여기서는 글롭만 가리킨다.
  *
- * `shared/components/`와 각 슬라이스의 `component/`는 전부 대상이다.
+ * `shared/component/`와 각 슬라이스의 `component/`는 전부 대상이다.
  *
  * `view/`는 **조합이 드러나는 것만** 대상이다 — 화면 한 구역을 실제로 채우는 view(`ShellView`,
  * `DirectoryTreeView`, `ChatTabView`, `SourceControlView`, `SearchView`, `SettingsTabView`).

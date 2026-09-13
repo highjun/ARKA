@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Text } from '#components/common';
+import { Text } from '#component/Text';
 import { ErrorBoundary } from './ErrorBoundary';
 
 /**

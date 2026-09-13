@@ -2,7 +2,7 @@ import { createToken } from '#core/di';
 import type { PaneId } from '../model/ITabsModel';
 
 /**
- * `shared/components`의 `TabSplitOrientation`·`SplitEdgeDropPosition`과 값이 같다 — ViewModel도 Model과
+ * `Tab`의 `TabSplitOrientation`·`SplitEdgeDropPosition`과 값이 같다 — ViewModel도 Model과
  * 같은 이유로 외부 라이브러리를 직접 import 하지 않는다(`MODEL-13`, ViewModel도 대상이다). Model이
  * `TabSplitOrientation`을 이미 선언해 뒀지만 그걸 가져다 쓰는 대신 여기서도 다시 선언한다 —
  * 가져다 쓰면 이 파일이 `export type { TabSplitOrientation }`로 다시 내보내야 View 층까지

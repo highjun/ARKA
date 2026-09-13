@@ -5,9 +5,9 @@ import { mergeClassNames } from '#utils/mergeClassNames';
 import { useSessionList } from './useSessionList';
 import styles from './SessionList.module.css';
 import { IconButton } from '@primer/react';
-import { Icon } from '#components/common/Icon';
-import { SidebarLayout } from '#components/layout/SidebarLayout';
-import { Menu } from '#components/common/Menu';
+import { Icon } from '#component/Icon';
+import { SidebarLayout } from '#component/SidebarLayout';
+import { Menu } from '#component/Menu';
 import { SessionRow } from '../SessionRow';
 import type { StatusIndicatorStatus } from '../StatusIndicator';
 

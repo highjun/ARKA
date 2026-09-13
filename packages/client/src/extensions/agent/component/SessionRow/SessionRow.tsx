@@ -5,7 +5,7 @@ import styles from './SessionRow.module.css';
 import { CounterLabel } from '@primer/react';
 import { StatusIndicator } from '../StatusIndicator';
 import type { StatusIndicatorStatus } from '../StatusIndicator';
-import { Timestamp } from '#components/common/Timestamp';
+import { Timestamp } from '#component/Timestamp';
 
 interface SessionRowSelection {
   readonly isActive?: boolean;

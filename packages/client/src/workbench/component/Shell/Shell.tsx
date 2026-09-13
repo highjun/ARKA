@@ -5,12 +5,12 @@ import { PortalProvider } from '#utils/portal';
 import { assembleCompound } from '#utils/assembleCompound';
 import styles from './Shell.module.css';
 import { SplitPageLayout, ThemeProvider } from '@primer/react';
-import { Container } from '#components/layout/Container';
-import { Icon } from '#components/common/Icon';
-import { IconButton } from '#components/common/IconButton';
+import { Container } from '#component/Container';
+import { Icon } from '#component/Icon';
+import { IconButton } from '#component/IconButton';
 import { ActivityBar } from '../ActivityBar';
 import type { ActivityBarItem } from '../ActivityBar';
-import { Menu } from '#components/common/Menu';
+import { Menu } from '#component/Menu';
 
 /** 패널이 없으면(아이콘 바만) 좁게, 있으면(아이콘 바+패널) 넓게 — 폭 값 자체는 워크벤치가 쓰던
  * 값을 그대로 컴포넌트 기본으로 가져온다. */

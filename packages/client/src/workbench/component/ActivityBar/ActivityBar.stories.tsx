@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { ContextMenu } from '#components/common/ContextMenu';
+import { ContextMenu } from '#component/ContextMenu';
 import { ActivityBar } from './index';
 import type { ActivityBarItem } from './index';
 

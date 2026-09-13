@@ -5,8 +5,8 @@ import { useControlledState } from '#utils/useControlledState';
 import { mergeClassNames } from '#utils/mergeClassNames';
 import styles from './InputComposer.module.css';
 import { ActionList, ActionMenu, Button, SegmentedControl } from '@primer/react';
-import { Icon } from '#components/common/Icon';
-import type { IconId } from '#components/common/Icon';
+import { Icon } from '#component/Icon';
+import type { IconId } from '#component/Icon';
 
 /** `plan`은 실행 없이 계획만 세운다 — 서버의 `RunMode`와 같은 값이다. */
 export type InputComposerMode = 'action' | 'plan';

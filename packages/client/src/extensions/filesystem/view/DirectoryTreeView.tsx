@@ -1,6 +1,7 @@
 import { useViewModel } from '#core/viewmodel';
 import { Button, Spinner } from '@primer/react';
-import { Container, Dialog } from '#components/layout';
+import { Container } from '#component/Container';
+import { Dialog } from '#component/Dialog';
 import { FileTree } from '../component';
 import type { FileTreeItem } from '../component';
 import type { MouseEvent } from 'react';

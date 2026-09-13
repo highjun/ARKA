@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Icon } from '#components/common/Icon';
-import { IconButton } from '#components/common/IconButton';
-import { Menu } from '#components/common/Menu';
+import { Icon } from '#component/Icon';
+import { IconButton } from '#component/IconButton';
+import { Menu } from '#component/Menu';
 import { Shell } from './index';
 import type { ActivityBarItem } from '../ActivityBar';
 

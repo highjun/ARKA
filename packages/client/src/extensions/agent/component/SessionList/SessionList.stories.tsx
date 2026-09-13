@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Menu } from '#components/common/Menu';
+import { Menu } from '#component/Menu';
 import { SessionList } from './index';
 import type { AgentSessionItem } from './index';
 
