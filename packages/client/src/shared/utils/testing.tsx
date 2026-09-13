@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import { expectNoA11yViolations } from './axe';
 
 /**
- * `docs/components.md` §4.2의 "정형 체크"를 함수로 만든 것 — primer/react의
+ * 컴포넌트의 정형 계약(→ ADR 0010)을 함수로 만든 것 — primer/react의
  * `utils/testing.tsx`(`implementsClassName`)가 `describe` 안에서 `it()`을 직접 생성해 호출 한 줄로
  * 끝내는 패턴을 그대로 가져와 data-component·forwardRef·axe까지 넓혔다.
  *

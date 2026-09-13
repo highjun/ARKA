@@ -2,9 +2,8 @@ import type { ICommandCenterRegistry } from './ICommandCenterRegistry';
 import { CommandCenterRegistry } from './CommandCenterRegistry';
 
 
-/** 읽기 전용 흉내 atom — 이 테스트는 구독을 안 본다. `nanostores`는 테스트의 외부 허용 목록에
- *  없다(`arka/external-import-allowlist`) — 타입 import조차 막혀 `ReadableAtom`을 못 쓰므로 최소
- *  모양만 흉내내고 호출부에서 필요한 타입으로 캐스트한다. */
+/** 읽기 전용 흉내 atom — 이 테스트는 구독을 안 본다. `ReadableAtom`을 그대로 가져오면 안 보는
+ *  것의 타입까지 맞춰야 하므로, 최소 모양만 흉내내고 호출부에서 필요한 타입으로 캐스트한다. */
 const fakeAtom = <T,>(value: T) => ({ get: () => value, listen: () => () => undefined }) as unknown;
 
 const make = (): ICommandCenterRegistry => {

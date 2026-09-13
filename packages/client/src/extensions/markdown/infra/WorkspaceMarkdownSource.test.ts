@@ -5,7 +5,7 @@ import type { MarkdownDirectoryWatcher, MarkdownFileReader } from './WorkspaceMa
 
 /**
  * 의존이 구조 타입이라 `filesystem`의 Mock을 쓰지 않고 여기서 세운다 — 슬라이스끼리는 import하지
- * 않는다(`arka/slices-are-siblings`). 이 스텁이 워크스페이스 포트의 자리다.
+ * 않는다(→ ADR 0007). 이 스텁이 워크스페이스 포트의 자리다.
  */
 const stubs = (files: Readonly<Record<string, string>>, binary: readonly string[] = []) => {
   const contents = new Map(Object.entries(files));

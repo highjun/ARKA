@@ -185,12 +185,22 @@
 - `shared/`는 아무것도 import할 수 없다. 공통 추출은 아래로만 한다.
 - client는 `core/ workbench/ extensions/ shared/` 넷이다. 의존 방향은 `eslint.config.ts`의 zone이 강제한다.
 - **빈 레이어를 미리 만들지 않는다.** 실제 I/O나 유스케이스가 생길 때 폴더를 만든다.
-- 파일 이름: 클래스·React 컴포넌트·계약(`I<Name>.ts`)은 PascalCase, 함수 모듈은 camelCase. 폴더는 camelCase(컴포넌트 폴더는 그 컴포넌트 이름). 하이픈·밑줄은 쓰지 않는다. **리뷰로 본다** — 이것을 보던 규칙은 껐다(2026-09-13).
-- **`model/`은 사실과 사건을, `viewmodel/`은 화면 상태를 다룬다.** `model`→`viewmodel`은 이벤트로, `viewmodel`→`view`는 바인딩으로 잇는다. atom은 ViewModel이 소유한다. → [ADR 0005](adr/0005-client-structure.md)
+- 파일 이름: 클래스·React 컴포넌트·계약(`I<Name>.ts`)은 PascalCase, 함수 모듈은 camelCase. 폴더는 camelCase(컴포넌트 폴더는 그 컴포넌트 이름). 하이픈·밑줄은 쓰지 않는다. **지금은 리뷰로 본다** — 이것을 보던 자작 규칙은 껐고 `project-structure/folder-structure`가 대신 든다. → [ADR 0011](adr/0011-lint-off-the-shelf.md)
+- **`model/`은 사실과 사건을, `viewmodel/`은 화면 상태를 다룬다.** `model`→`viewmodel`은 이벤트로, `viewmodel`→`view`는 바인딩으로 잇는다. atom은 ViewModel이 소유한다. → [ADR 0007](adr/0007-client-layers.md)
 - **`model/`은 도메인 타입·규칙(순수 로직)과 `infra/`가 구현할 인터페이스 선언까지다.** React·fetch·window·전역 상태를 런타임으로 알지 않는다.
 - **`view/`가 부르는 훅은 `useViewModel` 하나뿐이다.** 로컬 상태가 필요하면 ViewModel로 옮긴다. DI 접근(`useAppContext`·`resolve`)도 하지 않는다.
-- **위 두 줄은 지금 리뷰로 본다.** 이것을 보던 규칙 여섯은 주인이 되는 ADR이 없어 껐고(2026-09-13 아카이브와 함께 지웠다), 지금 등록된 `arka/*` 규칙은 `max-comment-lines` 하나다. 다시 켜려면 규칙을 낳은 결정부터 ADR로 세운다.
-- CSS는 `stylelint`가 본다 — client의 `lint`가 ESLint에 이어 돌린다. 색은 Primer 토큰만, hex·색 이름·`rgb()` 직접 지정 금지. → [ADR 0006](adr/0006-design-system.md)
+- **위 두 줄은 지금 리뷰로 본다.** 이것을 보던 자작 규칙 여섯은 주인 ADR이 없어 껐다. 주인은 [ADR 0007](adr/0007-client-layers.md)로 세웠고, 되살리는 것은 자작이 아니라 `boundaries/*`와 코어 선택자다 — 위반을 0으로 만든 라운드에서 켠다. → [ADR 0011](adr/0011-lint-off-the-shelf.md)
+- CSS는 `stylelint`가 본다 — client의 `lint`가 ESLint에 이어 돌린다. 값은 Primer 토큰만 참조한다 — 색·간격·테두리·그림자·글꼴에 리터럴을 쓰지 않는다. → [ADR 0009](adr/0009-primer-first.md)
+
+## 컴포넌트
+
+- **모양이 있는 기본 컴포넌트는 Primer에서 가져온다.** 없는 축을 더할 때만 감싼다 — 이름만 바꾸는 겹은 두지 않고, 감쌀 때는 슬롯 표식(`asSlot`)을 다시 붙인다. 예외 둘: 메뉴는 Radix 한 체계, 아이콘은 자작이다. → [ADR 0009](adr/0009-primer-first.md)
+- **props는 원소 속성 위에 얹는다** — `ComponentPropsWithoutRef<'x'>`에 자기 것을 더하고 `className`·`style`·`aria-*`·`data-*`를 통과시킨다. **`ref`는 보통 prop이다**(`forwardRef`를 쓰지 않는다). → [ADR 0008](adr/0008-component-surface.md)
+- **변형은 `data-<축>`으로 싣는다.** CSS는 루트 클래스 안에서 `:where([data-x])`로 갈린다. 클래스 이름 맵을 만들지 않는다.
+- **`value`/`defaultValue`/`onChange` 삼종은 `useControllableState`가 중재한다.** 손으로 `useState`를 두지 않는다.
+- **슬롯이 둘까지면 `ReactNode` prop, 셋 이상이면 부품으로 가른다.** compound는 `Object.assign`이고, 타입은 `<Name>Props`·`<Name><Sub>Props`로 평평하다.
+- **폴더 하나에 부품마다 파일 하나와 CSS 하나**를 둔다. 컨텍스트는 `<Name>Context.ts`로 뺀다.
+- 클래스는 `clsx`로만 합친다. 아이콘만 있는 컨트롤은 `aria-label`과 `aria-labelledby` 중 하나를 타입으로 요구하고, 못 쓰게 만들 때는 `disabled`보다 `inactive`를 쓴다.
 
 ## 테스트
 
@@ -202,7 +212,7 @@
 - **단위** — 계약이 못 잡는 것만. 대상 옆 `*.test.ts`. 적을수록 좋은 신호다.
 - **스모크** — view가 렌더되고 이벤트가 연결되는지만. 스타일은 Storybook 담당.
 - **Storybook** — 시각 검증. 최소 세트는 기본 / 빈 / 로딩 / 에러 — **그 상태가 실제로 있는 것만**이다. `SettingsTabView`처럼 ViewModel에 로딩·실패가 없는 화면에 그 스토리를 만들면 일어날 수 없는 상태를 그리게 된다.
-    - `shared/components/`와 슬라이스의 `component/`는 **전부** 스토리를 갖는다.
+    - `shared/components/`와 슬라이스의 `component/`는 **전부** 스토리를 갖는다. → [ADR 0010](adr/0010-ui-verification.md)
     - `view/`는 **조합이 드러나는 것만** 갖는다 — 화면 한 구역을 실제로 채우는 view. 컴포넌트 하나에 값을 꽂는 얇은 바인딩은 그 컴포넌트 스토리가 이미 같은 그림을 덮는다. 대상 목록은 `.storybook/main.ts`에 있다.
 - **E2E** — `test/e2e/*.spec.ts`.
 - **VRT** — 스토리를 순회해 찍는다. `pnpm --filter client test:vrt`(비교). 기준을 만들 때는 **스토리를 골라** 인자를 넘긴다 — `test:vrt -g "<스토리 id>" --update-snapshots`. **Docker에서만** 생성·비교한다.
