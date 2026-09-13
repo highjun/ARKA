@@ -48,5 +48,5 @@ export const Default: Story = story({});
 /** 세 섹션이 모두 기본값이 아닌 쪽으로 넘어간 모습 — 선택 표시가 실제로 따라가는지 본다. */
 export const AllChanged: Story = story({ theme: 'dark', density: 'touch', agentConfirmWrites: false });
 
-/** 밀도를 촘촘하게 — 이 값이 `--ade-row-height`를 통해 FileTree 같은 목록의 행 높이를 정한다. */
+/** 밀도를 촘촘하게 — 이 값이 `--arka-row-height`를 통해 FileTree 같은 목록의 행 높이를 정한다. */
 export const Compact: Story = story({ density: 'compact' });

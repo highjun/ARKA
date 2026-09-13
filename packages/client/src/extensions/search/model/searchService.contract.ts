@@ -14,7 +14,7 @@ export const testSearchServiceContract = (name: string, setup: () => SearchSetup
     let s: SearchSetup;
     beforeEach(async () => {
       s = await setup();
-      await s.seed({ 'README.md': '# ADE\nAgent Development\nagent again\n', 'src/main.ts': "export const agent = 1;\nconst x = 'Agent';\n" });
+      await s.seed({ 'README.md': '# ARKA\nAgent Development\nagent again\n', 'src/main.ts': "export const agent = 1;\nconst x = 'Agent';\n" });
     });
 
     it('대소문자 무시로 경로순·줄순으로 찾고 줄·열은 1부터다', async () => {

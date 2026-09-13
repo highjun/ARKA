@@ -28,5 +28,5 @@
   display: flex;
   gap: var(--space-sm);
   align-items: center;
-  min-height: var(--ade-row-height);
+  min-height: var(--arka-row-height);
 }

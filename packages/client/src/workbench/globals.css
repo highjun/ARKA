@@ -22,9 +22,9 @@
  * IDE 밀도와 터치 타겟(44px)의 충돌을 여기서 한 번에 푼다.
  */
 :root {
-  --ade-row-height: 28px;
+  --arka-row-height: 28px;
 }
 
 [data-density='touch'] {
-  --ade-row-height: 44px;
+  --arka-row-height: 44px;
 }
