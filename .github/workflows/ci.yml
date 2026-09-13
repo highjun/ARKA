@@ -50,17 +50,19 @@ jobs:
       - run: mkdir -p /tmp/ade-ci-workspace
       # `--wait`는 compose의 HEALTHCHECK(`/api/health`)가 통과할 때까지 기다린다.
       # "빌드는 되는데 뜨지 않는다"를 병합 전에 잡는 것이 이 잡의 전부다.
+      # **프로젝트 이름은 `.env.ci`의 `ADE_NAME`이 정한다**(`ci`) — `-p`로 또 적으면 두 곳이 갈린다.
+      # 터널은 `--profile tunnel` 없이는 뜨지 않는다. CI에는 토큰이 없고 필요도 없다.
       - name: 컨테이너를 띄운다
         run: |
-          ADE_UID=$(id -u) ADE_GID=$(id -g) docker compose -p ci \
+          ADE_UID=$(id -u) ADE_GID=$(id -g) docker compose \
             -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci \
             up -d --build --wait
       - name: 실패하면 로그를 남긴다
         if: failure()
-        run: docker compose -p ci -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci logs
+        run: docker compose -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci logs
       - name: 정리
         if: always()
-        run: docker compose -p ci -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci down -v
+        run: docker compose -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci down -v
 
   e2e:
     name: e2e
@@ -115,19 +117,28 @@ jobs:
       - name: 이미지를 만든다
         run: node ops/deploy/build.ts ade:latest
 
+      # 값은 **이 기계의 파일**에 있다(0600) — GitHub Secrets에 두지 않는다. `set -a`로 셸에 풀어
+      # compose의 치환(`${ADE_*}`)과 `environment:` 통과에 둘 다 닿게 한다.
+      # 터널·인그레스·DNS는 Cloudflare 대시보드가 들고, 여기 필요한 것은 커넥터 토큰뿐이다.
       - name: 올린다
-        run: node ops/deploy/cli.ts up ops/deploy/ade.deploy.ts
+        run: |
+          set -a; . "$HOME/ARKA/secure/env/ade.env"; set +a
+          docker compose -f ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
 
       # **이 검사가 실질적인 자물쇠다.** ADE에는 인증이 없고 워크스페이스가 사용자의 개인
       # 디렉터리라, Access가 살아 있지 않으면 그 전체가 인터넷에 열린다.
+      # **오리진도 이 기계의 파일에서 읽는다.** 공개 저장소라 워크플로 로그도 공개다 —
+      # 호스트 이름이 리포에 있으면 그것만으로 문을 두드릴 자리를 알려 주는 셈이다.
       - name: 익명 접근이 막히는지 본다
-        run: node ops/deploy/anonSmoke.ts https://arka.sangjun.dev
+        run: |
+          set -a; . "$HOME/ARKA/secure/env/ade.env"; set +a
+          node ops/deploy/anonSmoke.ts "$ADE_ORIGIN"
 
       - name: 실패하면 로그와 되돌리는 법을 남긴다
         if: failure()
         run: |
           docker logs --tail 100 ade-app || true
-          echo "::error::되돌리려면: docker image tag ade:previous ade:latest && node ops/deploy/cli.ts up ops/deploy/ade.deploy.ts"
+          echo "::error::되돌리려면 docs/operations.md의 '되돌리기' — 이미지를 ade:previous로 되돌리고 같은 compose 명령을 다시 돌립니다"
 
   secrets:
     name: secrets

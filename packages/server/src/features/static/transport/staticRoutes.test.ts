@@ -4,7 +4,7 @@ import { createStaticRoutes } from "./staticRoutes";
 /**
  * **kill-switch가 브라우저에 닿는 조건**만 본다. 어떤 파일을 고르는지는 `infra/staticFiles.test.ts`가 본다.
  *
- * 여기 케이스들은 2026-08-18에 `arka.sangjun.dev`에서 실제로 겪은 사고에 하나씩 대응한다 —
+ * 여기 케이스들은 2026-08-18에 실배포에서 실제로 겪은 사고에 하나씩 대응한다 —
  * 옛 PWA의 Service Worker가 새 앱을 가렸고, 회수 경로 자체가 막혀 저절로 사라지지 않았다.
  */
 const app = createStaticRoutes("/does-not-exist");

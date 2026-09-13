@@ -43,5 +43,5 @@ pnpm --filter ops verify     내보내기 전에
 - PR 본문에는 무엇을 왜 바꿨는지, 어떻게 확인했는지를 쓴다.
 - **CI가 실패하면 같은 브랜치에서 고쳐 다시 푸시한다. CI 설정을 바꿔서 통과시키지 않는다.**
 - **`.github/`·`ops/deploy/`·`.env.*`는 사용자 확인 없이 수정하지 않는다.**
-- **머지는 사용자가 한다. 그리고 `main` 머지는 곧 `arka.sangjun.dev` 배포다** → [docs/operations.md](docs/operations.md).
+- **머지는 사용자가 한다. 그리고 `main` 머지는 곧 `실배포 호스트` 배포다** → [docs/operations.md](docs/operations.md).
 - PR을 열면 사용자의 기계에 미리보기가 뜬다(`pr-<번호>-arka.…`). 동시에 다섯 개까지다.

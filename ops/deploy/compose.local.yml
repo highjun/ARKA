@@ -1,0 +1,10 @@
+# 로컬에서 브라우저로 열어 보려고 포트를 연다.
+#
+#     docker compose -f ops/deploy/compose.yml -f ops/deploy/compose.local.yml up -d --build
+#
+# **실배포는 포트를 하나도 열지 않는다**(→ ADR 0006) — 터널이 유일한 경로여야 "앱이 인증을
+# 모른다"가 성립한다. 루프백에 열면 docker 그룹이 없는 프로세스도 무인증으로 닿는다.
+services:
+  app:
+    ports:
+      - "127.0.0.1:${ADE_PORT:-3000}:3000"

@@ -1,5 +1,5 @@
 
-- [ ] **Cloudflare Tunnel + Access 설정** (ADR 0014) — 콘솔 작업이라 에이전트가 못 한다. 앱에는 인증이 0이므로 이것이 유일한 게이트다. 설정 뒤 `curl https://arka.sangjun.dev/api/files`가 인증 없이 200을 주지 않는지 확인한다(TASK-4가 이를 자동화한다).
+- [ ] **Cloudflare Tunnel + Access 설정** (ADR 0014) — 콘솔 작업이라 에이전트가 못 한다. 앱에는 인증이 0이므로 이것이 유일한 게이트다. 설정 뒤 `curl https://<호스트>/api/files`가 인증 없이 200을 주지 않는지 확인한다(TASK-4가 이를 자동화한다).
 - [ ] LLM API 키 => Claude Subscription 연결로 변경
 - [ ] 배포 실행 및 커밋 시 CI 자동화 스크립트
 
