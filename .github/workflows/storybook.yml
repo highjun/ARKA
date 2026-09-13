@@ -1,0 +1,94 @@
+# 스토리북을 GitHub Pages에 올린다 — **리뷰어가 링크로 화면을 본다.**
+#
+# `main`은 사이트 루트, PR은 `pr-<번호>/` 하위 경로에 올리고 PR이 닫히면 그 폴더를 지운다.
+# 정적 파일이라 **띄워 둘 서버가 없다** — 예전의 PR별 앱 미리보기와 무게가 다르다.
+#
+# 앱 전체를 만져 봐야 하면 Codespaces로 그 브랜치를 띄운다(→ `.devcontainer/README.md`).
+name: Storybook
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+concurrency:
+  group: storybook-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  publish:
+    name: storybook
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: 어디에 올릴지 정한다
+        id: where
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "dir=pr-${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "dir=." >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: ./.github/actions/setup
+        if: github.event.action != 'closed'
+      - name: 스토리북을 굽는다
+        if: github.event.action != 'closed'
+        run: pnpm --filter client run build:storybook
+
+      # 액션을 하나 더 핀 고정하는 대신 git으로 직접 민다 — 하는 일이 파일 복사와 커밋뿐이라
+      # 무엇이 일어나는지가 여기 다 보인다. `gh-pages`는 룰셋이 지키는 브랜치가 아니다.
+      - name: gh-pages에 올린다
+        env:
+          DIR: ${{ steps.where.outputs.dir }}
+          CLOSED: ${{ github.event.action == 'closed' }}
+        run: |
+          SRC="$PWD/packages/client/.output/storybook-static"
+          git clone --depth 1 --branch gh-pages \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/pages 2>/dev/null || {
+            mkdir -p /tmp/pages && cd /tmp/pages && git init -q && git checkout -q -b gh-pages
+            git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          }
+          cd /tmp/pages
+          # Jekyll이 `_`로 시작하는 파일을 삼킨다. 스토리북 산출물에 그런 것이 있다.
+          touch .nojekyll
+          if [ "$CLOSED" = "true" ]; then
+            rm -rf "./$DIR"
+          else
+            rm -rf "./$DIR" && mkdir -p "./$DIR" && cp -r "$SRC/." "./$DIR/"
+          fi
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && { echo "바뀐 것이 없습니다"; exit 0; }
+          git commit -q -m "storybook: ${{ github.event_name }} ${{ github.sha }}"
+          git push -q origin gh-pages
+
+      # PR에 코멘트 하나를 달고 **갱신한다** — push마다 새로 달면 대화가 묻힌다.
+      - name: PR에 링크를 남긴다
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const closed = context.payload.action === 'closed';
+            const dir = `pr-${context.payload.pull_request.number}`;
+            const url = `https://${context.repo.owner}.github.io/${context.repo.repo}/${dir}/`;
+            const body = [
+              '<!-- arka-storybook -->',
+              `### 스토리북 — ${closed ? '내렸습니다' : '올라갔습니다'}`,
+              closed ? '이 PR의 스토리북을 지웠습니다.' : url,
+              '',
+              '앱 전체를 만져 보려면 Code → Codespaces에서 이 브랜치를 띄웁니다(`.devcontainer/README.md`).',
+            ].join('\n');
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const list = await github.rest.issues.listComments({ owner, repo, issue_number });
+            const mine = list.data.find((c) => c.body?.includes('<!-- arka-storybook -->'));
+            if (mine) await github.rest.issues.updateComment({ owner, repo, comment_id: mine.id, body });
+            else await github.rest.issues.createComment({ owner, repo, issue_number, body });

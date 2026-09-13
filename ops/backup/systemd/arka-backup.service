@@ -1,0 +1,9 @@
+# 세션 SQLite 백업. **사용자 유닛이다** — sudo가 필요 없다. 설치 절차는 docs/operations.md.
+[Unit]
+Description=ARKA session database backup
+
+[Service]
+Type=oneshot
+# `PATH`를 박아 두는 이유: 사용자 유닛은 로그인 셸을 거치지 않아 nvm의 node가 안 보인다.
+Environment=PATH=%h/.nvm/versions/node/v24.15.0/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=node %h/ARKASHIC/ops/backup/run.ts

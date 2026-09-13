@@ -13,6 +13,7 @@ GitHub ──▶ self-hosted 러너 ──▶ docker compose ──▶ cloudflar
 |---|---|
 | 실배포 | compose 프로젝트 `arka`(`arka-app` + `arka-tunnel`). 호스트 이름은 `ARKA_ORIGIN`에 있다 |
 | 정본 | `ops/deploy/compose.yml` **한 장.** 로컬·CI·실배포가 같은 파일로 뜬다 |
+| 이미지 | `ghcr.io/highjun/arka:<커밋 SHA>`. **CI가 굽고 검사한 그것**을 러너가 당겨 띄운다 |
 | 러너 | `~/actions-runner`, 사용자 유닛 `arka-runner.service`, 라벨 `self-hosted,linux,arka` |
 | 터널 | 로컬 관리형. 설정·자격증명은 `~/ARKA/secure/cloudflared/`의 파일 둘, 인그레스는 그 호스트 → `http://app:3000` |
 | 값·비밀 | `~/ARKA/secure/env/arka.env`(0600) — `ARKA_ORIGIN`·`ARKA_TUNNEL_*`과 나머지 `ARKA_*` |
@@ -29,7 +30,7 @@ set -a; . ~/ARKA/secure/env/arka.env; set +a        # 값을 셸에 푼다
 C="docker compose -f ~/ARKASHIC/ops/deploy/compose.yml"
 
 $C ps                          # 무엇이 떠 있나
-$C --profile tunnel up -d --no-build --wait   # 다시 올린다(이미지는 이미 있는 것을 쓴다)
+$C --profile tunnel up -d --no-build --wait   # 다시 올린다(`ARKA_IMAGE`가 가리키는 이미지로)
 $C logs -f app                 # 앱 로그
 $C --profile tunnel down       # 내린다. `-v`를 붙이면 이름 있는 볼륨까지 지운다
 ```
@@ -45,7 +46,14 @@ docker compose -f ops/deploy/compose.yml -f ops/deploy/compose.local.yml up -d -
 ## 배포
 
 **`main`에 머지하면 배포된다.** 손으로 올리지 않는다 — 그러면 떠 있는 것이 어떤 커밋에도
-대응하지 않는다. 배포 잡은 이미지를 굽고(`build.ts`), compose로 올리고, 익명 접근이 막히는지 본다.
+대응하지 않는다.
+
+배포 잡은 **굽지 않는다.** `check`가 구워 GHCR에 올린 바로 그 이미지를 당겨 띄우고, 익명 접근이
+막히는지 본다. 검사한 산출물과 뜨는 산출물이 같아야 하기 때문이다 — 예전에는 CI가 굽고 버린 뒤
+러너가 다시 구웠다.
+
+배포 이력은 저장소의 **Environments → production**에 쌓인다. 무엇이 언제 어느 커밋으로 떴는지가
+거기 남고, 배포 직전 승인을 받고 싶으면 Settings → Environments에서 스위치만 켠다.
 
 ```sh
 curl -s "$ARKA_ORIGIN/api/version"   # Access 뒤라 로그인한 브라우저로 본다
@@ -53,13 +61,17 @@ curl -s "$ARKA_ORIGIN/api/version"   # Access 뒤라 로그인한 브라우저�
 
 ### 되돌리기
 
-배포 잡이 직전 이미지를 `arka:previous`로 표시해 둔다.
+**되돌릴 커밋의 SHA 태그를 당긴다.** 어느 SHA였는지는 Environments 탭이나 `git log`가 안다.
 
 ```sh
-docker image tag arka:previous arka:latest
+OLD=<되돌릴 커밋 SHA>
 set -a; . ~/ARKA/secure/env/arka.env; set +a
-docker compose -f ~/ARKASHIC/ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
+docker pull "ghcr.io/highjun/arka:$OLD"
+ARKA_IMAGE="ghcr.io/highjun/arka:$OLD" \
+  docker compose -f ~/ARKASHIC/ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
 ```
+
+되돌린 상태는 **어떤 커밋에도 대응하지 않는다** — 곧바로 되돌리는 커밋을 PR로 올려 `main`을 맞춘다.
 
 **workbench로 돌아가려면** — 그 호스트는 원래 workbench가 쓰던 자리다. 재료가 남아 있다.
 그 앱은 자기 터널을 쓰므로, `cloudflared tunnel route dns --overwrite-dns <workbench터널> <호스트>`로 이름을 되돌린다.

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
+  "name": "ARKA",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:24",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "postCreateCommand": "corepack enable && pnpm install --frozen-lockfile",
+  "forwardPorts": [5173, 3000, 6006],
+  "portsAttributes": {
+    "5173": { "label": "client (vite)", "onAutoForward": "notify" },
+    "3000": { "label": "server", "onAutoForward": "silent" },
+    "6006": { "label": "storybook", "onAutoForward": "silent" }
+  },
+  "remoteEnv": {
+    "ARKA_WORKSPACE": "${containerWorkspaceFolder}/.devcontainer/workspace"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "stylelint.vscode-stylelint"]
+    }
+  }
+}
