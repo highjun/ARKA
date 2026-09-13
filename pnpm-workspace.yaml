@@ -9,4 +9,4 @@ catalog:
   "@playwright/test": ^1.63.0
   vitest: ^5.0.0
   typescript: ^6.0.3
-  zod: ^4.5.4
+  zod: ^4.6.1
