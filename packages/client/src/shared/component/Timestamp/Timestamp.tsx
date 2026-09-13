@@ -1,7 +1,6 @@
 import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 import { clsx } from 'clsx';
-import { assembleCompound } from '#utils/assembleCompound';
 import styles from './Timestamp.module.css';
 import { formatTimestamp } from './shared';
 
@@ -11,9 +10,9 @@ export type TimestampMode = 'datetime' | 'relative' | 'duration';
 /** epoch ms와 Date 중 정확히 하나만 — 판별 유니온이라 컴파일 단계에서 강제된다. */
 export type TimestampInput = { readonly epoch: number; readonly date?: never } | { readonly date: Date; readonly epoch?: never };
 
-/** `style`과 `children`을 막는다 — 내용은 `mode`와 입력이 정하고 모양은 토큰이 정한다. */
-export type TimestampRootProps = TimestampInput &
-  Omit<HTMLAttributes<HTMLSpanElement>, 'style' | 'children'> & {
+/** `children`을 막는다 — 내용은 `mode`와 입력이 정한다. */
+export type TimestampProps = TimestampInput &
+  Omit<HTMLAttributes<HTMLSpanElement>, 'children'> & {
     readonly mode: TimestampMode;
     /** `datetime`/`duration` 전용 포맷 토큰(`YYYY`/`MM`/`DD`/`HH`/`mm`/`ss`) — 생략 시 각각
      * `'YYYY-MM-DD HH:mm'`/`'HH시간 mm분'`이 기본값. `duration`에서는 같은 토큰을 경과
@@ -24,7 +23,7 @@ export type TimestampRootProps = TimestampInput &
   };
 
 /** `forwardRef` — Primer 자신의 순수 표시용 컴포넌트도 전부 forwardRef다. */
-const Root = forwardRef<HTMLSpanElement, TimestampRootProps>(
+export const Timestamp = forwardRef<HTMLSpanElement, TimestampProps>(
   (
     {
       className,
@@ -59,5 +58,3 @@ const Root = forwardRef<HTMLSpanElement, TimestampRootProps>(
   },
 );
 
-export type { TimestampRootProps as TimestampProps };
-export const Timestamp = assembleCompound('Timestamp', Root, {});

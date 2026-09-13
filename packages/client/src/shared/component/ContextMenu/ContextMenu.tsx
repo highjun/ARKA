@@ -2,8 +2,7 @@ import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 import { clsx } from 'clsx';
 import { usePortalContainer } from '#utils/portal';
-import { useControlledState } from '#utils/useControlledState';
-import { assembleCompound } from '#utils/assembleCompound';
+import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import styles from './ContextMenu.module.css';
 import * as Primitive from '@radix-ui/react-context-menu';
 
@@ -14,18 +13,18 @@ import * as Primitive from '@radix-ui/react-context-menu';
  * 공개 표면은 컨텍스트 메뉴라면 어디에나 있는 개념이라 그대로 두고, 라이브러리가 쪼갠 `Portal` 만
  * 이 파일 안으로 접는다(밖에서 알 이유가 없다).
  */
-export interface ContextMenuRootProps extends Omit<HTMLAttributes<HTMLElement>, 'dir'> {
+export interface ContextMenuProps extends Omit<HTMLAttributes<HTMLElement>, 'dir'> {
   /** 열림 여부(controlled). 넘기면 controlled, 안 넘기면 `defaultOpen` 으로 컴포넌트가 자체 관리한다. */
   readonly open?: boolean;
   /**
    * uncontrolled 모드의 초깃값. 기본값 `false`.
    *
-   * `@radix-ui/react-context-menu`의 `Root`는 이 prop을 두지 않는다(서브메뉴에만 있다) —
+   * `@radix-ui/react-context-menu`의 `ContextMenuRoot`는 이 prop을 두지 않는다(서브메뉴에만 있다) —
    * 우클릭 지점이 있어야 뜰 자리가 정해지는 컴포넌트라 "클릭 없이 기본으로 열림"은 좌표가 없다
    * (2026-09-01 `Menu`와의 API 비대칭을 없애기 위해 그럼에도 추가했다 — `true`로 주면 실제
    * 우클릭 없이 열리는데, Radix가 그 경우 위치를 못 잡아 뷰포트 좌상단에 앵커링한다는 경고를
-   * 낸다(`Shell.test.tsx`에서 실측된 동작). Radix `Root`에 직접 넘기지 않고 이 컴포넌트가
-   * `useControlledState`로 흡수해서 항상 controlled `open`/`onOpenChange`로만 Radix에 넘긴다.
+   * 낸다(`Shell.test.tsx`에서 실측된 동작). Radix `ContextMenuRoot`에 직접 넘기지 않고 이 컴포넌트가
+   * `useControllableState`로 흡수해서 항상 controlled `open`/`onOpenChange`로만 Radix에 넘긴다.
    */
   readonly defaultOpen?: boolean;
   /** 열림 여부가 바뀔 때마다 호출된다(controlled 여부와 무관). */
@@ -58,8 +57,9 @@ export interface ContextMenuLabelProps extends HTMLAttributes<HTMLElement> {}
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- 커스텀 필드는 필요해지면 추가한다.
 export interface ContextMenuSeparatorProps extends HTMLAttributes<HTMLElement> {}
 
-const Root = ({ open, defaultOpen = false, onOpenChange, children, ...props }: ContextMenuRootProps) => {
-  const [isOpen, setOpen] = useControlledState({ value: open, defaultValue: defaultOpen, onChange: onOpenChange });
+/** 우클릭 메뉴의 열림 상태를 든다 — 자기 DOM은 그리지 않는다. 보이는 것은 `Trigger`와 `Content`다. */
+export const ContextMenuRoot = ({ open, defaultOpen = false, onOpenChange, children, ...props }: ContextMenuProps) => {
+  const [isOpen, setOpen] = useControllableState({ prop: open, defaultProp: defaultOpen, onChange: onOpenChange, caller: 'ContextMenu' });
 
   return (
     <Primitive.Root {...props} open={isOpen} onOpenChange={setOpen}>
@@ -69,7 +69,7 @@ const Root = ({ open, defaultOpen = false, onOpenChange, children, ...props }: C
 };
 
 /** 우클릭하면 메뉴를 여는 대상 엘리먼트. */
-const Trigger = ({ className, children, ...props }: ContextMenuTriggerProps) => (
+export const ContextMenuTrigger = ({ className, children, ...props }: ContextMenuTriggerProps) => (
   <Primitive.Trigger className={className} {...props}>
     {children}
   </Primitive.Trigger>
@@ -84,7 +84,7 @@ const Trigger = ({ className, children, ...props }: ContextMenuTriggerProps) => 
  * (`ContextMenu.module.css`). Shell 없이 `document.body`로 포탈될 때(Storybook 등)는 조상에
  * `pointer-events: none`가 없어 무해하다.
  */
-const Content = forwardRef<HTMLDivElement, ContextMenuContentProps>(
+export const ContextMenuContent = forwardRef<HTMLDivElement, ContextMenuContentProps>(
   ({ className, children, ...props }, ref) => {
     const container = usePortalContainer();
 
@@ -104,29 +104,24 @@ const Content = forwardRef<HTMLDivElement, ContextMenuContentProps>(
 );
 
 /** 클릭·키보드로 선택 가능한 메뉴 항목 하나. */
-const Item = ({ className, ...props }: ContextMenuItemProps) => (
+export const ContextMenuItem = ({ className, ...props }: ContextMenuItemProps) => (
   <Primitive.Item className={clsx(className, styles['item'])} {...props} />
 );
 
 /** 선택할 수 없는 섹션 제목. */
-const Label = ({ className, ...props }: ContextMenuLabelProps) => (
+export const ContextMenuLabel = ({ className, ...props }: ContextMenuLabelProps) => (
   <Primitive.Label className={clsx(className, styles['label'])} {...props} />
 );
 
 /** 항목 그룹을 나누는 구분선. */
-const Separator = ({ className, ...props }: ContextMenuSeparatorProps) => (
+export const ContextMenuSeparator = ({ className, ...props }: ContextMenuSeparatorProps) => (
   <Primitive.Separator className={clsx(className, styles['separator'])} {...props} />
 );
 
-export type { ContextMenuRootProps as ContextMenuProps };
 
 /**
- * Storybook Docs 서브컴포넌트 섹션 전용 재노출 — 공개 API는 `ContextMenu.Trigger` 등
- * `assembleCompound` 결과로만 접근한다(`index.ts`엔 안 싣는다). react-docgen-typescript가
- * 파일의 최상위 export만 컴포넌트로 인식해서, 비export 지역 함수(`Trigger` 등)엔
- * `__docgenInfo`가 안 붙는다(2026-09-06 실측 확인) — Docs 페이지의 서브컴포넌트 Props 표를
- * 뽑으려면 이 재노출이 필요하다.
+ * 부품을 `Object.assign`으로 네임스페이스에 붙인다. 부품 함수의 이름이 `ContextMenu<부품>`인 것은
+ * react-docgen-typescript가 파일의 최상위 export만 컴포넌트로 인식해서다 — Docs 페이지의
+ * 서브컴포넌트 Props 표가 그 이름으로 붙는다(2026-09-06 실측).
  */
-export { Trigger as ContextMenuTriggerDoc, Content as ContextMenuContentDoc, Item as ContextMenuItemDoc, Label as ContextMenuLabelDoc, Separator as ContextMenuSeparatorDoc };
-
-export const ContextMenu = assembleCompound('ContextMenu', Root, { Trigger, Content, Item, Label, Separator });
+export const ContextMenu = Object.assign(ContextMenuRoot, { Trigger: ContextMenuTrigger, Content: ContextMenuContent, Item: ContextMenuItem, Label: ContextMenuLabel, Separator: ContextMenuSeparator });

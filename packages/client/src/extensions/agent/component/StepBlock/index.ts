@@ -1,2 +1,2 @@
 export { StepBlock } from './StepBlock';
-export type { StepBlockProps, StepBlockRootProps, StepBlockThinkingProps, StepBlockToolProps } from './StepBlock';
+export type { StepBlockProps, StepBlockThinkingProps, StepBlockToolProps } from './StepBlock';

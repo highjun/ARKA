@@ -1,7 +1,6 @@
 import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 import { clsx } from 'clsx';
-import { assembleCompound } from '#utils/assembleCompound';
 import styles from './Icon.module.css';
 import { icons } from './data';
 import codicon from '@iconify-json/codicon/icons.json';
@@ -21,14 +20,14 @@ Iconify.addCollection(codicon as Parameters<typeof Iconify.addCollection>[0]);
 Iconify.addCollection(octicon as Parameters<typeof Iconify.addCollection>[0]);
 
 /** `id`를 막는다 — `iconId`와 헷갈려 잘못 넘기는 것을 타입에서 끊는다. */
-export interface IconRootProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'id'> {
+export interface IconProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'id'> {
   /** 표시할 아이콘. */
   readonly iconId: IconId;
   /** Icon의 크기. sm, md, lg 중 하나로 기본값은 md. */
   readonly size?: IconSize;
 }
 
-const Root = forwardRef<HTMLSpanElement, IconRootProps>(
+export const Icon = forwardRef<HTMLSpanElement, IconProps>(
   ({ className, iconId, size = 'md', ...props }, ref) => (
     <span
       ref={ref}
@@ -44,5 +43,3 @@ const Root = forwardRef<HTMLSpanElement, IconRootProps>(
   ),
 );
 
-export type { IconRootProps as IconProps };
-export const Icon = assembleCompound('Icon', Root, {});

@@ -1,7 +1,6 @@
 import { forwardRef, useState } from 'react';
 import type { HTMLAttributes } from 'react';
 import { clsx } from 'clsx';
-import { assembleCompound } from '#utils/assembleCompound';
 import { createTextClipboardPort } from './shared';
 import styles from './CodeBlock.module.css';
 import { IconButton } from '@primer/react';
@@ -81,7 +80,7 @@ const COPY_RESET_DELAY_MS = 1400;
 const clipboard = createTextClipboardPort();
 
 /** `children`을 막는다 — 코드는 `content`로만 들어온다. */
-export interface CodeBlockRootProps extends Omit<HTMLAttributes<HTMLElement>, 'title' | 'children'> {
+export interface CodeBlockProps extends Omit<HTMLAttributes<HTMLElement>, 'title' | 'children'> {
   /** 표시할 코드 원문. */
   readonly content: string;
   /** 캡션에 표시할 언어 이름표(예: `'typescript'`) — 문법 강조 자체와는 무관하다. */
@@ -98,7 +97,7 @@ export interface CodeBlockRootProps extends Omit<HTMLAttributes<HTMLElement>, 't
  * 토큰 종류를 클래스로 갈라 받지 않고 `data-token` 으로 드러낸다 — 종류마다 어느 색을 쓸지는
  * 스타일 결정이라 CSS 가 `[data-token=…]` 로 받는다.
  */
-const Root = forwardRef<HTMLElement, CodeBlockRootProps>(
+export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
   (
     {
       content,
@@ -167,7 +166,4 @@ const Root = forwardRef<HTMLElement, CodeBlockRootProps>(
     );
   },
 );
-Root.displayName = 'CodeBlock';
 
-export type { CodeBlockRootProps as CodeBlockProps };
-export const CodeBlock = assembleCompound('CodeBlock', Root, {});

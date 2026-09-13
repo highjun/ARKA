@@ -1,7 +1,6 @@
 import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 import { clsx } from 'clsx';
-import { assembleCompound } from '#utils/assembleCompound';
 import styles from './Text.module.css';
 
 /** `caption`은 크기가 고정이라 `size`와 다른 축이다. */
@@ -12,7 +11,7 @@ export type TextSize = 'small' | 'medium' | 'large';
 export type TextTone = 'default' | 'muted' | 'danger';
 
 /** `<span>`이라 블록이 필요하면 감싸는 쪽이 만든다. */
-export interface TextRootProps extends HTMLAttributes<HTMLSpanElement> {
+export interface TextProps extends HTMLAttributes<HTMLSpanElement> {
   /** typography 역할. 기본값 `'body'`(일반 본문). `'caption'`은 Primer가 별도로 두는
    * 압축된 한 줄 전용 스케일이라 `size`와 다른 축이다. */
   readonly variant?: TextVariant;
@@ -31,7 +30,7 @@ export interface TextRootProps extends HTMLAttributes<HTMLSpanElement> {
  * 여기 두지 않는다. `variant="caption"`+`tone="muted"` 조합이 옛 `Caption` 컴포넌트와
  * 동일해, 그 중복을 없애며 여기로 흡수했다(2026-09-06).
  */
-const Root = forwardRef<HTMLSpanElement, TextRootProps>(
+export const Text = forwardRef<HTMLSpanElement, TextProps>(
   ({ variant = 'body', size = 'medium', tone = 'default', className, ...props }, ref) => (
     <span
       ref={ref}
@@ -45,5 +44,3 @@ const Root = forwardRef<HTMLSpanElement, TextRootProps>(
   ),
 );
 
-export type { TextRootProps as TextProps };
-export const Text = assembleCompound('Text', Root, {});

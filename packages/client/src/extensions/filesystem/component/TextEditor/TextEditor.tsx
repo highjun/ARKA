@@ -1,6 +1,5 @@
+import { clsx } from 'clsx';
 import type { HTMLAttributes } from 'react';
-import { mergeClassNames } from '#utils/mergeClassNames';
-import { assembleCompound } from '#utils/assembleCompound';
 import styles from './TextEditor.module.css';
 import { useCodeMirrorEditor } from './useCodeMirrorEditor';
 import type { RevealPosition } from './useCodeMirrorEditor';
@@ -17,7 +16,7 @@ export type TextEditorChrome = 'bordered' | 'none';
  * `EditorTab` 과 props 를 맞춰 둔 것은 의도다 — 그 자리를 그대로 갈아끼울 수 있어야 한다. CodeMirror
  * 인스턴스 관리는 `useCodeMirrorEditor` 훅이 전담한다 — 여기는 구조(헤더·본문)만 조립한다.
  */
-export interface TextEditorRootProps extends Omit<HTMLAttributes<HTMLElement>, 'onChange' | 'children'> {
+export interface TextEditorProps extends Omit<HTMLAttributes<HTMLElement>, 'onChange' | 'children'> {
   /** 표시용이자 **언어를 고르는 근거**다(확장자). */
   readonly path: string;
   /** 보여줄 문서 전체 내용. */
@@ -47,7 +46,7 @@ export interface TextEditorRootProps extends Omit<HTMLAttributes<HTMLElement>, '
  * 행을 명시한다(`grid-template-rows: auto 1fr`) — `grid` 만 두면 높이가 주어진 자리에서 헤더가
  * 본문과 같이 늘어난다. `EditorTab` 이 실제로 그렇게 화면 절반을 먹었다.
  */
-const Root = ({
+export const TextEditor = ({
   path,
   content,
   className,
@@ -60,14 +59,14 @@ const Root = ({
   loading = false,
   revealAt = null,
   ...rest
-}: TextEditorRootProps) => {
+}: TextEditorProps) => {
   const { hostRef, openSearch } = useCodeMirrorEditor({ path, content, readOnly, onChange, onSave, revealAt });
 
   return (
     <section
       aria-label={path}
       data-chrome={chrome}
-      className={mergeClassNames(className, styles['root'])}
+      className={clsx(className, styles['root'])}
       {...rest}
       data-component="TextEditor"
     >
@@ -105,7 +104,4 @@ const Root = ({
   );
 };
 
-Root.displayName = 'TextEditor';
 
-export type { TextEditorRootProps as TextEditorProps };
-export const TextEditor = assembleCompound('TextEditor', Root, {});

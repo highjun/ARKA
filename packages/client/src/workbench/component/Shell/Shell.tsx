@@ -2,7 +2,6 @@ import { forwardRef, useState } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { clsx } from 'clsx';
 import { PortalProvider } from '#utils/portal';
-import { assembleCompound } from '#utils/assembleCompound';
 import styles from './Shell.module.css';
 import { SplitPageLayout, ThemeProvider } from '@primer/react';
 import { Container } from '#component/Container';
@@ -23,7 +22,7 @@ const RESIZABLE_MAX_WIDTH = '480px';
 const hasContent = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
 
 /** `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다. */
-export interface ShellRootProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+export interface ShellProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
   /** Primer `ThemeProvider`에 그대로 전달되는 색 모드. */
   readonly colorMode: 'light' | 'dark';
 
@@ -84,7 +83,7 @@ export interface ShellRootProps extends Omit<HTMLAttributes<HTMLDivElement>, 'ch
  * `SplitPageLayout`도 `ThemeProvider`도 forwardRef가 아니라서(둘 다 컴파일된 소스로 확인 —
  * plain 함수), ref는 우리가 직접 렌더하는 wrapper div로 보낸다.
  */
-const Root = forwardRef<HTMLDivElement, ShellRootProps>(
+export const Shell = forwardRef<HTMLDivElement, ShellProps>(
   (
     {
       colorMode,
@@ -214,5 +213,3 @@ const Root = forwardRef<HTMLDivElement, ShellRootProps>(
   },
 );
 
-export type { ShellRootProps as ShellProps };
-export const Shell = assembleCompound('Shell', Root, {});

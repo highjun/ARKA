@@ -1,7 +1,6 @@
 import type { HTMLAttributes } from 'react';
 import { forwardRef } from 'react';
 import { clsx } from 'clsx';
-import { assembleCompound } from '#utils/assembleCompound';
 import styles from './StatusIndicator.module.css';
 import { Icon } from '#component/Icon';
 import type { IconId } from '#component/Icon';
@@ -25,14 +24,14 @@ const ICON_OF: Record<StatusIndicatorStatus, IconId> = {
 };
 
 /** `children`을 막는다 — 문구는 `status`가 정한다. */
-export interface StatusIndicatorRootProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'style' | 'children'> {
+export interface StatusIndicatorProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
   /** 표시할 상태 — 아이콘·라벨·색상을 함께 결정한다. */
   readonly status: StatusIndicatorStatus;
 }
 
 /** `forwardRef` — `Icon`/`FileIcon`/`Timestamp`와 같은 근거(Primer 자신의 순수 표시용 컴포넌트도
  * 전부 forwardRef). */
-const Root = forwardRef<HTMLSpanElement, StatusIndicatorRootProps>(({ status, className, ...props }, ref) => (
+export const StatusIndicator = forwardRef<HTMLSpanElement, StatusIndicatorProps>(({ status, className, ...props }, ref) => (
   <span
     ref={ref}
     role="img"
@@ -46,7 +45,4 @@ const Root = forwardRef<HTMLSpanElement, StatusIndicatorRootProps>(({ status, cl
     <Icon iconId={ICON_OF[status]} size="sm" />
   </span>
 ));
-Root.displayName = 'StatusIndicator';
 
-export type { StatusIndicatorRootProps as StatusIndicatorProps };
-export const StatusIndicator = assembleCompound('StatusIndicator', Root, {});

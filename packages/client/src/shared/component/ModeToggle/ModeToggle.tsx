@@ -1,7 +1,6 @@
 import { forwardRef, useState } from 'react';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { clsx } from 'clsx';
-import { assembleCompound } from '#utils/assembleCompound';
 import styles from './ModeToggle.module.css';
 import { IconButton } from '@primer/react';
 
@@ -44,8 +43,8 @@ const getLabel = (labels: ModeToggleLabels | undefined, currentIndex: number, fa
  * `IconButton.d.ts` 확인)다. 우리가 감싸면서 그 ref 접근을 잃으면 raw `IconButton`을 쓸 때보다
  * 기능이 줄어든다.
  */
-export interface ModeToggleRootProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'aria-labelledby' | 'children' | 'onClick' | 'style' | 'value'> {
+export interface ModeToggleProps
+  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'aria-labelledby' | 'children' | 'onClick' | 'value'> {
   /** 두 상태 각각에 표시할 아이콘 — `[values[0]일 때, values[1]일 때]` 순서로 짝을 맞춘다. */
   readonly children: ModeToggleChildren;
   /** 두 상태 각각의 접근성 이름 — 없으면 `aria-label`을 쓴다. */
@@ -64,7 +63,7 @@ export interface ModeToggleRootProps
   readonly disabled?: boolean;
 }
 
-const Root = forwardRef<HTMLButtonElement, ModeToggleRootProps>(
+export const ModeToggle = forwardRef<HTMLButtonElement, ModeToggleProps>(
   (
     {
       'aria-label': ariaLabel,
@@ -105,7 +104,4 @@ const Root = forwardRef<HTMLButtonElement, ModeToggleRootProps>(
     );
   },
 );
-Root.displayName = 'ModeToggle';
 
-export type { ModeToggleRootProps as ModeToggleProps };
-export const ModeToggle = assembleCompound('ModeToggle', Root, {});
