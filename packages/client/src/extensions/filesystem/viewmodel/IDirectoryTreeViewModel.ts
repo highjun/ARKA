@@ -34,7 +34,7 @@ export type DirectoryTreeStatus = 'idle' | 'loading' | 'loaded' | 'error';
  * 우클릭 메뉴·삭제 확인이 다루는 최소 정보 — "무슨 행인가"만 있으면 된다.
  *
  * `shared/components` 의 `FileTreeItem` 을 그대로 쓰지 않는다 — ViewModel 계약은 `shared/components`를 알 수 없는
- * 자리다(`arka/external-import-allowlist`). `FileTreeItem` 은 이 모양을 이미 포함하므로 View가
+ * 자리다(→ ADR 0007). `FileTreeItem` 은 이 모양을 이미 포함하므로 View가
  * 그대로 건네도 맞는다.
  */
 export type ContextMenuTarget = {

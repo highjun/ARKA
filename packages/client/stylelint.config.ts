@@ -1,5 +1,5 @@
 /**
- * CSS Modules의 규율. → docs/adr/0006-design-system.md
+ * CSS Modules의 규율. → docs/adr/0009-primer-first.md
  *
  * 값은 Primer 토큰 변수(`--fgColor-*`, `--space-*`, `--borderRadius-*` …)를 참조한다 — 색을
  * 직접 적으면 라이트/다크가 갈리는 순간 한쪽이 깨진다. 규칙마다 `message`로 대안을 적는다.
