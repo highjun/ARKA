@@ -10,10 +10,10 @@ let root: string;
 const req = (query: string, extra: Partial<Parameters<typeof searchFiles>[1]> = {}) => ({ query, path: "", regex: false, caseSensitive: false, maxResults: 200, ...extra });
 
 beforeAll(async () => {
-  outside = realpathSync(await mkdtemp(path.join(os.tmpdir(), "ade-search-")));
+  outside = realpathSync(await mkdtemp(path.join(os.tmpdir(), "arka-search-")));
   root = path.join(outside, "root");
   await mkdir(path.join(root, "src", "node_modules"), { recursive: true });
-  await writeFile(path.join(root, "README.md"), "# ADE\nAgent Development Environment\nagent again\n");
+  await writeFile(path.join(root, "README.md"), "# ARKA\nAgent Development Environment\nagent again\n");
   await writeFile(path.join(root, "src", "main.ts"), "export const agent = 1;\nconst x = 'Agent';\n");
   await writeFile(path.join(root, "src", "node_modules", "dep.js"), "agent agent agent\n");
   await writeFile(path.join(root, "bin.dat"), Buffer.from([0, 1, 2, 97, 103, 101, 110, 116]));

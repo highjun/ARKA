@@ -4,7 +4,7 @@ import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
 
 /**
  * 밀도를 `<html data-density>`에 반영한다. `auto`는 포인터가 coarse(터치)면 touch, 아니면 compact.
- * CSS는 이 속성만 본다 — 컴포넌트는 `--ade-row-height` 같은 변수만 참조한다.
+ * CSS는 이 속성만 본다 — 컴포넌트는 `--arka-row-height` 같은 변수만 참조한다.
  */
 export const createDocumentDensity = ({ settingsModel }: { settingsModel: ISettingsModel }): IWorkbenchStartup => {
   let subscription: Disposable | null = null;

@@ -58,7 +58,7 @@ test.describe("폰", () => {
     await treeRow(page, "README.md").click();
 
     await expect(page.getByRole("tab", { name: /README\.md/u })).toBeVisible();
-    await expect(page.getByText("# ADE")).toBeVisible();
+    await expect(page.getByText("# ARKA")).toBeVisible();
   });
 });
 

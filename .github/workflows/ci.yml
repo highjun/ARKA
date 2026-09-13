@@ -125,7 +125,7 @@ jobs:
           set -a; . "$HOME/ARKA/secure/env/ade.env"; set +a
           docker compose -f ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
 
-      # **이 검사가 실질적인 자물쇠다.** ADE에는 인증이 없고 워크스페이스가 사용자의 개인
+      # **이 검사가 실질적인 자물쇠다.** ARKA에는 인증이 없고 워크스페이스가 사용자의 개인
       # 디렉터리라, Access가 살아 있지 않으면 그 전체가 인터넷에 열린다.
       # **오리진도 이 기계의 파일에서 읽는다.** 공개 저장소라 워크플로 로그도 공개다 —
       # 호스트 이름이 리포에 있으면 그것만으로 문을 두드릴 자리를 알려 주는 셈이다.

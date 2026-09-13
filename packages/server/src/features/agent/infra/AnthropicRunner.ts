@@ -16,7 +16,7 @@ export type MessagesClient = {
 /** 무한 루프 방어 — 모델이 툴만 계속 부르면 여기서 끊는다. */
 const MAX_TURNS = 40;
 
-const SYSTEM_PROMPT = `너는 ADE(Agent Development Environment) 안에서 사용자의 워크스페이스를 다루는 에이전트다.
+const SYSTEM_PROMPT = `너는 ARKA 안에서 사용자의 워크스페이스를 다루는 에이전트다.
 파일을 읽거나 바꿀 때는 툴을 쓴다. 경로는 워크스페이스 루트 기준 상대 경로다.
 모호하면 추측하지 말고 ask_user로 묻는다. 답은 한국어로, 간결하게.`;
 

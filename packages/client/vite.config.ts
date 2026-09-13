@@ -28,8 +28,8 @@ export default defineConfig({
       filename: "app-sw.js",
       includeAssets: ["arka-mark.svg"],
       manifest: {
-        name: "ADE",
-        short_name: "ADE",
+        name: "ARKA",
+        short_name: "ARKA",
         description: "Agent Development Environment",
         lang: "ko",
         display: "standalone",
