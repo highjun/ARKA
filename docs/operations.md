@@ -14,8 +14,8 @@ GitHub ──▶ self-hosted 러너 ──▶ docker compose ──▶ cloudflar
 | 실배포 | compose 프로젝트 `ade`(`ade-app` + `ade-tunnel`). 호스트 이름은 `ADE_ORIGIN`에 있다 |
 | 정본 | `ops/deploy/compose.yml` **한 장.** 로컬·CI·실배포가 같은 파일로 뜬다 |
 | 러너 | `~/actions-runner`, 사용자 유닛 `ade-runner.service`, 라벨 `self-hosted,linux,arka` |
-| 터널 | Cloudflare 대시보드가 든다(remotely-managed). 인그레스는 그 호스트 → `http://app:3000` |
-| 값·비밀 | `~/ARKA/secure/env/ade.env`(0600) — `TUNNEL_TOKEN`·`ADE_ORIGIN`과 나머지 `ADE_*` |
+| 터널 | 로컬 관리형. 설정·자격증명은 `~/ARKA/secure/cloudflared/`의 파일 둘, 인그레스는 그 호스트 → `http://app:3000` |
+| 값·비밀 | `~/ARKA/secure/env/ade.env`(0600) — `ADE_ORIGIN`·`ADE_TUNNEL_*`과 나머지 `ADE_*` |
 
 **sudo가 한 번도 필요 없다.** 전부 사용자 systemd 유닛이고(`Linger=yes`), docker는 그룹 권한으로 쓴다.
 
@@ -62,7 +62,7 @@ docker compose -f ~/ARKASHIC/ops/deploy/compose.yml --profile tunnel up -d --no-
 ```
 
 **workbench로 돌아가려면** — 그 호스트는 원래 workbench가 쓰던 자리다. 재료가 남아 있다.
-그 앱은 자기 터널을 쓰므로, 대시보드에서 이 호스트 이름의 인그레스를 workbench 터널로 옮긴다.
+그 앱은 자기 터널을 쓰므로, `cloudflared tunnel route dns --overwrite-dns <workbench터널> <호스트>`로 이름을 되돌린다.
 
 ```sh
 docker compose -p workbench -f ~/.local/state/arka/deploy/workbench/docker-compose.yml up -d
@@ -70,17 +70,26 @@ docker compose -p workbench -f ~/.local/state/arka/deploy/workbench/docker-compo
 
 ## 터널을 다시 세우려면
 
-대시보드 작업이라 에이전트가 못 한다. Zero Trust → Networks → Tunnels.
+**대시보드가 아니라 CLI로 한다.** 이 기계에 터널 로그인 인증서(`~/.cloudflared/cert.pem`)가 있어
+에이전트가 끝까지 할 수 있다. 지금 도는 것은 **로컬 관리형** 터널이다 — 설정이 대시보드가 아니라
+파일에 있고, 그 파일은 저장소 밖에 산다.
 
-1. **Create a tunnel** → `cloudflared` → 이름(지금은 `arka`) → **토큰을 복사한다.**
-2. **Public hostname**을 더한다(`ADE_ORIGIN`의 그 이름) → Service `HTTP` → `app:3000`.
-   컨테이너가 compose 네트워크 안에서 서비스 이름으로 닿으므로 호스트 포트가 필요 없다.
-   DNS CNAME은 대시보드가 만든다 — 이미 있으면 덮어쓸지 묻는다.
-3. 토큰을 `~/ARKA/secure/env/ade.env`에 `TUNNEL_TOKEN=…`으로 적고 `chmod 600`.
-4. 배포 잡을 다시 돌리거나 위의 `up` 명령을 돌린다.
+```sh
+cloudflared tunnel create <이름>                 # 자격증명 JSON이 ~/.cloudflared/에 떨어진다
+mv ~/.cloudflared/<터널ID>.json ~/ARKA/secure/cloudflared/ && chmod 600 ~/ARKA/secure/cloudflared/<터널ID>.json
+cloudflared tunnel route dns <이름> <호스트>      # CNAME. 남의 이름을 빼앗을 때만 --overwrite-dns
+```
 
-**Access는 터널과 별개다.** 앱 이름 `ade`, 도메인은 같은 호스트, 허용 이메일 하나.
-터널을 갈아도 Access 앱은 그대로 있다 — 지우면 그 호스트가 무인증으로 열린다.
+그리고 `~/ARKA/secure/cloudflared/config.yml`을 손으로 쓴다 — `tunnel`(ID),
+`credentials-file: /etc/cloudflared/creds.json`, `ingress`의 호스트 → `http://app:3000`.
+마지막으로 `~/ARKA/secure/env/ade.env`의 `ADE_TUNNEL_CONFIG`·`ADE_TUNNEL_CREDENTIALS`가 그 둘을
+가리키게 하고 위의 `up` 명령을 돌린다.
+
+**설정을 저장소에 두지 않는 이유**는 저장소가 공개라서다. 호스트 이름과 터널 ID가 그 안에 있다.
+
+**Access는 터널과 별개다.** 앱 이름 `ade`, 허용 이메일 하나. 터널을 갈아도 Access 앱은 그대로 있다 —
+지우면 그 호스트가 무인증으로 열린다. Access 앱은 **zone 레벨**에 산다
+(`/zones/{zone}/access/apps`) — **계정 레벨로 물으면 0개로 보여 무방비인 줄 알고 놀란다**(2026-09-13 실측).
 
 ## 장애가 나면 — 이 순서로 짚는다
 
