@@ -18,6 +18,9 @@ GitHub ──▶ self-hosted 러너 ──▶ docker compose ──▶ cloudflar
 | 터널 | 로컬 관리형. 설정·자격증명은 `~/ARKA/secure/cloudflared/`의 파일 둘, 인그레스는 그 호스트 → `http://app:3000` |
 | 값·비밀 | `~/ARKA/secure/env/arka.env`(0600) — `ARKA_ORIGIN`·`ARKA_TUNNEL_*`과 나머지 `ARKA_*` |
 
+**스토리북은 이 기계에 없다.** GitHub Pages(`highjun.github.io/ARKASHIC/`)에 올라간다.
+이 기계의 `storybook.sangjun.dev`는 **다른 프로젝트**(`arka-devkit`)의 것이다 — 이름이 비슷해 헷갈린다.
+
 **sudo가 한 번도 필요 없다.** 전부 사용자 systemd 유닛이고(`Linger=yes`), docker는 그룹 권한으로 쓴다.
 
 **저장소에 생성물이 없다.** 예전에는 상태 디렉터리에 만들어진 compose·manifest가 실배포의
