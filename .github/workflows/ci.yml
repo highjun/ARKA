@@ -1,15 +1,17 @@
-# 병합 전 관문(→ ADR 0005). **로컬의 `pnpm --filter ops check`와 같은 것을 돌린다** —
+# 병합 전 관문(→ ADR 0005). **로컬에서 부를 수 있는 명령만 부른다** —
 # CI에만 있는 검사를 만들면 로컬이 초록인데 CI가 빨간 상태를 아무도 재현하지 못한다.
 #
-# 잡 이름(`check`·`container`·`pr-title`)은 브랜치 보호의 필수 체크로 등록되므로 바꾸지 않는다.
+# 잡은 둘이다. `check`는 룰셋의 **필수 검사 이름**이라 바꾸지 않는다.
 name: CI
 
 on:
   push:
     branches: [main]
-  # `edited`는 제목을 고쳤을 때 pr-title을 다시 돌리려고 넣었다. 무거운 잡은 아래에서 건너뛴다.
+  # **`edited`를 받지 않는다.** PR 본문·제목을 고치면 이벤트가 하나 더 나고, 아래 concurrency가
+  # 돌던 진짜 검사를 취소한 뒤 그 자리를 대신한다 — 관문이 조용히 비었다(2026-09-13 실측).
+  # 제목을 고쳤으면 push하거나 PR을 닫았다 열어 다시 돌린다.
   pull_request:
-    types: [opened, synchronize, reopened, edited]
+    types: [opened, synchronize, reopened]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -24,13 +26,15 @@ permissions:
 jobs:
   check:
     name: check
-    # 제목만 고친 경우 코드가 그대로라 다시 돌릴 것이 없다.
-    if: github.event.action != 'edited'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # gitleaks가 커밋 범위를 훑으려면 이력이 있어야 한다.
+          fetch-depth: 0
       - uses: ./.github/actions/setup
-      # 순서에 이유가 있다 — 싼 것부터 돌려야 원인이 가려지지 않는다(→ ops/pipeline/check.ts).
+
+      # 순서에 이유가 있다 — **싼 것부터** 돌려야 원인이 가려지지 않는다.
       #
       # **`--if-present`가 없으면 모든 PR이 빨간불이다**: contracts와 ops에는 `build`가 없어
       # pnpm이 `ERR_PNPM_RECURSIVE_RUN_NO_SCRIPT`로 exit 1을 낸다(2026-09-10 실측).
@@ -39,41 +43,50 @@ jobs:
       - run: pnpm -r --if-present run test
       - run: pnpm -r --if-present run build
 
-  container:
-    name: container
-    if: github.event.action != 'edited'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # squash merge라 **PR 제목이 그대로 main의 커밋 메시지가 된다.** 개별 커밋이 아니라 이것을 본다.
+      # 제목을 인자가 아니라 env로 넘긴다 — 제목에 든 따옴표·백틱이 셸에 해석되지 않게.
+      - name: PR 제목 형식
+        if: github.event_name == 'pull_request'
+        run: printf '%s' "$PR_TITLE" | pnpm --filter ops exec commitlint
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+
+      # 액션이 아니라 이미지를 직접 쓴다 — 로컬에서 같은 명령으로 재현되고, 조직 라이선스
+      # 안내를 지나지 않아도 된다. `--redact`로 값이 로그에 남지 않게 한다.
+      - name: 이번에 더해진 커밋에 시크릿이 있나
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            RANGE="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
+          else
+            RANGE="${{ github.event.before }}..${{ github.sha }}"
+          fi
+          echo "범위=$RANGE"
+          docker run --rm -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.30.1 \
+            git /repo --gitleaks-ignore-path /repo/ops/.gitleaksignore \
+            --log-opts="--no-merges $RANGE" --redact --no-banner
+
       # **워크스페이스가 실재해야 부팅한다** — 없으면 config가 던지고 프로세스가 죽는다.
       # docker가 대신 만들게 두면 root 소유가 되어 컨테이너가 쓰지 못한다.
-      - run: mkdir -p /tmp/arka-ci-workspace
+      #
       # `--wait`는 compose의 HEALTHCHECK(`/api/health`)가 통과할 때까지 기다린다.
-      # "빌드는 되는데 뜨지 않는다"를 병합 전에 잡는 것이 이 잡의 전부다.
-      # **프로젝트 이름은 `.env.ci`의 `ARKA_NAME`이 정한다**(`ci`) — `-p`로 또 적으면 두 곳이 갈린다.
-      # 터널은 `--profile tunnel` 없이는 뜨지 않는다. CI에는 토큰이 없고 필요도 없다.
-      - name: 컨테이너를 띄운다
+      # "빌드는 되는데 뜨지 않는다"를 병합 전에 잡는 것이 이 단계의 전부다.
+      # 프로젝트 이름은 `.env.ci`의 `ARKA_NAME`이 정한다(`ci`). 터널은 프로필 뒤라 뜨지 않는다.
+      - name: 컨테이너가 뜨는가
         run: |
+          mkdir -p /tmp/arka-ci-workspace
           ARKA_UID=$(id -u) ARKA_GID=$(id -g) docker compose \
             -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci \
             up -d --build --wait
-      - name: 실패하면 로그를 남긴다
+      - name: 컨테이너가 안 뜨면 로그를 남긴다
         if: failure()
         run: docker compose -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci logs
-      - name: 정리
+      - name: 컨테이너를 치운다
         if: always()
         run: docker compose -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci down -v
 
-  e2e:
-    name: e2e
-    if: github.event.action != 'edited'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/setup
       # 스펙이 `projects`를 선언하지 않아 기본 chromium으로 돈다. 그것만 받는다.
-      - run: pnpm --filter client exec playwright install --with-deps chromium
       # webServer가 스스로 client를 빌드하고 server를 tsx로 띄운다(playwright.config.ts).
+      - run: pnpm --filter client exec playwright install --with-deps chromium
       - run: pnpm --filter client run test:e2e
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: failure()
@@ -82,24 +95,10 @@ jobs:
           path: packages/client/.output/playwright/
           retention-days: 7
 
-  pr-title:
-    name: pr-title
-    # squash merge라 **PR 제목이 그대로 main의 커밋 메시지가 된다.** 개별 커밋이 아니라 이것을 본다.
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/setup
-      # 제목을 인자가 아니라 env로 넘긴다 — 제목에 든 따옴표·백틱이 셸에 해석되지 않게.
-      - run: printf '%s' "$PR_TITLE" | pnpm --filter ops exec commitlint
-        env:
-          PR_TITLE: ${{ github.event.pull_request.title }}
-
   deploy:
     name: deploy
-    # **검사가 통과한 뒤에만 배포한다.** `needs`만이 워크플로 안에서 그것을 보장한다 —
-    # 파일을 갈라 `workflow_run`으로 엮으면 체크아웃 ref를 손으로 맞춰야 한다.
-    needs: [check, container, e2e]
+    # **검사가 통과한 뒤에만 배포한다.** `needs`만이 워크플로 안에서 그것을 보장한다.
+    needs: [check]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: [self-hosted, linux, arka]
     concurrency:
@@ -117,15 +116,14 @@ jobs:
       - name: 이미지를 만든다
         run: node ops/deploy/build.ts arka:latest
 
-      # 값은 **이 기계의 파일**에 있다(0600) — GitHub Secrets에 두지 않는다. `set -a`로 셸에 풀어
-      # compose의 치환(`${ARKA_*}`)과 `environment:` 통과에 둘 다 닿게 한다.
-      # 터널·인그레스·DNS는 Cloudflare 대시보드가 들고, 여기 필요한 것은 커넥터 토큰뿐이다.
       # **개명 전 컨테이너를 먼저 걷는다.** 이름이 `ade-*`에서 `arka-*`로 바뀌어 compose가
       # 옛 것을 자기 것으로 보지 못한다. 남겨 두면 같은 터널에 둘이 붙고 같은 SQLite를 둘이 쓴다.
       # 첫 배포가 성공하면 이 단계를 지운다.
       - name: 개명 전 컨테이너를 걷는다
         run: docker rm -f ade-app ade-tunnel 2>/dev/null || true
 
+      # 값은 **이 기계의 파일**에 있다(0600) — GitHub Secrets에 두지 않는다. `set -a`로 셸에 풀어
+      # compose의 치환(`${ARKA_*}`)과 `environment:` 통과에 둘 다 닿게 한다.
       - name: 올린다
         run: |
           set -a; . "$HOME/ARKA/secure/env/arka.env"; set +a
@@ -133,8 +131,7 @@ jobs:
 
       # **이 검사가 실질적인 자물쇠다.** ARKA에는 인증이 없고 워크스페이스가 사용자의 개인
       # 디렉터리라, Access가 살아 있지 않으면 그 전체가 인터넷에 열린다.
-      # **오리진도 이 기계의 파일에서 읽는다.** 공개 저장소라 워크플로 로그도 공개다 —
-      # 호스트 이름이 리포에 있으면 그것만으로 문을 두드릴 자리를 알려 주는 셈이다.
+      # 오리진도 이 기계의 파일에서 읽는다 — 공개 저장소라 워크플로 로그도 공개다.
       - name: 익명 접근이 막히는지 본다
         run: |
           set -a; . "$HOME/ARKA/secure/env/arka.env"; set +a
@@ -145,26 +142,3 @@ jobs:
         run: |
           docker logs --tail 100 arka-app || true
           echo "::error::되돌리려면 docs/operations.md의 '되돌리기' — 이미지를 arka:previous로 되돌리고 같은 compose 명령을 다시 돌립니다"
-
-  secrets:
-    name: secrets
-    if: github.event.action != 'edited'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          # gitleaks가 커밋 범위를 훑으려면 이력이 있어야 한다.
-          fetch-depth: 0
-      # 액션이 아니라 이미지를 직접 쓴다 — 로컬에서 같은 명령으로 재현되고, 조직 라이선스
-      # 안내를 지나지 않아도 된다. `--redact`로 값이 로그에 남지 않게 한다.
-      - name: 이번에 더해진 커밋을 훑는다
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            RANGE="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
-          else
-            RANGE="${{ github.event.before }}..${{ github.sha }}"
-          fi
-          echo "범위=$RANGE"
-          docker run --rm -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.30.1 \
-            git /repo --gitleaks-ignore-path /repo/ops/.gitleaksignore \
-            --log-opts="--no-merges $RANGE" --redact --no-banner

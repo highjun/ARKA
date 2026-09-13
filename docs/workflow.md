@@ -50,21 +50,25 @@ printf '%s' "feat(client): 검색 패널을 연다" | pnpm --filter ops exec com
 
 ## CI가 하는 일
 
-PR을 열면 다섯 잡이 돈다. 전부 로컬에서 부를 수 있는 명령이다 —
-**CI에만 있는 검사를 만들지 않는다.**
+**잡은 둘이다.** PR에는 `check` 하나가 돌고, `main`에 들어가면 그 뒤에 `deploy`가 붙는다.
+`check`는 룰셋의 **필수 검사 이름**이라 바꾸지 않는다.
 
-| 잡 | 하는 일 | 로컬에서 같은 것 |
-|---|---|---|
-| `check` | lint → typecheck → test → build | `pnpm --filter ops check` + `pnpm -r --if-present run build` |
-| `container` | 이미지를 빌드해 띄우고 `/api/health`를 기다린다 | `ARKA_UID=$(id -u) ARKA_GID=$(id -g) docker compose -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci up -d --build --wait` |
-| `e2e` | Playwright 13개 | `pnpm --filter client run test:e2e` |
-| `pr-title` | 제목 형식 | `printf '%s' "제목" \| pnpm --filter ops exec commitlint` |
-| `secrets` | 새 커밋에 시크릿이 있는지 | `docker run --rm -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.30.1 git /repo --gitleaks-ignore-path /repo/ops/.gitleaksignore --redact --no-banner` |
+`check`가 순서대로 도는 것과, 로컬에서 같은 것을 부르는 법:
 
+| 단계 | 로컬에서 같은 것 |
+|---|---|
+| lint → typecheck → test → build | `pnpm -r --if-present run lint` … |
+| PR 제목 형식(PR일 때만) | `printf '%s' "제목" \| pnpm --filter ops exec commitlint` |
+| 새 커밋에 시크릿이 있는지 | `docker run --rm -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.30.1 git /repo --gitleaks-ignore-path /repo/ops/.gitleaksignore --redact --no-banner` |
+| 컨테이너가 뜨는가 | `ARKA_UID=$(id -u) ARKA_GID=$(id -g) docker compose -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci up -d --build --wait` |
+| Playwright 13개 | `pnpm --filter client run test:e2e` |
+
+**CI에만 있는 검사를 만들지 않는다.** 빨간불은 로컬에서 같은 한 줄로 재현된다.
 **CI가 실패하면 같은 브랜치에서 고쳐 다시 푸시한다. CI 설정을 바꿔서 통과시키지 않는다.**
 
-`check`의 순서는 `ops/pipeline/check.ts`(typecheck → lint → test)와 다르다. CI는 **싼 것부터**
-돌려 원인이 가려지지 않게 하고, 로컬은 타입이 먼저 서야 나머지 결과가 읽힌다는 판단이다.
+**PR 본문이나 제목만 고치면 검사가 다시 돌지 않는다.** `edited` 이벤트를 받지 않기 때문이다 —
+받으면 그 이벤트가 돌던 진짜 검사를 취소하고 그 자리를 대신해 관문이 조용히 빈다(2026-09-13 실측).
+제목을 고쳤으면 push하거나 PR을 닫았다 연다.
 
 ## 미리보기
 
@@ -75,8 +79,7 @@ PR별 미리보기는 **없다.** 2026-09-13에 걷어냈다 — PR마다 이 �
 
 **`main`에 머지하면 실배포에 올라간다.** 머지가 곧 배포다.
 
-검사(`check`·`container`·`e2e`)가 통과한 뒤에만 돌고, 마지막에 익명 접근이 Access에 막히는지
-확인한다. 실패하면 로그와 되돌리는 명령이 함께 남는다.
+`check`가 통과한 뒤에만 돌고, 마지막에 익명 접근이 Access에 막히는지 확인한다. 실패하면 로그와 되돌리는 명령이 함께 남는다.
 
 배포 잡이 하는 것은 셋이다 — 이미지를 굽고(`build.ts`), **CI가 검사한 것과 같은 compose 파일**로
 올리고, 익명 스모크를 돌린다. 터널·인그레스·DNS는 코드가 아니라 Cloudflare 대시보드가 든다.
@@ -89,6 +92,6 @@ PR별 미리보기는 **없다.** 2026-09-13에 걷어냈다 — PR마다 이 �
 - **VRT** — 기준 이미지는 **검토에서 그 스토리를 Accept할 때 하나씩** 만든다
   (`CONVENTIONS.md`의 테스트 절). 아직 승인된 것이 없어 전부 건너뛴다. 승인이 쌓이면
   관문으로 올린다([TASK-53](tasks/0053.md)).
-- **Docker 경계 스모크**(`pnpm --filter ops test:smoke`) — `container` 잡과 겹치면서 느리다.
+- **Docker 경계 스모크**(`pnpm --filter ops test:smoke`) — `check`의 컨테이너 단계와 겹치면서 느리다.
 
 둘 다 `pnpm --filter ops verify`에는 그대로 들어 있다.

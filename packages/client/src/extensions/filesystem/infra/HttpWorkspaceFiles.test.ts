@@ -163,10 +163,10 @@ describe('failure', () => {
 });
 
 describe('프로토콜 헤더', () => {
-  it('모든 요청에 x-ade-protocol을 싣는다 — 서버가 낡은 클라이언트를 가려내는 근거다', async () => {
+  it('모든 요청에 x-arka-protocol을 싣는다 — 서버가 낡은 클라이언트를 가려내는 근거다', async () => {
     const { calls } = serverReplies(LISTING);
     await createWorkspaceFilesPort().list('');
-    expect(calls[0]?.headers['x-ade-protocol']).toBe('1');
+    expect(calls[0]?.headers['x-arka-protocol']).toBe('1');
   });
 
   it('인증 헤더는 없다 — 앱은 인증을 모른다', async () => {

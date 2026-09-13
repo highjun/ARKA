@@ -122,6 +122,11 @@ systemctl --user daemon-reload && systemctl --user enable --now arka-runner
 
 **해제하려면** `systemctl --user disable --now arka-runner`, 그리고 저장소 설정에서 러너를 지운다.
 
+**유닛을 멈춰도 리스너가 남는다.** 유닛이 `KillMode=process`라 systemd가 `run.sh`만 죽이고
+자식 `Runner.Listener`는 고아로 살아남는다. 그 리스너가 GitHub 세션을 쥐고 있어, 새 유닛을 올리면
+`A session for this runner already exists`로 30초마다 재시도만 한다(2026-09-13 실측 — 유닛 이름을
+바꿀 때 겪었다). `pkill -f Runner.Listener`로 걷고 나서 새 유닛을 올린다.
+
 ## 저장소 쪽에서 필요한 것
 
 | | |
