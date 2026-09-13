@@ -12,9 +12,7 @@ GitHub ──▶ self-hosted 러너 ──▶ docker compose ──▶ cloudflar
 | | |
 |---|---|
 | 실배포 | `arka.sangjun.dev` — compose 프로젝트 `ade`(`ade-app` + `ade-tunnel`) |
-| 미리보기 | PR마다 `pr-<번호>-arka.sangjun.dev`. 닫히면 내려간다 |
 | 러너 | `~/actions-runner`, 사용자 유닛 `ade-runner.service`, 라벨 `self-hosted,linux,arka` |
-| 청소 | `ade-sweep.timer` — 하루 1회, 버려진 미리보기를 걷는다 |
 | 상태 | `~/.local/state/ade/deploy/<이름>/`에 compose·cloudflared·manifest |
 | 자격증명 | `~/ARKA/secure/cloudflared/<터널ID>.json`(0600), `~/ARKA/secure/env/cloudflare.env` |
 
@@ -26,7 +24,6 @@ GitHub ──▶ self-hosted 러너 ──▶ docker compose ──▶ cloudflar
 node ops/deploy/cli.ts status ade          # 무엇이 떠 있고 어디로 열려 있나
 node ops/deploy/cli.ts up   <스펙> [--dry-run] [--overwrite-dns]
 node ops/deploy/cli.ts down <이름> [--purge] [--remove-access] [--dry-run]
-node ops/deploy/cli.ts sweep [--dry-run]
 ```
 
 `pnpm run deploy`는 없다 — `deploy`가 pnpm의 내장 명령이라 이름이 겹친다.
@@ -91,27 +88,14 @@ systemctl --user daemon-reload && systemctl --user enable --now ade-runner
 
 **해제하려면** `systemctl --user disable --now ade-runner`, 그리고 저장소 설정에서 러너를 지운다.
 
-## 청소 타이머
-
-```sh
-cp ~/ARKASHIC/ops/deploy/systemd/ade-sweep.{service,timer} ~/.config/systemd/user/
-systemctl --user daemon-reload && systemctl --user enable --now ade-sweep.timer
-```
-
-**워크플로의 teardown을 대신하는 것이 아니라 그것이 놓친 것을 줍는다.** PR이 base 브랜치
-삭제로 자동으로 닫히면 GitHub이 `closed` 이벤트를 쏘지 않는다(2026-09-11 실측 — 미리보기
-하나가 그렇게 남았다).
-
 ## 저장소 쪽에서 필요한 것
 
 | | |
 |---|---|
-| 변수 `PREVIEW_DOMAIN` | `sangjun.dev` |
-| 변수 `PREVIEW_MAX` | 동시 미리보기 상한(5) |
 | 러너 라벨 | `self-hosted`, `linux`, `arka` |
 
-브랜치 보호는 **걸 수 없다** — Free 요금제 + 비공개 저장소는 룰셋도 구식 branch protection도
-403이다(실측). `main` 직접 푸시는 `pre-push` 훅이 로컬에서만 막는다.
+`main`은 룰셋이 지킨다(2026-09-13, 저장소 공개 뒤) — PR 필수, 승인 1, 코드 오너 리뷰, 필수 검사 `check`,
+강제 push·삭제 금지. 에이전트 계정 `sangjun-agent`는 우회할 수 없다.
 
 ## 보안 전제 — 읽고 넘어가지 말 것
 
@@ -120,5 +104,5 @@ systemctl --user daemon-reload && systemctl --user enable --now ade-sweep.timer
 - **실배포 워크스페이스가 `/home/highjun/ARKA`다** — `secure/`를 포함한 개인 디렉터리 전체다.
   Access 정책의 허용 이메일을 최소로 유지하는 것이 실질적인 방어다.
 - **러너가 docker 그룹으로 돈다.** 그건 사실상 root다. 러너 침해 = 이 기계 전체 침해다.
-- 포크 PR을 러너에서 돌리지 않는 가드(`preview.yml`)가 **유일한 방어선이다.** 지우면 안 된다.
-- **저장소를 공개로 바꾸거나 외부 기여자를 받으면 러너를 즉시 해제한다.**
+- **저장소는 공개다**(2026-09-13). 러너에서 도는 잡은 `main` push의 `deploy`뿐이다 — PR 이벤트에 self-hosted
+  잡을 두지 않는다. 외부 기여자의 PR 워크플로는 Actions 설정에서 **모두 승인 필요**로 막아 둔다. 이 둘이 방어선이다.

@@ -50,7 +50,7 @@ printf '%s' "feat(client): 검색 패널을 연다" | pnpm --filter ops exec com
 
 ## CI가 하는 일
 
-PR을 열면 여섯 잡이 돈다. 검사 다섯은 전부 로컬에서 부를 수 있는 명령이다 —
+PR을 열면 다섯 잡이 돈다. 전부 로컬에서 부를 수 있는 명령이다 —
 **CI에만 있는 검사를 만들지 않는다.**
 
 | 잡 | 하는 일 | 로컬에서 같은 것 |
@@ -60,7 +60,6 @@ PR을 열면 여섯 잡이 돈다. 검사 다섯은 전부 로컬에서 부를 �
 | `e2e` | Playwright 13개 | `pnpm --filter client run test:e2e` |
 | `pr-title` | 제목 형식 | `printf '%s' "제목" \| pnpm --filter ops exec commitlint` |
 | `secrets` | 새 커밋에 시크릿이 있는지 | `docker run --rm -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.30.1 git /repo --gitleaks-ignore-path /repo/ops/.gitleaksignore --redact --no-banner` |
-| `preview` | **미리보기를 띄운다**(아래) | `node ops/deploy/cli.ts up ops/deploy/preview.deploy.ts` |
 
 **CI가 실패하면 같은 브랜치에서 고쳐 다시 푸시한다. CI 설정을 바꿔서 통과시키지 않는다.**
 
@@ -69,14 +68,8 @@ PR을 열면 여섯 잡이 돈다. 검사 다섯은 전부 로컬에서 부를 �
 
 ## 미리보기
 
-PR을 열면 **사용자의 기계에** 그 PR의 ADE가 뜬다.
-
-- 주소는 `pr-<번호>-arka.<PREVIEW_DOMAIN>`. 봇이 PR에 코멘트 하나를 달고 **갱신**한다.
-- 워크스페이스는 그 PR의 체크아웃 사본이다 — 파일 트리와 소스 제어 탭이 실제로 동작한다.
-  **실배포의 개인 디렉터리는 붙지 않는다.**
-- **PR을 닫으면 사라진다** — 컨테이너·터널·DNS·Access 앱·이미지까지. 놓친 것은 하루 한 번 청소가 줍는다.
-- 동시에 `PREVIEW_MAX`(5)개까지. 넘으면 배포하지 않고 실패한다.
-- **포크에서 온 PR은 뜨지 않는다.** 그 기계에 실배포와 개인 디렉터리가 있다.
+PR별 미리보기는 **없다.** 2026-09-13에 걷어냈다 — PR마다 이 기계에 터널·DNS·Access 앱을 만들고 지우는
+자체 도구가 배포 코드의 대부분이었고, 관례에 없는 것이었다. 화면 검토는 Storybook 호스팅으로 간다(별도 라운드).
 
 ## 배포
 

@@ -25,7 +25,7 @@
 - **`.github/`가 루트 항목을 하나 늘린다**(→ ADR 0002). 위치를 고를 수 없는 자리라 예외로 둔다.
 
 ## 강제:
-- **워크플로** `.github/workflows/ci.yml` — 검사 다섯 + `deploy`. `preview.yml`이 미리보기를 든다.
+- **워크플로** `.github/workflows/ci.yml` — 검사 다섯 + `deploy`. (미리보기는 2026-09-13에 걷어냈다.)
 - **필수 체크 등록은 못 한다** — Free 요금제 + 비공개 저장소는 룰셋이 403이다(2026-09-10 실측).
   `main` 직접 푸시는 `ops/hooks/prePush.ts`가 로컬에서만 막는다.
 - **commitlint** `ops/commitlint.config.ts` — PR 제목의 타입·scope·길이.
