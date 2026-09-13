@@ -8,7 +8,7 @@ import { createGitRunner } from "./gitCommand";
  * **git에게 무엇을 넘기는가**만 본다. git이 무엇을 하는지는 `gitOperations.test.ts`가 본다.
  *
  * git은 사용자 워크스페이스 안에서 돌고 그 안의 `.git/config`는 워크스페이스 내용이다 —
- * 훅이나 credential helper가 붙으면 환경을 읽는다(→ ADR 0007).
+ * 훅이나 credential helper가 붙으면 환경을 읽는다.
  */
 let root: string;
 

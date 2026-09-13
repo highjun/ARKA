@@ -31,7 +31,7 @@ export interface RunContext {
 }
 
 /**
- * Run을 실제로 굴리는 것. LLM 제공자·툴 집합은 구현의 사정이다(→ ADR 0019).
+ * Run을 실제로 굴리는 것. LLM 제공자·툴 집합은 구현의 사정이다.
  *
  * `run`이 정상 반환하면 `done`, 던지면 `error`, `signal`이 abort된 채 끝나면 `cancelled`로 런타임이
  * `run.finished`를 낸다. 실행기는 `run.started`/`run.finished`를 내지 않는다.

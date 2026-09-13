@@ -14,7 +14,7 @@ export type GitRunOptions = {
 export type GitRunner = (args: readonly string[], options?: GitRunOptions) => Promise<string>;
 
 /**
- * git에게 넘길 환경. **부모의 것을 통째로 넘기지 않는다**(→ ADR 0007).
+ * git에게 넘길 환경. **부모의 것을 통째로 넘기지 않는다**.
  *
  * git은 사용자 워크스페이스 **안에서** 돌고, 그 안의 `.git/config`는 워크스페이스 내용이다 —
  * 훅이나 credential helper가 붙으면 환경을 읽는다. 비밀이 거기 있을 이유가 없다.

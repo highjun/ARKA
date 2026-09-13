@@ -19,7 +19,7 @@ const TITLE_MAX = 40;
 /**
  * Run의 수명을 소유한다 — 시작·입력 전달·끊기·끝 처리. 세션마다 도는 Run은 하나뿐이다.
  *
- * `runtime/`인 이유: 요청이 끝나도 Run은 계속 돌고, 클라이언트가 나갔다 와도 이어져야 한다(→ ADR 0019).
+ * `runtime/`인 이유: 요청이 끝나도 Run은 계속 돌고, 클라이언트가 나갔다 와도 이어져야 한다.
  * 이벤트는 전부 `IEventStore`에 남기고, 세션 요약(`ISessionStore`)은 그 투영으로 함께 갱신한다.
  */
 export class RunManager {

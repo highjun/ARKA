@@ -4,7 +4,7 @@ import type { IAgentRunner, RunContext } from "../domain/IAgentRunner";
 const DEFAULT_CHUNK_MS = 30;
 
 /**
- * API 키 없이 도는 실행기 — 계약 테스트·E2E·스토리의 기준이다(→ ADR 0019).
+ * API 키 없이 도는 실행기 — 계약 테스트·E2E·스토리의 기준이다.
  *
  * 하는 일은 정해져 있다: 생각 한 블록 → `echo` 툴 호출 → 입력을 되풀이하는 답변을 단어 단위로 스트리밍.
  * 입력에 `?`가 있으면 답하기 전에 사용자에게 되묻는다 — 입력 요청 경로를 화면에서 확인하기 위해서다.

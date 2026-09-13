@@ -5,7 +5,7 @@ import type { RouteProbe } from "../../../responseContract";
 
 /**
  * 에이전트 라우트의 **응답 모양**만 본다. Run이 실제로 무엇을 하는지는 `runtime/RunManager.test.ts`와
- * `infra/ScriptedRunner.test.ts`가 본다. 키가 없으므로 스크립트 실행기가 돈다(→ ADR 0019).
+ * `infra/ScriptedRunner.test.ts`가 본다. 키가 없으므로 스크립트 실행기가 돈다.
  */
 let probe: RouteProbe;
 let dispose: () => Promise<void>;

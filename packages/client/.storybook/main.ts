@@ -1,7 +1,7 @@
 import type { StorybookConfig } from '@storybook/react-vite';
 
 /**
- * 스토리는 대상 옆에 둔다(→ ADR 0008) — 여기서는 글롭만 가리킨다.
+ * 스토리는 대상 옆에 둔다 — 여기서는 글롭만 가리킨다.
  *
  * `shared/components/`와 각 슬라이스의 `component/`는 전부 대상이다.
  *

@@ -3,7 +3,7 @@ import ops from "ops/lint";
 /**
  * 서버의 린트 설정.
  *
- * **계층 방향 규칙이 지금 비어 있다.** `docs/legacy/code/`로 옮겨 껐다 — 서버 구조 ADR이 아직
+ * **계층 방향 규칙이 지금 비어 있다.** 껐다(2026-09-13 지웠다. git 이력에 있다) — 서버 구
  * 새 번호로 옮겨지지 않아서다. 남은 zone은 [ADR 0001](../../docs/adr/0001-monorepo-pnpm.md)의 것뿐이다.
  */
 export default [

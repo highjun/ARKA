@@ -1,6 +1,5 @@
 import { spawnSync } from "node:child_process";
 import path from "node:path";
-import { STORYBOOK_STATIC } from "./vrt.config.ts";
 
 /**
  * 스토리를 순회해 **이전과 같은 그림인지** 본다. 인자는 playwright로 그대로 넘어간다 —
@@ -25,7 +24,8 @@ const run = (file: string, args: readonly string[], cwd: string): void => {
   if (status !== 0) process.exit(status ?? 1);
 };
 
-run("storybook", ["build", "-o", STORYBOOK_STATIC], CLIENT_ROOT);
+// **빌드 명령을 여기 적지 않는다** — `build:storybook`이 정본이고 Pages도 그것을 부른다.
+run("pnpm", ["run", "build:storybook"], CLIENT_ROOT);
 
 // 마운트는 이 패키지가 아니라 **저장소 루트**다. pnpm이 `node_modules/@playwright/test`를 루트의
 // `.pnpm` 저장소로 심볼릭 링크하므로, 패키지만 마운트하면 컨테이너 안에서 끊어진 링크가 된다.

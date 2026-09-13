@@ -8,7 +8,7 @@ export interface UpdateBannerProps {
 }
 
 /**
- * 캐시된 클라이언트가 서버보다 낡았을 때 맨 위에 뜨는 띠(→ ADR 0017). VSCode의 "다시 시작해 업데이트"
+ * 캐시된 클라이언트가 서버보다 낡았을 때 맨 위에 뜨는 띠. VSCode의 "다시 시작해 업데이트"
  * 알림과 같은 자리다 — 닫을 수 없다. 낡은 채로 쓰면 요청이 426으로 죽는다.
  */
 export const UpdateBanner = ({ onReload }: UpdateBannerProps) => (

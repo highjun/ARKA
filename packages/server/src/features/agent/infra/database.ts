@@ -1,7 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 
 /**
- * SQLite 연결과 스키마 마이그레이션(→ ADR 0011, 0019). 드라이버는 Node 내장 `node:sqlite`다.
+ * SQLite 연결과 스키마 마이그레이션. 드라이버는 Node 내장 `node:sqlite`다.
  *
  * 마이그레이션은 번호 순서대로 한 번씩 적용되고 `schema_version`에 기록된다. 사용자가 버전을
  * 건너뛰어 올려도(v1→v5) 빠진 단계가 순서대로 적용된다. **적용된 단계는 고치지 않는다** — 고치려면

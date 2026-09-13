@@ -15,7 +15,7 @@ const IMAGE = process.env["IMAGE"] ?? "arka:smoke";
 const PORT = Number(process.env["PORT"] ?? 3997);
 const NAME = `arka-smoke-${String(process.pid)}`;
 const BASE = `http://127.0.0.1:${String(PORT)}`;
-/** `/api/*`는 프로토콜 헤더가 있어야 통과한다(→ ADR 0017). */
+/** `/api/*`는 프로토콜 헤더가 있어야 통과한다. */
 const H = { "x-arka-protocol": "1", "content-type": "application/json" };
 
 const docker = (...args: readonly string[]): string => {

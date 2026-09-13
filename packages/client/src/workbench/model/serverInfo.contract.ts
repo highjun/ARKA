@@ -1,3 +1,4 @@
+import { PROTOCOL_HEADER } from '#contracts';
 import { describe, expect, it } from 'vitest';
 import type { IServerInfo, ServerInfo } from './IServerInfo';
 
@@ -9,7 +10,7 @@ export type ServerInfoSetup = {
   readonly silent: () => IServerInfo | Promise<IServerInfo>;
 };
 
-const SAMPLE: ServerInfo = { builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1, workspaceName: 'ARKASHIC' };
+const SAMPLE: ServerInfo = { builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1, protocolHeader: PROTOCOL_HEADER, workspaceName: 'ARKASHIC' };
 
 /**
  * `IServerInfo`를 구현한 모든 것이 통과해야 하는 스위트.

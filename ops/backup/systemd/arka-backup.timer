@@ -1,0 +1,11 @@
+# 하루 한 번. `Persistent=true`라 기계가 꺼져 있던 날의 몫도 켜지면 한 번 돈다.
+[Unit]
+Description=ARKA 백업 (하루 1회)
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+RandomizedDelaySec=30min
+
+[Install]
+WantedBy=timers.target

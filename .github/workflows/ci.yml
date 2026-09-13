@@ -27,6 +27,13 @@ jobs:
   check:
     name: check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # 검사한 이미지를 GHCR에 올린다. 공개 저장소라 패키지도 무료다.
+      packages: write
+    env:
+      IMAGE: ghcr.io/${{ github.repository_owner }}/arka:${{ github.sha }}
+      LATEST: ghcr.io/${{ github.repository_owner }}/arka:latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -45,8 +52,10 @@ jobs:
 
       # squash merge라 **PR 제목이 그대로 main의 커밋 메시지가 된다.** 개별 커밋이 아니라 이것을 본다.
       # 제목을 인자가 아니라 env로 넘긴다 — 제목에 든 따옴표·백틱이 셸에 해석되지 않게.
+      # **dependabot은 건너뛴다.** 봇이 짓는 제목(`build(repo): bump …from x to y`)이 72자를 넘는데
+      # 사람이 PR에서 고칠 수 없어, 아무도 고칠 수 없는 빨간불이 된다.
       - name: PR 제목 형식
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]'
         run: printf '%s' "$PR_TITLE" | pnpm --filter ops exec commitlint
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
@@ -65,24 +74,39 @@ jobs:
             git /repo --gitleaks-ignore-path /repo/ops/.gitleaksignore \
             --log-opts="--no-merges $RANGE" --redact --no-banner
 
+      # **여기서 굽는 이미지가 그대로 배포된다**(→ ADR 0006). 예전에는 CI가 굽고 버린 뒤
+      # 러너가 다시 구웠다 — 검사한 것과 뜨는 것이 다른 빌드였다.
+      # 굽는 길은 저장소에 하나뿐이다(`build.ts`가 커밋 SHA를 박고 뒤를 치운다).
+      - name: 이미지를 굽는다
+        run: node ops/deploy/build.ts "$IMAGE"
+
       # **워크스페이스가 실재해야 부팅한다** — 없으면 config가 던지고 프로세스가 죽는다.
       # docker가 대신 만들게 두면 root 소유가 되어 컨테이너가 쓰지 못한다.
       #
       # `--wait`는 compose의 HEALTHCHECK(`/api/health`)가 통과할 때까지 기다린다.
       # "빌드는 되는데 뜨지 않는다"를 병합 전에 잡는 것이 이 단계의 전부다.
       # 프로젝트 이름은 `.env.ci`의 `ARKA_NAME`이 정한다(`ci`). 터널은 프로필 뒤라 뜨지 않는다.
-      - name: 컨테이너가 뜨는가
+      - name: 그 이미지가 뜨는가
         run: |
           mkdir -p /tmp/arka-ci-workspace
-          ARKA_UID=$(id -u) ARKA_GID=$(id -g) docker compose \
+          ARKA_UID=$(id -u) ARKA_GID=$(id -g) ARKA_IMAGE="$IMAGE" docker compose \
             -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci \
-            up -d --build --wait
-      - name: 컨테이너가 안 뜨면 로그를 남긴다
+            up -d --no-build --wait
+      - name: 안 뜨면 로그를 남긴다
         if: failure()
         run: docker compose -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci logs
       - name: 컨테이너를 치운다
         if: always()
         run: docker compose -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci down -v
+
+      # **`main`일 때만 올린다.** PR의 이미지는 뜨는지만 보고 버린다 — 배포되지 않을 것을
+      # 레지스트리에 쌓지 않는다. 액션을 하나 더 핀 고정하는 대신 `docker login`을 직접 쓴다.
+      - name: 검사한 그 이미지를 올린다
+        if: github.event_name == 'push'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker push "$IMAGE"
+          docker tag "$IMAGE" "$LATEST" && docker push "$LATEST"
 
       # 스펙이 `projects`를 선언하지 않아 기본 chromium으로 돈다. 그것만 받는다.
       # webServer가 스스로 client를 빌드하고 server를 tsx로 띄운다(playwright.config.ts).
@@ -101,33 +125,36 @@ jobs:
     needs: [check]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: [self-hosted, linux, arka]
+    # 배포가 **기록으로 남는다.** 저장소의 Environments 탭에 무엇이 언제 어느 커밋으로 떴는지
+    # 쌓인다. 배포 직전 승인은 설정 스위치라 코드 변경 없이 켜고 끈다.
+    # `url`은 넣지 않는다 — 공개 저장소라 그 화면도 공개고, 호스트 이름을 리포 밖에 두기로 했다.
+    environment: production
+    permissions:
+      contents: read
+      packages: read
     concurrency:
       group: deploy-production
       # **배포는 중간에 자르지 않는다.** 컨테이너를 바꾸는 중에 끊기면 무엇이 떠 있는지 모른다.
       cancel-in-progress: false
+    env:
+      IMAGE: ghcr.io/${{ github.repository_owner }}/arka:${{ github.sha }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/setup
 
-      # 되돌릴 자리를 먼저 만든다. 지금 떠 있는 이미지에 이름을 붙여 둔다.
-      - name: 되돌릴 이미지를 표시한다
-        run: docker image tag arka:latest arka:previous 2>/dev/null || echo "첫 배포 — 되돌릴 것이 없습니다"
-
-      - name: 이미지를 만든다
-        run: node ops/deploy/build.ts arka:latest
-
-      # **개명 전 컨테이너를 먼저 걷는다.** 이름이 `ade-*`에서 `arka-*`로 바뀌어 compose가
-      # 옛 것을 자기 것으로 보지 못한다. 남겨 두면 같은 터널에 둘이 붙고 같은 SQLite를 둘이 쓴다.
-      # 첫 배포가 성공하면 이 단계를 지운다.
-      - name: 개명 전 컨테이너를 걷는다
-        run: docker rm -f ade-app ade-tunnel 2>/dev/null || true
+      # **굽지 않는다.** `check`가 구워 올린 바로 그 이미지를 당긴다 — 검사한 것과 뜨는 것이
+      # 같은 산출물이어야 한다. 되돌리기도 옛 SHA 태그를 당기는 것으로 정확해진다.
+      - name: 검사한 이미지를 당긴다
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker pull "$IMAGE"
 
       # 값은 **이 기계의 파일**에 있다(0600) — GitHub Secrets에 두지 않는다. `set -a`로 셸에 풀어
       # compose의 치환(`${ARKA_*}`)과 `environment:` 통과에 둘 다 닿게 한다.
+      # `ARKA_IMAGE`는 여기서 덮는다 — 파일의 값이 아니라 방금 검사한 SHA를 띄운다.
       - name: 올린다
         run: |
           set -a; . "$HOME/ARKA/secure/env/arka.env"; set +a
-          docker compose -f ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
+          ARKA_IMAGE="$IMAGE" docker compose -f ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
 
       # **이 검사가 실질적인 자물쇠다.** ARKA에는 인증이 없고 워크스페이스가 사용자의 개인
       # 디렉터리라, Access가 살아 있지 않으면 그 전체가 인터넷에 열린다.
@@ -137,8 +164,14 @@ jobs:
           set -a; . "$HOME/ARKA/secure/env/arka.env"; set +a
           node ops/deploy/anonSmoke.ts "$ARKA_ORIGIN"
 
+      # 러너에서 빌드가 사라져 `build.ts`의 회수 단계도 함께 사라졌다. 당겨 온 옛 이미지가
+      # 쌓이므로 여기서 걷는다 — 떠 있는 것이 물고 있는 이미지는 지워지지 않는다.
+      - name: 안 쓰는 이미지를 걷는다
+        if: always()
+        run: docker image prune -f
+
       - name: 실패하면 로그와 되돌리는 법을 남긴다
         if: failure()
         run: |
           docker logs --tail 100 arka-app || true
-          echo "::error::되돌리려면 docs/operations.md의 '되돌리기' — 이미지를 arka:previous로 되돌리고 같은 compose 명령을 다시 돌립니다"
+          echo "::error::되돌리려면 docs/operations.md의 '되돌리기' — 옛 커밋 SHA 태그를 당겨 같은 compose 명령을 돌립니다"

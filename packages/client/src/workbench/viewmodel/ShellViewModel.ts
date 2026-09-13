@@ -3,7 +3,7 @@ import { ViewModelBase } from '#core/viewmodel';
 import { atom } from 'nanostores';
 import type { ITabDirtyState } from '../model/ITabDirtyState';
 import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
-import { PROTOCOL_VERSION } from '#contracts';
+import { PROTOCOL_HEADER, PROTOCOL_VERSION } from '#contracts';
 import type { IServerInfo } from '../model/IServerInfo';
 import type { INotificationService } from '../model/INotificationService';
 import type { IActivityBarRegistry } from '../model/IActivityBarRegistry';
@@ -147,7 +147,10 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     void this.#serverInfo.load().then((info) => {
       this.#buildId.set(info === null ? '' : formatBuildLabel(info.builtAt, info.gitSha));
       this.#workspaceName.set(info?.workspaceName ?? '');
-      this.#isClientOutdated.set(info !== null && info.protocolVersion !== PROTOCOL_VERSION);
+      // 버전과 **헤더 이름** 둘 다 본다. 이름이 바뀌면 서버는 우리 요청을 헤더 없음으로 읽어 426을
+      // 주는데, 버전은 여전히 같아서 그것만 보면 낡은 줄 모른 채 빈 화면을 띄운다.
+      const outdated = info !== null && (info.protocolVersion !== PROTOCOL_VERSION || info.protocolHeader !== PROTOCOL_HEADER);
+      this.#isClientOutdated.set(outdated);
     });
   }
 
