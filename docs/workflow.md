@@ -56,7 +56,7 @@ PR을 열면 다섯 잡이 돈다. 전부 로컬에서 부를 수 있는 명령�
 | 잡 | 하는 일 | 로컬에서 같은 것 |
 |---|---|---|
 | `check` | lint → typecheck → test → build | `pnpm --filter ops check` + `pnpm -r --if-present run build` |
-| `container` | 이미지를 빌드해 띄우고 `/api/health`를 기다린다 | `ADE_UID=$(id -u) ADE_GID=$(id -g) docker compose -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci up -d --build --wait` |
+| `container` | 이미지를 빌드해 띄우고 `/api/health`를 기다린다 | `ARKA_UID=$(id -u) ARKA_GID=$(id -g) docker compose -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci up -d --build --wait` |
 | `e2e` | Playwright 13개 | `pnpm --filter client run test:e2e` |
 | `pr-title` | 제목 형식 | `printf '%s' "제목" \| pnpm --filter ops exec commitlint` |
 | `secrets` | 새 커밋에 시크릿이 있는지 | `docker run --rm -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.30.1 git /repo --gitleaks-ignore-path /repo/ops/.gitleaksignore --redact --no-banner` |

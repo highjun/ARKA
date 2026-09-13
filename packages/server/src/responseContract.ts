@@ -24,7 +24,7 @@ const silent = { info: () => undefined, warn: () => undefined, error: () => unde
 
 /** 빈 임시 워크스페이스 위에 앱을 세운다. `dispose`로 지운다. */
 export const probeApp = async (): Promise<RouteProbe & { dispose: () => Promise<void> }> => {
-  const workspaceRoot = realpathSync(await mkdtemp(path.join(os.tmpdir(), "ade-response-")));
+  const workspaceRoot = realpathSync(await mkdtemp(path.join(os.tmpdir(), "arka-response-")));
   const { app } = createApp({
     config: makeConfig({ workspaceRoot }),
     log: silent,

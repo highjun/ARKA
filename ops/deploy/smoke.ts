@@ -11,9 +11,9 @@ import path from "node:path";
  * 유지, ④ 정적 클라이언트가 같은 오리진에서 나오는가. 이 넷만 본다.
  */
 const REPO_ROOT = path.resolve(import.meta.dirname, "../..");
-const IMAGE = process.env["IMAGE"] ?? "ade:smoke";
+const IMAGE = process.env["IMAGE"] ?? "arka:smoke";
 const PORT = Number(process.env["PORT"] ?? 3997);
-const NAME = `ade-smoke-${String(process.pid)}`;
+const NAME = `arka-smoke-${String(process.pid)}`;
 const BASE = `http://127.0.0.1:${String(PORT)}`;
 /** `/api/*`는 프로토콜 헤더가 있어야 통과한다(→ ADR 0017). */
 const H = { "x-ade-protocol": "1", "content-type": "application/json" };
@@ -47,8 +47,8 @@ const waitHealthy = async (): Promise<void> => {
   fail("서버가 healthy가 되지 않았다");
 };
 
-const workspace = mkdtempSync(path.join(tmpdir(), "ade-ws-"));
-const data = mkdtempSync(path.join(tmpdir(), "ade-data-"));
+const workspace = mkdtempSync(path.join(tmpdir(), "arka-ws-"));
+const data = mkdtempSync(path.join(tmpdir(), "arka-data-"));
 
 try {
   console.log("# build");

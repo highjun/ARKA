@@ -13,7 +13,7 @@ import { createGitRunner } from "./gitCommand";
 let root: string;
 
 beforeAll(async () => {
-  root = await mkdtemp(path.join(os.tmpdir(), "ade-gitenv-"));
+  root = await mkdtemp(path.join(os.tmpdir(), "arka-gitenv-"));
   await createGitRunner(root)(["init", "-q"]);
 });
 
@@ -27,12 +27,12 @@ const childEnv = async (): Promise<string> =>
 
 describe("git 자식 프로세스의 환경", () => {
   it("부모의 비밀을 넘기지 않는다 — 통째로 넘기면 워크스페이스의 훅이 읽는다", async () => {
-    process.env["ADE_TEST_LEAK_TOKEN"] = "sk-must-not-reach-git";
+    process.env["ARKA_TEST_LEAK_TOKEN"] = "sk-must-not-reach-git";
 
     try {
       expect(await childEnv()).not.toContain("sk-must-not-reach-git");
     } finally {
-      delete process.env["ADE_TEST_LEAK_TOKEN"];
+      delete process.env["ARKA_TEST_LEAK_TOKEN"];
     }
   });
 

@@ -47,10 +47,10 @@ describe("비밀 마스킹 — 이름이 곧 장치다", () => {
   it("접미사가 붙은 필드를 가린다 — 환경변수 꼴과 camelCase 둘 다", () => {
     const { lines, log } = capture();
 
-    log.info("x", { ADE_ANTHROPIC_API_KEY: "sk-real", apiKey: "sk-real", accessToken: "t", dbPassword: "p", tunnelSecret: "s" });
+    log.info("x", { ARKA_ANTHROPIC_API_KEY: "sk-real", apiKey: "sk-real", accessToken: "t", dbPassword: "p", tunnelSecret: "s" });
 
     expect(parse(lines[0])).toMatchObject({
-      ADE_ANTHROPIC_API_KEY: "***", apiKey: "***", accessToken: "***", dbPassword: "***", tunnelSecret: "***",
+      ARKA_ANTHROPIC_API_KEY: "***", apiKey: "***", accessToken: "***", dbPassword: "***", tunnelSecret: "***",
     });
   });
 

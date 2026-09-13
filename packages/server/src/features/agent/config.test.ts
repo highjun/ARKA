@@ -13,24 +13,24 @@ describe("AgentEnv", () => {
   });
 
   it("scripted면 키가 있어도 보지 않는다 — 키를 남겨 둔 채 끌 수 있다", () => {
-    expect(AgentEnv.parse({ ADE_AGENT_RUNNER: "scripted", ADE_ANTHROPIC_API_KEY: "sk-test" })).toEqual({ runner: "scripted" });
+    expect(AgentEnv.parse({ ARKA_AGENT_RUNNER: "scripted", ARKA_ANTHROPIC_API_KEY: "sk-test" })).toEqual({ runner: "scripted" });
   });
 
   it("켰는데 키가 없으면 부팅을 막는다 — 기능이 조용히 꺼진 채 뜨는 것이 제일 나쁜 실패다", () => {
-    expect(issueOf({ ADE_AGENT_RUNNER: "anthropic" })).toEqual({ path: "ADE_ANTHROPIC_API_KEY", message: "required when ADE_AGENT_RUNNER=anthropic" });
+    expect(issueOf({ ARKA_AGENT_RUNNER: "anthropic" })).toEqual({ path: "ARKA_ANTHROPIC_API_KEY", message: "required when ARKA_AGENT_RUNNER=anthropic" });
   });
 
   it("키 이름에 오타가 나도 모드는 안 바뀐다 — 켠 채로 죽는다", () => {
-    expect(issueOf({ ADE_AGENT_RUNNER: "anthropic", ADE_ANTHROPIC_APIKEY: "sk-test" })?.path).toBe("ADE_ANTHROPIC_API_KEY");
+    expect(issueOf({ ARKA_AGENT_RUNNER: "anthropic", ARKA_ANTHROPIC_APIKEY: "sk-test" })?.path).toBe("ARKA_ANTHROPIC_API_KEY");
   });
 
   it("켜고 키를 주면 모델 기본값은 claude-opus-5다", () => {
-    expect(AgentEnv.parse({ ADE_AGENT_RUNNER: "anthropic", ADE_ANTHROPIC_API_KEY: "sk-test" })).toEqual({
+    expect(AgentEnv.parse({ ARKA_AGENT_RUNNER: "anthropic", ARKA_ANTHROPIC_API_KEY: "sk-test" })).toEqual({
       runner: "anthropic", apiKey: "sk-test", model: "claude-opus-5",
     });
   });
 
   it("모르는 실행기 이름은 거부한다 — 오타가 기본값으로 떨어지면 스위치가 아니다", () => {
-    expect(issueOf({ ADE_AGENT_RUNNER: "anthrpic" })?.path).toBe("ADE_AGENT_RUNNER");
+    expect(issueOf({ ARKA_AGENT_RUNNER: "anthrpic" })?.path).toBe("ARKA_AGENT_RUNNER");
   });
 });
