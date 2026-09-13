@@ -1,6 +1,6 @@
 import { useViewModel } from '#core/viewmodel';
 import { Spinner } from '@primer/react';
-import { Text } from '#components/common';
+import { Text } from '#component/Text';
 import { SourceControlViewModelToken } from '../viewmodel/ISourceControlViewModel';
 import styles from './DiffTabView.module.css';
 

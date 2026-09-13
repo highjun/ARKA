@@ -32,11 +32,11 @@ import { useControlledState } from '#utils/useControlledState';
 import styles from './Tab.module.css';
 import { getStripItemStates, useStripScrollHandle, useTabStrip } from './useTabStrip';
 import { getRootLeafState, useSplitBranch, useTabSplit } from './useTabSplit';
-import { Container } from '#components/layout/Container';
-import { Icon } from '#components/common/Icon';
-import type { IconId } from '#components/common/Icon';
-import { IconButton } from '#components/common/IconButton';
-import { ContextMenu } from '#components/common/ContextMenu';
+import { Container } from '#component/Container';
+import { Icon } from '#component/Icon';
+import type { IconId } from '#component/Icon';
+import { IconButton } from '#component/IconButton';
+import { ContextMenu } from '#component/ContextMenu';
 
 // ─── 공통 도메인 ───
 

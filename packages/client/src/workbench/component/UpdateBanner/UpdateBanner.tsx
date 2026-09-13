@@ -1,5 +1,6 @@
 import { Button } from '@primer/react';
-import { Icon, Text } from '#components/common';
+import { Icon } from '#component/Icon';
+import { Text } from '#component/Text';
 import styles from './UpdateBanner.module.css';
 
 /** 닫기 콜백이 없다 — 닫을 수 없는 띠라서다. */

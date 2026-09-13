@@ -1,5 +1,6 @@
 import { useViewModel } from '#core/viewmodel';
-import { Heading, Text } from '#components/common';
+import { Heading } from '#component/Heading';
+import { Text } from '#component/Text';
 import { SettingsViewModelToken } from '../viewmodel/ISettingsViewModel';
 import styles from './SettingsTabView.module.css';
 

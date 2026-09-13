@@ -1,6 +1,6 @@
 import { useViewModel } from '#core/viewmodel';
 import { ActionList, Button, Spinner, TextInput } from '@primer/react';
-import { Text } from '#components/common';
+import { Text } from '#component/Text';
 import { SearchViewModelToken } from '../viewmodel/ISearchViewModel';
 import styles from './SearchView.module.css';
 

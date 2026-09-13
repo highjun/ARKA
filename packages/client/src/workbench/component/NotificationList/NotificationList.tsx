@@ -1,6 +1,7 @@
 import { IconButton } from '@primer/react';
-import { Icon, Text } from '#components/common';
-import type { IconId } from '#components/common';
+import { Icon } from '#component/Icon';
+import { Text } from '#component/Text';
+import type { IconId } from '#component/Icon';
 import styles from './NotificationList.module.css';
 
 /** `severity`가 아이콘을 정한다. 색은 CSS가 같은 값으로 고른다. */

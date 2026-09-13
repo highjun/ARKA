@@ -5,10 +5,13 @@ import { ShellViewModelToken } from '../viewmodel/IShellViewModel';
 import { matchMenuItems } from '#core/menu';
 import { useViewModel } from '#core/viewmodel';
 import { Button } from '@primer/react';
-import { ContextMenu, Icon, ModeToggle, Text } from '#components/common';
-import { Dialog } from '#components/layout';
+import { ContextMenu } from '#component/ContextMenu';
+import { Icon } from '#component/Icon';
+import { ModeToggle } from '#component/ModeToggle';
+import { Text } from '#component/Text';
+import { Dialog } from '#component/Dialog';
 import { CommandPalette, NotificationList, Shell, Tab, UpdateBanner } from '../component';
-import type { IconId } from '#components/common';
+import type { IconId } from '#component/Icon';
 import type { TabItem, TabTreeNode } from '../component';
 import type { ReactNode } from 'react';
 import type { ICommandCenterRegistry } from '#core/commands';
@@ -52,7 +55,7 @@ const mergeTabDisplay = (node: ShellTabPaneNode, tabContentRegistry: ITabContent
   return { ...node, children: node.children.map((child) => mergeTabDisplay(child, tabContentRegistry)) };
 };
 
-/** ViewModel 의 트리를 `shared/components`의 `Tab`이 요구하는 트리로 바꾼다 — 탭마다 `content`를 여기서
+/** ViewModel 의 트리를 `Tab`이 요구하는 트리로 바꾼다 — 탭마다 `content`를 여기서
  *  처음이자 마지막으로 채워 넣는다(Model·ViewModel 은 `ReactNode`를 갖지 않는다는 원칙). */
 const buildTree = (node: ShellTabDisplayNode, renderTab: (tab: ShellTabRow) => ReactNode): TabTreeNode => {
   if (node.kind === 'leaf') {

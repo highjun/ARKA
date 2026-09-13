@@ -2,7 +2,7 @@ import type { HTMLAttributes, ReactNode } from 'react';
 import { assembleCompound } from '#utils/assembleCompound';
 import { mergeClassNames } from '#utils/mergeClassNames';
 import styles from './Message.module.css';
-import { Timestamp } from '#components/common/Timestamp';
+import { Timestamp } from '#component/Timestamp';
 
 /** 정렬과 색만 가른다 — `system`은 양쪽 어디에도 붙지 않는다. */
 export type MessageRole = 'user' | 'agent' | 'system';

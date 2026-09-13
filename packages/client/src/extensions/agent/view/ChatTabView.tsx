@@ -1,6 +1,6 @@
 import { useViewModel } from '#core/viewmodel';
 import { Banner, Button } from '@primer/react';
-import { Text } from '#components/common';
+import { Text } from '#component/Text';
 import type { ReactNode } from 'react';
 import { ChatRoom, InputComposer, Message, StepBlock } from '../component';
 import type { TranscriptItem } from '../model/IChatModel';

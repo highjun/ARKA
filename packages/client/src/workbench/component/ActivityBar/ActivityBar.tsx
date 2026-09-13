@@ -4,11 +4,11 @@ import { clsx } from 'clsx';
 import { useControlledState } from '#utils/useControlledState';
 import { assembleCompound } from '#utils/assembleCompound';
 import styles from './ActivityBar.module.css';
-import { Container } from '#components/layout/Container';
-import { Icon } from '#components/common/Icon';
-import { IconButton } from '#components/common/IconButton';
-import { ContextMenu } from '#components/common/ContextMenu';
-import type { IconId } from '#components/common/Icon';
+import { Container } from '#component/Container';
+import { Icon } from '#component/Icon';
+import { IconButton } from '#component/IconButton';
+import { ContextMenu } from '#component/ContextMenu';
+import type { IconId } from '#component/Icon';
 
 /** 세로 막대의 아이콘 하나. `isActive`를 직접 주면 `activeId` 계산을 건너뛴다. */
 export interface ActivityBarItem {

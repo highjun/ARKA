@@ -5,7 +5,7 @@ import { useControlledState } from '#utils/useControlledState';
 import { mergeClassNames } from '#utils/mergeClassNames';
 import styles from './StepBlock.module.css';
 import { Details } from '@primer/react';
-import { Icon } from '#components/common/Icon';
+import { Icon } from '#component/Icon';
 import { StatusIndicator } from '../StatusIndicator';
 import type { StatusIndicatorStatus } from '../StatusIndicator';
 
@@ -72,10 +72,10 @@ const formatBody = (value: unknown): string => {
 export type StepBlockRootProps = StepBlockThinkingProps | StepBlockToolProps;
 
 /**
- * `@primer/react`의 `Details`(네이티브 `<details>`)를 직접 쓴다 — arka-ui `Collapsible`은
- * props가 닫혀 있어(`data-component`도, 그 외 `HTMLAttributes`도 포워딩하지 않는다) 그대로
- * 감싸면 이 컴포넌트가 지켜야 하는 계약(`data-component-exposed`·`props-extends-html-attributes`)을
- * 못 채운다 — 옛 `ToolBlock`이 바깥에 래퍼 `div`를 하나 더 씌워 우회하던 이유이기도 했다.
+ * `@primer/react`의 `Details`(네이티브 `<details>`)를 직접 쓴다. 한때 공유 `Collapsible`을
+ * 감쌌는데 그것이 props를 닫아 두어(`data-component`도 `HTMLAttributes`도 통과시키지 않았다)
+ * 이 컴포넌트의 계약을 못 채웠다 — 옛 `ToolBlock`이 바깥에 래퍼 `div`를 하나 더 씌워 우회하던
+ * 이유이기도 했다. `Collapsible`은 2026-09-14에 지웠다(아무도 쓰지 않았다).
  * `ThinkingBlock`이 이미 쓰던 방식(`useControlledState` + `Details`)을 그대로 가져와 두
  * 컴포넌트를 합치면서 그 우회 래퍼를 없앤다.
  */

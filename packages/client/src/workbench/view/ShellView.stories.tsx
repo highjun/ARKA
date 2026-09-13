@@ -2,7 +2,7 @@ import { CommandCenterRegistry, CommandCenterRegistryToken } from '#core/command
 import { createContainer, singleton } from '#core/di';
 import { ViewModelProvider } from '#core/viewmodel';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Text } from '#components/common';
+import { Text } from '#component/Text';
 import { SidebarContentRegistry } from '../model/SidebarContentRegistry';
 import { SidebarContentRegistryToken } from '../model/ISidebarContentRegistry';
 import { TabContentRegistry } from '../model/TabContentRegistry';

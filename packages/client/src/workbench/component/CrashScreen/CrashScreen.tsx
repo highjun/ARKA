@@ -1,5 +1,6 @@
 import { Button } from '@primer/react';
-import { Heading, Text } from '#components/common';
+import { Heading } from '#component/Heading';
+import { Text } from '#component/Text';
 import styles from './CrashScreen.module.css';
 
 /** `onReload`는 필수다 — 사용자가 빠져나갈 길이 없는 화면을 만들지 않는다. */

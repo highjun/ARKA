@@ -90,7 +90,7 @@ export interface CommandPaletteRootProps extends Omit<HTMLAttributes<HTMLDivElem
    * 실제 구현(`xe=t.forwardRef(...)`)은 `open`/`onOpenChange`만 구조분해해 Radix `Dialog.Root`로
    * 넘기고 `defaultOpen`은 나머지 rest props에 섞여 `[cmdk-root]` div로 흘러가 버린다 — 타입은
    * 지원한다고 하지만 런타임은 조용히 무시한다(직접 렌더해서 확인함). 그래서 여기서 직접
-   * `useState`로 하이브리드를 구현한다 — `Collapsible`/`ModeToggle`과 같은 패턴이다.
+   * `useState`로 하이브리드를 구현한다 — `ModeToggle`·`FileTree`와 같은 패턴이다.
    */
   readonly defaultOpen?: boolean;
   /** 열림 여부가 바뀔 때마다(제어 여부 무관) 호출된다. */

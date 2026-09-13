@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { expectNoA11yViolations } from '#utils/axe';
 import { implementsClassName, implementsDataComponent, implementsForwardRef, implementsNoA11yViolations } from '#utils/testing';
 import { Shell } from './Shell';
-import { ContextMenu } from '#components/common/ContextMenu';
+import { ContextMenu } from '#component/ContextMenu';
 
 const ACTIVITY_ITEMS = [{ id: 'a', iconId: 'files' as const, label: '탐색기', isActive: true }];
 

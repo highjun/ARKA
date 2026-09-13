@@ -3,8 +3,8 @@ import { forwardRef } from 'react';
 import { clsx } from 'clsx';
 import { assembleCompound } from '#utils/assembleCompound';
 import styles from './StatusIndicator.module.css';
-import { Icon } from '#components/common/Icon';
-import type { IconId } from '#components/common/Icon';
+import { Icon } from '#component/Icon';
+import type { IconId } from '#component/Icon';
 
 /** 서버의 `RunStatus` 중 화면이 구분해 보여주는 넷만 남긴 것이다. */
 export type StatusIndicatorStatus = 'running' | 'done' | 'waitingInput' | 'error';

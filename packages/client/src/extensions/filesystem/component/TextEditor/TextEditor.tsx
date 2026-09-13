@@ -5,8 +5,8 @@ import styles from './TextEditor.module.css';
 import { useCodeMirrorEditor } from './useCodeMirrorEditor';
 import type { RevealPosition } from './useCodeMirrorEditor';
 import { Spinner } from '@primer/react';
-import { Icon } from '#components/common/Icon';
-import { IconButton } from '#components/common/IconButton';
+import { Icon } from '#component/Icon';
+import { IconButton } from '#component/IconButton';
 
 /** 프레임(테두리·radius·배경) 유무 — 패널을 꽉 채워서 쓸 땐 `none`. `ScrollArea`와 같은 이름. */
 export type TextEditorChrome = 'bordered' | 'none';
