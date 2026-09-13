@@ -13,7 +13,9 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # **`main` push는 취소하지 않는다.** 런이 통째로 취소되면 `deploy`까지 죽어 그 커밋이 배포되지 않는다
+  # (2026-09-11 #20·#21 실측). PR은 새 push가 오면 앞 런이 무의미하므로 취소한다.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # 기본은 읽기만. 더 필요한 잡이 자기 자리에서 더한다.
 permissions:
