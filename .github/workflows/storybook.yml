@@ -12,9 +12,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
 
+# **취소하지 않고 줄을 세운다.** 모두 같은 `gh-pages`에 밀기 때문이다 — 취소하면 그 발행이 통째로
+# 빠지고(2026-09-13 실측: main 발행이 취소되어 사이트 루트가 비었다), 겹쳐 돌면 push가 부딪친다.
 concurrency:
-  group: storybook-${{ github.ref }}
-  cancel-in-progress: true
+  group: storybook-pages
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -60,8 +62,17 @@ jobs:
           touch .nojekyll
           if [ "$CLOSED" = "true" ]; then
             rm -rf "./$DIR"
+          elif [ "$DIR" = "." ]; then
+            # **`rm -rf ./.`은 셸이 거부한다**(2026-09-13 실측 — 그래서 루트가 조용히 안 올라갔다).
+            # 루트만 갈아 끼우고 PR 폴더와 `.nojekyll`은 남긴다.
+            find . -mindepth 1 -maxdepth 1 ! -name .git ! -name .nojekyll ! -name 'pr-*' -exec rm -rf {} +
+            cp -r "$SRC/." ./
           else
             rm -rf "./$DIR" && mkdir -p "./$DIR" && cp -r "$SRC/." "./$DIR/"
+          fi
+          # 올리는 길인데 `index.html`이 없으면 위에서 뭔가 조용히 실패한 것이다.
+          if [ "$CLOSED" != "true" ] && [ ! -f "./$DIR/index.html" ]; then
+            echo "::error::스토리북이 복사되지 않았습니다 — $DIR/index.html이 없습니다"; exit 1
           fi
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
