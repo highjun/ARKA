@@ -95,7 +95,7 @@ export const pickFile = (root: string, url: string, exists: (candidate: string) 
 /**
  * 옛 Service Worker 를 걷어내는 스크립트.
  *
- * 이 호스트명(`arka.sangjun.dev`)에는 예전에 PWA 였던 앱이 있었고, 그 앱을 내린 뒤에도 사용자
+ * 이 호스트명에는 예전에 PWA 였던 앱이 있었고, 그 앱을 내린 뒤에도 사용자
  * 기기의 Service Worker 는 살아남아 같은 오리진 요청을 가로채 **옛 앱 셸을 계속 돌려준다.**
  * 배포를 내리는 것으로는 회수되지 않는다 — 서버가 할 수 있는 유일한 수단이 이것이다.
  *
