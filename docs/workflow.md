@@ -50,7 +50,7 @@ printf '%s' "feat(client): 검색 패널을 연다" | pnpm --filter ops exec com
 
 ## CI가 하는 일
 
-**잡은 둘이다.** PR에는 `check` 하나가 돌고, `main`에 들어가면 그 뒤에 `deploy`가 붙는다.
+**워크플로는 둘이다.** `ci.yml`의 잡이 `check`와 `deploy`고, `storybook.yml`이 화면을 올린다.
 `check`는 룰셋의 **필수 검사 이름**이라 바꾸지 않는다.
 
 `check`가 순서대로 도는 것과, 로컬에서 같은 것을 부르는 법:
@@ -60,8 +60,12 @@ printf '%s' "feat(client): 검색 패널을 연다" | pnpm --filter ops exec com
 | lint → typecheck → test → build | `pnpm -r --if-present run lint` … |
 | PR 제목 형식(PR일 때만) | `printf '%s' "제목" \| pnpm --filter ops exec commitlint` |
 | 새 커밋에 시크릿이 있는지 | `docker run --rm -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.30.1 git /repo --gitleaks-ignore-path /repo/ops/.gitleaksignore --redact --no-banner` |
-| 컨테이너가 뜨는가 | `ARKA_UID=$(id -u) ARKA_GID=$(id -g) docker compose -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci up -d --build --wait` |
+| 이미지를 굽는다 | `node ops/deploy/build.ts arka:local` |
+| 그 이미지가 뜨는가 | `ARKA_UID=$(id -u) ARKA_GID=$(id -g) ARKA_IMAGE=arka:local docker compose -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci up -d --no-build --wait` |
 | Playwright 13개 | `pnpm --filter client run test:e2e` |
+
+**여기서 굽는 이미지가 그대로 배포된다.** `main`이면 `check`가 그것을 GHCR에 올리고 `deploy`는
+굽지 않고 당겨서 띄운다 — 검사한 산출물과 뜨는 산출물이 같아야 하기 때문이다.
 
 **CI에만 있는 검사를 만들지 않는다.** 빨간불은 로컬에서 같은 한 줄로 재현된다.
 **CI가 실패하면 같은 브랜치에서 고쳐 다시 푸시한다. CI 설정을 바꿔서 통과시키지 않는다.**
@@ -70,10 +74,21 @@ printf '%s' "feat(client): 검색 패널을 연다" | pnpm --filter ops exec com
 받으면 그 이벤트가 돌던 진짜 검사를 취소하고 그 자리를 대신해 관문이 조용히 빈다(2026-09-13 실측).
 제목을 고쳤으면 push하거나 PR을 닫았다 연다.
 
-## 미리보기
+## 화면을 어떻게 보나
 
-PR별 미리보기는 **없다.** 2026-09-13에 걷어냈다 — PR마다 이 기계에 터널·DNS·Access 앱을 만들고 지우는
-자체 도구가 배포 코드의 대부분이었고, 관례에 없는 것이었다. 화면 검토는 Storybook 호스팅으로 간다(별도 라운드).
+**PR마다 스토리북이 올라간다.** 봇이 링크를 코멘트로 달고 갱신한다. PR을 닫으면 그 폴더를 지운다.
+
+| | |
+|---|---|
+| `main` | `highjun.github.io/ARKASHIC/` |
+| PR | `highjun.github.io/ARKASHIC/pr-<번호>/` |
+
+**PR별 앱 미리보기는 없다.** 예전에는 사용자 기계에 띄웠는데 터널·DNS·Access를 PR마다 만들고 지우는
+자체 도구가 배포 코드의 대부분이었다(2026-09-13 걷어냈다). 지금은 이렇게 나눠 본다 —
+화면은 스토리북이, 부팅은 `check`의 컨테이너 단계가, 동작은 e2e 13개가 본다.
+
+**앱 전체를 만져 봐야 하면 Codespaces로 그 브랜치를 띄운다**(→ [`.devcontainer/README.md`](../.devcontainer/README.md)).
+포트가 기본 비공개라 GitHub에 로그인한 본인만 닿는다 — 인증이 없는 앱을 공개 URL에 두지 않는다.
 
 ## 배포
 
