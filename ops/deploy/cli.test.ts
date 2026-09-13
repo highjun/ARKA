@@ -34,10 +34,6 @@ describe("down 플래그", () => {
 });
 
 describe("인자 가르기 — 위치로 가르면 대상 없는 명령이 깨진다", () => {
-  it("대상이 없는 명령에서 --dry-run이 대상으로 먹히지 않는다", () => {
-    expect(parseArgs(["sweep", "--dry-run"])).toEqual({ command: "sweep", target: undefined, flags: ["--dry-run"] });
-  });
-
   it("대상이 있으면 그대로 읽는다", () => {
     expect(parseArgs(["up", "ops/deploy/ade.deploy.ts", "--dry-run"]))
       .toEqual({ command: "up", target: "ops/deploy/ade.deploy.ts", flags: ["--dry-run"] });

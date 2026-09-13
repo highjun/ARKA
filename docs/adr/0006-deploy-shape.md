@@ -11,7 +11,7 @@ ADE는 사용자 PC 한 대에서 돌고 바깥으로는 cloudflared Tunnel로�
 - **Access가 문이다.** `accessEmails`가 비면 그 호스트는 무인증으로 열린다 — `up`이 경고하고, 배포 잡은 `anonSmoke`로 익명 요청이 막히는지 매번 확인한다.
 - **DNS는 생성이 CLI(`cloudflared tunnel route dns`), 삭제만 REST다.** 그래서 `proxied`도 `<uuid>.cfargotunnel.com`도 우리가 알 필요가 없다.
 - **`up`은 롤백하지 않는다.** 대신 되돌리기 어려운 단계에 닿기 전에 선다 — 자격증명 덮어쓰기 거부, DNS 자동 덮어쓰기 거부, 마운트 소스 확인, 유령 마운트 사전 검사.
-- **미리보기는 실배포와 다른 파일이 정한다.** 개인 디렉터리를 마운트하지 않는 것을 파일 분리로 강제한다. 미리보기만 Access 앱까지 지운다 — 그 호스트 이름은 다시 쓰이지 않는다.
+- ~~미리보기는 실배포와 다른 파일이 정한다.~~ 2026-09-13 미리보기를 걷어냈다 — 관례에 없는 자체 인프라였다.
 - **이미지가 커밋 SHA를 굽는다.** 더러운 트리면 `-dirty`가 붙는다 — 막지는 않되 남긴다.
 
 ## 기각:
@@ -29,8 +29,6 @@ ADE는 사용자 PC 한 대에서 돌고 바깥으로는 cloudflared Tunnel로�
 - **렌더러** `ops/deploy/render.ts` — `ports:`를 내지 않고, `name:`을 명시하고, 두 컨테이너에 `user:`를 붙인다. 셋 다 테스트가 지킨다.
 - **`up`** `ops/deploy/up.ts` — DNS 다음에 곧바로 Access, 파괴적 단계 전 가드 넷.
 - **배포 잡** `.github/workflows/ci.yml` — `needs`로 검사를 강제하고 `anonSmoke`로 끝낸다.
-- **미리보기** `.github/workflows/preview.yml` — 포크 가드, 상한, 닫히면 `--purge --remove-access`.
-- **청소** `ops/deploy/sweep.ts` — `pr-<숫자>`가 아닌 이름을 받으면 던진다.
 
 ## 상태:
 승인됨 (2026-09-11)
