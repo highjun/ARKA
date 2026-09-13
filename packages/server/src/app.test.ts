@@ -56,11 +56,12 @@ describe("createApp", () => {
     expect(body.gitSha).toBe("abc1234-dirty");
   });
 
-  it("/api/version은 시작 시각·프로토콜 버전·워크스페이스 이름을 헤더 없이도 준다", async () => {
+  it("/api/version은 시작 시각·프로토콜 버전·헤더 이름·워크스페이스 이름을 헤더 없이도 준다", async () => {
     const response = await buildApp().request("/api/version");
     expect(VersionResponse.parse(await response.json())).toEqual({
       builtAt: "2026-09-09T00:00:00.000Z",
       protocolVersion: PROTOCOL_VERSION,
+      protocolHeader: PROTOCOL_HEADER,
       workspaceName: path.basename(workspaceRoot),
     });
   });

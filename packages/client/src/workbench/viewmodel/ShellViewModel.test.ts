@@ -1,3 +1,4 @@
+import { PROTOCOL_HEADER, PROTOCOL_VERSION } from '#contracts';
 import { createRegistry } from '#core';
 import type { ITabDirtyState } from '../model/ITabDirtyState';
 import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
@@ -805,7 +806,7 @@ describe('IShellViewModel — 낡은 클라이언트', () => {
   const settled = () => new Promise((resolve) => setTimeout(resolve, 0));
 
   it('서버 프로토콜 버전이 다르면 낡았다고 표시한다', async () => {
-    const { viewModel } = make({ load: () => Promise.resolve({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 999, workspaceName: 'ws' }) });
+    const { viewModel } = make({ load: () => Promise.resolve({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 999, protocolHeader: PROTOCOL_HEADER, workspaceName: 'ws' }) });
     viewModel.onMount?.();
     await settled();
     expect(viewModel.isClientOutdated).toBe(true);
@@ -813,29 +814,36 @@ describe('IShellViewModel — 낡은 클라이언트', () => {
     expect(viewModel.workspaceName).toBe('ws');
   });
 
+  it('헤더 이름이 다르면 버전이 같아도 낡았다 — 개명하면 서버는 우리 요청을 헤더 없음으로 읽는다', async () => {
+    const { viewModel } = make({ load: () => Promise.resolve({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: PROTOCOL_VERSION, protocolHeader: 'x-somethingelse-protocol', workspaceName: 'ws' }) });
+    viewModel.onMount?.();
+    await settled();
+    expect(viewModel.isClientOutdated).toBe(true);
+  });
+
   it('같으면 낡지 않았다', async () => {
-    const { viewModel } = make({ load: () => Promise.resolve({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1, workspaceName: 'ws' }) });
+    const { viewModel } = make({ load: () => Promise.resolve({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1, protocolHeader: PROTOCOL_HEADER, workspaceName: 'ws' }) });
     viewModel.onMount?.();
     await settled();
     expect(viewModel.isClientOutdated).toBe(false);
   });
 
   it('커밋 SHA가 있으면 빌드 표시에 앞 7자를 잇는다 — 무엇이 떠 있는지 눈으로 본다', async () => {
-    const { viewModel } = make({ load: () => Promise.resolve({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1, workspaceName: 'ws', gitSha: '0123456789ab' }) });
+    const { viewModel } = make({ load: () => Promise.resolve({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1, protocolHeader: PROTOCOL_HEADER, workspaceName: 'ws', gitSha: '0123456789ab' }) });
     viewModel.onMount?.();
     await settled();
     expect(viewModel.buildId).toMatch(/ · 0123456$/u);
   });
 
   it('더러운 트리 표시는 지우지 않는다 — 그게 신호다', async () => {
-    const { viewModel } = make({ load: () => Promise.resolve({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1, workspaceName: 'ws', gitSha: '0123456789ab-dirty' }) });
+    const { viewModel } = make({ load: () => Promise.resolve({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1, protocolHeader: PROTOCOL_HEADER, workspaceName: 'ws', gitSha: '0123456789ab-dirty' }) });
     viewModel.onMount?.();
     await settled();
     expect(viewModel.buildId).toMatch(/ · 0123456-dirty$/u);
   });
 
   it('커밋 SHA가 없으면 시각만 남는다 — 소스에서 바로 띄운 서버다', async () => {
-    const { viewModel } = make({ load: () => Promise.resolve({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1, workspaceName: 'ws' }) });
+    const { viewModel } = make({ load: () => Promise.resolve({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1, protocolHeader: PROTOCOL_HEADER, workspaceName: 'ws' }) });
     viewModel.onMount?.();
     await settled();
     expect(viewModel.buildId).toMatch(/^v\d{4}\.\d{2}\.\d{2} \d{2}:\d{2}$/u);

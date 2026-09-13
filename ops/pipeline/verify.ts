@@ -9,7 +9,10 @@ import { step } from "./run.ts";
  * 몇 분 걸리니 라운드마다 돌리지 않는다.
  */
 step("pnpm", "--filter", "ops", "run", "check");
-step("pnpm", "-r", "run", "build");
+// **`--if-present`가 없으면 여기서 죽는다** — `ops`와 `contracts`에 `build`가 없어
+// pnpm이 `ERR_PNPM_RECURSIVE_RUN_NO_SCRIPT`를 낸다. CI는 고쳤는데 여기는 안 고쳐
+// 아래 세 줄에 **한 번도 닿지 못했다**(2026-09-13 발견).
+step("pnpm", "-r", "--if-present", "run", "build");
 step("pnpm", "--filter", "client", "run", "test:e2e");
 step("pnpm", "--filter", "client", "run", "test:vrt");
 step("pnpm", "--filter", "ops", "run", "test:smoke");

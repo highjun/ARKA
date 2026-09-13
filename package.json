@@ -11,7 +11,7 @@
     "typecheck": "pnpm -r run typecheck",
     "lint": "pnpm -r run lint",
     "test": "pnpm -r run test",
-    "build": "pnpm -r run build",
+    "build": "pnpm -r --if-present run build",
     "task": "pnpm --filter ops run task",
     "prepare": "simple-git-hooks"
   },

@@ -17,6 +17,12 @@ export const VersionResponse = z.object({
   builtAt: z.string(),
   /** 서버가 지금 말하는 프로토콜 버전. 클라이언트가 자기 `PROTOCOL_VERSION`과 비교해 낡았는지 안다. */
   protocolVersion: z.number().int().positive(),
+  /**
+   * 서버가 **읽는** 헤더 이름. 버전만으로는 모자라다 — 이름이 바뀌면 구 클라이언트의 요청은
+   * 서버 눈에 "헤더 없음"이라 426인데 양쪽 버전은 여전히 같아, 낡았다는 것을 스스로 알 수 없다
+   * (2026-09-13 개명에서 실제로 겪었다).
+   */
+  protocolHeader: z.string().min(1),
   /** 워크스페이스 루트 디렉터리 이름. 경로 전체는 주지 않는다 — 서버가 어디에 뿌리내렸는지가 화면에 새지 않게. */
   workspaceName: z.string(),
   /**

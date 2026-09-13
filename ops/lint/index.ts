@@ -75,8 +75,8 @@ const base: Linter.Config[] = [
 
   {
     // **각 패키지의 `tsconfig.json`을 검사한다**(→ ADR 0001). 이 블록이 없으면 `eslint .`은
-    // `.json`을 아예 집지 않는다. 주석이 있으므로 언어는 `json/jsonc`다. 금지 키와 메시지는
-    // `tsconfigRules.ts`가 든다 — 루트를 보는 `rootConfig.test.ts`와 같은 것을 읽어야 한다.
+    // `.json`을 아예 집지 않는다. 주석이 있으므로 언어는 `json/jsonc`다. 같은 금지가 루트
+    // `eslint.config.ts`에도 있다 — 루트 파일은 이 설정을 거치지 않아서다.
     files: ["**/tsconfig*.json"],
     plugins: { json },
     language: "json/jsonc",
