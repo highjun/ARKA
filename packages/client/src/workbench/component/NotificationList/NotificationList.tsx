@@ -1,4 +1,4 @@
-import { IconButton } from '@primer/react';
+import { IconButton } from '#component/IconButton';
 import { Icon } from '#component/Icon';
 import { Text } from '#component/Text';
 import type { IconId } from '#component/Icon';

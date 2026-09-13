@@ -1,6 +1,6 @@
 import { useViewModel } from '#core/viewmodel';
 import { Banner } from '@primer/react';
-import { TextEditor } from '../component';
+import { TextEditor } from '../component/TextEditor';
 import { FileContentViewModelToken } from '../viewmodel/IFileContentViewModel';
 import styles from './FileContentView.module.css';
 

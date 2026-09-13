@@ -1,7 +1,7 @@
 import { clsx } from 'clsx';
 import type { HTMLAttributes, ReactNode } from 'react';
 import styles from './ChatRoom.module.css';
-import { IconButton } from '@primer/react';
+import { IconButton } from '#component/IconButton';
 import { Icon } from '#component/Icon';
 import { SidebarLayout } from '#component/SidebarLayout';
 import { InputComposer } from '../InputComposer';

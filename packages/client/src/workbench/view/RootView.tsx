@@ -1,6 +1,7 @@
 import { useViewModel } from '#core/viewmodel';
 import { ErrorLogToken } from '../model/IErrorLog';
-import { CrashScreen, ErrorBoundary } from '../component';
+import { CrashScreen } from '../component/CrashScreen';
+import { ErrorBoundary } from '../component/ErrorBoundary';
 import { ShellView } from './ShellView';
 
 /**
