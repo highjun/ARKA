@@ -7,17 +7,17 @@ import { buildCommand, describeCommit, pruneCommands } from "./build.ts";
  */
 describe("빌드 명령", () => {
   it("BuildKit을 강제한다 — 레거시 빌더가 중간 단계를 이미지로 커밋한 것이 656개의 원인이다", () => {
-    expect(buildCommand("ade:latest", "abc").env?.["DOCKER_BUILDKIT"]).toBe("1");
+    expect(buildCommand("arka:latest", "abc").env?.["DOCKER_BUILDKIT"]).toBe("1");
   });
 
   it("저장소의 Dockerfile과 태그를 쓴다", () => {
-    expect(buildCommand("ade:pr-12", "abc1234").args).toEqual([
-      "build", "-f", "ops/deploy/Dockerfile", "--build-arg", "ADE_GIT_SHA=abc1234", "-t", "ade:pr-12", ".",
+    expect(buildCommand("arka:pr-12", "abc1234").args).toEqual([
+      "build", "-f", "ops/deploy/Dockerfile", "--build-arg", "ARKA_GIT_SHA=abc1234", "-t", "arka:pr-12", ".",
     ]);
   });
 
   it("커밋 SHA를 이미지에 굽는다 — 이것이 없으면 무엇이 떠 있는지 물을 길이 없다", () => {
-    expect(buildCommand("ade:latest", "deadbeef").args).toContain("ADE_GIT_SHA=deadbeef");
+    expect(buildCommand("arka:latest", "deadbeef").args).toContain("ARKA_GIT_SHA=deadbeef");
   });
 });
 

@@ -5,9 +5,9 @@
  * 워크스페이스 전체가 공개된 것**이라 실패로 본다.
  *
  * 호스트 이름은 인자로 받는다 — **리포에 적지 않는다.** 실배포의 값은 이 기계의
- * `~/ARKA/secure/env/ade.env`의 `ADE_ORIGIN`에 있다.
+ * `~/ARKA/secure/env/arka.env`의 `ARKA_ORIGIN`에 있다.
  *
- *     pnpm --filter ops run test:smoke:anon "$ADE_ORIGIN"
+ *     pnpm --filter ops run test:smoke:anon "$ARKA_ORIGIN"
  */
 const origin = process.argv[2];
 if (origin === undefined || origin === "") throw new Error("오리진 URL이 필요하다 — 예: https://<호스트>");

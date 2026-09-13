@@ -47,14 +47,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       # **워크스페이스가 실재해야 부팅한다** — 없으면 config가 던지고 프로세스가 죽는다.
       # docker가 대신 만들게 두면 root 소유가 되어 컨테이너가 쓰지 못한다.
-      - run: mkdir -p /tmp/ade-ci-workspace
+      - run: mkdir -p /tmp/arka-ci-workspace
       # `--wait`는 compose의 HEALTHCHECK(`/api/health`)가 통과할 때까지 기다린다.
       # "빌드는 되는데 뜨지 않는다"를 병합 전에 잡는 것이 이 잡의 전부다.
-      # **프로젝트 이름은 `.env.ci`의 `ADE_NAME`이 정한다**(`ci`) — `-p`로 또 적으면 두 곳이 갈린다.
+      # **프로젝트 이름은 `.env.ci`의 `ARKA_NAME`이 정한다**(`ci`) — `-p`로 또 적으면 두 곳이 갈린다.
       # 터널은 `--profile tunnel` 없이는 뜨지 않는다. CI에는 토큰이 없고 필요도 없다.
       - name: 컨테이너를 띄운다
         run: |
-          ADE_UID=$(id -u) ADE_GID=$(id -g) docker compose \
+          ARKA_UID=$(id -u) ARKA_GID=$(id -g) docker compose \
             -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci \
             up -d --build --wait
       - name: 실패하면 로그를 남긴다
@@ -112,17 +112,23 @@ jobs:
 
       # 되돌릴 자리를 먼저 만든다. 지금 떠 있는 이미지에 이름을 붙여 둔다.
       - name: 되돌릴 이미지를 표시한다
-        run: docker image tag ade:latest ade:previous 2>/dev/null || echo "첫 배포 — 되돌릴 것이 없습니다"
+        run: docker image tag arka:latest arka:previous 2>/dev/null || echo "첫 배포 — 되돌릴 것이 없습니다"
 
       - name: 이미지를 만든다
-        run: node ops/deploy/build.ts ade:latest
+        run: node ops/deploy/build.ts arka:latest
 
       # 값은 **이 기계의 파일**에 있다(0600) — GitHub Secrets에 두지 않는다. `set -a`로 셸에 풀어
-      # compose의 치환(`${ADE_*}`)과 `environment:` 통과에 둘 다 닿게 한다.
+      # compose의 치환(`${ARKA_*}`)과 `environment:` 통과에 둘 다 닿게 한다.
       # 터널·인그레스·DNS는 Cloudflare 대시보드가 들고, 여기 필요한 것은 커넥터 토큰뿐이다.
+      # **개명 전 컨테이너를 먼저 걷는다.** 이름이 `ade-*`에서 `arka-*`로 바뀌어 compose가
+      # 옛 것을 자기 것으로 보지 못한다. 남겨 두면 같은 터널에 둘이 붙고 같은 SQLite를 둘이 쓴다.
+      # 첫 배포가 성공하면 이 단계를 지운다.
+      - name: 개명 전 컨테이너를 걷는다
+        run: docker rm -f ade-app ade-tunnel 2>/dev/null || true
+
       - name: 올린다
         run: |
-          set -a; . "$HOME/ARKA/secure/env/ade.env"; set +a
+          set -a; . "$HOME/ARKA/secure/env/arka.env"; set +a
           docker compose -f ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
 
       # **이 검사가 실질적인 자물쇠다.** ARKA에는 인증이 없고 워크스페이스가 사용자의 개인
@@ -131,14 +137,14 @@ jobs:
       # 호스트 이름이 리포에 있으면 그것만으로 문을 두드릴 자리를 알려 주는 셈이다.
       - name: 익명 접근이 막히는지 본다
         run: |
-          set -a; . "$HOME/ARKA/secure/env/ade.env"; set +a
-          node ops/deploy/anonSmoke.ts "$ADE_ORIGIN"
+          set -a; . "$HOME/ARKA/secure/env/arka.env"; set +a
+          node ops/deploy/anonSmoke.ts "$ARKA_ORIGIN"
 
       - name: 실패하면 로그와 되돌리는 법을 남긴다
         if: failure()
         run: |
-          docker logs --tail 100 ade-app || true
-          echo "::error::되돌리려면 docs/operations.md의 '되돌리기' — 이미지를 ade:previous로 되돌리고 같은 compose 명령을 다시 돌립니다"
+          docker logs --tail 100 arka-app || true
+          echo "::error::되돌리려면 docs/operations.md의 '되돌리기' — 이미지를 arka:previous로 되돌리고 같은 compose 명령을 다시 돌립니다"
 
   secrets:
     name: secrets

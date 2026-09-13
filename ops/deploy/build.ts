@@ -10,14 +10,14 @@ import path from "node:path";
  */
 
 /** 남은 디스크가 이보다 적으면 빌드하지 않는다. 배포 중에 디스크가 차는 것이 느린 빌드보다 나쁘다. */
-const MIN_FREE_GB = Number(process.env["ADE_MIN_FREE_GB"] ?? 20);
+const MIN_FREE_GB = Number(process.env["ARKA_MIN_FREE_GB"] ?? 20);
 
 /**
  * 빌드 캐시로 남겨 둘 양. 이걸 안 주면 prune이 캐시를 통째로 날려 다음 빌드가 처음부터 돈다.
  *
  * 플래그가 `--keep-storage`에서 `--reserved-space`로 바뀌었다(docker 29에서 경고로 확인).
  */
-const CACHE_BUDGET = process.env["ADE_CACHE_BUDGET"] ?? "20GB";
+const CACHE_BUDGET = process.env["ARKA_CACHE_BUDGET"] ?? "20GB";
 
 const REPO_ROOT = path.resolve(import.meta.dirname, "../..");
 
@@ -34,7 +34,7 @@ export interface Command {
  */
 export const buildCommand = (tag: string, gitSha: string): Command => ({
   file: "docker",
-  args: ["build", "-f", "ops/deploy/Dockerfile", "--build-arg", `ADE_GIT_SHA=${gitSha}`, "-t", tag, "."],
+  args: ["build", "-f", "ops/deploy/Dockerfile", "--build-arg", `ARKA_GIT_SHA=${gitSha}`, "-t", tag, "."],
   env: { DOCKER_BUILDKIT: "1" },
 });
 
@@ -78,7 +78,7 @@ const run = ({ file, args, env }: Command): void => {
 };
 
 if (process.argv[1] === import.meta.filename) {
-  const tag = process.argv[2] ?? "ade:latest";
+  const tag = process.argv[2] ?? "arka:latest";
   const before = freeGb(REPO_ROOT);
   console.error(`[빌드] ${tag} — 시작 시 여유 ${before.toFixed(1)}GB`);
 

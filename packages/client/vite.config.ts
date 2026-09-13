@@ -10,7 +10,7 @@ const clientRoot = path.resolve(import.meta.dirname);
  * 빌드된 클라이언트가 놓이는 자리(저장소 루트 기준).
  *
  * **여기가 이 값의 유일한 출처다.** 서버가 이것을 정적으로 서빙하므로 E2E가 같은 값을
- * `ADE_CLIENT_ROOT`로 넘긴다(`test/e2e/playwright.config.ts`). 이미지 안에서는 `/app/dist/client`라
+ * `ARKA_CLIENT_ROOT`로 넘긴다(`test/e2e/playwright.config.ts`). 이미지 안에서는 `/app/dist/client`라
  * 다르다 — `ops/deploy/Dockerfile`이 `.output/dist`를 `dist`로 펴기 때문이다.
  */
 export const CLIENT_DIST = ".output/dist/client";

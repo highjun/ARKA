@@ -31,12 +31,12 @@ export default defineConfig({
     command: "pnpm --filter client build && pnpm --filter server exec tsx src/index.ts",
     cwd: repoRoot,
     env: {
-      ADE_WORKSPACE: path.join(import.meta.dirname, "fixture"),
-      ADE_PORT: String(PORT),
-      ADE_CLIENT_ROOT: path.join(repoRoot, CLIENT_DIST),
-      // **주지 않으면 `~/.ade/data.db`에 쓴다**(core/config.ts). 그러면 실행마다 세션이
+      ARKA_WORKSPACE: path.join(import.meta.dirname, "fixture"),
+      ARKA_PORT: String(PORT),
+      ARKA_CLIENT_ROOT: path.join(repoRoot, CLIENT_DIST),
+      // **주지 않으면 `~/.arka/data.db`에 쓴다**(core/config.ts). 그러면 실행마다 세션이
       // 쌓여 앞 실행이 다음 실행에 보이고, 개발자의 실제 데이터와 같은 자리를 쓴다.
-      ADE_DATA_DIR: path.join(repoRoot, ".output/e2e-data"),
+      ARKA_DATA_DIR: path.join(repoRoot, ".output/e2e-data"),
     },
     url: `http://127.0.0.1:${PORT}/`,
     reuseExistingServer: false,

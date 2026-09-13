@@ -20,11 +20,11 @@ FROM node:24-alpine
 # 소스 제어 기능이 git CLI를 워크스페이스에서 돌린다(features/git).
 RUN apk add --no-cache git
 ENV NODE_ENV=production \
-    ADE_HOST=0.0.0.0 \
-    ADE_PORT=3000 \
-    ADE_WORKSPACE=/workspace \
-    ADE_DATA_DIR=/data \
-    ADE_CLIENT_ROOT=/app/dist/client
+    ARKA_HOST=0.0.0.0 \
+    ARKA_PORT=3000 \
+    ARKA_WORKSPACE=/workspace \
+    ARKA_DATA_DIR=/data \
+    ARKA_CLIENT_ROOT=/app/dist/client
 # 위 경로는 저장소의 `ops/output.json`과 다르다 — 아래 COPY가 `.output/dist`를 `dist`로 펴기 때문이다.
 WORKDIR /app
 # 저장소에서는 생성물을 `.output/` 아래로 숨기지만, 이미지 안에서는 숨길 이유가 없다.
@@ -34,8 +34,8 @@ COPY --from=build /app/.output/dist ./dist
 RUN mkdir -p /data && chmod 777 /data
 # **맨 끝에 둔다.** 커밋마다 값이 바뀌므로, 위에 두면 그 아래 레이어가 매번 다시 만들어진다.
 # `ARG`는 스테이지마다 다시 선언해야 한다 — 빌드 단계의 것이 여기로 넘어오지 않는다.
-ARG ADE_GIT_SHA=""
-ENV ADE_GIT_SHA=$ADE_GIT_SHA
+ARG ARKA_GIT_SHA=""
+ENV ARKA_GIT_SHA=$ARKA_GIT_SHA
 VOLUME ["/workspace", "/data"]
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \

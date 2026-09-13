@@ -87,7 +87,7 @@ export const Running: Story = story({
 });
 
 export const Error: Story = story({
-  items: [...ITEMS.slice(0, 1), { kind: 'error', id: '9', message: 'ADE_ANTHROPIC_API_KEY가 없습니다.', at: AT + 1000 }],
+  items: [...ITEMS.slice(0, 1), { kind: 'error', id: '9', message: 'ARKA_ANTHROPIC_API_KEY가 없습니다.', at: AT + 1000 }],
   status: 'error',
   failure: '요청을 보내지 못했다 — 502 Bad Gateway',
 });

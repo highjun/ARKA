@@ -9,7 +9,7 @@ import { type AgentConfig, AgentEnv } from "../features/agent/config";
  * filesystem 전용이 아니라 git·run도 알아야 하는 앱 수준 값이다.
  *
  * 환경변수 하나하나를 zod로 검증한다. 잘못된 값으로 조용히 뜨는 것보다 부팅에서
- * 죽는 편이 낫다 — `ADE_PORT=abc`가 `NaN` 포트로 이어지면 원인을 한참 뒤에 찾는다.
+ * 죽는 편이 낫다 — `ARKA_PORT=abc`가 `NaN` 포트로 이어지면 원인을 한참 뒤에 찾는다.
  */
 
 /** 환경변수가 잘못됐다. `message`에 어느 변수가 왜 틀렸는지 담는다. */
@@ -23,21 +23,21 @@ export class ConfigError extends Error {
 
 const CoreEnv = z.object({
   /** 워크스페이스 루트. 없으면 현재 작업 디렉터리. */
-  ADE_WORKSPACE: z.string().min(1).optional(),
+  ARKA_WORKSPACE: z.string().min(1).optional(),
   /** 1~65535. 없으면 3000. */
-  ADE_PORT: z.coerce.number().int().min(1).max(65535).default(3000),
+  ARKA_PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   /**
    * 바인드할 주소. 기본은 루프백이다 — 같은 호스트의 다른 프로세스가 이 서버를 보는 것만으로
    * 워크스페이스 전체에 읽기·쓰기가 되므로(→ ADR 0014), 바깥에 열려면 명시해야 한다.
    * 컨테이너에서는 `0.0.0.0`으로 준다.
    */
-  ADE_HOST: z.string().min(1).default("127.0.0.1"),
+  ARKA_HOST: z.string().min(1).default("127.0.0.1"),
   /** 빌드된 클라이언트가 있는 디렉터리. 없으면 정적 서빙을 켜지 않는다. */
-  ADE_CLIENT_ROOT: z.string().min(1).optional(),
-  /** 데이터 디렉터리(SQLite 등). 없으면 `~/.ade`. 없는 디렉터리는 만든다. */
-  ADE_DATA_DIR: z.string().min(1).optional(),
+  ARKA_CLIENT_ROOT: z.string().min(1).optional(),
+  /** 데이터 디렉터리(SQLite 등). 없으면 `~/.arka`. 없는 디렉터리는 만든다. */
+  ARKA_DATA_DIR: z.string().min(1).optional(),
   /** 이 이미지를 만든 커밋. 이미지가 구워 넣는다 — 소스에서 바로 띄우면 없다. */
-  ADE_GIT_SHA: z.string().min(1).optional(),
+  ARKA_GIT_SHA: z.string().min(1).optional(),
 });
 
 /** 검증을 통과한 뒤의 설정. 경로는 전부 절대경로로 풀려 있다. */
@@ -81,7 +81,7 @@ const resolveDirectory = async (name: string, value: string): Promise<string> =>
  *
  * docker의 `ENV X=$ARG`는 인자를 안 주면 빈 문자열을 넣고, compose의 `X: "${X:-}"`도 그렇다.
  * 그것을 값으로 보면 `.min(1)`이 "너무 짧음"으로 잡아 **부팅이 죽고 재시작 루프에 빠진다** —
- * `ADE_ANTHROPIC_API_KEY`와 `ADE_GIT_SHA`에서 두 번 당했다. 여기서 한 번에 걷는다.
+ * `ARKA_ANTHROPIC_API_KEY`와 `ARKA_GIT_SHA`에서 두 번 당했다. 여기서 한 번에 걷는다.
  */
 const withoutEmpty = (env: Readonly<Record<string, string | undefined>>): Record<string, string | undefined> =>
   Object.fromEntries(Object.entries(env).filter(([, value]) => value !== ""));
@@ -104,24 +104,24 @@ const parseEnv = <T>(schema: z.ZodType<T>, env: Readonly<Record<string, string |
  */
 export const loadConfig = async (env: Readonly<Record<string, string | undefined>> = process.env): Promise<ServerConfig> => {
   const present = withoutEmpty(env);
-  const { ADE_WORKSPACE, ADE_PORT, ADE_HOST, ADE_CLIENT_ROOT, ADE_DATA_DIR, ADE_GIT_SHA } = parseEnv(CoreEnv, present);
+  const { ARKA_WORKSPACE, ARKA_PORT, ARKA_HOST, ARKA_CLIENT_ROOT, ARKA_DATA_DIR, ARKA_GIT_SHA } = parseEnv(CoreEnv, present);
   const agent = parseEnv(AgentEnv, present);
 
   // 데이터 디렉터리는 워크스페이스와 달리 우리가 소유한다 — 없으면 만든다.
-  const dataDir = path.resolve(ADE_DATA_DIR ?? path.join(os.homedir(), ".ade"));
+  const dataDir = path.resolve(ARKA_DATA_DIR ?? path.join(os.homedir(), ".arka"));
   try {
     await mkdir(dataDir, { recursive: true });
   } catch (error) {
-    throw new ConfigError(`ADE_DATA_DIR: cannot create ${dataDir}: ${error instanceof Error ? error.message : String(error)}`);
+    throw new ConfigError(`ARKA_DATA_DIR: cannot create ${dataDir}: ${error instanceof Error ? error.message : String(error)}`);
   }
 
   return {
-    workspaceRoot: await resolveDirectory("ADE_WORKSPACE", ADE_WORKSPACE ?? process.cwd()),
-    port: ADE_PORT,
-    host: ADE_HOST,
-    clientRoot: ADE_CLIENT_ROOT === undefined ? undefined : await resolveDirectory("ADE_CLIENT_ROOT", ADE_CLIENT_ROOT),
-    dataDir: await resolveDirectory("ADE_DATA_DIR", dataDir),
+    workspaceRoot: await resolveDirectory("ARKA_WORKSPACE", ARKA_WORKSPACE ?? process.cwd()),
+    port: ARKA_PORT,
+    host: ARKA_HOST,
+    clientRoot: ARKA_CLIENT_ROOT === undefined ? undefined : await resolveDirectory("ARKA_CLIENT_ROOT", ARKA_CLIENT_ROOT),
+    dataDir: await resolveDirectory("ARKA_DATA_DIR", dataDir),
     agent,
-    gitSha: ADE_GIT_SHA,
+    gitSha: ARKA_GIT_SHA,
   };
 };

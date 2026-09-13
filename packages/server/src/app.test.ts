@@ -29,7 +29,7 @@ const buildApp = () =>
   }).app;
 
 beforeAll(async () => {
-  workspaceRoot = realpathSync(await mkdtemp(path.join(os.tmpdir(), "ade-app-")));
+  workspaceRoot = realpathSync(await mkdtemp(path.join(os.tmpdir(), "arka-app-")));
   await writeFile(path.join(workspaceRoot, "a.txt"), "hello");
 });
 

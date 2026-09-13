@@ -11,21 +11,21 @@ GitHub ──▶ self-hosted 러너 ──▶ docker compose ──▶ cloudflar
 
 | | |
 |---|---|
-| 실배포 | compose 프로젝트 `ade`(`ade-app` + `ade-tunnel`). 호스트 이름은 `ADE_ORIGIN`에 있다 |
+| 실배포 | compose 프로젝트 `arka`(`arka-app` + `arka-tunnel`). 호스트 이름은 `ARKA_ORIGIN`에 있다 |
 | 정본 | `ops/deploy/compose.yml` **한 장.** 로컬·CI·실배포가 같은 파일로 뜬다 |
-| 러너 | `~/actions-runner`, 사용자 유닛 `ade-runner.service`, 라벨 `self-hosted,linux,arka` |
+| 러너 | `~/actions-runner`, 사용자 유닛 `arka-runner.service`, 라벨 `self-hosted,linux,arka` |
 | 터널 | 로컬 관리형. 설정·자격증명은 `~/ARKA/secure/cloudflared/`의 파일 둘, 인그레스는 그 호스트 → `http://app:3000` |
-| 값·비밀 | `~/ARKA/secure/env/ade.env`(0600) — `ADE_ORIGIN`·`ADE_TUNNEL_*`과 나머지 `ADE_*` |
+| 값·비밀 | `~/ARKA/secure/env/arka.env`(0600) — `ARKA_ORIGIN`·`ARKA_TUNNEL_*`과 나머지 `ARKA_*` |
 
 **sudo가 한 번도 필요 없다.** 전부 사용자 systemd 유닛이고(`Linger=yes`), docker는 그룹 권한으로 쓴다.
 
-**저장소에 생성물이 없다.** 예전에는 `~/.local/state/ade/`에 만들어진 compose·manifest가 실배포의
+**저장소에 생성물이 없다.** 예전에는 상태 디렉터리에 만들어진 compose·manifest가 실배포의
 정본이었고 리포의 `compose.yml`은 CI만 봤다 — 검사하는 것과 뜨는 것이 다른 파일이었다(2026-09-13 정리).
 
 ## 손으로 부르는 명령
 
 ```sh
-set -a; . ~/ARKA/secure/env/ade.env; set +a        # 값을 셸에 푼다
+set -a; . ~/ARKA/secure/env/arka.env; set +a        # 값을 셸에 푼다
 C="docker compose -f ~/ARKASHIC/ops/deploy/compose.yml"
 
 $C ps                          # 무엇이 떠 있나
@@ -48,16 +48,16 @@ docker compose -f ops/deploy/compose.yml -f ops/deploy/compose.local.yml up -d -
 대응하지 않는다. 배포 잡은 이미지를 굽고(`build.ts`), compose로 올리고, 익명 접근이 막히는지 본다.
 
 ```sh
-curl -s "$ADE_ORIGIN/api/version"   # Access 뒤라 로그인한 브라우저로 본다
+curl -s "$ARKA_ORIGIN/api/version"   # Access 뒤라 로그인한 브라우저로 본다
 ```
 
 ### 되돌리기
 
-배포 잡이 직전 이미지를 `ade:previous`로 표시해 둔다.
+배포 잡이 직전 이미지를 `arka:previous`로 표시해 둔다.
 
 ```sh
-docker image tag ade:previous ade:latest
-set -a; . ~/ARKA/secure/env/ade.env; set +a
+docker image tag arka:previous arka:latest
+set -a; . ~/ARKA/secure/env/arka.env; set +a
 docker compose -f ~/ARKASHIC/ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
 ```
 
@@ -82,21 +82,21 @@ cloudflared tunnel route dns <이름> <호스트>      # CNAME. 남의 이름을
 
 그리고 `~/ARKA/secure/cloudflared/config.yml`을 손으로 쓴다 — `tunnel`(ID),
 `credentials-file: /etc/cloudflared/creds.json`, `ingress`의 호스트 → `http://app:3000`.
-마지막으로 `~/ARKA/secure/env/ade.env`의 `ADE_TUNNEL_CONFIG`·`ADE_TUNNEL_CREDENTIALS`가 그 둘을
+마지막으로 `~/ARKA/secure/env/arka.env`의 `ARKA_TUNNEL_CONFIG`·`ARKA_TUNNEL_CREDENTIALS`가 그 둘을
 가리키게 하고 위의 `up` 명령을 돌린다.
 
 **설정을 저장소에 두지 않는 이유**는 저장소가 공개라서다. 호스트 이름과 터널 ID가 그 안에 있다.
 
-**Access는 터널과 별개다.** 앱 이름 `ade`, 허용 이메일 하나. 터널을 갈아도 Access 앱은 그대로 있다 —
+**Access는 터널과 별개다.** 앱 이름 `arka`, 허용 이메일 하나. 터널을 갈아도 Access 앱은 그대로 있다 —
 지우면 그 호스트가 무인증으로 열린다. Access 앱은 **zone 레벨**에 산다
 (`/zones/{zone}/access/apps`) — **계정 레벨로 물으면 0개로 보여 무방비인 줄 알고 놀란다**(2026-09-13 실측).
 
 ## 장애가 나면 — 이 순서로 짚는다
 
-1. **러너** — `systemctl --user status ade-runner`. GitHub 쪽은 저장소 Settings → Actions → Runners.
+1. **러너** — `systemctl --user status arka-runner`. GitHub 쪽은 저장소 Settings → Actions → Runners.
 2. **컨테이너** — `docker compose -f ops/deploy/compose.yml ps`. 마운트가 수상하면 유령 마운트다(아래).
-3. **터널** — `docker logs ade-tunnel --tail 50`. 앱이 healthy인데 밖에서 502/530이면 여기다.
-4. **Access** — `node ops/deploy/anonSmoke.ts "$ADE_ORIGIN"`. **302가 정상이다.**
+3. **터널** — `docker logs arka-tunnel --tail 50`. 앱이 healthy인데 밖에서 502/530이면 여기다.
+4. **Access** — `node ops/deploy/anonSmoke.ts "$ARKA_ORIGIN"`. **302가 정상이다.**
    200이 나오면 문이 열린 것이니 즉시 내린다.
 
 ### 유령 마운트
@@ -104,7 +104,7 @@ cloudflared tunnel route dns <이름> <호스트>      # CNAME. 남의 이름을
 바인드 마운트는 컨테이너를 **만든 시점의 inode**를 문다. 마운트 소스를 지웠다 새로 만들면
 컨테이너만 빈 inode를 계속 본다 — 서비스는 응답하지만 다음 재시작에 죽는다.
 `docker restart`로는 안 고쳐진다. **재생성만 고친다**: 위의 `up` 명령을 다시 돌린다.
-`docker inspect ade-app --format '{{json .Mounts}}'`의 `Source`가 실재하는지로 확인한다.
+`docker inspect arka-app --format '{{json .Mounts}}'`의 `Source`가 실재하는지로 확인한다.
 
 ## 러너를 다시 세우려면
 
@@ -116,11 +116,11 @@ tar xzf r.tar.gz && rm r.tar.gz
   --token "$(gh api -X POST repos/highjun/ARKASHIC/actions/runners/registration-token --jq .token)" \
   --name "arka-$(hostname -s)" --labels self-hosted,linux,arka --work _work
 
-cp ~/ARKASHIC/ops/deploy/systemd/ade-runner.service ~/.config/systemd/user/
-systemctl --user daemon-reload && systemctl --user enable --now ade-runner
+cp ~/ARKASHIC/ops/deploy/systemd/arka-runner.service ~/.config/systemd/user/
+systemctl --user daemon-reload && systemctl --user enable --now arka-runner
 ```
 
-**해제하려면** `systemctl --user disable --now ade-runner`, 그리고 저장소 설정에서 러너를 지운다.
+**해제하려면** `systemctl --user disable --now arka-runner`, 그리고 저장소 설정에서 러너를 지운다.
 
 ## 저장소 쪽에서 필요한 것
 

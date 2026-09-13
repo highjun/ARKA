@@ -35,7 +35,7 @@ describe("git 조작 (실제 저장소)", () => {
   let git: ReturnType<typeof createGitRunner>;
 
   beforeAll(async () => {
-    root = realpathSync(await mkdtemp(path.join(os.tmpdir(), "ade-git-")));
+    root = realpathSync(await mkdtemp(path.join(os.tmpdir(), "arka-git-")));
     git = createGitRunner(root);
     await git(["init", "-q", "-b", "main"]);
     await git(["config", "user.email", "test@example.com"]);
@@ -92,7 +92,7 @@ describe("git 조작 (실제 저장소)", () => {
   });
 
   it("저장소가 아니면 repository: false", async () => {
-    const plain = realpathSync(await mkdtemp(path.join(os.tmpdir(), "ade-plain-")));
+    const plain = realpathSync(await mkdtemp(path.join(os.tmpdir(), "arka-plain-")));
     try {
       expect(await status(createGitRunner(plain), plain)).toEqual({ repository: false, branch: null, files: [] });
       await expect(createGitRunner(plain)(["log"])).rejects.toBeInstanceOf(GitError);
