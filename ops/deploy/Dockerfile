@@ -1,5 +1,5 @@
 # 빌드 단계 — 의존성 설치와 번들. 산출물은 `.output/dist/` 하나다(client 정적 파일 + server 단일 번들).
-FROM node:24-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # corepack은 Node 25에서 빠지므로 직접 설치한다. **버전을 여기 적지 않는다** —
@@ -16,7 +16,7 @@ COPY . .
 RUN pnpm run build
 
 # 실행 단계 — node_modules가 없다. 서버는 의존성까지 한 파일로 번들됐고 클라이언트는 정적 파일이다.
-FROM node:24-alpine
+FROM node:26-alpine
 # 소스 제어 기능이 git CLI를 워크스페이스에서 돌린다(features/git).
 RUN apk add --no-cache git
 ENV NODE_ENV=production \
