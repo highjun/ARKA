@@ -13,7 +13,7 @@ const origin = process.argv[2];
 if (origin === undefined || origin === "") throw new Error("오리진 URL이 필요하다 — 예: https://<호스트>");
 
 /** /api/*는 프로토콜 헤더가 있어야 통과한다(→ ADR 0017). */
-const HEADERS = { "x-ade-protocol": "1" };
+const HEADERS = { "x-arka-protocol": "1" };
 const PATHS = ["/api/files?path=", "/api/agent/sessions", "/"];
 
 const check = async (path: string): Promise<boolean> => {

@@ -22,7 +22,7 @@ describe('HttpAgentApi', () => {
     const calls = serverReplies({ sessions: [session] });
     expect(await createAgentApiPort().listSessions()).toEqual([session]);
     expect(calls[0]).toMatchObject({ url: '/api/agent/sessions', method: 'GET' });
-    expect(calls[0]?.headers['x-ade-protocol']).toBe('1');
+    expect(calls[0]?.headers['x-arka-protocol']).toBe('1');
   });
 
   it('세션을 만들고 Run을 시작한다', async () => {

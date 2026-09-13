@@ -9,5 +9,11 @@
  */
 export const PROTOCOL_VERSION = 1;
 
-/** 요청 헤더 이름. 값은 양의 정수 문자열. */
-export const PROTOCOL_HEADER = "x-ade-protocol";
+/**
+ * 요청 헤더 이름. 값은 양의 정수 문자열.
+ *
+ * **이름을 바꾸면 캐시된 구 클라이언트가 전부 426을 받는다** — 헤더가 아예 없는 요청으로 보이기
+ * 때문이다. 2026-09-13에 `x-ade-protocol`에서 옮겼다(제품 이름이 ARKA다). 단일 사용자라
+ * 한 번 새로고침하면 끝나므로 옛 이름을 함께 받아 주는 전환 기간을 두지 않았다.
+ */
+export const PROTOCOL_HEADER = "x-arka-protocol";
