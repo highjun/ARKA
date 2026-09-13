@@ -18,7 +18,7 @@ const replace = (items: readonly TranscriptItem[], id: string, update: (item: Tr
   items.map((item) => (item.id === id ? update(item) : item));
 
 /**
- * 이벤트 하나를 대화에 접는다 — 순수 함수라 여기가 Model 테스트의 중심이다(→ ADR 0008).
+ * 이벤트 하나를 대화에 접는다 — 순수 함수라 여기가 Model 테스트의 중심이다.
  *
  * 이미 본 `seq`는 무시한다. 재연결이 `since=lastSeq`로 이어 받으므로 겹칠 일은 드물지만,
  * 겹치면 조각이 두 번 붙어 글자가 중복된다.

@@ -30,7 +30,7 @@ export const serializeError = (error: unknown): LogFields => {
 };
 
 /**
- * 비밀을 이름으로 알아본다 — `_KEY`·`_TOKEN`·`_SECRET`·`_PASSWORD`로 끝나는 필드(→ ADR 0007).
+ * 비밀을 이름으로 알아본다 — `_KEY`·`_TOKEN`·`_SECRET`·`_PASSWORD`로 끝나는 필드.
  *
  * **이름 규칙이 곧 이 동작이다.** 비밀에 그 접미사를 붙이기로 한 이유가 여기 있다 —
  * 붙어 있으면 기계가 알아보고, 안 붙어 있으면 아무 장치도 걸리지 않는다.

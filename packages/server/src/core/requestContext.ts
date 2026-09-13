@@ -1,7 +1,7 @@
 import type { MiddlewareHandler } from "hono";
 
 /**
- * 요청마다 흐르는 인증 컨텍스트. 지금은 인증이 없으므로 `userId`는 거의 항상 `"local"`이다(→ ADR 0014).
+ * 요청마다 흐르는 인증 컨텍스트. 지금은 인증이 없으므로 `userId`는 거의 항상 `"local"`이다.
  *
  * 그래도 자리를 만들어 두는 이유: 나중에 권한을 나눌 때 라우트마다 "누가"를 새로 꿰는 것이 전면 수정이다.
  * Cloudflare Access를 지나온 요청은 `Cf-Access-Authenticated-User-Email` 헤더를 싣는다 — 그것이 있으면

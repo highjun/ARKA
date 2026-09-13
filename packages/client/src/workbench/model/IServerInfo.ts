@@ -19,7 +19,7 @@ export const ServerInfoToken = createToken<IServerInfo>('serverInfo');
  * 서버에게 "너는 누구냐"를 묻는다 — 언제 떴고 어떤 프로토콜을 말하는지.
  *
  * 진단용이지 기능이 아니다 — 실패하면 `null`을 주고 화면은 그대로 돌아야 한다. 그래서 던지지 않는다.
- * 프로토콜 헤더 없이 부를 수 있는 엔드포인트라(→ ADR 0017) 낡은 클라이언트도 이 답은 받는다.
+ * 프로토콜 헤더 없이 부를 수 있는 엔드포인트라 낡은 클라이언트도 이 답은 받는다.
  */
 export interface IServerInfo {
   load(): Promise<ServerInfo | null>;

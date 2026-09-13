@@ -21,7 +21,7 @@ export default defineConfig({
   root: path.join(clientRoot, "src/workbench"),
   plugins: [
     react(),
-    // 설치 가능한 PWA(→ ADR 0018). Service Worker 파일명은 `app-sw.js`다 — `/sw.js`는 이 호스트명에
+    // 설치 가능한 PWA. Service Worker 파일명은 `app-sw.js`다 — `/sw.js`는 이 호스트명에
     // 남은 옛 PWA를 걷어내는 kill-switch가 서버에서 차지하고 있다(server/features/static).
     VitePWA({
       registerType: "autoUpdate",

@@ -1,7 +1,7 @@
 import type { AgentEvent, AgentEventInput, SessionId } from "#contracts";
 
 /**
- * 이벤트 로그 — 세션 안에서 일어난 모든 일의 원본(→ ADR 0019). append-only다.
+ * 이벤트 로그 — 세션 안에서 일어난 모든 일의 원본. append-only다.
  *
  * `seq`는 세션마다 1부터 단조 증가하고 저장소가 붙인다. 구독자는 append 직후 **동기로** 불린다 —
  * 그래야 SSE가 이벤트를 놓치지 않는다(`listSince` 뒤 `subscribe` 사이의 틈은 호출부가 `since`로 메운다).

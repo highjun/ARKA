@@ -6,4 +6,6 @@ Description=ARKA session database backup
 Type=oneshot
 # `PATH`를 박아 두는 이유: 사용자 유닛은 로그인 셸을 거치지 않아 nvm의 node가 안 보인다.
 Environment=PATH=%h/.nvm/versions/node/v24.15.0/bin:/usr/local/bin:/usr/bin:/bin
-ExecStart=node %h/ARKASHIC/ops/backup/run.ts
+# **`ExecStart`는 절대 경로여야 한다** — `node`만 적으면 systemd가 203/EXEC로 죽는다(실측).
+# `env`를 거쳐 위 `PATH`에서 찾게 한다. nvm 버전이 올라도 이 파일을 안 고쳐도 된다.
+ExecStart=/usr/bin/env node %h/ARKASHIC/ops/backup/run.ts

@@ -51,7 +51,7 @@ const COMMENT_RULES = [
  * export default [...ops.configs.base, { files: ["src/**"], rules: { … } }];
  * ```
  *
- * **여기 있는 규칙은 전부 ADR이 든다.** 주인 없는 규칙은 끄고 `docs/legacy/code/`에 뒀다 —
+ * **여기 있는 규칙은 전부 ADR이 든다.** 주인 없는 규칙은 껐다(2026-09-13 지웠다. git 이력에 있다) —
  * 규칙은 결정이 낳는 것이라, 결정이 아직 재작성되지 않았으면 강제할 근거가 없다.
  */
 const base: Linter.Config[] = [

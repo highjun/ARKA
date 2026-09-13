@@ -8,7 +8,7 @@ storybook-static/
 .claude
 docs/USER_NOTE.md
 
-# 키·인증서 파일. 이름만 봐도 비밀인 것은 손이 닿기 전에 막는다(→ ADR 0007).
+# 키·인증서 파일. 이름만 봐도 비밀인 것은 손이 닿기 전에 막는다.
 *.pem
 *.key
 *.p12

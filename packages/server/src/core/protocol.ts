@@ -2,7 +2,7 @@ import { PROTOCOL_HEADER, type ProtocolErrorBody } from "#contracts";
 import type { MiddlewareHandler } from "hono";
 
 /**
- * `/api/*` 요청의 프로토콜 헤더를 검사한다(→ ADR 0017). 지원하지 않는 버전이거나 헤더가 없으면
+ * `/api/*` 요청의 프로토콜 헤더를 검사한다. 지원하지 않는 버전이거나 헤더가 없으면
  * 426과 `VersionMismatch`로 답한다 — 낡은 PWA 클라이언트가 새 서버를 치는 상황을 잡는 장치다.
  *
  * `/api/health`·`/api/version`은 이 미들웨어보다 **앞에** 등록해야 한다. Hono는 등록 순서대로
