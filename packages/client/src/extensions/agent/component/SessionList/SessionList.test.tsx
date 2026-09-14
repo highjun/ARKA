@@ -2,15 +2,15 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { implementsClassName, implementsDataComponent, implementsNoA11yViolations, implementsRef } from '#utils/testing';
 import { SessionList } from './SessionList';
-import type { AgentSessionItem } from './SessionList';
+import type { AgentSession } from './SessionList';
 import { Menu } from '#component/Menu';
 
-const SESSIONS: AgentSessionItem[] = [
+const SESSIONS: AgentSession[] = [
   { id: 'a', title: '첫 세션' },
   { id: 'b', title: '둘째 세션', disabled: true },
 ];
 
-const SESSIONS_WITH_ARCHIVED: AgentSessionItem[] = [...SESSIONS, { id: 'c', title: '보관된 세션', archived: true }];
+const SESSIONS_WITH_ARCHIVED: AgentSession[] = [...SESSIONS, { id: 'c', title: '보관된 세션', archived: true }];
 
 describe('SessionList', () => {
   implementsClassName((extra) => <SessionList sessions={SESSIONS} {...extra} />);
@@ -121,7 +121,7 @@ describe('SessionList', () => {
     });
 
     it('uncontrolled 모드에서 클릭한 세션이 활성 상태가 된다', () => {
-      const sessions: AgentSessionItem[] = [
+      const sessions: AgentSession[] = [
         { id: 'a', title: '첫 세션' },
         { id: 'c', title: '셋째 세션' },
       ];

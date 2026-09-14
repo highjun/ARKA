@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Menu } from '#component/Menu';
 import { SessionList } from './index';
-import type { AgentSessionItem } from './index';
+import type { AgentSession } from './index';
 
 /** `timestamp`는 상대 시간(지금 기준)이라 결정적이지 않다 — 스토리에선 넘기지 않는다. */
-const SESSIONS: readonly AgentSessionItem[] = [
+const SESSIONS: readonly AgentSession[] = [
   { id: 'a', title: '빌드 실패 분석', excerpt: 'tsconfig의 paths가 vite 설정과 어긋나 있습니다.', status: 'running', unread: 3 },
   { id: 'b', title: '리팩터링 계획', excerpt: 'Workbench.tsx를 해체하는 순서를 정리했습니다.', status: 'waitingInput', unread: 120 },
   { id: 'c', title: '테스트 추가', excerpt: '계약 스위트가 통과합니다.', status: 'done' },

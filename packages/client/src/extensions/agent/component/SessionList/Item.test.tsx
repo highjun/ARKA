@@ -1,33 +1,33 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import { implementsClassName, implementsDataComponent, implementsNoA11yViolations, implementsRef } from '#utils/testing';
-import { SessionRow } from './SessionRow';
+import { SessionListItem } from './Item';
 
-describe('SessionRow', () => {
-  implementsClassName((extra) => <SessionRow title="세션" {...extra} />);
-  implementsDataComponent((extra) => <SessionRow title="세션" {...extra} />, 'SessionRow');
-  implementsRef<HTMLDivElement>((extra) => <SessionRow title="세션" {...extra} />, HTMLDivElement);
+describe('SessionListItem', () => {
+  implementsClassName((extra) => <SessionListItem title="세션" {...extra} />);
+  implementsDataComponent((extra) => <SessionListItem title="세션" {...extra} />, 'SessionList.Item');
+  implementsRef<HTMLDivElement>((extra) => <SessionListItem title="세션" {...extra} />, HTMLDivElement);
   implementsNoA11yViolations(() => (
     <div role="listbox" aria-label="Agent sessions">
-      <SessionRow title="세션" />
+      <SessionListItem title="세션" />
     </div>
   ));
 
   it('role="option" 과 aria-label 로 제목을 노출한다', () => {
-    render(<SessionRow title="결제 버그 조사" />);
+    render(<SessionListItem title="결제 버그 조사" />);
 
     expect(screen.getByRole('option', { name: '결제 버그 조사' })).toBeInTheDocument();
   });
 
   it('isActive 가 aria-selected 에 그대로 반영된다', () => {
-    render(<SessionRow title="세션" isActive />);
+    render(<SessionListItem title="세션" isActive />);
 
     expect(screen.getByRole('option')).toHaveAttribute('aria-selected', 'true');
   });
 
   it('클릭하면 onSelect 가 호출된다', () => {
     const onSelect = vi.fn();
-    render(<SessionRow title="세션" onSelect={onSelect} />);
+    render(<SessionListItem title="세션" onSelect={onSelect} />);
 
     fireEvent.click(screen.getByRole('option'));
 
@@ -36,7 +36,7 @@ describe('SessionRow', () => {
 
   it('Enter/Space 로 선택된다', () => {
     const onSelect = vi.fn();
-    render(<SessionRow title="세션" onSelect={onSelect} />);
+    render(<SessionListItem title="세션" onSelect={onSelect} />);
     const row = screen.getByRole('option');
 
     fireEvent.keyDown(row, { key: 'Enter' });
@@ -47,7 +47,7 @@ describe('SessionRow', () => {
 
   it('disabled 면 클릭·키보드 선택이 무시되고 tabIndex 가 -1, aria-disabled 가 true 다', () => {
     const onSelect = vi.fn();
-    render(<SessionRow title="세션" disabled onSelect={onSelect} />);
+    render(<SessionListItem title="세션" disabled onSelect={onSelect} />);
     const row = screen.getByRole('option');
 
     fireEvent.click(row);
@@ -59,33 +59,33 @@ describe('SessionRow', () => {
   });
 
   it('unread 가 없거나 0 이하면 배지를 숨긴다', () => {
-    const { rerender } = render(<SessionRow title="세션" />);
+    const { rerender } = render(<SessionListItem title="세션" />);
     expect(screen.queryByText(/^\d+\+?$/u)).not.toBeInTheDocument();
 
-    rerender(<SessionRow title="세션" unread={0} />);
+    rerender(<SessionListItem title="세션" unread={0} />);
     expect(screen.queryByText(/^\d+\+?$/u)).not.toBeInTheDocument();
   });
 
   it('unread 가 99 를 넘으면 "99+" 로 캡핑된다', () => {
-    render(<SessionRow title="세션" unread={140} />);
+    render(<SessionListItem title="세션" unread={140} />);
 
     expect(screen.getByText('99+')).toBeInTheDocument();
   });
 
   it('unread 가 정상 범위면 그대로 표시된다', () => {
-    render(<SessionRow title="세션" unread={3} />);
+    render(<SessionListItem title="세션" unread={3} />);
 
     expect(screen.getByText('3')).toBeInTheDocument();
   });
 
   it('timestamp 가 없으면 타임스탬프 자리를 렌더하지 않는다', () => {
-    const { container } = render(<SessionRow title="세션" />);
+    const { container } = render(<SessionListItem title="세션" />);
 
     expect(container.querySelector('[data-component="Timestamp"]')).not.toBeInTheDocument();
   });
 
   it('timestamp 가 있으면 렌더한다 — 실제 포맷은 Timestamp 자체 테스트 책임', () => {
-    const { container } = render(<SessionRow title="세션" timestamp={Date.now() - 60_000} />);
+    const { container } = render(<SessionListItem title="세션" timestamp={Date.now() - 60_000} />);
 
     expect(container.querySelector('[data-component="Timestamp"]')).toBeInTheDocument();
   });

@@ -1,10 +1,10 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { useSessionList } from './useSessionList';
-import type { AgentSessionItem } from './SessionList';
+import type { AgentSession } from './SessionList';
 
-const SESSION_A: AgentSessionItem = { id: 'a', title: '첫 세션' };
-const SESSION_B_DISABLED: AgentSessionItem = { id: 'b', title: '둘째 세션', disabled: true };
+const SESSION_A: AgentSession = { id: 'a', title: '첫 세션' };
+const SESSION_B_DISABLED: AgentSession = { id: 'b', title: '둘째 세션', disabled: true };
 
 describe('useSessionList', () => {
   it('시작값 없이는 activeId가 undefined다', () => {

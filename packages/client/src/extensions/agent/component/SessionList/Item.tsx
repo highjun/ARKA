@@ -1,12 +1,13 @@
 import { clsx } from 'clsx';
 import type { HTMLAttributes, KeyboardEvent } from 'react';
-import styles from './SessionRow.module.css';
+import styles from './Item.module.css';
 import { CounterLabel } from '@primer/react';
 import { StatusIndicator } from '../StatusIndicator';
 import type { StatusIndicatorStatus } from '../StatusIndicator';
 import { Timestamp } from '#component/Timestamp';
 
-interface SessionRowSelection {
+/** 고를 수 있는지와 고르면 무엇을 하는지 — 행의 상호작용만 묶은 것이다. */
+export interface SessionListItemSelection {
   readonly isActive?: boolean;
   readonly disabled?: boolean;
   readonly onSelect?: () => void;
@@ -29,7 +30,7 @@ const formatUnread = (unread: number): string | null => {
  * 순수 함수라 훅이 필요 없다 — `cva()`처럼 값(이 경우 이벤트 핸들러가 든 props 객체)을 계산해서
  * 반환할 뿐이고, JSX 속성에는 이 반환값을 그대로 스프레드한다(인라인 함수 리터럴이 아니다).
  */
-const getInteractiveProps = ({ isActive = false, disabled = false, onSelect }: SessionRowSelection) => {
+const getInteractiveProps = ({ isActive = false, disabled = false, onSelect }: SessionListItemSelection) => {
   const select = () => {
     if (disabled) return;
     onSelect?.();
@@ -50,7 +51,7 @@ const getInteractiveProps = ({ isActive = false, disabled = false, onSelect }: S
 };
 
 /** `title`을 가로챈다 — 네이티브 툴팁이 아니라 세션 제목이다. */
-export interface SessionRowProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'title' | 'onSelect'> {
+export interface SessionListItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'title' | 'onSelect'> {
   /** 세션 제목 — 목록의 첫 줄이자 `aria-label`로 그대로 쓰인다. */
   readonly title: string;
   /** 마지막 메시지 등 미리보기 한 줄. 없으면 빈 자리로 남는다. */
@@ -70,7 +71,7 @@ export interface SessionRowProps extends Omit<HTMLAttributes<HTMLDivElement>, 'c
 }
 
 /** 세션 목록의 행 하나 — 제목·미리보기·시각·안 읽은 수를 담고 클릭과 Enter/Space로 선택된다. */
-export const SessionRow = ({
+export const SessionListItem = ({
   title,
   excerpt,
   status = 'done',
@@ -81,7 +82,7 @@ export const SessionRow = ({
   onSelect,
   className,
   ...props
-}: SessionRowProps) => {
+}: SessionListItemProps) => {
   const unreadText = formatUnread(unread ?? 0);
   return (
     <div
@@ -90,7 +91,7 @@ export const SessionRow = ({
       aria-label={title}
       data-active={isActive}
       data-disabled={disabled}
-      data-component="SessionRow"
+      data-component="SessionList.Item"
       className={clsx(className, styles['root'])}
     >
       <div className={styles['headerRow']}>
