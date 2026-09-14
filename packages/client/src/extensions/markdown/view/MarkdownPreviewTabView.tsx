@@ -1,7 +1,7 @@
 import { useViewModel } from '#core/viewmodel';
 import { Banner, Spinner } from '@primer/react';
 import { Blankslate } from '@primer/react/experimental';
-import { MarkdownPreview } from '../component/MarkdownPreview';
+import { Markdown } from '#component/Markdown';
 import { MarkdownPreviewViewModelToken } from '../viewmodel/IMarkdownPreviewViewModel';
 import styles from './MarkdownPreviewTabView.module.css';
 
@@ -31,7 +31,7 @@ export const MarkdownPreviewTabView = ({ tabId }: { readonly tabId: string }) =>
   return (
     <div className={styles['root']} data-component="MarkdownPreviewTabView">
       {preview.truncated ? <Banner variant="warning" title="파일이 커서 앞부분만 보여 준다" layout="compact" /> : null}
-      <MarkdownPreview markdown={preview.markdown} />
+      <Markdown source={preview.markdown} />
     </div>
   );
 };
