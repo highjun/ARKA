@@ -32,8 +32,7 @@
 - **린트** `jsdoc/require-description`·`informative-docs`·`no-blank-blocks`· `no-blank-block-descriptions`·`no-types`·`tsdoc/syntax`: 주석의 자명한 내용이 없도록 제한한다.
 - **린트** `line-comment-position`·`arka/max-comment-lines` —  주석의 위치와 양을 제한한다.
 - **린트** `sonarjs/no-commented-code`·`no-warning-comments` — 불필요한 내용(코드나 경고)를 주석으로 두지 않는다.
-- **린트** `eslint-comments/require-description`·`no-unlimited-disable`·`disable-enable-pair` ·`no-restricted-disable`·`@typescript-eslint/ban-ts-comment`: eslint-disable 등으로 우회할 수 없게 한다.
+- **린트** `@eslint-community/eslint-comments/require-description`·`no-unlimited-disable`·`disable-enable-pair`·`no-restricted-disable`·`@typescript-eslint/ban-ts-comment`: eslint-disable 등으로 우회할 수 없게 한다.
 
 ## 상태:
-승인됨 (2026-09-10). **2026-09-14 개정** — 비공개 선언에 문서 블록을 요구하던 결정을 뺐다.
-바깥 관례와 견주는 감사에서 근거가 없다고 판정했다. 형태(`/** */`로 쓴다)는 그대로다.
+승인됨 (2026-09-10). 2026-09-14 개정 — 비공개 선언에 문서 블록을 요구하던 결정을 뺐다(형태는 그대로).
