@@ -19,5 +19,12 @@ const lint = (args: readonly string[], cwd: string): void => {
   if (status !== 0) process.exit(status ?? 1);
 };
 
-lint(["."], OPS_ROOT);
-lint(["--config", "eslint.config.ts", "tsconfig.json"], REPO_ROOT);
+/*
+ * **`--max-warnings 0`이 없으면 `warn` 규칙은 장식이다** — 종료 코드가 0이라 관문이 초록이다
+ * (2026-09-14 실측: 이 저장소에 `warn`이 셋 있었고 전부 통과 대상이었다). 편집기에서 노란 줄로
+ * 남는 구분은 그대로 두고, 관문에서만 막는다.
+ */
+const MAX_WARNINGS = ["--max-warnings", "0"];
+
+lint([".", ...MAX_WARNINGS], OPS_ROOT);
+lint(["--config", "eslint.config.ts", "tsconfig.json", ...MAX_WARNINGS], REPO_ROOT);

@@ -29,6 +29,32 @@ const RESTRICTED_SYNTAX = [
 ];
 
 /** `view/`에만 더 걸리는 것 — 훅 하나와 DI 접근 금지(→ ADR 0007). */
+/*
+ * **브라우저 패키지에 Node 전역이 보인다** — `tsconfig`의 `types: ["vitest/globals"]`가
+ * `@types/node`를 전이로 끌고 온다(→ TASK-44). `types` 배열은 전역 자동 포함만 통제하고 전이
+ * 의존은 못 막으니 여기서 막는다. `test/`·`vite.config.ts`·`.storybook/`은 Node에서 돌아 대상이 아니다.
+ */
+const NODE_GLOBALS = [
+  { name: "process", message: "브라우저 패키지입니다 — 빌드 타임 값은 `import.meta.env`를 쓰세요." },
+  { name: "Buffer", message: "브라우저 패키지입니다 — `Uint8Array`나 `TextEncoder`를 쓰세요." },
+  { name: "__dirname", message: "브라우저 패키지입니다 — 경로는 `import.meta.url`을 쓰세요." },
+  { name: "__filename", message: "브라우저 패키지입니다 — 경로는 `import.meta.url`을 쓰세요." },
+  { name: "global", message: "브라우저 패키지입니다 — `globalThis`를 쓰세요." },
+  { name: "require", message: "ESM입니다 — `import`를 쓰세요." },
+];
+
+/*
+ * **`model/`·`viewmodel/`은 브라우저 API를 직접 보지 않는다**(→ ADR 0007). 플랫폼에 닿는 것은
+ * 조립부(`registerServices.tsx`)가 얇은 함수로 주입한다 — 그래야 이 계층이 jsdom 없이도 돈다.
+ * 규약과 코드 주석이 이 규칙을 인용해 왔는데 정작 설정에는 없었다(2026-09-14 실측).
+ */
+const PLATFORM_GLOBALS = [
+  "fetch", "window", "document", "navigator", "location", "localStorage", "sessionStorage", "alert", "confirm", "prompt",
+].map((name) => ({
+  name,
+  message: "`model/`·`viewmodel/`은 플랫폼에 직접 닿지 않습니다 — 조립부가 주입하는 함수를 받으세요(→ ADR 0007).",
+}));
+
 const VIEW_ONLY_SYNTAX = [
   {
     selector: 'CallExpression[callee.name=/^use[A-Z]/]:not([callee.name="useViewModel"])',
@@ -61,7 +87,19 @@ export default [
     files: ["src/**/*.tsx"],
     plugins: { "primer-react": primerReact },
     settings: primerReact.configs.recommended.settings,
-    rules: primerReact.configs.recommended.rules,
+    rules: {
+      ...primerReact.configs.recommended.rules,
+      /*
+       * 프리셋 밖의 규칙. ADR이 인용하던 셋 중 **이것만** 켠다 — 나머지 둘은 우리 결정과
+       * 어긋난다는 것을 실측으로 확인했고 그 ADR의 `기각:`으로 옮겼다.
+       */
+      // 폐기된 진입점(→ ADR 0009).
+      "primer-react/no-deprecated-entrypoints": "error",
+      // 와일드카드 import — 무엇을 쓰는지 감춘다.
+      "primer-react/no-wildcard-imports": "error",
+      // CSS Modules 는 default import 로 받는다.
+      "primer-react/enforce-css-module-default-import": "error",
+    },
   },
 
   {
@@ -83,12 +121,13 @@ export default [
     rules: { "@eslint-react/no-forward-ref": "error", "@eslint-react/no-context-provider": "error" },
   },
 
-  {
-    // 스토리 파일의 모양.
-    files: ["src/**/*.stories.tsx"],
-    plugins: { storybook },
-    rules: storybook.configs["flat/recommended"].at(-1)?.rules ?? {},
-  },
+  /*
+   * 스토리 파일의 모양. **프리셋을 그대로 펴야 한다** — 블록이 셋이고(설정·스토리 글롭·
+   * `.storybook/main` 글롭) `.at(-1)`로 하나만 집으면 규칙 12개가 조용히 빠진 채 초록이
+   * 된다(2026-09-14에 그 상태로 머지됐다). 글롭도 프리셋의 것을 쓴다 — `.storybook/main.ts`를
+   * 보는 `no-uninstalled-addons`는 스토리 파일에 걸 규칙이 아니다.
+   */
+  ...storybook.configs["flat/recommended"],
 
   {
     files: ["src/**/*.{ts,tsx}", "test/**/*.ts", ".storybook/*.{ts,tsx}", "*.config.ts"],
@@ -172,6 +211,19 @@ export default [
         },
       ],
     },
+  },
+
+  {
+    // Node 전역(→ TASK-44). `src/`만이다 — `test/`·`vite.config.ts`·`.storybook/`은 Node에서 돈다.
+    files: ["src/**/*.{ts,tsx}"],
+    rules: { "no-restricted-globals": ["error", ...NODE_GLOBALS] },
+  },
+
+  {
+    // 플랫폼 전역. **Node 쪽까지 함께 펴 준다** — `no-restricted-globals`도 한 파일에 한 배열이라
+    // 나중 블록이 앞의 것을 통째로 덮는다(위 `RESTRICTED_SYNTAX` 주석과 같은 함정).
+    files: ["src/**/model/**/*.{ts,tsx}", "src/**/viewmodel/**/*.{ts,tsx}"],
+    rules: { "no-restricted-globals": ["error", ...NODE_GLOBALS, ...PLATFORM_GLOBALS] },
   },
 
   {
