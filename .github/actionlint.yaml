@@ -1,0 +1,5 @@
+# 자체 호스트 러너의 라벨을 알려준다. 없으면 actionlint가 `arka`를 오타로 본다 —
+# 그 판정은 맞다(라벨 오타는 잡이 영원히 큐에 남는다). 그래서 끄지 않고 선언한다.
+self-hosted-runner:
+  labels:
+    - arka

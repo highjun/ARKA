@@ -1,4 +1,5 @@
 import { ESLint } from "eslint";
+import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { REPO_ROOT, TRACKED, read } from "./repo.ts";
 
@@ -23,11 +24,23 @@ const PROBES: readonly (readonly [string, readonly string[]])[] = [
   ["ops", ["lint/index.ts", "pipeline/check.ts"]],
 ];
 
-/*
- * **저장소 루트는 대표에 없다.** 루트 `eslint.config.ts`가 `@eslint/json`을 import하는데 그것은
- * `ops/node_modules`에만 있어서, ESLint CLI(`ops`의 바이너리)로는 풀리고 여기서는 안 풀린다.
- * 루트가 켜는 규칙(`no-restricted-syntax`)은 패키지 쪽에도 있어 잃는 것이 없다.
+/**
+ * 루트 설정의 대표 파일. **루트만 CLI로 묻는다** — 루트 `eslint.config.ts`가 import하는
+ * 플러그인이 `ops/node_modules`에만 있어서, `ops`의 ESLint 바이너리로는 풀리고 이 프로세스의
+ * API 호출로는 안 풀린다. 파일 셋이라 `--print-config` 세 번이 싸다.
  */
+const ROOT_PROBES = ["tsconfig.json", "package.json", ".github/workflows/ci.yml"] as const;
+
+/** 루트 설정이 그 파일에 켜는 규칙 이름. */
+const rootRules = (file: string): readonly string[] => {
+  const bin = path.join(REPO_ROOT, "ops/node_modules/.bin/eslint");
+  const { status, stdout } = spawnSync(bin, ["--config", "eslint.config.ts", "--print-config", file], {
+    cwd: REPO_ROOT,
+    encoding: "utf8",
+  });
+  if (status !== 0) throw new Error(`루트 설정을 읽지 못했습니다: ${file}`);
+  return Object.keys((JSON.parse(stdout) as { rules?: Record<string, unknown> }).rules ?? {});
+};
 
 /** 위 대표 파일들에 **실제로 걸리는** ESLint 규칙 이름 전부. */
 export const activeEslintRules = async (): Promise<ReadonlySet<string>> => {
@@ -38,6 +51,9 @@ export const activeEslintRules = async (): Promise<ReadonlySet<string>> => {
       const config = await eslint.calculateConfigForFile(file);
       for (const name of Object.keys(config.rules ?? {})) names.add(name);
     }
+  }
+  for (const file of ROOT_PROBES) {
+    for (const name of rootRules(file)) names.add(name);
   }
   return names;
 };

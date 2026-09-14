@@ -56,6 +56,12 @@ jobs:
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
 
+      # **워크플로의 뜻을 본다** — 없는 `uses`, 잘못된 `needs`, 오타 난 러너 라벨, 셸 문법.
+      # ESLint의 `yml/*`는 형태만 보므로 이 자리가 따로 있다. 공식 이미지를 `docker run`으로
+      # 쓰는 것은 아래 gitleaks와 같은 방식이다 — 비공식 npm 재포장을 쓰지 않는다.
+      - name: 워크플로가 말이 되나
+        run: docker run --rm -v "$PWD:/repo:ro" -w /repo rhysd/actionlint:1.7.7 -no-color
+
       # 액션이 아니라 이미지를 직접 쓴다 — 로컬에서 같은 명령으로 재현되고, 조직 라이선스
       # 안내를 지나지 않아도 된다. `--redact`로 값이 로그에 남지 않게 한다.
       - name: 이번에 더해진 커밋에 시크릿이 있나

@@ -2,6 +2,7 @@
   "name": "arkashic",
   "version": "0.0.0",
   "private": true,
+  "description": "ARKA — 에이전트가 사용자의 워크스페이스를 다루는 개발 환경",
   "type": "module",
   "packageManager": "pnpm@11.13.1",
   "engines": {
@@ -9,8 +10,8 @@
   },
   "scripts": {
     "build": "pnpm -r --if-present run build",
-    "task": "pnpm --filter ops run task",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "task": "pnpm --filter ops run task"
   },
   "devDependencies": {
     "simple-git-hooks": "^2.14.0"
