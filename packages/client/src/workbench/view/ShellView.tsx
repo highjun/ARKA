@@ -4,12 +4,11 @@ import { TabContentRegistryToken } from '../model/ITabContentRegistry';
 import { ShellViewModelToken } from '../viewmodel/IShellViewModel';
 import { matchMenuItems } from '#core/menu';
 import { useViewModel } from '#core/viewmodel';
-import { Banner, Button } from '@primer/react';
+import { Banner, ConfirmationDialog } from '@primer/react';
 import { ContextMenu } from '#component/ContextMenu';
 import { Icon } from '#component/Icon';
 import { ModeToggle } from '#component/ModeToggle';
 import { Text } from '#component/Text';
-import { Dialog } from '#component/Dialog';
 import { CommandPalette } from '../component/CommandPalette';
 import { NotificationList } from '../component/NotificationList';
 import { Shell } from '../component/Shell';
@@ -265,22 +264,15 @@ export const ShellView = () => {
       <NotificationList items={viewModel.notifications} onDismiss={(id) => viewModel.dismissNotification(id)} />
 
       {pendingTabClose === null ? null : (
-        <Dialog
-          onClose={() => viewModel.cancelCloseTab()}
-          iconId="warning"
-          tone="attention"
+        <ConfirmationDialog
           title="저장하지 않은 변경사항이 있다"
-          description="닫으면 사라진다 — 그래도 닫을까?"
+          confirmButtonContent="닫기"
+          cancelButtonContent="취소"
+          confirmButtonType="danger"
+          onClose={(gesture) => (gesture === 'confirm' ? viewModel.confirmCloseTab() : viewModel.cancelCloseTab())}
         >
-          <Dialog.Actions>
-            <Button variant="default" onClick={() => viewModel.cancelCloseTab()}>
-              취소
-            </Button>
-            <Button variant="danger" onClick={() => viewModel.confirmCloseTab()}>
-              닫기
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
+          닫으면 사라진다 — 그래도 닫을까?
+        </ConfirmationDialog>
       )}
     </>
   );

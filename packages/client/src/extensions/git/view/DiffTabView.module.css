@@ -7,12 +7,6 @@
   line-height: var(--text-body-lineHeight-small);
 }
 
-.center {
-  display: flex;
-  justify-content: center;
-  padding: var(--space-lg);
-}
-
 .line {
   display: block;
   padding: 0 var(--space-sm);

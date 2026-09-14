@@ -1,6 +1,6 @@
 import { useViewModel } from '#core/viewmodel';
 import { Spinner } from '@primer/react';
-import { Text } from '#component/Text';
+import { Blankslate } from '@primer/react/experimental';
 import { SourceControlViewModelToken } from '../viewmodel/ISourceControlViewModel';
 import styles from './DiffTabView.module.css';
 
@@ -15,23 +15,26 @@ export const DiffTabView = ({ tabId }: { readonly tabId: string }) => {
 
   if (diff.loading && diff.text === '') {
     return (
-      <div className={styles['center']}>
-        <Spinner size="medium" srText="diff를 읽는 중" />
-      </div>
+      <Blankslate>
+        <Blankslate.Visual>
+          <Spinner size="medium" srText="diff를 읽는 중" />
+        </Blankslate.Visual>
+      </Blankslate>
     );
   }
   if (diff.failure !== null) {
     return (
-      <div className={styles['center']}>
-        <Text tone="danger">{diff.failure}</Text>
-      </div>
+      <Blankslate>
+        <Blankslate.Heading as="h2">diff를 읽지 못했다</Blankslate.Heading>
+        <Blankslate.Description>{diff.failure}</Blankslate.Description>
+      </Blankslate>
     );
   }
   if (diff.text === '') {
     return (
-      <div className={styles['center']}>
-        <Text tone="muted">차이가 없다.</Text>
-      </div>
+      <Blankslate>
+        <Blankslate.Heading as="h2">차이가 없다</Blankslate.Heading>
+      </Blankslate>
     );
   }
   return (

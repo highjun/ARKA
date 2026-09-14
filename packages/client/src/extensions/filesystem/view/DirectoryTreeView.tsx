@@ -1,7 +1,7 @@
 import { useViewModel } from '#core/viewmodel';
-import { Button, Spinner } from '@primer/react';
+import { ConfirmationDialog, Dialog, Spinner } from '@primer/react';
+import { Blankslate } from '@primer/react/experimental';
 import { Container } from '#component/Container';
-import { Dialog } from '#component/Dialog';
 import { FileTree } from '../component/FileTree';
 import type { FileTreeItem } from '../component/FileTree';
 import type { MouseEvent } from 'react';
@@ -37,23 +37,18 @@ const toItem = (row: FileTreeRow): FileTreeItem => ({
   children: row.children?.map(toItem),
 });
 
-const EMPTY_LABEL_STYLE = {
-  padding: 'var(--space-sm)',
-  fontSize: 'var(--text-body-size-small)',
-  lineHeight: 'var(--text-body-lineHeight-small)',
-  color: 'var(--fgColor-muted)',
-} as const;
-
-const LOADING_STYLE = { display: 'flex', justifyContent: 'center', padding: 'var(--space-lg)' } as const;
-
 /** 행이 아직 없는 이유가 둘이라 표시도 둘이다 — 기다리는 중이면 돌고, 정말 비었으면 그렇게 말한다. */
 const emptyLabelOf = (status: DirectoryTreeStatus) =>
   status === 'loaded' ? (
-    <p style={EMPTY_LABEL_STYLE}>비어 있다</p>
+    <Blankslate>
+      <Blankslate.Heading as="h2">비어 있다</Blankslate.Heading>
+    </Blankslate>
   ) : (
-    <div style={LOADING_STYLE}>
-      <Spinner size="medium" srText="워크스페이스를 읽는 중" />
-    </div>
+    <Blankslate>
+      <Blankslate.Visual>
+        <Spinner size="medium" srText="워크스페이스를 읽는 중" />
+      </Blankslate.Visual>
+    </Blankslate>
   );
 
 const deleteTitleOf = (targets: readonly ContextMenuTarget[]) =>
@@ -113,7 +108,12 @@ export const DirectoryTreeView = ({
   };
 
   if (viewModel.failure !== null) {
-    return <p style={{ ...EMPTY_LABEL_STYLE, color: 'var(--fgColor-danger)' }}>{viewModel.failure}</p>;
+    return (
+      <Blankslate>
+        <Blankslate.Heading as="h2">워크스페이스를 읽지 못했다</Blankslate.Heading>
+        <Blankslate.Description>{viewModel.failure}</Blankslate.Description>
+      </Blankslate>
+    );
   }
 
   return (
@@ -146,37 +146,25 @@ export const DirectoryTreeView = ({
       </CommandContextMenu>
 
       {viewModel.deleteTargets.length === 0 ? null : (
-        <Dialog
-          onClose={() => viewModel.cancelDelete()}
-          iconId="warning"
-          tone="attention"
+        <ConfirmationDialog
           title={deleteTitleOf(viewModel.deleteTargets)}
-          description={deleteSubtitleOf(viewModel.deleteTargets)}
+          confirmButtonContent="지우기"
+          cancelButtonContent="취소"
+          confirmButtonType="danger"
+          onClose={(gesture) => (gesture === 'confirm' ? viewModel.confirmDelete() : viewModel.cancelDelete())}
         >
-          <Dialog.Actions>
-            <Button variant="default" onClick={() => viewModel.cancelDelete()}>
-              취소
-            </Button>
-            <Button variant="danger" onClick={() => viewModel.confirmDelete()}>
-              지우기
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
+          {deleteSubtitleOf(viewModel.deleteTargets)}
+        </ConfirmationDialog>
       )}
 
       {viewModel.failureNotice === null ? null : (
         <Dialog
-          onClose={() => viewModel.dismissFailureNotice()}
-          iconId="error"
-          tone="danger"
+          role="alertdialog"
           title="문제가 생겼다"
-          description={viewModel.failureNotice}
+          onClose={() => viewModel.dismissFailureNotice()}
+          footerButtons={[{ content: '확인', buttonType: 'primary', autoFocus: true, onClick: () => viewModel.dismissFailureNotice() }]}
         >
-          <Dialog.Actions>
-            <Button variant="default" onClick={() => viewModel.dismissFailureNotice()}>
-              확인
-            </Button>
-          </Dialog.Actions>
+          {viewModel.failureNotice}
         </Dialog>
       )}
     </>
