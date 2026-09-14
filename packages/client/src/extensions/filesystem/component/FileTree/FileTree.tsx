@@ -151,8 +151,20 @@ const Row = ({
   const isSelected = selectedIds.has(item.id);
   const isEditing = editingId === item.id;
 
-  const handleClick = (event: MouseEvent<HTMLElement>) => onRowClick(node, event);
-  const handleDoubleClick = (event: MouseEvent<HTMLElement>) => onRowDoubleClick(node, event);
+  /**
+   * 행끼리 DOM으로 중첩돼 있어(`li > ul > li`) 자식의 클릭이 부모 행까지 버블링된다 — 가장 가까운
+   * `treeitem`이 자기 것이 아닐 때는 넘긴다. `onFocus`가 `target !== currentTarget`으로 같은 일을
+   * 하는데, 클릭은 대상이 항상 후손이라 그 비교로는 못 가른다.
+   */
+  const isOwnRow = (event: MouseEvent<HTMLElement>) =>
+    (event.target as HTMLElement).closest('[role="treeitem"]') === event.currentTarget;
+
+  const handleClick = (event: MouseEvent<HTMLElement>) => {
+    if (isOwnRow(event)) onRowClick(node, event);
+  };
+  const handleDoubleClick = (event: MouseEvent<HTMLElement>) => {
+    if (isOwnRow(event)) onRowDoubleClick(node, event);
+  };
 
   /**
    * disabled 행("비어 있다"/"불러오는 중…"/에러 자리표시)은 `onRowContextMenu`를 안 부르는 것만으론
@@ -163,6 +175,7 @@ const Row = ({
    * 루트로 풀려 엉뚱한 곳에 파일이 생긴다 — 그래서 여기서 `stopPropagation`으로 아예 못 나가게 막는다.
    */
   const handleContextMenu = (event: MouseEvent<HTMLElement>) => {
+    if (!isOwnRow(event)) return;
     if (item.disabled) {
       event.stopPropagation();
       return;
@@ -202,6 +215,11 @@ const Row = ({
         setFocusedId(item.id);
       }}
       onKeyDown={onKeyDown(node)}
+      // 클릭·우클릭을 `treeitem` 자신이 받는다. 안쪽 행 `div`에 두면 키보드 처리(`onKeyDown`)와
+      // 다른 원소가 되어, 마우스로만 되는 자리가 생긴다(axe `click-events-have-key-events`).
+      onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
+      onContextMenu={handleContextMenu}
     >
       <div
         className={styles['row']}
@@ -209,9 +227,6 @@ const Row = ({
         // `margin-inline` 음수 상쇄와 짝) — 인라인 스타일이 CSS 클래스보다 항상 이기므로
         // `.row`의 `padding-inline`으로는 이 값을 못 준다, 여기서 직접 더한다.
         style={{ paddingLeft: `calc(${level - 1} * var(--space-md) + var(--space-sm))` }}
-        onClick={handleClick}
-        onDoubleClick={handleDoubleClick}
-        onContextMenu={handleContextMenu}
       >
         <span className={styles['marker']} aria-hidden="true">
           {isFolder ? <Icon iconId={expanded ? 'chevronDown' : 'chevronRight'} size="sm" /> : <FileIcon fileName={item.name} className={styles['fileIcon']} />}

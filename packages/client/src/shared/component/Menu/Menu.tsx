@@ -102,7 +102,7 @@ const useKind = (): MenuKind => useContext(KindContext);
 /** 메뉴의 열림 상태를 든다 — 자기 DOM은 그리지 않는다. 보이는 것은 `Trigger`와 `Content`다. */
 export const MenuRoot = ({ kind = 'dropdown', open, defaultOpen = false, onOpenChange, children, ...props }: MenuProps) => {
   const [isOpen, setOpen] = useControllableState({ prop: open, defaultProp: defaultOpen, onChange: onOpenChange, caller: 'Menu' });
-  const body = <KindContext.Provider value={kind}>{children}</KindContext.Provider>;
+  const body = <KindContext value={kind}>{children}</KindContext>;
 
   return kind === 'context' ? (
     <Context.Root {...props} open={isOpen} onOpenChange={setOpen}>

@@ -104,8 +104,8 @@ export const GroupImpl = ({
   };
 
   return (
-    <ClassNamesContext.Provider value={classNames}>
-      <GroupContext.Provider value={state}>
+    <ClassNamesContext value={classNames}>
+      <GroupContext value={state}>
         <div {...props} ref={ref as Ref<HTMLDivElement>} className={clsx(className, classNames.group)}>
           {/* 탭이 하나도 없으면 TabStrip 자체를 렌더하지 않는다 — `stripEmptyLabel`은 빈 슬롯의
               문구만 바꿀 뿐(테두리·배경·항상 뜨는 "..." 메뉴는 그대로 남아) Strip을 못
@@ -141,8 +141,8 @@ export const GroupImpl = ({
             {panelOverlay}
           </div>
         </div>
-      </GroupContext.Provider>
-    </ClassNamesContext.Provider>
+      </GroupContext>
+    </ClassNamesContext>
   );
 };
 GroupImpl.displayName = 'Tab.Group';

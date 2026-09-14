@@ -1,11 +1,12 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
-import { implementsClassName, implementsDataComponent, implementsNoA11yViolations } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsNoA11yViolations, implementsRef } from '#utils/testing';
 import { SessionRow } from './SessionRow';
 
 describe('SessionRow', () => {
   implementsClassName((extra) => <SessionRow title="세션" {...extra} />);
   implementsDataComponent((extra) => <SessionRow title="세션" {...extra} />, 'SessionRow');
+  implementsRef<HTMLDivElement>((extra) => <SessionRow title="세션" {...extra} />, HTMLDivElement);
   implementsNoA11yViolations(() => (
     <div role="listbox" aria-label="Agent sessions">
       <SessionRow title="세션" />

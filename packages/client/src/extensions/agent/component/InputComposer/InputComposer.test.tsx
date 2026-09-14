@@ -1,12 +1,13 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { implementsClassName, implementsDataComponent, implementsNoA11yViolations } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsNoA11yViolations, implementsRef } from '#utils/testing';
 import { InputComposer } from './InputComposer';
 
 /** 값·모드·모델 3축의 controlled/uncontrolled 와 submit 동작이 계약대로인지 본다. */
 describe('InputComposer', () => {
   implementsClassName((extra) => <InputComposer {...extra} />);
   implementsDataComponent((extra) => <InputComposer {...extra} />, 'InputComposer');
+  implementsRef<HTMLFormElement>((extra) => <InputComposer {...extra} />, HTMLFormElement);
   implementsNoA11yViolations(() => <InputComposer />);
 
   it('값이 비어 있지 않을 때만 전송할 수 있고 전송 후에는 값을 비운다', () => {

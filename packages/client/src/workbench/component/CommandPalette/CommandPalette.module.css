@@ -99,7 +99,7 @@
   border-width: var(--borderWidth-thin);
   border-radius: var(--borderRadius-small);
   padding-inline: var(--space-xs);
-  /* stylelint-disable-next-line arka/spacing-tokens -- 2px 미만 base-size 토큰이 없다, 키캡
+  /* 2px 미만 base-size 토큰이 없다, 키캡
      칩의 미세 조정값이라 리터럴이 불가피하다 */
   padding-block: 1px;
   font-family: inherit;

@@ -30,7 +30,7 @@
 ## 강제:
 - **린트** `@eslint-react/no-forward-ref` — `forwardRef` 사용을 막는다.
 - **린트** `primer/direct-slot-children`·`primer/spread-props-first` — 슬롯 감싸기와 props 덮어쓰기 순서를 막는다.
-- **린트** `project-structure/folder-structure` — 폴더 하나에 파일 구성과 이름 형식을 요구한다.
+- **테스트** `packages/client/test/structure.test.ts` — 컴포넌트 폴더에 스토리·테스트·배럴이 있고 그룹 배럴이 없기를 요구한다.
 - **타입** — `aria-label` XOR `aria-labelledby`, `<Name>Props`의 원소 속성 상속.
 - **리뷰** — "이 슬롯이 둘인가 셋인가"와 "이 축이 변형인가 다른 컴포넌트인가"는 사람만 판정한다.
 

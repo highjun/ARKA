@@ -33,23 +33,23 @@ export const KeybindingTable = ({ rows, className, ref, ...props }: KeybindingTa
   <table ref={ref} {...props} data-component="KeybindingTable" className={clsx(className, styles['table'])}>
     <thead>
       <tr>
-        <th>키</th>
-        <th>커맨드</th>
-        <th>id</th>
+        <th className={styles['cell']}>키</th>
+        <th className={styles['cell']}>커맨드</th>
+        <th className={styles['cell']}>id</th>
       </tr>
     </thead>
     <tbody>
       {rows.map((row) => (
         <tr key={row.id}>
-          <td>
+          <td className={styles['cell']}>
             {row.keys.map((key) => (
               <kbd key={key} className={styles['key']}>
                 {key}
               </kbd>
             ))}
           </td>
-          <td>{row.label}</td>
-          <td>
+          <td className={styles['cell']}>{row.label}</td>
+          <td className={styles['cell']}>
             <Text size="small" tone="muted">
               {row.commandId}
             </Text>

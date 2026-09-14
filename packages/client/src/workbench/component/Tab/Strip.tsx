@@ -205,8 +205,8 @@ export const StripRootImpl = ({
   const { isOverflowing, onPointerDown: onScrollHandlePointerDown } = useStripScrollHandle(viewportRef);
 
   return (
-    <ClassNamesContext.Provider value={classNames}>
-      <StripContext.Provider value={context}>
+    <ClassNamesContext value={classNames}>
+      <StripContext value={context}>
         {/* `role="tablist"`는 실제 탭이 있는 안쪽 div 에만 건다 — 이 바깥 div 까지 tablist 로 두면
             `stripTail`의 "더보기" 버튼이 presentation 래퍼를 뚫고 tablist 의 허용되지 않는
             자식(role=button)으로 잡힌다(axe `aria-required-children`). tablist 의 유일한 실제
@@ -231,7 +231,7 @@ export const StripRootImpl = ({
           </div>
           {overlay}
         </div>
-      </StripContext.Provider>
-    </ClassNamesContext.Provider>
+      </StripContext>
+    </ClassNamesContext>
   );
 };

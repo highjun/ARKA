@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { implementsClassName, implementsDataComponent, implementsNoA11yViolations } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsNoA11yViolations, implementsRef } from '#utils/testing';
 import { TextEditor } from './TextEditor';
 
 /**
@@ -12,6 +12,7 @@ import { TextEditor } from './TextEditor';
 describe('TextEditor', () => {
   implementsClassName((extra) => <TextEditor path="a.ts" content="const a = 1;" {...extra} />);
   implementsDataComponent((extra) => <TextEditor path="a.ts" content="const a = 1;" {...extra} />, 'TextEditor');
+  implementsRef<HTMLElement>((extra) => <TextEditor path="a.ts" content="const a = 1;" {...extra} />, HTMLElement);
   implementsNoA11yViolations(() => <TextEditor path="a.ts" content="const a = 1;" />);
 
   it('경로를 레이블과 머리글에 쓴다', () => {

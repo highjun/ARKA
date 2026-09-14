@@ -213,7 +213,7 @@ export const useSplitBranch = (node: TabTreeSplit, shared: SplitContextValue) =>
     shared.onNodeResize(node.id, childId, clampSize(pointerPercent - (cumulativeSizes[index] ?? 0)));
   };
 
-  const startResize = (event: ReactPointerEvent<HTMLButtonElement>, childId: string, index: number) => {
+  const startResize = (event: ReactPointerEvent<HTMLElement>, childId: string, index: number) => {
     if (!shared.onNodeResize) return;
     event.preventDefault();
     event.currentTarget.setPointerCapture?.(event.pointerId);
@@ -232,7 +232,7 @@ export const useSplitBranch = (node: TabTreeSplit, shared: SplitContextValue) =>
     window.addEventListener('pointerup', onEnd, { once: true });
   };
 
-  const resizeByKeyboard = (event: ReactKeyboardEvent<HTMLButtonElement>, childId: string, index: number) => {
+  const resizeByKeyboard = (event: ReactKeyboardEvent<HTMLElement>, childId: string, index: number) => {
     if (!shared.onNodeResize) return;
     const decrementKey = state.orientation === 'horizontal' ? 'ArrowLeft' : 'ArrowUp';
     const incrementKey = state.orientation === 'horizontal' ? 'ArrowRight' : 'ArrowDown';

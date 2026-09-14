@@ -1,6 +1,6 @@
 import { clsx } from 'clsx';
 import { useCallback, useMemo, useState } from 'react';
-import type { ChangeEvent, FormHTMLAttributes, KeyboardEvent } from 'react';
+import type { ChangeEvent, FormHTMLAttributes, KeyboardEvent, Ref } from 'react';
 import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import styles from './InputComposer.module.css';
 import { Button, SegmentedControl } from '@primer/react';
@@ -68,6 +68,8 @@ const getSelectedModel = (models: readonly InputComposerModelItem[], modelId?: s
 
 /** `onSubmit`을 가로챈다 — 폼 이벤트가 아니라 입력 내용과 모드를 준다. */
 export interface InputComposerProps extends Omit<FormHTMLAttributes<HTMLFormElement>, 'children' | 'onSubmit'> {
+  /** 루트 `form`으로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLFormElement>;
   /** controlled 모드의 현재 입력값. */
   readonly value?: string;
   /** uncontrolled 모드의 초깃값. */
@@ -117,6 +119,7 @@ export interface InputComposerProps extends Omit<FormHTMLAttributes<HTMLFormElem
  * 위해 `onModelSelect`도 `selectModel`에서 별도로 호출한다(둘 다 같은 시점에 함께 불린다).
  */
 export const InputComposer = ({
+  ref,
   value,
   defaultValue = '',
   disabled = false,
@@ -213,6 +216,7 @@ export const InputComposer = ({
 
   return (
     <form
+      ref={ref}
       className={clsx(className, styles['root'])}
       onSubmit={(event) => {
         event.preventDefault();

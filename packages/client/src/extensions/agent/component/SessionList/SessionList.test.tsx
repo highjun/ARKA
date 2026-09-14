@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { implementsClassName, implementsDataComponent, implementsNoA11yViolations } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsNoA11yViolations, implementsRef } from '#utils/testing';
 import { SessionList } from './SessionList';
 import type { AgentSessionItem } from './SessionList';
 import { Menu } from '#component/Menu';
@@ -15,6 +15,7 @@ const SESSIONS_WITH_ARCHIVED: AgentSessionItem[] = [...SESSIONS, { id: 'c', titl
 describe('SessionList', () => {
   implementsClassName((extra) => <SessionList sessions={SESSIONS} {...extra} />);
   implementsDataComponent((extra) => <SessionList sessions={SESSIONS} {...extra} />, 'SessionList');
+  implementsRef<HTMLDivElement>((extra) => <SessionList sessions={SESSIONS} {...extra} />, HTMLDivElement);
   implementsNoA11yViolations(() => <SessionList sessions={SESSIONS} />);
 
   describe('Markup', () => {

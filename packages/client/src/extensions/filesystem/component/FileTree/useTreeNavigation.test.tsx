@@ -91,6 +91,8 @@ const TreeNavigationFixture = ({
           ref={registerNode(node.item.id)}
           role="treeitem"
           aria-label={node.item.name}
+          // `treeitem`은 선택 여부를 항상 알려야 한다(WAI-ARIA). 이 흉내는 선택을 안 보므로 false 고정.
+          aria-selected={false}
           tabIndex={node.item.id === effectiveFocusedId ? 0 : -1}
           onFocus={() => setFocusedId(node.item.id)}
           onKeyDown={onRowKeyDown(node)}

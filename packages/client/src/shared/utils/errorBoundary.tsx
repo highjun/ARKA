@@ -14,6 +14,9 @@ type ErrorBoundaryState = { readonly error: Error | null };
 /**
  * 렌더 중 오류가 앱 전체를 빈 화면으로 만드는 것을 막는다.
  *
+ * 자기 DOM을 그리지 않아 `component/`가 아니라 여기 산다 — `PortalProvider`가 같은 이유로
+ * 이 폴더에 있다(→ ADR 0007). 그래서 `data-component`도 `className`도 없다.
+ *
  * 클래스 컴포넌트인 것은 React가 `componentDidCatch`를 함수 컴포넌트에 주지 않아서다.
  * 복구는 하지 않는다 — 어떤 상태에서 죽었는지 모르는 채로 다시 그리면 같은 자리에서 또 죽는다.
  * 대신 fallback이 새로고침을 권한다.

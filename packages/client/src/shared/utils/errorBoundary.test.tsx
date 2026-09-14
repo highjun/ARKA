@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ErrorBoundary } from './ErrorBoundary';
+import { ErrorBoundary } from './errorBoundary';
 
 const Bomb = (): never => {
   throw new Error('폭발');

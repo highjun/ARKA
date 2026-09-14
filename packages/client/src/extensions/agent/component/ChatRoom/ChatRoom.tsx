@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import type { HTMLAttributes, ReactNode } from 'react';
+import type { HTMLAttributes, ReactNode, Ref } from 'react';
 import styles from './ChatRoom.module.css';
 import { IconButton } from '#component/IconButton';
 import { Icon } from '#component/Icon';
@@ -7,7 +7,7 @@ import { Panel } from '#component/Panel';
 import { InputComposer } from '../InputComposer';
 import { Message } from '../Message';
 import { StatusIndicator } from '../StatusIndicator';
-import type { MessageRole } from '../Message';
+import type { MessageAuthor } from '../Message';
 import type { InputComposerMode } from '../InputComposer';
 import type { StatusIndicatorStatus } from '../StatusIndicator';
 
@@ -16,7 +16,7 @@ export interface ChatRoomMessage {
   /** 메시지 고유 id — 리스트 렌더링의 `key`로도 쓰인다. */
   readonly id: string;
   /** 메시지 발화자 역할. */
-  readonly role: MessageRole;
+  readonly author: MessageAuthor;
   /** 발화 시각(ms epoch) — 상대 시간 표시에 쓰인다. */
   readonly timestamp?: number;
   /** 아바타 — 커스텀 노드 또는 이미지 URL 문자열. */
@@ -27,6 +27,8 @@ export interface ChatRoomMessage {
 
 /** `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다. */
 export interface ChatRoomProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {
+  /** 루트 `Panel`로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLDivElement>;
   /** 헤더에 표시할 채팅방 제목. */
   readonly title?: string;
   /** 헤더의 상태 인디케이터. */
@@ -58,6 +60,7 @@ export interface ChatRoomProps extends Omit<HTMLAttributes<HTMLDivElement>, 'tit
 
 /** 헤더·로그·작성창을 세로로 쌓은 대화 한 판. 로그는 `messages` 또는 `children`으로 채운다. */
 export const ChatRoom = ({
+  ref,
   title = 'Agent chat',
   status = 'running',
   messages = [],
@@ -92,6 +95,7 @@ export const ChatRoom = ({
   return (
     <section className={clsx(className, styles['root'])} {...props} data-component="ChatRoom">
       <Panel
+        ref={ref}
         title={
           <div className={styles['titleGroup']}>
             <StatusIndicator status={status} />
@@ -106,7 +110,7 @@ export const ChatRoom = ({
               <div className={styles['empty']}>{emptyLabel}</div>
             ) : (
               messages.map((message) => (
-                <Message key={message.id} role={message.role} timestamp={message.timestamp} avatar={message.avatar}>
+                <Message key={message.id} author={message.author} timestamp={message.timestamp} avatar={message.avatar}>
                   {message.content}
                 </Message>
               ))

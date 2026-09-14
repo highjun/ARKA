@@ -5,11 +5,28 @@
  * 직접 적으면 라이트/다크가 갈리는 순간 한쪽이 깨진다. 규칙마다 `message`로 대안을 적는다.
  */
 export default {
-  extends: ["stylelint-config-standard"],
+  extends: ["stylelint-config-standard", "@primer/stylelint-config"],
   // **검사 대상은 여기가 정한다** — 스크립트는 `"**/*.css"`만 넘긴다. 점 폴더는 stylelint가 기본으로
   // 건너뛰지만 그래도 적어 둔다: 그 동작이 바뀌면 번들 CSS가 쏟아진다(직접 주면 5122건).
   ignoreFiles: ["**/node_modules/**", "**/.output/**"],
+  overrides: [
+    {
+      // 리셋과 마크다운 렌더러는 **원소 자체**를 스타일한다 — 리셋은 그것이 정의이고, 마크다운은
+      // 그려지는 원소를 우리가 만들지 않아서(렌더러가 낸다) 클래스를 붙일 자리가 없다. GitHub의
+      // `markdown-body`도 같은 모양이다. 컴포넌트 CSS에는 이 규칙이 그대로 걸린다.
+      files: ["src/workbench/reset.css", "src/shared/component/Markdown/Markdown.module.css"],
+      rules: { "selector-max-type": null, "selector-max-id": null, "selector-max-specificity": null },
+    },
+  ],
   rules: {
+    // Primer 자신의 `--space-*` 토큰(primitives 11에 정의돼 있고 문서 주석까지 달려 있다)을 이
+    // 규칙이 거부한다 — 규칙이 그 토큰 세트보다 낡았다. 값·간격 토큰은 `primer/colors` 등
+    // 나머지 규칙과 리뷰가 본다.
+    "primer/spacing": null,
+    // 토큰 정의가 `@primer/primitives`의 CSS 안에 있어서 이 규칙이 해석하지 못한다 — 우리
+    // 파일에 없는 이름을 전부 미지의 것으로 본다(172건). 실재 여부는 타입이 아니라 브라우저가
+    // 판정하고, 없는 토큰은 값이 비어 화면에서 즉시 드러난다(2026-08-23에 그렇게 발견했다).
+    "csstools/value-no-unknown-custom-properties": null,
     "color-no-hex": [true, { message: "색을 직접 적지 마세요 — Primer 토큰(`var(--fgColor-*)`, `var(--bgColor-*)`)을 참조하세요." }],
     "color-named": ["never", { message: "색 이름을 쓰지 마세요 — Primer 토큰을 참조하세요." }],
     "function-disallowed-list": [

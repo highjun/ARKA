@@ -36,7 +36,7 @@
 | `index.ts` | 테스트 | |
 | 린트·tsconfig 설정 | | |
 
-**"이 셋으로 나눈 게 맞는가"는 사람만 판정할 수 있다.** `arka/file-names`는 형식만, `arka/slices-are-siblings`는 방향만 본다. 그래서 폴더 단위가 정독이다.
+**"이 셋으로 나눈 게 맞는가"는 사람만 판정할 수 있다.** 린트는 형식과 방향만 본다. 그래서 폴더 단위가 정독이다.
 
 ### 검토 필수 지점
 
@@ -92,7 +92,7 @@
 <감수하는 비용·위험. 감수할 것이 없으면 절을 통째로 뺀다.>
 
 ## 강제:
-- **린트** `arka/view-only-uses-view-model` — <무엇을 막는지>
+- **린트** `import-x/no-restricted-paths` — <무엇을 막는지>
 - **리뷰** — "이 셋으로 나눈 게 맞는가"는 사람만 판정한다
 
 ## 상태:
@@ -109,7 +109,7 @@
 - **대가** — Consequences의 **부정 절반만**. "결과"로 두면 자화자찬 절이 된다. **`기각:`으로 설명되는 것은 여기 다시 쓰지 않는다** — 대안을 버려서 잃은 것(예: Turborepo를 기각했으니 빌드 캐싱이 없다)은 이미 `기각:`의 대우다. `대가:`에는 **고른 길 자체가 무는 값**만 적는다.
 - **강제** — 값은 넷뿐: **린트 / 타입 / 테스트 / 리뷰.** 의 "이 코드가 잘못 동작하면 누가 알려주는가"를 결정 자신에게 되묻는 절이다.
     - **`아무도`라는 값은 없다.** 결정이 ADR에 적혀 있고 이 저장소가 리뷰를 하는 한 최소한 `리뷰`가 본다. "아무도 안 본다"는 사실이 아니고, ADR이 스스로를 무의미하다고 선언하게 만든다.
-    - **린트는 규칙 ID로 적는다** — `arka/slices-are-siblings`, `import-x/no-restricted-paths` 처럼. 산문으로 적으면 기계가 실재를 대조할 수 없다. 규칙 하나가 여러 설정을 갖는 경우(zone 등)는 ID 뒤에 무엇을 막는지 덧붙인다.
+    - **린트는 규칙 ID로 적는다** — `import-x/no-restricted-paths`, `@eslint-react/no-forward-ref` 처럼. 산문으로 적으면 기계가 실재를 대조할 수 없다. 규칙 하나가 여러 설정을 갖는 경우(zone 등)는 ID 뒤에 무엇을 막는지 덧붙인다.
     - **`리뷰`만 적힌 줄이 다음 린트 규칙의 대기열**이다. `grep -- '- \*\*리뷰\*\*' docs/adr/*.md`로 뽑는다 — 따로 목록을 두지 않는다.
 - **상태** — 한 줄. 어휘는 셋뿐이다.
 
@@ -125,7 +125,7 @@
 ### 쓰지 않는 것
 
 - **"현재 코드는 어떻다"를 본문에 쓰지 않는다.** 결정은 과거의 사실이라 변하지 않지만 코드는 변한다. 실측을 문서에 캐시하면 코드가 그 격차를 메운 순간 **역방향 거짓말**이 된다 — 이 저장소가 세 번 겪었다. 격차는 할 일 태스크(`docs/tasks/`)로 나간다(제목에 `ADR NNNN`).
-- **지금 있는 폴더를 열거하지 않는다.** 파일트리는 *규칙의 모양*만 남기고 인스턴스 이름(`filesystem`·`git` 같은)은 지운다. `arka/slices-are-siblings`가 슬라이스를 열거하지 않고 경로에서 뽑는 것과 같은 이유다.
+- **지금 있는 폴더를 열거하지 않는다.** 파일트리는 *규칙의 모양*만 남기고 인스턴스 이름(`filesystem`·`git` 같은)은 지운다. 규칙이 인스턴스가 아니라 모양을 보는 것과 같은 이유다.
 - **구현 세부·릴리스 노트를 쓰지 않는다.** 환경변수명·번들러·스크립트 경로는 코드가 정본이고, 필요하면 코드가 `(→ ADR NNNN)`으로 역참조한다.
 
 ### 길이
@@ -185,11 +185,11 @@
 - `shared/`는 아무것도 import할 수 없다. 공통 추출은 아래로만 한다.
 - client는 `core/ workbench/ extensions/ shared/` 넷이다. 의존 방향은 `eslint.config.ts`의 zone이 강제한다.
 - **빈 레이어를 미리 만들지 않는다.** 실제 I/O나 유스케이스가 생길 때 폴더를 만든다.
-- 파일 이름: 클래스·React 컴포넌트·계약(`I<Name>.ts`)은 PascalCase, 함수 모듈은 camelCase. 폴더는 camelCase(컴포넌트 폴더는 그 컴포넌트 이름). 하이픈·밑줄은 쓰지 않는다. **지금은 리뷰로 본다** — 이것을 보던 자작 규칙은 껐고 `project-structure/folder-structure`가 대신 든다. → [ADR 0011](adr/0011-lint-off-the-shelf.md)
+- 파일 이름: 클래스·React 컴포넌트·계약(`I<Name>.ts`)은 PascalCase, 함수 모듈은 camelCase. 폴더는 camelCase(컴포넌트 폴더는 그 컴포넌트 이름). 하이픈·밑줄은 쓰지 않는다. **지금은 리뷰로 본다** — 이것을 보던 자작 규칙은 껐다. → [ADR 0011](adr/0011-lint-off-the-shelf.md)
 - **`model/`은 사실과 사건을, `viewmodel/`은 화면 상태를 다룬다.** `model`→`viewmodel`은 이벤트로, `viewmodel`→`view`는 바인딩으로 잇는다. atom은 ViewModel이 소유한다. → [ADR 0007](adr/0007-client-layers.md)
 - **`model/`은 도메인 타입·규칙(순수 로직)과 `infra/`가 구현할 인터페이스 선언까지다.** React·fetch·window·전역 상태를 런타임으로 알지 않는다.
 - **`view/`가 부르는 훅은 `useViewModel` 하나뿐이다.** 로컬 상태가 필요하면 ViewModel로 옮긴다. DI 접근(`useAppContext`·`resolve`)도 하지 않는다.
-- **위 두 줄은 지금 리뷰로 본다.** 이것을 보던 자작 규칙 여섯은 주인 ADR이 없어 껐다. 주인은 [ADR 0007](adr/0007-client-layers.md)로 세웠고, 되살리는 것은 자작이 아니라 `boundaries/*`와 코어 선택자다 — 위반을 0으로 만든 라운드에서 켠다. → [ADR 0011](adr/0011-lint-off-the-shelf.md)
+- **위 두 줄은 린트가 본다** — `no-restricted-syntax`가 `view/`의 훅과 DI 접근을, `@typescript-eslint/no-restricted-imports`가 `model/`의 상태 라이브러리를 막는다(`import type`은 허용한다). → [ADR 0011](adr/0011-lint-off-the-shelf.md)
 - CSS는 `stylelint`가 본다 — client의 `lint`가 ESLint에 이어 돌린다. 값은 Primer 토큰만 참조한다 — 색·간격·테두리·그림자·글꼴에 리터럴을 쓰지 않는다. → [ADR 0009](adr/0009-primer-first.md)
 
 ## 컴포넌트

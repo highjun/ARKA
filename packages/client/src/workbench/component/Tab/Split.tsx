@@ -82,12 +82,12 @@ export interface SplitLeafHandlers {
 
 /** 나누는 선(버튼)이 받는 핸들러 — 포인터와 키보드 둘 다로 크기를 바꾼다. */
 export interface SplitResizeHandlers {
-  readonly onPointerEnter: PointerEventHandler<HTMLButtonElement>;
-  readonly onPointerLeave: PointerEventHandler<HTMLButtonElement>;
-  readonly onFocus: FocusEventHandler<HTMLButtonElement>;
-  readonly onBlur: FocusEventHandler<HTMLButtonElement>;
-  readonly onPointerDown: PointerEventHandler<HTMLButtonElement>;
-  readonly onKeyDown: KeyboardEventHandler<HTMLButtonElement>;
+  readonly onPointerEnter: PointerEventHandler<HTMLElement>;
+  readonly onPointerLeave: PointerEventHandler<HTMLElement>;
+  readonly onFocus: FocusEventHandler<HTMLElement>;
+  readonly onBlur: FocusEventHandler<HTMLElement>;
+  readonly onPointerDown: PointerEventHandler<HTMLElement>;
+  readonly onKeyDown: KeyboardEventHandler<HTMLElement>;
 }
 
 /** 자식 하나가 그릴 때 보는 파생 상태. `style`에 이미 계산된 비율이 들어 있다. */
@@ -186,9 +186,13 @@ const ResizeHandle = ({ state }: { state: SplitChildState }) => {
   const classNames = useTabClassNames();
 
   return state.isLast ? null : (
-    <button
-      type="button"
+    // `button`이 아니라 포커스 받는 `separator`다 — 창을 나누는 손잡이의 정본 패턴이고
+    // (WAI-ARIA window splitter), `button` 역할은 `aria-orientation`을 받지 않는다. 키보드
+    // 조작은 `resizeHandlers`의 `onKeyDown`이 이미 든다.
+    <div
       {...state.resizeHandlers}
+      role="separator"
+      tabIndex={0}
       aria-label={`Resize tab group ${state.node.id}`}
       aria-orientation={state.orientation === 'horizontal' ? 'vertical' : 'horizontal'}
       data-orientation={state.orientation}
@@ -414,15 +418,15 @@ export const SplitRootImpl = ({
   const rootPropsWithData = { ...rootProps, 'data-component': 'Tab' };
 
   return (
-    <ClassNamesContext.Provider value={classNames}>
-      <SplitContext.Provider value={context}>
+    <ClassNamesContext value={classNames}>
+      <SplitContext value={context}>
         {visibleTree.kind === 'leaf' ? (
           <RootLeafSection ref={ref} leaf={visibleTree} rootProps={rootPropsWithData} className={className} {...passthrough} />
         ) : (
           <SplitBranch ref={ref} node={visibleTree} isRoot rootProps={rootPropsWithData} className={className} {...passthrough} />
         )}
-      </SplitContext.Provider>
-    </ClassNamesContext.Provider>
+      </SplitContext>
+    </ClassNamesContext>
   );
 };
 SplitRootImpl.displayName = 'Tab.Split';
