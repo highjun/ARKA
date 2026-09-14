@@ -1,8 +1,8 @@
 import { useViewModel } from '#core/viewmodel';
 import { Spinner } from '@primer/react';
 import { Blankslate } from '@primer/react/experimental';
+import { DiffView } from '../component/DiffView';
 import { SourceControlViewModelToken } from '../viewmodel/ISourceControlViewModel';
-import styles from './DiffTabView.module.css';
 
 /**
  * diff 탭. 어느 변경인지는 탭 id(`staged:path` / `wt:path`)가 말한다. `openDiff`는 멱등이라 렌더마다 부른다.
@@ -37,23 +37,5 @@ export const DiffTabView = ({ tabId }: { readonly tabId: string }) => {
       </Blankslate>
     );
   }
-  return (
-    <pre data-component="DiffTabView" className={styles['root']}>
-      {diff.text.split('\n').map((line, index) => (
-        <span key={index} className={styles['line']} data-kind={kindOf(line)}>
-          {line}
-          {'\n'}
-        </span>
-      ))}
-    </pre>
-  );
-};
-
-const kindOf = (line: string): 'add' | 'del' | 'hunk' | 'meta' | 'ctx' => {
-  if (line.startsWith('+++') || line.startsWith('---')) return 'meta';
-  if (line.startsWith('@@')) return 'hunk';
-  if (line.startsWith('+')) return 'add';
-  if (line.startsWith('-')) return 'del';
-  if (line.startsWith('diff ') || line.startsWith('index ')) return 'meta';
-  return 'ctx';
+  return <DiffView data-component="DiffTabView" text={diff.text} />;
 };

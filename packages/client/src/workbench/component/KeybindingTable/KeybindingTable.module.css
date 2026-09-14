@@ -1,0 +1,22 @@
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-body-size-small);
+}
+
+.table th,
+.table td {
+  padding: var(--space-xs) var(--space-sm);
+  text-align: left;
+  border-bottom: var(--borderWidth-thin) solid var(--borderColor-muted);
+}
+
+.key {
+  display: inline-block;
+  padding: 0 var(--space-xs);
+  margin-right: var(--space-xs);
+  font-family: var(--fontStack-monospace);
+  background-color: var(--bgColor-muted);
+  border: var(--borderWidth-thin) solid var(--borderColor-default);
+  border-radius: var(--borderRadius-small);
+}

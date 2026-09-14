@@ -1,8 +1,8 @@
 import { useViewModel } from '#core/viewmodel';
-import { ActionList, Button, Spinner, TextInput } from '@primer/react';
-import { IconButton } from '#component/IconButton';
+import { Button, Spinner, TextInput } from '@primer/react';
 import { Icon } from '#component/Icon';
 import { Text } from '#component/Text';
+import { ChangeList } from '../component/ChangeList';
 import type { ChangeRow } from '../viewmodel/ISourceControlViewModel';
 import { SourceControlViewModelToken } from '../viewmodel/ISourceControlViewModel';
 import styles from './SourceControlView.module.css';
@@ -26,36 +26,6 @@ export const SourceControlView = ({ onOpenTab }: { readonly onOpenTab: (tab: { r
   }
 
   const openDiff = (row: ChangeRow) => onOpenTab({ id: `${row.staged ? 'staged' : 'wt'}:${row.path}`, kind: DIFF_TAB_KIND, title: `${row.path}${row.staged ? ' (스테이지)' : ''}` });
-  const group = (title: string, rows: readonly ChangeRow[], action: { label: string; iconId: 'add' | 'close'; onAll: () => void; onOne: (path: string) => void }) => (
-    <ActionList.Group>
-      <div className={styles['groupHeading']}>
-        <ActionList.GroupHeading as="h3">
-          {title} <Text size="small" tone="muted">{rows.length}</Text>
-        </ActionList.GroupHeading>
-        {rows.length > 0 ? <IconButton size="small" variant="invisible" aria-label={`${title} 전부 ${action.label}`} icon={() => <Icon iconId={action.iconId} size="sm" />} onClick={action.onAll} /> : null}
-      </div>
-      {rows.map((row) => (
-        <ActionList.Item key={`${row.staged ? 's' : 'w'}:${row.path}`} onSelect={() => openDiff(row)}>
-          <ActionList.LeadingVisual>
-            <span className={styles['badge']} data-badge={row.badge}>{row.badge}</span>
-          </ActionList.LeadingVisual>
-          <span className={styles['path']}>{row.path}</span>
-          <ActionList.TrailingVisual>
-            <IconButton
-              size="small"
-              variant="invisible"
-              aria-label={`${row.path} ${action.label}`}
-              icon={() => <Icon iconId={action.iconId} size="sm" />}
-              onClick={(event) => {
-                event.stopPropagation();
-                action.onOne(row.path);
-              }}
-            />
-          </ActionList.TrailingVisual>
-        </ActionList.Item>
-      ))}
-    </ActionList.Group>
-  );
 
   return (
     <div data-component="SourceControlView" className={styles['root']}>
@@ -82,10 +52,18 @@ export const SourceControlView = ({ onOpenTab }: { readonly onOpenTab: (tab: { r
       {viewModel.failure === null ? null : <Text size="small" tone="danger" className={styles['failure']}>{viewModel.failure}</Text>}
       {viewModel.lastCommit === null ? null : <Text size="small" tone="muted" className={styles['failure']}>커밋됨 {viewModel.lastCommit}</Text>}
       <div className={styles['lists']}>
-        <ActionList>
-          {group('스테이지된 변경', viewModel.staged, { label: '해제', iconId: 'close', onAll: () => viewModel.unstageAll(), onOne: (path) => viewModel.unstage(path) })}
-          {group('변경 사항', viewModel.unstaged, { label: '스테이지', iconId: 'add', onAll: () => viewModel.stageAll(), onOne: (path) => viewModel.stage(path) })}
-        </ActionList>
+        <ChangeList
+          heading="스테이지된 변경"
+          entries={viewModel.staged}
+          action={{ label: '해제', iconId: 'close', onAll: () => viewModel.unstageAll(), onOne: (path) => viewModel.unstage(path) }}
+          onSelect={(entry) => openDiff({ ...entry, staged: true })}
+        />
+        <ChangeList
+          heading="변경 사항"
+          entries={viewModel.unstaged}
+          action={{ label: '스테이지', iconId: 'add', onAll: () => viewModel.stageAll(), onOne: (path) => viewModel.stage(path) }}
+          onSelect={(entry) => openDiff({ ...entry, staged: false })}
+        />
         {viewModel.staged.length + viewModel.unstaged.length === 0 && !viewModel.loading ? <Text size="small" tone="muted" className={styles['failure']}>변경 없음</Text> : null}
       </div>
     </div>
