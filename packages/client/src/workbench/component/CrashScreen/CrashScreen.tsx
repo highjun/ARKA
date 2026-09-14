@@ -1,5 +1,4 @@
-import { Button } from '@primer/react';
-import { Heading } from '#component/Heading';
+import { Button, Heading } from '@primer/react';
 import { Text } from '#component/Text';
 import styles from './CrashScreen.module.css';
 
@@ -15,7 +14,7 @@ export interface CrashScreenProps {
  */
 export const CrashScreen = ({ message, onReload }: CrashScreenProps) => (
   <div data-component="CrashScreen" role="alert" className={styles['root']}>
-    <Heading level={1}>화면을 그리다 오류가 났다</Heading>
+    <Heading as="h1" variant="large">화면을 그리다 오류가 났다</Heading>
     <Text tone="muted">저장하지 않은 변경은 남아 있지 않을 수 있다. 다시 불러오면 마지막 저장 상태로 돌아간다.</Text>
     <pre className={styles['detail']}>{message}</pre>
     <Button variant="primary" onClick={onReload}>

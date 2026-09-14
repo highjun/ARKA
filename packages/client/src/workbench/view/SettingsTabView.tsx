@@ -1,5 +1,5 @@
 import { useViewModel } from '#core/viewmodel';
-import { Heading } from '#component/Heading';
+import { Heading } from '@primer/react';
 import { Text } from '#component/Text';
 import { SettingsViewModelToken } from '../viewmodel/ISettingsViewModel';
 import styles from './SettingsTabView.module.css';
@@ -20,7 +20,7 @@ export const SettingsTabView = () => {
   return (
     <div data-component="SettingsTabView" className={styles['root']}>
       <section className={styles['section']}>
-        <Heading level={2}>테마</Heading>
+        <Heading as="h2" variant="medium">테마</Heading>
         <fieldset className={styles['options']}>
           <legend className={styles['legend']}>화면 밝기</legend>
           {THEMES.map((theme) => (
@@ -32,14 +32,14 @@ export const SettingsTabView = () => {
         </fieldset>
       </section>
       <section className={styles['section']}>
-        <Heading level={2}>에이전트</Heading>
+        <Heading as="h2" variant="medium">에이전트</Heading>
         <label className={styles['option']}>
           <input type="checkbox" checked={viewModel.agentConfirmWrites} onChange={(event) => viewModel.setAgentConfirmWrites(event.target.checked)} />
           <Text>파일을 바꾸기 전에 묻기 — 끄면 에이전트가 write_file·create_entry를 바로 실행한다</Text>
         </label>
       </section>
       <section className={styles['section']}>
-        <Heading level={2}>밀도</Heading>
+        <Heading as="h2" variant="medium">밀도</Heading>
         <fieldset className={styles['options']}>
           <legend className={styles['legend']}>행 높이와 터치 타겟</legend>
           {DENSITIES.map((density) => (

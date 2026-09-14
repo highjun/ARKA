@@ -4,7 +4,7 @@ import { TabContentRegistryToken } from '../model/ITabContentRegistry';
 import { ShellViewModelToken } from '../viewmodel/IShellViewModel';
 import { matchMenuItems } from '#core/menu';
 import { useViewModel } from '#core/viewmodel';
-import { Button } from '@primer/react';
+import { Banner, Button } from '@primer/react';
 import { ContextMenu } from '#component/ContextMenu';
 import { Icon } from '#component/Icon';
 import { ModeToggle } from '#component/ModeToggle';
@@ -14,7 +14,6 @@ import { CommandPalette } from '../component/CommandPalette';
 import { NotificationList } from '../component/NotificationList';
 import { Shell } from '../component/Shell';
 import { Tab } from '../component/Tab';
-import { UpdateBanner } from '../component/UpdateBanner';
 import type { IconId } from '#component/Icon';
 import type { TabItem, TabTreeNode } from '../component/Tab';
 import type { ReactNode } from 'react';
@@ -182,7 +181,20 @@ export const ShellView = () => {
 
   return (
     <>
-      {viewModel.isClientOutdated ? <UpdateBanner onReload={() => viewModel.reloadApp()} /> : null}
+      {/* 닫을 수 없다 — 낡은 채로 쓰면 요청이 426으로 죽는다. `role="status"`로 랜드마크 대신
+          라이브 영역을 만든다: 이 띠는 처음부터 있는 것이 아니라 프로토콜이 어긋난 순간 나타나므로
+          나타났다는 사실이 읽혀야 한다. `flush`는 화면 맨 위에 모서리 없이 붙이려는 것이다. */}
+      {viewModel.isClientOutdated ? (
+        <Banner
+          role="status"
+          variant="warning"
+          layout="compact"
+          flush
+          title="새 버전이 있다"
+          description="이 화면은 서버와 다른 프로토콜을 쓰고 있다."
+          primaryAction={<Banner.PrimaryAction onClick={() => viewModel.reloadApp()}>다시 불러오기</Banner.PrimaryAction>}
+        />
+      ) : null}
       <Shell
         colorMode={viewModel.theme as 'light' | 'dark'}
         overlays={
