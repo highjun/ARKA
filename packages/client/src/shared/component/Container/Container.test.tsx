@@ -4,9 +4,9 @@ import { describe, expect, it } from 'vitest';
 import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from '#utils/testing';
 import { Container } from './Container';
 
-/** 다섯 조각을 감싼 구조가 계약대로 동작하는지 본다 — 내용은 Viewport 안에 들어가고 ref 도 거기 꽂힌다. */
+/** 스크롤하는 원소가 루트 자신인지 본다 — 내용이 그 안에 들어가고 ref 도 거기 꽂힌다. */
 describe('Container', () => {
-  it('children 을 Viewport 안에 렌더링하고 ref 도 거기에 넘긴다', () => {
+  it('children 을 스크롤하는 원소 안에 렌더링하고 ref 도 거기에 넘긴다', () => {
     const ref = createRef<HTMLDivElement>();
 
     render(<Container ref={ref}>content</Container>);
@@ -27,14 +27,13 @@ describe('Container', () => {
   });
 
   describe('scroll="none"', () => {
-    it('Radix ScrollArea 없이 순수 div로 렌더한다 — 스크롤바 파츠가 없다', () => {
+    it('자르지 않는다 — overflow 를 켜지 않는 축이다', () => {
       const { container } = render(<Container scroll="none">content</Container>);
 
-      expect(screen.getByText('content')).toBeInTheDocument();
-      expect(container.querySelectorAll('[data-radix-scroll-area-viewport]')).toHaveLength(0);
+      expect(container.querySelector('[data-scroll="none"]')).toBe(screen.getByText('content'));
     });
 
-    it('ref 를 그 div 에 직접 꽂는다', () => {
+    it('ref 를 그 원소에 직접 꽂는다', () => {
       const ref = createRef<HTMLDivElement>();
 
       render(

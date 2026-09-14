@@ -1,126 +1,50 @@
-import type { HTMLAttributes, ReactNode, Ref } from 'react';
+import type { HTMLAttributes, Ref } from 'react';
 import { clsx } from 'clsx';
 import styles from './Container.module.css';
-import * as Primitive from '@radix-ui/react-scroll-area';
 
 /** `none`은 테두리와 배경을 지운다 — 자리는 그대로 차지한다. */
 export type ContainerChrome = 'visible' | 'none';
-/** 마운트할 스크롤바 축을 정한다 — 안 마운트한 축은 Radix가 그 방향 스크롤 자체를 안 켠다. */
+
+/**
+ * 어느 축이 넘칠 때 스크롤할지. `'none'`은 아예 자르지 않는다(높이 제약 없는 카드).
+ *
+ * 축을 고르는 이유는 한쪽만 켜야 하는 자리가 있어서다 — `Tab`의 탭 스트립은 가로로만 넘쳐야
+ * 하는데 양쪽을 켜면 아이콘의 1px 광학 보정 같은 미세한 세로 오버플로에도 세로 스크롤바가
+ * 함께 뜬다(2026-08-31 지적).
+ */
 export type ContainerScroll = 'auto' | 'none' | 'horizontal' | 'vertical';
 
-/** `headless.tsx`와 `styled.tsx` 사이의 계약이었던 것 — 조각이 다섯이라 슬롯마다 다른 클래스가
- * 필요해 `classNames`로 묶는다. 이름을 `*Props`로 안 끝내는 건 의도적이다 — `scrollbars`가
- * 리터럴 유니언 배열이라 lint의 "컨트롤 가능한 prop 탐지"가 `*Props`로 끝나는 선언을 전부
- * 훑는데, 이건 공개 Props가 아니라 `Container` 내부에서만 쓰는 조립 계약이라 그 탐지 대상에서
- * 빠져야 한다. */
-interface ScrollAreaRootConfig {
-  /** 루트 원소로 그대로 통과한다. */
-  readonly ref?: Ref<HTMLDivElement>;
-  readonly className?: string;
-  readonly children?: ReactNode;
-  /** 마운트할 Scrollbar 축 — 마운트 안 한 축은 Radix가 애초에 그 방향 스크롤 자체를 안 켠다. */
-  readonly scrollbars: readonly ('horizontal' | 'vertical')[];
-  readonly classNames?: {
-    readonly viewport?: string;
-    readonly scrollbarVertical?: string;
-    readonly scrollbarHorizontal?: string;
-    readonly thumb?: string;
-    readonly corner?: string;
-  };
-}
-
-/**
- * `@radix-ui/react-scroll-area`를 아는 유일한 함수 — 이 파일에서 이 라이브러리를 직접 참조하는
- * 곳은 여기뿐이다. Container·Viewport·Scrollbar·Thumb·Corner 다섯 조각을 여기서 조립해 감추고, 밖에는
- * `<Container>{children}</Container>` 하나로 보인다.
- *
- * ref 는 Viewport 로 보낸다 — 스크롤 위치를 읽거나 옮기는 대상이 항상 Viewport 이기 때문이다
- * (client-architecture.md 1.3 Component "DOM 접근").
- */
-const ScrollAreaRoot = ({ className, classNames, children, scrollbars, ref, ...props }: ScrollAreaRootConfig) => (
-  <Primitive.Root className={className} {...props} data-component="Container">
-    <Primitive.Viewport ref={ref} className={classNames?.viewport}>
-      {children}
-    </Primitive.Viewport>
-    {scrollbars.includes('vertical') && (
-      <Primitive.Scrollbar orientation="vertical" className={classNames?.scrollbarVertical}>
-        <Primitive.Thumb className={classNames?.thumb} />
-      </Primitive.Scrollbar>
-    )}
-    {scrollbars.includes('horizontal') && (
-      <Primitive.Scrollbar orientation="horizontal" className={classNames?.scrollbarHorizontal}>
-        <Primitive.Thumb className={classNames?.thumb} />
-      </Primitive.Scrollbar>
-    )}
-    <Primitive.Corner className={classNames?.corner} />
-  </Primitive.Root>
-);
-ScrollAreaRoot.displayName = 'Container.ScrollAreaRoot';
-
-const SCROLLBARS_BY_AXIS: Record<Exclude<ContainerScroll, 'none'>, readonly ('horizontal' | 'vertical')[]> = {
-  auto: ['horizontal', 'vertical'],
-  horizontal: ['horizontal'],
-  vertical: ['vertical'],
-};
-
-/**
- * props 를 라이브러리 타입에서 파생시키지 않고 직접 선언한다 — 파생시키면 계약이 그 라이브러리를
- * 따라 바뀐다.
- */
+/** 자기 치수를 갖지 않는다 — 높이·폭은 쓰는 쪽이 `className`으로 준다. */
 export interface ContainerProps extends HTMLAttributes<HTMLDivElement> {
-  /** 루트 원소로 그대로 통과한다. */
+  /** 스크롤하는 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLDivElement>;
   /** 테두리·배경·radius. 프레임 안쪽 우물로 쓸 때는 `none`. */
   readonly chrome?: ContainerChrome;
-  /**
-   * `'none'`이면 Radix ScrollArea 없이 순수 테두리 박스로 렌더한다 — `overflow: visible`이라
-   * 내용이 넘쳐도 자르지 않는다. 높이 제약이 없는 카드처럼 "그냥 테두리 있는 상자"가 필요한
-   * 자리에 쓴다.
-   *
-   * `'horizontal'`/`'vertical'`은 그 축의 Radix Scrollbar만 마운트한다 — `'auto'`(기본값)는
-   * 둘 다 마운트하는데, Radix는 마운트된 축만 `overflow: scroll`을 켜기 때문에(소스로 확인)
-   * 가로 스크롤만 쓰고 싶은 자리(예: `Tab`의 탭 스트립)에서 `'auto'`를 쓰면 세로쪽 미세한
-   * 오버플로(아이콘의 1px 광학 보정 같은)만 생겨도 세로 스크롤바가 함께 뜨는 문제가 있었다
-   * (2026-08-31 지적으로 확인). 항상 양쪽 다 필요하면 `'auto'`를 그대로 둔다.
-   */
+  /** 어느 축이 스크롤하나. 기본값 `'auto'`(양쪽). */
   readonly scroll?: ContainerScroll;
 }
 
 /**
- * `common/`의 기본 스크롤 컨테이너 — Tab·Shell·ActivityBar 등 스크롤이 필요한 자리는 항상 이걸
- * 쓴다(raw `overflow: auto` div를 직접 두지 않는다). 스캐폴드를 이 컴포넌트가 소유한다 —
- * `<Container>{children}</Container>` 하나로 끝난다.
+ * 스크롤이 필요한 자리의 기본 상자 — raw `overflow: auto` div를 직접 두지 않고 이걸 쓴다.
+ * 스크롤바 모양이 앱 전체에서 같아야 하기 때문이다.
  *
- * ref는 실제로 스크롤되는 Viewport에 꽂는다(ScrollAreaRoot가 아니라) — 스크롤 위치 관찰 같은
- * 명령형 접근이 필요할 때 쓰는 대상은 항상 Viewport다(client-architecture.md 1.3 Component
- * "DOM 접근" 참고).
+ * 예전에는 Radix ScrollArea로 스크롤바를 직접 그렸다. `scrollbar-width`·`scrollbar-color`가
+ * Baseline에 들어오면서 그 일이 CSS 두 줄이 됐고(→ ADR 0009), 라이브러리가 끼워 넣던 래퍼
+ * `div`를 우회하느라 쌓였던 CSS 다섯 뭉치가 함께 사라졌다 — 퍼센트 높이가 끊기던 것,
+ * `display: table` 때문에 ellipsis가 안 걸리던 것, 빈 공간에서 우클릭이 안 먹던 것이 전부
+ * 그 래퍼 탓이었다.
+ *
+ * `ref`는 실제로 스크롤되는 원소에 꽂힌다 — 이제 그것이 루트 자신이다.
  */
-export const Container = ({ children, chrome = 'visible', scroll = 'auto', className, ref, ...props }: ContainerProps) => {
-  if (scroll === 'none') {
-    return (
-      <div {...props} ref={ref} data-component="Container" data-chrome={chrome} data-scroll="none" className={clsx(className, styles['root'])}>
-        {children}
-      </div>
-    );
-  }
-  return (
-    <ScrollAreaRoot
-      {...props}
-      ref={ref}
-      data-chrome={chrome}
-      data-scroll={scroll}
-      scrollbars={SCROLLBARS_BY_AXIS[scroll]}
-      className={clsx(className, styles['root'])}
-      classNames={{
-        viewport: styles['viewport'],
-        scrollbarVertical: styles['scrollbarVertical'],
-        scrollbarHorizontal: styles['scrollbarHorizontal'],
-        thumb: styles['thumb'],
-        corner: styles['corner'],
-      }}
-    >
-      {children}
-    </ScrollAreaRoot>
-  );
-};
-
+export const Container = ({ children, chrome = 'visible', scroll = 'auto', className, ref, ...props }: ContainerProps) => (
+  <div
+    {...props}
+    ref={ref}
+    data-component="Container"
+    data-chrome={chrome}
+    data-scroll={scroll}
+    className={clsx(className, styles['root'])}
+  >
+    {children}
+  </div>
+);
