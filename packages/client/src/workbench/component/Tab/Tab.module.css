@@ -1,4 +1,6 @@
-.chromeBordered {
+/* `chrome` 변형 — 클래스 합성이 아니라 루트의 `data-chrome`이 고른다(→ ADR 0008). 프레임이
+   붙는 자리는 단일 그룹(`.group`)과 분할 루트(`.splitRoot*`) 셋뿐이다. */
+[data-chrome='bordered'] {
   border-radius: var(--borderRadius-small);
   border-style: solid;
   border-width: var(--borderWidth-thin);
@@ -70,7 +72,7 @@
  * 잘렸다. 그 삐침을 흡수할 여유만 오른쪽에 더한다. */
 .headerLabel[data-preview] {
   font-style: italic;
-  /* stylelint-disable-next-line arka/spacing-tokens -- 이탤릭 글자 삐침을 흡수하는 폰트 메트릭
+  /* 이탤릭 글자 삐침을 흡수하는 폰트 메트릭
      보정값이라 spacing 토큰이 아니다(실제 여백이 아니라 글자 폭 밖으로 삐져나오는 잉크를 위한
      여유). */
   padding-right: 0.2em;

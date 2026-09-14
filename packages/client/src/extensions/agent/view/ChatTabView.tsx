@@ -1,5 +1,6 @@
 import { useViewModel } from '#core/viewmodel';
 import { Banner, Button } from '@primer/react';
+import { Markdown } from '#component/Markdown';
 import { Text } from '#component/Text';
 import type { ReactNode } from 'react';
 import { ChatRoom } from '../component/ChatRoom';
@@ -63,14 +64,14 @@ const renderItem = (item: TranscriptItem): ReactNode => {
   switch (item.kind) {
     case 'user':
       return (
-        <Message key={item.id} role="user" timestamp={item.at}>
-          {item.text}
+        <Message key={item.id} author="user" timestamp={item.at}>
+          <Markdown source={item.text} />
         </Message>
       );
     case 'assistant':
       return (
-        <Message key={item.id} role="agent" timestamp={item.at}>
-          {item.text}
+        <Message key={item.id} author="agent" timestamp={item.at}>
+          <Markdown source={item.text} />
           {item.done ? null : <span aria-label="응답 중" className={styles['cursor']} />}
         </Message>
       );
@@ -80,7 +81,7 @@ const renderItem = (item: TranscriptItem): ReactNode => {
       return <StepBlock key={item.id} kind="tool" status={item.done ? (item.isError ? 'error' : 'done') : 'running'} toolId={item.toolId} toolInput={item.input} toolOutput={item.output} />;
     case 'error':
       return (
-        <Message key={item.id} role="system" timestamp={item.at}>
+        <Message key={item.id} author="system" timestamp={item.at}>
           <Text tone="danger">{item.message}</Text>
         </Message>
       );

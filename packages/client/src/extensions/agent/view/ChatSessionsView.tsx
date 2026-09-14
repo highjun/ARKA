@@ -1,5 +1,6 @@
 import { useViewModel } from '#core/viewmodel';
 import { Spinner } from '@primer/react';
+import { Blankslate } from '@primer/react/experimental';
 import { SessionList } from '../component/SessionList';
 import { ChatViewModelToken } from '../viewmodel/IChatViewModel';
 import styles from './ChatSessionsView.module.css';
@@ -17,9 +18,11 @@ export const ChatSessionsView = ({ onOpenTab }: { readonly onOpenTab: (tab: { re
 
   if (viewModel.sessionsLoading && viewModel.sessions.length === 0) {
     return (
-      <div className={styles['loading']}>
-        <Spinner size="medium" srText="세션을 읽는 중" />
-      </div>
+      <Blankslate>
+        <Blankslate.Visual>
+          <Spinner size="medium" srText="세션을 읽는 중" />
+        </Blankslate.Visual>
+      </Blankslate>
     );
   }
 

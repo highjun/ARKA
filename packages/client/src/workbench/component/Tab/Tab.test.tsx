@@ -180,4 +180,10 @@ describe('Tab', () => {
     // 바꿔야 해 legacy 1:1 포트 동작이 달라진다. 알려진 한계로 이 규칙만 뺀다.
     await expectNoA11yViolations(container, { rules: { 'nested-interactive': { enabled: false } } });
   });
+
+  /*
+   * `implementsNoA11yViolations`가 여기 없다 — 탭 헤더가 `nested-interactive`에 걸린다(누를 수 있는
+   * 탭 안에 닫기 버튼이 있다). 고치려면 닫기 버튼을 탭의 형제로 빼야 하고 CSS 524줄이 얽혀 있어
+   * 눈으로 확인 없이 손대지 않는다. TASK-66에 분석과 제안 구조를 적었다.
+   */
 });

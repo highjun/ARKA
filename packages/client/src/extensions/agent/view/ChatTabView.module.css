@@ -16,6 +16,7 @@
   height: 1em;
   margin-left: var(--space-xs);
   vertical-align: text-bottom;
+  /* stylelint-disable-next-line primer/colors -- 이건 표면이 아니라 캐럿이다. 글자와 같은 잉크색이어야 해서 `fgColor`가 맞다. */
   background-color: var(--fgColor-accent);
   animation: blink 1s steps(2, start) infinite;
 }

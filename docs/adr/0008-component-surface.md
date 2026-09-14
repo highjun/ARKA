@@ -10,7 +10,7 @@
 - **`ref`는 보통 prop이다. `forwardRef`를 쓰지 않는다** — React 19가 그렇게 바꿨고 우리는 18을 지원하지 않는다.
 - **변형은 문자열 유니온 prop을 `data-<축>`으로 싣는다.** CSS는 루트 클래스 하나 안에서 `:where([data-x])`로 갈라 특이성을 한 겹으로 둔다. 클래스 이름 맵을 만들지 않는다.
 - **`value`/`defaultValue`/`onChange` 삼종은 `useControllableState`가 중재한다** — 손으로 `useState`를 두지 않는다.
-- **슬롯이 둘까지면 `ReactNode` prop(`leadingVisual` 식), 셋 이상이면 부품으로 가른다.**
+- **슬롯이 둘까지면 `ReactNode` prop(`leadingVisual` 식), 셋 이상이면 부품으로 가른다.** 예외는 남의 컴포넌트가 자식을 **참조 동일성**으로 골라내는 자리다 — 그 안에 우리 부품을 끼우면 부모가 못 알아본다(Primer `useSlots`). 그때는 슬롯이 셋을 넘어도 prop으로 받고 조립을 안쪽에 둔다.
 - **compound는 `Object.assign(Root, { Item })`이다.** 부품이 없으면 그냥 내보낸다. props 타입은 `<Name>Props`·`<Name><Sub>Props`로 평평하게 둔다.
 - **폴더 하나에 부품마다 파일 하나와 CSS 하나**를 둔다. 컨텍스트는 `<Name>Context.ts`로 뺀다.
 - **아이콘만 있는 컨트롤은 `aria-label`과 `aria-labelledby` 중 하나를 타입으로 요구한다.** 못 쓰게 만들 때는 `disabled`보다 `inactive`를 쓴다 — 키보드로 발견할 수 있어야 한다.
@@ -30,7 +30,7 @@
 ## 강제:
 - **린트** `@eslint-react/no-forward-ref` — `forwardRef` 사용을 막는다.
 - **린트** `primer/direct-slot-children`·`primer/spread-props-first` — 슬롯 감싸기와 props 덮어쓰기 순서를 막는다.
-- **린트** `project-structure/folder-structure` — 폴더 하나에 파일 구성과 이름 형식을 요구한다.
+- **테스트** `packages/client/test/structure.test.ts` — 컴포넌트 폴더에 스토리·테스트·배럴이 있고 그룹 배럴이 없기를 요구한다.
 - **타입** — `aria-label` XOR `aria-labelledby`, `<Name>Props`의 원소 속성 상속.
 - **리뷰** — "이 슬롯이 둘인가 셋인가"와 "이 축이 변형인가 다른 컴포넌트인가"는 사람만 판정한다.
 

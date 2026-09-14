@@ -128,4 +128,45 @@ describe('Menu', () => {
     // 그 형제라 안 잡힌다. 실제로 뜬 걸 검사하려면 body 를 봐야 한다.
     await expectNoA11yViolations(document.body);
   });
+
+  /** `kind="context"`는 같은 부품으로 다른 Radix를 탄다 — 여는 계기와 폭만 갈린다. */
+  describe('kind="context"', () => {
+    it('우클릭으로 열린다(비제어)', () => {
+      render(<Demo kind="context" />);
+
+      expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+
+      fireEvent.contextMenu(screen.getByText('더보기'));
+
+      expect(screen.getByRole('menuitem', { name: '새 파일' })).toBeInTheDocument();
+    });
+
+    it('open=false 로 제어하면 우클릭해도 안 열린다', () => {
+      render(<Demo kind="context" open={false} />);
+
+      fireEvent.contextMenu(screen.getByText('더보기'));
+
+      expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+    });
+
+    it('open=true 로 제어하면 항상 열려 있다', () => {
+      render(<Demo kind="context" open />);
+
+      expect(screen.getByRole('menuitem', { name: '새 파일' })).toBeInTheDocument();
+    });
+
+    it('defaultOpen 이 비제어 시작값이 된다', () => {
+      render(<Demo kind="context" defaultOpen />);
+
+      expect(screen.getByRole('menuitem', { name: '새 파일' })).toBeInTheDocument();
+    });
+
+    it('Content 에 kind 가 data 속성으로 실린다 — CSS가 폭을 그것으로 가른다', () => {
+      render(<Demo kind="context" open />);
+
+      expect(screen.getByRole('menu')).toHaveAttribute('data-kind', 'context');
+    });
+
+    implementsNoA11yViolations(() => <Demo kind="context" open />);
+  });
 });

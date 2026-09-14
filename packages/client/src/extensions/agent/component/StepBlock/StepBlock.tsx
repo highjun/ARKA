@@ -5,6 +5,7 @@ import styles from './StepBlock.module.css';
 import { Details } from '@primer/react';
 import { Icon } from '#component/Icon';
 import { StatusIndicator } from '../StatusIndicator';
+import { Markdown } from '#component/Markdown';
 import type { StatusIndicatorStatus } from '../StatusIndicator';
 
 // `StepBlockBaseProps`처럼 공유 베이스 인터페이스로 뽑지 않는다 — `ui/props-extends-html-attributes`
@@ -29,7 +30,7 @@ export interface StepBlockThinkingProps extends Omit<HTMLAttributes<HTMLDetailsE
    * 펼쳤을 때 보여줄 생각 내용. `kind='tool'`과 달리 본문이 없어도 펼친다 — 생각이 비어 있다는
    * 사실 자체가 보여줄 내용이라서. 없으면 `emptyLabel` 을 대신 보여준다.
    */
-  readonly summary?: ReactNode;
+  readonly summary?: string;
   /** `summary` 가 없을 때 보여줄 안내 문구. 기본값 `'생각 내용이 없습니다.'`. */
   readonly emptyLabel?: ReactNode;
 }
@@ -109,7 +110,7 @@ export const StepBlock = ({ ref, ...props }: StepBlockProps) => {
             <StatusIndicator status={status} />
           </span>
         </Details.Summary>
-        <div className={styles['content']}>{summary ?? emptyLabel}</div>
+        <div className={styles['content']}>{summary === undefined ? emptyLabel : <Markdown source={summary} />}</div>
       </Details>
     );
   }

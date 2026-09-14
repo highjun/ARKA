@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useControllableState } from '@radix-ui/react-use-controllable-state';
-import type { AgentSessionItem } from './SessionList';
+import type { AgentSession } from './SessionList';
 
 /** `activeId`의 유무로 controlled·uncontrolled가 갈린다. */
 export interface UseSessionListOptions {
@@ -9,7 +9,7 @@ export interface UseSessionListOptions {
   /** uncontrolled 모드의 시작 활성 세션 id. */
   readonly defaultActiveId?: string;
   /** 활성 세션이 바뀔 때마다 호출된다(controlled 여부와 무관). */
-  readonly onActiveChange?: (session: AgentSessionItem) => void;
+  readonly onActiveChange?: (session: AgentSession) => void;
   /** 활성 세션의 id만 필요할 때 쓴다(controlled 여부와 무관) — 세션 객체 전체가 필요하면
    * `onActiveChange`를 쓴다. `activeId`가 바뀔 때마다 `onActiveChange`와 함께 호출된다. */
   readonly onActiveIdChange?: (activeId: string) => void;
@@ -18,7 +18,7 @@ export interface UseSessionListOptions {
 /** `selectSession`은 `disabled` 세션을 조용히 무시한다. */
 export interface UseSessionListResult {
   readonly activeId: string | undefined;
-  readonly selectSession: (session: AgentSessionItem) => void;
+  readonly selectSession: (session: AgentSession) => void;
 }
 
 /**
@@ -39,7 +39,7 @@ export function useSessionList({ activeId, defaultActiveId, onActiveChange, onAc
   });
 
   const selectSession = useCallback(
-    (session: AgentSessionItem) => {
+    (session: AgentSession) => {
       if (session.disabled) return;
       setActiveId(session.id);
       onActiveChange?.(session);

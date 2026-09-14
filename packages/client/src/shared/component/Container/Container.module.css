@@ -1,33 +1,34 @@
-/* `height: 100%`가 없으면 block 기본값(`auto`)이라, 소비처가 바깥 div로 높이만 주고
-   `Container` 자신엔 치수 className을 안 준 흔한 패턴(스토리 다수가 이렇게 씀)에서 콘텐츠가
-   넘치지 않고 상자가 그냥 늘어나 세로 스크롤이 전혀 발동하지 않았다(2026-09-02 발견). 조상이
-   명시적 높이가 없으면 `height: 100%`는 스펙상 `auto`로 풀려 기존 동작과 동일하게 안전하다. */
+/* `height: 100%`가 없으면 block 기본값(`auto`)이라, 쓰는 쪽이 바깥 div로 높이만 주고
+   `Container` 자신엔 치수 className을 안 준 흔한 패턴에서 상자가 그냥 늘어나 스크롤이 전혀
+   발동하지 않았다(2026-09-02 발견). 조상이 명시적 높이가 없으면 `height: 100%`는 스펙상
+   `auto`로 풀려 기존 동작과 같다. */
 .root {
   position: relative;
-  overflow: hidden;
   height: 100%;
   color: var(--fgColor-default);
+
+  /* 스크롤바를 얇게, 손잡이만 보이게. Firefox·Chromium이 이 두 줄을 읽고, Safari는 원래
+     오버레이 스크롤바라 무시해도 같은 그림이 된다. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--control-transparent-bgColor-active) transparent;
 }
 
-/* `scroll="none"` — 내용이 넘쳐도 자르지 않는다. Radix ScrollArea Root가 아니라 순수 div라
-   `.viewport` 등 자식 클래스는 적용되지 않는다. */
+.root[data-scroll='auto'] {
+  overflow: auto;
+}
+
+/* 한 축만 켠다 — 반대 축은 `hidden`이어야 미세한 오버플로로 스크롤바가 따라 뜨지 않는다. */
+.root[data-scroll='horizontal'] {
+  overflow: auto hidden;
+}
+
+.root[data-scroll='vertical'] {
+  overflow: hidden auto;
+}
+
+/* 내용이 넘쳐도 자르지 않는다. */
 .root[data-scroll='none'] {
   overflow: visible;
-}
-
-/* 스토리 전용 — `root`는 치수를 안 가져서(소비자가 매번 className으로 준다), 데모에서 스크롤이
-   실제로 보이려면 여기서 하나 빌려 준다. `--control-large-size`(2.5rem, 컨트롤 높이용)는 30줄을
-   담기엔 너무 작아 스크롤이 전혀 안 보였다 — 패널 높이 토큰인 `--overlay-height-small`로 바꾼다. */
-.demo {
-  height: var(--overlay-height-small);
-  max-width: var(--breakpoint-medium);
-}
-
-/* 세로+가로 동시 오버플로 데모 — 폭·높이 둘 다 제한한다. */
-.demoBoth {
-  width: var(--breakpoint-medium);
-  max-width: 100%;
-  height: var(--overlay-height-small);
 }
 
 .root[data-chrome='visible'] {
@@ -38,131 +39,16 @@
   background-color: var(--bgColor-default);
 }
 
-/*
- * Radix `ScrollAreaViewport`는 실제 스크롤을 위해 자신에게 native `overflow: scroll`을 인라인
- * 스타일로 건다(Radix 소스로 확인) — 이 native 스크롤바를 숨기지 않으면, 커스텀 `Thumb`(아래
- * `.scrollbarHorizontal`/`.scrollbarVertical`)과 별개로 브라우저 자체 스크롤바가 이 요소 위에
- * "항상" 그대로 떠 있는다. 실사용 중 "탭이 넘칠 때 기본 스크롤이 뜬다"는 지적으로 확인했다
- * (2026-09-05) — Radix 공식 예제도 Viewport에 이 두 줄을 얹는 걸 표준 레시피로 든다.
- */
-.viewport {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  scrollbar-width: none;
+/* 스토리 전용 — `root`는 치수를 안 가져서(쓰는 쪽이 매번 className으로 준다), 데모에서 스크롤이
+   실제로 보이려면 여기서 하나 빌려 준다. */
+.demo {
+  height: var(--overlay-height-small);
+  max-width: var(--breakpoint-medium);
 }
 
-.viewport::-webkit-scrollbar {
-  display: none;
-}
-
-/*
- * Radix `ScrollAreaViewport`는 `children`을 `<div style="min-width:100%; display:table">`로
- * 한 번 더 감싼다(공개 API로 className/style을 못 주는 자리, `@radix-ui/react-scroll-area` 소스로
- * 확인) — 이 wrapper는 height가 없어 콘텐츠 높이만큼만 자란다. 그 결과 짧은 콘텐츠 아래 남는 빈
- * 공간이 이 subtree 밖으로 취급돼 ContextMenu 같은 자손 이벤트가 거기서 안 먹는다(2026-09-02
- * 발견).
- *
- * `min-height:100%`만으로는 부족하다 — Container 를 중첩해서 쓰는 자리(예: 사이드바 패널 본문
- * Container 안에 directory-tree 자신의 Container 가 또 있는 구조)에서, 안쪽 Container 의
- * `.viewport{height:100%}` 가 퍼센트를 풀려면 조상이 "명시적" 높이를 가져야 하는데, `min-height`
- * 는 그 조상의 `height` 계산값을 여전히 `auto`로 남겨(스펙상 명시적 높이로 안 쳐준다) 퍼센트가
- * 안 풀리고 다시 콘텐츠 높이로 무너진다(2026-09-02, 실제 워크벤치 트리처럼 두 겹으로 감싼
- * 경우에만 재현됨). `.viewport`를 flex 로 만들어 이 wrapper를 늘어나는(stretch) flex item 으로
- * 만들면, cross-size(높이)가 자손의 퍼센트 계산에도 "명시적"으로 취급된다(Flexbox 스펙) —
- * `position:absolute`처럼 정상 흐름에서 빼지 않아 클릭 히트테스트에 부작용이 없다(실제로
- * absolute 버전은 우클릭 감지가 깨져서 되돌렸다).
- *
- * `display: block !important`도 함께 준다 — `display:table`인 채로 두면, 그 밑에 실제 콘텐츠가
- * table-row/table-cell이 아니라서 브라우저가 익명 table-row/table-cell 박스를 자동으로
- * 만들어 끼워 넣는다(CSS 표 서식 모델의 필수 규칙). 이 wrapper 자신은 flex로 정확히 1400px
- * 로 늘어나 있어도, 그 익명 셀은 콘텐츠 높이(예: ContextMenu.Trigger 안쪽 실제 콘텐츠 높이)만큼만
- * 잡히고 셀 안 콘텐츠에 `height:100%`를 늘 100%로 넘겨주지 않는다 — directory-tree 처럼
- * Container 를 한 번 더 감싼 실제 자리에서 자손의 `height:100%`(`.fill`/`.trigger`, workbench
- * 자체 CSS)가 셀 경계에서 다시 끊기는 걸로 드러났다(2026-09-02). `block`으로 바꾸면 익명 셀
- * 생성 자체가 없어져 자손 percentage-height 체인이 정상적으로 이어진다.
- */
-
-/*
- * Radix `ScrollAreaViewport`는 `children`을 `<div style="min-width:100%; display:table">`로
- * 한 번 더 감싼다(공개 API로 className/style을 못 주는 자리, `@radix-ui/react-scroll-area` 소스로
- * 확인) — 이 wrapper는 height가 없어 콘텐츠 높이만큼만 자라고(세로), `display:table`의 자동
- * 레이아웃 특성상 `white-space:nowrap` 자손 텍스트의 고유 폭만큼 컨테이너보다 더 넓게도 자란다
- * (가로). 세로 문제는 짧은 콘텐츠 아래 남는 빈 공간이 이 subtree 밖으로 취급돼 ContextMenu 같은
- * 자손 이벤트가 거기서 안 먹는 버그로, 가로 문제는 자손의 `text-overflow:ellipsis`가 "박스가
- * 콘텐츠보다 좁아야" 발동하는데 그 조건 자체가 성립하지 않아 긴 텍스트가 안 잘리는 버그로
- * 이어졌다(2026-09-02, 사이드바 우클릭·FileTree 파일명 ellipsis 두 버그로 각각 발견).
- */
-.viewport > div {
-  display: block !important;
-  flex: 1 1 auto;
-  min-width: 0;
-  min-height: 100%;
-}
-
-/*
- * `scroll="horizontal"`(Tab 탭 스트립 전용, 코드베이스 전체에서 유일한 사용처)은 예외다 — 그쪽은
- * 콘텐츠가 넓어져 가로 스크롤되는 것이 의도된 동작이라, 위 `min-width: 0`(콘텐츠보다 좁게 줄어들
- * 수 있게 하는 설정)을 다시 `auto`(= 콘텐츠의 min-content 폭, 기본값)로 되돌리고 `flex-shrink`도
- * 끈다 — 나머지(`auto`/`vertical`, FileTree·사이드바 패널 등)는 `min-width: 0` 그대로 두어 폭이
- * 뷰포트보다 좁아질 수 있게 해야, 자손의 `text-overflow:ellipsis`가 "박스가 콘텐츠보다 좁아야"
- * 발동하는 조건을 만난다(2026-09-02, FileTree 파일명이 안 잘리던 버그).
- */
-.root[data-scroll='horizontal'] > .viewport > div {
-  flex-shrink: 0;
-  min-width: auto;
-}
-
-/* `scroll="horizontal"`(Tab 탭 스트립 전용, 코드베이스 전체에서 유일한 사용처)은 제외한다 —
-   그쪽은 콘텐츠가 넓어져 가로 스크롤되는 것이 의도된 동작이다. 나머지(`auto`/`vertical`)는 폭을
-   뷰포트에 정확히 맞춰야 자손의 ellipsis/wrap이 정상 발동한다. */
-.root[data-scroll='auto'] > .viewport > div,
-.root[data-scroll='vertical'] > .viewport > div {
+/* 세로+가로 동시 오버플로 데모 — 폭·높이 둘 다 제한한다. */
+.demoBoth {
+  width: var(--breakpoint-medium);
   max-width: 100%;
-}
-
-/*
- * 세로 트랙은 세로로 쌓아야(`column`) thumb이 세로로 자라고, 가로 트랙은 가로로 나열해야(`row`)
- * thumb이 가로로 자란다. 예전엔 이게 뒤집혀 있어서(세로엔 방향 지정이 아예 없어 기본값 `row`,
- * 가로엔 `column`이 붙어 있었다) 두 축 다 thumb이 트랙 방향으로 안 자라는 채였다(2026-08-25 발견).
- */
-.scrollbarVertical {
-  display: flex;
-  flex-direction: column;
-  width: 10px;
-  touch-action: none;
-  user-select: none;
-  background-color: transparent;
-  padding: 0;
-  transition: background-color var(--motion-duration-short) var(--motion-easing-move);
-}
-
-.scrollbarHorizontal {
-  display: flex;
-  flex-direction: row;
-  height: 10px;
-  touch-action: none;
-  user-select: none;
-  background-color: transparent;
-  padding: 0;
-  transition: background-color var(--motion-duration-short) var(--motion-easing-move);
-}
-
-/*
- * `flex-grow`는 안 준다 — Radix 가 이미 `--radix-scroll-area-thumb-width`/`-height`(콘텐츠·뷰포트
- * 비율로 계산한 정확한 크기)를 inline style 로 건다(`@radix-ui/react-scroll-area` 소스 확인). 지난
- * 라운드에 방향 버그를 고치며 `flex-grow: 1`을 같이 넣었더니, 트랙에 thumb 하나뿐이라 남는 여유
- * 공간이 전부 여기로 배분돼 thumb 이 사실상 항상 트랙 전체 길이로 자라는 회귀가 났다(2026-08-25
- * 발견 — "스크롤 Thumb 이 너무 길어졌다"). Radix 가 준 크기를 그대로 믿는다.
- */
-.thumb {
-  position: relative;
-  flex-shrink: 0;
-  border-radius: var(--borderRadius-full);
-  background-color: var(--control-transparent-bgColor-active);
-  transition: background-color var(--motion-duration-short) var(--motion-easing-move);
-}
-
-.corner {
-  background-color: var(--bgColor-default);
+  height: var(--overlay-height-small);
 }

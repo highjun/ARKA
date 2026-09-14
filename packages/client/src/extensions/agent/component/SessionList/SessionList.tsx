@@ -5,15 +5,15 @@ import { useSessionList } from './useSessionList';
 import styles from './SessionList.module.css';
 import { IconButton } from '#component/IconButton';
 import { Icon } from '#component/Icon';
-import { SidebarLayout } from '#component/SidebarLayout';
+import { Panel } from '#component/Panel';
 import { Menu } from '#component/Menu';
-import { SessionRow } from '../SessionRow';
+import { SessionListItem } from './Item';
 import type { StatusIndicatorStatus } from '../StatusIndicator';
 
 const hasContent = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
 
 /** 목록이 그리는 데 필요한 최소 정보. 대화 내용은 여기 없다. */
-export interface AgentSessionItem {
+export interface AgentSession {
   readonly id: string;
   readonly title: string;
   readonly excerpt?: string;
@@ -28,13 +28,13 @@ export interface AgentSessionItem {
 /** `children`을 막는다 — 항목은 `sessions`로만 들어온다. */
 export interface SessionListProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
   /** 표시할 세션 목록. */
-  readonly sessions: readonly AgentSessionItem[];
+  readonly sessions: readonly AgentSession[];
   /** 넘기면 controlled, 안 넘기면 `defaultActiveId`로 컴포넌트가 자체 관리한다. */
   readonly activeId?: string;
   /** uncontrolled 모드의 시작 활성 세션. */
   readonly defaultActiveId?: string;
   /** 활성 세션이 바뀔 때마다 호출된다(controlled 여부와 무관). */
-  readonly onActiveChange?: (session: AgentSessionItem) => void;
+  readonly onActiveChange?: (session: AgentSession) => void;
   /** 활성 세션의 id만 필요할 때 쓴다(controlled 여부와 무관) — 세션 객체 전체가 필요하면
    * `onActiveChange`를 쓴다. */
   readonly onActiveIdChange?: (activeId: string) => void;
@@ -52,10 +52,10 @@ export interface SessionListProps extends Omit<HTMLAttributes<HTMLDivElement>, '
 }
 
 /**
- * 에이전트 세션 목록 — 헤더(제목 + 생성 버튼)와 세션 행(`SessionRow`)들을 그린다. 활성 세션 선택은
+ * 에이전트 세션 목록 — 헤더(제목 + 생성 버튼)와 세션 행(`SessionList.Item`)들을 그린다. 활성 세션 선택은
  * `useSessionList`가 controlled/uncontrolled 하이브리드로 관리하며, disabled 세션은 선택되지 않는다.
  */
-export const SessionList = ({
+const SessionListRoot = ({
   sessions,
   activeId,
   defaultActiveId,
@@ -102,13 +102,13 @@ export const SessionList = ({
 
   return (
     <div className={clsx(className, styles['root'])} {...props} data-component="SessionList">
-      <SidebarLayout title={<span className={styles['heading']}>{heading}</span>} actions={actions}>
+      <Panel title={<span className={styles['heading']}>{heading}</span>} actions={actions}>
         {visibleSessions.length === 0 ? (
           <div className={styles['empty']}>{emptyLabel}</div>
         ) : (
           <div role="listbox" aria-label="Agent sessions" className={styles['list']}>
             {visibleSessions.map((session) => (
-              <SessionRow
+              <SessionListItem
                 key={session.id}
                 title={session.title}
                 excerpt={session.excerpt}
@@ -122,8 +122,10 @@ export const SessionList = ({
             ))}
           </div>
         )}
-      </SidebarLayout>
+      </Panel>
     </div>
   );
 };
 
+/** 부품 이름이 `SessionList<부품>`인 것은 react-docgen이 최상위 export만 보기 때문이다. */
+export const SessionList = Object.assign(SessionListRoot, { Item: SessionListItem });

@@ -151,18 +151,31 @@ const Row = ({
   const isSelected = selectedIds.has(item.id);
   const isEditing = editingId === item.id;
 
-  const handleClick = (event: MouseEvent<HTMLElement>) => onRowClick(node, event);
-  const handleDoubleClick = (event: MouseEvent<HTMLElement>) => onRowDoubleClick(node, event);
+  /**
+   * 행끼리 DOM으로 중첩돼 있어(`li > ul > li`) 자식의 클릭이 부모 행까지 버블링된다 — 가장 가까운
+   * `treeitem`이 자기 것이 아닐 때는 넘긴다. `onFocus`가 `target !== currentTarget`으로 같은 일을
+   * 하는데, 클릭은 대상이 항상 후손이라 그 비교로는 못 가른다.
+   */
+  const isOwnRow = (event: MouseEvent<HTMLElement>) =>
+    (event.target as HTMLElement).closest('[role="treeitem"]') === event.currentTarget;
+
+  const handleClick = (event: MouseEvent<HTMLElement>) => {
+    if (isOwnRow(event)) onRowClick(node, event);
+  };
+  const handleDoubleClick = (event: MouseEvent<HTMLElement>) => {
+    if (isOwnRow(event)) onRowDoubleClick(node, event);
+  };
 
   /**
    * disabled 행("비어 있다"/"불러오는 중…"/에러 자리표시)은 `onRowContextMenu`를 안 부르는 것만으론
-   * 부족하다 — 여기서 멈추면 이벤트가 그대로 위로 버블링돼, 감싸는 `ContextMenu.Trigger`(컴포넌트
+   * 부족하다 — 여기서 멈추면 이벤트가 그대로 위로 버블링돼, 감싸는 `Menu.Trigger`(컴포넌트
    * 밖, `onContextMenu` 자체를 모르는 계약이라 이 행이 disabled인지 알 길이 없다)가 그걸 받아 메뉴를
    * 열어 버린다. 그러면 `onContextMenu` 콜백이 한 번도 안 불렸으니 앱 쪽 "우클릭한 대상"은 이전
    * 값(주로 없음)에 머무는데, 메뉴는 뜬 채로 "새 파일"을 고르면 그 대상 없음이 조용히 워크스페이스
    * 루트로 풀려 엉뚱한 곳에 파일이 생긴다 — 그래서 여기서 `stopPropagation`으로 아예 못 나가게 막는다.
    */
   const handleContextMenu = (event: MouseEvent<HTMLElement>) => {
+    if (!isOwnRow(event)) return;
     if (item.disabled) {
       event.stopPropagation();
       return;
@@ -202,6 +215,11 @@ const Row = ({
         setFocusedId(item.id);
       }}
       onKeyDown={onKeyDown(node)}
+      // 클릭·우클릭을 `treeitem` 자신이 받는다. 안쪽 행 `div`에 두면 키보드 처리(`onKeyDown`)와
+      // 다른 원소가 되어, 마우스로만 되는 자리가 생긴다(axe `click-events-have-key-events`).
+      onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
+      onContextMenu={handleContextMenu}
     >
       <div
         className={styles['row']}
@@ -209,9 +227,6 @@ const Row = ({
         // `margin-inline` 음수 상쇄와 짝) — 인라인 스타일이 CSS 클래스보다 항상 이기므로
         // `.row`의 `padding-inline`으로는 이 값을 못 준다, 여기서 직접 더한다.
         style={{ paddingLeft: `calc(${level - 1} * var(--space-md) + var(--space-sm))` }}
-        onClick={handleClick}
-        onDoubleClick={handleDoubleClick}
-        onContextMenu={handleContextMenu}
       >
         <span className={styles['marker']} aria-hidden="true">
           {isFolder ? <Icon iconId={expanded ? 'chevronDown' : 'chevronRight'} size="sm" /> : <FileIcon fileName={item.name} className={styles['fileIcon']} />}
@@ -319,7 +334,7 @@ export interface FileTreeProps extends Omit<HTMLAttributes<HTMLElement>, 'childr
   /**
    * 행을 우클릭했다 — 어느 행인지만 알린다. 메뉴 자체(무엇을 보여줄지, 어디에 띄울지)는
    * 이 컴포넌트의 일이 아니다. `preventDefault`/`stopPropagation`을 하지 않으므로, 이 이벤트를
-   * 감싸는 컨텍스트 메뉴(예: `ContextMenu.Trigger`)가 있으면 그쪽으로 그대로 버블링된다.
+   * 감싸는 컨텍스트 메뉴(예: `Menu.Trigger`)가 있으면 그쪽으로 그대로 버블링된다.
    *
    * 우클릭한 행이 선택 밖에 있으면 이 콜백이 불리기 **전에** 선택을 그 행 하나로 정규화한다(그리고
    * `onSelectedIdsChange`가 먼저 불린다) — "메뉴의 대상 = 지금 하이라이트된 것"이 항상 참이 되게

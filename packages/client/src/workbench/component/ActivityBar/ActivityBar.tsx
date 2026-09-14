@@ -5,7 +5,7 @@ import styles from './ActivityBar.module.css';
 import { Container } from '#component/Container';
 import { Icon } from '#component/Icon';
 import { IconButton } from '#component/IconButton';
-import { ContextMenu } from '#component/ContextMenu';
+import { Menu } from '#component/Menu';
 import type { IconId } from '#component/Icon';
 
 /** 세로 막대의 아이콘 하나. `isActive`를 직접 주면 `activeId` 계산을 건너뛴다. */
@@ -31,7 +31,7 @@ export interface ActivityBarProps extends Omit<HTMLAttributes<HTMLElement>, 'onS
   readonly defaultActiveId?: string;
   /** 활성 항목이 바뀔 때마다 호출된다(controlled 여부와 무관). */
   readonly onActiveIdChange?: (id: string) => void;
-  /** 주어지면 아이콘이 우클릭에 반응해 이 결과를 `ContextMenu.Content`로 띄운다 — 없으면 지금처럼 아무 일도 없다(옵트인). */
+  /** 주어지면 아이콘이 우클릭에 반응해 이 결과를 `Menu.Content`로 띄운다 — 없으면 지금처럼 아무 일도 없다(옵트인). */
   readonly renderItemContextMenu?: (item: ActivityBarItem) => ReactNode;
 }
 
@@ -60,8 +60,8 @@ export const ActivityBar = ({ items, onSelect, activeId, defaultActiveId = '', o
             const isActive = item.isActive ?? item.id === currentActiveId;
 
             return renderItemContextMenu ? (
-              <ContextMenu key={item.id}>
-                <ContextMenu.Trigger className={styles['itemContextMenuTrigger']}>
+              <Menu kind="context" key={item.id}>
+                <Menu.Trigger className={styles['itemContextMenuTrigger']}>
                   <IconButton
                     variant={isActive ? 'default' : 'invisible'}
                     size="medium"
@@ -70,9 +70,9 @@ export const ActivityBar = ({ items, onSelect, activeId, defaultActiveId = '', o
                     onClick={() => handleSelect(item.id)}
                     icon={() => <Icon iconId={item.iconId} size="lg" />}
                   />
-                </ContextMenu.Trigger>
-                <ContextMenu.Content>{renderItemContextMenu(item)}</ContextMenu.Content>
-              </ContextMenu>
+                </Menu.Trigger>
+                <Menu.Content>{renderItemContextMenu(item)}</Menu.Content>
+              </Menu>
             ) : (
               <IconButton
                 key={item.id}

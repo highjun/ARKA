@@ -8,7 +8,7 @@ import { Timestamp } from './index';
 const FIXED = Date.UTC(2026, 0, 2, 3, 4, 5);
 
 const meta = {
-  title: 'common/Timestamp',
+  title: 'shared/Timestamp',
   component: Timestamp,
 } satisfies Meta<typeof Timestamp>;
 

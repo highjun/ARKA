@@ -1,6 +1,6 @@
 import { CommandCenterRegistryToken } from '#core/commands';
 import { useViewModel } from '#core/viewmodel';
-import { Text } from '#component/Text';
+import { KeybindingTable } from '../component/KeybindingTable';
 import styles from './KeybindingsTabView.module.css';
 
 /**
@@ -16,34 +16,7 @@ export const KeybindingsTabView = () => {
   }));
   return (
     <div data-component="KeybindingsTabView" className={styles['root']}>
-      <table className={styles['table']}>
-        <thead>
-          <tr>
-            <th>키</th>
-            <th>커맨드</th>
-            <th>id</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.id}>
-              <td>
-                {row.keys.map((key) => (
-                  <kbd key={key} className={styles['key']}>
-                    {key}
-                  </kbd>
-                ))}
-              </td>
-              <td>{row.label}</td>
-              <td>
-                <Text size="small" tone="muted">
-                  {row.commandId}
-                </Text>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <KeybindingTable rows={rows} />
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { ContextMenu } from '#component/ContextMenu';
+import { Menu } from '#component/Menu';
 import { ActivityBar } from './index';
 import type { ActivityBarItem } from './index';
 
@@ -31,6 +31,6 @@ export const Empty: Story = { args: { items: [] } };
 export const NoneActive: Story = { args: { defaultActiveId: undefined } };
 export const WithContextMenu: Story = {
   args: {
-    renderItemContextMenu: (item) => <ContextMenu.Item onSelect={() => undefined}>{item.label} 숨기기</ContextMenu.Item>,
+    renderItemContextMenu: (item) => <Menu.Item onSelect={() => undefined}>{item.label} 숨기기</Menu.Item>,
   },
 };

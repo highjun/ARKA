@@ -1,6 +1,7 @@
 import { useViewModel } from '#core/viewmodel';
-import { ActionList, Button, Spinner, TextInput } from '@primer/react';
+import { Button, Spinner, TextInput } from '@primer/react';
 import { Text } from '#component/Text';
+import { SearchResultList } from '../component/SearchResultList';
 import { SearchViewModelToken } from '../viewmodel/ISearchViewModel';
 import styles from './SearchView.module.css';
 
@@ -35,23 +36,10 @@ export const SearchView = ({ onFileOpen }: { readonly onFileOpen: (path: string,
         </Text>
       </div>
       <div className={styles['results']}>
-        <ActionList>
-          {viewModel.rows.map((file) => (
-            <ActionList.Group key={file.path}>
-              <ActionList.GroupHeading as="h3">{file.path}</ActionList.GroupHeading>
-              {file.matches.map((match) => (
-                <ActionList.Item key={`${String(match.line)}:${String(match.column)}`} onSelect={() => onFileOpen(file.path, { line: match.line, column: match.column })}>
-                  <ActionList.LeadingVisual>
-                    <Text size="small" tone="muted">
-                      {match.line}
-                    </Text>
-                  </ActionList.LeadingVisual>
-                  <span className={styles['preview']}>{match.preview.trim()}</span>
-                </ActionList.Item>
-              ))}
-            </ActionList.Group>
-          ))}
-        </ActionList>
+        <SearchResultList
+          files={viewModel.rows}
+          onSelect={(path, match) => onFileOpen(path, { line: match.line, column: match.column })}
+        />
       </div>
     </div>
   );

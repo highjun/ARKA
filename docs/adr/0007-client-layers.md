@@ -25,7 +25,8 @@
 - 슬라이스가 서로를 모르니 **둘이 같은 것을 쓰려면 먼저 위로 올려야 한다**. 올릴 자리를 고르는 판단이 매번 든다.
 
 ## 강제:
-- **린트** `boundaries/element-types`·`boundaries/external` — 슬라이스 간 import와 `model/`의 상태 라이브러리를 막는다(→ [ADR 0011](0011-lint-off-the-shelf.md)).
+- **린트** `import-x/no-restricted-paths` — 슬라이스끼리의 import를 막는다(zone에 슬라이스를 열거한다).
+- **린트** `@typescript-eslint/no-restricted-imports` — `model/`의 상태 라이브러리·React를 막는다. `import type`은 허용한다 — 컴파일에서 지워져 결합이 아니다.
 - **린트** `no-restricted-syntax` — `view/`에서 `useViewModel` 아닌 훅과 DI 접근을 막는다.
 - **리뷰** — "이 조각이 도메인을 모르는가"와 "이것을 위로 올릴 자리가 맞는가"는 사람만 판정한다.
 

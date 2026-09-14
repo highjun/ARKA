@@ -1,8 +1,8 @@
 import { useViewModel } from '#core/viewmodel';
 import { Spinner } from '@primer/react';
-import { Text } from '#component/Text';
+import { Blankslate } from '@primer/react/experimental';
+import { DiffView } from '../component/DiffView';
 import { SourceControlViewModelToken } from '../viewmodel/ISourceControlViewModel';
-import styles from './DiffTabView.module.css';
 
 /**
  * diff 탭. 어느 변경인지는 탭 id(`staged:path` / `wt:path`)가 말한다. `openDiff`는 멱등이라 렌더마다 부른다.
@@ -15,42 +15,27 @@ export const DiffTabView = ({ tabId }: { readonly tabId: string }) => {
 
   if (diff.loading && diff.text === '') {
     return (
-      <div className={styles['center']}>
-        <Spinner size="medium" srText="diff를 읽는 중" />
-      </div>
+      <Blankslate>
+        <Blankslate.Visual>
+          <Spinner size="medium" srText="diff를 읽는 중" />
+        </Blankslate.Visual>
+      </Blankslate>
     );
   }
   if (diff.failure !== null) {
     return (
-      <div className={styles['center']}>
-        <Text tone="danger">{diff.failure}</Text>
-      </div>
+      <Blankslate>
+        <Blankslate.Heading as="h2">diff를 읽지 못했다</Blankslate.Heading>
+        <Blankslate.Description>{diff.failure}</Blankslate.Description>
+      </Blankslate>
     );
   }
   if (diff.text === '') {
     return (
-      <div className={styles['center']}>
-        <Text tone="muted">차이가 없다.</Text>
-      </div>
+      <Blankslate>
+        <Blankslate.Heading as="h2">차이가 없다</Blankslate.Heading>
+      </Blankslate>
     );
   }
-  return (
-    <pre data-component="DiffTabView" className={styles['root']}>
-      {diff.text.split('\n').map((line, index) => (
-        <span key={index} className={styles['line']} data-kind={kindOf(line)}>
-          {line}
-          {'\n'}
-        </span>
-      ))}
-    </pre>
-  );
-};
-
-const kindOf = (line: string): 'add' | 'del' | 'hunk' | 'meta' | 'ctx' => {
-  if (line.startsWith('+++') || line.startsWith('---')) return 'meta';
-  if (line.startsWith('@@')) return 'hunk';
-  if (line.startsWith('+')) return 'add';
-  if (line.startsWith('-')) return 'del';
-  if (line.startsWith('diff ') || line.startsWith('index ')) return 'meta';
-  return 'ctx';
+  return <DiffView data-component="DiffTabView" text={diff.text} />;
 };

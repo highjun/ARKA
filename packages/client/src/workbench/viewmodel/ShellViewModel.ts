@@ -658,7 +658,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     /**
      * 탭 우클릭 메뉴(`menuId: 'shell.tab.context'`) — `ShellView`가 `CommandContextMenu` 대신 이
      * registry를 직접 조회해 `Tab.renderTabContextMenu` 자리에 항목만 그린다(그 자리는 이미
-     * `ContextMenu.Content` 안이라 `CommandContextMenu`가 감싸는 `Trigger`가 중복된다). `group`은
+     * `Menu.Content` 안이라 `CommandContextMenu`가 감싸는 `Trigger`가 중복된다). `group`은
      * VSCode 관례 — `1_split`이 분할, `2_close`가 닫기 계열, `3_copy`가 복사.
      */
     commandCenterRegistry.registerMenuItem({ id: 'shell.tab.context.splitLeft', menuId: 'shell.tab.context', commandId: 'shell.tab.splitLeft', group: '1_split', order: 0 });

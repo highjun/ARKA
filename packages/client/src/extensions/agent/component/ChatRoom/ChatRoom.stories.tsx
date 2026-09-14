@@ -6,9 +6,9 @@ import type { ChatRoomMessage } from './index';
 const FIXED = 1_757_000_000_000;
 
 const MESSAGES: readonly ChatRoomMessage[] = [
-  { id: 'm1', role: 'user', timestamp: FIXED, content: '이 프로젝트의 빌드가 왜 실패하는지 알려줘.' },
-  { id: 'm2', role: 'agent', timestamp: FIXED + 60_000, content: 'tsconfig의 `paths`가 vite 설정과 어긋나 있습니다. 두 곳을 맞추겠습니다.' },
-  { id: 'm3', role: 'system', timestamp: FIXED + 120_000, content: '파일 2개가 수정되었습니다.' },
+  { id: 'm1', author: 'user', timestamp: FIXED, content: '이 프로젝트의 빌드가 왜 실패하는지 알려줘.' },
+  { id: 'm2', author: 'agent', timestamp: FIXED + 60_000, content: 'tsconfig의 `paths`가 vite 설정과 어긋나 있습니다. 두 곳을 맞추겠습니다.' },
+  { id: 'm3', author: 'system', timestamp: FIXED + 120_000, content: '파일 2개가 수정되었습니다.' },
 ];
 
 const meta = {

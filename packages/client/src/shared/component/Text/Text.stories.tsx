@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Text } from './index';
 
 const meta = {
-  title: 'common/text/Text',
+  title: 'shared/Text',
   component: Text,
   args: { children: '본문 텍스트' },
 } satisfies Meta<typeof Text>;

@@ -1,17 +1,18 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { implementsClassName, implementsDataComponent, implementsNoA11yViolations } from '#utils/testing';
+import { implementsClassName, implementsDataComponent, implementsNoA11yViolations, implementsRef } from '#utils/testing';
 import { ChatRoom } from './ChatRoom';
 import type { ChatRoomMessage } from './ChatRoom';
 
 const MESSAGES: ChatRoomMessage[] = [
-  { id: 'm1', role: 'user', content: '안녕하세요' },
-  { id: 'm2', role: 'agent', content: '무엇을 도와드릴까요?' },
+  { id: 'm1', author: 'user', content: '안녕하세요' },
+  { id: 'm2', author: 'agent', content: '무엇을 도와드릴까요?' },
 ];
 
 describe('ChatRoom', () => {
   implementsClassName((extra) => <ChatRoom {...extra} />);
   implementsDataComponent((extra) => <ChatRoom {...extra} />, 'ChatRoom');
+  implementsRef<HTMLDivElement>((extra) => <ChatRoom {...extra} />, HTMLDivElement);
   implementsNoA11yViolations(() => <ChatRoom />);
 
   it('messages를 로그 영역에 순서대로 렌더한다', () => {

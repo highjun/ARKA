@@ -1,7 +1,7 @@
 import { useViewModel } from '#core/viewmodel';
 import { Banner, Spinner } from '@primer/react';
-import { Text } from '#component/Text';
-import { MarkdownPreview } from '../component/MarkdownPreview';
+import { Blankslate } from '@primer/react/experimental';
+import { Markdown } from '#component/Markdown';
 import { MarkdownPreviewViewModelToken } from '../viewmodel/IMarkdownPreviewViewModel';
 import styles from './MarkdownPreviewTabView.module.css';
 
@@ -13,22 +13,25 @@ export const MarkdownPreviewTabView = ({ tabId }: { readonly tabId: string }) =>
 
   if (preview.failure !== null) {
     return (
-      <div className={styles['center']}>
-        <Text tone="danger">{preview.failure}</Text>
-      </div>
+      <Blankslate>
+        <Blankslate.Heading as="h2">미리보기를 만들지 못했다</Blankslate.Heading>
+        <Blankslate.Description>{preview.failure}</Blankslate.Description>
+      </Blankslate>
     );
   }
   if (preview.loading && preview.markdown === '') {
     return (
-      <div className={styles['center']}>
-        <Spinner size="medium" srText="읽는 중" />
-      </div>
+      <Blankslate>
+        <Blankslate.Visual>
+          <Spinner size="medium" srText="읽는 중" />
+        </Blankslate.Visual>
+      </Blankslate>
     );
   }
   return (
     <div className={styles['root']} data-component="MarkdownPreviewTabView">
       {preview.truncated ? <Banner variant="warning" title="파일이 커서 앞부분만 보여 준다" layout="compact" /> : null}
-      <MarkdownPreview markdown={preview.markdown} />
+      <Markdown source={preview.markdown} />
     </div>
   );
 };

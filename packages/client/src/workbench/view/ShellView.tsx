@@ -4,17 +4,15 @@ import { TabContentRegistryToken } from '../model/ITabContentRegistry';
 import { ShellViewModelToken } from '../viewmodel/IShellViewModel';
 import { matchMenuItems } from '#core/menu';
 import { useViewModel } from '#core/viewmodel';
-import { Button } from '@primer/react';
-import { ContextMenu } from '#component/ContextMenu';
+import { Banner, ConfirmationDialog } from '@primer/react';
+import { Menu } from '#component/Menu';
 import { Icon } from '#component/Icon';
 import { ModeToggle } from '#component/ModeToggle';
 import { Text } from '#component/Text';
-import { Dialog } from '#component/Dialog';
 import { CommandPalette } from '../component/CommandPalette';
 import { NotificationList } from '../component/NotificationList';
 import { Shell } from '../component/Shell';
 import { Tab } from '../component/Tab';
-import { UpdateBanner } from '../component/UpdateBanner';
 import type { IconId } from '#component/Icon';
 import type { TabItem, TabTreeNode } from '../component/Tab';
 import type { ReactNode } from 'react';
@@ -99,9 +97,9 @@ const findLeafIdForTab = (node: TabTreeNode, tabId: string): string | null => {
 
 /**
  * 탭 우클릭 메뉴를 `menuId: 'shell.tab.context'`(`shellCommands.ts`가 등록) 조회로 그린다 —
- * `CommandContextMenu`(`CommandMenuView`)를 그대로 못 쓰는 이유는, 그건 자기 `ContextMenu.Trigger`
- * 를 새로 감싸는데 `Tab.tsx`가 `renderTabContextMenu`를 이미 `ContextMenu.Content` 안에서 부르기
- * 때문이다 — 여기선 항목(`ContextMenu.Item`)만 돌려준다.
+ * `CommandContextMenu`를 그대로 못 쓰는 이유는, 그건 자기 `Menu.Trigger`
+ * 를 새로 감싸는데 `Tab.tsx`가 `renderTabContextMenu`를 이미 `Menu.Content` 안에서 부르기
+ * 때문이다 — 여기선 항목(`Menu.Item`)만 돌려준다.
  */
 const buildTabContextMenu = (tree: TabTreeNode, commandCenterRegistry: ICommandCenterRegistry) => (tab: TabItem) => {
   const leafId = findLeafIdForTab(tree, tab.id);
@@ -118,9 +116,9 @@ const buildTabContextMenu = (tree: TabTreeNode, commandCenterRegistry: ICommandC
   return (
     <>
       {items.map((item) => (
-        <ContextMenu.Item key={item.id} onSelect={() => commandCenterRegistry.commandRegistry.tryGet(item.commandId)?.execute(context)}>
+        <Menu.Item key={item.id} onSelect={() => commandCenterRegistry.commandRegistry.tryGet(item.commandId)?.execute(context)}>
           {item.label}
-        </ContextMenu.Item>
+        </Menu.Item>
       ))}
     </>
   );
@@ -182,7 +180,20 @@ export const ShellView = () => {
 
   return (
     <>
-      {viewModel.isClientOutdated ? <UpdateBanner onReload={() => viewModel.reloadApp()} /> : null}
+      {/* 닫을 수 없다 — 낡은 채로 쓰면 요청이 426으로 죽는다. `role="status"`로 랜드마크 대신
+          라이브 영역을 만든다: 이 띠는 처음부터 있는 것이 아니라 프로토콜이 어긋난 순간 나타나므로
+          나타났다는 사실이 읽혀야 한다. `flush`는 화면 맨 위에 모서리 없이 붙이려는 것이다. */}
+      {viewModel.isClientOutdated ? (
+        <Banner
+          role="status"
+          variant="warning"
+          layout="compact"
+          flush
+          title="새 버전이 있다"
+          description="이 화면은 서버와 다른 프로토콜을 쓰고 있다."
+          primaryAction={<Banner.PrimaryAction onClick={() => viewModel.reloadApp()}>다시 불러오기</Banner.PrimaryAction>}
+        />
+      ) : null}
       <Shell
         colorMode={viewModel.theme as 'light' | 'dark'}
         overlays={
@@ -253,22 +264,15 @@ export const ShellView = () => {
       <NotificationList items={viewModel.notifications} onDismiss={(id) => viewModel.dismissNotification(id)} />
 
       {pendingTabClose === null ? null : (
-        <Dialog
-          onClose={() => viewModel.cancelCloseTab()}
-          iconId="warning"
-          tone="attention"
+        <ConfirmationDialog
           title="저장하지 않은 변경사항이 있다"
-          description="닫으면 사라진다 — 그래도 닫을까?"
+          confirmButtonContent="닫기"
+          cancelButtonContent="취소"
+          confirmButtonType="danger"
+          onClose={(gesture) => (gesture === 'confirm' ? viewModel.confirmCloseTab() : viewModel.cancelCloseTab())}
         >
-          <Dialog.Actions>
-            <Button variant="default" onClick={() => viewModel.cancelCloseTab()}>
-              취소
-            </Button>
-            <Button variant="danger" onClick={() => viewModel.confirmCloseTab()}>
-              닫기
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
+          닫으면 사라진다 — 그래도 닫을까?
+        </ConfirmationDialog>
       )}
     </>
   );

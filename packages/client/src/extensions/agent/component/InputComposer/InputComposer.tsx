@@ -1,9 +1,10 @@
 import { clsx } from 'clsx';
 import { useCallback, useMemo, useState } from 'react';
-import type { ChangeEvent, FormHTMLAttributes, KeyboardEvent } from 'react';
+import type { ChangeEvent, FormHTMLAttributes, KeyboardEvent, Ref } from 'react';
 import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import styles from './InputComposer.module.css';
-import { ActionList, ActionMenu, Button, SegmentedControl } from '@primer/react';
+import { Button, SegmentedControl } from '@primer/react';
+import { Menu } from '#component/Menu';
 import { Icon } from '#component/Icon';
 import type { IconId } from '#component/Icon';
 
@@ -67,6 +68,8 @@ const getSelectedModel = (models: readonly InputComposerModelItem[], modelId?: s
 
 /** `onSubmit`을 가로챈다 — 폼 이벤트가 아니라 입력 내용과 모드를 준다. */
 export interface InputComposerProps extends Omit<FormHTMLAttributes<HTMLFormElement>, 'children' | 'onSubmit'> {
+  /** 루트 `form`으로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLFormElement>;
   /** controlled 모드의 현재 입력값. */
   readonly value?: string;
   /** uncontrolled 모드의 초깃값. */
@@ -116,6 +119,7 @@ export interface InputComposerProps extends Omit<FormHTMLAttributes<HTMLFormElem
  * 위해 `onModelSelect`도 `selectModel`에서 별도로 호출한다(둘 다 같은 시점에 함께 불린다).
  */
 export const InputComposer = ({
+  ref,
   value,
   defaultValue = '',
   disabled = false,
@@ -212,6 +216,7 @@ export const InputComposer = ({
 
   return (
     <form
+      ref={ref}
       className={clsx(className, styles['root'])}
       onSubmit={(event) => {
         event.preventDefault();
@@ -260,33 +265,26 @@ export const InputComposer = ({
         </div>
         <div className={styles['actions']}>
           <span className={styles['modelLabel']}>{MODEL_LABEL}</span>
-          <ActionMenu>
-            <ActionMenu.Button aria-label={MODEL_LABEL} disabled={state.disabled || state.models.length === 0}>
-              <span className={styles['modelOption']}>
-                {state.selectedModel?.iconId ? <Icon iconId={state.selectedModel.iconId} size="sm" /> : null}
-                <span className={styles['modelName']}>{state.selectedModel?.label ?? MODEL_LABEL}</span>
-              </span>
-            </ActionMenu.Button>
-            <ActionMenu.Overlay>
-              <ActionList selectionVariant="single">
+          <Menu>
+            <Menu.Trigger asChild>
+              <Button aria-label={MODEL_LABEL} disabled={state.disabled || state.models.length === 0}>
+                <span className={styles['modelOption']}>
+                  {state.selectedModel?.iconId ? <Icon iconId={state.selectedModel.iconId} size="sm" /> : null}
+                  <span className={styles['modelName']}>{state.selectedModel?.label ?? MODEL_LABEL}</span>
+                </span>
+              </Button>
+            </Menu.Trigger>
+            <Menu.Content>
+              <Menu.RadioGroup value={state.selectedModel?.id} onValueChange={(id) => state.selectModel(id)}>
                 {state.models.map((model) => (
-                  <ActionList.Item
-                    key={model.id}
-                    selected={model.id === state.selectedModel?.id}
-                    disabled={model.disabled}
-                    onSelect={() => state.selectModel(model.id)}
-                  >
-                    {model.iconId ? (
-                      <ActionList.LeadingVisual>
-                        <Icon iconId={model.iconId} size="sm" />
-                      </ActionList.LeadingVisual>
-                    ) : null}
+                  <Menu.RadioItem key={model.id} value={model.id} disabled={model.disabled}>
+                    {model.iconId ? <Icon iconId={model.iconId} size="sm" /> : null}
                     {model.label}
-                  </ActionList.Item>
+                  </Menu.RadioItem>
                 ))}
-              </ActionList>
-            </ActionMenu.Overlay>
-          </ActionMenu>
+              </Menu.RadioGroup>
+            </Menu.Content>
+          </Menu>
           <Button aria-label={SUBMIT_LABEL} disabled={!state.canSubmit} onClick={state.submit} variant="primary">
             <Icon iconId={state.loading ? 'close' : 'sendHorizontal'} size="sm" />
           </Button>

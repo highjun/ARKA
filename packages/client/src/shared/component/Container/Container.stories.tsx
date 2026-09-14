@@ -4,7 +4,7 @@ import { Container } from './index';
 const LINES = Array.from({ length: 40 }, (_, index) => `${index + 1}번째 줄 — 세로로 넘치는 내용`);
 
 const meta = {
-  title: 'layout/Container',
+  title: 'shared/Container',
   component: Container,
   decorators: [
     (Story) => (

@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import { implementsClassName, implementsDataComponent, implementsNoA11yViolations, implementsRef } from '#utils/testing';
 import { CrashScreen } from './CrashScreen';
 
 describe('CrashScreen', () => {
@@ -14,4 +15,9 @@ describe('CrashScreen', () => {
     fireEvent.click(screen.getByRole('button', { name: '다시 불러오기' }));
     expect(onReload).toHaveBeenCalledTimes(1);
   });
+
+  implementsClassName((extra) => <CrashScreen message="boom" onReload={() => undefined} {...extra} />);
+  implementsDataComponent((extra) => <CrashScreen message="boom" onReload={() => undefined} {...extra} />, 'CrashScreen');
+  implementsRef<HTMLDivElement>((extra) => <CrashScreen message="boom" onReload={() => undefined} {...extra} />, HTMLDivElement);
+  implementsNoA11yViolations(() => <CrashScreen message="boom" onReload={() => undefined} />);
 });
