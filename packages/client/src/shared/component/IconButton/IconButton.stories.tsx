@@ -3,7 +3,7 @@ import { Icon } from '#component/Icon';
 import { IconButton } from './index';
 
 const meta = {
-  title: 'common/IconButton',
+  title: 'shared/IconButton',
   component: IconButton,
   args: { 'aria-label': '검색', icon: () => <Icon iconId="search" size="sm" /> },
 } satisfies Meta<typeof IconButton>;

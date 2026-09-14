@@ -5,7 +5,7 @@ import { useSessionList } from './useSessionList';
 import styles from './SessionList.module.css';
 import { IconButton } from '#component/IconButton';
 import { Icon } from '#component/Icon';
-import { SidebarLayout } from '#component/SidebarLayout';
+import { Panel } from '#component/Panel';
 import { Menu } from '#component/Menu';
 import { SessionRow } from '../SessionRow';
 import type { StatusIndicatorStatus } from '../StatusIndicator';
@@ -102,7 +102,7 @@ export const SessionList = ({
 
   return (
     <div className={clsx(className, styles['root'])} {...props} data-component="SessionList">
-      <SidebarLayout title={<span className={styles['heading']}>{heading}</span>} actions={actions}>
+      <Panel title={<span className={styles['heading']}>{heading}</span>} actions={actions}>
         {visibleSessions.length === 0 ? (
           <div className={styles['empty']}>{emptyLabel}</div>
         ) : (
@@ -122,7 +122,7 @@ export const SessionList = ({
             ))}
           </div>
         )}
-      </SidebarLayout>
+      </Panel>
     </div>
   );
 };

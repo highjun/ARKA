@@ -3,7 +3,7 @@ import type { HTMLAttributes, ReactNode } from 'react';
 import styles from './ChatRoom.module.css';
 import { IconButton } from '#component/IconButton';
 import { Icon } from '#component/Icon';
-import { SidebarLayout } from '#component/SidebarLayout';
+import { Panel } from '#component/Panel';
 import { InputComposer } from '../InputComposer';
 import { Message } from '../Message';
 import { StatusIndicator } from '../StatusIndicator';
@@ -91,7 +91,7 @@ export const ChatRoom = ({
 
   return (
     <section className={clsx(className, styles['root'])} {...props} data-component="ChatRoom">
-      <SidebarLayout
+      <Panel
         title={
           <div className={styles['titleGroup']}>
             <StatusIndicator status={status} />
@@ -115,7 +115,7 @@ export const ChatRoom = ({
         <div className={styles['composerSlot']}>
           {composer ?? <InputComposer mode={mode} defaultMode={defaultMode} onModeChange={onModeChange} />}
         </div>
-      </SidebarLayout>
+      </Panel>
     </section>
   );
 };

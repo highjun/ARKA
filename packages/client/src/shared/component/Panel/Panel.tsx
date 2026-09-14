@@ -1,11 +1,11 @@
 import { clsx } from 'clsx';
 import type { HTMLAttributes, ReactNode, Ref } from 'react';
-import styles from './SidebarLayout.module.css';
+import styles from './Panel.module.css';
 
 const hasContent = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
 
 /** `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다. */
-export interface SidebarLayoutProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {
+export interface PanelProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLDivElement>;
   /** 헤더에 표시할 제목 — 아이콘 접두어 등을 조합할 수 있도록 문자열이 아니라 `ReactNode`다. */
@@ -22,11 +22,11 @@ export interface SidebarLayoutProps extends Omit<HTMLAttributes<HTMLDivElement>,
  * `title`·`actions` 둘 다 없으면 헤더 행 자체를 렌더하지 않는다(`Shell`의 `panelTitle`/
  * `panelActions` 없을 때 규칙과 같다).
  */
-export const SidebarLayout = ({ title, actions, children, className, ref, ...props }: SidebarLayoutProps) => {
+export const Panel = ({ title, actions, children, className, ref, ...props }: PanelProps) => {
   const hasHeader = title !== undefined || hasContent(actions);
 
   return (
-    <div ref={ref} {...props} data-component="SidebarLayout" className={clsx(className, styles['root'])}>
+    <div ref={ref} {...props} data-component="Panel" className={clsx(className, styles['root'])}>
       {hasHeader ? (
         <header className={styles['header']}>
           <div className={styles['title']}>{title}</div>

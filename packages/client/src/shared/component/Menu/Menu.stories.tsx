@@ -22,7 +22,7 @@ const OverlayStage = ({ children }: { readonly children: ReactNode }) => {
 };
 
 const meta = {
-  title: 'common/Menu',
+  title: 'shared/Menu',
   component: Menu,
   decorators: [
     (Story) => (

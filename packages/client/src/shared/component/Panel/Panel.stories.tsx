@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Icon } from '#component/Icon';
 import { IconButton } from '#component/IconButton';
-import { SidebarLayout } from './index';
+import { Panel } from './index';
 
 const meta = {
-  title: 'layout/SidebarLayout',
-  component: SidebarLayout,
+  title: 'shared/Panel',
+  component: Panel,
   decorators: [
     (Story) => (
       <div style={{ height: 480, width: 720 }}>
@@ -18,7 +18,7 @@ const meta = {
     actions: <IconButton variant="invisible" size="small" aria-label="새 파일" icon={() => <Icon iconId="newFile" size="sm" />} />,
     children: <div style={{ padding: 8 }}>본문 내용</div>,
   },
-} satisfies Meta<typeof SidebarLayout>;
+} satisfies Meta<typeof Panel>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
