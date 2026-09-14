@@ -1,4 +1,4 @@
-import type { HTMLAttributes, MouseEvent, Ref } from "react";
+import type { ComponentPropsWithoutRef, MouseEvent, Ref } from "react";
 import { clsx } from "clsx";
 import { ActionList } from "@primer/react";
 import { Icon } from "#component/Icon";
@@ -37,7 +37,7 @@ interface ChangeListItemProps {
 }
 
 /** `children`·`role`·`onSelect`를 가로챈다 — 행은 `entries`가 정하고 `onSelect`는 고른 행을 준다. */
-export interface ChangeListProps extends Omit<HTMLAttributes<HTMLUListElement>, "children" | "role" | "onSelect"> {
+export interface ChangeListProps extends Omit<ComponentPropsWithoutRef<"ul">, "children" | "role" | "onSelect"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLUListElement>;
   /** 머리글 문구(`'스테이지된 변경'`). 개수는 옆에 자동으로 붙는다. */

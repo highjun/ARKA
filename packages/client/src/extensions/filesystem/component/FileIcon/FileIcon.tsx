@@ -1,4 +1,4 @@
-import type { HTMLAttributes, Ref } from "react";
+import type { ComponentPropsWithoutRef, Ref } from "react";
 import { clsx } from "clsx";
 import styles from "./FileIcon.module.css";
 import { FILE_ICON_MAP, fileIconIdOf } from "./shared";
@@ -11,7 +11,7 @@ type FileIconSize = "sm" | "md" | "lg";
 Iconify.addCollection(seti as Parameters<typeof Iconify.addCollection>[0]);
 
 /** `id`를 막는다 — 파일 이름과 헷갈려 잘못 넘기는 것을 타입에서 끊는다. */
-export interface FileIconProps extends Omit<HTMLAttributes<HTMLSpanElement>, "id"> {
+export interface FileIconProps extends Omit<ComponentPropsWithoutRef<"span">, "id"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLSpanElement>;
   /** 파일 이름. 확장자로 아이콘을 고른다 — 어느 `FileIconId` 를 쓸지는 컴포넌트가 정한다. */

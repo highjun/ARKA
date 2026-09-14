@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import type { HTMLAttributes, KeyboardEvent } from "react";
+import type { ComponentPropsWithoutRef, KeyboardEvent } from "react";
 import styles from "./Item.module.css";
 import { CounterLabel } from "@primer/react";
 import { StatusIndicator } from "../StatusIndicator";
@@ -51,7 +51,7 @@ const getInteractiveProps = ({ isActive = false, disabled = false, onSelect }: S
 };
 
 /** `title`을 가로챈다 — 네이티브 툴팁이 아니라 세션 제목이다. */
-export interface SessionListItemProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "title" | "onSelect"> {
+export interface SessionListItemProps extends Omit<ComponentPropsWithoutRef<"div">, "children" | "title" | "onSelect"> {
   /** 세션 제목 — 목록의 첫 줄이자 `aria-label`로 그대로 쓰인다. */
   readonly title: string;
   /** 마지막 메시지 등 미리보기 한 줄. 없으면 빈 자리로 남는다. */

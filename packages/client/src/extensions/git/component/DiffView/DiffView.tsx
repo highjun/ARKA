@@ -1,4 +1,4 @@
-import type { HTMLAttributes, Ref } from "react";
+import type { ComponentPropsWithoutRef, Ref } from "react";
 import { clsx } from "clsx";
 import styles from "./DiffView.module.css";
 
@@ -6,7 +6,7 @@ import styles from "./DiffView.module.css";
 export type DiffLineKind = "add" | "del" | "hunk" | "meta" | "ctx";
 
 /** `children`을 막는다 — 내용은 `text`가 정한다. */
-export interface DiffViewProps extends Omit<HTMLAttributes<HTMLPreElement>, "children"> {
+export interface DiffViewProps extends Omit<ComponentPropsWithoutRef<"pre">, "children"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLPreElement>;
   /** unified diff 원문. 줄 단위로 갈라 그린다. */

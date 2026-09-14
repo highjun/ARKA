@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { HTMLAttributes, Ref } from "react";
+import type { ComponentPropsWithoutRef, Ref } from "react";
 import { clsx } from "clsx";
 import { createTextClipboardPort } from "./shared";
 import styles from "./CodeBlock.module.css";
@@ -82,7 +82,7 @@ const COPY_RESET_DELAY_MS = 1400;
 const clipboard = createTextClipboardPort();
 
 /** `children`을 막는다 — 코드는 `content`로만 들어온다. */
-export interface CodeBlockProps extends Omit<HTMLAttributes<HTMLElement>, "title" | "children"> {
+export interface CodeBlockProps extends Omit<ComponentPropsWithoutRef<"figure">, "title" | "children"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLElement>;
   /** 표시할 코드 원문. */

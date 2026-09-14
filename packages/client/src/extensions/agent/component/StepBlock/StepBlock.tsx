@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import type { FormEvent, HTMLAttributes, ReactNode, Ref } from "react";
+import type { ComponentPropsWithoutRef, FormEvent, ReactNode, Ref } from "react";
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import styles from "./StepBlock.module.css";
 import { Details } from "@primer/react";
@@ -14,7 +14,7 @@ import type { StatusIndicatorStatus } from "../StatusIndicator";
  * `Tab.tsx`의 `TabGroupProps`도 같은 선례다. 필드 넷이 두 인터페이스에 중복되지만 그만큼 안전하다.
  */
 export interface StepBlockThinkingProps extends Omit<
-  HTMLAttributes<HTMLDetailsElement>,
+  ComponentPropsWithoutRef<"details">,
   "title" | "children" | "onToggle"
 > {
   /** `'thinking'`이면 사고 과정 블록(점선 테두리) — 본문이 비어도 펼쳐진다. */
@@ -40,7 +40,7 @@ export interface StepBlockThinkingProps extends Omit<
 
 /** `<details>`라 펼침 상태를 브라우저가 든다 — `onToggle`을 가로채 그 변화를 알린다. */
 export interface StepBlockToolProps extends Omit<
-  HTMLAttributes<HTMLDetailsElement>,
+  ComponentPropsWithoutRef<"details">,
   "title" | "children" | "onToggle"
 > {
   /** `'tool'`이면 도구 실행 블록(실선 테두리) — 입력/출력이 둘 다 없으면 펼쳐지지 않는다. */

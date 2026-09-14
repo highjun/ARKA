@@ -1,4 +1,4 @@
-import type { HTMLAttributes, Ref } from "react";
+import type { ComponentPropsWithoutRef, Ref } from "react";
 import { clsx } from "clsx";
 import styles from "./StatusIndicator.module.css";
 import { Icon } from "#component/Icon";
@@ -23,7 +23,7 @@ const ICON_OF: Record<StatusIndicatorStatus, IconId> = {
 };
 
 /** `children`을 막는다 — 문구는 `status`가 정한다. */
-export interface StatusIndicatorProps extends Omit<HTMLAttributes<HTMLSpanElement>, "children"> {
+export interface StatusIndicatorProps extends Omit<ComponentPropsWithoutRef<"span">, "children"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLSpanElement>;
   /** 표시할 상태 — 아이콘·라벨·색상을 함께 결정한다. */

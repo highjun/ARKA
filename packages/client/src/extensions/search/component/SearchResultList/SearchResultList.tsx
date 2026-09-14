@@ -1,4 +1,4 @@
-import type { HTMLAttributes, Ref } from "react";
+import type { ComponentPropsWithoutRef, Ref } from "react";
 import { clsx } from "clsx";
 import { ActionList } from "@primer/react";
 import { Text } from "#component/Text";
@@ -31,10 +31,7 @@ interface SearchResultListItemProps {
 }
 
 /** `children`·`onSelect`를 가로챈다 — 행은 `files`가 정하고 `onSelect`는 고른 자리를 준다. */
-export interface SearchResultListProps extends Omit<
-  HTMLAttributes<HTMLUListElement>,
-  "children" | "role" | "onSelect"
-> {
+export interface SearchResultListProps extends Omit<ComponentPropsWithoutRef<"ul">, "children" | "role" | "onSelect"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLUListElement>;
   /** 파일별로 묶인 결과. 비면 아무것도 그리지 않는다 — 빈 상태 문구는 쓰는 쪽이 낸다. */

@@ -1,6 +1,6 @@
 import { clsx } from "clsx";
 import { useState } from "react";
-import type { HTMLAttributes, ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { useSessionList } from "./useSessionList";
 import styles from "./SessionList.module.css";
 import { IconButton } from "#component/IconButton";
@@ -26,7 +26,7 @@ export interface AgentSession {
 }
 
 /** `children`을 막는다 — 항목은 `sessions`로만 들어온다. */
-export interface SessionListProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
+export interface SessionListProps extends Omit<ComponentPropsWithoutRef<"div">, "children"> {
   /** 표시할 세션 목록. */
   readonly sessions: readonly AgentSession[];
   /** 넘기면 controlled, 안 넘기면 `defaultActiveId`로 컴포넌트가 자체 관리한다. */

@@ -33,6 +33,7 @@
 - **린트** `primer-react/direct-slot-children` — 슬롯을 다른 원소로 감싸는 것을 막는다.
 - **테스트** `packages/client/test/structure.test.ts` — 컴포넌트 폴더에 스토리·테스트·배럴이 있고 그룹 배럴이 없기를 요구한다.
 - **타입** — `aria-label` XOR `aria-labelledby`, `<Name>Props`의 원소 속성 상속.
+- **린트** `no-restricted-syntax` — props 바탕에 `HTMLAttributes<HTMLXElement>`를 쓰지 못하게 한다. 루트 태그가 갈리는 컴포넌트만 예외이고 그 자리는 사유를 적은 `eslint-disable`로 드러난다(지금 하나 — `FileTree`).
 - **리뷰** — "이 슬롯이 둘인가 셋인가"와 "이 축이 변형인가 다른 컴포넌트인가"는 사람만 판정한다.
 
 ## 상태:

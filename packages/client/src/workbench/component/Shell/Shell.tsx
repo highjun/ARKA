@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { HTMLAttributes, ReactNode, Ref } from "react";
+import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
 import { clsx } from "clsx";
 import { PortalProvider } from "#utils/portal";
 import styles from "./Shell.module.css";
@@ -23,7 +23,7 @@ const RESIZABLE_MAX_WIDTH = "480px";
 const hasContent = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
 
 /** `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다. */
-export interface ShellProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
+export interface ShellProps extends Omit<ComponentPropsWithoutRef<"div">, "children"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLDivElement>;
   /** Primer `ThemeProvider`에 그대로 전달되는 색 모드. */

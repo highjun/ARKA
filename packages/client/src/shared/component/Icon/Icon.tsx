@@ -1,4 +1,4 @@
-import type { HTMLAttributes, Ref } from "react";
+import type { ComponentPropsWithoutRef, Ref } from "react";
 import { clsx } from "clsx";
 import styles from "./Icon.module.css";
 import { icons } from "./data";
@@ -19,7 +19,7 @@ Iconify.addCollection(codicon as Parameters<typeof Iconify.addCollection>[0]);
 Iconify.addCollection(octicon as Parameters<typeof Iconify.addCollection>[0]);
 
 /** `id`를 막는다 — `iconId`와 헷갈려 잘못 넘기는 것을 타입에서 끊는다. */
-export interface IconProps extends Omit<HTMLAttributes<HTMLSpanElement>, "id"> {
+export interface IconProps extends Omit<ComponentPropsWithoutRef<"span">, "id"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLSpanElement>;
   /** 표시할 아이콘. */

@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import type { HTMLAttributes, ReactNode, Ref } from "react";
+import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
 import styles from "./Message.module.css";
 import { Timestamp } from "#component/Timestamp";
 
@@ -23,7 +23,7 @@ const getAvatarInitial = (author: MessageAuthor) => {
 };
 
 /** `children`을 막는다 — 본문은 `children` 대신 정해진 슬롯으로 받는다. */
-export interface MessageProps extends Omit<HTMLAttributes<HTMLElement>, "children"> {
+export interface MessageProps extends Omit<ComponentPropsWithoutRef<"article">, "children"> {
   /** 루트 `article`로 그대로 통과한다. */
   readonly ref?: Ref<HTMLElement>;
   /** 메시지 발신 주체 — 아바타 초기값·라벨 표시를 결정한다. */

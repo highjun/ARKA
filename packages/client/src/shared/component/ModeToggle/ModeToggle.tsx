@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { ButtonHTMLAttributes, ReactNode, Ref } from "react";
+import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
 import { clsx } from "clsx";
 import styles from "./ModeToggle.module.css";
 import { IconButton } from "@primer/react";
@@ -52,7 +52,7 @@ const getLabel = (labels: ModeToggleLabels | undefined, currentIndex: number, fa
  * 줄어든다.
  */
 export interface ModeToggleProps extends Omit<
-  ButtonHTMLAttributes<HTMLButtonElement>,
+  ComponentPropsWithoutRef<"button">,
   "aria-labelledby" | "children" | "onClick" | "value"
 > {
   /** 루트 원소로 그대로 통과한다. */

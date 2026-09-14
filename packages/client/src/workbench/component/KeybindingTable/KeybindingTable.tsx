@@ -1,4 +1,4 @@
-import type { HTMLAttributes, Ref } from "react";
+import type { ComponentPropsWithoutRef, Ref } from "react";
 import { clsx } from "clsx";
 import { Text } from "#component/Text";
 import styles from "./KeybindingTable.module.css";
@@ -16,7 +16,7 @@ interface KeybindingTableRow {
 }
 
 /** `children`을 막는다 — 내용은 `rows`가 정한다. */
-export interface KeybindingTableProps extends Omit<HTMLAttributes<HTMLTableElement>, "children"> {
+export interface KeybindingTableProps extends Omit<ComponentPropsWithoutRef<"table">, "children"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLTableElement>;
   /** 그릴 줄들. 비면 머리만 남는다. */

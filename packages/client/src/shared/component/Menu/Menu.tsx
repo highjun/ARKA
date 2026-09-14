@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import type { HTMLAttributes, Ref } from "react";
+import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
 import { clsx } from "clsx";
 import { usePortalContainer } from "#utils/portal";
 import { Icon } from "#component/Icon";
@@ -18,10 +18,16 @@ type MenuKind = "dropdown" | "context";
  * **여기만 Primer를 쓰지 않는다**(→ ADR 0009). Primer에 우클릭 메뉴가 없어서, 좌클릭과 우클릭을
  * 한 API로 두려면 Radix 둘(`dropdown`·`context`)을 함께 감싸는 길뿐이다. 부품 다섯이 양쪽에서
  * 같은 모양이라 `kind` 하나로 갈린다.
+ *
+ * **원소 props 를 바탕으로 두지 않는다** — 루트는 열림 상태만 들고 자기 DOM 을 그리지 않는다.
+ * `HTMLAttributes` 를 물려받고 있었는데(2026-09-14까지) `className`·`id`·이벤트를 받는 것처럼
+ * 보이고 실제로는 Radix Root 가 조용히 버렸다. 보이는 것은 `Trigger` 와 `Content` 다.
  */
-export interface MenuProps extends Omit<HTMLAttributes<HTMLElement>, "dir"> {
+export interface MenuProps {
   /** 무엇이 여는가. 기본값 `'dropdown'`(좌클릭 앵커). `'context'`면 우클릭으로 뜬다. */
   readonly kind?: MenuKind;
+  /** `Trigger`·`Content` 를 둔다. */
+  readonly children?: ReactNode;
   /** 제어 모드의 열림 여부. */
   readonly open?: boolean;
   /**
@@ -41,7 +47,7 @@ export interface MenuProps extends Omit<HTMLAttributes<HTMLElement>, "dir"> {
  * 이미 버튼인 것을 그 안에 넣으면 버튼이 중첩된다(잘못된 HTML, 클릭 시맨틱도 깨진다). `asChild`를
  * 켜면 Radix가 속성을 자식에 병합만 하고 자기 태그를 안 그린다.
  */
-interface MenuTriggerProps extends HTMLAttributes<HTMLElement> {
+interface MenuTriggerProps extends ComponentPropsWithoutRef<"button"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLButtonElement>;
   /** true면 Radix가 속성을 자식에 병합만 하고 자기 태그는 안 그린다. */
@@ -51,13 +57,13 @@ interface MenuTriggerProps extends HTMLAttributes<HTMLElement> {
 }
 
 /** 뜬 메뉴의 껍데기. 포탈로 나가므로 조상의 `overflow`에 잘리지 않는다. */
-interface MenuContentProps extends HTMLAttributes<HTMLDivElement> {
+interface MenuContentProps extends ComponentPropsWithoutRef<"div"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLDivElement>;
 }
 
 /** 고를 수 있는 한 줄. `onSelect`를 가로채므로 표준 `onSelect`는 쓸 수 없다. */
-interface MenuItemProps extends Omit<HTMLAttributes<HTMLElement>, "onSelect"> {
+interface MenuItemProps extends Omit<ComponentPropsWithoutRef<"div">, "onSelect"> {
   /** true면 선택할 수 없고 흐리게 표시된다. */
   readonly disabled?: boolean;
   /** 항목을 고르면 호출된다. */
@@ -66,14 +72,14 @@ interface MenuItemProps extends Omit<HTMLAttributes<HTMLElement>, "onSelect"> {
 
 /** 고를 수 없는 머리글. 항목 묶음에 이름을 붙일 때 쓴다. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- 커스텀 필드는 필요해지면 추가한다.
-interface MenuLabelProps extends HTMLAttributes<HTMLElement> {}
+interface MenuLabelProps extends ComponentPropsWithoutRef<"div"> {}
 
 /** 묶음 사이의 줄. 포커스를 받지 않는다. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- 커스텀 필드는 필요해지면 추가한다.
-interface MenuSeparatorProps extends HTMLAttributes<HTMLElement> {}
+interface MenuSeparatorProps extends ComponentPropsWithoutRef<"div"> {}
 
 /** 하나만 고를 수 있는 묶음. 안에는 `Menu.RadioItem`만 둔다. */
-interface MenuRadioGroupProps extends Omit<HTMLAttributes<HTMLElement>, "onChange"> {
+interface MenuRadioGroupProps extends Omit<ComponentPropsWithoutRef<"div">, "onChange"> {
   /** 지금 고른 값. */
   readonly value?: string;
   /** 다른 값을 고르면 호출된다. */
@@ -81,7 +87,7 @@ interface MenuRadioGroupProps extends Omit<HTMLAttributes<HTMLElement>, "onChang
 }
 
 /** 고른 것에 표시가 붙는 한 줄. `Menu.RadioGroup` 안에서만 뜻이 있다. */
-interface MenuRadioItemProps extends Omit<HTMLAttributes<HTMLElement>, "onSelect"> {
+interface MenuRadioItemProps extends Omit<ComponentPropsWithoutRef<"div">, "onSelect"> {
   /** 이 줄이 나타내는 값. */
   readonly value: string;
   /** true면 고를 수 없고 흐리게 표시된다. */

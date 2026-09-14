@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { DragEvent, HTMLAttributes, KeyboardEvent, MouseEvent, ReactNode, Ref } from "react";
+import type { DragEvent, KeyboardEvent, MouseEvent, HTMLAttributes, ReactNode, Ref } from "react";
 import { clsx } from "clsx";
 import { useTreeNavigation, flattenVisible } from "./useTreeNavigation";
 import {
@@ -309,7 +309,15 @@ const Row = ({
   );
 };
 
-/** `onSelect`·`onContextMenu`를 가로챈다 — 행 단위로 다시 정의한다. */
+/**
+ * `onSelect`·`onContextMenu`를 가로챈다 — 행 단위로 다시 정의한다.
+ *
+ * **이 저장소에서 바탕이 `HTMLAttributes`인 유일한 자리다**(→ ADR 0008). 항목이 없으면 `<div>`,
+ * 있으면 `<ul role="tree">`를 그려 실제 태그가 갈리는데, 이벤트 핸들러의 제네릭이 원소별이라
+ * (`ClipboardEventHandler<HTMLDivElement>` ≠ `<HTMLUListElement>`) 태그를 하나로 정하면
+ * 나머지 분기에서 거짓이 된다. 그래서 공통 조상으로 둔다 — 분기마다 실제 태그로 좁혀 넘긴다.
+ */
+// eslint-disable-next-line no-restricted-syntax -- 루트 태그가 둘이라 단일 태그 바탕이 거짓이 된다(위 주석).
 export interface FileTreeProps extends Omit<HTMLAttributes<HTMLElement>, "children" | "onSelect" | "onContextMenu"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLElement>;
@@ -608,7 +616,7 @@ export const FileTree = ({
     return (
       <div
         // 빈 상태는 <div>, 아니면 <ul>이라 실제 DOM 타입이 갈린다 — 공개 계약은 공통 조상
-        // HTMLElement로 두므로(위 FileTreeProps 주석), 각 분기에서 실제 태그에 맞춰 좁힌다.
+        // HTMLElement다(위 FileTreeProps 주석). 각 분기에서 실제 태그에 맞춰 좁힌다.
         ref={ref as Ref<HTMLDivElement>}
         data-chrome={chrome}
         className={clsx(className, styles["root"])}

@@ -1,4 +1,4 @@
-import type { HTMLAttributes, Ref } from "react";
+import type { ComponentPropsWithoutRef, Ref } from "react";
 import { clsx } from "clsx";
 import styles from "./Timestamp.module.css";
 import { formatTimestamp } from "./shared";
@@ -12,7 +12,7 @@ type TimestampInput =
 
 /** `children`을 막는다 — 내용은 `mode`와 입력이 정한다. */
 export type TimestampProps = TimestampInput &
-  Omit<HTMLAttributes<HTMLSpanElement>, "children"> & {
+  Omit<ComponentPropsWithoutRef<"span">, "children"> & {
     /** 루트 `span`으로 그대로 통과한다. */
     readonly ref?: Ref<HTMLSpanElement>;
     readonly mode: TimestampMode;

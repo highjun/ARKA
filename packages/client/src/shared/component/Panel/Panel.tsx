@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import type { HTMLAttributes, ReactNode, Ref } from "react";
+import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
 import styles from "./Panel.module.css";
 
 const hasContent = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
@@ -12,7 +12,7 @@ const hasContent = (node: ReactNode): boolean => node !== null && node !== undef
 type PanelDensity = "comfortable" | "compact";
 
 /** `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다. */
-export interface PanelProps extends Omit<HTMLAttributes<HTMLDivElement>, "title" | "children"> {
+export interface PanelProps extends Omit<ComponentPropsWithoutRef<"div">, "title" | "children"> {
   /** 머리의 빽빽함. */
   readonly density?: PanelDensity;
   /** 루트 원소로 그대로 통과한다. */

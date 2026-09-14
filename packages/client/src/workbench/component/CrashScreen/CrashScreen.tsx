@@ -1,4 +1,4 @@
-import type { HTMLAttributes, Ref } from "react";
+import type { ComponentPropsWithoutRef, Ref } from "react";
 import { clsx } from "clsx";
 import { Button, Heading } from "@primer/react";
 import { Text } from "#component/Text";
@@ -6,7 +6,7 @@ import styles from "./CrashScreen.module.css";
 
 /** `onReload`는 필수다 — 사용자가 빠져나갈 길이 없는 화면을 만들지 않는다. */
 /** `children`을 막는다 — 내용은 `message`가 정한다. */
-export interface CrashScreenProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
+export interface CrashScreenProps extends Omit<ComponentPropsWithoutRef<"div">, "children"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLDivElement>;
   /** 잡힌 오류의 메시지. 스택은 보여주지 않는다 — 사용자가 할 수 있는 일은 새로고침뿐이다. */

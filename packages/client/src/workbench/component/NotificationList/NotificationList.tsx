@@ -1,4 +1,4 @@
-import type { HTMLAttributes, Ref } from "react";
+import type { ComponentPropsWithoutRef, Ref } from "react";
 import { clsx } from "clsx";
 import { IconButton } from "#component/IconButton";
 import { Icon } from "#component/Icon";
@@ -15,7 +15,7 @@ type NotificationListItem = {
 
 /** 스스로 사라지지 않는다 — 닫는 것은 `onDismiss`를 받은 쪽의 몫이다. */
 /** `children`을 막는다 — 줄은 `items`가 정한다. */
-export interface NotificationListProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
+export interface NotificationListProps extends Omit<ComponentPropsWithoutRef<"div">, "children"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLDivElement>;
   /** 쌓아 보일 알림들. 비면 아무것도 그리지 않는다. */

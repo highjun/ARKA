@@ -1,5 +1,5 @@
 import { memo } from "react";
-import type { ComponentPropsWithoutRef, HTMLAttributes, Ref } from "react";
+import type { ComponentPropsWithoutRef, Ref } from "react";
 import { clsx } from "clsx";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -10,7 +10,7 @@ import { CodeBlock } from "#component/CodeBlock";
 type MarkdownComponents = NonNullable<ComponentPropsWithoutRef<typeof ReactMarkdown>["components"]>;
 
 /** 원문을 받는다 — 파싱과 렌더는 이 컴포넌트가 한다. */
-export interface MarkdownProps extends HTMLAttributes<HTMLElement> {
+export interface MarkdownProps extends ComponentPropsWithoutRef<"div"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLElement>;
   /** 마크다운 원문. */

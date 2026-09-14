@@ -1,4 +1,4 @@
-import type { HTMLAttributes, ReactNode, Ref } from "react";
+import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
 import { clsx } from "clsx";
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import styles from "./ActivityBar.module.css";
@@ -18,7 +18,7 @@ export interface ActivityBarItem {
 }
 
 /** `onSelect`를 가로챈다 — 표준 `onSelect`가 아니라 항목 선택이다. */
-export interface ActivityBarProps extends Omit<HTMLAttributes<HTMLElement>, "onSelect"> {
+export interface ActivityBarProps extends Omit<ComponentPropsWithoutRef<"nav">, "onSelect"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLElement>;
   /** 세로로 나열할 아이콘 항목들. */

@@ -1,4 +1,4 @@
-import type { HTMLAttributes, ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { clsx } from "clsx";
 import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
@@ -6,7 +6,7 @@ import type { IconId } from "#component/Icon";
 import { useTabClassNames } from "./TabContext";
 
 /** `title`을 가로챈다 — 네이티브 툴팁이 아니라 탭 제목이다. */
-export interface TabHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "title"> {
+export interface TabHeaderProps extends Omit<ComponentPropsWithoutRef<"div">, "children" | "title"> {
   /** 이 탭이 지금 선택된(보이는) 탭인가. */
   readonly isActive?: boolean;
   /** 저장 안 된 변경이 있는가 — 제목 옆에 점으로 표시된다. */

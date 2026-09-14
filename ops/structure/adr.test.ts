@@ -63,7 +63,17 @@ const isPath = (token: string) =>
  * 규칙 ID나 패키지 이름의 **모양**. 하이픈이나 `/`가 있어야 한다 — 한 낱말짜리 백틱
  * (`main`·`check`·`contracts`)은 브랜치·잡·패키지 이름이라 실효 설정에서 찾을 것이 없다.
  */
+/** 규칙이 아니라 지시문. 규칙 이름처럼 생겼지만 실효 설정에서 찾을 것이 없다. */
+const DIRECTIVES = new Set([
+  "eslint-disable",
+  "eslint-disable-next-line",
+  "eslint-enable",
+  "ts-expect-error",
+  "ts-ignore",
+]);
+
 const isCitable = (token: string) =>
+  !DIRECTIVES.has(token) &&
   !isPath(token) &&
   !token.includes(" ") &&
   !token.endsWith("/") &&

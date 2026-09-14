@@ -19,6 +19,15 @@ const RESTRICTED_SYNTAX = [
     message: "`#contracts`로 가져오세요 — 맨이름은 서드파티와 구분되지 않습니다.",
   })),
   // 테스트 이름을 보던 셀렉터 둘은 `vitest/valid-title`로 갈았다(→ ADR 0011).
+  /*
+   * **props 바탕은 `ComponentPropsWithoutRef<'tag'>`다**(→ ADR 0008). `HTMLAttributes<HTMLXElement>`는
+   * 원소 고유 속성을 빠뜨린다 — `href`·`disabled`·`type`이 없어서 소비처가 캐스트하게 된다.
+   * 루트 태그가 갈리는 컴포넌트만 예외이고, 그 자리는 사유를 적은 `eslint-disable`로 드러난다.
+   */
+  {
+    selector: "TSTypeReference > Identifier[name=/^(?:[A-Za-z]+)?HTMLAttributes$/]",
+    message: "props 바탕은 `ComponentPropsWithoutRef<'tag'>`를 쓰세요 — 원소 고유 속성이 빠집니다(→ ADR 0008).",
+  },
 ];
 
 /** client의 슬라이스. 새 슬라이스를 더할 때 여기 한 줄을 빼먹으면 그 슬라이스만 검사에서 빠진다. */

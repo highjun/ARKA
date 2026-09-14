@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import type { HTMLAttributes, Ref } from "react";
+import type { ComponentPropsWithoutRef, Ref } from "react";
 import styles from "./TextEditor.module.css";
 import { useCodeMirrorEditor } from "./useCodeMirrorEditor";
 import type { RevealPosition } from "./useCodeMirrorEditor";
@@ -16,7 +16,7 @@ type TextEditorChrome = "bordered" | "none";
  * `EditorTab` 과 props 를 맞춰 둔 것은 의도다 — 그 자리를 그대로 갈아끼울 수 있어야 한다. CodeMirror
  * 인스턴스 관리는 `useCodeMirrorEditor` 훅이 전담한다 — 여기는 구조(헤더·본문)만 조립한다.
  */
-export interface TextEditorProps extends Omit<HTMLAttributes<HTMLElement>, "onChange" | "children"> {
+export interface TextEditorProps extends Omit<ComponentPropsWithoutRef<"section">, "onChange" | "children"> {
   /** 루트 `section`으로 그대로 통과한다. */
   readonly ref?: Ref<HTMLElement>;
   /** 표시용이자 **언어를 고르는 근거**다(확장자). */

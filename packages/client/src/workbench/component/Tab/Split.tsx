@@ -1,10 +1,10 @@
 import { createContext, useContext } from "react";
 import type {
   CSSProperties,
+  ComponentPropsWithoutRef,
   Dispatch,
   DragEventHandler,
   FocusEventHandler,
-  HTMLAttributes,
   KeyboardEventHandler,
   MutableRefObject,
   PointerEventHandler,
@@ -51,7 +51,7 @@ export interface TabTreeSplit {
 export type TabTreeNode = TabTreeLeaf | TabTreeSplit;
 
 /** 드래그 핸들러를 가로챈다 — 분할·재정렬을 이 컴포넌트가 직접 다룬다. */
-export interface TabSplitProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "onDragStart" | "onDrop"> {
+export interface TabSplitProps extends Omit<ComponentPropsWithoutRef<"div">, "children" | "onDragStart" | "onDrop"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLElement>;
   /** 분할 레이아웃 자체 — 리프(탭 그룹)와 가지(분할 방향+자식)가 재귀적으로 중첩된다. */
@@ -299,7 +299,7 @@ const SplitBranch = ({
 }: {
   node: TabTreeSplit;
   isRoot?: boolean;
-  rootProps?: Omit<HTMLAttributes<HTMLDivElement>, "children">;
+  rootProps?: Omit<ComponentPropsWithoutRef<"div">, "children">;
   className?: string;
   childState?: SplitChildState;
 } & LeafPassthrough & { readonly ref?: Ref<HTMLElement> }) => {
@@ -381,7 +381,7 @@ const RootLeafSection = ({
   ref,
 }: {
   leaf: TabTreeLeaf;
-  rootProps: Omit<HTMLAttributes<HTMLDivElement>, "children">;
+  rootProps: Omit<ComponentPropsWithoutRef<"div">, "children">;
   className?: string;
 } & LeafPassthrough & { readonly ref?: Ref<HTMLElement> }) => {
   const classNames = useTabClassNames();

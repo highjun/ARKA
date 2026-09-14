@@ -1,8 +1,8 @@
 import { createContext, useContext, useRef } from "react";
 import type {
+  ComponentPropsWithoutRef,
   Dispatch,
   DragEventHandler,
-  HTMLAttributes,
   KeyboardEvent,
   KeyboardEventHandler,
   MouseEventHandler,
@@ -22,7 +22,7 @@ import { ClassNamesContext, useTabClassNames } from "./TabContext";
 import { TabHeader } from "./Header";
 
 /** 콜백이 없으면 그 기능 자체가 꺼진다 — `onTabClose`가 없으면 닫기 버튼도 안 뜬다. */
-export interface TabStripProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
+export interface TabStripProps extends Omit<ComponentPropsWithoutRef<"div">, "children"> {
   /** 지금 선택된 탭의 id. */
   readonly activeTab: TabId;
   /** 스트립에 표시할 탭 목록. */

@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { HTMLAttributes, ReactNode, Ref } from "react";
+import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
 import { clsx } from "clsx";
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import { Container } from "#component/Container";
@@ -15,7 +15,7 @@ export interface GroupState {
 }
 
 /** `activeTab`의 유무로 controlled·uncontrolled가 갈린다. */
-export interface TabGroupProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
+export interface TabGroupProps extends Omit<ComponentPropsWithoutRef<"div">, "children"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLElement>;
   /** 지금 선택된 탭의 id. 넘기면 controlled, 안 넘기면 `defaultActiveTab` 으로 컴포넌트가 자체 관리한다. */

@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import type { HTMLAttributes, ReactNode, Ref } from "react";
+import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
 import styles from "./ChatRoom.module.css";
 import { IconButton } from "#component/IconButton";
 import { Icon } from "#component/Icon";
@@ -26,7 +26,7 @@ export interface ChatRoomMessage {
 }
 
 /** `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다. */
-export interface ChatRoomProps extends Omit<HTMLAttributes<HTMLDivElement>, "title" | "children"> {
+export interface ChatRoomProps extends Omit<ComponentPropsWithoutRef<"div">, "title" | "children"> {
   /** 루트 `Panel`로 그대로 통과한다. */
   readonly ref?: Ref<HTMLDivElement>;
   /** 헤더에 표시할 채팅방 제목. */

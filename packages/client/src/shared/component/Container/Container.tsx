@@ -1,4 +1,4 @@
-import type { HTMLAttributes, Ref } from "react";
+import type { ComponentPropsWithoutRef, Ref } from "react";
 import { clsx } from "clsx";
 import styles from "./Container.module.css";
 
@@ -15,7 +15,7 @@ type ContainerChrome = "visible" | "none";
 type ContainerScroll = "auto" | "none" | "horizontal" | "vertical";
 
 /** 자기 치수를 갖지 않는다 — 높이·폭은 쓰는 쪽이 `className`으로 준다. */
-export interface ContainerProps extends HTMLAttributes<HTMLDivElement> {
+export interface ContainerProps extends ComponentPropsWithoutRef<"div"> {
   /** 스크롤하는 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLDivElement>;
   /** 테두리·배경·radius. 프레임 안쪽 우물로 쓸 때는 `none`. */
