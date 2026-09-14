@@ -7,10 +7,10 @@ import { IconButton } from '#component/IconButton';
 import { Icon } from '#component/Icon';
 
 /** 정규식 하나로 가르는 근사 강조다 — 파서가 아니라 언어를 가리지 않는다. */
-export type CodeBlockSyntaxTokenKind = 'plain' | 'keyword' | 'string' | 'comment' | 'number' | 'function' | 'punctuation';
+type CodeBlockSyntaxTokenKind = 'plain' | 'keyword' | 'string' | 'comment' | 'number' | 'function' | 'punctuation';
 
 /** `key`는 React 목록용이라 같은 줄 안에서만 고유하면 된다. */
-export interface CodeBlockSyntaxToken {
+interface CodeBlockSyntaxToken {
   readonly key: string;
   readonly kind: CodeBlockSyntaxTokenKind;
   readonly text: string;
@@ -28,11 +28,11 @@ const SYNTAX_PATTERN =
   /(\/\/.*$|\/\*[\s\S]*?\*\/|`(?:\\.|[^`])*`|"(?:\\.|[^"])*"|'(?:\\.|[^'])*'|\b(?:const|let|var|type|interface|export|import|from|return|function|class|extends|readonly|new|if|else|for|while|true|false|null|undefined)\b|\b\d+(?:\.\d+)?\b|\b[A-Za-z_$][\w$]*(?=\s*\()|[{}()[\].,;:<>/=+\-*])/gmu;
 
 /** 끝의 줄바꿈 **하나만** 떼어낸다 — 펜스 코드가 늘 달고 오는 것이라 빈 줄로 보이면 안 된다. */
-export const normalizeContent = (value: string) => String(value).replace(/\n$/u, '');
+const normalizeContent = (value: string) => String(value).replace(/\n$/u, '');
 /** 비었거나 공백뿐이면 `'text'`다 — 캡션이 빈 이름표를 그리지 않게. */
-export const normalizeLanguage = (value?: string) => value?.trim().toLowerCase() || 'text';
+const normalizeLanguage = (value?: string) => value?.trim().toLowerCase() || 'text';
 /** 없으면 빈 문자열이다. 캡션을 그릴지 말지는 부르는 쪽이 이 값으로 정한다. */
-export const normalizeTitle = (value?: string) => value?.trim() ?? '';
+const normalizeTitle = (value?: string) => value?.trim() ?? '';
 
 const getSyntaxTokenKind = (text: string): CodeBlockSyntaxTokenKind => {
   if (text.startsWith('//') || text.startsWith('/*')) return 'comment';
@@ -68,7 +68,7 @@ const tokenizeLine = (line: string, lineNumber: number): CodeBlockSyntaxToken[] 
 };
 
 /** 줄 단위로 잘라 각 줄을 따로 토큰화한다 — 여러 줄 주석은 줄을 넘어 이어지지 않는다. */
-export const getLines = (content: string): CodeBlockLine[] =>
+const getLines = (content: string): CodeBlockLine[] =>
   content.split('\n').map((text, index) => {
     const number = index + 1;
     return { key: `${number}:${text}`, number, text: text || ' ', tokens: tokenizeLine(text, number) };

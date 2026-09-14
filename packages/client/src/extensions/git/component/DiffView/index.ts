@@ -1,2 +1,1 @@
-export { DiffView, diffLineKindOf } from './DiffView';
-export type { DiffLineKind, DiffViewProps } from './DiffView';
+export { DiffView } from './DiffView';

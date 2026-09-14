@@ -29,7 +29,7 @@ export type PendingInput = {
 };
 
 /** 스트림 연결 상태. `live`는 붙어 있다는 뜻이지 Run이 돈다는 뜻이 아니다(그건 `runStatus`). */
-export type ChatConnection = 'idle' | 'connecting' | 'live' | 'error';
+type ChatConnection = 'idle' | 'connecting' | 'live' | 'error';
 
 /** 세션 하나의 대화 상태 전부. 스트림이 붙어 있는 동안 계속 갱신된다. */
 export type SessionChat = {

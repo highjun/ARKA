@@ -13,7 +13,7 @@ const StripRoot = ({ className, ...props }: TabStripProps) => (
 );
 
 /** 탭 헤더들을 가로로 늘어놓는 띠 — 넘치면 스크롤하고, 다 안 보이는 탭은 오버플로 메뉴로 묶는다. */
-export const TabStrip = Object.assign(StripRoot, { Items: StripItems, Menu: StripMenu });
+const TabStrip = Object.assign(StripRoot, { Items: StripItems, Menu: StripMenu });
 
 /**
  * Strip과 활성 탭의 내용(`children`)을 세로로 붙인 패널 하나 — 분할이 없을 때 `Tab`이 렌더하는
@@ -22,7 +22,7 @@ export const TabStrip = Object.assign(StripRoot, { Items: StripItems, Menu: Stri
  * `data-component` 는 여기서 리터럴로 정한다 — 실제 DOM에 닿는 자리(`GroupImpl`)가 하나뿐이라
  * 다른 컴포넌트와 같은 자리다.
  */
-export const TabGroup = ({ className, chrome, ref, ...props }: TabGroupProps) => (
+const TabGroup = ({ className, chrome, ref, ...props }: TabGroupProps) => (
   <GroupImpl {...props} ref={ref} classNames={buildClassNames()} className={className} data-chrome={chrome ?? 'bordered'} data-component="Tab" />
 );
 TabGroup.displayName = 'Tab.Group';
@@ -31,7 +31,7 @@ TabGroup.displayName = 'Tab.Group';
  * TabSplit 은 leaf 하나뿐일 때와 branch 가 있을 때 렌더되는 태그가 다르다(`section`/`div`) —
  * `SplitRootImpl`이 안다.
  */
-export const TabSplit = ({ className, chrome, ref, ...props }: TabSplitProps) => (
+const TabSplit = ({ className, chrome, ref, ...props }: TabSplitProps) => (
   <SplitRootImpl {...props} ref={ref} classNames={buildClassNames()} className={className} data-chrome={chrome ?? 'bordered'} data-component="Tab" />
 );
 TabSplit.displayName = 'Tab.Split';
@@ -46,7 +46,7 @@ export type TabProps = (TabSplitProps | (TabGroupProps & { tree?: never })) & {
 };
 
 /** `tree`가 있으면 분할을, 없으면 단일 그룹을 그린다. */
-export const TabRoot = ({ ref, ...props }: TabProps) =>
+const TabRoot = ({ ref, ...props }: TabProps) =>
   props.tree ? <TabSplit {...props} ref={ref} /> : <TabGroup {...props} ref={ref} />;
 TabRoot.displayName = 'Tab';
 
@@ -60,8 +60,6 @@ export const Tab = Object.assign(TabRoot, { Header: TabHeader, Strip: TabStrip, 
 /**
  * 공개 표면은 이 파일이 낸다 — 부품이 파일로 갈렸어도 밖에서 보는 자리는 `Tab` 하나다.
  */
-export type { SplitDropPosition, SplitEdgeDropPosition, StripDropPosition, TabChrome, TabDropZone, TabGroupItem, TabId, TabItem, TabSplitOrientation } from './shared';
-export type { TabHeaderProps } from './Header';
-export type { TabStripProps } from './Strip';
+export type { TabGroupItem, TabItem } from './shared';
 export type { TabGroupProps } from './Group';
 export type { TabSplitProps, TabTreeLeaf, TabTreeNode, TabTreeSplit } from './Split';

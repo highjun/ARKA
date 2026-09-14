@@ -59,7 +59,7 @@ export interface TabGroupProps extends Omit<HTMLAttributes<HTMLDivElement>, 'chi
 }
 
 /** 목록이 비면 `selectedTab`이 `undefined`다 — 부르는 쪽이 빈 상태를 그린다. */
-export const getGroupState = (tabItems: readonly TabGroupItem[], activeTab: TabId): GroupState => {
+const getGroupState = (tabItems: readonly TabGroupItem[], activeTab: TabId): GroupState => {
   const selected = tabItems.find((tab) => tab.id === activeTab) ?? tabItems[0];
 
   return {

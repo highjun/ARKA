@@ -3,7 +3,7 @@ import { clsx } from 'clsx';
 import styles from './Container.module.css';
 
 /** `none`은 테두리와 배경을 지운다 — 자리는 그대로 차지한다. */
-export type ContainerChrome = 'visible' | 'none';
+type ContainerChrome = 'visible' | 'none';
 
 /**
  * 어느 축이 넘칠 때 스크롤할지. `'none'`은 아예 자르지 않는다(높이 제약 없는 카드).
@@ -12,7 +12,7 @@ export type ContainerChrome = 'visible' | 'none';
  * 하는데 양쪽을 켜면 아이콘의 1px 광학 보정 같은 미세한 세로 오버플로에도 세로 스크롤바가
  * 함께 뜬다(2026-08-31 지적).
  */
-export type ContainerScroll = 'auto' | 'none' | 'horizontal' | 'vertical';
+type ContainerScroll = 'auto' | 'none' | 'horizontal' | 'vertical';
 
 /** 자기 치수를 갖지 않는다 — 높이·폭은 쓰는 쪽이 `className`으로 준다. */
 export interface ContainerProps extends HTMLAttributes<HTMLDivElement> {

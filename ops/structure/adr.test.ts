@@ -18,7 +18,7 @@ const STATUS_WORDS = ["승인됨", "대체됨", "폐기됨"] as const;
  */
 const ENFORCERS = new Set([
   "린트", "타입", "테스트", "리뷰", "파이프라인", "스모크",
-  "stylelint", "commitlint", "gitleaks", "markdownlint", "actionlint",
+  "stylelint", "commitlint", "gitleaks", "markdownlint", "actionlint", "knip",
   "룰셋", "CODEOWNERS", "워크플로", "배포 잡", "compose",
 ]);
 
@@ -68,7 +68,10 @@ describe("ADR 형식", () => {
   });
 
   it.each(ADRS)(`%s — 본문이 ${MAX_BODY_LINES}줄을 넘지 않는다`, (file) => {
-    expect(read(file).split("\n").length - 1).toBeLessThanOrEqual(MAX_BODY_LINES);
+    // 제목 줄과 파일 끝 줄바꿈을 뺀 **본문 줄 수**다. 세는 것이 눈에 보이는 것과 같아야 한다.
+    const body = read(file).replace(/\n$/u, "").split("\n").slice(1);
+
+    expect(body.length).toBeLessThanOrEqual(MAX_BODY_LINES);
   });
 
   it.each(ADRS)("%s — `상태:`가 한 줄이고 어휘가 셋 중 하나다", (file) => {

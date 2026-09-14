@@ -81,7 +81,7 @@ export interface SplitLeafHandlers {
 }
 
 /** 나누는 선(버튼)이 받는 핸들러 — 포인터와 키보드 둘 다로 크기를 바꾼다. */
-export interface SplitResizeHandlers {
+interface SplitResizeHandlers {
   readonly onPointerEnter: PointerEventHandler<HTMLElement>;
   readonly onPointerLeave: PointerEventHandler<HTMLElement>;
   readonly onFocus: FocusEventHandler<HTMLElement>;
@@ -104,14 +104,6 @@ export interface SplitChildState {
   readonly style: CSSProperties;
   readonly handlers?: SplitLeafHandlers;
   readonly resizeHandlers: SplitResizeHandlers;
-}
-
-/** 가지 하나가 그릴 때 보는 파생 상태. `ref`는 크기 계산에 실제 픽셀이 필요해서 든다. */
-export interface SplitBranchState {
-  readonly ref: MutableRefObject<HTMLElement | null>;
-  readonly orientation: TabSplitOrientation;
-  readonly disabledResize: boolean;
-  readonly childStates: readonly SplitChildState[];
 }
 
 /** 트리 전체가 잎 하나일 때 — 가지가 없어 나누는 선도 없다. */

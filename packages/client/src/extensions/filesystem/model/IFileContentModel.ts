@@ -8,9 +8,9 @@ import { createToken, type Disposable } from '#core/di';
  */
 
 /** 읽기 상태다 — 저장은 `SaveStatus`가 따로 든다. */
-export type FileStatus = 'loading' | 'loaded' | 'error';
+type FileStatus = 'loading' | 'loaded' | 'error';
 /** 저장에 성공하면 `idle`로 돌아온다 — `saved` 같은 상태를 따로 두지 않는다. */
-export type SaveStatus = 'idle' | 'saving' | 'error';
+type SaveStatus = 'idle' | 'saving' | 'error';
 
 /** 열린 파일 하나. 편집 중인 내용과 디스크의 내용이 함께 있다. */
 export type OpenFile = {

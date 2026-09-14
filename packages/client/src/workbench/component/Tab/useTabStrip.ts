@@ -4,7 +4,7 @@ import type { StripContextValue, StripDropIndicator, StripItemState, StripListHa
 import type { StripDropPosition, TabId, TabItem } from './shared';
 
 /** 끝을 넘어가면 원본을 그대로 돌려준다 — 순환하지 않는다. 키보드 재정렬이 쓴다. */
-export const reorder = (tabItems: readonly TabItem[], itemId: string, direction: -1 | 1): readonly TabItem[] => {
+const reorder = (tabItems: readonly TabItem[], itemId: string, direction: -1 | 1): readonly TabItem[] => {
   const index = tabItems.findIndex((tab) => tab.id === itemId);
   const nextIndex = index + direction;
   if (index < 0 || nextIndex < 0 || nextIndex >= tabItems.length) return tabItems;
@@ -16,7 +16,7 @@ export const reorder = (tabItems: readonly TabItem[], itemId: string, direction:
 };
 
 /** 순서가 실제로 안 바뀌면 **원본 참조를 그대로** 돌려준다 — 부르는 쪽이 참조로 변경을 판단한다. */
-export const reorderByDrop = (
+const reorderByDrop = (
   tabItems: readonly TabItem[],
   fromId: string,
   targetId: string,
@@ -37,7 +37,7 @@ export const reorderByDrop = (
 };
 
 /** 어떤 탭의 중점보다도 왼쪽이면 그 탭 앞(`before`), 다 지나쳤으면 마지막 탭 뒤(`after`). */
-export const getNearestGapPosition = (
+const getNearestGapPosition = (
   clientX: number,
   tabRects: readonly { id: string; rect: DOMRect }[],
 ): StripDropIndicator | null => {
@@ -50,16 +50,16 @@ export const getNearestGapPosition = (
 };
 
 /** DOM을 직접 읽는다 — 실제 그려진 폭이 필요해 상태만으로는 계산할 수 없다. */
-export const getStripChildRects = (container: HTMLDivElement): { id: string; rect: DOMRect }[] =>
+const getStripChildRects = (container: HTMLDivElement): { id: string; rect: DOMRect }[] =>
   Array.from(container.querySelectorAll<HTMLElement>('[role="tab"]'))
     .map((tab) => ({ id: tab.dataset.tabId ?? '', rect: tab.getBoundingClientRect() }))
     .filter((entry) => entry.id.length > 0);
 
 /** 클릭과 포인터 재정렬을 가르는 최소 이동 거리(px) — 6px는 브라우저 네이티브 DnD/터치 슬롭 관행값. */
-export const POINTER_DRAG_THRESHOLD_PX = 6;
+const POINTER_DRAG_THRESHOLD_PX = 6;
 
 /** 표시선이 없거나 순서가 그대로면 콜백을 부르지 않는다. */
-export const commitReorder = (
+const commitReorder = (
   tabItems: readonly TabItem[],
   fromId: string,
   indicator: StripDropIndicator | null,
@@ -70,7 +70,7 @@ export const commitReorder = (
   if (nextItems !== tabItems) onTabReorder?.([...nextItems]);
 };
 
-export const createStripKeyDown =
+const createStripKeyDown =
   /** Context에서 `onKeyDown`을 빼고 받는다 — 지금 만들고 있는 것이 그것이라 순환을 끊는다. */
   (context: Omit<StripContextValue, 'onKeyDown'>) => (event: KeyboardEvent<HTMLDivElement>, item: TabItem) => {
     const currentIndex = context.tabItems.findIndex((tab) => tab.id === item.id);

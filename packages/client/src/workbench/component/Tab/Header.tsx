@@ -5,12 +5,6 @@ import { IconButton } from '#component/IconButton';
 import type { IconId } from '#component/Icon';
 import { useTabClassNames } from './TabContext';
 
-/** 헤더가 그릴 때 보는 파생 상태. prop의 `undefined`가 여기서 `false`로 굳는다. */
-export interface HeaderState {
-  readonly active: boolean;
-  readonly dirty: boolean;
-}
-
 /** `title`을 가로챈다 — 네이티브 툴팁이 아니라 탭 제목이다. */
 export interface TabHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'title'> {
   /** 이 탭이 지금 선택된(보이는) 탭인가. */
@@ -33,12 +27,6 @@ export interface TabHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'ch
   /** 탭 제목. */
   readonly title: string;
 }
-
-/** 순수 함수라 스토리와 테스트가 렌더 없이 상태 조합을 확인한다. */
-export const getHeaderState = (isActive: boolean, isDirty: boolean): HeaderState => ({
-  active: Boolean(isActive),
-  dirty: Boolean(isDirty),
-});
 
 /** 닫기 버튼 클릭 — 헤더 자신의 클릭(탭 활성화)으로 안 번지게 막고 나서 닫는다. */
 const handleHeaderCloseClick = (onClose: () => void) => (event: { stopPropagation: () => void }) => {

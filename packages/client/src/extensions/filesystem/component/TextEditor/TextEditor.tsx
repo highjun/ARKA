@@ -8,7 +8,7 @@ import { Icon } from '#component/Icon';
 import { IconButton } from '#component/IconButton';
 
 /** 프레임(테두리·radius·배경) 유무 — 패널을 꽉 채워서 쓸 땐 `none`. `ScrollArea`와 같은 이름. */
-export type TextEditorChrome = 'bordered' | 'none';
+type TextEditorChrome = 'bordered' | 'none';
 
 /**
  * 코드 한 편을 문법 강조와 함께 보여준다.

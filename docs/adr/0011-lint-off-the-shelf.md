@@ -31,7 +31,8 @@
 - **stylelint** `@primer/stylelint-config` — 색·테두리·그림자·글꼴을 토큰으로만 쓰게 한다.
 - **markdownlint** `ops/markdownlint.jsonc` — 문서의 형태. ADR 형식과 맞서는 규칙(줄 길이·절 앞 빈 줄·제목 끝 콜론)은 끄고 그 이유를 그 파일에 적는다.
 - **테스트** `packages/client/test/structure.test.ts` — 컴포넌트마다 스토리·테스트·배럴이 있는지, 그룹 배럴이 없는지.
-- **파이프라인** `ops/pipeline/check.ts` — typecheck → lint → test → build 순서로 돌리고 앞에서 걸리면 뒤를 안 돌린다. CI의 `check` 잡이 이 파일을 부른다.
+- **파이프라인** `ops/pipeline/check.ts` — typecheck → lint → test → build → knip 순서로 돌리고 앞에서 걸리면 뒤를 안 돌린다. CI의 `check` 잡이 이 파일을 부른다.
+- **knip** `ops/knip.ts` — 안 쓰는 파일·export·의존성, phantom, 안 쓰는 catalog 항목. 패키지 하나만 봐서는 알 수 없어 파이프라인에 있다. `index.ts`에 "바깥이 부르는 것만"이라는 규약은 이것 없이는 검사할 수 없다.
 - **테스트** `ops/structure/*.test.ts` — ADR의 절·줄 수·`상태:` 어휘·`강제:` 장치 이름, 인용한 규칙 ID가 실효 설정에 있는지, 문서와 코드 주석의 링크·ADR·태스크 인용이 실재하는지, `docs/` 최상위와 태스크 frontmatter.
 - **테스트** `ops/lint/rules/*.test.ts` — 자작 규칙에 valid/invalid를 둔다. 규칙이 하나니 파일도 하나다.
 - **리뷰** — "이 규칙을 만들기 전에 찾아봤는가"와 프리셋을 통째로 켤지는 사람만 판정한다.

@@ -8,7 +8,7 @@ import type { PaneId } from '../model/ITabsModel';
  * 가져다 쓰면 이 파일이 `export type { TabSplitOrientation }`로 다시 내보내야 View 층까지
  * 닿는데, 재수출 전용 statement는 `model-type-only`(`type.ts`는 타입 선언만 담는다)에 걸린다.
  */
-export type TabSplitOrientation = 'horizontal' | 'vertical';
+type TabSplitOrientation = 'horizontal' | 'vertical';
 /** 새 분할을 만드는 넷. 합치기(`center`)는 여기 없다. */
 export type SplitEdgeDropPosition = 'left' | 'right' | 'top' | 'bottom';
 
@@ -46,7 +46,7 @@ export interface ShellTabPaneLeaf {
   readonly size?: number;
 }
 /** `ShellTabPaneLeaf`와 짝을 이루는 분할 노드. */
-export interface ShellTabPaneSplit {
+interface ShellTabPaneSplit {
   readonly kind: 'split';
   readonly id: PaneId;
   readonly orientation: TabSplitOrientation;

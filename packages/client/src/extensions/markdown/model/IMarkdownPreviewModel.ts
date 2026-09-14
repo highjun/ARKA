@@ -1,7 +1,7 @@
 import { createToken, type Disposable } from '#core/di';
 
 /** `error`여도 `markdown`은 직전 내용을 그대로 든다 — 실패했다고 화면을 비우지 않는다. */
-export type PreviewStatus = 'loading' | 'loaded' | 'error';
+type PreviewStatus = 'loading' | 'loaded' | 'error';
 
 /** 파일 하나의 미리보기 상태. 감시 중이면 파일이 바뀔 때마다 갱신된다. */
 export type Preview = {

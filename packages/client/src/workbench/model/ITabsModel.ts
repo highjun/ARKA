@@ -45,7 +45,7 @@ export interface TabPaneLeaf {
   readonly size?: number;
 }
 /** `TabPaneLeaf`와 짝을 이루는 분할 노드. */
-export interface TabPaneSplit {
+interface TabPaneSplit {
   readonly kind: 'split';
   readonly id: PaneId;
   readonly orientation: TabSplitOrientation;

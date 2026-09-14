@@ -1,7 +1,6 @@
 import { createToken } from '#core/di';
 import type { AgentEvent, SessionId } from '#contracts';
 
-export type { AgentEvent };
 
 export const AgentEventsToken = createToken<IAgentEvents>('agentEvents');
 /**

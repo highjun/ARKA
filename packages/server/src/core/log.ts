@@ -6,7 +6,7 @@
  */
 
 /** `debug`는 두지 않는다 — 끄고 켤 장치가 없으면 결국 아무도 안 읽는다. */
-export type LogLevel = "info" | "warn" | "error";
+type LogLevel = "info" | "warn" | "error";
 
 /** JSON 한 줄에 그대로 펼쳐진다. 키가 겹치면 뒤가 이긴다. */
 export type LogFields = Readonly<Record<string, unknown>>;

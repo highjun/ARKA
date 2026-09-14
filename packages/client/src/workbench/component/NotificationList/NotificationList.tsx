@@ -7,7 +7,7 @@ import type { IconId } from '#component/Icon';
 import styles from './NotificationList.module.css';
 
 /** `severity`가 아이콘을 정한다. 색은 CSS가 같은 값으로 고른다. */
-export type NotificationListItem = {
+type NotificationListItem = {
   readonly id: string;
   readonly severity: 'info' | 'warning' | 'error';
   readonly message: string;

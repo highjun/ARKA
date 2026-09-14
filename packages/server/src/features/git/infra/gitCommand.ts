@@ -6,7 +6,7 @@ const TIMEOUT_MS = 30_000;
 const MAX_OUTPUT = 16 * 1024 * 1024;
 
 /** 한 번의 git 호출에 붙는 선택지. */
-export type GitRunOptions = {
+type GitRunOptions = {
   /** 이 종료 코드는 실패가 아니다 — `diff --no-index`는 차이가 있으면 1로 끝난다. */
   readonly okExitCodes?: readonly number[];
 };

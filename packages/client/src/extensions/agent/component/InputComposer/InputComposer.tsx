@@ -24,7 +24,7 @@ export interface InputComposerModelItem {
 }
 
 /** 이 컴포넌트가 실제로 그리는 값·핸들러 묶음 — 상태 소유와 렌더링을 분리하지 않고 한 파일에 두더라도, 계약 자체는 명시적 타입으로 고정해둔다. */
-export interface InputComposerState {
+interface InputComposerState {
   readonly value: string;
   readonly disabled: boolean;
   readonly loading: boolean;

@@ -9,7 +9,7 @@ const hasContent = (node: ReactNode): boolean => node !== null && node !== undef
  *
  * `'compact'`는 VS Code 탐색기 머리처럼 낮고 좁다 — 사이드바처럼 세로가 귀한 자리에 쓴다.
  */
-export type PanelDensity = 'comfortable' | 'compact';
+type PanelDensity = 'comfortable' | 'compact';
 
 /** `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다. */
 export interface PanelProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {

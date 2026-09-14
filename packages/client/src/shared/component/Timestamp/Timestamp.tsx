@@ -7,7 +7,7 @@ import { formatTimestamp } from './shared';
 export type TimestampMode = 'datetime' | 'relative' | 'duration';
 
 /** epoch ms와 Date 중 정확히 하나만 — 판별 유니온이라 컴파일 단계에서 강제된다. */
-export type TimestampInput = { readonly epoch: number; readonly date?: never } | { readonly date: Date; readonly epoch?: never };
+type TimestampInput = { readonly epoch: number; readonly date?: never } | { readonly date: Date; readonly epoch?: never };
 
 /** `children`을 막는다 — 내용은 `mode`와 입력이 정한다. */
 export type TimestampProps = TimestampInput &

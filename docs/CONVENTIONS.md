@@ -180,7 +180,7 @@
 - 도메인을 모르는 것(DI·설정·부팅)만 `core/`에 둔다.
 - 슬라이스 내부 — client는 `model/` `infra/` `viewmodel/` `view/` `component/`, server는 `domain/` `infra/` `services/` `runtime/` `transport/`. `runtime/`은 **요청보다 오래 사는 것**을 든다(`RunManager`) — 요청 하나로 끝나는 `services/`와 수명이 다르다. 두 목록은 `eslint.config.ts`의 zone과 구조 테스트가 닫힌 집합으로 든다.
 - 의존은 안쪽(`model`/`domain`)을 향한다. 어느 구현이 꽂힐지는 조립부(client는 `workbench/registerServices.tsx`)가 정한다.
-- `index.ts`에는 바깥이 실제로 부르는 것만 넣는다. 내부 구현·에러 타입·유틸은 내보내지 않는다.
+- `index.ts`에는 바깥이 실제로 부르는 것만 넣는다. 내부 구현·에러 타입·유틸은 내보내지 않는다. **`knip`이 본다** — 아무도 안 부르는 export는 관문에서 막힌다. → [ADR 0011](adr/0011-lint-off-the-shelf.md)
 - 슬라이스끼리 직접 import하지 않는다. DI 토큰이나 이벤트로만 소통한다.
 - `shared/`는 아무것도 import할 수 없다. 공통 추출은 아래로만 한다.
 - client는 `core/ workbench/ extensions/ shared/` 넷이다. **의존 방향·슬라이스 경계·`shared/`의 고립을 세 패키지 모두 `eslint.config.ts`의 zone이 강제한다** — server는 2026-09-14까지 비어 있었다.

@@ -9,7 +9,7 @@ import * as Iconify from '@iconify/react/offline';
 /** `ICON_MAP`에 있는 것만 쓸 수 있다 — 세트 전체가 번들에 있어도 목록 밖은 타입이 막는다. */
 export type IconId = keyof typeof icons;
 /** 픽셀이 아니라 토큰이다. 기본값은 `md`. */
-export type IconSize = 'sm' | 'md' | 'lg';
+type IconSize = 'sm' | 'md' | 'lg';
 export const ICON_MAP: Record<IconId, string> = icons;
 
 /**

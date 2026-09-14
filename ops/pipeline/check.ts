@@ -15,3 +15,10 @@ step("pnpm", "-r", "--if-present", "run", "typecheck");
 step("pnpm", "-r", "--if-present", "run", "lint");
 step("pnpm", "-r", "--if-present", "run", "test");
 step("pnpm", "-r", "--if-present", "run", "build");
+
+/*
+ * **죽은 표면.** 패키지 하나만 봐서는 알 수 없어(다른 패키지가 쓰는지 봐야 한다) 패키지의 `lint`가
+ * 아니라 여기 있다. `--no-config-hints`인 이유는 진입점을 **일부러 명시**해서다 — knip의 기본
+ * 탐지에 맡기면 그것이 바뀔 때 진입점이 조용히 사라진다(→ ADR 0011).
+ */
+step("npx", "--prefix", "ops", "knip", "--config", "ops/knip.ts", "--no-config-hints");

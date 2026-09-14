@@ -4,7 +4,7 @@ import { Text } from '#component/Text';
 import styles from './KeybindingTable.module.css';
 
 /** 키바인딩 한 줄 — 어떤 키가 어떤 커맨드를 부르나. */
-export interface KeybindingTableRow {
+interface KeybindingTableRow {
   /** 목록 안에서 고유한 값. `key`로 쓴다. */
   readonly id: string;
   /** 눌러야 하는 키들. 화면에 나오는 순서 그대로다. */

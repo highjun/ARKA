@@ -1,7 +1,7 @@
 import { createToken } from '#core/di';
 import type { AgentSession, RunMode, RunResponse, SessionId } from '#contracts';
 
-export type { AgentSession, RunMode, RunResponse, SessionId };
+export type { AgentSession, RunMode, SessionId };
 
 export const AgentApiToken = createToken<IAgentApi>('agentApi');
 /**

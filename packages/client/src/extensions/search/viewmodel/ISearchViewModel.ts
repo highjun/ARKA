@@ -1,7 +1,7 @@
 import { createToken } from '#core/di';
 
 /** 줄·열은 1부터. `preview`는 그 줄의 원문이라 화면이 잘라 쓴다. */
-export type SearchMatchRow = {
+type SearchMatchRow = {
   readonly line: number;
   readonly column: number;
   readonly preview: string;

@@ -21,7 +21,7 @@ const looksBinary = (buffer: Buffer): boolean => buffer.includes(0);
  * 파일 하나를 줄 단위로 찾는다. 바이너리·상한 초과는 `null`(읽지 않은 것으로 센다).
  * `budget`은 남은 결과 수 — 0이 되면 멈춘다.
  */
-export const searchFile = async (absolute: string, relative: string, pattern: RegExp, budget: number): Promise<readonly SearchMatch[] | null> => {
+const searchFile = async (absolute: string, relative: string, pattern: RegExp, budget: number): Promise<readonly SearchMatch[] | null> => {
   const handle = await open(absolute, "r");
   try {
     const { size } = await handle.stat();

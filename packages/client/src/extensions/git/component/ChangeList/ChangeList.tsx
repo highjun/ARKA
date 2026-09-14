@@ -7,7 +7,7 @@ import { Text } from '#component/Text';
 import styles from './ChangeList.module.css';
 
 /** 목록의 행 하나 — 어떤 파일이 어떻게 바뀌었나. 스테이지 여부는 목록이 안다. */
-export interface ChangeListEntry {
+interface ChangeListEntry {
   /** 워크스페이스 기준 경로 — 행의 이름이자 `key`다. */
   readonly path: string;
   /** 한 글자 상태표. `M`·`A`·`D`·`R`·`U`. 색은 CSS가 이 값으로 고른다. */
@@ -15,7 +15,7 @@ export interface ChangeListEntry {
 }
 
 /** 행마다 하나씩, 머리글에 하나 붙는 같은 동작 — 스테이지하거나 해제한다. */
-export interface ChangeListAction {
+interface ChangeListAction {
   /** 접근성 이름에 들어가는 동사(`'스테이지'`·`'해제'`). */
   readonly label: string;
   /** 버튼에 그릴 아이콘. */
@@ -27,7 +27,7 @@ export interface ChangeListAction {
 }
 
 /** 행 하나. 목록 밖에서 단독으로 쓰는 일은 없지만 스토리·테스트가 이 단위를 본다. */
-export interface ChangeListItemProps {
+interface ChangeListItemProps {
   /** 그릴 행. */
   readonly entry: ChangeListEntry;
   /** 행에 붙는 동작. */
@@ -61,7 +61,7 @@ export interface ChangeListProps extends Omit<HTMLAttributes<HTMLUListElement>, 
  * 못한다(axe `nested-interactive`). `TrailingAction`은 Primer가 그 자리를 행의 활성 영역 **밖**에
  * 두려고 만든 부품이다.
  */
-export const ChangeListItem = ({ entry, action, onSelect }: ChangeListItemProps) => (
+const ChangeListItem = ({ entry, action, onSelect }: ChangeListItemProps) => (
   <ActionList.Item onSelect={() => onSelect(entry)}>
     <ActionList.LeadingVisual>
       <span className={styles['badge']} data-badge={entry.badge}>

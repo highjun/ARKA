@@ -7,7 +7,7 @@ import styles from './Markdown.module.css';
 import { CodeBlock } from '#component/CodeBlock';
 
 /** 요소별 덮어쓰기 맵 — react-markdown의 `components`를 그대로 받는다. */
-export type MarkdownComponents = NonNullable<ComponentPropsWithoutRef<typeof ReactMarkdown>['components']>;
+type MarkdownComponents = NonNullable<ComponentPropsWithoutRef<typeof ReactMarkdown>['components']>;
 
 /** 원문을 받는다 — 파싱과 렌더는 이 컴포넌트가 한다. */
 export interface MarkdownProps extends HTMLAttributes<HTMLElement> {

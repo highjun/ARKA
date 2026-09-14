@@ -1,7 +1,6 @@
 import { createToken } from '#core/di';
-import type { GitFileStatus, GitStatusResponse } from '#contracts';
+import type { GitStatusResponse } from '#contracts';
 
-export type { GitFileStatus, GitStatusResponse };
 
 export const GitServiceToken = createToken<IGitService>('gitService');
 /** 서버의 `/api/git/*` 통로. 실패는 던진다 — 메시지는 사람이 읽을 수 있는 말(git의 stderr 포함). */

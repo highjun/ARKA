@@ -7,7 +7,7 @@ import { IconButton } from '@primer/react';
 /** 두 개 고정이다 — 셋 이상이면 이 컴포넌트가 아니라 세그먼트 컨트롤이다. */
 export type ModeToggleValues = readonly [string, string];
 /** `values`와 같은 순서로 짝지어진다. */
-export type ModeToggleChildren = readonly [ReactNode, ReactNode];
+type ModeToggleChildren = readonly [ReactNode, ReactNode];
 /** 스크린리더가 읽는 이름 — 화면에는 `children`이 보인다. */
 export type ModeToggleLabels = readonly [string, string];
 

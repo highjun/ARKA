@@ -3,11 +3,11 @@ import { clsx } from 'clsx';
 import styles from './Text.module.css';
 
 /** `caption`은 크기가 고정이라 `size`와 다른 축이다. */
-export type TextVariant = 'body' | 'caption';
+type TextVariant = 'body' | 'caption';
 /** `variant='body'`일 때만 듣는다. 기본값은 `medium`. */
-export type TextSize = 'small' | 'medium' | 'large';
+type TextSize = 'small' | 'medium' | 'large';
 /** 색만 바꾼다 — 굵기나 크기는 그대로다. */
-export type TextTone = 'default' | 'muted' | 'danger';
+type TextTone = 'default' | 'muted' | 'danger';
 
 /** `<span>`이라 블록이 필요하면 감싸는 쪽이 만든다. */
 export interface TextProps extends HTMLAttributes<HTMLSpanElement> {

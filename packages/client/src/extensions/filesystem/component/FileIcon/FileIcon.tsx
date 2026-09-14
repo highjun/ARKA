@@ -2,12 +2,11 @@ import type { HTMLAttributes, Ref } from 'react';
 import { clsx } from 'clsx';
 import styles from './FileIcon.module.css';
 import { FILE_ICON_MAP, fileIconIdOf } from './shared';
-import type { FileIconId } from './shared';
 import { seti } from './data';
 import * as Iconify from '@iconify/react/offline';
 
 /** `Icon`의 크기 축과 같다 — 두 아이콘이 한 줄에서 어긋나지 않게. */
-export type FileIconSize = 'sm' | 'md' | 'lg';
+type FileIconSize = 'sm' | 'md' | 'lg';
 
 Iconify.addCollection(seti as Parameters<typeof Iconify.addCollection>[0]);
 
@@ -39,4 +38,3 @@ export const FileIcon = ({ className, fileName, size = 'md', ref, ...props }: Fi
   );
 };
 
-export type { FileIconId };

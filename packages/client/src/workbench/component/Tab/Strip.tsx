@@ -71,7 +71,7 @@ export interface StripContextValue {
 }
 
 /** 항목 하나에 그대로 펼쳐 붙이는 핸들러 묶음. */
-export interface StripItemHandlers {
+interface StripItemHandlers {
   readonly draggable: boolean;
   readonly onClick: MouseEventHandler<HTMLDivElement>;
   readonly onDoubleClick: MouseEventHandler<HTMLDivElement>;

@@ -5,7 +5,7 @@ import { Text } from '#component/Text';
 import styles from './SearchResultList.module.css';
 
 /** 한 파일 안에서 찾은 자리 하나. */
-export interface SearchResultMatch {
+interface SearchResultMatch {
   /** 1부터 세는 줄 번호 — 행 앞에 그대로 보인다. */
   readonly line: number;
   /** 1부터 세는 열 번호 — 보이지 않지만 열 때 쓴다. */
@@ -15,7 +15,7 @@ export interface SearchResultMatch {
 }
 
 /** 파일 하나와 그 안의 자리들 — 머리글이 파일, 행이 자리다. */
-export interface SearchResultFile {
+interface SearchResultFile {
   /** 워크스페이스 기준 경로. 머리글 문구이자 `key`다. */
   readonly path: string;
   /** 그 파일에서 찾은 자리들. */
@@ -23,7 +23,7 @@ export interface SearchResultFile {
 }
 
 /** 자리 한 줄. 목록 밖에서 단독으로 쓰지는 않지만 스토리·테스트가 이 단위를 본다. */
-export interface SearchResultListItemProps {
+interface SearchResultListItemProps {
   /** 그릴 자리. */
   readonly match: SearchResultMatch;
   /** 자리를 고르면 호출된다 — 보통 파일을 그 줄·열로 연다. */
@@ -41,7 +41,7 @@ export interface SearchResultListProps extends Omit<HTMLAttributes<HTMLUListElem
 }
 
 /** 찾은 자리 한 줄 — 줄 번호와 그 줄의 내용. */
-export const SearchResultListItem = ({ match, onSelect }: SearchResultListItemProps) => (
+const SearchResultListItem = ({ match, onSelect }: SearchResultListItemProps) => (
   <ActionList.Item onSelect={() => onSelect(match)}>
     <ActionList.LeadingVisual>
       <Text size="small" tone="muted">

@@ -11,7 +11,7 @@ import { FileIcon } from '../FileIcon';
 /** 워크스페이스 루트 기준 경로다 — 트리 안에서 유일하다. */
 export type FileTreeItemId = string;
 /** 폴더만 펼칠 수 있고 앞자리에 셰브론이 온다. */
-export type FileTreeItemType = 'folder' | 'file';
+type FileTreeItemType = 'folder' | 'file';
 
 /** 트리가 그리는 데 필요한 최소 정보. 자식은 `children`으로 재귀한다. */
 export interface FileTreeItem {
@@ -36,7 +36,7 @@ export interface FileTreeItem {
  * 주석 참고). 기본은 `none`이다 — 실제 소비처(`apps/workbench`)가 이미 항상 패널 안에 꽉 채워
  * 쓴다. 독립된 미리보기처럼 스스로 경계가 필요할 때만 `bordered`로 바꾼다.
  */
-export type FileTreeChrome = 'bordered' | 'none';
+type FileTreeChrome = 'bordered' | 'none';
 
 /**
  * props를 라이브러리 타입에서 파생시키지 않고 직접 선언한다 — 파생시키면 계약이 그 라이브러리를
