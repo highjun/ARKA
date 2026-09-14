@@ -1,10 +1,35 @@
 import ops from "ops/lint";
 
+/** server의 슬라이스. 새 슬라이스를 더할 때 여기 한 줄을 빼먹으면 그 슬라이스만 검사에서 빠진다. */
+const SLICES = ["agent", "filesystem", "git", "search", "static"];
+
 /**
- * 서버의 린트 설정.
+ * **의존은 안쪽을 향한다**(→ [ADR 0007](../../docs/adr/0007-client-layers.md)의 server 판).
+ * 계층마다 *자기 슬라이스 안에서* 볼 수 있는 것.
  *
- * **계층 방향 규칙이 지금 비어 있다.** 껐다(2026-09-13 지웠다. git 이력에 있다) — 서버 구
- * 새 번호로 옮겨지지 않아서다. 남은 zone은 [ADR 0001](../../docs/adr/0001-monorepo-pnpm.md)의 것뿐이다.
+ * `runtime/`은 요청보다 오래 사는 것을 든다 — `services/`(요청 하나를 처리하고 끝나는 유스케이스)와
+ * 수명이 달라 따로 있다(`RunManager`가 그 자리다).
+ */
+const LAYER_ALLOW: Readonly<Record<string, readonly string[]>> = {
+  domain: ["domain"],
+  infra: ["domain", "infra"],
+  services: ["domain", "infra", "services"],
+  runtime: ["domain", "infra", "services", "runtime"],
+  transport: ["domain", "infra", "services", "runtime", "transport"],
+};
+
+const LAYER_ZONES = SLICES.flatMap((slice) =>
+  Object.entries(LAYER_ALLOW).map(([layer, allowed]) => ({
+    target: `./src/features/${slice}/${layer}`,
+    from: `./src/features/${slice}`,
+    except: allowed.map((name) => `./${name}`),
+    message: "의존은 안쪽을 향합니다 — 이 계층은 자기 아래만 봅니다(→ ADR 0007).",
+  })),
+);
+
+/**
+ * 서버의 린트 설정. **client와 같은 선이다** — 2026-09-14까지 계층 방향과 슬라이스 경계가
+ * 비어 있었고(2026-09-13에 지워진 뒤 새 번호로 옮겨지지 않았다) 남은 zone은 패키지 경계뿐이었다.
  */
 export default [
   ...ops.configs.base,
@@ -31,11 +56,27 @@ export default [
         "error",
         {
           zones: [
-            { 
-              target: "./src", 
-              from: "../client/src", 
-              message: "server는 client를 import할 수 없습니다. 공유할 코드는 contracts로 옮기고 `#contracts`로 가져오세요." 
+            {
+              target: "./src",
+              from: "../client/src",
+              message: "server는 client를 import할 수 없습니다. 공유할 코드는 contracts로 옮기고 `#contracts`로 가져오세요.",
             },
+            ...SLICES.map((slice) => ({
+              target: `./src/features/${slice}`,
+              from: "./src/features",
+              except: [`./${slice}`],
+              message: "슬라이스끼리 직접 import하지 않습니다 — 조립부(`src/app.ts`)가 잇습니다(→ ADR 0007).",
+            })),
+            // `core/`는 도메인을 모른다(DI·설정·부팅·로그). **예외는 기능의 `config.ts` 하나** —
+            // 환경변수의 주인은 기능이고 검증 관문만 `core/config.ts`에 있다. 기능을 지우면
+            // 그 변수도 함께 사라지는 배치다.
+            {
+              target: "./src/core",
+              from: "./src/features",
+              except: SLICES.map((slice) => `./${slice}/config.ts`),
+              message: "`core/`는 도메인을 모릅니다 — 기능의 `config.ts`만 예외입니다(→ ADR 0007).",
+            },
+            ...LAYER_ZONES,
           ],
         },
       ],

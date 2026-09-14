@@ -21,6 +21,33 @@ const RESTRICTED_SYNTAX = [
   // 테스트 이름을 보던 셀렉터 둘은 `vitest/valid-title`로 갈았다(→ ADR 0011).
 ];
 
+/** client의 슬라이스. 새 슬라이스를 더할 때 여기 한 줄을 빼먹으면 그 슬라이스만 검사에서 빠진다. */
+const SLICES = ["agent", "filesystem", "git", "markdown", "search"];
+
+/**
+ * **의존은 안쪽을 향한다**(→ ADR 0007). 계층마다 *자기 슬라이스 안에서* 볼 수 있는 것.
+ *
+ * `view`가 `model`을 보는 것은 DI 토큰과 타입 때문이다 — 값을 읽는 길은 `useViewModel` 하나고
+ * 그건 위 선택자가 따로 본다.
+ */
+const LAYER_ALLOW: Readonly<Record<string, readonly string[]>> = {
+  model: ["model"],
+  infra: ["model", "infra"],
+  viewmodel: ["model", "viewmodel"],
+  view: ["model", "viewmodel", "view", "component"],
+  component: ["component"],
+};
+
+/** 슬라이스를 품는 뿌리마다 계층 zone을 낸다. `core/`·`shared/`는 계층이 없어 대상이 아니다. */
+const LAYER_ZONES = ["./src/workbench", ...SLICES.map((slice) => `./src/extensions/${slice}`)].flatMap((root) =>
+  Object.entries(LAYER_ALLOW).map(([layer, allowed]) => ({
+    target: `${root}/${layer}`,
+    from: root,
+    except: allowed.map((name) => `./${name}`),
+    message: "의존은 안쪽을 향합니다 — 이 계층은 자기 아래만 봅니다(→ ADR 0007).",
+  })),
+);
+
 /** `view/`에만 더 걸리는 것 — 훅 하나와 DI 접근 금지(→ ADR 0007). */
 /*
  * **브라우저 패키지에 Node 전역이 보인다** — `tsconfig`의 `types: ["vitest/globals"]`가
@@ -141,12 +168,27 @@ export default [
         {
           zones: [
             { target: "./src", from: "../server/src", message: "client는 server를 import할 수 없습니다. 공유할 코드는 contracts로 옮기고 `#contracts`로 가져오세요." },
-            ...["agent", "filesystem", "git", "markdown", "search"].map((slice) => ({
+            ...SLICES.map((slice) => ({
               target: `./src/extensions/${slice}`,
               from: "./src/extensions",
               except: [`./${slice}`],
               message: "슬라이스끼리 직접 import하지 않습니다 — DI 토큰이나 이벤트로 소통하세요(→ ADR 0007).",
             })),
+            // `shared/`는 아무것도 import할 수 없다 — 공통 추출은 아래로만 한다(→ ADR 0007).
+            {
+              target: "./src/shared",
+              from: "./src",
+              except: ["./shared"],
+              message: "`shared/`는 아무것도 import하지 않습니다 — 공통 추출은 아래로만 합니다(→ ADR 0007).",
+            },
+            // `core/`는 도메인을 모른다. 아래(`shared/`)만 본다.
+            {
+              target: "./src/core",
+              from: "./src",
+              except: ["./core", "./shared"],
+              message: "`core/`는 도메인을 모릅니다 — `workbench/`·`extensions/`를 import하지 않습니다(→ ADR 0007).",
+            },
+            ...LAYER_ZONES,
           ],
         },
       ],
