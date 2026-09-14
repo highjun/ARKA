@@ -39,9 +39,9 @@ const getLabel = (labels: ModeToggleLabels | undefined, currentIndex: number, fa
  * `<button>`이라 `appearance: none`을 빠뜨려 브라우저 기본 테두리/음영이 남아있던 버그가 있었다).
  * `.root`에 남은 CSS는 터치 타겟 확장(`::after`)뿐이다.
  *
- * **우리 `IconButton` 겹을 쓰지 않는 유일한 자리다**(린트 예외). 그 겹이 터치 환경에서 버튼
- * 박스 자체를 44px로 키우는데, 여기서는 같은 목표를 `::after` 오버레이로 이미 이룬다 — 헤더에
- * 놓이는 컨트롤이라 박스가 커지면 옆 것들을 밀어낸다. 둘을 겹치면 커지고 또 넓어진다.
+ * **우리 `IconButton` 겹을 쓰지 않는 유일한 자리다**(린트 예외). 이유는 하나뿐이다 —
+ * 그 겹이 `data-component`를 스프레드 뒤에 박아서, 겹쳐 쓰면 이 컴포넌트의 이름이
+ * 사라진다(→ TASK-64). 그것이 풀리면 예외와 중복 CSS가 함께 없어진다.
  *
  * `ref`는 그대로 통과시킨다 — 감싸면서 ref 접근을 잃으면 raw `IconButton`을 쓸 때보다 기능이
  * 줄어든다.

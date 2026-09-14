@@ -52,7 +52,7 @@ export default [
     // `importNames`가 별칭(`IconButton as PrimerIconButton`)까지 잡기 때문이다. 그 겹 자신은
     // 가져와야 하므로 `ignores`로 대상에서 뺀다 — 규칙을 끄는 것이 아니다.
     files: ["src/**/*.{ts,tsx}"],
-    // `ModeToggle`은 터치 영역을 `::after` 오버레이로 스스로 넓힌다 — 겹의 박스 확대와 겹친다.
+    // `ModeToggle`은 겹을 쓰면 자기 `data-component`를 잃는다(→ TASK-64). 그때까지만 예외다.
     ignores: ["src/shared/component/IconButton/**", "src/shared/component/ModeToggle/**"],
     rules: {
       "no-restricted-imports": [
