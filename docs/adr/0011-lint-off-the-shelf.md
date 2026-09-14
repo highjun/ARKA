@@ -11,14 +11,13 @@
 - **대상을 다스리는 도구를 그 대상의 배포자에게서 받는다** — Primer 컴포넌트는 `eslint-plugin-primer-react`, Primer 토큰은 `@primer/stylelint-config`가 본다. 우리가 토큰 이름을 옮겨 적지 않는다.
 - **자작 규칙은 관례에 없는 것 하나뿐이다** — `arka/max-comment-lines`. 주석의 줄 **수**를 재는 규칙이 어디에도 없다(있는 것은 줄 **너비**를 잰다).
 - **규칙 하나를 켜는 순서는 측정 → 위반 0 → 켜기다.** 위반이 남아 있으면 같은 라운드에서 없애고, 못 없애면 켜지 않는다. 빨간 검사를 켜지 않는다(→ [ADR 0005](0005-ci-gate.md)).
-- **인용하는 규칙 ID는 실재해야 한다.** 없는 규칙을 근거로 든 자리가 **네 번** 나왔다. 강제가 아직 없으면 규칙 ID 대신 ADR을 가리킨다.
-- **린트는 파일 하나 안에서 판정되는 것**(구문·import·이름·전역)을, **테스트는 파일 시스템과 문서에 관한 질문**("옆에 파일이 있나", "이 링크가 가리키는 것이 있나", "인용한 규칙 ID가 실효 설정에 있나")을 본다. ESLint는 파일 하나를 보므로 뒤쪽에 구조적으로 답하지 못한다. 저장소 전체의 모양은 `ops/structure/`가, 패키지 안의 모양은 그 패키지의 `test/`가 든다(→ [ADR 0002](0002-live-next-to-what-they-govern.md)).
+- **인용하는 규칙 ID는 실재해야 한다.** 없는 규칙을 근거로 든 자리가 **네 번** 나왔다. 강제가 아직 없으면 규칙 ID 대신 ADR을 가리킨다. 어느 자리가 무엇을 보는지는 → [ADR 0012](0012-where-enforcement-lives.md).
 
 ## 기각:
-- **껐던 `arka/*` 여섯을 되살리기** — 넷은 기성품(`primer-react`·`jsx-a11y`·`@eslint-react`·`import-x` zone)이 덮고, `test-names-korean`은 `vitest/valid-title`이, `view-only-uses-view-model`은 코어 `no-restricted-syntax` 선택자 둘이 덮는다. 되살리면 남의 코드 대신 우리 코드를 유지한다.
+- **껐던 `arka/*` 여섯을 되살리기** — 넷은 기성품(`primer-react`·`jsx-a11y`·`@eslint-react`·`import-x` zone)이, `test-names-korean`은 `vitest/valid-title`이, `view-only-uses-view-model`은 코어 선택자 둘이 덮는다.
 - **`eslint-plugin-boundaries`로 슬라이스 경계를 다스리기** — 캡처 변수(`{{from.slice}}`)로 "형제끼리만 금지"를 한 줄에 쓸 수 있어 골랐다가, v7에서 우리 배치에 걸리지 않아 걷었다(2026-09-14 실측). `import-x/no-restricted-paths`의 zone에 슬라이스를 열거하면 같은 경계가 되고, 다섯 줄이면 끝난다.
 - **`eslint-plugin-project-structure`로 스토리 존재를 강제하기** — `folder-structure`가 트리 **전체**를 선언하게 만든다. 지금 정하려는 것은 컴포넌트 폴더 하나의 모양뿐이고, "옆에 파일이 있나"는 구문이 아니라 파일 시스템 질문이라 테스트가 더 맞는 자리다(`test/structure.test.ts`).
-- **`markdownlint`의 커스텀 규칙(`markdownlint-rule-*`)으로 문서를 보기** — 개인 유지 서드파티라 기성품의 이점이 없고, 마크다운 도구는 **코드 주석 안의 `(→ ADR NNNN)`을 못 본다**. 거짓 인용이 난 자리가 바로 거기다.
+- **`markdownlint-rule-*` 커스텀 규칙** — 개인 유지 서드파티라 기성품의 이점이 없고, 마크다운 도구는 **코드 주석의 `(→ ADR NNNN)`을 못 본다**. 거짓 인용이 난 자리가 거기다.
 - **플러그인 없이 코어 규칙만 쓰기** — 폴더 구성과 슬라이스 경계는 선택자로 표현할 수 없다. 파일 시스템과 import 그래프를 읽어야 한다.
 
 ## 대가:
@@ -38,4 +37,4 @@
 - **리뷰** — "이 규칙을 만들기 전에 찾아봤는가"와 프리셋을 통째로 켤지는 사람만 판정한다.
 
 ## 상태:
-승인됨 (2026-09-14). 같은 날 개정 — 강제의 자리를 린트와 테스트로 가르고 `ops/structure/`를 세웠다. 도구 둘은 적용 중에 바꿨다(`boundaries`→`import-x` zone, `project-structure`→구조 테스트).
+승인됨 (2026-09-14). 같은 날 개정 — 도구 둘을 적용 중에 바꾸고(`boundaries`→`import-x` zone, `project-structure`→구조 테스트) 강제의 자리는 ADR 0012로 뗐다.

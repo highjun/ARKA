@@ -60,6 +60,7 @@ printf '%s' "feat(client): 검색 패널을 연다" | pnpm --filter ops exec com
 | typecheck → lint → test → build | `pnpm --filter ops check` — **CI가 부르는 것이 이 명령 그대로다** |
 | PR 제목 형식(PR일 때만) | `printf '%s' "제목" \| pnpm --filter ops exec commitlint` |
 | 워크플로가 말이 되나 | `docker run --rm -v "$PWD:/repo:ro" -w /repo rhysd/actionlint:1.7.7 -no-color` |
+| `src/` 밖 변경이 PR 본문에 적혀 있나(PR일 때만) | `PR_BODY="$(gh pr view --json body -q .body)" node ops/pipeline/outsideSrc.ts origin/main HEAD` |
 | 새 커밋에 시크릿이 있는지 | `docker run --rm -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.30.1 git /repo --gitleaks-ignore-path /repo/ops/.gitleaksignore --redact --no-banner` |
 | 이미지를 굽는다 | `node ops/deploy/build.ts arka:local` |
 | 그 이미지가 뜨는가 | `ARKA_UID=$(id -u) ARKA_GID=$(id -g) ARKA_IMAGE=arka:local docker compose -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci up -d --no-build --wait` |

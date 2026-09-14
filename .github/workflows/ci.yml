@@ -56,6 +56,17 @@ jobs:
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
 
+      # **`src/` 밖을 건드렸으면 PR 본문이 그것을 말해야 한다**(→ ADR 0003). 밖은 배치·설정·결정이라
+      # 파급이 전역이고 승인은 PR 리뷰다 — 리뷰어가 diff를 열기 전에 무엇이 밖이었나를 알아야 한다.
+      # 언급 여부만 본다. 설명이 타당한가는 사람이 판정한다.
+      - name: src 밖 변경이 PR 본문에 적혀 있나
+        if: github.event_name == 'pull_request'
+        run: node ops/pipeline/outsideSrc.ts "$BASE" "$HEAD"
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+
       # **워크플로의 뜻을 본다** — 없는 `uses`, 잘못된 `needs`, 오타 난 러너 라벨, 셸 문법.
       # ESLint의 `yml/*`는 형태만 보므로 이 자리가 따로 있다. 공식 이미지를 `docker run`으로
       # 쓰는 것은 아래 gitleaks와 같은 방식이다 — 비공식 npm 재포장을 쓰지 않는다.

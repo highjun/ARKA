@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import path from "node:path";
 
 /** 저장소 루트. 파이프라인은 어디서 불려도 같은 자리에서 돌아야 한다. */
-const REPO_ROOT = path.resolve(import.meta.dirname, "../..");
+export const REPO_ROOT = path.resolve(import.meta.dirname, "../..");
 
 /**
  * 한 단계를 돌리고, 실패하면 **거기서 멈춘다.**
