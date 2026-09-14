@@ -22,7 +22,7 @@
 
 ## 제출 전
 
-```
+```sh
 pnpm --filter ops check      라운드마다
 pnpm --filter ops verify     내보내기 전에
 ```

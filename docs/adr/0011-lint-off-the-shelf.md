@@ -12,8 +12,7 @@
 - **자작 규칙은 관례에 없는 것 하나뿐이다** — `arka/max-comment-lines`. 주석의 줄 **수**를 재는 규칙이 어디에도 없다(있는 것은 줄 **너비**를 잰다).
 - **규칙 하나를 켜는 순서는 측정 → 위반 0 → 켜기다.** 위반이 남아 있으면 같은 라운드에서 없애고, 못 없애면 켜지 않는다. 빨간 검사를 켜지 않는다(→ [ADR 0005](0005-ci-gate.md)).
 - **인용하는 규칙 ID는 실재해야 한다.** 없는 규칙을 근거로 든 자리가 **네 번** 나왔다. 강제가 아직 없으면 규칙 ID 대신 ADR을 가리킨다.
-- **린트가 보는 것은 파일 하나 안에서 판정되는 것**(구문·import·이름·전역)이고, **파일 시스템과 문서에 관한 질문은 테스트가 본다** — "옆에 파일이 있나", "이 링크가 가리키는 것이 있나", "인용한 규칙 ID가 실효 설정에 있나". ESLint는 파일 하나를 보므로 이런 질문에 구조적으로 답하지 못한다.
-- **저장소 전체의 모양은 `ops/structure/`가 본다.** 패키지 안의 모양은 그 패키지의 `test/`에 남는다(→ [ADR 0002](0002-live-next-to-what-they-govern.md)).
+- **린트는 파일 하나 안에서 판정되는 것**(구문·import·이름·전역)을, **테스트는 파일 시스템과 문서에 관한 질문**("옆에 파일이 있나", "이 링크가 가리키는 것이 있나", "인용한 규칙 ID가 실효 설정에 있나")을 본다. ESLint는 파일 하나를 보므로 뒤쪽에 구조적으로 답하지 못한다. 저장소 전체의 모양은 `ops/structure/`가, 패키지 안의 모양은 그 패키지의 `test/`가 든다(→ [ADR 0002](0002-live-next-to-what-they-govern.md)).
 
 ## 기각:
 - **껐던 `arka/*` 여섯을 되살리기** — 넷은 기성품(`primer-react`·`jsx-a11y`·`@eslint-react`·`import-x` zone)이 덮고, 둘(`test-names-korean`·`view-only-uses-view-model`)은 코어 `no-restricted-syntax` 선택자 넷이다. 되살리면 남의 코드 대신 우리 코드를 유지한다.
@@ -30,6 +29,7 @@
 ## 강제:
 - **린트** `primer-react/*`·`jsx-a11y/*`·`@eslint-react/no-forward-ref`·`no-restricted-syntax`(한글 테스트 이름·`view/`의 훅)·`import-x/no-restricted-paths`(패키지·슬라이스)·`no-restricted-imports`(Primer `IconButton`)·`@typescript-eslint/no-restricted-imports`(`model/`의 상태 라이브러리).
 - **stylelint** `@primer/stylelint-config` — 색·테두리·그림자·글꼴을 토큰으로만 쓰게 한다.
+- **markdownlint** `ops/markdownlint.jsonc` — 문서의 형태. ADR 형식과 맞서는 규칙(줄 길이·절 앞 빈 줄·제목 끝 콜론)은 끄고 그 이유를 그 파일에 적는다.
 - **테스트** `packages/client/test/structure.test.ts` — 컴포넌트마다 스토리·테스트·배럴이 있는지, 그룹 배럴이 없는지.
 - **파이프라인** `ops/pipeline/check.ts` — typecheck → lint → test → build 순서로 돌리고 앞에서 걸리면 뒤를 안 돌린다. CI의 `check` 잡이 이 파일을 부른다.
 - **테스트** `ops/structure/*.test.ts` — ADR의 절·줄 수·`상태:` 어휘·`강제:` 장치 이름, 인용한 규칙 ID가 실효 설정에 있는지, 문서와 코드 주석의 링크·ADR·태스크 인용이 실재하는지, `docs/` 최상위와 태스크 frontmatter.

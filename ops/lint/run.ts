@@ -28,3 +28,10 @@ const MAX_WARNINGS = ["--max-warnings", "0"];
 
 lint([".", ...MAX_WARNINGS], OPS_ROOT);
 lint(["--config", "eslint.config.ts", "tsconfig.json", ...MAX_WARNINGS], REPO_ROOT);
+
+/*
+ * **마크다운도 여기서 본다.** 2026-09-14까지 `docs/**`·`README`·`CLAUDE.md`는 기계 검사가
+ * 0건이었다. 대상 글롭과 끈 규칙의 이유는 `ops/markdownlint.jsonc`가 적는다.
+ */
+const markdown = spawnSync("markdownlint-cli2", ["--config", "ops/markdownlint.jsonc"], { cwd: REPO_ROOT, stdio: "inherit" });
+if (markdown.status !== 0) process.exit(markdown.status ?? 1);

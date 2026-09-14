@@ -18,7 +18,7 @@ const STATUS_WORDS = ["승인됨", "대체됨", "폐기됨"] as const;
  */
 const ENFORCERS = new Set([
   "린트", "타입", "테스트", "리뷰", "파이프라인", "스모크",
-  "stylelint", "commitlint", "gitleaks",
+  "stylelint", "commitlint", "gitleaks", "markdownlint",
   "룰셋", "CODEOWNERS", "워크플로", "배포 잡", "compose",
 ]);
 
@@ -67,7 +67,7 @@ describe("ADR 형식", () => {
     expect(order).toEqual(required);
   });
 
-  it.each(ADRS)("%s — 본문이 %i줄을 넘지 않는다", (file) => {
+  it.each(ADRS)(`%s — 본문이 ${MAX_BODY_LINES}줄을 넘지 않는다`, (file) => {
     expect(read(file).split("\n").length - 1).toBeLessThanOrEqual(MAX_BODY_LINES);
   });
 

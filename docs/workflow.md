@@ -23,17 +23,17 @@ gh pr create                        # 제목은 아래 형식으로
 **squash merge라서 PR 제목이 그대로 `main`의 커밋 메시지가 된다.** 이력에 남는 것은
 개별 커밋이 아니라 이 한 줄이다. 그래서 커밋이 아니라 제목을 검사한다.
 
-```
+```text
 <타입>(<scope>): <한글 설명>
 ```
 
 | 자리 | 값 |
-|---|---|
+| --- | --- |
 | 타입 | `feat` `fix` `refactor` `perf` `docs` `test` `build` `ci` `chore` `revert` |
 | scope | **선택.** 쓴다면 `contracts` `client` `server` `ops` `repo` 중 하나 |
 | 설명 | 한글. 마침표를 찍지 않는다. 제목 전체가 **72자**를 넘지 않는다 |
 
-```
+```text
 feat(client): 검색 패널을 연다
 fix(server): 빈 API 키로 부팅이 죽던 것을 고친다
 docs: 작업 흐름을 적는다
@@ -56,7 +56,7 @@ printf '%s' "feat(client): 검색 패널을 연다" | pnpm --filter ops exec com
 `check`가 순서대로 도는 것과, 로컬에서 같은 것을 부르는 법:
 
 | 단계 | 로컬에서 같은 것 |
-|---|---|
+| --- | --- |
 | typecheck → lint → test → build | `pnpm --filter ops check` — **CI가 부르는 것이 이 명령 그대로다** |
 | PR 제목 형식(PR일 때만) | `printf '%s' "제목" \| pnpm --filter ops exec commitlint` |
 | 새 커밋에 시크릿이 있는지 | `docker run --rm -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.30.1 git /repo --gitleaks-ignore-path /repo/ops/.gitleaksignore --redact --no-banner` |
@@ -79,7 +79,7 @@ printf '%s' "feat(client): 검색 패널을 연다" | pnpm --filter ops exec com
 **PR마다 스토리북이 올라간다.** 봇이 링크를 코멘트로 달고 갱신한다. PR을 닫으면 그 폴더를 지운다.
 
 | | |
-|---|---|
+| --- | --- |
 | `main` | `highjun.github.io/ARKASHIC/` |
 | PR | `highjun.github.io/ARKASHIC/pr-<번호>/` |
 

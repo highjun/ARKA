@@ -8,7 +8,7 @@
 ## 무엇으로 만들었나
 
 | | |
-|---|---|
+| --- | --- |
 | 패키지 | `contracts`(zod 스키마) · `client`(React PWA) · `server`(Hono) — pnpm 워크스페이스 |
 | 배포 단위 | Docker 이미지 하나. 클라이언트 정적 파일과 서버 번들이 함께 들어간다 |
 | 저장소 | SQLite(`node:sqlite`) |
@@ -28,7 +28,7 @@ pnpm --filter ops check                   # CI의 `check` 잡이 부르는 것�
 ## 읽을 것
 
 | | |
-|---|---|
+| --- | --- |
 | [docs/overview.md](docs/overview.md) | 무엇을 만들고 있나 |
 | [docs/workflow.md](docs/workflow.md) | 브랜치·PR·CI·배포가 어떻게 도나 |
 | [docs/operations.md](docs/operations.md) | 이 기계에서 무엇이 어떻게 도나, 장애가 나면 |
