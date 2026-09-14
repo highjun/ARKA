@@ -1,9 +1,15 @@
 import { CircularDependencyError, TokenNotRegisteredError } from "./errors";
 import type { Token } from "./token";
 
-/** dispose 대상. 스코프가 정리될 때 자기가 만든 인스턴스 중 이걸 구현한 것만 부른다. */
+/**
+ * dispose 대상. 스코프가 정리될 때 자기가 만든 인스턴스 중 이걸 구현한 것만 부른다.
+ *
+ * **동기다.** `void | Promise<void>`였는데 비동기 정리를 하는 구현이 하나도 없었고(2026-09-14 실측),
+ * 합집합 때문에 모든 `dispose()` 호출이 "버려진 Promise"로 보여 `no-floating-promises`가 여덟 번
+ * 물었다. 비동기 정리가 필요해지면 그때 별도 타입을 만든다 — 컨테이너는 이미 `await`한다.
+ */
 export interface Disposable {
-  dispose(): void | Promise<void>;
+  dispose(): void;
 }
 
 /** `singleton`은 앱에 하나, `scoped`는 스코프마다 하나, `transient`는 조회할 때마다 새로. */
@@ -110,8 +116,9 @@ class ContainerImpl implements Container {
     }
     this.#children.clear();
 
+    // `Disposable.dispose()`는 동기다 — `await`를 두면 `await-thenable`이 문다.
     for (let i = this.#disposables.length - 1; i >= 0; i -= 1) {
-      await this.#disposables[i]?.dispose();
+      this.#disposables[i]?.dispose();
     }
     this.#disposables.length = 0;
     this.#instances.clear();

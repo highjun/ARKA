@@ -135,7 +135,7 @@ export const CodeBlock = ({
         <IconButton
           variant="invisible"
           size="small"
-          onClick={copyCode}
+          onClick={() => void copyCode()}
           aria-label={copied ? copiedLabel : copyLabel}
           icon={() => <Icon iconId={copied ? "check" : "copy"} size="sm" />}
         />

@@ -112,9 +112,16 @@ const base: Linter.Config[] = [
     plugins: { "@typescript-eslint": tseslint.plugin as never },
     languageOptions: {
       parser: tseslint.parser as never,
-      // parserOptions.project를 일부러 두지 않는다. 경계 규칙은 import 경로만 보고
-      // 타입 정보가 필요 없어서, 타입 검사 프로그램을 만들지 않으면 그만큼 컴파일러 API에 덜 묶인다.
-      parserOptions: { sourceType: "module", ecmaVersion: "latest" },
+      // **타입 정보를 켠다.** 아래 규칙 넷은 타입 없이는 판정할 수 없고, 그것이 잡는 것을
+      // 잡는 다른 것이 없다 — 특히 `await`를 빼먹은 Promise는 조용히 성공한다.
+      parserOptions: {
+        sourceType: "module",
+        ecmaVersion: "latest",
+        // 어느 tsconfig에도 없는 설정 파일 둘. `eslint.config.ts`는 `ops/lint`가 TS 원본이라
+        // 패키지 옵션으로 ops 소스를 컴파일하게 되어 뺐고(→ ADR 0001의 대가),
+        // `stylelint.config.ts`는 `@primer/stylelint-config`가 타입을 안 싣는다. 파싱만 한다.
+        projectService: { allowDefaultProject: ["eslint.config.ts", "stylelint.config.ts"] },
+      },
     },
     rules: {
       // zod 스키마를 `export const X` + `export type X`로 함께 내보내는데, 코어 규칙은
@@ -132,6 +139,16 @@ const base: Linter.Config[] = [
       "@typescript-eslint/no-empty-object-type": "error",
       // `@ts-ignore`는 왜 껐는지를 남기지 않고 타입 오류를 숨긴다(→ ADR 0004). `@ts-expect-error`는
       // 오류가 사라지면 스스로 실패하므로 설명과 함께 허용한다.
+      /*
+       * **타입이 있어야 판정되는 것들.** `await`를 빼먹은 Promise는 테스트도 타입 검사도
+       * 통과하고 런타임에 조용히 어긋난다 — 이 저장소는 서버 라우트·에이전트 실행·파일 I/O가
+       * 전부 async다.
+       */
+      "@typescript-eslint/no-floating-promises": "error",
+      "@typescript-eslint/no-misused-promises": "error",
+      "@typescript-eslint/await-thenable": "error",
+      // `require-await`는 켜지 않는다 — `async function*`은 `await` 없이도 **타입이 요구하는**
+      // 모양인데(`Symbol.asyncIterator`) 규칙이 그것을 구별하지 못한다(2026-09-14 실측).
       "@typescript-eslint/ban-ts-comment": [
         "error",
         {
