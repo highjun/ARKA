@@ -1,19 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import type { DragEvent, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
-import type {
-  SplitChildState,
-  SplitContextValue,
-  SplitDropIndicator,
-  SplitDropPosition,
-  SplitLeafHandlers,
-  SplitRootLeafState,
-  SplitState,
-  TabDropZone,
-  TabSplitProps,
-  TabTreeLeaf,
-  TabTreeNode,
-  TabTreeSplit,
-} from './Tab';
+import type { SplitChildState, SplitContextValue, SplitDropIndicator, SplitLeafHandlers, SplitRootLeafState, SplitState, TabSplitProps, TabTreeLeaf, TabTreeNode, TabTreeSplit } from './Split';
+import type { SplitDropPosition, TabDropZone } from './shared';
 
 // ─────────────────────────── 계산 ───────────────────────────
 

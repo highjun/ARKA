@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent, PointerEventHandler, ReactNode, RefObject } from 'react';
-import type { StripContextValue, StripDropIndicator, StripDropPosition, StripItemState, StripListHandlers, TabId, TabItem } from './Tab';
+import type { StripContextValue, StripDropIndicator, StripItemState, StripListHandlers } from './Strip';
+import type { StripDropPosition, TabId, TabItem } from './shared';
 
 /** 끝을 넘어가면 원본을 그대로 돌려준다 — 순환하지 않는다. 키보드 재정렬이 쓴다. */
 export const reorder = (tabItems: readonly TabItem[], itemId: string, direction: -1 | 1): readonly TabItem[] => {
