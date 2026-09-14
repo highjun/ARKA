@@ -682,10 +682,7 @@ export interface TabSplitProps extends Omit<HTMLAttributes<HTMLDivElement>, 'chi
 }
 
 /** `tree`를 주면 TabSplit, 주지 않고 `tabItems`/`activeTab`을 주면 단일 Group으로 동작한다. */
-export type TabProps = (TabSplitProps | (TabGroupProps & { tree?: never })) & {
-  /** 루트 원소로 그대로 통과한다. */
-  readonly ref?: Ref<HTMLElement>;
-};
+export type TabProps = TabSplitProps | (TabGroupProps & { tree?: never });
 
 /** `sizes`는 정규화를 거쳐 합이 100이다. */
 export interface SplitState {
@@ -886,13 +883,15 @@ const SplitBranch = ({
   onTabPin,
   emptyMessage,
   stripEmptyLabel,
-  renderTabContextMenu, ref }: {
+  renderTabContextMenu,
+  ref,
+}: {
   node: TabTreeSplit;
   isRoot?: boolean;
   rootProps?: Omit<HTMLAttributes<HTMLDivElement>, 'children'>;
   className?: string;
   childState?: SplitChildState;
-  } & LeafPassthrough & { readonly ref?: Ref<HTMLElement> }) => {
+} & LeafPassthrough & { readonly ref?: Ref<HTMLElement> }) => {
   const classNames = useTabClassNames();
   const shared = useSplitContext();
   const branch = useSplitBranch(node, shared);
@@ -900,105 +899,106 @@ const SplitBranch = ({
   const showDivider = Boolean(childState && !childState.isLast);
 
   return (
-  <div
-  {...(isRoot ? rootProps : {})}
-  ref={mergeRefs<HTMLElement>(branch.ref, isRoot ? ref : null)}
-  data-orientation={branch.orientation}
-  style={isRoot ? undefined : childState?.style}
-  className={clsx(
-  isRoot ? className : undefined,
-  isRoot
-  ? isHorizontal
-  ? classNames.splitRootHorizontal
-  : classNames.splitRootVertical
-  : isHorizontal
-  ? classNames.splitBranchHorizontal
-  : classNames.splitBranchVertical,
-  showDivider &&
-  (childState?.orientation === 'horizontal'
-  ? classNames.splitBranchDividerHorizontal
-  : classNames.splitBranchDividerVertical),
-  )}
-  >
-  {branch.childStates.map((state) =>
-  state.node.kind === 'leaf' ? (
-  <LeafSection
-  key={state.node.id}
-  state={state}
-  onTabClick={onTabClick}
-  onMenuClick={onMenuClick}
-  onTabClose={onTabClose}
-  onTabReorder={onTabReorder}
-  onTabPin={onTabPin}
-  emptyMessage={emptyMessage}
-  stripEmptyLabel={stripEmptyLabel}
-  renderTabContextMenu={renderTabContextMenu}
-  />
-  ) : (
-  <SplitBranch
-  key={state.node.id}
-  node={state.node}
-  childState={state}
-  onTabClick={onTabClick}
-  onMenuClick={onMenuClick}
-  onTabClose={onTabClose}
-  onTabReorder={onTabReorder}
-  onTabPin={onTabPin}
-  emptyMessage={emptyMessage}
-  stripEmptyLabel={stripEmptyLabel}
-  renderTabContextMenu={renderTabContextMenu}
-  />
-  ),
-  )}
-  {!isRoot && childState ? <ResizeHandle state={childState} /> : null}
-  </div>
+    <div
+      {...(isRoot ? rootProps : {})}
+      ref={mergeRefs<HTMLElement>(branch.ref, isRoot ? ref : null)}
+      data-orientation={branch.orientation}
+      style={isRoot ? undefined : childState?.style}
+      className={clsx(
+        isRoot ? className : undefined,
+        isRoot
+          ? isHorizontal
+            ? classNames.splitRootHorizontal
+            : classNames.splitRootVertical
+          : isHorizontal
+            ? classNames.splitBranchHorizontal
+            : classNames.splitBranchVertical,
+        showDivider &&
+          (childState?.orientation === 'horizontal'
+            ? classNames.splitBranchDividerHorizontal
+            : classNames.splitBranchDividerVertical),
+      )}
+    >
+      {branch.childStates.map((state) =>
+        state.node.kind === 'leaf' ? (
+          <LeafSection
+            key={state.node.id}
+            state={state}
+            onTabClick={onTabClick}
+            onMenuClick={onMenuClick}
+            onTabClose={onTabClose}
+            onTabReorder={onTabReorder}
+            onTabPin={onTabPin}
+            emptyMessage={emptyMessage}
+            stripEmptyLabel={stripEmptyLabel}
+            renderTabContextMenu={renderTabContextMenu}
+          />
+        ) : (
+          <SplitBranch
+            key={state.node.id}
+            node={state.node}
+            childState={state}
+            onTabClick={onTabClick}
+            onMenuClick={onMenuClick}
+            onTabClose={onTabClose}
+            onTabReorder={onTabReorder}
+            onTabPin={onTabPin}
+            emptyMessage={emptyMessage}
+            stripEmptyLabel={stripEmptyLabel}
+            renderTabContextMenu={renderTabContextMenu}
+          />
+        ),
+      )}
+      {!isRoot && childState ? <ResizeHandle state={childState} /> : null}
+    </div>
   );
-  };
-  SplitBranch.displayName = 'Tab.Split.Branch';
+};
+SplitBranch.displayName = 'Tab.Split.Branch';
 
-  const RootLeafSection = ({ leaf, rootProps, className, onTabClick, onMenuClick, onTabClose, onTabReorder, onTabPin, emptyMessage, stripEmptyLabel, renderTabContextMenu, ref }: {
-  leaf: TabTreeLeaf;
-  rootProps: Omit<HTMLAttributes<HTMLDivElement>, 'children'>;
-  className?: string;
+const RootLeafSection = ({ leaf, rootProps, className, onTabClick, onMenuClick, onTabClose, onTabReorder, onTabPin, emptyMessage, stripEmptyLabel, renderTabContextMenu, ref }: {
+    leaf: TabTreeLeaf;
+    rootProps: Omit<HTMLAttributes<HTMLDivElement>, 'children'>;
+    className?: string;
   } & LeafPassthrough & { readonly ref?: Ref<HTMLElement> }) => {
   const classNames = useTabClassNames();
   const shared = useSplitContext();
   const state = getRootLeafState(leaf, shared);
 
   return (
-  <section
-  {...rootProps}
-  {...state.handlers}
-  ref={ref}
-  className={clsx(className, classNames.rootLeafSection)}
-  >
-  <GroupImpl
-  activeTab={leaf.activeTab}
-  tabItems={leaf.tabItems}
-  onTabClick={handleLeafTabClick(onTabClick, leaf.id)}
-  onMenuClick={handleLeafMenuClick(onMenuClick, leaf.id)}
-  onTabClose={handleLeafTabClose(onTabClose, leaf.id)}
-  onTabReorder={handleLeafTabReorder(onTabReorder, leaf.id)}
-  onTabPin={handleLeafTabPin(onTabPin, leaf.id)}
-  emptyMessage={emptyMessage}
-  stripEmptyLabel={stripEmptyLabel}
-  renderTabContextMenu={renderTabContextMenu}
-  className={classNames.rootLeafGroup}
-  panelLabel={`Tab group ${leaf.id}`}
-  panelOverlay={
-  state.dropZone === 'panel' && state.dropPosition ? (
-  <span aria-hidden="true" data-position={state.dropPosition} className={classNames.panelDropIndicator} />
-  ) : undefined
-  }
-  stripOverlay={state.dropZone === 'strip' ? <span aria-hidden="true" className={classNames.stripDropOverlay} /> : undefined}
-  />
-  </section>
+    <section
+      {...rootProps}
+      {...state.handlers}
+      ref={ref}
+      className={clsx(className, classNames.rootLeafSection)}
+    >
+      <GroupImpl
+        activeTab={leaf.activeTab}
+        tabItems={leaf.tabItems}
+        onTabClick={handleLeafTabClick(onTabClick, leaf.id)}
+        onMenuClick={handleLeafMenuClick(onMenuClick, leaf.id)}
+        onTabClose={handleLeafTabClose(onTabClose, leaf.id)}
+        onTabReorder={handleLeafTabReorder(onTabReorder, leaf.id)}
+        onTabPin={handleLeafTabPin(onTabPin, leaf.id)}
+        emptyMessage={emptyMessage}
+        stripEmptyLabel={stripEmptyLabel}
+        renderTabContextMenu={renderTabContextMenu}
+        className={classNames.rootLeafGroup}
+        panelLabel={`Tab group ${leaf.id}`}
+        panelOverlay={
+          state.dropZone === 'panel' && state.dropPosition ? (
+            <span aria-hidden="true" data-position={state.dropPosition} className={classNames.panelDropIndicator} />
+          ) : undefined
+        }
+        stripOverlay={state.dropZone === 'strip' ? <span aria-hidden="true" className={classNames.stripDropOverlay} /> : undefined}
+      />
+    </section>
   );
-  };
-  RootLeafSection.displayName = 'Tab.Split.RootLeafSection';
+};
+RootLeafSection.displayName = 'Tab.Split.RootLeafSection';
 
-  /** 실제 구현 — `data-component`를 스스로 찍지 않는다(공개 `Tab.Split`이 필요하면 감싸서 찍는다). */
-  const SplitRootImpl = ({ tree,
+/** 실제 구현 — `data-component`를 스스로 찍지 않는다(공개 `Tab.Split`이 필요하면 감싸서 찍는다). */
+const SplitRootImpl = ({
+  tree,
   activeLeaf,
   onTabClick,
   onMenuClick,
@@ -1143,7 +1143,7 @@ export const TabSplit = ({ className, chrome, ref, ...props }: TabSplitProps) =>
 TabSplit.displayName = 'Tab.Split';
 
 /** `tree`가 있으면 TabSplit, 없으면 단일 Group으로 동작한다. */
-export const TabRoot = ({ ref, ...props }: TabProps) =>
+export const TabRoot = ({ ref, ...props }: TabProps & { readonly ref?: Ref<HTMLElement> }) =>
   props.tree ? <TabSplit {...props} ref={ref} /> : <TabGroup {...props} ref={ref} />;
 TabRoot.displayName = 'Tab';
 
