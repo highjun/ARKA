@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { useSessionList } from './useSessionList';
 import styles from './SessionList.module.css';
-import { IconButton } from '@primer/react';
+import { IconButton } from '#component/IconButton';
 import { Icon } from '#component/Icon';
 import { SidebarLayout } from '#component/SidebarLayout';
 import { Menu } from '#component/Menu';

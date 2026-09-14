@@ -45,4 +45,28 @@ export default [
       ],
     },
   },
+
+  {
+    // Primer `IconButton`을 직접 가져오면 터치 최소 타겟 CSS를 잃는다(→ ADR 0009). 여기서만
+    // `no-restricted-imports`를 쓰는 이유는 막을 것이 모듈 이름이 아니라 **가져오는 이름**이고
+    // `importNames`가 별칭(`IconButton as PrimerIconButton`)까지 잡기 때문이다. 그 겹 자신은
+    // 가져와야 하므로 `ignores`로 대상에서 뺀다 — 규칙을 끄는 것이 아니다.
+    files: ["src/**/*.{ts,tsx}"],
+    // `ModeToggle`은 겹을 쓰면 자기 `data-component`를 잃는다(→ TASK-64). 그때까지만 예외다.
+    ignores: ["src/shared/component/IconButton/**", "src/shared/component/ModeToggle/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@primer/react",
+              importNames: ["IconButton"],
+              message: "`#component/IconButton`으로 가져오세요 — 터치 환경의 최소 타겟 CSS가 그 겹에만 있습니다.",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];

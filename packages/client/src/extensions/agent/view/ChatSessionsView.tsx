@@ -1,6 +1,6 @@
 import { useViewModel } from '#core/viewmodel';
 import { Spinner } from '@primer/react';
-import { SessionList } from '../component';
+import { SessionList } from '../component/SessionList';
 import { ChatViewModelToken } from '../viewmodel/IChatViewModel';
 import styles from './ChatSessionsView.module.css';
 

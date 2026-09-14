@@ -3,19 +3,18 @@
 }
 
 /*
- * 시각적 크기는 `IconButton`(`variant="invisible"`, 기본 `size="medium"`)에 맡기고, 터치 영역만
- * `::after`로 밖으로 확장한다 — 컨트롤을 키우면 레이아웃이 흔들리지만, 오버레이는 아무것도 안
- * 밀어낸다. 모바일이 정본 폼팩터라(`apps/workbench` README) 이 44px(Primer
- * `--control-minTarget-coarse`) 최소 터치 영역은 장식이 아니라 접근성 요구사항이다.
+ * `IconButton.module.css`와 같은 방식이다 — 보이는 박스는 `IconButton`에 맡기고 터치 타겟만
+ * 의사 요소로 세로로 넓힌다. 두 곳에 같은 CSS가 있는 것은 이 컴포넌트가 우리 `IconButton` 겹을
+ * 쓰지 못해서다(→ TASK-64). 그 문제가 풀리면 이 블록과 린트 예외가 함께 사라진다.
  */
-.root::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  min-width: var(--control-minTarget-coarse);
-  min-height: var(--control-minTarget-coarse);
-  width: 100%;
-  height: 100%;
+@media (pointer: coarse) {
+  .root::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: 0;
+    min-height: var(--control-minTarget-coarse);
+    transform: translateY(-50%);
+  }
 }

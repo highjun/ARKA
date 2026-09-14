@@ -3,7 +3,7 @@ import type { HTMLAttributes, Ref } from 'react';
 import { clsx } from 'clsx';
 import { createTextClipboardPort } from './shared';
 import styles from './CodeBlock.module.css';
-import { IconButton } from '@primer/react';
+import { IconButton } from '#component/IconButton';
 import { Icon } from '#component/Icon';
 
 /** 정규식 하나로 가르는 근사 강조다 — 파서가 아니라 언어를 가리지 않는다. */

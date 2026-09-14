@@ -1,5 +1,6 @@
 import { useViewModel } from '#core/viewmodel';
-import { ActionList, Button, IconButton, Spinner, TextInput } from '@primer/react';
+import { ActionList, Button, Spinner, TextInput } from '@primer/react';
+import { IconButton } from '#component/IconButton';
 import { Icon } from '#component/Icon';
 import { Text } from '#component/Text';
 import type { ChangeRow } from '../viewmodel/ISourceControlViewModel';

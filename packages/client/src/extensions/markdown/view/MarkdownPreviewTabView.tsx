@@ -1,7 +1,7 @@
 import { useViewModel } from '#core/viewmodel';
 import { Banner, Spinner } from '@primer/react';
 import { Text } from '#component/Text';
-import { MarkdownPreview } from '../component';
+import { MarkdownPreview } from '../component/MarkdownPreview';
 import { MarkdownPreviewViewModelToken } from '../viewmodel/IMarkdownPreviewViewModel';
 import styles from './MarkdownPreviewTabView.module.css';
 

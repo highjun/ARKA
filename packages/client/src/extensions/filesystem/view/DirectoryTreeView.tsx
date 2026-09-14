@@ -2,8 +2,8 @@ import { useViewModel } from '#core/viewmodel';
 import { Button, Spinner } from '@primer/react';
 import { Container } from '#component/Container';
 import { Dialog } from '#component/Dialog';
-import { FileTree } from '../component';
-import type { FileTreeItem } from '../component';
+import { FileTree } from '../component/FileTree';
+import type { FileTreeItem } from '../component/FileTree';
 import type { MouseEvent } from 'react';
 import { CommandContextMenu } from '#core/commands';
 import type {
