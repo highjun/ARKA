@@ -6,11 +6,11 @@ import { createStoragePort } from './LocalStorage';
  * 검사한다. Adapter의 이름은 이 파일 어디에도 나오지 않는다.
  */
 
-afterEach(() => {
-  localStorage.clear();
-});
-
 describe('get·set', () => {
+  afterEach(() => {
+    localStorage.clear();
+  });
+
   it('쓴 것을 그대로 읽는다', () => {
     const storage = createStoragePort();
 

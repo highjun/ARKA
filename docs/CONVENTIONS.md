@@ -223,7 +223,7 @@
 - **렌더·상호작용 테스트는 스토리를 가져다 쓴다** — `composeStories`로 가져와 `await Story.run()`으로 `play`까지 돌린다. 로직 테스트(훅·ViewModel)는 단언마다 자기 최소 입력을 쓴다. → [ADR 0010](adr/0010-ui-verification.md)
 - 스냅샷은 인라인(`toMatchInlineSnapshot`)만 쓴다. 외부 `.snap` 파일은 두지 않는다 — 안 열고 갱신하게 된다.
 - 커버리지 목표를 두지 않는다.
-- `it`/`test` 이름은 한글 문장으로 쓴다. `describe`는 **대상의 식별자**라 영문 그대로다(`describe('Timestamp')`). TSDoc의 `@throws`에 적은 경우는 각각 테스트로 확인한다 — 적어두기만 하면 주장일 뿐이다.
+- `it`/`test` 이름은 한글 문장으로 쓴다. `describe`는 **대상의 식별자**라 영문 그대로다(`describe('Timestamp')`). 파일마다 최상위 `describe` 하나가 전부를 감싸고 훅도 그 안에 둔다. 단정 헬퍼는 `expect`로 시작하는 이름을 갖는다 — 그래야 `vitest/expect-expect`가 알아본다. TSDoc의 `@throws`에 적은 경우는 각각 테스트로 확인한다 — 적어두기만 하면 주장일 뿐이다.
 - 설정 파일은 갈라질 때만 만든다. 기본값으로 도는 동안에는 두지 않는다.
 
 E2E는 `pnpm --filter client test:e2e`로 돌린다. 조립이 맞물리는지는 `workbench/registerServices.test.tsx`가 본다 — 대상(`registerServices.tsx`) 옆에 있는 단위 테스트다.

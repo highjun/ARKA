@@ -15,7 +15,7 @@
 - **린트는 파일 하나 안에서 판정되는 것**(구문·import·이름·전역)을, **테스트는 파일 시스템과 문서에 관한 질문**("옆에 파일이 있나", "이 링크가 가리키는 것이 있나", "인용한 규칙 ID가 실효 설정에 있나")을 본다. ESLint는 파일 하나를 보므로 뒤쪽에 구조적으로 답하지 못한다. 저장소 전체의 모양은 `ops/structure/`가, 패키지 안의 모양은 그 패키지의 `test/`가 든다(→ [ADR 0002](0002-live-next-to-what-they-govern.md)).
 
 ## 기각:
-- **껐던 `arka/*` 여섯을 되살리기** — 넷은 기성품(`primer-react`·`jsx-a11y`·`@eslint-react`·`import-x` zone)이 덮고, 둘(`test-names-korean`·`view-only-uses-view-model`)은 코어 `no-restricted-syntax` 선택자 넷이다. 되살리면 남의 코드 대신 우리 코드를 유지한다.
+- **껐던 `arka/*` 여섯을 되살리기** — 넷은 기성품(`primer-react`·`jsx-a11y`·`@eslint-react`·`import-x` zone)이 덮고, `test-names-korean`은 `vitest/valid-title`이, `view-only-uses-view-model`은 코어 `no-restricted-syntax` 선택자 둘이 덮는다. 되살리면 남의 코드 대신 우리 코드를 유지한다.
 - **`eslint-plugin-boundaries`로 슬라이스 경계를 다스리기** — 캡처 변수(`{{from.slice}}`)로 "형제끼리만 금지"를 한 줄에 쓸 수 있어 골랐다가, v7에서 우리 배치에 걸리지 않아 걷었다(2026-09-14 실측). `import-x/no-restricted-paths`의 zone에 슬라이스를 열거하면 같은 경계가 되고, 다섯 줄이면 끝난다.
 - **`eslint-plugin-project-structure`로 스토리 존재를 강제하기** — `folder-structure`가 트리 **전체**를 선언하게 만든다. 지금 정하려는 것은 컴포넌트 폴더 하나의 모양뿐이고, "옆에 파일이 있나"는 구문이 아니라 파일 시스템 질문이라 테스트가 더 맞는 자리다(`test/structure.test.ts`).
 - **`markdownlint`의 커스텀 규칙(`markdownlint-rule-*`)으로 문서를 보기** — 개인 유지 서드파티라 기성품의 이점이 없고, 마크다운 도구는 **코드 주석 안의 `(→ ADR NNNN)`을 못 본다**. 거짓 인용이 난 자리가 바로 거기다.
@@ -27,7 +27,7 @@
 - **ESLint 메이저를 올릴 때 플러그인 여섯이 전부 따라와야 한다.** 하나가 늦으면 올림이 막힌다 — 지금 열린 TypeScript 메이저 PR이 같은 모양이다.
 
 ## 강제:
-- **린트** `primer-react/*`·`jsx-a11y/*`·`@eslint-react/no-forward-ref`·`no-restricted-syntax`(한글 테스트 이름·`view/`의 훅)·`import-x/no-restricted-paths`(패키지·슬라이스)·`no-restricted-imports`(Primer `IconButton`)·`@typescript-eslint/no-restricted-imports`(`model/`의 상태 라이브러리).
+- **린트** `primer-react/*`·`jsx-a11y/*`·`@eslint-react/no-forward-ref`·`vitest/*`(테스트 규율)·`no-restricted-syntax`(`view/`의 훅)·`import-x/no-restricted-paths`(패키지·슬라이스)·`no-restricted-imports`(Primer `IconButton`)·`@typescript-eslint/no-restricted-imports`(`model/`의 상태 라이브러리).
 - **stylelint** `@primer/stylelint-config` — 색·테두리·그림자·글꼴을 토큰으로만 쓰게 한다.
 - **markdownlint** `ops/markdownlint.jsonc` — 문서의 형태. ADR 형식과 맞서는 규칙(줄 길이·절 앞 빈 줄·제목 끝 콜론)은 끄고 그 이유를 그 파일에 적는다.
 - **테스트** `packages/client/test/structure.test.ts` — 컴포넌트마다 스토리·테스트·배럴이 있는지, 그룹 배럴이 없는지.

@@ -18,14 +18,7 @@ const RESTRICTED_SYNTAX = [
     selector: `${node}[source.value=/^contracts(\\/|$)/]`,
     message: "`#contracts`로 가져오세요 — 맨이름은 서드파티와 구분되지 않습니다.",
   })),
-  {
-    selector: 'CallExpression[callee.name=/^(it|test)$/] > Literal:first-child:not([value=/[가-힣]/])',
-    message: "`it()`/`test()` 이름은 한글 문장으로 쓰세요(→ ADR 0004).",
-  },
-  {
-    selector: 'CallExpression[callee.name=/^(it|test)$/] > TemplateLiteral:first-child:not(:has(TemplateElement[value.cooked=/[가-힣]/]))',
-    message: "`it()`/`test()` 이름은 한글 문장으로 쓰세요(→ ADR 0004).",
-  },
+  // 테스트 이름을 보던 셀렉터 둘은 `vitest/valid-title`로 갈았다(→ ADR 0011).
 ];
 
 /** `view/`에만 더 걸리는 것 — 훅 하나와 DI 접근 금지(→ ADR 0007). */

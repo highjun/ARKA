@@ -1,4 +1,5 @@
 import comments from "@eslint-community/eslint-plugin-eslint-comments";
+import vitest from "@vitest/eslint-plugin";
 import js from "@eslint/js";
 import json from "@eslint/json";
 import jsdoc from "eslint-plugin-jsdoc";
@@ -193,6 +194,47 @@ const base: Linter.Config[] = [
       // 주석 처리된 코드는 지운다. git이 이미 영구 보관한다.
       "sonarjs/no-commented-code": "error",
       "jsdoc/require-jsdoc": REQUIRE_JSDOC,
+    },
+  },
+
+  {
+    /*
+     * **테스트의 규율.** 네 패키지가 전부 vitest를 쓰므로 바탕에 둔다. 이 블록이 대신하는 것은
+     * client 설정에 있던 `no-restricted-syntax` 선택자 둘이다 — 그 배열은 한 파일에 한 벌이라
+     * 블록이 겹치면 통째로 덮이는데(2026-09-09·09-14에 두 번 겪었다), 규칙 이름이 갈리면
+     * 그 함정에서 그만큼 벗어난다(→ ADR 0011).
+     */
+    files: ["**/*.{test,spec}.{ts,tsx}"],
+    plugins: { vitest },
+    rules: {
+      /*
+       * `it`/`test` 이름은 **한글 문장**이다(→ ADR 0004). `describe`는 대상의 식별자라 영문
+       * 그대로다 — 실측 186건이 그 모양이고, 규약이 둘을 묶어 적던 것을 2026-09-14에 갈랐다.
+       */
+      "vitest/valid-title": ["error", {
+        mustMatch: { it: ["[가-힣]", "`it()`/`test()` 이름은 한글 문장으로 쓰세요(→ ADR 0004)."] },
+      }],
+      /*
+       * 단정이 없는 테스트는 "돌았다"만 알려 준다. **단정 헬퍼는 `expect`로 시작하는 이름을
+       * 갖는다**(`expectNoA11yViolations`·`expectResponse`) — 그래야 이 규칙이 알아본다.
+       */
+      "vitest/expect-expect": ["error", { assertFunctionNames: ["expect", "expect*"] }],
+      // 외부 `.snap`은 두지 않고 인라인만 쓴다(→ ADR 0010). 인라인도 커지면 읽히지 않는다.
+      "vitest/no-restricted-matchers": ["error", {
+        toMatchSnapshot: "외부 `.snap` 대신 `toMatchInlineSnapshot`을 쓰세요 — 갱신이 diff에 드러납니다(→ ADR 0010).",
+      }],
+      "vitest/no-large-snapshots": ["error", { maxSize: 20, inlineMaxSize: 12 }],
+      // 대상 옆에 `<Name>.test.ts`로 둔다(→ ADR 0002).
+      "vitest/consistent-test-filename": ["error", { pattern: String.raw`.*\.(test|spec)\.tsx?$` }],
+      // 최상위 `describe`가 없으면 실패 출력에서 무엇의 테스트인지 안 보인다.
+      "vitest/require-top-level-describe": "error",
+      // 좁혀 놓고 커밋하면 나머지가 조용히 안 돈다.
+      "vitest/no-focused-tests": "error",
+      "vitest/no-disabled-tests": "error",
+      // 같은 이름이 둘이면 어느 쪽이 깨졌는지 출력으로 가려지지 않는다.
+      "vitest/no-identical-title": "error",
+      // 주석 처리된 테스트는 지운다 — 미룬 일은 `docs/tasks/`에 적는다(→ ADR 0004).
+      "vitest/no-commented-out-tests": "error",
     },
   },
 

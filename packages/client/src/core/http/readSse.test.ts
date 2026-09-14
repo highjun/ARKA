@@ -14,11 +14,12 @@ const originalFetch = globalThis.fetch;
 const serverSends = (chunks: readonly string[], status = 200, close = true): void => {
   globalThis.fetch = (() => Promise.resolve({ ok: status < 400, status, body: streamOf(chunks, { close }) })) as unknown as typeof fetch;
 };
-afterEach(() => {
-  globalThis.fetch = originalFetch;
-});
 
 describe('readSse', () => {
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
   it('data 프레임마다 부르고 주석 프레임은 건너뛴다', async () => {
     serverSends(['data: {"a":1}\n\n: ping\n\nid: 2\ndata: {"a":2}\n\n']);
     const got: string[] = [];

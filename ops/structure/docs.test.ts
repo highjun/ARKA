@@ -46,7 +46,7 @@ describe("문서의 자리", () => {
 });
 
 describe("태스크 frontmatter", () => {
-  it.each(TASKS)("%s", (file) => {
+  it.each(TASKS)("%s — 필수 열쇠가 있고 `id`·`status`가 규약대로다", (file) => {
     const fields = frontmatter(read(file));
     const number = /(?<n>\d{4})\.md$/u.exec(file)?.groups?.["n"] ?? "";
 

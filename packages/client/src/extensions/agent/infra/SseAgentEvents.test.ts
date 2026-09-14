@@ -22,13 +22,14 @@ const serverSends = (chunks: readonly string[]) => {
   return urls;
 };
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
-afterEach(() => {
-  globalThis.fetch = originalFetch;
-});
 
 const head = { sessionId: 's', runId: null, at: 0 };
 
 describe('SseAgentEvents', () => {
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
   it('since를 쿼리로 싣고, 계약에 맞는 이벤트만 넘기며, 모르는 type은 버린다', async () => {
     const urls = serverSends([frame({ ...head, seq: 3, type: 'session.renamed', title: 'a' }), frame({ ...head, seq: 4, type: 'future' }), ': ping\n\n']);
     const got: number[] = [];

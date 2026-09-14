@@ -9,23 +9,23 @@ let outside: string;
 let root: string;
 const req = (query: string, extra: Partial<Parameters<typeof searchFiles>[1]> = {}) => ({ query, path: "", regex: false, caseSensitive: false, maxResults: 200, ...extra });
 
-beforeAll(async () => {
-  outside = realpathSync(await mkdtemp(path.join(os.tmpdir(), "arka-search-")));
-  root = path.join(outside, "root");
-  await mkdir(path.join(root, "src", "node_modules"), { recursive: true });
-  await writeFile(path.join(root, "README.md"), "# ARKA\nAgent Development Environment\nagent again\n");
-  await writeFile(path.join(root, "src", "main.ts"), "export const agent = 1;\nconst x = 'Agent';\n");
-  await writeFile(path.join(root, "src", "node_modules", "dep.js"), "agent agent agent\n");
-  await writeFile(path.join(root, "bin.dat"), Buffer.from([0, 1, 2, 97, 103, 101, 110, 116]));
-  await writeFile(path.join(outside, "secret.txt"), "agent secret\n");
-  await symlink(path.join(outside, "secret.txt"), path.join(root, "link.txt"));
-});
-
-afterAll(async () => {
-  await rm(outside, { recursive: true, force: true });
-});
-
 describe("searchFiles", () => {
+  beforeAll(async () => {
+    outside = realpathSync(await mkdtemp(path.join(os.tmpdir(), "arka-search-")));
+    root = path.join(outside, "root");
+    await mkdir(path.join(root, "src", "node_modules"), { recursive: true });
+    await writeFile(path.join(root, "README.md"), "# ARKA\nAgent Development Environment\nagent again\n");
+    await writeFile(path.join(root, "src", "main.ts"), "export const agent = 1;\nconst x = 'Agent';\n");
+    await writeFile(path.join(root, "src", "node_modules", "dep.js"), "agent agent agent\n");
+    await writeFile(path.join(root, "bin.dat"), Buffer.from([0, 1, 2, 97, 103, 101, 110, 116]));
+    await writeFile(path.join(outside, "secret.txt"), "agent secret\n");
+    await symlink(path.join(outside, "secret.txt"), path.join(root, "link.txt"));
+  });
+
+  afterAll(async () => {
+    await rm(outside, { recursive: true, force: true });
+  });
+
   it("대소문자 무시로 줄·열·미리보기를 준다", async () => {
     const result = await searchFiles(root, req("agent"));
     expect(result.matches).toEqual([

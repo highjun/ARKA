@@ -2,7 +2,7 @@ import { realpathSync } from 'node:fs';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { afterAll, afterEach, beforeAll, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { resolveWatchPaths, watchPaths, type WorkspaceWatchHandle } from './watchOperations';
 
 /**
@@ -28,89 +28,92 @@ const waitFor = async (assertion: () => void, { timeoutMs = 2_000, intervalMs = 
 
 let root: string;
 
-beforeAll(async () => {
-  root = realpathSync(await mkdtemp(path.join(os.tmpdir(), 'wb-watch-')));
-  await mkdir(path.join(root, 'projects'), { recursive: true });
-  await writeFile(path.join(root, 'a.md'), '원본');
-});
+describe('watchOperations', () => {
 
-afterAll(async () => {
-  await rm(root, { recursive: true, force: true });
-});
+  beforeAll(async () => {
+    root = realpathSync(await mkdtemp(path.join(os.tmpdir(), 'wb-watch-')));
+    await mkdir(path.join(root, 'projects'), { recursive: true });
+    await writeFile(path.join(root, 'a.md'), '원본');
+  });
 
-const handles: WorkspaceWatchHandle[] = [];
-afterEach(() => {
-  for (const handle of handles.splice(0)) handle.close();
-});
+  afterAll(async () => {
+    await rm(root, { recursive: true, force: true });
+  });
 
-const watch = (absolutePaths: readonly string[]): { calls: () => (readonly string[])[] } => {
-  const calls: (readonly string[])[] = [];
-  handles.push(watchPaths(root, absolutePaths, (changed) => calls.push(changed)));
-  return { calls: () => calls };
-};
+  const handles: WorkspaceWatchHandle[] = [];
+  afterEach(() => {
+    for (const handle of handles.splice(0)) handle.close();
+  });
 
-it('파일이 바뀌면 루트 기준 상대경로로 알려준다', async () => {
-  const target = path.join(root, 'a.md');
-  const { calls } = watch([target]);
+  const watch = (absolutePaths: readonly string[]): { calls: () => (readonly string[])[] } => {
+    const calls: (readonly string[])[] = [];
+    handles.push(watchPaths(root, absolutePaths, (changed) => calls.push(changed)));
+    return { calls: () => calls };
+  };
 
-  await writeFile(target, '고친 내용');
+  it('파일이 바뀌면 루트 기준 상대경로로 알려준다', async () => {
+    const target = path.join(root, 'a.md');
+    const { calls } = watch([target]);
 
-  await waitFor(() => expect(calls().flat()).toContain('a.md'));
-});
+    await writeFile(target, '고친 내용');
 
-it('여러 이벤트가 몰리면 한 프레임으로 묶는다', async () => {
-  const target = path.join(root, 'coalesce.md');
-  await writeFile(target, '0');
-  const { calls } = watch([target]);
+    await waitFor(() => expect(calls().flat()).toContain('a.md'));
+  });
 
-  for (let index = 0; index < 5; index += 1) await writeFile(target, String(index));
+  it('여러 이벤트가 몰리면 한 프레임으로 묶는다', async () => {
+    const target = path.join(root, 'coalesce.md');
+    await writeFile(target, '0');
+    const { calls } = watch([target]);
 
-  await waitFor(() => expect(calls().length).toBeGreaterThan(0));
-  // 5번 썼지만 코얼레싱 창(200ms) 안에서 벌어졌으므로 프레임 수는 그보다 훨씬 적어야 한다.
-  expect(calls().length).toBeLessThan(5);
-});
+    for (let index = 0; index < 5; index += 1) await writeFile(target, String(index));
 
-it('감시 대상 하나가 없어도 나머지는 계속 감시한다', async () => {
-  const gone = path.join(root, 'never-existed.md');
-  const target = path.join(root, 'survives.md');
-  await writeFile(target, '0');
-  const { calls } = watch([gone, target]);
+    await waitFor(() => expect(calls().length).toBeGreaterThan(0));
+    // 5번 썼지만 코얼레싱 창(200ms) 안에서 벌어졌으므로 프레임 수는 그보다 훨씬 적어야 한다.
+    expect(calls().length).toBeLessThan(5);
+  });
 
-  await writeFile(target, '1');
+  it('감시 대상 하나가 없어도 나머지는 계속 감시한다', async () => {
+    const gone = path.join(root, 'never-existed.md');
+    const target = path.join(root, 'survives.md');
+    await writeFile(target, '0');
+    const { calls } = watch([gone, target]);
 
-  await waitFor(() => expect(calls().flat()).toContain('survives.md'));
-});
+    await writeFile(target, '1');
 
-it('close 하면 더는 알리지 않는다', async () => {
-  const target = path.join(root, 'stop.md');
-  await writeFile(target, '0');
-  const calls: (readonly string[])[] = [];
-  const handle = watchPaths(root, [target], (changed) => calls.push(changed));
+    await waitFor(() => expect(calls().flat()).toContain('survives.md'));
+  });
 
-  handle.close();
-  await writeFile(target, '1');
-  await new Promise((resolve) => setTimeout(resolve, 300));
+  it('close 하면 더는 알리지 않는다', async () => {
+    const target = path.join(root, 'stop.md');
+    await writeFile(target, '0');
+    const calls: (readonly string[])[] = [];
+    const handle = watchPaths(root, [target], (changed) => calls.push(changed));
 
-  expect(calls).toEqual([]);
-});
+    handle.close();
+    await writeFile(target, '1');
+    await new Promise((resolve) => setTimeout(resolve, 300));
 
-it('디렉터리를 감시하면 그 안의 새 파일도 알린다', async () => {
-  const dir = path.join(root, 'projects');
-  const { calls } = watch([dir]);
+    expect(calls).toEqual([]);
+  });
 
-  await writeFile(path.join(dir, 'new.txt'), 'x');
+  it('디렉터리를 감시하면 그 안의 새 파일도 알린다', async () => {
+    const dir = path.join(root, 'projects');
+    const { calls } = watch([dir]);
 
-  await waitFor(() => expect(calls().flat()).toContain('projects'));
-});
+    await writeFile(path.join(dir, 'new.txt'), 'x');
 
-it('resolveWatchPaths — 여러 경로를 전부 해석한다', async () => {
-  const resolved = await resolveWatchPaths(root, ['', 'a.md', 'projects']);
+    await waitFor(() => expect(calls().flat()).toContain('projects'));
+  });
 
-  expect(resolved).toEqual([root, path.join(root, 'a.md'), path.join(root, 'projects')]);
-});
+  it('resolveWatchPaths — 여러 경로를 전부 해석한다', async () => {
+    const resolved = await resolveWatchPaths(root, ['', 'a.md', 'projects']);
 
-it('resolveWatchPaths — 하나라도 루트 밖이면 전부 거부한다', async () => {
-  const resolved = await resolveWatchPaths(root, ['a.md', '../outside']);
+    expect(resolved).toEqual([root, path.join(root, 'a.md'), path.join(root, 'projects')]);
+  });
 
-  expect(resolved).toBeNull();
+  it('resolveWatchPaths — 하나라도 루트 밖이면 전부 거부한다', async () => {
+    const resolved = await resolveWatchPaths(root, ['a.md', '../outside']);
+
+    expect(resolved).toBeNull();
+  });
 });

@@ -4,13 +4,14 @@ import { emptyChat, foldEvent } from './transcript';
 
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 let seq = 0;
-beforeEach(() => {
-  seq = 0;
-});
 const ev = (partial: DistributiveOmit<AgentEvent, 'seq' | 'sessionId' | 'at'>): AgentEvent => ({ ...partial, seq: ++seq, sessionId: 's', at: seq } as AgentEvent);
 const fold = (...events: AgentEvent[]) => events.reduce(foldEvent, emptyChat('s'));
 
 describe('foldEvent', () => {
+  beforeEach(() => {
+    seq = 0;
+  });
+
   it('run.started는 사용자 메시지가 되고 Run이 돈다', () => {
     const chat = fold(ev({ runId: 'r', type: 'run.started', mode: 'action', input: '안녕' }));
     expect(chat.items).toEqual([{ kind: 'user', id: 'run:r', text: '안녕', at: 1 }]);

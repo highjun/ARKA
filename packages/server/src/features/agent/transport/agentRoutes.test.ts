@@ -10,16 +10,6 @@ import type { RouteProbe } from "../../../responseContract";
 let probe: RouteProbe;
 let dispose: () => Promise<void>;
 
-beforeEach(async () => {
-  const started = await probeApp();
-  probe = started;
-  dispose = started.dispose;
-});
-
-afterEach(async () => {
-  await dispose();
-});
-
 const createSession = async (): Promise<string> => {
   const body = await expectResponse(
     probe,
@@ -31,6 +21,16 @@ const createSession = async (): Promise<string> => {
 };
 
 describe("에이전트 라우트의 응답 계약", () => {
+  beforeEach(async () => {
+    const started = await probeApp();
+    probe = started;
+    dispose = started.dispose;
+  });
+
+  afterEach(async () => {
+    await dispose();
+  });
+
   it("빈 목록도 SessionListResponse다", async () => {
     const body = await expectResponse(probe, { url: "/api/agent/sessions" }, SessionListResponse);
     expect(body.sessions).toEqual([]);

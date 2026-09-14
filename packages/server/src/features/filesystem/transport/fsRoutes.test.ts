@@ -13,17 +13,17 @@ import type { RouteProbe } from "../../../responseContract";
 let probe: RouteProbe;
 let dispose: () => Promise<void>;
 
-beforeEach(async () => {
-  const started = await probeApp();
-  probe = started;
-  dispose = started.dispose;
-});
-
-afterEach(async () => {
-  await dispose();
-});
-
 describe("파일 라우트의 응답 계약", () => {
+  beforeEach(async () => {
+    const started = await probeApp();
+    probe = started;
+    dispose = started.dispose;
+  });
+
+  afterEach(async () => {
+    await dispose();
+  });
+
   it("빈 루트 목록이 DirectoryListing이다", async () => {
     const body = await expectResponse(probe, { url: "/api/files?path=" }, DirectoryListing);
     expect(body).toEqual({ path: "", parent: null, entries: [] });

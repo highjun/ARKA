@@ -11,11 +11,12 @@ const serverReplies = (body: unknown, status = 200) => {
   }) as unknown as typeof fetch;
   return calls;
 };
-afterEach(() => {
-  globalThis.fetch = originalFetch;
-});
 
 describe('HttpGitService', () => {
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
   it('상태를 계약대로 읽는다', async () => {
     const body = { repository: true, branch: 'main', files: [{ path: 'a', staged: null, unstaged: 'modified' }] };
     serverReplies(body);

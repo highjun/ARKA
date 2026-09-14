@@ -21,7 +21,7 @@ describe("문서의 상대 링크가 실재한다", () => {
     expect(MARKDOWN.flatMap((file) => linksOf(read(file))).length).toBeGreaterThan(20);
   });
 
-  it.each(MARKDOWN)("%s", (file) => {
+  it.each(MARKDOWN)("%s — 상대 링크가 가리키는 파일이 있다", (file) => {
     const dead = linksOf(read(file)).filter((target) => {
       const resolved = path.resolve(path.dirname(path.join(REPO_ROOT, file)), target.split("#")[0] ?? "");
       return !existsSync(resolved);
@@ -42,7 +42,7 @@ describe("코드가 인용한 ADR이 실재한다", () => {
     expect(SOURCE.flatMap((file) => cited(read(file))).length).toBeGreaterThan(10);
   });
 
-  it.each(SOURCE.filter((file) => cited(read(file)).length > 0))("%s", (file) => {
+  it.each(SOURCE.filter((file) => cited(read(file)).length > 0))("%s — 주석이 인용한 ADR 번호가 있다", (file) => {
     const missing = cited(read(file)).filter((number) => !ADR_BY_NUMBER.has(number));
 
     expect(missing).toEqual([]);
@@ -64,7 +64,7 @@ describe("코드가 인용한 ADR이 실재한다", () => {
 });
 
 describe("인용한 태스크가 실재한다", () => {
-  it.each([...MARKDOWN, ...SOURCE])("%s", (file) => {
+  it.each([...MARKDOWN, ...SOURCE])("%s — 인용한 TASK 번호의 파일이 있다", (file) => {
     const missing = [...read(file).matchAll(/TASK-(?<number>\d+)/gu)]
       .map((match) => match.groups?.["number"] ?? "")
       .filter((number) => !TRACKED_SET.has(`docs/tasks/${number.padStart(4, "0")}.md`));

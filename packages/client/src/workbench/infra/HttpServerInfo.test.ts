@@ -7,11 +7,12 @@ const originalFetch = globalThis.fetch;
 const serverReplies = (body: unknown, status = 200): void => {
   globalThis.fetch = (() => Promise.resolve({ ok: status < 400, status, json: () => Promise.resolve(body) })) as unknown as typeof fetch;
 };
-afterEach(() => {
-  globalThis.fetch = originalFetch;
-});
 
 describe('HttpServerInfo', () => {
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
   it('계약대로 온 답을 그대로 준다', async () => {
     serverReplies({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1, protocolHeader: PROTOCOL_HEADER, workspaceName: 'ws' });
     expect(await createServerInfoPort().load()).toEqual({ builtAt: '2026-09-09T00:00:00.000Z', protocolVersion: 1, protocolHeader: PROTOCOL_HEADER, workspaceName: 'ws' });

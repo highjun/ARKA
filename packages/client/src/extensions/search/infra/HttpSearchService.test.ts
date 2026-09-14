@@ -10,11 +10,12 @@ const serverReplies = (body: unknown, status = 200) => {
   }) as unknown as typeof fetch;
   return urls;
 };
-afterEach(() => {
-  globalThis.fetch = originalFetch;
-});
 
 describe('HttpSearchService', () => {
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
   it('조건을 쿼리로 싣고 계약대로 읽는다', async () => {
     const body = { matches: [{ path: 'a', line: 1, column: 1, preview: 'x' }], truncated: false, filesScanned: 1 };
     const urls = serverReplies(body);

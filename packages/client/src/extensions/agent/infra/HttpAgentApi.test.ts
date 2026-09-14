@@ -11,13 +11,14 @@ const serverReplies = (body: unknown, status = 200) => {
   }) as unknown as typeof fetch;
   return calls;
 };
-afterEach(() => {
-  globalThis.fetch = originalFetch;
-});
 
 const session = { id: 's1', title: 't', createdAt: 1, updatedAt: 1, archived: false, lastRunStatus: null };
 
 describe('HttpAgentApi', () => {
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
   it('목록을 계약대로 읽는다', async () => {
     const calls = serverReplies({ sessions: [session] });
     expect(await createAgentApiPort().listSessions()).toEqual([session]);
