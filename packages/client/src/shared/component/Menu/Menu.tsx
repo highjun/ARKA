@@ -2,6 +2,7 @@ import { createContext, useContext } from 'react';
 import type { HTMLAttributes, Ref } from 'react';
 import { clsx } from 'clsx';
 import { usePortalContainer } from '#utils/portal';
+import { Icon } from '#component/Icon';
 import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import styles from './Menu.module.css';
 import * as Context from '@radix-ui/react-context-menu';
@@ -193,9 +194,13 @@ export const MenuRadioItem = ({ className, children, ...props }: MenuRadioItemPr
     <>
       <span className={styles['itemIndicator']}>
         {kind === 'context' ? (
-          <Context.ItemIndicator>✓</Context.ItemIndicator>
+          <Context.ItemIndicator>
+            <Icon iconId="check" size="sm" />
+          </Context.ItemIndicator>
         ) : (
-          <Dropdown.ItemIndicator>✓</Dropdown.ItemIndicator>
+          <Dropdown.ItemIndicator>
+            <Icon iconId="check" size="sm" />
+          </Dropdown.ItemIndicator>
         )}
       </span>
       {children}
