@@ -28,7 +28,8 @@
 ## 강제:
 - **린트** `primer-react/*`·`jsx-a11y/*`·`@eslint-react/no-forward-ref`·`vitest/*`(테스트 규율)·`check-file/*`(파일·폴더 이름)·`no-restricted-syntax`(`view/`의 훅)·`import-x/no-restricted-paths`(패키지·슬라이스)·`no-restricted-imports`(Primer `IconButton`)·`@typescript-eslint/no-restricted-imports`(`model/`의 상태 라이브러리).
 - **stylelint** `@primer/stylelint-config` — 색·테두리·그림자·글꼴을 토큰으로만 쓰게 한다.
-- **markdownlint** `ops/markdownlint.jsonc` — 문서의 형태. ADR 형식과 맞서는 규칙(줄 길이·절 앞 빈 줄·제목 끝 콜론)은 끄고 그 이유를 그 파일에 적는다.
+- **markdownlint** `ops/.markdownlint-cli2.jsonc` — 문서의 형태. ADR 형식과 맞서는 규칙(줄 길이·절 앞 빈 줄·제목 끝 콜론)은 끄고 그 이유를 그 파일에 적는다.
+- **prettier** `ops/prettier.config.ts` — 코드의 모양. `printWidth`만 기본값과 다르다(120). 마크다운은 대상이 아니다 — 표를 글자 수로 정렬해 한글에서 어긋난다.
 - **테스트** `packages/client/test/structure.test.ts` — 컴포넌트마다 스토리·테스트·배럴이 있는지, 그룹 배럴이 없는지.
 - **파이프라인** `ops/pipeline/check.ts` — typecheck → lint → test → build → knip 순서로 돌리고 앞에서 걸리면 뒤를 안 돌린다. CI의 `check` 잡이 이 파일을 부른다.
 - **knip** `ops/knip.ts` — 안 쓰는 파일·export·의존성, phantom, 안 쓰는 catalog 항목. 패키지 하나만 봐서는 알 수 없어 파이프라인에 있다. `index.ts`에 "바깥이 부르는 것만"이라는 규약은 이것 없이는 검사할 수 없다.

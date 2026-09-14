@@ -20,7 +20,7 @@
  * 래퍼)와 달리, 파일 트리는 패널 안에 꽉 차는 워크스페이스 섹션이다(VSCode·JetBrains 등도
  * 트리 경계에 라운딩을 안 준다) — 카드가 아니라 인셋(inset) 패널이라는 뜻으로 각지게 둔다.
  */
-.root[data-chrome='bordered'] {
+.root[data-chrome="bordered"] {
   border-style: solid;
   border-width: var(--borderWidth-thin);
   border-color: var(--borderColor-muted);
@@ -78,7 +78,7 @@
  * `pointer-events: auto` + 위아래 행과의 겹침 처리를 다시 설계한다.
  */
 .item::after {
-  content: '';
+  content: "";
   position: absolute;
   inset-inline: 0;
   top: 50%;
@@ -111,7 +111,7 @@
   background-color: var(--control-transparent-bgColor-hover);
 }
 
-.item[aria-disabled='true'] > .row {
+.item[aria-disabled="true"] > .row {
   cursor: not-allowed;
   color: var(--fgColor-muted);
 }
@@ -128,7 +128,7 @@
  * 링과 같은 `--fgColor-accent`로 톤을 맞춘다). `[data-active]` 규칙보다 뒤에 둬 같은 특이도에서
  * 드롭 피드백이 선택색을 덮도록 한다.
  */
-.item[data-drop='inside'] > .row {
+.item[data-drop="inside"] > .row {
   background-color: var(--bgColor-accent-muted);
   outline: 2px solid var(--fgColor-accent);
   outline-offset: -2px;

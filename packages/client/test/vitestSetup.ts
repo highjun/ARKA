@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom/vitest';
+import "@testing-library/jest-dom/vitest";
 
 /**
  * jsdom은 `ResizeObserver`와 `Element.prototype.scrollIntoView`를 구현하지 않는다(cmdk·Radix Select가
@@ -27,18 +27,17 @@ if (!("adoptedStyleSheets" in Document.prototype)) {
 }
 
 /** jsdom은 `window.matchMedia`도 구현하지 않는다(Primer의 `useMedia`가 마운트 시 호출) — 항상 "불일치"로 답하는 스텁. */
-window.matchMedia ??=
-  ((query: string) =>
-    ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: () => {},
-      removeListener: () => {},
-      addEventListener: () => {},
-      removeEventListener: () => {},
-      dispatchEvent: () => false,
-    }) as unknown as MediaQueryList) as typeof window.matchMedia;
+window.matchMedia ??= ((query: string) =>
+  ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  }) as unknown as MediaQueryList) as typeof window.matchMedia;
 
 /**
  * jsdom은 `PointerEvent`를 아예 안 만든다(`typeof PointerEvent === 'undefined'`) — Radix의
@@ -47,7 +46,7 @@ window.matchMedia ??=
  * 없으면 `button`/`pointerId` 같은 필드가 빠진 이벤트를 만들어 저 체크를 통과 못 시킨다 —
  * `MouseEvent`를 상속한 최소 스텁으로 그 필드만 채운다.
  */
-if (typeof globalThis.PointerEvent === 'undefined') {
+if (typeof globalThis.PointerEvent === "undefined") {
   class PointerEventPolyfill extends MouseEvent {
     readonly pointerId: number;
     readonly pointerType: string;
@@ -56,7 +55,7 @@ if (typeof globalThis.PointerEvent === 'undefined') {
     constructor(type: string, params: PointerEventInit = {}) {
       super(type, params);
       this.pointerId = params.pointerId ?? 0;
-      this.pointerType = params.pointerType ?? '';
+      this.pointerType = params.pointerType ?? "";
       this.isPrimary = params.isPrimary ?? false;
     }
   }
@@ -68,6 +67,7 @@ if (typeof globalThis.PointerEvent === 'undefined') {
  * jsdom의 `Range`에는 `getClientRects`가 없다 — CodeMirror가 `scrollIntoView` 뒤 측정(rAF)에서 부르며
  * 테스트가 끝난 뒤 "잡히지 않은 예외"로 남는다. 레이아웃이 없는 환경이라 빈 목록으로 답한다.
  */
-if (typeof Range !== 'undefined' && typeof Range.prototype.getClientRects !== 'function') {
-  Range.prototype.getClientRects = () => ({ length: 0, item: () => null, [Symbol.iterator]: function* () {} }) as unknown as DOMRectList;
+if (typeof Range !== "undefined" && typeof Range.prototype.getClientRects !== "function") {
+  Range.prototype.getClientRects = () =>
+    ({ length: 0, item: () => null, [Symbol.iterator]: function* () {} }) as unknown as DOMRectList;
 }

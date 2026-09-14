@@ -1,20 +1,20 @@
-import { createToken, type Disposable } from '#core/di';
-import type { GitFileStatus } from '#contracts';
+import { createToken, type Disposable } from "#core/di";
+import type { GitFileStatus } from "#contracts";
 
 /** `idle`은 아직 한 번도 안 읽은 상태다 — 저장소가 아니라는 뜻이 아니다. */
-export type GitLoadStatus = 'idle' | 'loading' | 'loaded' | 'error';
+export type GitLoadStatus = "idle" | "loading" | "loaded" | "error";
 
 /** 다시 읽는 동안에도 `text`는 직전 것을 그대로 든다 — 화면이 깜빡이지 않게. */
 export type DiffEntry = {
-  readonly status: 'loading' | 'loaded' | 'error';
+  readonly status: "loading" | "loaded" | "error";
   readonly text: string;
   readonly failure: string | null;
 };
 
 /** diff 캐시의 키 — `staged:path` 또는 `wt:path`. 탭 id로도 쓴다. */
-export const diffKeyOf = (path: string, staged: boolean): string => `${staged ? 'staged' : 'wt'}:${path}`;
+export const diffKeyOf = (path: string, staged: boolean): string => `${staged ? "staged" : "wt"}:${path}`;
 
-export const GitModelToken = createToken<IGitModel>('gitModel');
+export const GitModelToken = createToken<IGitModel>("gitModel");
 /**
  * 워크스페이스의 Git 상태를 소유한다. VSCode의 `Repository` 모델에 해당한다.
  *

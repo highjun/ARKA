@@ -1,21 +1,24 @@
-import { clsx } from 'clsx';
-import type { FormEvent, HTMLAttributes, ReactNode, Ref } from 'react';
-import { useControllableState } from '@radix-ui/react-use-controllable-state';
-import styles from './StepBlock.module.css';
-import { Details } from '@primer/react';
-import { Icon } from '#component/Icon';
-import { StatusIndicator } from '../StatusIndicator';
-import { Markdown } from '#component/Markdown';
-import type { StatusIndicatorStatus } from '../StatusIndicator';
+import { clsx } from "clsx";
+import type { FormEvent, HTMLAttributes, ReactNode, Ref } from "react";
+import { useControllableState } from "@radix-ui/react-use-controllable-state";
+import styles from "./StepBlock.module.css";
+import { Details } from "@primer/react";
+import { Icon } from "#component/Icon";
+import { StatusIndicator } from "../StatusIndicator";
+import { Markdown } from "#component/Markdown";
+import type { StatusIndicatorStatus } from "../StatusIndicator";
 
 // `StepBlockBaseProps`처럼 공유 베이스 인터페이스로 뽑지 않는다 — `ui/props-extends-html-attributes`
 /**
  * 각 Props 인터페이스가 `HTMLAttributes` 계열을 **직접** 상속한다 — 간접 상속은 검사가 못 따라간다.
  * `Tab.tsx`의 `TabGroupProps`도 같은 선례다. 필드 넷이 두 인터페이스에 중복되지만 그만큼 안전하다.
  */
-export interface StepBlockThinkingProps extends Omit<HTMLAttributes<HTMLDetailsElement>, 'title' | 'children' | 'onToggle'> {
+export interface StepBlockThinkingProps extends Omit<
+  HTMLAttributes<HTMLDetailsElement>,
+  "title" | "children" | "onToggle"
+> {
   /** `'thinking'`이면 사고 과정 블록(점선 테두리) — 본문이 비어도 펼쳐진다. */
-  readonly kind: 'thinking';
+  readonly kind: "thinking";
   /** 실행 상태. 헤더의 `StatusIndicator`에 반영된다. 기본값 `'done'`. */
   readonly status?: StatusIndicatorStatus;
   /** 펼침 여부. 넘기면 controlled, 안 넘기면 `defaultExpanded` 로 컴포넌트가 자체 관리한다. */
@@ -36,9 +39,12 @@ export interface StepBlockThinkingProps extends Omit<HTMLAttributes<HTMLDetailsE
 }
 
 /** `<details>`라 펼침 상태를 브라우저가 든다 — `onToggle`을 가로채 그 변화를 알린다. */
-export interface StepBlockToolProps extends Omit<HTMLAttributes<HTMLDetailsElement>, 'title' | 'children' | 'onToggle'> {
+export interface StepBlockToolProps extends Omit<
+  HTMLAttributes<HTMLDetailsElement>,
+  "title" | "children" | "onToggle"
+> {
   /** `'tool'`이면 도구 실행 블록(실선 테두리) — 입력/출력이 둘 다 없으면 펼쳐지지 않는다. */
-  readonly kind: 'tool';
+  readonly kind: "tool";
   /** 실행 상태. 헤더의 `StatusIndicator`에 반영된다. 기본값 `'done'`. */
   readonly status?: StatusIndicatorStatus;
   /** 펼침 여부. 넘기면 controlled, 안 넘기면 `defaultExpanded` 로 컴포넌트가 자체 관리한다. */
@@ -82,14 +88,19 @@ export type StepBlockProps = (StepBlockThinkingProps | StepBlockToolProps) & {
  * 컴포넌트를 합치면서 그 우회 래퍼를 없앤다.
  */
 export const StepBlock = ({ ref, ...props }: StepBlockProps) => {
-  const { status = 'done', expanded, defaultExpanded = false, onExpandedChange, className, ...rest } = props;
-  const [isExpanded, setExpanded] = useControllableState({ prop: expanded, defaultProp: defaultExpanded, onChange: onExpandedChange, caller: 'StepBlock' });
+  const { status = "done", expanded, defaultExpanded = false, onExpandedChange, className, ...rest } = props;
+  const [isExpanded, setExpanded] = useControllableState({
+    prop: expanded,
+    defaultProp: defaultExpanded,
+    onChange: onExpandedChange,
+    caller: "StepBlock",
+  });
   const handleToggle = (event: FormEvent<HTMLDetailsElement>) => setExpanded(event.currentTarget.open);
 
-  if (rest.kind === 'thinking') {
+  if (rest.kind === "thinking") {
     // `kind`는 분기용 판별 필드일 뿐 DOM에 흘려보내면 안 되는 값이라(항상 값이 있어
     // `undefined` spread로 자연 소거되는 `Tab.tsx`의 `tree?: never`와 달리) 의도적으로 버린다.
-    const { kind: _kind, title = '생각 중', summary, emptyLabel = '생각 내용이 없습니다.', ...detailsProps } = rest;
+    const { kind: _kind, title = "생각 중", summary, emptyLabel = "생각 내용이 없습니다.", ...detailsProps } = rest;
 
     return (
       <Details
@@ -99,18 +110,18 @@ export const StepBlock = ({ ref, ...props }: StepBlockProps) => {
         onToggle={handleToggle}
         data-kind="thinking"
         data-component="StepBlock"
-        className={clsx(className, styles['root'])}
+        className={clsx(className, styles["root"])}
       >
-        <Details.Summary className={styles['trigger']}>
-          <span data-chevron className={styles['chevron']}>
+        <Details.Summary className={styles["trigger"]}>
+          <span data-chevron className={styles["chevron"]}>
             <Icon iconId="chevronRight" size="sm" />
           </span>
-          <span className={styles['header']}>
-            <span className={styles['title']}>{title}</span>
+          <span className={styles["header"]}>
+            <span className={styles["title"]}>{title}</span>
             <StatusIndicator status={status} />
           </span>
         </Details.Summary>
-        <div className={styles['content']}>{summary === undefined ? emptyLabel : <Markdown source={summary} />}</div>
+        <div className={styles["content"]}>{summary === undefined ? emptyLabel : <Markdown source={summary} />}</div>
       </Details>
     );
   }
@@ -127,24 +138,23 @@ export const StepBlock = ({ ref, ...props }: StepBlockProps) => {
       onToggle={handleToggle}
       data-kind="tool"
       data-component="StepBlock"
-      className={clsx(className, styles['root'])}
+      className={clsx(className, styles["root"])}
     >
-      <Details.Summary className={styles['trigger']}>
-        <span data-chevron className={styles['chevron']}>
+      <Details.Summary className={styles["trigger"]}>
+        <span data-chevron className={styles["chevron"]}>
           <Icon iconId="chevronRight" size="sm" />
         </span>
-        <span className={styles['header']}>
-          <span className={clsx(undefined, styles['title'], styles['toolId'])}>{toolId}</span>
+        <span className={styles["header"]}>
+          <span className={clsx(undefined, styles["title"], styles["toolId"])}>{toolId}</span>
           <StatusIndicator status={status} />
         </span>
       </Details.Summary>
       {hasBody ? (
-        <div className={styles['content']}>
-          {toolInput !== undefined ? <pre className={styles['body']}>{formatBody(toolInput)}</pre> : null}
-          {toolOutput !== undefined ? <pre className={styles['output']}>{formatBody(toolOutput)}</pre> : null}
+        <div className={styles["content"]}>
+          {toolInput !== undefined ? <pre className={styles["body"]}>{formatBody(toolInput)}</pre> : null}
+          {toolOutput !== undefined ? <pre className={styles["output"]}>{formatBody(toolOutput)}</pre> : null}
         </div>
       ) : null}
     </Details>
   );
 };
-

@@ -7,7 +7,10 @@ import { ASK_USER_TOOL, isApproval, WRITING_TOOLS } from "./workspaceTools";
 /** 실행기가 클라이언트에게 바라는 것 — 테스트가 가짜 스트림을 꽂을 수 있게 좁힌다. */
 export type MessagesClient = {
   messages: {
-    stream(params: Anthropic.MessageStreamParams, options?: { signal?: AbortSignal }): AsyncIterable<Anthropic.MessageStreamEvent> & {
+    stream(
+      params: Anthropic.MessageStreamParams,
+      options?: { signal?: AbortSignal },
+    ): AsyncIterable<Anthropic.MessageStreamEvent> & {
       finalMessage(): Promise<Anthropic.Message>;
     };
   };
@@ -37,7 +40,17 @@ export class AnthropicRunner implements IAgentRunner {
   readonly #newId: () => string;
 
   /** `client`를 밖에서 받는 이유는 테스트가 실제 API를 부르지 않기 위해서다. */
-  constructor({ client, model, tools, newId = () => crypto.randomUUID() }: { client: MessagesClient; model: string; tools: IAgentTools; newId?: () => string }) {
+  constructor({
+    client,
+    model,
+    tools,
+    newId = () => crypto.randomUUID(),
+  }: {
+    client: MessagesClient;
+    model: string;
+    tools: IAgentTools;
+    newId?: () => string;
+  }) {
     this.#client = client;
     this.#model = model;
     this.#tools = tools;
@@ -46,13 +59,19 @@ export class AnthropicRunner implements IAgentRunner {
 
   /** 모델이 툴을 부르면 돌려주고 그 결과를 다시 넣는다 — 툴 호출이 없을 때까지 돈다. */
   async run(ctx: RunContext): Promise<void> {
-    const messages: Anthropic.MessageParam[] = [...historyToMessages(ctx.history), { role: "user", content: ctx.input }];
+    const messages: Anthropic.MessageParam[] = [
+      ...historyToMessages(ctx.history),
+      { role: "user", content: ctx.input },
+    ];
     const tools: Anthropic.Tool[] = this.#tools.definitions.map((tool) => ({
       name: tool.name,
       description: tool.description,
       input_schema: tool.inputSchema as Anthropic.Tool.InputSchema,
     }));
-    const system = ctx.mode === "plan" ? `${SYSTEM_PROMPT}\n지금은 계획 모드다 — 파일을 바꾸지 말고 무엇을 어떻게 할지 단계로 적어라.` : SYSTEM_PROMPT;
+    const system =
+      ctx.mode === "plan"
+        ? `${SYSTEM_PROMPT}\n지금은 계획 모드다 — 파일을 바꾸지 말고 무엇을 어떻게 할지 단계로 적어라.`
+        : SYSTEM_PROMPT;
 
     for (let turn = 0; turn < MAX_TURNS; turn += 1) {
       if (ctx.signal.aborted) throw new Error("run cancelled");
@@ -77,8 +96,10 @@ export class AnthropicRunner implements IAgentRunner {
           if (event.content_block.type === "text") ctx.emit({ type: "assistant.delta", messageId: id, text: "" });
         } else if (event.type === "content_block_delta") {
           const id = blockIds.get(event.index) ?? this.#newId();
-          if (event.delta.type === "thinking_delta") ctx.emit({ type: "thinking.delta", blockId: id, text: event.delta.thinking });
-          if (event.delta.type === "text_delta") ctx.emit({ type: "assistant.delta", messageId: id, text: event.delta.text });
+          if (event.delta.type === "thinking_delta")
+            ctx.emit({ type: "thinking.delta", blockId: id, text: event.delta.thinking });
+          if (event.delta.type === "text_delta")
+            ctx.emit({ type: "assistant.delta", messageId: id, text: event.delta.text });
         }
       }
       const message = await stream.finalMessage();
@@ -90,7 +111,9 @@ export class AnthropicRunner implements IAgentRunner {
       }
 
       if (message.stop_reason === "refusal") {
-        throw new Error(`모델이 요청을 거절했다${message.stop_details?.explanation ? `: ${message.stop_details.explanation}` : ""}`);
+        throw new Error(
+          `모델이 요청을 거절했다${message.stop_details?.explanation ? `: ${message.stop_details.explanation}` : ""}`,
+        );
       }
       if (message.stop_reason === "pause_turn") {
         messages.push({ role: "assistant", content: message.content });
@@ -105,7 +128,12 @@ export class AnthropicRunner implements IAgentRunner {
         ctx.emit({ type: "tool.call", callId: use.id, toolId: use.name, input: use.input });
         const outcome = await this.#execute(ctx, use);
         ctx.emit({ type: "tool.result", callId: use.id, output: outcome.output, isError: outcome.isError });
-        results.push({ type: "tool_result", tool_use_id: use.id, content: JSON.stringify(outcome.output), is_error: outcome.isError });
+        results.push({
+          type: "tool_result",
+          tool_use_id: use.id,
+          content: JSON.stringify(outcome.output),
+          is_error: outcome.isError,
+        });
       }
       // 병렬 호출의 결과는 한 user 메시지에 전부 담는다 — 나눠 보내면 모델이 병렬 호출을 그만둔다.
       messages.push({ role: "user", content: results });
@@ -121,7 +149,9 @@ export class AnthropicRunner implements IAgentRunner {
     }
     if (ctx.confirmWrites && WRITING_TOOLS.has(use.name)) {
       const path = (use.input as { path?: unknown }).path;
-      const answer = await ctx.requestInput(`파일을 바꾸려 한다: ${use.name} ${typeof path === "string" ? path : ""} — 허용하려면 '예'라고 답하세요.`);
+      const answer = await ctx.requestInput(
+        `파일을 바꾸려 한다: ${use.name} ${typeof path === "string" ? path : ""} — 허용하려면 '예'라고 답하세요.`,
+      );
       if (!isApproval(answer)) return { output: { error: `사용자가 거부했다: ${answer}` }, isError: true };
     }
     return this.#tools.execute(use.name, use.input, ctx.signal);

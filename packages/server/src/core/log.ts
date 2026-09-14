@@ -63,7 +63,9 @@ export const maskSecrets = (fields: LogFields): LogFields => maskValue(fields, 0
 /** `write`와 `now`를 받는 이유는 테스트가 출력과 시각을 붙잡기 위해서다. */
 export const createLogger = (write: (line: string) => void, now: () => Date = () => new Date()): Logger => {
   const emit = (level: LogLevel, event: string, fields: LogFields | undefined): void => {
-    write(`${JSON.stringify({ time: now().toISOString(), level, event, ...(fields === undefined ? {} : maskSecrets(fields)) })}\n`);
+    write(
+      `${JSON.stringify({ time: now().toISOString(), level, event, ...(fields === undefined ? {} : maskSecrets(fields)) })}\n`,
+    );
   };
   return {
     info: (event, fields) => emit("info", event, fields),

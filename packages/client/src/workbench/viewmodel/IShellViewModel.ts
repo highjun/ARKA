@@ -1,5 +1,5 @@
-import { createToken } from '#core/di';
-import type { PaneId } from '../model/ITabsModel';
+import { createToken } from "#core/di";
+import type { PaneId } from "../model/ITabsModel";
 
 /**
  * `Tab`의 `TabSplitOrientation`·`SplitEdgeDropPosition`과 값이 같다 — ViewModel도 Model과
@@ -8,9 +8,9 @@ import type { PaneId } from '../model/ITabsModel';
  * 가져다 쓰면 이 파일이 `export type { TabSplitOrientation }`로 다시 내보내야 View 층까지
  * 닿는데, 재수출 전용 statement는 `model-type-only`(`type.ts`는 타입 선언만 담는다)에 걸린다.
  */
-type TabSplitOrientation = 'horizontal' | 'vertical';
+type TabSplitOrientation = "horizontal" | "vertical";
 /** 새 분할을 만드는 넷. 합치기(`center`)는 여기 없다. */
-export type SplitEdgeDropPosition = 'left' | 'right' | 'top' | 'bottom';
+export type SplitEdgeDropPosition = "left" | "right" | "top" | "bottom";
 
 /** 탭 우클릭 메뉴(`menuId: 'shell.tab.context'`) 커맨드가 받는 대상 — 어느 pane의 어느 탭인지. */
 export type TabContextTarget = { readonly leafId: PaneId; readonly tabId: string };
@@ -39,7 +39,7 @@ export type ShellTabRow = {
  * `isPreview`가 여기서 파생된다).
  */
 export interface ShellTabPaneLeaf {
-  readonly kind: 'leaf';
+  readonly kind: "leaf";
   readonly id: PaneId;
   readonly tabs: readonly ShellTabRow[];
   readonly activeTabId: string | null;
@@ -47,7 +47,7 @@ export interface ShellTabPaneLeaf {
 }
 /** `ShellTabPaneLeaf`와 짝을 이루는 분할 노드. */
 interface ShellTabPaneSplit {
-  readonly kind: 'split';
+  readonly kind: "split";
   readonly id: PaneId;
   readonly orientation: TabSplitOrientation;
   readonly children: readonly ShellTabPaneNode[];
@@ -72,7 +72,7 @@ export type ShellActivityRow = {
 /** 알림 한 줄 — `INotificationService`의 것에서 화면이 쓰는 필드만. */
 export type ShellNotificationRow = {
   readonly id: string;
-  readonly severity: 'info' | 'warning' | 'error';
+  readonly severity: "info" | "warning" | "error";
   readonly message: string;
 };
 
@@ -150,7 +150,12 @@ export interface IShellViewModel {
    * 마지막 위치 요청 — 어느 탭의 몇 줄·몇 열. View가 그 탭의 내용에 넘긴다. `seq`는 요청마다 오른다.
    * 없으면 `null`. 셸은 파일을 모르므로 "탭 id와 위치"만 든다.
    */
-  readonly reveal: { readonly tabId: string; readonly line: number; readonly column: number; readonly seq: number } | null;
+  readonly reveal: {
+    readonly tabId: string;
+    readonly line: number;
+    readonly column: number;
+    readonly seq: number;
+  } | null;
 
   /**
    * 파일이 아닌 탭을 **고정으로** 연다 — 대화, 설정 같은 것. 이미 열려 있으면 그 탭으로 간다.

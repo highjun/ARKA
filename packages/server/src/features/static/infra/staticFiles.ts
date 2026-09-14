@@ -1,5 +1,5 @@
-import path from 'node:path';
-import fs from 'node:fs';
+import path from "node:path";
+import fs from "node:fs";
 
 /**
  * 빌드된 SPA 를 이 서버가 직접 내보낸다.
@@ -13,21 +13,21 @@ import fs from 'node:fs';
  */
 
 const CONTENT_TYPES: Readonly<Record<string, string>> = {
-  '.html': 'text/html; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.json': 'application/json; charset=utf-8',
-  '.map': 'application/json; charset=utf-8',
-  '.svg': 'image/svg+xml',
-  '.png': 'image/png',
-  '.ico': 'image/x-icon',
-  '.woff2': 'font/woff2',
-  '.webmanifest': 'application/manifest+json; charset=utf-8',
+  ".html": "text/html; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".map": "application/json; charset=utf-8",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".ico": "image/x-icon",
+  ".woff2": "font/woff2",
+  ".webmanifest": "application/manifest+json; charset=utf-8",
 };
 
 /** 모르는 확장자는 `application/octet-stream`이다 — 브라우저가 실행하지 않고 내려받는다. */
 export const contentTypeFor = (filePath: string): string =>
-  CONTENT_TYPES[path.extname(filePath).toLowerCase()] ?? 'application/octet-stream';
+  CONTENT_TYPES[path.extname(filePath).toLowerCase()] ?? "application/octet-stream";
 
 /**
  * 이름에 내용 해시가 박힌 것만 영구 캐시한다.
@@ -36,7 +36,7 @@ export const contentTypeFor = (filePath: string): string =>
  * 이미 사라진 자산을 가리킨다.
  */
 export const cacheControlFor = (relativePath: string): string =>
-  relativePath.startsWith('assets') ? 'public, max-age=31536000, immutable' : 'no-store';
+  relativePath.startsWith("assets") ? "public, max-age=31536000, immutable" : "no-store";
 
 /**
  * URL 을 `root` 안의 절대경로로 바꾼다. 밖으로 나가면 `undefined`.
@@ -46,7 +46,7 @@ export const cacheControlFor = (relativePath: string): string =>
  * ② 만으로는 인코딩된 탈출을 놓친다.
  */
 export const resolveWithin = (root: string, url: string): string | undefined => {
-  const rawPath = url.split('?')[0] ?? '/';
+  const rawPath = url.split("?")[0] ?? "/";
 
   let decoded: string;
   try {
@@ -55,9 +55,9 @@ export const resolveWithin = (root: string, url: string): string | undefined => 
     // 깨진 퍼센트 인코딩
     return undefined;
   }
-  if (decoded.includes('\0')) return undefined;
+  if (decoded.includes("\0")) return undefined;
 
-  const normalized = path.posix.normalize(decoded.startsWith('/') ? decoded : `/${decoded}`);
+  const normalized = path.posix.normalize(decoded.startsWith("/") ? decoded : `/${decoded}`);
   // 선행 `/` 를 `.` 으로 바꿔 상대경로로 만든다 — 그러지 않으면 resolve 가 root 를 통째로 무시한다.
   const resolved = path.resolve(root, `.${normalized}`);
 
@@ -81,15 +81,19 @@ const onDisk = (candidate: string): boolean => fs.existsSync(candidate) && fs.st
  * 그렇게 당했다: 이 호스트명에 옛 PWA 가 남긴 `/sw.js` 를 브라우저가 갱신하려 할 때마다
  * `text/html` 이 돌아가 **업데이트가 실패하고 옛 Service Worker 가 영구히 살아남았다.**
  */
-export const pickFile = (root: string, url: string, exists: (candidate: string) => boolean = onDisk): StaticFile | undefined => {
+export const pickFile = (
+  root: string,
+  url: string,
+  exists: (candidate: string) => boolean = onDisk,
+): StaticFile | undefined => {
   const resolved = resolveWithin(root, url);
   if (resolved === undefined) return undefined;
 
   if (exists(resolved)) return { filePath: resolved, relativePath: path.relative(root, resolved) };
-  if (path.extname(resolved) !== '') return undefined;
+  if (path.extname(resolved) !== "") return undefined;
 
-  const indexPath = path.join(root, 'index.html');
-  return exists(indexPath) ? { filePath: indexPath, relativePath: 'index.html' } : undefined;
+  const indexPath = path.join(root, "index.html");
+  return exists(indexPath) ? { filePath: indexPath, relativePath: "index.html" } : undefined;
 };
 
 /**

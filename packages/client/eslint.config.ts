@@ -69,7 +69,16 @@ const NODE_GLOBALS = [
  * 규약과 코드 주석이 이 규칙을 인용해 왔는데 정작 설정에는 없었다(2026-09-14 실측).
  */
 const PLATFORM_GLOBALS = [
-  "fetch", "window", "document", "navigator", "location", "localStorage", "sessionStorage", "alert", "confirm", "prompt",
+  "fetch",
+  "window",
+  "document",
+  "navigator",
+  "location",
+  "localStorage",
+  "sessionStorage",
+  "alert",
+  "confirm",
+  "prompt",
 ].map((name) => ({
   name,
   message: "`model/`·`viewmodel/`은 플랫폼에 직접 닿지 않습니다 — 조립부가 주입하는 함수를 받으세요(→ ADR 0007).",
@@ -167,7 +176,12 @@ export default [
         "error",
         {
           zones: [
-            { target: "./src", from: "../server/src", message: "client는 server를 import할 수 없습니다. 공유할 코드는 contracts로 옮기고 `#contracts`로 가져오세요." },
+            {
+              target: "./src",
+              from: "../server/src",
+              message:
+                "client는 server를 import할 수 없습니다. 공유할 코드는 contracts로 옮기고 `#contracts`로 가져오세요.",
+            },
             ...SLICES.map((slice) => ({
               target: `./src/extensions/${slice}`,
               from: "./src/extensions",
@@ -234,7 +248,8 @@ export default [
           paths: ["react", "react-dom", "nanostores", "zustand", "jotai", "valtio", "@primer/react"].map((name) => ({
             name,
             allowTypeImports: true,
-            message: "`model/`은 상태 라이브러리와 React를 런타임으로 모릅니다 — 화면 상태는 ViewModel이 소유합니다(→ ADR 0007).",
+            message:
+              "`model/`은 상태 라이브러리와 React를 런타임으로 모릅니다 — 화면 상태는 ViewModel이 소유합니다(→ ADR 0007).",
           })),
           patterns: [
             {

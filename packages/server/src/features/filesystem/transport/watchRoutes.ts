@@ -21,10 +21,7 @@ export function createWatchRoutes(workspaceRoot: string): Hono {
   app.get("/api/files/watch", async (c) => {
     const requested = c.req.queries("path") ?? [];
     if (requested.length === 0 || requested.length > MAX_WATCH_PATHS) {
-      return c.json(
-        { code: "BadRequest", message: `path must be given 1~${String(MAX_WATCH_PATHS)} times` },
-        400,
-      );
+      return c.json({ code: "BadRequest", message: `path must be given 1~${String(MAX_WATCH_PATHS)} times` }, 400);
     }
 
     const resolved = await resolveWatchPaths(workspaceRoot, requested);

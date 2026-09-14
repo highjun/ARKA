@@ -1,12 +1,12 @@
-import { CommandCenterRegistry, CommandCenterRegistryToken } from '#core/commands';
-import { createContainer, singleton } from '#core/di';
-import { ViewModelProvider } from '#core/viewmodel';
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { DirectoryTreeViewModelToken } from '../viewmodel/IDirectoryTreeViewModel';
-import type { FileTreeRow, IDirectoryTreeViewModel } from '../viewmodel/IDirectoryTreeViewModel';
-import { FileContentViewModelToken } from '../viewmodel/IFileContentViewModel';
-import type { IFileContentViewModel } from '../viewmodel/IFileContentViewModel';
-import { DirectoryTreeView } from './DirectoryTreeView';
+import { CommandCenterRegistry, CommandCenterRegistryToken } from "#core/commands";
+import { createContainer, singleton } from "#core/di";
+import { ViewModelProvider } from "#core/viewmodel";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { DirectoryTreeViewModelToken } from "../viewmodel/IDirectoryTreeViewModel";
+import type { FileTreeRow, IDirectoryTreeViewModel } from "../viewmodel/IDirectoryTreeViewModel";
+import { FileContentViewModelToken } from "../viewmodel/IFileContentViewModel";
+import type { IFileContentViewModel } from "../viewmodel/IFileContentViewModel";
+import { DirectoryTreeView } from "./DirectoryTreeView";
 
 /**
  * 고정된 VM을 꽂는다 — 실물은 마운트에 워크스페이스를 읽고 `fs.watch`를 건다. 우클릭 메뉴는
@@ -19,7 +19,7 @@ const viewModel = (state: Partial<IDirectoryTreeViewModel>): IDirectoryTreeViewM
   rows: [],
   expandedIds: [],
   selectedIds: [],
-  status: 'loaded',
+  status: "loaded",
   failure: null,
   start: () => undefined,
   setFolderExpanded: () => undefined,
@@ -29,7 +29,7 @@ const viewModel = (state: Partial<IDirectoryTreeViewModel>): IDirectoryTreeViewM
   renameEntry: () => Promise.resolve(),
   removeEntry: () => Promise.resolve(),
   removeEntries: () => Promise.resolve(),
-  moveEntry: () => Promise.resolve(''),
+  moveEntry: () => Promise.resolve(""),
   startWatching: () => undefined,
   stopWatching: () => undefined,
   contextTarget: null,
@@ -63,29 +63,34 @@ const fileContentViewModel: IFileContentViewModel = {
 
 const ROWS: readonly FileTreeRow[] = [
   {
-    id: 'packages',
-    name: 'packages',
-    type: 'folder',
+    id: "packages",
+    name: "packages",
+    type: "folder",
     children: [
       {
-        id: 'packages/client',
-        name: 'client',
-        type: 'folder',
+        id: "packages/client",
+        name: "client",
+        type: "folder",
         children: [
-          { id: 'packages/client/src', name: 'src', type: 'folder', children: [{ id: 'packages/client/src/main.tsx', name: 'main.tsx', type: 'file' }] },
-          { id: 'packages/client/package.json', name: 'package.json', type: 'file' },
+          {
+            id: "packages/client/src",
+            name: "src",
+            type: "folder",
+            children: [{ id: "packages/client/src/main.tsx", name: "main.tsx", type: "file" }],
+          },
+          { id: "packages/client/package.json", name: "package.json", type: "file" },
         ],
       },
-      { id: 'packages/server', name: 'server', type: 'folder', disabled: true },
+      { id: "packages/server", name: "server", type: "folder", disabled: true },
     ],
   },
-  { id: 'docs', name: 'docs', type: 'folder', loading: true },
-  { id: 'CONVENTIONS.md', name: 'CONVENTIONS.md', type: 'file' },
-  { id: 'package.json', name: 'package.json', type: 'file' },
+  { id: "docs", name: "docs", type: "folder", loading: true },
+  { id: "CONVENTIONS.md", name: "CONVENTIONS.md", type: "file" },
+  { id: "package.json", name: "package.json", type: "file" },
 ];
 
 const meta = {
-  title: 'filesystem/DirectoryTreeView',
+  title: "filesystem/DirectoryTreeView",
   component: DirectoryTreeView,
   args: { onFileOpen: () => undefined, onFileMove: () => undefined, onFilePin: () => undefined },
 } satisfies Meta<typeof DirectoryTreeView>;
@@ -96,12 +101,21 @@ type Story = StoryObj<typeof meta>;
 const story = (state: Partial<IDirectoryTreeViewModel>): Story => ({
   decorators: [
     (Story) => {
-      const container = createContainer('story');
-      container.register(DirectoryTreeViewModelToken, singleton(() => viewModel(state)));
-      container.register(FileContentViewModelToken, singleton(() => fileContentViewModel));
-      container.register(CommandCenterRegistryToken, singleton(() => new CommandCenterRegistry()));
+      const container = createContainer("story");
+      container.register(
+        DirectoryTreeViewModelToken,
+        singleton(() => viewModel(state)),
+      );
+      container.register(
+        FileContentViewModelToken,
+        singleton(() => fileContentViewModel),
+      );
+      container.register(
+        CommandCenterRegistryToken,
+        singleton(() => new CommandCenterRegistry()),
+      );
       return (
-        <ViewModelProvider container={container.createScope('view')}>
+        <ViewModelProvider container={container.createScope("view")}>
           <div style={{ height: 520, width: 320 }}>
             <Story />
           </div>
@@ -113,31 +127,31 @@ const story = (state: Partial<IDirectoryTreeViewModel>): Story => ({
 
 export const Default: Story = story({
   rows: ROWS,
-  expandedIds: ['packages', 'packages/client'],
-  selectedIds: ['CONVENTIONS.md'],
+  expandedIds: ["packages", "packages/client"],
+  selectedIds: ["CONVENTIONS.md"],
 });
 
 /** 워크스페이스가 정말 비었을 때 — 읽는 중과 달라야 한다. */
-export const Empty: Story = story({ status: 'loaded' });
+export const Empty: Story = story({ status: "loaded" });
 
 /** 아직 루트를 읽는 중 — 행이 없는 이유가 다르므로 스피너가 뜬다. */
-export const Loading: Story = story({ status: 'loading' });
+export const Loading: Story = story({ status: "loading" });
 
 /** 루트를 읽지 못했다 — 트리 자체가 뜨지 않는 유일한 경우다. */
-export const Error: Story = story({ status: 'error', failure: '워크스페이스를 읽지 못했다 — ENOENT' });
+export const Error: Story = story({ status: "error", failure: "워크스페이스를 읽지 못했다 — ENOENT" });
 
 /** 이름을 인라인으로 고치는 중 — 행 자체가 입력칸이 된다(모달이 아니다). */
-export const Editing: Story = story({ rows: ROWS, expandedIds: ['packages'], editingId: 'CONVENTIONS.md' });
+export const Editing: Story = story({ rows: ROWS, expandedIds: ["packages"], editingId: "CONVENTIONS.md" });
 
 /** 여러 항목을 지우기 직전의 확인 — 폴더가 섞이면 문구가 달라진다. */
 export const DeleteConfirm: Story = story({
   rows: ROWS,
-  expandedIds: ['packages'],
+  expandedIds: ["packages"],
   deleteTargets: [
-    { id: 'packages', name: 'packages', type: 'folder' },
-    { id: 'package.json', name: 'package.json', type: 'file' },
+    { id: "packages", name: "packages", type: "folder" },
+    { id: "package.json", name: "package.json", type: "file" },
   ],
 });
 
 /** 조작이 실패해 안내를 띄운 상태. */
-export const FailureNotice: Story = story({ rows: ROWS, failureNotice: '같은 이름이 이미 있다 — EEXIST' });
+export const FailureNotice: Story = story({ rows: ROWS, failureNotice: "같은 이름이 이미 있다 — EEXIST" });

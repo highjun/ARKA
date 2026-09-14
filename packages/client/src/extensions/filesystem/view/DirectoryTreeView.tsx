@@ -1,20 +1,15 @@
-import { useViewModel } from '#core/viewmodel';
-import { ConfirmationDialog, Dialog, Spinner } from '@primer/react';
-import { Blankslate } from '@primer/react/experimental';
-import { Container } from '#component/Container';
-import { FileTree } from '../component/FileTree';
-import type { FileTreeItem } from '../component/FileTree';
-import type { MouseEvent } from 'react';
-import { CommandContextMenu } from '#core/commands';
-import type {
-  ContextMenuTarget,
-  DirectoryTreeStatus,
-
-  FileTreeRow,
-} from '../viewmodel/IDirectoryTreeViewModel';
-import { DirectoryTreeViewModelToken } from '../viewmodel/IDirectoryTreeViewModel';
-import { FileContentViewModelToken } from '../viewmodel/IFileContentViewModel';
-import styles from './DirectoryTreeView.module.css';
+import { useViewModel } from "#core/viewmodel";
+import { ConfirmationDialog, Dialog, Spinner } from "@primer/react";
+import { Blankslate } from "@primer/react/experimental";
+import { Container } from "#component/Container";
+import { FileTree } from "../component/FileTree";
+import type { FileTreeItem } from "../component/FileTree";
+import type { MouseEvent } from "react";
+import { CommandContextMenu } from "#core/commands";
+import type { ContextMenuTarget, DirectoryTreeStatus, FileTreeRow } from "../viewmodel/IDirectoryTreeViewModel";
+import { DirectoryTreeViewModelToken } from "../viewmodel/IDirectoryTreeViewModel";
+import { FileContentViewModelToken } from "../viewmodel/IFileContentViewModel";
+import styles from "./DirectoryTreeView.module.css";
 
 /**
  * DI·구독·마크업이 한 파일에 있다 — `binding.tsx`+`styled.tsx` 분리가 지키려던 것("DI를 아는
@@ -39,7 +34,7 @@ const toItem = (row: FileTreeRow): FileTreeItem => ({
 
 /** 행이 아직 없는 이유가 둘이라 표시도 둘이다 — 기다리는 중이면 돌고, 정말 비었으면 그렇게 말한다. */
 const emptyLabelOf = (status: DirectoryTreeStatus) =>
-  status === 'loaded' ? (
+  status === "loaded" ? (
     <Blankslate>
       <Blankslate.Heading as="h2">비어 있다</Blankslate.Heading>
     </Blankslate>
@@ -55,7 +50,9 @@ const deleteTitleOf = (targets: readonly ContextMenuTarget[]) =>
   targets.length === 1 ? `${targets[0]!.name}을(를) 지울까요?` : `${String(targets.length)}개 항목을 지울까요?`;
 
 const deleteSubtitleOf = (targets: readonly ContextMenuTarget[]) =>
-  targets.some((target) => target.type === 'folder') ? '안의 내용까지 전부 사라진다. 되돌릴 수 없다.' : '되돌릴 수 없다.';
+  targets.some((target) => target.type === "folder")
+    ? "안의 내용까지 전부 사라진다. 되돌릴 수 없다."
+    : "되돌릴 수 없다.";
 
 /** 사이드바의 파일 탐색기. 트리 컴포넌트에 ViewModel의 행을 그대로 넘기고 배치만 한다. */
 export const DirectoryTreeView = ({
@@ -73,10 +70,10 @@ export const DirectoryTreeView = ({
 
   // 컴포넌트 어휘(FileTreeItem)를 ViewModel 어휘(경로 + 폴더 여부)로 바꾸기만 한다.
   const handleActivate = (item: FileTreeItem) => {
-    if (item.type !== 'folder') onFileOpen(item.id);
+    if (item.type !== "folder") onFileOpen(item.id);
   };
   const handleRowDoubleClick = (item: FileTreeItem) => {
-    if (item.type !== 'folder') onFilePin(item.id);
+    if (item.type !== "folder") onFilePin(item.id);
   };
   const handleExpand = (item: FileTreeItem, expanded: boolean) => viewModel.setFolderExpanded(item.id, expanded);
   /**
@@ -121,10 +118,14 @@ export const DirectoryTreeView = ({
       {/* 우클릭 메뉴는 이제 커맨드 레지스트리가 그린다(2026-09-04, Menu 축 실배선) — 무엇이
           뜨는지는 `app/filesystemCommands.ts`가 `registerMenuItem`으로 등록한 것이다. `context`는
           지금 우클릭된 대상 — 커맨드의 `execute(context)`로 그대로 전달된다. */}
-      <CommandContextMenu menuId="filesystem.explorer.context" context={viewModel.contextTarget} onOpenChange={onContextMenuOpenChange}>
+      <CommandContextMenu
+        menuId="filesystem.explorer.context"
+        context={viewModel.contextTarget}
+        onOpenChange={onContextMenuOpenChange}
+      >
         {/* 스크롤 컨테이너는 Container 다 — hover 할 때만 스크롤바가 보인다. */}
-        <div className={styles['fill']} onContextMenu={onContainerContextMenu}>
-          <Container chrome="none" className={styles['fill']}>
+        <div className={styles["fill"]} onContextMenu={onContainerContextMenu}>
+          <Container chrome="none" className={styles["fill"]}>
             <FileTree
               chrome="none"
               items={viewModel.rows.map(toItem)}
@@ -151,7 +152,7 @@ export const DirectoryTreeView = ({
           confirmButtonContent="지우기"
           cancelButtonContent="취소"
           confirmButtonType="danger"
-          onClose={(gesture) => (gesture === 'confirm' ? viewModel.confirmDelete() : viewModel.cancelDelete())}
+          onClose={(gesture) => (gesture === "confirm" ? viewModel.confirmDelete() : viewModel.cancelDelete())}
         >
           {deleteSubtitleOf(viewModel.deleteTargets)}
         </ConfirmationDialog>
@@ -162,7 +163,14 @@ export const DirectoryTreeView = ({
           role="alertdialog"
           title="문제가 생겼다"
           onClose={() => viewModel.dismissFailureNotice()}
-          footerButtons={[{ content: '확인', buttonType: 'primary', autoFocus: true, onClick: () => viewModel.dismissFailureNotice() }]}
+          footerButtons={[
+            {
+              content: "확인",
+              buttonType: "primary",
+              autoFocus: true,
+              onClick: () => viewModel.dismissFailureNotice(),
+            },
+          ]}
         >
           {viewModel.failureNotice}
         </Dialog>

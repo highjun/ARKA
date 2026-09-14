@@ -28,17 +28,17 @@ const copyByClipboardApi = async (text: string): Promise<boolean> => {
 
 const copyByExecCommand = (text: string): boolean => {
   // jsdom 은 `execCommand` 자체를 구현하지 않는다 — 있는지부터 본다.
-  if (typeof globalThis.document?.execCommand !== 'function') return false;
+  if (typeof globalThis.document?.execCommand !== "function") return false;
 
-  const textArea = document.createElement('textarea');
+  const textArea = document.createElement("textarea");
   textArea.value = text;
-  textArea.setAttribute('readonly', '');
-  textArea.style.position = 'fixed';
-  textArea.style.opacity = '0';
+  textArea.setAttribute("readonly", "");
+  textArea.style.position = "fixed";
+  textArea.style.opacity = "0";
   document.body.appendChild(textArea);
   textArea.select();
   try {
-    return document.execCommand('copy');
+    return document.execCommand("copy");
   } catch {
     return false;
   } finally {

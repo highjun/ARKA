@@ -5,17 +5,17 @@
   justify-content: center;
 }
 
-.FileIcon[data-size='sm'] {
+.FileIcon[data-size="sm"] {
   width: var(--base-size-16);
   height: var(--base-size-16);
 }
 
-.FileIcon[data-size='md'] {
+.FileIcon[data-size="md"] {
   width: var(--base-size-20);
   height: var(--base-size-20);
 }
 
-.FileIcon[data-size='lg'] {
+.FileIcon[data-size="lg"] {
   width: var(--base-size-24);
   height: var(--base-size-24);
 }

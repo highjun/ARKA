@@ -1,4 +1,4 @@
-import { createToken } from '#core/di';
+import { createToken } from "#core/di";
 /**
  * 워크스페이스를 읽는 통로.
  *
@@ -17,7 +17,7 @@ import { createToken } from '#core/di';
  * 서버와 어긋나도 아무도 모른다(실제로 `WatchEvent`가 그랬다). 화면이 쓰지 않는 필드가 계약에
  * 있다면 계약에서 빼는 것이지 여기서 가리는 것이 아니다.
  */
-import type { DirectoryListing, FileContent, FileEntry, FileEntryType } from '#contracts';
+import type { DirectoryListing, FileContent, FileEntry, FileEntryType } from "#contracts";
 
 export type { DirectoryListing, FileContent, FileEntry, FileEntryType };
 

@@ -1,9 +1,9 @@
-import { useControllableState } from '@radix-ui/react-use-controllable-state';
-import type { HTMLAttributes, ReactNode, Ref } from 'react';
-import { clsx } from 'clsx';
-import { usePortalContainer } from '#utils/portal';
-import styles from './CommandPalette.module.css';
-import { Command } from 'cmdk';
+import { useControllableState } from "@radix-ui/react-use-controllable-state";
+import type { HTMLAttributes, ReactNode, Ref } from "react";
+import { clsx } from "clsx";
+import { usePortalContainer } from "#utils/portal";
+import styles from "./CommandPalette.module.css";
+import { Command } from "cmdk";
 
 /** 팔레트에 뜰 항목 하나 — 커맨드 하나에 대응한다. `id`가 선택됐을 때 돌아온다. */
 export type CommandPaletteItem = {
@@ -17,7 +17,7 @@ export type CommandPaletteItem = {
  * `CommandPaletteProps`를 참조하지 않고 필드를 되풀이한다 — "Props 선언은 CommandPalette 바로 앞"이라
  * `CommandPalette`보다 먼저 오는 이 헬퍼가 그 타입을 앞당겨 참조하면 선언 순서가 어긋난다.
  */
-type PaletteDialogAttrs = Omit<HTMLAttributes<HTMLDivElement>, 'onSelect' | 'defaultValue'> & {
+type PaletteDialogAttrs = Omit<HTMLAttributes<HTMLDivElement>, "onSelect" | "defaultValue"> & {
   readonly open: boolean;
   readonly onOpenChange?: (open: boolean) => void;
   readonly items: readonly CommandPaletteItem[];
@@ -36,39 +36,49 @@ type PaletteDialogAttrs = Omit<HTMLAttributes<HTMLDivElement>, 'onSelect' | 'def
  *
  * 검색·필터링은 `cmdk` 내장(fuzzy substring match)이라 직접 구현하지 않는다.
  */
-const PaletteDialog = ({ open, onOpenChange, items, onSelect, placeholder, emptyMessage, className, ref, ...props }: PaletteDialogAttrs & { readonly ref?: Ref<HTMLDivElement> }) => {
+const PaletteDialog = ({
+  open,
+  onOpenChange,
+  items,
+  onSelect,
+  placeholder,
+  emptyMessage,
+  className,
+  ref,
+  ...props
+}: PaletteDialogAttrs & { readonly ref?: Ref<HTMLDivElement> }) => {
   const container = usePortalContainer();
 
   return (
-  <Command.Dialog
-    {...props}
-    ref={ref}
-    open={open}
-    onOpenChange={onOpenChange}
-    label="커맨드 팔레트"
-    contentClassName={className}
-    overlayClassName={styles['overlay']}
-    container={container}
-  >
-    <Command.Input placeholder={placeholder} />
-    <Command.List>
-      <Command.Empty>{emptyMessage}</Command.Empty>
-      {items.map((item) => (
-        <Command.Item key={item.id} value={item.label} onSelect={() => onSelect(item.id)}>
-          <span className={styles['itemLabel']}>{item.label}</span>
-          {item.shortcut !== undefined && item.shortcut.length > 0 && (
-            <span className={styles['shortcuts']}>
-              {item.shortcut.map((key) => (
-                <kbd key={key} className={styles['shortcutKey']}>
-                  {key}
-                </kbd>
-              ))}
-            </span>
-          )}
-        </Command.Item>
-      ))}
-    </Command.List>
-  </Command.Dialog>
+    <Command.Dialog
+      {...props}
+      ref={ref}
+      open={open}
+      onOpenChange={onOpenChange}
+      label="커맨드 팔레트"
+      contentClassName={className}
+      overlayClassName={styles["overlay"]}
+      container={container}
+    >
+      <Command.Input placeholder={placeholder} />
+      <Command.List>
+        <Command.Empty>{emptyMessage}</Command.Empty>
+        {items.map((item) => (
+          <Command.Item key={item.id} value={item.label} onSelect={() => onSelect(item.id)}>
+            <span className={styles["itemLabel"]}>{item.label}</span>
+            {item.shortcut !== undefined && item.shortcut.length > 0 && (
+              <span className={styles["shortcuts"]}>
+                {item.shortcut.map((key) => (
+                  <kbd key={key} className={styles["shortcutKey"]}>
+                    {key}
+                  </kbd>
+                ))}
+              </span>
+            )}
+          </Command.Item>
+        ))}
+      </Command.List>
+    </Command.Dialog>
   );
 };
 
@@ -79,7 +89,7 @@ const PaletteDialog = ({ open, onOpenChange, items, onSelect, placeholder, empty
  * @deprecated `shell/` 컴포넌트 스코프 재정리(2026-08-25)에서 정식 스코프 밖으로 뺐다 — 워크벤치가
  * 지금도 쓰고 있어 지우지는 않았지만, 새 코드에서 이걸 골라 쓰기 전에 정말 필요한지부터 확인할 것.
  */
-export interface CommandPaletteProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect' | 'defaultValue'> {
+export interface CommandPaletteProps extends Omit<HTMLAttributes<HTMLDivElement>, "onSelect" | "defaultValue"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLDivElement>;
   /** 열림 여부(제어). */
@@ -107,8 +117,22 @@ export interface CommandPaletteProps extends Omit<HTMLAttributes<HTMLDivElement>
 }
 
 /** 명령을 검색해 실행하는 모달 — 열림 상태는 넘기면 그 값을, 안 넘기면 스스로 든다. */
-export const CommandPalette = ({ open, defaultOpen, onOpenChange, className, emptyMessage, placeholder, ref, ...props }: CommandPaletteProps) => {
-  const [isOpen, setOpen] = useControllableState({ prop: open, defaultProp: defaultOpen ?? false, onChange: onOpenChange, caller: 'CommandPalette' });
+export const CommandPalette = ({
+  open,
+  defaultOpen,
+  onOpenChange,
+  className,
+  emptyMessage,
+  placeholder,
+  ref,
+  ...props
+}: CommandPaletteProps) => {
+  const [isOpen, setOpen] = useControllableState({
+    prop: open,
+    defaultProp: defaultOpen ?? false,
+    onChange: onOpenChange,
+    caller: "CommandPalette",
+  });
 
   return (
     <PaletteDialog
@@ -116,11 +140,10 @@ export const CommandPalette = ({ open, defaultOpen, onOpenChange, className, emp
       ref={ref}
       open={isOpen}
       onOpenChange={setOpen}
-      className={clsx(className, styles['content'])}
-      placeholder={placeholder ?? '커맨드 검색...'}
-      emptyMessage={emptyMessage ?? '결과가 없다.'}
+      className={clsx(className, styles["content"])}
+      placeholder={placeholder ?? "커맨드 검색..."}
+      emptyMessage={emptyMessage ?? "결과가 없다."}
       data-component="CommandPalette"
     />
   );
 };
-

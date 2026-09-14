@@ -1,6 +1,6 @@
-import type { Disposable } from '#core/di';
-import type { ISettingsModel } from '../model/ISettingsModel';
-import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
+import type { Disposable } from "#core/di";
+import type { ISettingsModel } from "../model/ISettingsModel";
+import type { IWorkbenchStartup } from "../model/IWorkbenchStartup";
 
 /**
  * 밀도를 `<html data-density>`에 반영한다. `auto`는 포인터가 coarse(터치)면 touch, 아니면 compact.
@@ -8,22 +8,22 @@ import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
  */
 export const createDocumentDensity = ({ settingsModel }: { settingsModel: ISettingsModel }): IWorkbenchStartup => {
   let subscription: Disposable | null = null;
-  const coarse = window.matchMedia('(pointer: coarse)');
+  const coarse = window.matchMedia("(pointer: coarse)");
   const apply = () => {
     const { density } = settingsModel.settings;
-    document.documentElement.dataset['density'] = density === 'auto' ? (coarse.matches ? 'touch' : 'compact') : density;
+    document.documentElement.dataset["density"] = density === "auto" ? (coarse.matches ? "touch" : "compact") : density;
   };
   return {
     start: () => {
       apply();
       subscription = settingsModel.onDidChange(apply);
-      coarse.addEventListener('change', apply);
+      coarse.addEventListener("change", apply);
     },
     stop: () => {
       subscription?.dispose();
       subscription = null;
-      coarse.removeEventListener('change', apply);
-      delete document.documentElement.dataset['density'];
+      coarse.removeEventListener("change", apply);
+      delete document.documentElement.dataset["density"];
     },
   };
 };

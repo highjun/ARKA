@@ -58,7 +58,14 @@ export class RunManager {
   /** `title`이 없으면 기본 제목이 붙는다. 만든 즉시 저장된다. */
   createSession(title: string | undefined): AgentSession {
     const at = this.#now();
-    const session: AgentSession = { id: this.#newId(), title: title ?? "", createdAt: at, updatedAt: at, archived: false, lastRunStatus: null };
+    const session: AgentSession = {
+      id: this.#newId(),
+      title: title ?? "",
+      createdAt: at,
+      updatedAt: at,
+      archived: false,
+      lastRunStatus: null,
+    };
     this.#sessions.create(session);
     return session;
   }
@@ -78,8 +85,10 @@ export class RunManager {
   /** 제목·보관은 이벤트로도 남긴다 — 세션 요약은 투영이고 원본은 로그다. */
   updateSession(sessionId: SessionId, patch: { title?: string; archived?: boolean }): AgentSession {
     this.getSession(sessionId);
-    if (patch.title !== undefined) this.#events.append({ sessionId, runId: null, type: "session.renamed", title: patch.title });
-    if (patch.archived !== undefined) this.#events.append({ sessionId, runId: null, type: "session.archived", archived: patch.archived });
+    if (patch.title !== undefined)
+      this.#events.append({ sessionId, runId: null, type: "session.renamed", title: patch.title });
+    if (patch.archived !== undefined)
+      this.#events.append({ sessionId, runId: null, type: "session.archived", archived: patch.archived });
     return this.#sessions.update(sessionId, { ...patch, updatedAt: this.#now() });
   }
 
@@ -87,9 +96,15 @@ export class RunManager {
    * Run을 시작한다. 응답은 즉시 돌아오고 실행은 뒤에서 이어진다.
    * @throws AgentError `SessionNotFound`, `RunInProgress`
    */
-  start(sessionId: SessionId, input: string, mode: RunMode, { confirmWrites = true }: { confirmWrites?: boolean } = {}): RunResponse {
+  start(
+    sessionId: SessionId,
+    input: string,
+    mode: RunMode,
+    { confirmWrites = true }: { confirmWrites?: boolean } = {},
+  ): RunResponse {
     const session = this.getSession(sessionId);
-    if (this.#active.has(sessionId)) throw new AgentError("RunInProgress", `session ${sessionId} already has a running run`);
+    if (this.#active.has(sessionId))
+      throw new AgentError("RunInProgress", `session ${sessionId} already has a running run`);
 
     const runId = this.#newId();
     const history = this.#events.listSince(sessionId, 0);
@@ -108,7 +123,8 @@ export class RunManager {
   provideInput(sessionId: SessionId, runId: RunId, requestId: string, text: string): void {
     const active = this.#requireActive(sessionId, runId);
     const pending = active.pendingInput.get(requestId);
-    if (pending === undefined) throw new AgentError("NotWaitingInput", `run ${runId} is not waiting for input ${requestId}`);
+    if (pending === undefined)
+      throw new AgentError("NotWaitingInput", `run ${runId} is not waiting for input ${requestId}`);
     active.pendingInput.delete(requestId);
     this.#events.append({ sessionId, runId, type: "input.provided", requestId, text });
     this.#sessions.update(sessionId, { lastRunStatus: "running", updatedAt: this.#now() });
@@ -135,14 +151,20 @@ export class RunManager {
 
   #requireActive(sessionId: SessionId, runId: RunId): ActiveRun {
     const active = this.#active.get(sessionId);
-    if (active === undefined || active.runId !== runId) throw new AgentError("RunNotFound", `no running run ${runId} in session ${sessionId}`);
+    if (active === undefined || active.runId !== runId)
+      throw new AgentError("RunNotFound", `no running run ${runId} in session ${sessionId}`);
     return active;
   }
 
   async #execute(
     sessionId: SessionId,
     active: ActiveRun,
-    { input, mode, history, confirmWrites }: { input: string; mode: RunMode; history: RunContext["history"]; confirmWrites: boolean },
+    {
+      input,
+      mode,
+      history,
+      confirmWrites,
+    }: { input: string; mode: RunMode; history: RunContext["history"]; confirmWrites: boolean },
   ): Promise<void> {
     const { runId, abort } = active;
     const emit = (event: RunEventInput): void => {

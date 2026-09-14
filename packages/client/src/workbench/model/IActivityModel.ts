@@ -1,4 +1,4 @@
-import { createToken, type Disposable } from '#core/di';
+import { createToken, type Disposable } from "#core/di";
 
 /**
  * 사이드바 활동 하나의 id. 어떤 활동이 있는지는 Model이 모른다 — `IActivityBarRegistry`
@@ -21,5 +21,4 @@ export interface IActivityModel {
 
   /** 상태가 바뀔 때마다 부른다. */
   onDidChange(listener: () => void): Disposable;
-
 }

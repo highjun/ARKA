@@ -1,7 +1,14 @@
 import { stat } from "node:fs/promises";
 import type { DirectoryListing, FileContent, FileEntryType } from "#contracts";
 import { FileError } from "../domain/errors";
-import { createEntry, listDirectory, readFileContent, resolveNewEntry, resolveWithin, writeFileContent } from "../infra/fileOperations";
+import {
+  createEntry,
+  listDirectory,
+  readFileContent,
+  resolveNewEntry,
+  resolveWithin,
+  writeFileContent,
+} from "../infra/fileOperations";
 
 /**
  * 워크스페이스를 **경로 방어를 거쳐** 다루는 유스케이스 — HTTP 밖(에이전트 툴 등)에서 쓰는 통로다.

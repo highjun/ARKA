@@ -30,11 +30,25 @@ run("pnpm", ["run", "build:storybook"], CLIENT_ROOT);
 // 마운트는 이 패키지가 아니라 **저장소 루트**다. pnpm이 `node_modules/@playwright/test`를 루트의
 // `.pnpm` 저장소로 심볼릭 링크하므로, 패키지만 마운트하면 컨테이너 안에서 끊어진 링크가 된다.
 // 그래서 바이너리는 패키지 것이고 작업 디렉터리는 루트다.
-run("docker", [
-  "run", "--rm",
-  "--user", `${String(process.getuid?.() ?? 0)}:${String(process.getgid?.() ?? 0)}`,
-  "-v", `${REPO_ROOT}:/work`, "-w", "/work", "-e", "HOME=/tmp", IMAGE,
-  "packages/client/node_modules/.bin/playwright", "test",
-  "-c", "packages/client/test/vrt/vrt.config.ts",
-  ...process.argv.slice(2),
-], REPO_ROOT);
+run(
+  "docker",
+  [
+    "run",
+    "--rm",
+    "--user",
+    `${String(process.getuid?.() ?? 0)}:${String(process.getgid?.() ?? 0)}`,
+    "-v",
+    `${REPO_ROOT}:/work`,
+    "-w",
+    "/work",
+    "-e",
+    "HOME=/tmp",
+    IMAGE,
+    "packages/client/node_modules/.bin/playwright",
+    "test",
+    "-c",
+    "packages/client/test/vrt/vrt.config.ts",
+    ...process.argv.slice(2),
+  ],
+  REPO_ROOT,
+);

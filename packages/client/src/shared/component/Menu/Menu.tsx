@@ -1,15 +1,15 @@
-import { createContext, useContext } from 'react';
-import type { HTMLAttributes, Ref } from 'react';
-import { clsx } from 'clsx';
-import { usePortalContainer } from '#utils/portal';
-import { Icon } from '#component/Icon';
-import { useControllableState } from '@radix-ui/react-use-controllable-state';
-import styles from './Menu.module.css';
-import * as Context from '@radix-ui/react-context-menu';
-import * as Dropdown from '@radix-ui/react-dropdown-menu';
+import { createContext, useContext } from "react";
+import type { HTMLAttributes, Ref } from "react";
+import { clsx } from "clsx";
+import { usePortalContainer } from "#utils/portal";
+import { Icon } from "#component/Icon";
+import { useControllableState } from "@radix-ui/react-use-controllable-state";
+import styles from "./Menu.module.css";
+import * as Context from "@radix-ui/react-context-menu";
+import * as Dropdown from "@radix-ui/react-dropdown-menu";
 
 /** 무엇이 메뉴를 여는가. 부품 구성과 항목 모양은 둘이 같다. */
-type MenuKind = 'dropdown' | 'context';
+type MenuKind = "dropdown" | "context";
 
 /**
  * props 를 라이브러리 타입에서 파생시키지 않고 직접 선언한다 — 파생시키면 계약이 그 라이브러리를
@@ -19,7 +19,7 @@ type MenuKind = 'dropdown' | 'context';
  * 한 API로 두려면 Radix 둘(`dropdown`·`context`)을 함께 감싸는 길뿐이다. 부품 다섯이 양쪽에서
  * 같은 모양이라 `kind` 하나로 갈린다.
  */
-export interface MenuProps extends Omit<HTMLAttributes<HTMLElement>, 'dir'> {
+export interface MenuProps extends Omit<HTMLAttributes<HTMLElement>, "dir"> {
   /** 무엇이 여는가. 기본값 `'dropdown'`(좌클릭 앵커). `'context'`면 우클릭으로 뜬다. */
   readonly kind?: MenuKind;
   /** 제어 모드의 열림 여부. */
@@ -57,7 +57,7 @@ interface MenuContentProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 /** 고를 수 있는 한 줄. `onSelect`를 가로채므로 표준 `onSelect`는 쓸 수 없다. */
-interface MenuItemProps extends Omit<HTMLAttributes<HTMLElement>, 'onSelect'> {
+interface MenuItemProps extends Omit<HTMLAttributes<HTMLElement>, "onSelect"> {
   /** true면 선택할 수 없고 흐리게 표시된다. */
   readonly disabled?: boolean;
   /** 항목을 고르면 호출된다. */
@@ -73,7 +73,7 @@ interface MenuLabelProps extends HTMLAttributes<HTMLElement> {}
 interface MenuSeparatorProps extends HTMLAttributes<HTMLElement> {}
 
 /** 하나만 고를 수 있는 묶음. 안에는 `Menu.RadioItem`만 둔다. */
-interface MenuRadioGroupProps extends Omit<HTMLAttributes<HTMLElement>, 'onChange'> {
+interface MenuRadioGroupProps extends Omit<HTMLAttributes<HTMLElement>, "onChange"> {
   /** 지금 고른 값. */
   readonly value?: string;
   /** 다른 값을 고르면 호출된다. */
@@ -81,7 +81,7 @@ interface MenuRadioGroupProps extends Omit<HTMLAttributes<HTMLElement>, 'onChang
 }
 
 /** 고른 것에 표시가 붙는 한 줄. `Menu.RadioGroup` 안에서만 뜻이 있다. */
-interface MenuRadioItemProps extends Omit<HTMLAttributes<HTMLElement>, 'onSelect'> {
+interface MenuRadioItemProps extends Omit<HTMLAttributes<HTMLElement>, "onSelect"> {
   /** 이 줄이 나타내는 값. */
   readonly value: string;
   /** true면 고를 수 없고 흐리게 표시된다. */
@@ -94,17 +94,22 @@ interface MenuRadioItemProps extends Omit<HTMLAttributes<HTMLElement>, 'onSelect
  * 부품이 어느 Radix를 쓸지 알려 주는 통로. 부품마다 `kind`를 다시 받게 하면 루트와 어긋날 수
  * 있어 컨텍스트로 내린다.
  */
-const KindContext = createContext<MenuKind>('dropdown');
+const KindContext = createContext<MenuKind>("dropdown");
 
 /** 부품이 자기 루트의 `kind`를 읽는다. */
 const useKind = (): MenuKind => useContext(KindContext);
 
 /** 메뉴의 열림 상태를 든다 — 자기 DOM은 그리지 않는다. 보이는 것은 `Trigger`와 `Content`다. */
-const MenuRoot = ({ kind = 'dropdown', open, defaultOpen = false, onOpenChange, children, ...props }: MenuProps) => {
-  const [isOpen, setOpen] = useControllableState({ prop: open, defaultProp: defaultOpen, onChange: onOpenChange, caller: 'Menu' });
+const MenuRoot = ({ kind = "dropdown", open, defaultOpen = false, onOpenChange, children, ...props }: MenuProps) => {
+  const [isOpen, setOpen] = useControllableState({
+    prop: open,
+    defaultProp: defaultOpen,
+    onChange: onOpenChange,
+    caller: "Menu",
+  });
   const body = <KindContext value={kind}>{children}</KindContext>;
 
-  return kind === 'context' ? (
+  return kind === "context" ? (
     <Context.Root {...props} open={isOpen} onOpenChange={setOpen}>
       {body}
     </Context.Root>
@@ -119,7 +124,7 @@ const MenuRoot = ({ kind = 'dropdown', open, defaultOpen = false, onOpenChange, 
 const MenuTrigger = ({ className, children, ref, ...props }: MenuTriggerProps) => {
   const shared = { className, ...props };
 
-  return useKind() === 'context' ? (
+  return useKind() === "context" ? (
     <Context.Trigger {...shared}>{children}</Context.Trigger>
   ) : (
     <Dropdown.Trigger {...shared} ref={ref}>
@@ -138,9 +143,15 @@ const MenuTrigger = ({ className, children, ref, ...props }: MenuTriggerProps) =
 const MenuContent = ({ className, children, ref, ...props }: MenuContentProps) => {
   const kind = useKind();
   const container = usePortalContainer();
-  const shared = { ...props, ref, 'data-component': 'Menu', 'data-kind': kind, className: clsx(className, styles['content']) };
+  const shared = {
+    ...props,
+    ref,
+    "data-component": "Menu",
+    "data-kind": kind,
+    className: clsx(className, styles["content"]),
+  };
 
-  return kind === 'context' ? (
+  return kind === "context" ? (
     <Context.Portal container={container}>
       <Context.Content {...shared}>{children}</Context.Content>
     </Context.Portal>
@@ -155,30 +166,30 @@ const MenuContent = ({ className, children, ref, ...props }: MenuContentProps) =
 
 /** 클릭·키보드로 선택 가능한 메뉴 항목 하나. */
 const MenuItem = ({ className, ...props }: MenuItemProps) => {
-  const shared = { className: clsx(className, styles['item']), ...props };
+  const shared = { className: clsx(className, styles["item"]), ...props };
 
-  return useKind() === 'context' ? <Context.Item {...shared} /> : <Dropdown.Item {...shared} />;
+  return useKind() === "context" ? <Context.Item {...shared} /> : <Dropdown.Item {...shared} />;
 };
 
 /** 선택할 수 없는 섹션 제목. */
 const MenuLabel = ({ className, ...props }: MenuLabelProps) => {
-  const shared = { className: clsx(className, styles['label']), ...props };
+  const shared = { className: clsx(className, styles["label"]), ...props };
 
-  return useKind() === 'context' ? <Context.Label {...shared} /> : <Dropdown.Label {...shared} />;
+  return useKind() === "context" ? <Context.Label {...shared} /> : <Dropdown.Label {...shared} />;
 };
 
 /** 항목 그룹을 나누는 구분선. */
 const MenuSeparator = ({ className, ...props }: MenuSeparatorProps) => {
-  const shared = { className: clsx(className, styles['separator']), ...props };
+  const shared = { className: clsx(className, styles["separator"]), ...props };
 
-  return useKind() === 'context' ? <Context.Separator {...shared} /> : <Dropdown.Separator {...shared} />;
+  return useKind() === "context" ? <Context.Separator {...shared} /> : <Dropdown.Separator {...shared} />;
 };
 
 /** 하나만 고르는 묶음 — 고른 줄에만 표시가 붙는다. */
 const MenuRadioGroup = ({ className, ...props }: MenuRadioGroupProps) => {
   const shared = { className, ...props };
 
-  return useKind() === 'context' ? <Context.RadioGroup {...shared} /> : <Dropdown.RadioGroup {...shared} />;
+  return useKind() === "context" ? <Context.RadioGroup {...shared} /> : <Dropdown.RadioGroup {...shared} />;
 };
 
 /**
@@ -189,11 +200,11 @@ const MenuRadioGroup = ({ className, ...props }: MenuRadioGroupProps) => {
  */
 const MenuRadioItem = ({ className, children, ...props }: MenuRadioItemProps) => {
   const kind = useKind();
-  const shared = { className: clsx(className, styles['item']), ...props };
+  const shared = { className: clsx(className, styles["item"]), ...props };
   const body = (
     <>
-      <span className={styles['itemIndicator']}>
-        {kind === 'context' ? (
+      <span className={styles["itemIndicator"]}>
+        {kind === "context" ? (
           <Context.ItemIndicator>
             <Icon iconId="check" size="sm" />
           </Context.ItemIndicator>
@@ -207,7 +218,7 @@ const MenuRadioItem = ({ className, children, ...props }: MenuRadioItemProps) =>
     </>
   );
 
-  return kind === 'context' ? (
+  return kind === "context" ? (
     <Context.RadioItem {...shared}>{body}</Context.RadioItem>
   ) : (
     <Dropdown.RadioItem {...shared}>{body}</Dropdown.RadioItem>

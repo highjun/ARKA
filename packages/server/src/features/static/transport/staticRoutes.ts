@@ -1,11 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { Hono } from "hono";
-import {
-  KILL_SWITCH_SW,
-  cacheControlFor,
-  contentTypeFor,
-  pickFile,
-} from "../infra/staticFiles";
+import { KILL_SWITCH_SW, cacheControlFor, contentTypeFor, pickFile } from "../infra/staticFiles";
 
 /**
  * 빌드된 클라이언트를 서빙한다. API 라우트 **뒤에** 붙여야 한다 — 확장자 없는 경로를

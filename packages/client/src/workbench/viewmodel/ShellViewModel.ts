@@ -1,18 +1,26 @@
-import type { Disposable } from '#core/di';
-import { ViewModelBase } from '#core/viewmodel';
-import { atom } from 'nanostores';
-import type { ITabDirtyState } from '../model/ITabDirtyState';
-import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
-import { PROTOCOL_HEADER, PROTOCOL_VERSION } from '#contracts';
-import type { IServerInfo } from '../model/IServerInfo';
-import type { INotificationService } from '../model/INotificationService';
-import type { IActivityBarRegistry } from '../model/IActivityBarRegistry';
-import type { IActivityModel } from '../model/IActivityModel';
-import type { ICommandCenterRegistry } from '#core/commands';
-import { ROOT_PANE_ID } from '../model/tabsShare';
-import type { OpenTab, PaneId, TabPaneLeaf, TabPaneNode, TabSplitOrientation, ITabsModel } from '../model/ITabsModel';
-import type { IThemeModel } from '../model/IThemeModel';
-import type { ShellActivityRow, ShellTabPaneNode, ShellTabRow, IShellViewModel, SplitEdgeDropPosition, TabContextTarget, ShellNotificationRow } from './IShellViewModel';
+import type { Disposable } from "#core/di";
+import { ViewModelBase } from "#core/viewmodel";
+import { atom } from "nanostores";
+import type { ITabDirtyState } from "../model/ITabDirtyState";
+import type { IWorkbenchStartup } from "../model/IWorkbenchStartup";
+import { PROTOCOL_HEADER, PROTOCOL_VERSION } from "#contracts";
+import type { IServerInfo } from "../model/IServerInfo";
+import type { INotificationService } from "../model/INotificationService";
+import type { IActivityBarRegistry } from "../model/IActivityBarRegistry";
+import type { IActivityModel } from "../model/IActivityModel";
+import type { ICommandCenterRegistry } from "#core/commands";
+import { ROOT_PANE_ID } from "../model/tabsShare";
+import type { OpenTab, PaneId, TabPaneLeaf, TabPaneNode, TabSplitOrientation, ITabsModel } from "../model/ITabsModel";
+import type { IThemeModel } from "../model/IThemeModel";
+import type {
+  ShellActivityRow,
+  ShellTabPaneNode,
+  ShellTabRow,
+  IShellViewModel,
+  SplitEdgeDropPosition,
+  TabContextTarget,
+  ShellNotificationRow,
+} from "./IShellViewModel";
 
 /** `IShellViewModel`의 유일한 구현체 — `IActivityModel`·`ITabsModel`·`IThemeModel`을 조합해 화면 상태를 파생시킨다. */
 /**
@@ -25,18 +33,18 @@ import type { ShellActivityRow, ShellTabPaneNode, ShellTabRow, IShellViewModel, 
  */
 const formatBuildLabel = (iso: string, gitSha?: string): string => {
   const at = new Date(iso);
-  if (Number.isNaN(at.getTime())) return '';
+  if (Number.isNaN(at.getTime())) return "";
 
-  const two = (value: number): string => String(value).padStart(2, '0');
+  const two = (value: number): string => String(value).padStart(2, "0");
   const time = `v${String(at.getFullYear())}.${two(at.getMonth() + 1)}.${two(at.getDate())} ${two(at.getHours())}:${two(at.getMinutes())}`;
   // 앞 7자는 사람이 눈으로 옮겨 적는 길이다. `-dirty`는 그대로 남긴다 — 그게 신호다.
-  return gitSha === undefined ? time : `${time} · ${gitSha.replace(/^([0-9a-f]{7})[0-9a-f]*/u, '$1')}`;
+  return gitSha === undefined ? time : `${time} · ${gitSha.replace(/^([0-9a-f]{7})[0-9a-f]*/u, "$1")}`;
 };
 
 /** 셸 전체가 보는 하나의 ViewModel. 탭·활동·테마·알림 Model을 구독해 화면이 쓸 값으로 편다. */
 export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   /** 트리 전체가 빈 leaf 하나로 무너졌을 때(전부 닫힘) 되돌아갈 자리 — Model 의 초기 상태와 같다. */
-  static readonly #EMPTY_ROOT: TabPaneNode = { kind: 'leaf', id: ROOT_PANE_ID, tabs: [], activeTabId: null };
+  static readonly #EMPTY_ROOT: TabPaneNode = { kind: "leaf", id: ROOT_PANE_ID, tabs: [], activeTabId: null };
 
   readonly #activityModel: IActivityModel;
   readonly #tabsModel: ITabsModel;
@@ -54,13 +62,13 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   readonly #tabDirtyState: ITabDirtyState;
   readonly #startup: IWorkbenchStartup;
   readonly #serverInfo: IServerInfo;
-  readonly #buildId = this.observe(atom(''));
-  readonly #workspaceName = this.observe(atom(''));
+  readonly #buildId = this.observe(atom(""));
+  readonly #workspaceName = this.observe(atom(""));
   readonly #isClientOutdated = this.observe(atom(false));
   readonly #reloadApp: () => void;
   readonly #notificationService: INotificationService;
   readonly #notifications;
-  readonly #reveal = this.observe(atom<IShellViewModel['reveal']>(null));
+  readonly #reveal = this.observe(atom<IShellViewModel["reveal"]>(null));
   #revealSeq = 0;
   readonly #activities;
   readonly #tree;
@@ -145,11 +153,12 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   onMount(): void {
     this.#startup.start();
     void this.#serverInfo.load().then((info) => {
-      this.#buildId.set(info === null ? '' : formatBuildLabel(info.builtAt, info.gitSha));
-      this.#workspaceName.set(info?.workspaceName ?? '');
+      this.#buildId.set(info === null ? "" : formatBuildLabel(info.builtAt, info.gitSha));
+      this.#workspaceName.set(info?.workspaceName ?? "");
       // 버전과 **헤더 이름** 둘 다 본다. 이름이 바뀌면 서버는 우리 요청을 헤더 없음으로 읽어 426을
       // 주는데, 버전은 여전히 같아서 그것만 보면 낡은 줄 모른 채 빈 화면을 띄운다.
-      const outdated = info !== null && (info.protocolVersion !== PROTOCOL_VERSION || info.protocolHeader !== PROTOCOL_HEADER);
+      const outdated =
+        info !== null && (info.protocolVersion !== PROTOCOL_VERSION || info.protocolHeader !== PROTOCOL_HEADER);
       this.#isClientOutdated.set(outdated);
     });
   }
@@ -269,7 +278,10 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     if (index === -1) return;
 
     const closable = new Set(
-      leaf.tabs.slice(index + 1).filter((tab) => !protectedTabIds.includes(tab.id)).map((tab) => tab.id),
+      leaf.tabs
+        .slice(index + 1)
+        .filter((tab) => !protectedTabIds.includes(tab.id))
+        .map((tab) => tab.id),
     );
     if (closable.size === 0) return;
     const kept = leaf.tabs.filter((tab) => !closable.has(tab.id));
@@ -282,7 +294,8 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
    */
   #closeMany(leafId: PaneId, leaf: TabPaneLeaf, kept: readonly OpenTab[], fallbackActiveTabId: string): void {
     const closedIds = new Set(leaf.tabs.filter((tab) => !kept.includes(tab)).map((tab) => tab.id));
-    const nextActiveTabId = leaf.activeTabId !== null && closedIds.has(leaf.activeTabId) ? fallbackActiveTabId : leaf.activeTabId;
+    const nextActiveTabId =
+      leaf.activeTabId !== null && closedIds.has(leaf.activeTabId) ? fallbackActiveTabId : leaf.activeTabId;
     const tree = this.#tabsModel.tree;
     const nextTree = this.#replaceLeaf(tree, leafId, (l) => ({ ...l, tabs: kept, activeTabId: nextActiveTabId }));
 
@@ -316,7 +329,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
 
     const remaining = sourceLeaf.tabs.filter((tab) => tab.id !== tabId);
     const updatedSource: TabPaneLeaf = {
-      kind: 'leaf',
+      kind: "leaf",
       id: sourceLeaf.id,
       tabs: remaining,
       activeTabId: sourceLeaf.activeTabId === tabId ? (remaining[0]?.id ?? null) : sourceLeaf.activeTabId,
@@ -324,12 +337,12 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     // 결정적인 id다(타임스탬프·난수 없음) — 같은 leaf에서 같은 탭을 분할하는 조작은 그 사이에
     // 이전 결과가 닫혀 있어야만 다시 일어날 수 있어 충돌하지 않는다.
     const newLeafId = `${sourceLeafId}-split-${tabId}`;
-    const newLeaf: TabPaneLeaf = { kind: 'leaf', id: newLeafId, tabs: [movedTab], activeTabId: tabId };
-    const orientation: TabSplitOrientation = position === 'left' || position === 'right' ? 'horizontal' : 'vertical';
+    const newLeaf: TabPaneLeaf = { kind: "leaf", id: newLeafId, tabs: [movedTab], activeTabId: tabId };
+    const orientation: TabSplitOrientation = position === "left" || position === "right" ? "horizontal" : "vertical";
     // position이 왼쪽/위면 새 leaf가 먼저 그려지는 자리, 오른쪽/아래면 나중 자리 — 드롭한 가장자리
     // 쪽에 새 패널이 생기는 게 자연스럽다.
-    const children = position === 'left' || position === 'top' ? [newLeaf, updatedSource] : [updatedSource, newLeaf];
-    const splitNode: TabPaneNode = { kind: 'split', id: `${sourceLeafId}-split-root`, orientation, children };
+    const children = position === "left" || position === "top" ? [newLeaf, updatedSource] : [updatedSource, newLeaf];
+    const splitNode: TabPaneNode = { kind: "split", id: `${sourceLeafId}-split-root`, orientation, children };
 
     const nextTree = this.#replaceLeaf(tree, sourceLeafId, () => splitNode);
     // 방금 떼어낸 탭이 있는 새 pane 으로 포커스를 옮긴다 — 드래그해서 분할했으면 그쪽을 보려던 것이다.
@@ -425,7 +438,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
 
   /** 현재 테마를 반전시켜 `#themeModel.setTheme`을 호출한다. */
   toggleTheme(): void {
-    this.#themeModel.setTheme(this.#themeModel.theme === 'dark' ? 'light' : 'dark');
+    this.#themeModel.setTheme(this.#themeModel.theme === "dark" ? "light" : "dark");
   }
 
   /** 고정 탭으로 연다. 이미 있으면 그 탭을 활성으로만 만든다 — 미리보기 자리와 무관하다. */
@@ -452,7 +465,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   }
 
   /** 위치 요청이 없으면 `null`. 같은 위치를 다시 요청해도 `seq`로 구분된다. */
-  get reveal(): IShellViewModel['reveal'] {
+  get reveal(): IShellViewModel["reveal"] {
     return this.#reveal.get();
   }
 
@@ -462,7 +475,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
       this.#revealSeq += 1;
       this.#reveal.set({ tabId: path, line: position.line, column: position.column, seq: this.#revealSeq });
     }
-    const tab: OpenTab = { id: path, kind: 'file', title: this.#nameOf(path) };
+    const tab: OpenTab = { id: path, kind: "file", title: this.#nameOf(path) };
     const tree = this.#tabsModel.tree;
     const activeLeafId = this.#tabsModel.activeLeafId;
     const leaf = this.#findLeaf(tree, activeLeafId);
@@ -521,11 +534,15 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
      * 문제없다 — 커맨드는 그냥 또 다른 트리거일 뿐이다).
      */
     commandCenterRegistry.registerCommand({
-      id: 'shell.toggleTheme',
-      label: '테마 전환',
+      id: "shell.toggleTheme",
+      label: "테마 전환",
       execute: () => this.toggleTheme(),
     });
-    commandCenterRegistry.registerKeybinding({ id: 'shell.toggleTheme.keybinding', keybinding: 'ctrl+j', actionId: 'shell.toggleTheme' });
+    commandCenterRegistry.registerKeybinding({
+      id: "shell.toggleTheme.keybinding",
+      keybinding: "ctrl+j",
+      actionId: "shell.toggleTheme",
+    });
 
     /**
      * 팔레트를 여는 것 자체가 커맨드다 — VSCode의 `workbench.action.showCommands`와 같은 방식.
@@ -534,40 +551,56 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
      * `IShellViewModel`로 옮겨왔다).
      */
     commandCenterRegistry.registerCommand({
-      id: 'shell.openCommandPalette',
-      label: '커맨드 팔레트 열기',
+      id: "shell.openCommandPalette",
+      label: "커맨드 팔레트 열기",
       execute: () => this.setPaletteOpen(true),
     });
-    commandCenterRegistry.registerKeybinding({ id: 'shell.openCommandPalette.keybinding', keybinding: 'ctrl+k', actionId: 'shell.openCommandPalette' });
+    commandCenterRegistry.registerKeybinding({
+      id: "shell.openCommandPalette.keybinding",
+      keybinding: "ctrl+k",
+      actionId: "shell.openCommandPalette",
+    });
 
     // 활동마다 `<title> 보기` — VSCode의 `workbench.view.explorer`(Ctrl+Shift+E) 같은 것. 단축키는
     // 활동을 등록한 쪽이 descriptor에 적는다.
     for (const activity of this.#activityBar.list()) {
       const commandId = `shell.showActivity.${activity.id}`;
-      commandCenterRegistry.registerCommand({ id: commandId, label: `${activity.title} 보기`, execute: () => this.showActivity(activity.id) });
+      commandCenterRegistry.registerCommand({
+        id: commandId,
+        label: `${activity.title} 보기`,
+        execute: () => this.showActivity(activity.id),
+      });
       if (activity.keybinding !== undefined) {
-        commandCenterRegistry.registerKeybinding({ id: `${commandId}.keybinding`, keybinding: activity.keybinding, actionId: commandId });
+        commandCenterRegistry.registerKeybinding({
+          id: `${commandId}.keybinding`,
+          keybinding: activity.keybinding,
+          actionId: commandId,
+        });
       }
     }
 
     commandCenterRegistry.registerCommand({
-      id: 'shell.openSettings',
-      label: '설정 열기',
-      execute: () => this.openTab({ id: 'settings', kind: 'settings', title: '설정' }),
+      id: "shell.openSettings",
+      label: "설정 열기",
+      execute: () => this.openTab({ id: "settings", kind: "settings", title: "설정" }),
     });
-    commandCenterRegistry.registerKeybinding({ id: 'shell.openSettings.keybinding', keybinding: 'ctrl+,', actionId: 'shell.openSettings' });
+    commandCenterRegistry.registerKeybinding({
+      id: "shell.openSettings.keybinding",
+      keybinding: "ctrl+,",
+      actionId: "shell.openSettings",
+    });
 
     commandCenterRegistry.registerCommand({
-      id: 'shell.openKeybindings',
-      label: '키보드 단축키 보기',
-      execute: () => this.openTab({ id: 'keybindings', kind: 'keybindings', title: '키보드 단축키' }),
+      id: "shell.openKeybindings",
+      label: "키보드 단축키 보기",
+      execute: () => this.openTab({ id: "keybindings", kind: "keybindings", title: "키보드 단축키" }),
     });
 
     const isTabContextTarget = (value: unknown): value is TabContextTarget =>
-      typeof value === 'object' && value !== null && 'leafId' in value && 'tabId' in value;
+      typeof value === "object" && value !== null && "leafId" in value && "tabId" in value;
 
     const findLeafTabs = (node: ShellTabPaneNode, leafId: PaneId): readonly ShellTabRow[] | undefined => {
-      if (node.kind === 'leaf') return node.id === leafId ? node.tabs : undefined;
+      if (node.kind === "leaf") return node.id === leafId ? node.tabs : undefined;
       for (const child of node.children) {
         const found = findLeafTabs(child, leafId);
         if (found !== undefined) return found;
@@ -576,7 +609,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     };
 
     const findActiveTabId = (node: ShellTabPaneNode, leafId: PaneId): string | null => {
-      if (node.kind === 'leaf') return node.id === leafId ? node.activeTabId : null;
+      if (node.kind === "leaf") return node.id === leafId ? node.activeTabId : null;
       for (const child of node.children) {
         const found = findActiveTabId(child, leafId);
         if (found !== null) return found;
@@ -609,14 +642,14 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
         },
       });
     };
-    registerSplit('shell.tab.splitLeft', '탭: 왼쪽으로 분할', 'left');
-    registerSplit('shell.tab.splitRight', '탭: 오른쪽으로 분할', 'right');
-    registerSplit('shell.tab.splitTop', '탭: 위로 분할', 'top');
-    registerSplit('shell.tab.splitBottom', '탭: 아래로 분할', 'bottom');
+    registerSplit("shell.tab.splitLeft", "탭: 왼쪽으로 분할", "left");
+    registerSplit("shell.tab.splitRight", "탭: 오른쪽으로 분할", "right");
+    registerSplit("shell.tab.splitTop", "탭: 위로 분할", "top");
+    registerSplit("shell.tab.splitBottom", "탭: 아래로 분할", "bottom");
 
     commandCenterRegistry.registerCommand({
-      id: 'shell.tab.close',
-      label: '탭: 닫기',
+      id: "shell.tab.close",
+      label: "탭: 닫기",
       execute: (context) => {
         const target = targetOf(context);
         if (target === null) return;
@@ -625,8 +658,8 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     });
 
     commandCenterRegistry.registerCommand({
-      id: 'shell.tab.closeOthers',
-      label: '탭: 다른 탭 모두 닫기',
+      id: "shell.tab.closeOthers",
+      label: "탭: 다른 탭 모두 닫기",
       execute: (context) => {
         const target = targetOf(context);
         if (target === null) return;
@@ -635,8 +668,8 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     });
 
     commandCenterRegistry.registerCommand({
-      id: 'shell.tab.closeToRight',
-      label: '탭: 오른쪽 탭 모두 닫기',
+      id: "shell.tab.closeToRight",
+      label: "탭: 오른쪽 탭 모두 닫기",
       execute: (context) => {
         const target = targetOf(context);
         if (target === null) return;
@@ -645,8 +678,8 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     });
 
     commandCenterRegistry.registerCommand({
-      id: 'shell.tab.copyPath',
-      label: '탭: 경로 복사',
+      id: "shell.tab.copyPath",
+      label: "탭: 경로 복사",
       // 탭 id가 곧 워크스페이스 루트 기준 경로다(`ShellTabRow` 계약 참고).
       execute: (context) => {
         const target = targetOf(context);
@@ -661,21 +694,69 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
      * `Menu.Content` 안이라 `CommandContextMenu`가 감싸는 `Trigger`가 중복된다). `group`은
      * VSCode 관례 — `1_split`이 분할, `2_close`가 닫기 계열, `3_copy`가 복사.
      */
-    commandCenterRegistry.registerMenuItem({ id: 'shell.tab.context.splitLeft', menuId: 'shell.tab.context', commandId: 'shell.tab.splitLeft', group: '1_split', order: 0 });
-    commandCenterRegistry.registerMenuItem({ id: 'shell.tab.context.splitRight', menuId: 'shell.tab.context', commandId: 'shell.tab.splitRight', group: '1_split', order: 1 });
-    commandCenterRegistry.registerMenuItem({ id: 'shell.tab.context.splitTop', menuId: 'shell.tab.context', commandId: 'shell.tab.splitTop', group: '1_split', order: 2 });
-    commandCenterRegistry.registerMenuItem({ id: 'shell.tab.context.splitBottom', menuId: 'shell.tab.context', commandId: 'shell.tab.splitBottom', group: '1_split', order: 3 });
-    commandCenterRegistry.registerMenuItem({ id: 'shell.tab.context.close', menuId: 'shell.tab.context', commandId: 'shell.tab.close', group: '2_close', order: 0 });
-    commandCenterRegistry.registerMenuItem({ id: 'shell.tab.context.closeOthers', menuId: 'shell.tab.context', commandId: 'shell.tab.closeOthers', group: '2_close', order: 1 });
-    commandCenterRegistry.registerMenuItem({ id: 'shell.tab.context.closeToRight', menuId: 'shell.tab.context', commandId: 'shell.tab.closeToRight', group: '2_close', order: 2 });
-    commandCenterRegistry.registerMenuItem({ id: 'shell.tab.context.copyPath', menuId: 'shell.tab.context', commandId: 'shell.tab.copyPath', group: '3_copy', order: 0 });
+    commandCenterRegistry.registerMenuItem({
+      id: "shell.tab.context.splitLeft",
+      menuId: "shell.tab.context",
+      commandId: "shell.tab.splitLeft",
+      group: "1_split",
+      order: 0,
+    });
+    commandCenterRegistry.registerMenuItem({
+      id: "shell.tab.context.splitRight",
+      menuId: "shell.tab.context",
+      commandId: "shell.tab.splitRight",
+      group: "1_split",
+      order: 1,
+    });
+    commandCenterRegistry.registerMenuItem({
+      id: "shell.tab.context.splitTop",
+      menuId: "shell.tab.context",
+      commandId: "shell.tab.splitTop",
+      group: "1_split",
+      order: 2,
+    });
+    commandCenterRegistry.registerMenuItem({
+      id: "shell.tab.context.splitBottom",
+      menuId: "shell.tab.context",
+      commandId: "shell.tab.splitBottom",
+      group: "1_split",
+      order: 3,
+    });
+    commandCenterRegistry.registerMenuItem({
+      id: "shell.tab.context.close",
+      menuId: "shell.tab.context",
+      commandId: "shell.tab.close",
+      group: "2_close",
+      order: 0,
+    });
+    commandCenterRegistry.registerMenuItem({
+      id: "shell.tab.context.closeOthers",
+      menuId: "shell.tab.context",
+      commandId: "shell.tab.closeOthers",
+      group: "2_close",
+      order: 1,
+    });
+    commandCenterRegistry.registerMenuItem({
+      id: "shell.tab.context.closeToRight",
+      menuId: "shell.tab.context",
+      commandId: "shell.tab.closeToRight",
+      group: "2_close",
+      order: 2,
+    });
+    commandCenterRegistry.registerMenuItem({
+      id: "shell.tab.context.copyPath",
+      menuId: "shell.tab.context",
+      commandId: "shell.tab.copyPath",
+      group: "3_copy",
+      order: 0,
+    });
   }
 
   /** Model 의 트리를 화면용 트리로 바꾼다 — leaf 의 탭마다 `isPreview`·`isDirty` 를 파생시킨다. */
   #toShellTree(node: TabPaneNode, previewId: string | null): ShellTabPaneNode {
-    if (node.kind === 'leaf') {
+    if (node.kind === "leaf") {
       return {
-        kind: 'leaf',
+        kind: "leaf",
         id: node.id,
         tabs: node.tabs.map((tab) => ({
           id: tab.id,
@@ -689,7 +770,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
       };
     }
     return {
-      kind: 'split',
+      kind: "split",
       id: node.id,
       orientation: node.orientation,
       children: node.children.map((child) => this.#toShellTree(child, previewId)),
@@ -699,12 +780,12 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
 
   /** 트리 어디든 재귀로 내려가 `leafId`를 찾아 갱신한다 — leaf 를 다른 노드(예: split)로 바꿀 수도 있다(분할). */
   #replaceLeaf(node: TabPaneNode, leafId: PaneId, replace: (leaf: TabPaneLeaf) => TabPaneNode): TabPaneNode {
-    if (node.kind === 'leaf') return node.id === leafId ? replace(node) : node;
+    if (node.kind === "leaf") return node.id === leafId ? replace(node) : node;
     return { ...node, children: node.children.map((child) => this.#replaceLeaf(child, leafId, replace)) };
   }
 
   #findLeaf(node: TabPaneNode, leafId: PaneId): TabPaneLeaf | null {
-    if (node.kind === 'leaf') return node.id === leafId ? node : null;
+    if (node.kind === "leaf") return node.id === leafId ? node : null;
     for (const child of node.children) {
       const found = this.#findLeaf(child, leafId);
       if (found) return found;
@@ -713,30 +794,35 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   }
 
   #firstLeafId(node: TabPaneNode): PaneId {
-    if (node.kind === 'leaf') return node.id;
+    if (node.kind === "leaf") return node.id;
     const [first] = node.children;
     return first ? this.#firstLeafId(first) : ROOT_PANE_ID;
   }
 
   /** 빈 leaf를 걷어내고, 자식이 하나만 남은 split은 그 자식으로 대체한다. 전부 사라지면 `null`. */
   #pruneTree(node: TabPaneNode): TabPaneNode | null {
-    if (node.kind === 'leaf') return node.tabs.length > 0 ? node : null;
-    const survivors = node.children.map((child) => this.#pruneTree(child)).filter((child): child is TabPaneNode => child !== null);
+    if (node.kind === "leaf") return node.tabs.length > 0 ? node : null;
+    const survivors = node.children
+      .map((child) => this.#pruneTree(child))
+      .filter((child): child is TabPaneNode => child !== null);
     const [only, second] = survivors;
     if (!only) return null;
     return second ? { ...node, children: survivors } : { ...only, size: node.size };
   }
 
   #resizeChild(node: TabPaneNode, branchId: PaneId, childId: PaneId, nextSize: number): TabPaneNode {
-    if (node.kind === 'leaf') return node;
+    if (node.kind === "leaf") return node;
     if (node.id === branchId) {
-      return { ...node, children: node.children.map((child) => (child.id === childId ? { ...child, size: nextSize } : child)) };
+      return {
+        ...node,
+        children: node.children.map((child) => (child.id === childId ? { ...child, size: nextSize } : child)),
+      };
     }
     return { ...node, children: node.children.map((child) => this.#resizeChild(child, branchId, childId, nextSize)) };
   }
 
   #retargetTree(node: TabPaneNode, retarget: (id: string) => string): TabPaneNode {
-    if (node.kind === 'leaf') {
+    if (node.kind === "leaf") {
       const tabs = node.tabs.map((tab) => {
         const id = retarget(tab.id);
         return id === tab.id ? tab : { ...tab, id, title: this.#nameOf(id) };
@@ -753,7 +839,9 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   #commit(tree: TabPaneNode, preferredActiveLeafId: PaneId): void {
     const pruned = this.#pruneTree(tree) ?? ShellViewModel.#EMPTY_ROOT;
     this.#tabsModel.setTree(pruned);
-    const activeLeafId = this.#findLeaf(pruned, preferredActiveLeafId) ? preferredActiveLeafId : this.#firstLeafId(pruned);
+    const activeLeafId = this.#findLeaf(pruned, preferredActiveLeafId)
+      ? preferredActiveLeafId
+      : this.#firstLeafId(pruned);
     this.#tabsModel.setActiveLeafId(activeLeafId);
   }
 
@@ -769,7 +857,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
 
   /** 경로의 마지막 조각. 폰의 탭 스트립에는 경로 전체가 들어가지 않는다. */
   #nameOf(path: string): string {
-    return path.split('/').pop() ?? path;
+    return path.split("/").pop() ?? path;
   }
 
   #isActivityId(id: string): boolean {
@@ -798,5 +886,4 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   #computeTree() {
     return this.#toShellTree(this.#tabsModel.tree, this.#tabsModel.previewTabId);
   }
-
 }

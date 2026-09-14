@@ -5,7 +5,9 @@ describe("openDatabase", () => {
   it("새 DB에 최신 스키마를 만든다", () => {
     const db = openDatabase(":memory:");
     expect(currentVersion(db)).toBe(SCHEMA_VERSION);
-    const tables = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all() as { name: string }[];
+    const tables = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all() as {
+      name: string;
+    }[];
     expect(tables.map((t) => t.name)).toEqual(["events", "schema_version", "sessions"]);
   });
 

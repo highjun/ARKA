@@ -1,4 +1,4 @@
-import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { Component, type ErrorInfo, type ReactNode } from "react";
 
 /** `renderFallback`이 필수다 — 오류를 삼키고 아무것도 안 그리는 상태를 만들지 않는다. */
 export interface ErrorBoundaryProps {

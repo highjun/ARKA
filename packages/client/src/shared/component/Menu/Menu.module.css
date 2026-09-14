@@ -34,7 +34,7 @@
 
 /* 우클릭 메뉴는 항목 문구가 길다(파일 경로·"이름 바꾸기" 같은 동사구) — 좌클릭 드롭다운보다
    넓게 잡는다. 둘을 한 컴포넌트로 합치면서 값 차이를 `data-kind`로 남겼다. */
-.content[data-kind='context'] {
+.content[data-kind="context"] {
   min-width: 220px;
 }
 

@@ -1,1 +1,1 @@
-export { Timestamp } from './Timestamp';
+export { Timestamp } from "./Timestamp";

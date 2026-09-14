@@ -10,9 +10,5 @@ export { PinTabToken } from "./model/IPinTab";
 
 export { DirectoryTreeViewModel } from "./viewmodel/DirectoryTreeViewModel";
 export { FileContentViewModel } from "./viewmodel/FileContentViewModel";
-export {
-  DirectoryTreeViewModelToken,
-} from "./viewmodel/IDirectoryTreeViewModel";
-export {
-  FileContentViewModelToken,
-} from "./viewmodel/IFileContentViewModel";
+export { DirectoryTreeViewModelToken } from "./viewmodel/IDirectoryTreeViewModel";
+export { FileContentViewModelToken } from "./viewmodel/IFileContentViewModel";

@@ -1,4 +1,4 @@
-import { createToken, type Disposable } from '#core/di';
+import { createToken, type Disposable } from "#core/di";
 /**
  * 화면이 그리는 파일 하나.
  *

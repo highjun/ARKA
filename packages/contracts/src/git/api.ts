@@ -34,7 +34,9 @@ export type GitStatusResponse = z.infer<typeof GitStatusResponse>;
 /** `GET /api/git/diff?path=&staged=` */
 export const GitDiffRequest = z.object({
   path: z.string().min(1),
-  staged: z.preprocess((value) => (value === "true" ? true : value === "false" ? false : value), z.boolean()).default(false),
+  staged: z
+    .preprocess((value) => (value === "true" ? true : value === "false" ? false : value), z.boolean())
+    .default(false),
 });
 export type GitDiffRequest = z.infer<typeof GitDiffRequest>;
 

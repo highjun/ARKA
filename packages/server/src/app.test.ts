@@ -28,8 +28,7 @@ const buildApp = () =>
     startedAt: "2026-09-09T00:00:00.000Z",
   }).app;
 
-describe('createApp', () => {
-
+describe("createApp", () => {
   beforeAll(async () => {
     workspaceRoot = realpathSync(await mkdtemp(path.join(os.tmpdir(), "arka-app-")));
     await writeFile(path.join(workspaceRoot, "a.txt"), "hello");
@@ -105,7 +104,10 @@ describe('createApp', () => {
     it("/api/search가 워크스페이스를 찾는다", async () => {
       const response = await buildApp().request("/api/search?query=hel&caseSensitive=false", withProtocol());
       expect(response.status).toBe(200);
-      expect(await response.json()).toMatchObject({ matches: [{ path: "a.txt", line: 1, column: 1, preview: "hello" }], truncated: false });
+      expect(await response.json()).toMatchObject({
+        matches: [{ path: "a.txt", line: 1, column: 1, preview: "hello" }],
+        truncated: false,
+      });
       const bad = await buildApp().request("/api/search?query=", withProtocol());
       expect(bad.status).toBe(400);
     });
@@ -167,7 +169,11 @@ describe('createApp', () => {
       while (boundary !== -1) {
         const frame = buffer.slice(0, boundary);
         buffer = buffer.slice(boundary + 2);
-        const data = frame.split("\n").filter((line) => line.startsWith("data:")).map((line) => line.slice(5).trim()).join("");
+        const data = frame
+          .split("\n")
+          .filter((line) => line.startsWith("data:"))
+          .map((line) => line.slice(5).trim())
+          .join("");
         if (data !== "") frames.push(JSON.parse(data));
         boundary = buffer.indexOf("\n\n");
       }
@@ -207,7 +213,11 @@ describe('createApp', () => {
       const stream = await app.request(`/api/agent/sessions/${session.id}/events?since=0`, withProtocol());
       expect(stream.headers.get("content-type")).toContain("text/event-stream");
       const frames = await readFrames(stream, 3);
-      expect(frames.map((f) => (f as { type: string }).type)).toEqual(["session.renamed", "run.started", "thinking.delta"]);
+      expect(frames.map((f) => (f as { type: string }).type)).toEqual([
+        "session.renamed",
+        "run.started",
+        "thinking.delta",
+      ]);
     });
 
     it("도는 Run이 있으면 409 RunInProgress", async () => {

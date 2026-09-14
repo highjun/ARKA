@@ -1,19 +1,19 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Menu } from '#component/Menu';
-import { ActivityBar } from './index';
-import type { ActivityBarItem } from './index';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Menu } from "#component/Menu";
+import { ActivityBar } from "./index";
+import type { ActivityBarItem } from "./index";
 
 const ITEMS: readonly ActivityBarItem[] = [
-  { id: 'files', iconId: 'files', label: '탐색기' },
-  { id: 'search', iconId: 'search', label: '검색' },
-  { id: 'sourceControl', iconId: 'sourceControl', label: '소스 제어' },
-  { id: 'agent', iconId: 'brain', label: '에이전트' },
+  { id: "files", iconId: "files", label: "탐색기" },
+  { id: "search", iconId: "search", label: "검색" },
+  { id: "sourceControl", iconId: "sourceControl", label: "소스 제어" },
+  { id: "agent", iconId: "brain", label: "에이전트" },
 ];
 
 const meta = {
-  title: 'workbench/ActivityBar',
+  title: "workbench/ActivityBar",
   component: ActivityBar,
-  args: { items: ITEMS, defaultActiveId: 'files', onSelect: () => undefined },
+  args: { items: ITEMS, defaultActiveId: "files", onSelect: () => undefined },
   decorators: [
     (Story) => (
       <div style={{ height: 480, width: 48 }}>

@@ -1,4 +1,4 @@
-import { createTextClipboardPort } from './shared';
+import { createTextClipboardPort } from "./shared";
 
 /**
  * mock 없이 실제 환경에 대고 계약을 본다. **jsdom 은 `navigator.clipboard` 도
@@ -10,16 +10,16 @@ import { createTextClipboardPort } from './shared';
  * 실제로 복사가 일어나는지는 브라우저 러너 없이 볼 수 없다. 그건 mock 으로 메울 문제가 아니라
  * 러너를 들일지 말지의 문제라, 여기서는 검증 범위를 정직하게 좁힌다.
  */
-describe('createTextClipboardPort', () => {
-  it('클립보드 수단이 없어도 던지지 않고 `false` 를 돌려준다', async () => {
+describe("createTextClipboardPort", () => {
+  it("클립보드 수단이 없어도 던지지 않고 `false` 를 돌려준다", async () => {
     const clipboard = createTextClipboardPort();
 
-    await expect(clipboard.copy('hello')).resolves.toBe(false);
+    await expect(clipboard.copy("hello")).resolves.toBe(false);
   });
 
-  it('빈 문자열도 같은 계약을 따른다', async () => {
+  it("빈 문자열도 같은 계약을 따른다", async () => {
     const clipboard = createTextClipboardPort();
 
-    await expect(clipboard.copy('')).resolves.toBe(false);
+    await expect(clipboard.copy("")).resolves.toBe(false);
   });
 });

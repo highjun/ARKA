@@ -1,5 +1,5 @@
-import { createRegistry } from '#core/registry';
-import { matchKeybinding } from '#core/menu';
+import { createRegistry } from "#core/registry";
+import { matchKeybinding } from "#core/menu";
 import type {
   ICommandCenterRegistry,
   CommandDescriptor,
@@ -10,7 +10,7 @@ import type {
   KeybindingRegistry,
   MenuItemDescriptor,
   MenuRegistry,
-} from './ICommandCenterRegistry';
+} from "./ICommandCenterRegistry";
 
 /** `ICommandCenterRegistry`의 유일한 구현체 — 네 레지스트리 모두 `core`의 `createRegistry()`로 만든다. */
 export class CommandCenterRegistry implements ICommandCenterRegistry {

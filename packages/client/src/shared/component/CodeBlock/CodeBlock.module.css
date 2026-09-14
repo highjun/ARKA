@@ -87,22 +87,22 @@
   color: var(--fgColor-muted);
 }
 
-.token[data-token='keyword'] {
+.token[data-token="keyword"] {
   color: var(--codeMirror-syntax-fgColor-keyword);
 }
 
-.token[data-token='string'] {
+.token[data-token="string"] {
   color: var(--codeMirror-syntax-fgColor-string);
 }
 
-.token[data-token='comment'] {
+.token[data-token="comment"] {
   color: var(--codeMirror-syntax-fgColor-comment);
 }
 
-.token[data-token='number'] {
+.token[data-token="number"] {
   color: var(--codeMirror-syntax-fgColor-constant);
 }
 
-.token[data-token='function'] {
+.token[data-token="function"] {
   color: var(--codeMirror-syntax-fgColor-entity);
 }

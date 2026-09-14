@@ -9,7 +9,11 @@ import type { MiddlewareHandler } from "hono";
  * 매칭하므로 앞에 있는 라우트에는 미들웨어가 걸리지 않는다.
  */
 export const createProtocolGuard = (supported: readonly number[]): MiddlewareHandler => {
-  const body = (message: string): ProtocolErrorBody => ({ code: "VersionMismatch", message, supported: [...supported] });
+  const body = (message: string): ProtocolErrorBody => ({
+    code: "VersionMismatch",
+    message,
+    supported: [...supported],
+  });
   return async (c, next) => {
     const raw = c.req.header(PROTOCOL_HEADER);
     if (raw === undefined) {

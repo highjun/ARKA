@@ -1,17 +1,24 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import type { DragEvent, HTMLAttributes, KeyboardEvent, MouseEvent, ReactNode, Ref } from 'react';
-import { clsx } from 'clsx';
-import { useTreeNavigation, flattenVisible } from './useTreeNavigation';
-import { compactFolderChains, isApplePlatform, nextSelection, selectAll, selectionIncluding, selectionIntentOf } from './shared';
-import type { FlatTreeNode } from './useTreeNavigation';
-import styles from './FileTree.module.css';
-import { Icon } from '#component/Icon';
-import { FileIcon } from '../FileIcon';
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { DragEvent, HTMLAttributes, KeyboardEvent, MouseEvent, ReactNode, Ref } from "react";
+import { clsx } from "clsx";
+import { useTreeNavigation, flattenVisible } from "./useTreeNavigation";
+import {
+  compactFolderChains,
+  isApplePlatform,
+  nextSelection,
+  selectAll,
+  selectionIncluding,
+  selectionIntentOf,
+} from "./shared";
+import type { FlatTreeNode } from "./useTreeNavigation";
+import styles from "./FileTree.module.css";
+import { Icon } from "#component/Icon";
+import { FileIcon } from "../FileIcon";
 
 /** 워크스페이스 루트 기준 경로다 — 트리 안에서 유일하다. */
 export type FileTreeItemId = string;
 /** 폴더만 펼칠 수 있고 앞자리에 셰브론이 온다. */
-type FileTreeItemType = 'folder' | 'file';
+type FileTreeItemType = "folder" | "file";
 
 /** 트리가 그리는 데 필요한 최소 정보. 자식은 `children`으로 재귀한다. */
 export interface FileTreeItem {
@@ -36,7 +43,7 @@ export interface FileTreeItem {
  * 주석 참고). 기본은 `none`이다 — 실제 소비처(`apps/workbench`)가 이미 항상 패널 안에 꽉 채워
  * 쓴다. 독립된 미리보기처럼 스스로 경계가 필요할 때만 `bordered`로 바꾼다.
  */
-type FileTreeChrome = 'bordered' | 'none';
+type FileTreeChrome = "bordered" | "none";
 
 /**
  * props를 라이브러리 타입에서 파생시키지 않고 직접 선언한다 — 파생시키면 계약이 그 라이브러리를
@@ -57,9 +64,9 @@ interface RowProps {
   readonly onRowClick: (node: FlatTreeNode, event: MouseEvent<HTMLElement>) => void;
   readonly onRowDoubleClick: (node: FlatTreeNode, event: MouseEvent<HTMLElement>) => void;
   readonly onRowContextMenu: (node: FlatTreeNode, event: MouseEvent<HTMLElement>) => void;
-  readonly onKeyDown: ReturnType<typeof useTreeNavigation>['onRowKeyDown'];
-  readonly registerNode: ReturnType<typeof useTreeNavigation>['registerNode'];
-  readonly setFocusedId: ReturnType<typeof useTreeNavigation>['setFocusedId'];
+  readonly onKeyDown: ReturnType<typeof useTreeNavigation>["onRowKeyDown"];
+  readonly registerNode: ReturnType<typeof useTreeNavigation>["registerNode"];
+  readonly setFocusedId: ReturnType<typeof useTreeNavigation>["setFocusedId"];
   /** `onItemDrop`이 있을 때만 true — 없으면 항목이 아예 `draggable`이 안 된다. */
   readonly dndEnabled: boolean;
   readonly dropTargetId: FileTreeItemId | undefined;
@@ -81,7 +88,15 @@ interface RowProps {
  * `stopPropagation`을 여기서 건다 — 안 그러면 이 `<input>`을 감싼 행의 `onKeyDown`(트리 키보드
  * 내비게이션, 방향키로 행을 옮기는 등)이 같은 키 입력에 또 반응한다.
  */
-const EditableLabel = ({ value, onCommit, onCancel }: { readonly value: string; readonly onCommit: (next: string) => void; readonly onCancel: () => void }) => {
+const EditableLabel = ({
+  value,
+  onCommit,
+  onCancel,
+}: {
+  readonly value: string;
+  readonly onCommit: (next: string) => void;
+  readonly onCancel: () => void;
+}) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -94,18 +109,18 @@ const EditableLabel = ({ value, onCommit, onCancel }: { readonly value: string; 
   return (
     <input
       ref={inputRef}
-      className={styles['labelInput']}
+      className={styles["labelInput"]}
       defaultValue={value}
       onClick={(event) => event.stopPropagation()}
       onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
         event.stopPropagation();
-        if (event.key === 'Enter') {
+        if (event.key === "Enter") {
           // `blur()`를 직접 부르지 않는다 — 그러면 이 이벤트 안에서 `onBlur`도 동기적으로 튀어
           // 커밋이 두 번 불린다. 부모가 `editingId`를 지우면 이 입력은 blur 이벤트 없이 그냥
           // 사라진다(언마운트는 blur를 발생시키지 않는다).
           event.preventDefault();
           onCommit(event.currentTarget.value);
-        } else if (event.key === 'Escape') {
+        } else if (event.key === "Escape") {
           event.preventDefault();
           onCancel();
         }
@@ -146,7 +161,7 @@ const Row = ({
   onEditCancel,
 }: RowProps) => {
   const { item, level } = node;
-  const isFolder = item.type === 'folder';
+  const isFolder = item.type === "folder";
   const expanded = isFolder && expandedIds.has(item.id);
   const isSelected = selectedIds.has(item.id);
   const isEditing = editingId === item.id;
@@ -196,11 +211,11 @@ const Row = ({
       aria-selected={item.disabled ? undefined : isSelected}
       aria-disabled={item.disabled || undefined}
       tabIndex={item.id === focusedId ? 0 : -1}
-      data-active={isSelected ? '' : undefined}
+      data-active={isSelected ? "" : undefined}
       // 지금 드래그 중인 항목이 이 폴더 위에 있다 — `onItemDrop`이 없으면(`dndEnabled` false)
       // 애초에 드래그 자체가 안 시작되므로 이 값도 항상 비어 있다.
-      data-drop={dropTargetId === item.id ? 'inside' : undefined}
-      className={styles['item']}
+      data-drop={dropTargetId === item.id ? "inside" : undefined}
+      className={styles["item"]}
       draggable={dndEnabled && !item.disabled}
       onDragStart={(event) => onRowDragStart(node, event)}
       onDragEnter={(event) => onRowDragOver(node, event)}
@@ -222,14 +237,18 @@ const Row = ({
       onContextMenu={handleContextMenu}
     >
       <div
-        className={styles['row']}
+        className={styles["row"]}
         // 깊이별 들여쓰기 + 패널 가장자리로부터의 기본 인셋(`--space-sm`, `.row`의
         // `margin-inline` 음수 상쇄와 짝) — 인라인 스타일이 CSS 클래스보다 항상 이기므로
         // `.row`의 `padding-inline`으로는 이 값을 못 준다, 여기서 직접 더한다.
         style={{ paddingLeft: `calc(${level - 1} * var(--space-md) + var(--space-sm))` }}
       >
-        <span className={styles['marker']} aria-hidden="true">
-          {isFolder ? <Icon iconId={expanded ? 'chevronDown' : 'chevronRight'} size="sm" /> : <FileIcon fileName={item.name} className={styles['fileIcon']} />}
+        <span className={styles["marker"]} aria-hidden="true">
+          {isFolder ? (
+            <Icon iconId={expanded ? "chevronDown" : "chevronRight"} size="sm" />
+          ) : (
+            <FileIcon fileName={item.name} className={styles["fileIcon"]} />
+          )}
         </span>
         {isEditing ? (
           <EditableLabel
@@ -240,22 +259,24 @@ const Row = ({
         ) : (
           // 긴 이름은 ellipsis로 잘린다(`.label`) — `title`이 네이티브 hover 툴팁으로 전체 이름을
           // 보여준다. VSCode·JetBrains 등 대부분의 파일 탐색기가 wrap 대신 이 방식을 쓴다.
-          <span className={styles['label']} title={item.name}>
+          <span className={styles["label"]} title={item.name}>
             {item.name}
           </span>
         )}
         {/* 이 행 자체에 관련된 요청(자식 목록 로딩·편집 커밋 등)이 진행 중이다. */}
-        {item.loading ? <Icon iconId="loading" size="sm" className={styles['trailingSpinner']} aria-label="처리 중" /> : null}
+        {item.loading ? (
+          <Icon iconId="loading" size="sm" className={styles["trailingSpinner"]} aria-label="처리 중" />
+        ) : null}
       </div>
       {isFolder && expanded ? (
-        <ul role="group" className={styles['group']}>
+        <ul role="group" className={styles["group"]}>
           {/* 이 그룹(= 이 폴더의 자식들)이 공유하는 들여쓰기 안내선 하나 — 자식 행 자신의
               `paddingLeft`(아래 재귀 호출에서 `level + 1`)와 마커 칸 중앙에 맞춘 x좌표를 인라인
               스타일로 직접 준다(CSS 커스텀 프로퍼티로 다리를 놓으면 stylelint의 Primer 토큰
               검사가 "알 수 없는 커스텀 프로퍼티"로 오탐한다). */}
           <span
             aria-hidden="true"
-            className={styles['guide']}
+            className={styles["guide"]}
             style={{ left: `calc(${level} * var(--space-md) + var(--space-sm) + var(--base-size-20) / 2)` }}
           />
           {item.children?.map((child) => (
@@ -289,7 +310,7 @@ const Row = ({
 };
 
 /** `onSelect`·`onContextMenu`를 가로챈다 — 행 단위로 다시 정의한다. */
-export interface FileTreeProps extends Omit<HTMLAttributes<HTMLElement>, 'children' | 'onSelect' | 'onContextMenu'> {
+export interface FileTreeProps extends Omit<HTMLAttributes<HTMLElement>, "children" | "onSelect" | "onContextMenu"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLElement>;
   /** 트리에 표시할 항목(폴더·파일) — 계층 구조 자체가 이 목록의 `children`으로 표현된다. */
@@ -381,12 +402,12 @@ export interface FileTreeProps extends Omit<HTMLAttributes<HTMLElement>, 'childr
  */
 export const FileTree = ({
   items,
-  chrome = 'none',
+  chrome = "none",
   expandedIds,
   defaultExpandedIds,
   selectedIds,
   defaultSelectedIds,
-  emptyLabel = '파일이 없습니다',
+  emptyLabel = "파일이 없습니다",
   onToggleFolder,
   onExpandedIdsChange,
   onSelectedIdsChange,
@@ -401,9 +422,13 @@ export const FileTree = ({
   ref,
   ...props
 }: FileTreeProps) => {
-  const [uncontrolledExpandedIds, setUncontrolledExpandedIds] = useState<readonly FileTreeItemId[]>(defaultExpandedIds ?? []);
+  const [uncontrolledExpandedIds, setUncontrolledExpandedIds] = useState<readonly FileTreeItemId[]>(
+    defaultExpandedIds ?? [],
+  );
   const resolvedExpandedIds = expandedIds ?? uncontrolledExpandedIds;
-  const [uncontrolledSelectedIds, setUncontrolledSelectedIds] = useState<readonly FileTreeItemId[]>(defaultSelectedIds ?? []);
+  const [uncontrolledSelectedIds, setUncontrolledSelectedIds] = useState<readonly FileTreeItemId[]>(
+    defaultSelectedIds ?? [],
+  );
   const resolvedSelectedIds = selectedIds ?? uncontrolledSelectedIds;
   const anchorRef = useRef<FileTreeItemId | undefined>(resolvedSelectedIds[0]);
   // VSCode의 `explorer.compactFolders`처럼, 폴더 하나만 자식으로 둔 체인을 한 행("a/b/c")으로
@@ -422,7 +447,9 @@ export const FileTree = ({
   const [dropTargetId, setDropTargetId] = useState<FileTreeItemId | undefined>(undefined);
 
   const handleToggleFolder = (item: FileTreeItem, expanded: boolean) => {
-    const nextExpandedIds = expanded ? [...resolvedExpandedIds, item.id] : resolvedExpandedIds.filter((id) => id !== item.id);
+    const nextExpandedIds = expanded
+      ? [...resolvedExpandedIds, item.id]
+      : resolvedExpandedIds.filter((id) => id !== item.id);
     if (expandedIds === undefined) setUncontrolledExpandedIds(nextExpandedIds);
     onToggleFolder?.(item, expanded);
     onExpandedIdsChange?.(nextExpandedIds);
@@ -448,14 +475,14 @@ export const FileTree = ({
     if (item.disabled) return;
     anchorRef.current = item.id;
     commitSelection([item.id]);
-    if (item.type === 'folder') handleToggleFolder(item, !expandedSet.has(item.id));
+    if (item.type === "folder") handleToggleFolder(item, !expandedSet.has(item.id));
     item.onClick?.();
     onActivate?.(item);
   };
 
   const handleExtendSelection = (node: FlatTreeNode) => {
     const { ids, anchorId } = nextSelection({
-      intent: 'range',
+      intent: "range",
       current: resolvedSelectedIds,
       order: orderRows,
       anchorId: anchorRef.current,
@@ -492,13 +519,19 @@ export const FileTree = ({
     if (isApplePlatform() && event.ctrlKey) return;
 
     const intent = selectionIntentOf(event);
-    if (intent === 'replace') {
+    if (intent === "replace") {
       activateNode(node);
       setFocusedId(item.id);
       return;
     }
 
-    const { ids, anchorId } = nextSelection({ intent, current: resolvedSelectedIds, order: orderRows, anchorId: anchorRef.current, targetId: item.id });
+    const { ids, anchorId } = nextSelection({
+      intent,
+      current: resolvedSelectedIds,
+      order: orderRows,
+      anchorId: anchorRef.current,
+      targetId: item.id,
+    });
     anchorRef.current = anchorId;
     commitSelection(ids);
     // jsdom의 `fireEvent.click`은 실제 포커스를 옮기지 않는다 — roving tabindex와 다음 키보드
@@ -540,7 +573,7 @@ export const FileTree = ({
    */
   const handleRowDragStart = (node: FlatTreeNode, event: DragEvent<HTMLElement>) => {
     event.stopPropagation();
-    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.effectAllowed = "move";
     draggedIdRef.current = node.item.id;
   };
 
@@ -549,7 +582,7 @@ export const FileTree = ({
   const handleRowDragOver = (node: FlatTreeNode, event: DragEvent<HTMLElement>) => {
     event.stopPropagation();
     const draggedId = draggedIdRef.current;
-    if (draggedId === undefined || node.item.type !== 'folder' || node.item.id === draggedId) return;
+    if (draggedId === undefined || node.item.type !== "folder" || node.item.id === draggedId) return;
     event.preventDefault();
     setDropTargetId((current) => (current === node.item.id ? current : node.item.id));
   };
@@ -558,7 +591,7 @@ export const FileTree = ({
     event.stopPropagation();
     event.preventDefault();
     const draggedId = draggedIdRef.current;
-    if (draggedId !== undefined && node.item.type === 'folder' && node.item.id !== draggedId) {
+    if (draggedId !== undefined && node.item.type === "folder" && node.item.id !== draggedId) {
       const source = flat.find((flatNode) => flatNode.item.id === draggedId)?.item;
       if (source) onItemDrop?.(source, node.item);
     }
@@ -578,11 +611,11 @@ export const FileTree = ({
         // HTMLElement로 두므로(위 FileTreeProps 주석), 각 분기에서 실제 태그에 맞춰 좁힌다.
         ref={ref as Ref<HTMLDivElement>}
         data-chrome={chrome}
-        className={clsx(className, styles['root'])}
+        className={clsx(className, styles["root"])}
         {...props}
         data-component="FileTree"
       >
-        <div className={styles['empty']}>{emptyLabel}</div>
+        <div className={styles["empty"]}>{emptyLabel}</div>
       </div>
     );
   }
@@ -594,7 +627,7 @@ export const FileTree = ({
       role="tree"
       aria-multiselectable="true"
       data-chrome={chrome}
-      className={clsx(className, styles['root'])}
+      className={clsx(className, styles["root"])}
       {...props}
       data-component="FileTree"
     >
@@ -625,4 +658,3 @@ export const FileTree = ({
     </ul>
   );
 };
-

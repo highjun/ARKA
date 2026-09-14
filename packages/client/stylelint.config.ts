@@ -12,7 +12,12 @@ const browserCompat = [
     ...options,
     allow: {
       ...options.allow,
-      features: [...options.allow.features, "properties.interpolate-size", "properties.text-wrap", "properties.-webkit-tap-highlight-color"],
+      features: [
+        ...options.allow.features,
+        "properties.interpolate-size",
+        "properties.text-wrap",
+        "properties.-webkit-tap-highlight-color",
+      ],
     },
   },
 ];
@@ -46,11 +51,17 @@ export default {
     // 파일에 없는 이름을 전부 미지의 것으로 본다(172건). 실재 여부는 타입이 아니라 브라우저가
     // 판정하고, 없는 토큰은 값이 비어 화면에서 즉시 드러난다(2026-08-23에 그렇게 발견했다).
     "csstools/value-no-unknown-custom-properties": null,
-    "color-no-hex": [true, { message: "색을 직접 적지 마세요 — Primer 토큰(`var(--fgColor-*)`, `var(--bgColor-*)`)을 참조하세요." }],
+    "color-no-hex": [
+      true,
+      { message: "색을 직접 적지 마세요 — Primer 토큰(`var(--fgColor-*)`, `var(--bgColor-*)`)을 참조하세요." },
+    ],
     "color-named": ["never", { message: "색 이름을 쓰지 마세요 — Primer 토큰을 참조하세요." }],
     "function-disallowed-list": [
       ["rgb", "rgba", "hsl", "hsla"],
-      { message: "색 함수를 직접 쓰지 마세요 — Primer 토큰을 참조하세요. 투명도가 필요하면 `--overlay-*`·`--*-muted` 토큰이 있습니다." },
+      {
+        message:
+          "색 함수를 직접 쓰지 마세요 — Primer 토큰을 참조하세요. 투명도가 필요하면 `--overlay-*`·`--*-muted` 토큰이 있습니다.",
+      },
     ],
     // CSS Modules의 클래스명·keyframes 이름은 JS 식별자다(`styles['brandGroup']`) — kebab-case 강제를 끈다.
     "selector-class-pattern": null,

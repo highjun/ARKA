@@ -7,8 +7,7 @@ import { z } from "zod";
 
 /** 조립된 실행기 설정. `anthropic`이면 키가 이미 검증돼 있다 — 조립부가 다시 확인하지 않는다. */
 export type AgentConfig =
-  | { readonly runner: "scripted" }
-  | { readonly runner: "anthropic"; readonly apiKey: string; readonly model: string };
+  { readonly runner: "scripted" } | { readonly runner: "anthropic"; readonly apiKey: string; readonly model: string };
 
 /**
  * **스위치와 비밀을 가른다.** 예전에는 `ARKA_ANTHROPIC_API_KEY`의 유무가 실행기를 겸해서
@@ -25,7 +24,11 @@ export const AgentEnv = z
     // `scripted`면 키를 아예 보지 않는다 — 키가 남아 있어도 모드는 안 바뀐다.
     if (env.ARKA_AGENT_RUNNER === "scripted") return { runner: "scripted" };
     if (env.ARKA_ANTHROPIC_API_KEY === undefined) {
-      ctx.addIssue({ code: "custom", path: ["ARKA_ANTHROPIC_API_KEY"], message: "required when ARKA_AGENT_RUNNER=anthropic" });
+      ctx.addIssue({
+        code: "custom",
+        path: ["ARKA_ANTHROPIC_API_KEY"],
+        message: "required when ARKA_AGENT_RUNNER=anthropic",
+      });
       return z.NEVER;
     }
     return { runner: "anthropic", apiKey: env.ARKA_ANTHROPIC_API_KEY, model: env.ARKA_ANTHROPIC_MODEL };

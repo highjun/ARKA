@@ -1,6 +1,6 @@
-import { apiHeaders } from '#core/http';
-import { DirectoryListing, FileContent, FileErrorBody } from '#contracts';
-import type { FileEntryType, IWorkspaceFiles } from '../model/IWorkspaceFiles';
+import { apiHeaders } from "#core/http";
+import { DirectoryListing, FileContent, FileErrorBody } from "#contracts";
+import type { FileEntryType, IWorkspaceFiles } from "../model/IWorkspaceFiles";
 
 /**
  * 서버(`features/filesystem`)의 파일 API 를 읽는 구현.
@@ -25,17 +25,17 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
   static readonly #TIMEOUT_MS = 10_000;
 
   async list(path: string): Promise<DirectoryListing> {
-    return DirectoryListing.parse(await this.#get('/api/files', path));
+    return DirectoryListing.parse(await this.#get("/api/files", path));
   }
 
   async read(path: string): Promise<FileContent> {
-    return FileContent.parse(await this.#get('/api/files/content', path));
+    return FileContent.parse(await this.#get("/api/files/content", path));
   }
 
   async write(path: string, content: string): Promise<void> {
-    const response = await this.#fetch('/api/files/content', {
-      method: 'PUT',
-      headers: { ...apiHeaders(), 'content-type': 'application/json' },
+    const response = await this.#fetch("/api/files/content", {
+      method: "PUT",
+      headers: { ...apiHeaders(), "content-type": "application/json" },
       body: JSON.stringify({ path, content }),
     });
     if (!response.ok) {
@@ -45,9 +45,9 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
   }
 
   async create(path: string, type: FileEntryType): Promise<void> {
-    const response = await this.#fetch('/api/files', {
-      method: 'POST',
-      headers: { ...apiHeaders(), 'content-type': 'application/json' },
+    const response = await this.#fetch("/api/files", {
+      method: "POST",
+      headers: { ...apiHeaders(), "content-type": "application/json" },
       body: JSON.stringify({ path, type }),
     });
     if (!response.ok) {
@@ -57,9 +57,9 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
   }
 
   async move(from: string, to: string): Promise<void> {
-    const response = await this.#fetch('/api/files/move', {
-      method: 'POST',
-      headers: { ...apiHeaders(), 'content-type': 'application/json' },
+    const response = await this.#fetch("/api/files/move", {
+      method: "POST",
+      headers: { ...apiHeaders(), "content-type": "application/json" },
       body: JSON.stringify({ from, to }),
     });
     if (!response.ok) {
@@ -70,7 +70,7 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
 
   async remove(path: string): Promise<void> {
     const response = await this.#fetch(`/api/files?${new URLSearchParams({ path }).toString()}`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: apiHeaders(),
     });
     if (!response.ok) {
@@ -98,7 +98,7 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
       return await fetch(url, { ...init, signal: AbortSignal.timeout(HttpWorkspaceFilesAdapter.#TIMEOUT_MS) });
     } catch (error) {
       // 중단은 브라우저마다 이름이 갈린다(`TimeoutError`·`AbortError`) — 사람이 읽을 말로 바꾼다.
-      if (error instanceof DOMException) throw new Error('응답이 없다 — 연결을 확인해 주세요.', { cause: error });
+      if (error instanceof DOMException) throw new Error("응답이 없다 — 연결을 확인해 주세요.", { cause: error });
       throw error;
     }
   }
@@ -106,12 +106,11 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
   async #reasonOf(response: Response): Promise<string> {
     try {
       const body = FileErrorBody.safeParse(await response.json());
-      return body.success ? `: ${body.data.message}` : '';
+      return body.success ? `: ${body.data.message}` : "";
     } catch {
-      return '';
+      return "";
     }
   }
-
 }
 
 /** `IWorkspaceFiles`의 실제 구현(`HttpWorkspaceFilesAdapter`)을 만든다. */

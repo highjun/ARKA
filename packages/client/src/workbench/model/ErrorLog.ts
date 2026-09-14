@@ -1,6 +1,6 @@
-import type { Disposable } from '#core/di';
-import { Emitter } from '#core/events';
-import type { ErrorEntry, IErrorLog } from './IErrorLog';
+import type { Disposable } from "#core/di";
+import { Emitter } from "#core/events";
+import type { ErrorEntry, IErrorLog } from "./IErrorLog";
 
 /** `IErrorLog`의 유일한 구현체. 최근 `MAX_ENTRIES`개만 남긴다. */
 export class ErrorLog implements IErrorLog {
@@ -36,6 +36,6 @@ export class ErrorLog implements IErrorLog {
     if (error instanceof Error) {
       return { time, source, name: error.name, message: error.message, stack: error.stack };
     }
-    return { time, source, name: 'NonError', message: String(error), stack: undefined };
+    return { time, source, name: "NonError", message: String(error), stack: undefined };
   }
 }

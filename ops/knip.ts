@@ -52,12 +52,14 @@ const config: KnipConfig = {
         "structure/*.test.ts",
         "*.config.ts",
         "knip.ts",
-        "markdownlint.jsonc",
+        ".markdownlint-cli2.jsonc",
       ],
       project: ["**/*.ts"],
       // 루트 설정이 쓰는 플러그인이 여기 선언돼 있다(위 `"."` 주석) — 이 패키지는 import하지 않는다.
       // `@commitlint/cli`는 CI가 `pnpm --filter ops exec commitlint`로 **바이너리로** 부른다.
-      ignoreDependencies: ["eslint-plugin-package-json", "eslint-plugin-yml", "@commitlint/cli"],
+      // `@commitlint/cli`·`markdownlint-cli2`는 **바이너리로** 부른다(CI와 `lint/run.ts`) — knip은
+      // 헬퍼를 지나는 호출에서 이름을 못 읽는다. `prettier`는 자기 설정 파일로 알아본다.
+      ignoreDependencies: ["eslint-plugin-package-json", "eslint-plugin-yml", "@commitlint/cli", "markdownlint-cli2"],
     },
   },
   /*

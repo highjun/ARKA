@@ -18,13 +18,13 @@
   background-color: var(--control-transparent-bgColor-hover);
 }
 
-.root[data-active='true'] {
+.root[data-active="true"] {
   border-color: var(--borderColor-accent-emphasis);
   background-color: var(--bgColor-accent-muted);
   font-weight: var(--base-text-weight-medium);
 }
 
-.root[data-disabled='true'] {
+.root[data-disabled="true"] {
   cursor: not-allowed;
   opacity: 0.5;
 }

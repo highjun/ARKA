@@ -8,11 +8,11 @@
   color: var(--fgColor-default);
 }
 
-.root[data-kind='thinking'] {
+.root[data-kind="thinking"] {
   border-style: dashed;
 }
 
-.root[data-kind='tool'] {
+.root[data-kind="tool"] {
   border-style: solid;
 }
 
@@ -76,7 +76,7 @@
   /* stylelint-disable-next-line primer/typography -- Primer의 --fontStack-monospace는 시스템
      폰트 스택이다, 우리는 자체 임베드 웹폰트(Cascadia Code, globals.css에서 로드)를 브랜드
      선택으로 쓴다 */
-  font-family: 'Cascadia Code Variable', 'Pretendard Variable', ui-monospace, monospace;
+  font-family: "Cascadia Code Variable", "Pretendard Variable", ui-monospace, monospace;
   font-size: var(--text-codeInline-size);
 }
 

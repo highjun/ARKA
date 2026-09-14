@@ -1,5 +1,5 @@
-import type { ICommandCenterRegistry } from '#core/commands';
-import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
+import type { ICommandCenterRegistry } from "#core/commands";
+import type { IWorkbenchStartup } from "../model/IWorkbenchStartup";
 
 /**
  * 브라우저 키보드 이벤트를 `ctrl+j` 형태 문자열로 정규화한다.
@@ -9,12 +9,12 @@ import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
  */
 const normalizeKeydown = (event: KeyboardEvent): string => {
   const parts: string[] = [];
-  if (event.ctrlKey || event.metaKey) parts.push('ctrl');
-  if (event.altKey) parts.push('alt');
-  if (event.shiftKey) parts.push('shift');
+  if (event.ctrlKey || event.metaKey) parts.push("ctrl");
+  if (event.altKey) parts.push("alt");
+  if (event.shiftKey) parts.push("shift");
   const key = event.key.toLowerCase();
-  if (!['control', 'meta', 'alt', 'shift'].includes(key)) parts.push(key);
-  return parts.join('+');
+  if (!["control", "meta", "alt", "shift"].includes(key)) parts.push(key);
+  return parts.join("+");
 };
 
 /**
@@ -34,7 +34,7 @@ export const createGlobalKeybindings = ({
     if (executed) event.preventDefault();
   };
   return {
-    start: () => window.addEventListener('keydown', onKeydown),
-    stop: () => window.removeEventListener('keydown', onKeydown),
+    start: () => window.addEventListener("keydown", onKeydown),
+    stop: () => window.removeEventListener("keydown", onKeydown),
   };
 };

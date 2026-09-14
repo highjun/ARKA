@@ -33,7 +33,14 @@ export const testEventStoreContract = (name: string, setup: () => IEventStore | 
     });
 
     it("저장한 이벤트를 그대로 돌려준다 — unknown 필드(툴 입력)도 잃지 않는다", () => {
-      const saved = store.append({ sessionId: "a", runId: "r", type: "tool.call", callId: "c", toolId: "echo", input: { text: "x", n: [1, 2] } });
+      const saved = store.append({
+        sessionId: "a",
+        runId: "r",
+        type: "tool.call",
+        callId: "c",
+        toolId: "echo",
+        input: { text: "x", n: [1, 2] },
+      });
       expect(store.listSince("a", 0)[0]).toEqual(saved);
       expect(saved).toMatchObject({ input: { text: "x", n: [1, 2] } });
     });

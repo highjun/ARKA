@@ -1,8 +1,8 @@
-import { useViewModel } from '#core/viewmodel';
-import { ErrorLogToken } from '../model/IErrorLog';
-import { CrashScreen } from '../component/CrashScreen';
-import { ErrorBoundary } from '#utils/errorBoundary';
-import { ShellView } from './ShellView';
+import { useViewModel } from "#core/viewmodel";
+import { ErrorLogToken } from "../model/IErrorLog";
+import { CrashScreen } from "../component/CrashScreen";
+import { ErrorBoundary } from "#utils/errorBoundary";
+import { ShellView } from "./ShellView";
 
 /**
  * 앱의 맨 바깥. 셸이 렌더 중 죽으면 `CrashScreen`으로 바꾸고 오류를 `IErrorLog`에 남긴다.
@@ -14,8 +14,10 @@ export const RootView = () => {
   const errorLog = useViewModel(ErrorLogToken);
   return (
     <ErrorBoundary
-      onError={(error) => errorLog.report(error, 'render')}
-      renderFallback={(error) => <CrashScreen message={`${error.name}: ${error.message}`} onReload={() => location.reload()} />}
+      onError={(error) => errorLog.report(error, "render")}
+      renderFallback={(error) => (
+        <CrashScreen message={`${error.name}: ${error.message}`} onReload={() => location.reload()} />
+      )}
     >
       <ShellView />
     </ErrorBoundary>

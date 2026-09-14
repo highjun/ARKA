@@ -34,32 +34,34 @@ const gitEnv = (): NodeJS.ProcessEnv => {
  * `git -C <root> …`를 셸 없이 실행한다 — 인자가 배열로 가므로 경로에 공백·따옴표가 있어도 그대로다.
  * 실패는 `GitError`로: 저장소 아님 → `NotARepository`, git 없음 → `Unavailable`, 나머지 → `CommandFailed`.
  */
-export const createGitRunner = (root: string): GitRunner => (args, { okExitCodes = [] } = {}) =>
-  new Promise((resolve, reject) => {
-    execFile(
-      "git",
-      ["-C", root, ...args],
-      { timeout: TIMEOUT_MS, maxBuffer: MAX_OUTPUT, env: gitEnv() },
-      (error, stdout, stderr) => {
-        if (error === null) {
-          resolve(stdout);
-          return;
-        }
-        const code = (error as NodeJS.ErrnoException).code;
-        if (typeof code === "number" && okExitCodes.includes(code)) {
-          resolve(stdout);
-          return;
-        }
-        if (code === "ENOENT") {
-          reject(new GitError("Unavailable", "git is not installed on the server"));
-          return;
-        }
-        const detail = stderr.trim() || error.message;
-        if (/not a git repository/iu.test(detail)) {
-          reject(new GitError("NotARepository", detail));
-          return;
-        }
-        reject(new GitError("CommandFailed", detail));
-      },
-    );
-  });
+export const createGitRunner =
+  (root: string): GitRunner =>
+  (args, { okExitCodes = [] } = {}) =>
+    new Promise((resolve, reject) => {
+      execFile(
+        "git",
+        ["-C", root, ...args],
+        { timeout: TIMEOUT_MS, maxBuffer: MAX_OUTPUT, env: gitEnv() },
+        (error, stdout, stderr) => {
+          if (error === null) {
+            resolve(stdout);
+            return;
+          }
+          const code = (error as NodeJS.ErrnoException).code;
+          if (typeof code === "number" && okExitCodes.includes(code)) {
+            resolve(stdout);
+            return;
+          }
+          if (code === "ENOENT") {
+            reject(new GitError("Unavailable", "git is not installed on the server"));
+            return;
+          }
+          const detail = stderr.trim() || error.message;
+          if (/not a git repository/iu.test(detail)) {
+            reject(new GitError("NotARepository", detail));
+            return;
+          }
+          reject(new GitError("CommandFailed", detail));
+        },
+      );
+    });

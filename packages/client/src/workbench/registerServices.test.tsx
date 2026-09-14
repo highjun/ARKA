@@ -33,7 +33,7 @@ import { createApplication } from "./registerServices";
  * 다음 테스트에서 부팅 시 복원돼 같은 텍스트가 사이드바와 탭 양쪽에 뜬다.
  */
 
-describe('registerServices', () => {
+describe("registerServices", () => {
   afterEach(() => {
     localStorage.clear();
   });
@@ -45,7 +45,10 @@ describe('registerServices', () => {
     const agent = new MockAgentBackend();
     container.register(AgentApiToken, { lifetime: "singleton", create: () => agent });
     container.register(AgentEventsToken, { lifetime: "singleton", create: () => agent });
-    container.register(SearchServiceToken, { lifetime: "singleton", create: () => new MockSearchService({ "a.md": "원본" }) });
+    container.register(SearchServiceToken, {
+      lifetime: "singleton",
+      create: () => new MockSearchService({ "a.md": "원본" }),
+    });
     container.register(GitServiceToken, { lifetime: "singleton", create: () => new MockGitService() });
     render(
       <ViewModelProvider container={container}>
@@ -152,7 +155,10 @@ describe('registerServices', () => {
       // React가 잡힌 오류를 console.error로도 내보낸다 — 테스트 출력이 그걸로 덮이지 않게 막는다.
       const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
       const container = createApplication().createScope("test");
-      container.register(WorkspaceFilesToken, { lifetime: "singleton", create: () => new MockWorkspaceFiles({ "a.md": "" }) });
+      container.register(WorkspaceFilesToken, {
+        lifetime: "singleton",
+        create: () => new MockWorkspaceFiles({ "a.md": "" }),
+      });
       // 파일 탭을 그리는 컴포넌트를 터지는 것으로 바꾼다 — 자식 스코프에 다시 등록해 부모를 가린다.
       container.register(TabContentRegistryToken, {
         lifetime: "singleton",

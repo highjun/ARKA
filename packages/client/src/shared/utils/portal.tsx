@@ -1,4 +1,4 @@
-import { createContext, useContext, type ReactNode } from 'react';
+import { createContext, useContext, type ReactNode } from "react";
 
 /**
  * 오버레이(ContextMenu·CommandPalette 등)가 어디로 포탈될지를 정하는 공유 자리 — 자기 DOM을
@@ -11,9 +11,13 @@ import { createContext, useContext, type ReactNode } from 'react';
 const PortalContext = createContext<HTMLElement | undefined>(undefined);
 
 /** `container`가 `undefined`면 각 컴포넌트가 자기 기본값(대개 `document.body`)으로 떨어진다. */
-export const PortalProvider = ({ container, children }: { readonly container: HTMLElement | undefined; readonly children: ReactNode }) => (
-  <PortalContext value={container}>{children}</PortalContext>
-);
+export const PortalProvider = ({
+  container,
+  children,
+}: {
+  readonly container: HTMLElement | undefined;
+  readonly children: ReactNode;
+}) => <PortalContext value={container}>{children}</PortalContext>;
 
 /** Provider가 없으면 `undefined` — 컴포넌트마다 자기 라이브러리의 기본 포탈 대상(대개 `document.body`)에 맡긴다. */
 export const usePortalContainer = (): HTMLElement | undefined => useContext(PortalContext);

@@ -1,7 +1,18 @@
-import { useMemo, useRef, useState } from 'react';
-import type { DragEvent, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
-import type { SplitChildState, SplitContextValue, SplitDropIndicator, SplitLeafHandlers, SplitRootLeafState, SplitState, TabSplitProps, TabTreeLeaf, TabTreeNode, TabTreeSplit } from './Split';
-import type { SplitDropPosition, TabDropZone } from './shared';
+import { useMemo, useRef, useState } from "react";
+import type { DragEvent, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from "react";
+import type {
+  SplitChildState,
+  SplitContextValue,
+  SplitDropIndicator,
+  SplitLeafHandlers,
+  SplitRootLeafState,
+  SplitState,
+  TabSplitProps,
+  TabTreeLeaf,
+  TabTreeNode,
+  TabTreeSplit,
+} from "./Split";
+import type { SplitDropPosition, TabDropZone } from "./shared";
 
 // ─────────────────────────── 계산 ───────────────────────────
 
@@ -21,7 +32,7 @@ const normalizeSizes = (nodes: readonly TabTreeNode[]): number[] => {
 };
 
 /** `onNodeResize`가 없거나 자식이 하나면 크기 조절이 꺼진다. */
-const getSplitState = (node: TabTreeSplit, onNodeResize?: TabSplitProps['onNodeResize']): SplitState => ({
+const getSplitState = (node: TabTreeSplit, onNodeResize?: TabSplitProps["onNodeResize"]): SplitState => ({
   orientation: node.orientation,
   sizes: normalizeSizes(node.children),
   disabledResize: !onNodeResize || node.children.length < 2,
@@ -29,14 +40,16 @@ const getSplitState = (node: TabTreeSplit, onNodeResize?: TabSplitProps['onNodeR
 
 /** 빈 leaf를 걷어내고, 자식이 하나만 남은 split은 그 자식으로 대체한다. 전부 사라지면 `null`. */
 const pruneVisibleTree = (node: TabTreeNode): TabTreeNode | null => {
-  if (node.kind === 'leaf') return node.tabItems.length > 0 ? node : null;
+  if (node.kind === "leaf") return node.tabItems.length > 0 ? node : null;
 
-  const survivors = node.children.map((child) => pruneVisibleTree(child)).filter((child): child is TabTreeNode => child !== null);
+  const survivors = node.children
+    .map((child) => pruneVisibleTree(child))
+    .filter((child): child is TabTreeNode => child !== null);
 
   if (survivors.length === 0) return null;
   if (survivors.length === 1) {
     const only = survivors[0]!;
-    return only.kind === 'leaf' ? { ...only, size: node.size } : { ...only, size: node.size };
+    return only.kind === "leaf" ? { ...only, size: node.size } : { ...only, size: node.size };
   }
   return { ...node, children: survivors };
 };
@@ -48,60 +61,61 @@ const getSplitDropPosition = (event: DragEvent<HTMLElement>, rect: DOMRect): Spl
   const y = (event.clientY - rect.top) / rect.height;
   const edge = 0.22;
 
-  if (x <= edge) return 'left';
-  if (x >= 1 - edge) return 'right';
-  if (y <= edge) return 'top';
-  if (y >= 1 - edge) return 'bottom';
-  return 'center';
+  if (x <= edge) return "left";
+  if (x >= 1 - edge) return "right";
+  if (y <= edge) return "top";
+  if (y >= 1 - edge) return "bottom";
+  return "center";
 };
 
 const getLeafPanelRect = (sectionEl: HTMLElement): DOMRect =>
-  sectionEl.querySelector<HTMLElement>('[role="tabpanel"]')?.getBoundingClientRect() ?? sectionEl.getBoundingClientRect();
+  sectionEl.querySelector<HTMLElement>('[role="tabpanel"]')?.getBoundingClientRect() ??
+  sectionEl.getBoundingClientRect();
 
 /** 드롭 대상이 탭 목록 안이면 `strip`, 아니면 `panel`이다 — DOM 조상을 거슬러 판단한다. */
 const getLeafDropZone = (event: DragEvent<HTMLElement>): TabDropZone =>
-  event.target instanceof HTMLElement && event.target.closest('[role="tablist"]') ? 'strip' : 'panel';
+  event.target instanceof HTMLElement && event.target.closest('[role="tablist"]') ? "strip" : "panel";
 
 const getTransferValue = (event: DragEvent<HTMLElement>, key: string): string => {
   try {
     return event.dataTransfer.getData(key);
   } catch {
-    return '';
+    return "";
   }
 };
 
 /** leaf 하나의 drag/drop 핸들러 — branch 자식과 트리가 leaf 하나뿐인 루트 양쪽에서 재사용한다. */
 const createLeafDragHandlers = (leafId: string, activeTabId: string, shared: SplitContextValue): SplitLeafHandlers => ({
   onDragStart: (event) => {
-    const draggedId = getTransferValue(event, 'text/plain') || activeTabId;
+    const draggedId = getTransferValue(event, "text/plain") || activeTabId;
     shared.dragSourceRef.current = { leafId, tabId: draggedId };
-    event.dataTransfer.setData('application/x-arka-source-leaf', leafId);
-    event.dataTransfer.setData('application/x-arka-tab-id', draggedId);
+    event.dataTransfer.setData("application/x-arka-source-leaf", leafId);
+    event.dataTransfer.setData("application/x-arka-tab-id", draggedId);
   },
   onDragOver: (event) => {
     const zone = getLeafDropZone(event);
     const sameLeaf = shared.dragSourceRef.current?.leafId === leafId;
 
-    if (zone === 'strip') {
+    if (zone === "strip") {
       if (sameLeaf) {
         shared.setDropIndicator((current) => (current?.leafId === leafId ? null : current));
         return;
       }
       event.preventDefault();
-      event.dataTransfer.dropEffect = 'move';
-      shared.setDropIndicator({ leafId, zone: 'strip' });
+      event.dataTransfer.dropEffect = "move";
+      shared.setDropIndicator({ leafId, zone: "strip" });
       return;
     }
 
     const position = getSplitDropPosition(event, getLeafPanelRect(event.currentTarget));
-    if (position === 'center' && sameLeaf) {
+    if (position === "center" && sameLeaf) {
       shared.setDropIndicator((current) => (current?.leafId === leafId ? null : current));
       return;
     }
 
     event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-    shared.setDropIndicator({ leafId, zone: 'panel', position });
+    event.dataTransfer.dropEffect = "move";
+    shared.setDropIndicator({ leafId, zone: "panel", position });
   },
   onDragLeave: (event) => {
     if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
@@ -109,15 +123,16 @@ const createLeafDragHandlers = (leafId: string, activeTabId: string, shared: Spl
   },
   onDropCapture: (event) => {
     const zone = getLeafDropZone(event);
-    const sourceLeafId = getTransferValue(event, 'application/x-arka-source-leaf') || shared.dragSourceRef.current?.leafId;
+    const sourceLeafId =
+      getTransferValue(event, "application/x-arka-source-leaf") || shared.dragSourceRef.current?.leafId;
     const droppedId =
-      getTransferValue(event, 'application/x-arka-tab-id') ||
-      getTransferValue(event, 'text/plain') ||
+      getTransferValue(event, "application/x-arka-tab-id") ||
+      getTransferValue(event, "text/plain") ||
       shared.dragSourceRef.current?.tabId;
 
     if (!sourceLeafId || !droppedId) return;
 
-    if (zone === 'strip') {
+    if (zone === "strip") {
       if (sourceLeafId === leafId) return;
       event.preventDefault();
       event.stopPropagation();
@@ -128,11 +143,11 @@ const createLeafDragHandlers = (leafId: string, activeTabId: string, shared: Spl
     }
 
     const position = getSplitDropPosition(event, getLeafPanelRect(event.currentTarget));
-    if (position === 'center' && sourceLeafId === leafId) return;
+    if (position === "center" && sourceLeafId === leafId) return;
 
     event.preventDefault();
     event.stopPropagation();
-    if (position !== 'center') {
+    if (position !== "center") {
       shared.onTabSplit?.(sourceLeafId, droppedId, position);
     } else {
       shared.onTabMove?.(sourceLeafId, leafId, droppedId);
@@ -189,7 +204,7 @@ export const getRootLeafState = (leaf: TabTreeLeaf, shared: SplitContextValue): 
     node: leaf,
     isActive: shared.activeLeaf === leaf.id,
     dropZone: indicator?.zone ?? null,
-    dropPosition: indicator?.zone === 'panel' ? indicator.position : null,
+    dropPosition: indicator?.zone === "panel" ? indicator.position : null,
     handlers: createLeafDragHandlers(leaf.id, leaf.activeTab, shared),
   };
 };
@@ -209,7 +224,9 @@ export const useSplitBranch = (node: TabTreeSplit, shared: SplitContextValue) =>
 
     const rect = branchElement.getBoundingClientRect();
     const pointerPercent =
-      state.orientation === 'horizontal' ? ((clientX - rect.left) / rect.width) * 100 : ((clientY - rect.top) / rect.height) * 100;
+      state.orientation === "horizontal"
+        ? ((clientX - rect.left) / rect.width) * 100
+        : ((clientY - rect.top) / rect.height) * 100;
     shared.onNodeResize(node.id, childId, clampSize(pointerPercent - (cumulativeSizes[index] ?? 0)));
   };
 
@@ -220,22 +237,23 @@ export const useSplitBranch = (node: TabTreeSplit, shared: SplitContextValue) =>
     shared.setResizingChildId(childId);
     updateChildSize(childId, index, event.clientX, event.clientY);
 
-    const onMove = (moveEvent: globalThis.PointerEvent) => updateChildSize(childId, index, moveEvent.clientX, moveEvent.clientY);
+    const onMove = (moveEvent: globalThis.PointerEvent) =>
+      updateChildSize(childId, index, moveEvent.clientX, moveEvent.clientY);
     const onEnd = () => {
       shared.setResizingChildId(null);
       shared.setVisibleHandleChildId(null);
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onEnd);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onEnd);
     };
 
-    window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onEnd, { once: true });
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onEnd, { once: true });
   };
 
   const resizeByKeyboard = (event: ReactKeyboardEvent<HTMLElement>, childId: string, index: number) => {
     if (!shared.onNodeResize) return;
-    const decrementKey = state.orientation === 'horizontal' ? 'ArrowLeft' : 'ArrowUp';
-    const incrementKey = state.orientation === 'horizontal' ? 'ArrowRight' : 'ArrowDown';
+    const decrementKey = state.orientation === "horizontal" ? "ArrowLeft" : "ArrowUp";
+    const incrementKey = state.orientation === "horizontal" ? "ArrowRight" : "ArrowDown";
     if (event.key !== decrementKey && event.key !== incrementKey) return;
 
     event.preventDefault();
@@ -244,7 +262,7 @@ export const useSplitBranch = (node: TabTreeSplit, shared: SplitContextValue) =>
   };
 
   const getChildState = (child: TabTreeNode, index: number): SplitChildState => {
-    const isLeaf = child.kind === 'leaf';
+    const isLeaf = child.kind === "leaf";
     const indicator = isLeaf && shared.dropIndicator?.leafId === child.id ? shared.dropIndicator : null;
 
     return {
@@ -254,7 +272,7 @@ export const useSplitBranch = (node: TabTreeSplit, shared: SplitContextValue) =>
       orientation: state.orientation,
       isActive: isLeaf && shared.activeLeaf === child.id,
       dropZone: indicator?.zone ?? null,
-      dropPosition: indicator?.zone === 'panel' ? indicator.position : null,
+      dropPosition: indicator?.zone === "panel" ? indicator.position : null,
       isResizing: shared.resizingChildId === child.id,
       isHandleVisible: shared.visibleHandleChildId === child.id || shared.resizingChildId === child.id,
       style: { flexBasis: `${state.sizes[index] ?? 0}%`, flexGrow: 0, flexShrink: 0 },
@@ -262,10 +280,14 @@ export const useSplitBranch = (node: TabTreeSplit, shared: SplitContextValue) =>
       resizeHandlers: {
         onPointerEnter: () => shared.setVisibleHandleChildId(child.id),
         onPointerLeave: () =>
-          shared.setVisibleHandleChildId((current) => (current === child.id && shared.resizingChildId !== child.id ? null : current)),
+          shared.setVisibleHandleChildId((current) =>
+            current === child.id && shared.resizingChildId !== child.id ? null : current,
+          ),
         onFocus: () => shared.setVisibleHandleChildId(child.id),
         onBlur: () =>
-          shared.setVisibleHandleChildId((current) => (current === child.id && shared.resizingChildId !== child.id ? null : current)),
+          shared.setVisibleHandleChildId((current) =>
+            current === child.id && shared.resizingChildId !== child.id ? null : current,
+          ),
         onPointerDown: (event) => startResize(event, child.id, index),
         onKeyDown: (event) => resizeByKeyboard(event, child.id, index),
       },

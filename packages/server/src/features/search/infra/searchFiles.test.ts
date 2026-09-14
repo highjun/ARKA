@@ -7,7 +7,14 @@ import { compilePattern, searchFiles } from "./searchFiles";
 
 let outside: string;
 let root: string;
-const req = (query: string, extra: Partial<Parameters<typeof searchFiles>[1]> = {}) => ({ query, path: "", regex: false, caseSensitive: false, maxResults: 200, ...extra });
+const req = (query: string, extra: Partial<Parameters<typeof searchFiles>[1]> = {}) => ({
+  query,
+  path: "",
+  regex: false,
+  caseSensitive: false,
+  maxResults: 200,
+  ...extra,
+});
 
 describe("searchFiles", () => {
   beforeAll(async () => {
@@ -39,13 +46,17 @@ describe("searchFiles", () => {
 
   it("node_modules·바이너리·심링크는 읽지 않는다", async () => {
     const result = await searchFiles(root, req("agent"));
-    expect(result.matches.some((m) => m.path.includes("node_modules") || m.path === "bin.dat" || m.path === "link.txt")).toBe(false);
+    expect(
+      result.matches.some((m) => m.path.includes("node_modules") || m.path === "bin.dat" || m.path === "link.txt"),
+    ).toBe(false);
     expect(result.filesScanned).toBe(2);
   });
 
   it("대소문자 구분과 정규식", async () => {
     expect((await searchFiles(root, req("Agent", { caseSensitive: true }))).matches.map((m) => m.line)).toEqual([2, 2]);
-    expect((await searchFiles(root, req("ag.nt ag", { regex: true }))).matches.map((m) => m.path)).toEqual(["README.md"]);
+    expect((await searchFiles(root, req("ag.nt ag", { regex: true }))).matches.map((m) => m.path)).toEqual([
+      "README.md",
+    ]);
   });
 
   it("maxResults에 걸리면 truncated", async () => {
@@ -55,7 +66,10 @@ describe("searchFiles", () => {
   });
 
   it("경로를 좁힐 수 있고 루트 밖은 빈 결과다", async () => {
-    expect((await searchFiles(root, req("agent", { path: "src" }))).matches.map((m) => m.path)).toEqual(["src/main.ts", "src/main.ts"]);
+    expect((await searchFiles(root, req("agent", { path: "src" }))).matches.map((m) => m.path)).toEqual([
+      "src/main.ts",
+      "src/main.ts",
+    ]);
     expect((await searchFiles(root, req("agent", { path: "../" }))).matches).toEqual([]);
   });
 

@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import type { IconId } from '#component/Icon';
+import type { ReactNode } from "react";
+import type { IconId } from "#component/Icon";
 
 /**
  * 부품이 함께 쓰는 도메인 타입 — 탭 하나가 무엇인지, 드롭이 어디로 떨어지는지, 클래스 슬롯이
@@ -7,7 +7,7 @@ import type { IconId } from '#component/Icon';
  */
 
 /** 프레임(테두리·radius·배경) 유무 — 패널을 꽉 채워서 쓸 땐 `none`. `Container`와 같은 축이다. */
-export type TabChrome = 'bordered' | 'none';
+export type TabChrome = "bordered" | "none";
 
 /** 소비자가 정하는 불투명 문자열 — 이 컴포넌트는 비교만 한다. */
 export type TabId = string;
@@ -36,15 +36,15 @@ export interface TabGroupItem extends TabItem {
 }
 
 /** 자식이 늘어서는 방향이다 — 나누는 선의 방향이 아니다. */
-export type TabSplitOrientation = 'horizontal' | 'vertical';
+export type TabSplitOrientation = "horizontal" | "vertical";
 /** 스트립 안에서 대상 탭의 앞이냐 뒤냐. */
-export type StripDropPosition = 'before' | 'after';
+export type StripDropPosition = "before" | "after";
 /** `center`는 나누지 않고 그 리프에 합친다는 뜻이다. */
-export type SplitDropPosition = 'left' | 'right' | 'top' | 'bottom' | 'center';
+export type SplitDropPosition = "left" | "right" | "top" | "bottom" | "center";
 /** 실제로 새 분할을 만드는 넷. `center`가 빠진다. */
-export type SplitEdgeDropPosition = Exclude<SplitDropPosition, 'center'>;
+export type SplitEdgeDropPosition = Exclude<SplitDropPosition, "center">;
 /** 스트립에 떨구면 순서 바꾸기, 패널에 떨구면 분할이다. */
-export type TabDropZone = 'strip' | 'panel';
+export type TabDropZone = "strip" | "panel";
 
 /**
  * 슬롯별 클래스 조립 계약.

@@ -26,14 +26,20 @@ describe("createContainer()", () => {
     it("transient는 조회할 때마다 새로 만든다", () => {
       const c = createContainer();
       let next = 0;
-      c.register(Counter, transient(() => ({ id: (next += 1) })));
+      c.register(
+        Counter,
+        transient(() => ({ id: (next += 1) })),
+      );
 
       expect(c.resolve(Counter)).not.toBe(c.resolve(Counter));
     });
 
     it("scoped는 스코프마다 하나씩 만든다", () => {
       const c = createContainer();
-      c.register(Counter, scoped(() => ({ id: 1 })));
+      c.register(
+        Counter,
+        scoped(() => ({ id: 1 })),
+      );
       const a = c.createScope("a");
       const b = c.createScope("b");
 
@@ -53,14 +59,20 @@ describe("createContainer()", () => {
   describe("스코프", () => {
     it("자식은 부모에 등록된 것을 본다", () => {
       const c = createContainer();
-      c.register(Counter, singleton(() => ({ id: 1 })));
+      c.register(
+        Counter,
+        singleton(() => ({ id: 1 })),
+      );
 
       expect(c.createScope("child").resolve(Counter).id).toBe(1);
     });
 
     it("부모는 자식에 등록된 것을 못 본다", () => {
       const c = createContainer();
-      c.createScope("child").register(Counter, singleton(() => ({ id: 1 })));
+      c.createScope("child").register(
+        Counter,
+        singleton(() => ({ id: 1 })),
+      );
 
       expect(() => c.resolve(Counter)).toThrow(TokenNotRegisteredError);
     });
@@ -69,16 +81,25 @@ describe("createContainer()", () => {
       const c = createContainer();
       const a = c.createScope("a");
       const b = c.createScope("b");
-      a.register(Counter, singleton(() => ({ id: 1 })));
+      a.register(
+        Counter,
+        singleton(() => ({ id: 1 })),
+      );
 
       expect(() => b.resolve(Counter)).toThrow(TokenNotRegisteredError);
     });
 
     it("자식에 같은 토큰을 다시 등록하면 그 스코프에서만 부모를 가린다", () => {
       const c = createContainer();
-      c.register(Counter, singleton(() => ({ id: 1 })));
+      c.register(
+        Counter,
+        singleton(() => ({ id: 1 })),
+      );
       const child = c.createScope("child");
-      child.register(Counter, singleton(() => ({ id: 2 })));
+      child.register(
+        Counter,
+        singleton(() => ({ id: 2 })),
+      );
 
       expect(child.resolve(Counter).id).toBe(2);
       expect(c.resolve(Counter).id).toBe(1);
@@ -94,7 +115,10 @@ describe("createContainer()", () => {
       const dispose = vi.fn();
       const token = createToken<{ dispose: () => void }>("disposable");
       const c = createContainer();
-      c.register(token, singleton(() => ({ dispose })));
+      c.register(
+        token,
+        singleton(() => ({ dispose })),
+      );
       c.resolve(token);
 
       await c.dispose();
@@ -106,7 +130,10 @@ describe("createContainer()", () => {
       const dispose = vi.fn();
       const token = createToken<{ dispose: () => void }>("disposable");
       const c = createContainer();
-      c.register(token, singleton(() => ({ dispose })));
+      c.register(
+        token,
+        singleton(() => ({ dispose })),
+      );
 
       await c.dispose();
 
@@ -118,8 +145,14 @@ describe("createContainer()", () => {
       const first = createToken<object>("first");
       const second = createToken<object>("second");
       const c = createContainer();
-      c.register(first, singleton(() => ({ dispose: () => order.push("first") })));
-      c.register(second, singleton(() => ({ dispose: () => order.push("second") })));
+      c.register(
+        first,
+        singleton(() => ({ dispose: () => order.push("first") })),
+      );
+      c.register(
+        second,
+        singleton(() => ({ dispose: () => order.push("second") })),
+      );
       c.resolve(first);
       c.resolve(second);
 
@@ -133,7 +166,10 @@ describe("createContainer()", () => {
       const token = createToken<{ dispose: () => void }>("disposable");
       const c = createContainer();
       const child = c.createScope("child");
-      child.register(token, singleton(() => ({ dispose })));
+      child.register(
+        token,
+        singleton(() => ({ dispose })),
+      );
       child.resolve(token);
 
       await c.dispose();
@@ -147,8 +183,14 @@ describe("createContainer()", () => {
       const a = createToken<object>("a");
       const b = createToken<object>("b");
       const c = createContainer();
-      c.register(a, singleton((container) => ({ b: container.resolve(b) })));
-      c.register(b, singleton((container) => ({ a: container.resolve(a) })));
+      c.register(
+        a,
+        singleton((container) => ({ b: container.resolve(b) })),
+      );
+      c.register(
+        b,
+        singleton((container) => ({ a: container.resolve(a) })),
+      );
 
       expect(() => c.resolve(a)).toThrow(CircularDependencyError);
       expect(() => c.resolve(a)).toThrow(/a → b → a/);
@@ -157,7 +199,10 @@ describe("createContainer()", () => {
     it("자기 자신을 조회해도 잡는다", () => {
       const self = createToken<object>("self");
       const c = createContainer();
-      c.register(self, singleton((container) => ({ me: container.resolve(self) })));
+      c.register(
+        self,
+        singleton((container) => ({ me: container.resolve(self) })),
+      );
 
       expect(() => c.resolve(self)).toThrow(CircularDependencyError);
     });
@@ -166,8 +211,14 @@ describe("createContainer()", () => {
       const leaf = createToken<{ id: number }>("leaf");
       const branch = createToken<{ leaf: { id: number } }>("branch");
       const c = createContainer();
-      c.register(leaf, singleton(() => ({ id: 1 })));
-      c.register(branch, singleton((container) => ({ leaf: container.resolve(leaf) })));
+      c.register(
+        leaf,
+        singleton(() => ({ id: 1 })),
+      );
+      c.register(
+        branch,
+        singleton((container) => ({ leaf: container.resolve(leaf) })),
+      );
 
       expect(c.resolve(branch).leaf.id).toBe(1);
     });

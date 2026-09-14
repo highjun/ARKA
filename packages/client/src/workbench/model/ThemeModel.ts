@@ -1,11 +1,11 @@
-import type { Disposable } from '#core/di';
-import { Emitter } from '#core/events';
-import type { IStorage } from '../model/IStorage';
-import type { Theme, IThemeModel } from './IThemeModel';
+import type { Disposable } from "#core/di";
+import { Emitter } from "#core/events";
+import type { IStorage } from "../model/IStorage";
+import type { Theme, IThemeModel } from "./IThemeModel";
 
 /** `IThemeModel`의 유일한 구현체 — 생성자에서 `IStorage`로부터 저장된 테마를 복원한다. */
 export class ThemeModel implements IThemeModel {
-  static readonly #THEME_KEY = 'workbench.theme';
+  static readonly #THEME_KEY = "workbench.theme";
 
   readonly #storage: IStorage;
   #theme: Theme;
@@ -28,12 +28,12 @@ export class ThemeModel implements IThemeModel {
   }
 
   static #isTheme(value: string): value is Theme {
-    return value === 'light' || value === 'dark';
+    return value === "light" || value === "dark";
   }
 
   static #restoreTheme(storage: IStorage): Theme {
     const raw = storage.get(ThemeModel.#THEME_KEY);
-    return raw !== null && ThemeModel.#isTheme(raw) ? raw : 'light';
+    return raw !== null && ThemeModel.#isTheme(raw) ? raw : "light";
   }
 
   readonly #changed = new Emitter();
@@ -48,5 +48,4 @@ export class ThemeModel implements IThemeModel {
   onDidChange(listener: () => void): Disposable {
     return this.#changed.event(listener);
   }
-
 }

@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react';
-import { clsx } from 'clsx';
-import styles from './ModeToggle.module.css';
-import { IconButton } from '@primer/react';
+import { useState } from "react";
+import type { ButtonHTMLAttributes, ReactNode, Ref } from "react";
+import { clsx } from "clsx";
+import styles from "./ModeToggle.module.css";
+import { IconButton } from "@primer/react";
 
 /** 두 개 고정이다 — 셋 이상이면 이 컴포넌트가 아니라 세그먼트 컨트롤이다. */
 export type ModeToggleValues = readonly [string, string];
@@ -12,14 +12,19 @@ type ModeToggleChildren = readonly [ReactNode, ReactNode];
 export type ModeToggleLabels = readonly [string, string];
 
 /** 순수 함수 — `cva()`처럼 값을 계산해 반환하고, 컴포넌트는 그 반환값을 그대로 스프레드한다. */
-const getToggleProps = (values: ModeToggleValues, value: string, disabled: boolean, onChange: (value: string) => void) => {
+const getToggleProps = (
+  values: ModeToggleValues,
+  value: string,
+  disabled: boolean,
+  onChange: (value: string) => void,
+) => {
   const currentIndex = value === values[1] ? 1 : 0;
   const nextIndex = currentIndex === 0 ? 1 : 0;
 
   return {
     currentIndex,
-    'aria-pressed': currentIndex === 1,
-    'data-state': values[currentIndex],
+    "aria-pressed": currentIndex === 1,
+    "data-state": values[currentIndex],
     onClick: () => {
       if (disabled) return;
       onChange(values[nextIndex]);
@@ -30,7 +35,7 @@ const getToggleProps = (values: ModeToggleValues, value: string, disabled: boole
 /** `labels`도 호출부의 `aria-label`도 없는 극단적인 경우를 위한 마지막 안전망 — 아이콘 버튼은 접근성
  * 이름 없이 렌더되면 안 된다(`IconButton`이 `aria-label`을 필수로 요구하는 이유와 같다). */
 const getLabel = (labels: ModeToggleLabels | undefined, currentIndex: number, fallback: string | undefined) =>
-  labels?.[currentIndex] ?? fallback ?? '전환';
+  labels?.[currentIndex] ?? fallback ?? "전환";
 
 /**
  * Primer `IconButton`을 그대로 감싼다 — 이 파일에서 `@primer/react`를 직접 참조하는 곳은
@@ -46,8 +51,10 @@ const getLabel = (labels: ModeToggleLabels | undefined, currentIndex: number, fa
  * `ref`는 그대로 통과시킨다 — 감싸면서 ref 접근을 잃으면 raw `IconButton`을 쓸 때보다 기능이
  * 줄어든다.
  */
-export interface ModeToggleProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'aria-labelledby' | 'children' | 'onClick' | 'value'> {
+export interface ModeToggleProps extends Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  "aria-labelledby" | "children" | "onClick" | "value"
+> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLButtonElement>;
   /** 두 상태 각각에 표시할 아이콘 — `[values[0]일 때, values[1]일 때]` 순서로 짝을 맞춘다. */
@@ -70,7 +77,7 @@ export interface ModeToggleProps
 
 /** 두 값 사이를 오가는 아이콘 버튼 — 어느 쪽인지는 `value`가 없으면 스스로 든다. */
 export const ModeToggle = ({
-  'aria-label': ariaLabel,
+  "aria-label": ariaLabel,
   children,
   className,
   defaultValue,
@@ -102,8 +109,7 @@ export const ModeToggle = ({
       disabled={disabled}
       variant="invisible"
       data-component="ModeToggle"
-      className={clsx(className, styles['root'])}
+      className={clsx(className, styles["root"])}
     />
   );
 };
-

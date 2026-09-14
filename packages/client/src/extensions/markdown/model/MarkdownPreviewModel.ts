@@ -1,7 +1,7 @@
-import type { Disposable } from '#core/di';
-import { Emitter } from '#core/events';
-import type { IMarkdownPreviewModel, Preview } from './IMarkdownPreviewModel';
-import type { IMarkdownSource } from './IMarkdownSource';
+import type { Disposable } from "#core/di";
+import { Emitter } from "#core/events";
+import type { IMarkdownPreviewModel, Preview } from "./IMarkdownPreviewModel";
+import type { IMarkdownSource } from "./IMarkdownSource";
 
 /** `IMarkdownPreviewModel`의 유일한 구현체. */
 export class MarkdownPreviewModel implements IMarkdownPreviewModel {
@@ -23,7 +23,7 @@ export class MarkdownPreviewModel implements IMarkdownPreviewModel {
   /** 이미 열려 있으면 아무 일도 안 한다. 열자마자 `loading`으로 두고 읽기 시작한다. */
   open(path: string): void {
     if (this.#watches.has(path)) return;
-    this.#set({ path, status: 'loading', markdown: '', truncated: false, failure: null });
+    this.#set({ path, status: "loading", markdown: "", truncated: false, failure: null });
     this.#watches.set(
       path,
       this.#source.watch(path, () => void this.#load(path)),
@@ -52,10 +52,14 @@ export class MarkdownPreviewModel implements IMarkdownPreviewModel {
       const document = await this.#source.read(path);
       // 그 사이 닫혔다
       if (this.#previews[path] === undefined) return;
-      this.#set({ path, status: 'loaded', markdown: document.content, truncated: document.truncated, failure: null });
+      this.#set({ path, status: "loaded", markdown: document.content, truncated: document.truncated, failure: null });
     } catch (error) {
       if (this.#previews[path] === undefined) return;
-      this.#set({ ...(this.#previews[path] ?? current), status: 'error', failure: error instanceof Error ? error.message : String(error) });
+      this.#set({
+        ...(this.#previews[path] ?? current),
+        status: "error",
+        failure: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 

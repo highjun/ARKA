@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import type { HTMLAttributes, Ref } from 'react';
-import { clsx } from 'clsx';
-import { createTextClipboardPort } from './shared';
-import styles from './CodeBlock.module.css';
-import { IconButton } from '#component/IconButton';
-import { Icon } from '#component/Icon';
+import { useState } from "react";
+import type { HTMLAttributes, Ref } from "react";
+import { clsx } from "clsx";
+import { createTextClipboardPort } from "./shared";
+import styles from "./CodeBlock.module.css";
+import { IconButton } from "#component/IconButton";
+import { Icon } from "#component/Icon";
 
 /** 정규식 하나로 가르는 근사 강조다 — 파서가 아니라 언어를 가리지 않는다. */
-type CodeBlockSyntaxTokenKind = 'plain' | 'keyword' | 'string' | 'comment' | 'number' | 'function' | 'punctuation';
+type CodeBlockSyntaxTokenKind = "plain" | "keyword" | "string" | "comment" | "number" | "function" | "punctuation";
 
 /** `key`는 React 목록용이라 같은 줄 안에서만 고유하면 된다. */
 interface CodeBlockSyntaxToken {
@@ -28,24 +28,24 @@ const SYNTAX_PATTERN =
   /(\/\/.*$|\/\*[\s\S]*?\*\/|`(?:\\.|[^`])*`|"(?:\\.|[^"])*"|'(?:\\.|[^'])*'|\b(?:const|let|var|type|interface|export|import|from|return|function|class|extends|readonly|new|if|else|for|while|true|false|null|undefined)\b|\b\d+(?:\.\d+)?\b|\b[A-Za-z_$][\w$]*(?=\s*\()|[{}()[\].,;:<>/=+\-*])/gmu;
 
 /** 끝의 줄바꿈 **하나만** 떼어낸다 — 펜스 코드가 늘 달고 오는 것이라 빈 줄로 보이면 안 된다. */
-const normalizeContent = (value: string) => String(value).replace(/\n$/u, '');
+const normalizeContent = (value: string) => String(value).replace(/\n$/u, "");
 /** 비었거나 공백뿐이면 `'text'`다 — 캡션이 빈 이름표를 그리지 않게. */
-const normalizeLanguage = (value?: string) => value?.trim().toLowerCase() || 'text';
+const normalizeLanguage = (value?: string) => value?.trim().toLowerCase() || "text";
 /** 없으면 빈 문자열이다. 캡션을 그릴지 말지는 부르는 쪽이 이 값으로 정한다. */
-const normalizeTitle = (value?: string) => value?.trim() ?? '';
+const normalizeTitle = (value?: string) => value?.trim() ?? "";
 
 const getSyntaxTokenKind = (text: string): CodeBlockSyntaxTokenKind => {
-  if (text.startsWith('//') || text.startsWith('/*')) return 'comment';
-  if (text.startsWith('`') || text.startsWith('"') || text.startsWith("'")) return 'string';
-  if (/^\d/u.test(text)) return 'number';
-  if (/^[{}()[\].,;:<>/=+\-*]$/u.test(text)) return 'punctuation';
+  if (text.startsWith("//") || text.startsWith("/*")) return "comment";
+  if (text.startsWith("`") || text.startsWith('"') || text.startsWith("'")) return "string";
+  if (/^\d/u.test(text)) return "number";
+  if (/^[{}()[\].,;:<>/=+\-*]$/u.test(text)) return "punctuation";
   if (
     /^(const|let|var|type|interface|export|import|from|return|function|class|extends|readonly|new|if|else|for|while|true|false|null|undefined)$/u.test(
       text,
     )
   )
-    return 'keyword';
-  return 'function';
+    return "keyword";
+  return "function";
 };
 
 const tokenizeLine = (line: string, lineNumber: number): CodeBlockSyntaxToken[] => {
@@ -56,22 +56,24 @@ const tokenizeLine = (line: string, lineNumber: number): CodeBlockSyntaxToken[] 
     const text = match[0];
     const index = match.index ?? 0;
 
-    if (index > cursor) tokens.push({ key: `${lineNumber}:${cursor}:plain`, kind: 'plain', text: line.slice(cursor, index) });
+    if (index > cursor)
+      tokens.push({ key: `${lineNumber}:${cursor}:plain`, kind: "plain", text: line.slice(cursor, index) });
     tokens.push({ key: `${lineNumber}:${index}:${text}`, kind: getSyntaxTokenKind(text), text });
     cursor = index + text.length;
   }
 
-  if (cursor < line.length) tokens.push({ key: `${lineNumber}:${cursor}:plain`, kind: 'plain', text: line.slice(cursor) });
-  if (tokens.length === 0) tokens.push({ key: `${lineNumber}:0:plain`, kind: 'plain', text: line || ' ' });
+  if (cursor < line.length)
+    tokens.push({ key: `${lineNumber}:${cursor}:plain`, kind: "plain", text: line.slice(cursor) });
+  if (tokens.length === 0) tokens.push({ key: `${lineNumber}:0:plain`, kind: "plain", text: line || " " });
 
   return tokens;
 };
 
 /** 줄 단위로 잘라 각 줄을 따로 토큰화한다 — 여러 줄 주석은 줄을 넘어 이어지지 않는다. */
 const getLines = (content: string): CodeBlockLine[] =>
-  content.split('\n').map((text, index) => {
+  content.split("\n").map((text, index) => {
     const number = index + 1;
-    return { key: `${number}:${text}`, number, text: text || ' ', tokens: tokenizeLine(text, number) };
+    return { key: `${number}:${text}`, number, text: text || " ", tokens: tokenizeLine(text, number) };
   });
 
 const COPY_RESET_DELAY_MS = 1400;
@@ -80,7 +82,7 @@ const COPY_RESET_DELAY_MS = 1400;
 const clipboard = createTextClipboardPort();
 
 /** `children`을 막는다 — 코드는 `content`로만 들어온다. */
-export interface CodeBlockProps extends Omit<HTMLAttributes<HTMLElement>, 'title' | 'children'> {
+export interface CodeBlockProps extends Omit<HTMLAttributes<HTMLElement>, "title" | "children"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLElement>;
   /** 표시할 코드 원문. */
@@ -104,8 +106,8 @@ export const CodeBlock = ({
   language,
   title,
   className,
-  copyLabel = 'Copy code',
-  copiedLabel = 'Copied',
+  copyLabel = "Copy code",
+  copiedLabel = "Copied",
   ref,
   ...props
 }: CodeBlockProps) => {
@@ -124,35 +126,30 @@ export const CodeBlock = ({
   };
 
   return (
-    <figure
-      ref={ref}
-      {...props}
-      data-component="CodeBlock"
-      className={clsx(className, styles['root'])}
-    >
-      <figcaption className={styles['caption']}>
-        <span className={styles['meta']}>
-          <span className={styles['language']}>{normalizedLanguage}</span>
-          {normalizedTitle ? <span className={styles['title']}>{normalizedTitle}</span> : null}
+    <figure ref={ref} {...props} data-component="CodeBlock" className={clsx(className, styles["root"])}>
+      <figcaption className={styles["caption"]}>
+        <span className={styles["meta"]}>
+          <span className={styles["language"]}>{normalizedLanguage}</span>
+          {normalizedTitle ? <span className={styles["title"]}>{normalizedTitle}</span> : null}
         </span>
         <IconButton
           variant="invisible"
           size="small"
           onClick={copyCode}
           aria-label={copied ? copiedLabel : copyLabel}
-          icon={() => <Icon iconId={copied ? 'check' : 'copy'} size="sm" />}
+          icon={() => <Icon iconId={copied ? "check" : "copy"} size="sm" />}
         />
       </figcaption>
-      <pre className={styles['body']} data-language={normalizedLanguage}>
+      <pre className={styles["body"]} data-language={normalizedLanguage}>
         <code>
           {lines.map((line) => (
-            <span key={line.key} className={styles['line']}>
-              <span className={styles['lineNumber']} aria-hidden="true">
+            <span key={line.key} className={styles["line"]}>
+              <span className={styles["lineNumber"]} aria-hidden="true">
                 {line.number}
               </span>
-              <span className={styles['lineText']}>
+              <span className={styles["lineText"]}>
                 {line.tokens.map((token) => (
-                  <span key={token.key} className={styles['token']} data-token={token.kind}>
+                  <span key={token.key} className={styles["token"]} data-token={token.kind}>
                     {token.text}
                   </span>
                 ))}
@@ -164,4 +161,3 @@ export const CodeBlock = ({
     </figure>
   );
 };
-

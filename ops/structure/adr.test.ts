@@ -17,9 +17,24 @@ const STATUS_WORDS = ["승인됨", "대체됨", "폐기됨"] as const;
  * 알려주는가"에 새 종류를 더한다는 선언이고, 리뷰가 볼 자리다.
  */
 const ENFORCERS = new Set([
-  "린트", "타입", "테스트", "리뷰", "파이프라인", "스모크",
-  "stylelint", "commitlint", "gitleaks", "markdownlint", "actionlint", "knip",
-  "룰셋", "CODEOWNERS", "워크플로", "배포 잡", "compose",
+  "린트",
+  "타입",
+  "테스트",
+  "리뷰",
+  "파이프라인",
+  "스모크",
+  "stylelint",
+  "commitlint",
+  "gitleaks",
+  "markdownlint",
+  "actionlint",
+  "prettier",
+  "knip",
+  "룰셋",
+  "CODEOWNERS",
+  "워크플로",
+  "배포 잡",
+  "compose",
 ]);
 
 /** 절 이름 → 그 절의 본문 줄들. */
@@ -41,7 +56,8 @@ const sectionsOf = (body: string): Map<string, string[]> => {
 /** 백틱 안의 토큰. 규칙 ID·경로·패키지 이름이 전부 이 모양으로 적힌다. */
 const backticked = (line: string): string[] => [...line.matchAll(/`(?<token>[^`]+)`/gu)].map((m) => m[1] ?? "");
 
-const isPath = (token: string) => /^(?:packages|ops|docs|\.github)\//u.test(token) || /\.(?:ts|tsx|css|json|ya?ml)$/u.test(token);
+const isPath = (token: string) =>
+  /^(?:packages|ops|docs|\.github)\//u.test(token) || /\.(?:ts|tsx|css|json|ya?ml)$/u.test(token);
 
 /**
  * 규칙 ID나 패키지 이름의 **모양**. 하이픈이나 `/`가 있어야 한다 — 한 낱말짜리 백틱

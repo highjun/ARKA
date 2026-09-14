@@ -1,4 +1,4 @@
-import type { Descriptor, Registry } from '#core/registry';
+import type { Descriptor, Registry } from "#core/registry";
 
 /**
  * Action — 트리거도 `when` 도 모르는 순수 동작 정의.

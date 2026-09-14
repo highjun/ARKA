@@ -1,1 +1,1 @@
-export { CrashScreen } from './CrashScreen';
+export { CrashScreen } from "./CrashScreen";

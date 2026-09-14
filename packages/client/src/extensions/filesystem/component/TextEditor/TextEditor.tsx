@@ -1,14 +1,14 @@
-import { clsx } from 'clsx';
-import type { HTMLAttributes, Ref } from 'react';
-import styles from './TextEditor.module.css';
-import { useCodeMirrorEditor } from './useCodeMirrorEditor';
-import type { RevealPosition } from './useCodeMirrorEditor';
-import { Spinner } from '@primer/react';
-import { Icon } from '#component/Icon';
-import { IconButton } from '#component/IconButton';
+import { clsx } from "clsx";
+import type { HTMLAttributes, Ref } from "react";
+import styles from "./TextEditor.module.css";
+import { useCodeMirrorEditor } from "./useCodeMirrorEditor";
+import type { RevealPosition } from "./useCodeMirrorEditor";
+import { Spinner } from "@primer/react";
+import { Icon } from "#component/Icon";
+import { IconButton } from "#component/IconButton";
 
 /** 프레임(테두리·radius·배경) 유무 — 패널을 꽉 채워서 쓸 땐 `none`. `ScrollArea`와 같은 이름. */
-type TextEditorChrome = 'bordered' | 'none';
+type TextEditorChrome = "bordered" | "none";
 
 /**
  * 코드 한 편을 문법 강조와 함께 보여준다.
@@ -16,7 +16,7 @@ type TextEditorChrome = 'bordered' | 'none';
  * `EditorTab` 과 props 를 맞춰 둔 것은 의도다 — 그 자리를 그대로 갈아끼울 수 있어야 한다. CodeMirror
  * 인스턴스 관리는 `useCodeMirrorEditor` 훅이 전담한다 — 여기는 구조(헤더·본문)만 조립한다.
  */
-export interface TextEditorProps extends Omit<HTMLAttributes<HTMLElement>, 'onChange' | 'children'> {
+export interface TextEditorProps extends Omit<HTMLAttributes<HTMLElement>, "onChange" | "children"> {
   /** 루트 `section`으로 그대로 통과한다. */
   readonly ref?: Ref<HTMLElement>;
   /** 표시용이자 **언어를 고르는 근거**다(확장자). */
@@ -52,7 +52,7 @@ export const TextEditor = ({
   path,
   content,
   className,
-  chrome = 'bordered',
+  chrome = "bordered",
   readOnly = true,
   onChange,
   onSave,
@@ -70,12 +70,12 @@ export const TextEditor = ({
       ref={ref}
       aria-label={path}
       data-chrome={chrome}
-      className={clsx(className, styles['root'])}
+      className={clsx(className, styles["root"])}
       {...rest}
       data-component="TextEditor"
     >
-      <header className={styles['header']}>
-        <span className={styles['path']}>{path}</span>
+      <header className={styles["header"]}>
+        <span className={styles["path"]}>{path}</span>
         <IconButton
           variant="invisible"
           size="small"
@@ -87,19 +87,19 @@ export const TextEditor = ({
           <IconButton
             variant="invisible"
             size="small"
-            aria-label={isSaving ? '저장하는 중' : '저장'}
-            data-dirty={isDirty ? '' : undefined}
-            className={styles['saveButton']}
+            aria-label={isSaving ? "저장하는 중" : "저장"}
+            data-dirty={isDirty ? "" : undefined}
+            className={styles["saveButton"]}
             disabled={isSaving || !isDirty}
             onClick={() => onSave?.()}
             icon={() => (isSaving ? <Spinner size="small" srText="저장하는 중" /> : <Icon iconId="save" size="sm" />)}
           />
         )}
       </header>
-      <div className={styles['bodyWrapper']}>
-        <div ref={hostRef} className={styles['body']} />
+      <div className={styles["bodyWrapper"]}>
+        <div ref={hostRef} className={styles["body"]} />
         {loading ? (
-          <div className={styles['loadingOverlay']}>
+          <div className={styles["loadingOverlay"]}>
             <Spinner size="large" srText="읽는 중" />
           </div>
         ) : null}
@@ -107,5 +107,3 @@ export const TextEditor = ({
     </section>
   );
 };
-
-

@@ -1,15 +1,15 @@
-import { clsx } from 'clsx';
-import type { HTMLAttributes, ReactNode, Ref } from 'react';
-import styles from './ChatRoom.module.css';
-import { IconButton } from '#component/IconButton';
-import { Icon } from '#component/Icon';
-import { Panel } from '#component/Panel';
-import { InputComposer } from '../InputComposer';
-import { Message } from '../Message';
-import { StatusIndicator } from '../StatusIndicator';
-import type { MessageAuthor } from '../Message';
-import type { InputComposerMode } from '../InputComposer';
-import type { StatusIndicatorStatus } from '../StatusIndicator';
+import { clsx } from "clsx";
+import type { HTMLAttributes, ReactNode, Ref } from "react";
+import styles from "./ChatRoom.module.css";
+import { IconButton } from "#component/IconButton";
+import { Icon } from "#component/Icon";
+import { Panel } from "#component/Panel";
+import { InputComposer } from "../InputComposer";
+import { Message } from "../Message";
+import { StatusIndicator } from "../StatusIndicator";
+import type { MessageAuthor } from "../Message";
+import type { InputComposerMode } from "../InputComposer";
+import type { StatusIndicatorStatus } from "../StatusIndicator";
 
 /** 채팅방 로그에 표시할 메시지 한 건. */
 export interface ChatRoomMessage {
@@ -26,7 +26,7 @@ export interface ChatRoomMessage {
 }
 
 /** `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다. */
-export interface ChatRoomProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {
+export interface ChatRoomProps extends Omit<HTMLAttributes<HTMLDivElement>, "title" | "children"> {
   /** 루트 `Panel`로 그대로 통과한다. */
   readonly ref?: Ref<HTMLDivElement>;
   /** 헤더에 표시할 채팅방 제목. */
@@ -61,15 +61,15 @@ export interface ChatRoomProps extends Omit<HTMLAttributes<HTMLDivElement>, 'tit
 /** 헤더·로그·작성창을 세로로 쌓은 대화 한 판. 로그는 `messages` 또는 `children`으로 채운다. */
 export const ChatRoom = ({
   ref,
-  title = 'Agent chat',
-  status = 'running',
+  title = "Agent chat",
+  status = "running",
   messages = [],
   children,
   composer,
   mode,
   defaultMode,
   onModeChange,
-  emptyLabel = '아직 메시지가 없습니다.',
+  emptyLabel = "아직 메시지가 없습니다.",
   onEdit,
   onArchive,
   onSetting,
@@ -80,8 +80,20 @@ export const ChatRoom = ({
   const isEmpty = messages.length === 0;
   const defaultActions = (
     <>
-      <IconButton variant="invisible" size="small" aria-label="Edit chat" onClick={onEdit} icon={() => <Icon iconId="pencil" size="sm" />} />
-      <IconButton variant="invisible" size="small" aria-label="Archive chat" onClick={onArchive} icon={() => <Icon iconId="archive" size="sm" />} />
+      <IconButton
+        variant="invisible"
+        size="small"
+        aria-label="Edit chat"
+        onClick={onEdit}
+        icon={() => <Icon iconId="pencil" size="sm" />}
+      />
+      <IconButton
+        variant="invisible"
+        size="small"
+        aria-label="Archive chat"
+        onClick={onArchive}
+        icon={() => <Icon iconId="archive" size="sm" />}
+      />
       <IconButton
         variant="invisible"
         size="small"
@@ -93,21 +105,21 @@ export const ChatRoom = ({
   );
 
   return (
-    <section className={clsx(className, styles['root'])} {...props} data-component="ChatRoom">
+    <section className={clsx(className, styles["root"])} {...props} data-component="ChatRoom">
       <Panel
         ref={ref}
         title={
-          <div className={styles['titleGroup']}>
+          <div className={styles["titleGroup"]}>
             <StatusIndicator status={status} />
-            <div className={styles['title']}>{title}</div>
+            <div className={styles["title"]}>{title}</div>
           </div>
         }
         actions={actions ?? defaultActions}
       >
-        <div role="log" aria-live="polite" className={styles['log']}>
+        <div role="log" aria-live="polite" className={styles["log"]}>
           {children ??
             (isEmpty ? (
-              <div className={styles['empty']}>{emptyLabel}</div>
+              <div className={styles["empty"]}>{emptyLabel}</div>
             ) : (
               messages.map((message) => (
                 <Message key={message.id} author={message.author} timestamp={message.timestamp} avatar={message.avatar}>
@@ -116,11 +128,10 @@ export const ChatRoom = ({
               ))
             ))}
         </div>
-        <div className={styles['composerSlot']}>
+        <div className={styles["composerSlot"]}>
           {composer ?? <InputComposer mode={mode} defaultMode={defaultMode} onModeChange={onModeChange} />}
         </div>
       </Panel>
     </section>
   );
 };
-

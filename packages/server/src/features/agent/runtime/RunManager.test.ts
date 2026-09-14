@@ -12,7 +12,14 @@ const make = (runner: IAgentRunner) => {
   const events = new MemoryEventStore({ now: () => 0 });
   const sessions = new MemorySessionStore();
   let id = 0;
-  const manager = new RunManager({ events, sessions, runner, log: silent, now: () => 0, newId: () => `id${String(++id)}` });
+  const manager = new RunManager({
+    events,
+    sessions,
+    runner,
+    log: silent,
+    now: () => 0,
+    newId: () => `id${String(++id)}`,
+  });
   return { events, sessions, manager };
 };
 
@@ -42,7 +49,13 @@ describe("RunManager", () => {
     expect(response.status).toBe("running");
     expect(sessions.get(session.id)?.lastRunStatus).toBe("running");
     await tick();
-    expect(types(events, session.id)).toEqual(["session.renamed", "run.started", "assistant.delta", "assistant.done", "run.finished"]);
+    expect(types(events, session.id)).toEqual([
+      "session.renamed",
+      "run.started",
+      "assistant.delta",
+      "assistant.done",
+      "run.finished",
+    ]);
     expect(events.listSince(session.id, 0).at(-1)).toMatchObject({ type: "run.finished", status: "done" });
     expect(sessions.get(session.id)).toMatchObject({ lastRunStatus: "done", title: "hi" });
   });
@@ -119,7 +132,12 @@ describe("RunManager", () => {
     const session = manager.createSession("t");
     const { runId } = manager.start(session.id, "a", "action");
     await tick();
-    expect(events.listSince(session.id, 0)[1]).toMatchObject({ type: "tool.call", sessionId: session.id, runId, input: { x: 1 } });
+    expect(events.listSince(session.id, 0)[1]).toMatchObject({
+      type: "tool.call",
+      sessionId: session.id,
+      runId,
+      input: { x: 1 },
+    });
   });
 
   it("updateSession은 이벤트로 남기고 요약을 갱신한다", () => {

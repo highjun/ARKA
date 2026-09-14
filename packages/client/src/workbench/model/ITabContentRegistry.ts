@@ -1,6 +1,6 @@
-import { createToken } from '#core/di';
-import type { ComponentType } from 'react';
-import type { DescriptorMatch } from '#core';
+import { createToken } from "#core/di";
+import type { ComponentType } from "react";
+import type { DescriptorMatch } from "#core";
 
 /**
  * 탭 하나의 내용 — `OpenTab.kind`로 찾는다.

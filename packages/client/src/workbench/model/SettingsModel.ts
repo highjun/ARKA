@@ -1,14 +1,14 @@
-import type { Disposable } from '#core/di';
-import { Emitter } from '#core/events';
-import type { Density, ISettingsModel, Settings } from './ISettingsModel';
-import type { IStorage } from './IStorage';
+import type { Disposable } from "#core/di";
+import { Emitter } from "#core/events";
+import type { Density, ISettingsModel, Settings } from "./ISettingsModel";
+import type { IStorage } from "./IStorage";
 
-const DEFAULTS: Settings = { density: 'auto', agentConfirmWrites: true };
-const isDensity = (value: unknown): value is Density => value === 'auto' || value === 'compact' || value === 'touch';
+const DEFAULTS: Settings = { density: "auto", agentConfirmWrites: true };
+const isDensity = (value: unknown): value is Density => value === "auto" || value === "compact" || value === "touch";
 
 /** `ISettingsModel`의 유일한 구현체. 저장된 값이 깨져 있으면 기본값으로 돌아간다. */
 export class SettingsModel implements ISettingsModel {
-  static readonly #KEY = 'workbench.settings';
+  static readonly #KEY = "workbench.settings";
 
   readonly #storage: IStorage;
   readonly #changed = new Emitter();
@@ -32,7 +32,8 @@ export class SettingsModel implements ISettingsModel {
       ...(patch.density !== undefined ? { density: patch.density } : {}),
       ...(patch.agentConfirmWrites !== undefined ? { agentConfirmWrites: patch.agentConfirmWrites } : {}),
     };
-    if (next.density === this.#settings.density && next.agentConfirmWrites === this.#settings.agentConfirmWrites) return;
+    if (next.density === this.#settings.density && next.agentConfirmWrites === this.#settings.agentConfirmWrites)
+      return;
     this.#settings = next;
     this.#storage.set(SettingsModel.#KEY, JSON.stringify(next));
     this.#changed.fire();
@@ -50,7 +51,8 @@ export class SettingsModel implements ISettingsModel {
       const parsed = JSON.parse(raw) as { density?: unknown; agentConfirmWrites?: unknown };
       return {
         density: isDensity(parsed.density) ? parsed.density : DEFAULTS.density,
-        agentConfirmWrites: typeof parsed.agentConfirmWrites === 'boolean' ? parsed.agentConfirmWrites : DEFAULTS.agentConfirmWrites,
+        agentConfirmWrites:
+          typeof parsed.agentConfirmWrites === "boolean" ? parsed.agentConfirmWrites : DEFAULTS.agentConfirmWrites,
       };
     } catch {
       return DEFAULTS;

@@ -41,7 +41,9 @@ const waitHealthy = async (): Promise<void> => {
   for (let i = 0; i < 30; i += 1) {
     try {
       if ((await fetch(`${BASE}/api/health`)).ok) return;
-    } catch { /* 아직 안 떴다 */ }
+    } catch {
+      /* 아직 안 떴다 */
+    }
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
   fail("서버가 healthy가 되지 않았다");
@@ -55,17 +57,31 @@ try {
   // **`build.ts`를 통한다** — 직접 `docker build`를 부르면 회수 단계를 비껴가고, 그렇게 쌓인
   // 중간 이미지가 656개까지 간 적이 있다. 빌드하는 길은 저장소에 하나뿐이어야 한다.
   spawnSync("node", [`${REPO_ROOT}/ops/deploy/build.ts`, IMAGE], { stdio: "inherit" });
-  docker("run", "-d", "--name", NAME,
-    "--user", `${String(process.getuid?.() ?? 0)}:${String(process.getgid?.() ?? 0)}`,
-    "-p", `127.0.0.1:${String(PORT)}:3000`,
-    "-v", `${workspace}:/workspace`, "-v", `${data}:/data`, IMAGE);
+  docker(
+    "run",
+    "-d",
+    "--name",
+    NAME,
+    "--user",
+    `${String(process.getuid?.() ?? 0)}:${String(process.getgid?.() ?? 0)}`,
+    "-p",
+    `127.0.0.1:${String(PORT)}:3000`,
+    "-v",
+    `${workspace}:/workspace`,
+    "-v",
+    `${data}:/data`,
+    IMAGE,
+  );
   await waitHealthy();
 
   console.log("# ① 볼륨 권한 — 컨테이너가 만든 파일을 호스트 사용자가 소유한다");
   await api("/api/files", { method: "POST", body: JSON.stringify({ path: "from-container.txt", type: "file" }) });
   const owner = statSync(path.join(workspace, "from-container.txt")).uid;
   if (owner !== process.getuid?.()) fail(`소유자 불일치: ${String(owner)}`);
-  await api("/api/files/content", { method: "PUT", body: JSON.stringify({ path: "from-container.txt", content: "hello" }) });
+  await api("/api/files/content", {
+    method: "PUT",
+    body: JSON.stringify({ path: "from-container.txt", content: "hello" }),
+  });
   const onHost = readFileSync(path.join(workspace, "from-container.txt"), "utf8");
   if (onHost !== "hello") fail(`내용 불일치: ${onHost}`);
 
@@ -95,7 +111,9 @@ try {
   console.log("# ③ 재시작 후 데이터 유지 — 워크스페이스 파일과 SQLite의 세션");
   // 응답은 `{ session: AgentSession }`이다 — **id가 최상위가 아니다.** 정규식으로 첫 `"id"`를
   // 집던 옛 방식은 그 중첩을 모른 채 우연히 맞았다. 파싱하니 실제 모양이 드러났다.
-  const created = (await (await api("/api/agent/sessions", { method: "POST", body: JSON.stringify({ title: "smoke" }) })).json()) as { session?: { id?: string } };
+  const created = (await (
+    await api("/api/agent/sessions", { method: "POST", body: JSON.stringify({ title: "smoke" }) })
+  ).json()) as { session?: { id?: string } };
   const sessionId = created.session?.id;
   if (sessionId === undefined) fail("세션이 만들어지지 않았다");
   statSync(path.join(data, "data.db"));

@@ -1,8 +1,8 @@
-import { ViewModelBase } from '#core/viewmodel';
-import { atom } from 'nanostores';
-import type { Density, ISettingsModel } from '../model/ISettingsModel';
-import type { IThemeModel, Theme } from '../model/IThemeModel';
-import type { ISettingsViewModel } from './ISettingsViewModel';
+import { ViewModelBase } from "#core/viewmodel";
+import { atom } from "nanostores";
+import type { Density, ISettingsModel } from "../model/ISettingsModel";
+import type { IThemeModel, Theme } from "../model/IThemeModel";
+import type { ISettingsViewModel } from "./ISettingsViewModel";
 
 /** `ISettingsViewModel`의 유일한 구현체. */
 export class SettingsViewModel extends ViewModelBase implements ISettingsViewModel {

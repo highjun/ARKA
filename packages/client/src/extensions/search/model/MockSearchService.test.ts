@@ -1,7 +1,7 @@
-import { MockSearchService } from './MockSearchService';
-import { testSearchServiceContract } from './searchService.contract';
+import { MockSearchService } from "./MockSearchService";
+import { testSearchServiceContract } from "./searchService.contract";
 
-testSearchServiceContract('MockSearchService', () => {
+testSearchServiceContract("MockSearchService", () => {
   const service = new MockSearchService();
   return {
     service,

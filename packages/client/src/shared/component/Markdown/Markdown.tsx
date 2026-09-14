@@ -1,13 +1,13 @@
-import { memo } from 'react';
-import type { ComponentPropsWithoutRef, HTMLAttributes, Ref } from 'react';
-import { clsx } from 'clsx';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import styles from './Markdown.module.css';
-import { CodeBlock } from '#component/CodeBlock';
+import { memo } from "react";
+import type { ComponentPropsWithoutRef, HTMLAttributes, Ref } from "react";
+import { clsx } from "clsx";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import styles from "./Markdown.module.css";
+import { CodeBlock } from "#component/CodeBlock";
 
 /** 요소별 덮어쓰기 맵 — react-markdown의 `components`를 그대로 받는다. */
-type MarkdownComponents = NonNullable<ComponentPropsWithoutRef<typeof ReactMarkdown>['components']>;
+type MarkdownComponents = NonNullable<ComponentPropsWithoutRef<typeof ReactMarkdown>["components"]>;
 
 /** 원문을 받는다 — 파싱과 렌더는 이 컴포넌트가 한다. */
 export interface MarkdownProps extends HTMLAttributes<HTMLElement> {
@@ -35,7 +35,7 @@ export interface MarkdownProps extends HTMLAttributes<HTMLElement> {
 const CODE_COMPONENTS: MarkdownComponents = {
   pre: ({ children }) => <>{children}</>,
   code: ({ className, children, ...props }) => {
-    const language = /language-(\w+)/u.exec(className ?? '')?.[1];
+    const language = /language-(\w+)/u.exec(className ?? "")?.[1];
 
     if (language === undefined) {
       return (
@@ -58,7 +58,12 @@ const CODE_COMPONENTS: MarkdownComponents = {
  * 루트는 `div`다. 메시지 말풍선(`article`) 안에 들어가는 쓰임이 있어서 `article`을 내면 중첩된다.
  */
 export const Markdown = memo(({ source, components, className, ref, ...props }: MarkdownProps) => (
-  <div ref={ref as Ref<HTMLDivElement>} {...props} data-component="Markdown" className={clsx(className, styles['root'])}>
+  <div
+    ref={ref as Ref<HTMLDivElement>}
+    {...props}
+    data-component="Markdown"
+    className={clsx(className, styles["root"])}
+  >
     <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ ...CODE_COMPONENTS, ...components }}>
       {source}
     </ReactMarkdown>

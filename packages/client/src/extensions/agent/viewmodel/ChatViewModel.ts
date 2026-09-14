@@ -1,29 +1,29 @@
-import type { Disposable } from '#core/di';
-import { ViewModelBase } from '#core/viewmodel';
-import { atom } from 'nanostores';
-import type { RunStatus } from '#contracts';
-import type { IChatModel, SessionChat } from '../model/IChatModel';
-import { emptyChat } from '../model/transcript';
-import type { ChatComposerState, ChatSessionRow, ChatState, IChatViewModel } from './IChatViewModel';
+import type { Disposable } from "#core/di";
+import { ViewModelBase } from "#core/viewmodel";
+import { atom } from "nanostores";
+import type { RunStatus } from "#contracts";
+import type { IChatModel, SessionChat } from "../model/IChatModel";
+import { emptyChat } from "../model/transcript";
+import type { ChatComposerState, ChatSessionRow, ChatState, IChatViewModel } from "./IChatViewModel";
 
-type Draft = { readonly value: string; readonly mode: 'action' | 'plan'; readonly sending: boolean };
-const EMPTY_DRAFT: Draft = { value: '', mode: 'action', sending: false };
+type Draft = { readonly value: string; readonly mode: "action" | "plan"; readonly sending: boolean };
+const EMPTY_DRAFT: Draft = { value: "", mode: "action", sending: false };
 
 /** Run 상태를 `StatusIndicator`의 어휘로. `queued`·`cancelled`는 화면에 따로 없어 가장 가까운 것으로. */
-const statusOf = (status: RunStatus | null): ChatSessionRow['status'] => {
+const statusOf = (status: RunStatus | null): ChatSessionRow["status"] => {
   switch (status) {
     case null:
       return null;
-    case 'queued':
-    case 'running':
-      return 'running';
-    case 'waitingInput':
-      return 'waitingInput';
-    case 'error':
-      return 'error';
-    case 'done':
-    case 'cancelled':
-      return 'done';
+    case "queued":
+    case "running":
+      return "running";
+    case "waitingInput":
+      return "waitingInput";
+    case "error":
+      return "error";
+    case "done":
+    case "cancelled":
+      return "done";
   }
 };
 
@@ -42,7 +42,7 @@ export class ChatViewModel extends ViewModelBase implements IChatViewModel {
     super();
     this.#model = chatModel;
     this.#sessions = this.observe(atom(this.#computeSessions()));
-    this.#sessionsLoading = this.observe(atom(chatModel.sessionsStatus === 'loading'));
+    this.#sessionsLoading = this.observe(atom(chatModel.sessionsStatus === "loading"));
     this.#sessionsFailure = this.observe(atom(chatModel.sessionsFailure));
     this.#chats = this.observe(atom(chatModel.chats));
   }
@@ -101,9 +101,9 @@ export class ChatViewModel extends ViewModelBase implements IChatViewModel {
     const composer: ChatComposerState = {
       value: draft.value,
       mode: draft.mode,
-      canSubmit: draft.value.trim() !== '' && !draft.sending && !running,
+      canSubmit: draft.value.trim() !== "" && !draft.sending && !running,
       sending: draft.sending,
-      placeholder: chat.pendingInput?.prompt ?? (running ? '에이전트가 작업 중이다…' : '무엇을 할까요?'),
+      placeholder: chat.pendingInput?.prompt ?? (running ? "에이전트가 작업 중이다…" : "무엇을 할까요?"),
     };
     return {
       items: chat.items,
@@ -111,7 +111,7 @@ export class ChatViewModel extends ViewModelBase implements IChatViewModel {
       pendingInput: chat.pendingInput,
       canCancel: chat.activeRunId !== null,
       composer,
-      reconnecting: chat.connection === 'connecting' && chat.lastSeq > 0,
+      reconnecting: chat.connection === "connecting" && chat.lastSeq > 0,
       failure: chat.failure,
     };
   }
@@ -122,7 +122,7 @@ export class ChatViewModel extends ViewModelBase implements IChatViewModel {
   }
 
   /** 세션마다 따로 기억한다. 보낼 때 함께 실린다. */
-  setMode(id: string, mode: 'action' | 'plan'): void {
+  setMode(id: string, mode: "action" | "plan"): void {
     this.#patchDraft(id, { mode });
   }
 
@@ -131,7 +131,7 @@ export class ChatViewModel extends ViewModelBase implements IChatViewModel {
     const state = this.chatOf(id);
     if (!state.composer.canSubmit) return;
     const { value, mode } = state.composer;
-    this.#patchDraft(id, { value: '', sending: true });
+    this.#patchDraft(id, { value: "", sending: true });
     void this.#model.send(id, value, mode).finally(() => this.#patchDraft(id, { sending: false }));
   }
 
@@ -148,7 +148,7 @@ export class ChatViewModel extends ViewModelBase implements IChatViewModel {
   #computeSessions(): readonly ChatSessionRow[] {
     return this.#model.sessions.map((session) => ({
       id: session.id,
-      title: session.title === '' ? '새 대화' : session.title,
+      title: session.title === "" ? "새 대화" : session.title,
       status: statusOf(session.lastRunStatus),
       archived: session.archived,
       timestamp: session.updatedAt,
@@ -157,7 +157,7 @@ export class ChatViewModel extends ViewModelBase implements IChatViewModel {
 
   #recompute(): void {
     this.#sessions.set(this.#computeSessions());
-    this.#sessionsLoading.set(this.#model.sessionsStatus === 'loading');
+    this.#sessionsLoading.set(this.#model.sessionsStatus === "loading");
     this.#sessionsFailure.set(this.#model.sessionsFailure);
     this.#chats.set(this.#model.chats);
   }

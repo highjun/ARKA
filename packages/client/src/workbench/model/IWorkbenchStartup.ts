@@ -1,5 +1,5 @@
-import { createToken, type Token } from '#core/di';
-import type { DescriptorMatch } from '#core';
+import { createToken, type Token } from "#core/di";
+import type { DescriptorMatch } from "#core";
 
 /**
  * 셸이 뜨고 지는 것에 맞춰 켜고 꺼야 하는 것 하나.
@@ -26,8 +26,7 @@ export type WorkbenchStartupDescriptor = {
   readonly token: Token<IWorkbenchStartup>;
 };
 
-export const WorkbenchStartupRegistryToken =
-  createToken<IWorkbenchStartupRegistry>('workbenchStartupRegistry');
+export const WorkbenchStartupRegistryToken = createToken<IWorkbenchStartupRegistry>("workbenchStartupRegistry");
 /** 셸 수명주기에 얹을 것들의 기여 지점. VSCode의 `IWorkbenchContributionsRegistry`에 해당한다. */
 export interface IWorkbenchStartupRegistry {
   /** descriptor 등록. 같은 ID로 재등록 불가. */

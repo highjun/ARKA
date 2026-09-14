@@ -1,1 +1,1 @@
-export { FileIcon } from './FileIcon';
+export { FileIcon } from "./FileIcon";

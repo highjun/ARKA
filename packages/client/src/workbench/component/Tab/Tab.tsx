@@ -1,12 +1,12 @@
-import type { Ref } from 'react';
-import { buildClassNames } from './TabContext';
-import { TabHeader } from './Header';
-import { StripItems, StripMenu, StripRootImpl } from './Strip';
-import type { TabStripProps } from './Strip';
-import { GroupImpl } from './Group';
-import type { TabGroupProps } from './Group';
-import { SplitRootImpl } from './Split';
-import type { TabSplitProps } from './Split';
+import type { Ref } from "react";
+import { buildClassNames } from "./TabContext";
+import { TabHeader } from "./Header";
+import { StripItems, StripMenu, StripRootImpl } from "./Strip";
+import type { TabStripProps } from "./Strip";
+import { GroupImpl } from "./Group";
+import type { TabGroupProps } from "./Group";
+import { SplitRootImpl } from "./Split";
+import type { TabSplitProps } from "./Split";
 
 const StripRoot = ({ className, ...props }: TabStripProps) => (
   <StripRootImpl {...props} classNames={buildClassNames()} className={className} />
@@ -23,18 +23,32 @@ const TabStrip = Object.assign(StripRoot, { Items: StripItems, Menu: StripMenu }
  * 다른 컴포넌트와 같은 자리다.
  */
 const TabGroup = ({ className, chrome, ref, ...props }: TabGroupProps) => (
-  <GroupImpl {...props} ref={ref} classNames={buildClassNames()} className={className} data-chrome={chrome ?? 'bordered'} data-component="Tab" />
+  <GroupImpl
+    {...props}
+    ref={ref}
+    classNames={buildClassNames()}
+    className={className}
+    data-chrome={chrome ?? "bordered"}
+    data-component="Tab"
+  />
 );
-TabGroup.displayName = 'Tab.Group';
+TabGroup.displayName = "Tab.Group";
 
 /**
  * TabSplit 은 leaf 하나뿐일 때와 branch 가 있을 때 렌더되는 태그가 다르다(`section`/`div`) —
  * `SplitRootImpl`이 안다.
  */
 const TabSplit = ({ className, chrome, ref, ...props }: TabSplitProps) => (
-  <SplitRootImpl {...props} ref={ref} classNames={buildClassNames()} className={className} data-chrome={chrome ?? 'bordered'} data-component="Tab" />
+  <SplitRootImpl
+    {...props}
+    ref={ref}
+    classNames={buildClassNames()}
+    className={className}
+    data-chrome={chrome ?? "bordered"}
+    data-component="Tab"
+  />
 );
-TabSplit.displayName = 'Tab.Split';
+TabSplit.displayName = "Tab.Split";
 
 /**
  * `tree`를 주면 분할, 주지 않고 `tabItems`/`activeTab`을 주면 단일 그룹으로 동작한다. 두 모양이
@@ -48,7 +62,7 @@ export type TabProps = (TabSplitProps | (TabGroupProps & { tree?: never })) & {
 /** `tree`가 있으면 분할을, 없으면 단일 그룹을 그린다. */
 const TabRoot = ({ ref, ...props }: TabProps) =>
   props.tree ? <TabSplit {...props} ref={ref} /> : <TabGroup {...props} ref={ref} />;
-TabRoot.displayName = 'Tab';
+TabRoot.displayName = "Tab";
 
 /**
  * 부품을 `Object.assign`으로 네임스페이스에 붙인다. 부품 함수의 이름이 `Tab<부품>`인 것은
@@ -60,6 +74,6 @@ export const Tab = Object.assign(TabRoot, { Header: TabHeader, Strip: TabStrip, 
 /**
  * 공개 표면은 이 파일이 낸다 — 부품이 파일로 갈렸어도 밖에서 보는 자리는 `Tab` 하나다.
  */
-export type { TabGroupItem, TabItem } from './shared';
-export type { TabGroupProps } from './Group';
-export type { TabSplitProps, TabTreeLeaf, TabTreeNode, TabTreeSplit } from './Split';
+export type { TabGroupItem, TabItem } from "./shared";
+export type { TabGroupProps } from "./Group";
+export type { TabSplitProps, TabTreeLeaf, TabTreeNode, TabTreeSplit } from "./Split";

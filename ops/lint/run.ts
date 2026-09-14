@@ -31,7 +31,17 @@ lint(["--config", "eslint.config.ts", "tsconfig.json", ...MAX_WARNINGS], REPO_RO
 
 /*
  * **마크다운도 여기서 본다.** 2026-09-14까지 `docs/**`·`README`·`CLAUDE.md`는 기계 검사가
- * 0건이었다. 대상 글롭과 끈 규칙의 이유는 `ops/markdownlint.jsonc`가 적는다.
+ * 0건이었다. 대상 글롭과 끈 규칙의 이유는 `ops/.markdownlint-cli2.jsonc`가 적는다.
  */
-const markdown = spawnSync("markdownlint-cli2", ["--config", "ops/markdownlint.jsonc"], { cwd: REPO_ROOT, stdio: "inherit" });
-if (markdown.status !== 0) process.exit(markdown.status ?? 1);
+const run = (file: string, args: readonly string[]): void => {
+  const { status } = spawnSync(file, args, { cwd: REPO_ROOT, stdio: "inherit" });
+  if (status !== 0) process.exit(status ?? 1);
+};
+
+run("markdownlint-cli2", ["--config", "ops/.markdownlint-cli2.jsonc"]);
+
+/*
+ * **코드의 모양**(→ TASK-65). `--check`만 한다 — 고치는 것은 `pnpm --filter ops run format`이고,
+ * 관문이 남의 파일을 조용히 고쳐서는 안 된다. 마크다운은 대상이 아니다(`.prettierignore`).
+ */
+run("prettier", ["--config", "ops/prettier.config.ts", "--check", "--log-level", "warn", "."]);

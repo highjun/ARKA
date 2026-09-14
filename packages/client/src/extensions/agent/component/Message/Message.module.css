@@ -35,14 +35,14 @@
   line-height: var(--text-caption-lineHeight);
 }
 
-.avatar[data-role='user'] {
+.avatar[data-role="user"] {
   border-color: var(--borderColor-accent-emphasis);
   background-color: var(--bgColor-accent-emphasis);
   color: var(--fgColor-onEmphasis);
 }
 
-.avatar[data-role='agent'],
-.avatar[data-role='system'] {
+.avatar[data-role="agent"],
+.avatar[data-role="system"] {
   border-color: var(--borderColor-default);
   background-color: var(--bgColor-muted);
   color: var(--fgColor-default);

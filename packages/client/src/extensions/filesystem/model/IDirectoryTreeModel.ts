@@ -1,5 +1,5 @@
-import { createToken, type Disposable } from '#core/di';
-import type { FileEntry, FileEntryType } from '../model/IWorkspaceFiles';
+import { createToken, type Disposable } from "#core/di";
+import type { FileEntry, FileEntryType } from "../model/IWorkspaceFiles";
 
 /**
  * 워크스페이스 트리의 상태.
@@ -12,7 +12,7 @@ import type { FileEntry, FileEntryType } from '../model/IWorkspaceFiles';
  */
 
 /** `idle`은 아직 한 번도 안 읽은 폴더다 — 펼치면 `loading`으로 간다. */
-type DirectoryStatus = 'idle' | 'loading' | 'loaded' | 'error';
+type DirectoryStatus = "idle" | "loading" | "loaded" | "error";
 
 /** 폴더 하나의 읽기 상태. 자식 목록은 경로로만 가리키고 중첩하지 않는다. */
 type DirectoryNode = {
@@ -69,5 +69,4 @@ export interface IDirectoryTreeModel {
 
   /** 상태가 바뀔 때마다 부른다. ViewModel이 이걸 받아 자기 atom을 갱신한다. */
   onDidChange(listener: () => void): Disposable;
-
 }

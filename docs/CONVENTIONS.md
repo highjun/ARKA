@@ -190,6 +190,7 @@
 - **`model/`은 도메인 타입·규칙(순수 로직)과 `infra/`가 구현할 인터페이스 선언까지다.** React·fetch·window·전역 상태를 런타임으로 알지 않는다.
 - **`view/`가 부르는 훅은 `useViewModel` 하나뿐이다.** 로컬 상태가 필요하면 ViewModel로 옮긴다. DI 접근(`useAppContext`·`resolve`)도 하지 않는다.
 - **위 두 줄은 린트가 본다** — `no-restricted-syntax`가 `view/`의 훅과 DI 접근을, `@typescript-eslint/no-restricted-imports`가 `model/`의 상태 라이브러리를 막는다(`import type`은 허용한다). → [ADR 0011](adr/0011-lint-off-the-shelf.md)
+- **코드의 모양은 `prettier`가 정한다.** 손으로 맞추지 않는다 — 고치려면 `pnpm --filter ops run format`이고, 관문은 `--check`만 한다. 마크다운은 `markdownlint`가 든다.
 - CSS는 `stylelint`가 본다 — client의 `lint`가 ESLint에 이어 돌린다. 값은 Primer 토큰만 참조한다 — 색·간격·테두리·그림자·글꼴에 리터럴을 쓰지 않는다. → [ADR 0009](adr/0009-primer-first.md)
 
 ## 컴포넌트

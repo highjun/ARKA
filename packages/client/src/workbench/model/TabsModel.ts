@@ -1,18 +1,18 @@
-import type { Disposable } from '#core/di';
-import { Emitter } from '#core/events';
-import type { IStorage } from '../model/IStorage';
-import { ROOT_PANE_ID } from './tabsShare';
-import type { OpenTab, PaneId, TabPaneNode, ITabsModel } from './ITabsModel';
+import type { Disposable } from "#core/di";
+import { Emitter } from "#core/events";
+import type { IStorage } from "../model/IStorage";
+import { ROOT_PANE_ID } from "./tabsShare";
+import type { OpenTab, PaneId, TabPaneNode, ITabsModel } from "./ITabsModel";
 
 /** `ITabsModel`의 유일한 구현체 — 트리·활성 leaf·미리보기를 `IStorage`에 지속하고, 구 스키마(flat 배열)를 트리로 이식한다. */
 export class TabsModel implements ITabsModel {
-  static readonly #TREE_KEY = 'workbench.tabTree';
-  static readonly #ACTIVE_LEAF_ID_KEY = 'workbench.activeLeafId';
-  static readonly #PREVIEW_TAB_ID_KEY = 'workbench.previewTabId';
+  static readonly #TREE_KEY = "workbench.tabTree";
+  static readonly #ACTIVE_LEAF_ID_KEY = "workbench.activeLeafId";
+  static readonly #PREVIEW_TAB_ID_KEY = "workbench.previewTabId";
   // 마이그레이션 전용 — 트리 도입 전(2026-08-31 이전) 버전이 쓰던 키. 새로 쓰지 않는다, 지우지도
   // 않는다(구버전으로 롤백하는 경로를 굳이 막을 이유가 없다).
-  static readonly #LEGACY_TABS_KEY = 'workbench.tabs';
-  static readonly #LEGACY_ACTIVE_TAB_ID_KEY = 'workbench.activeTabId';
+  static readonly #LEGACY_TABS_KEY = "workbench.tabs";
+  static readonly #LEGACY_ACTIVE_TAB_ID_KEY = "workbench.activeTabId";
 
   readonly #storage: IStorage;
   #tree: TabPaneNode;
@@ -57,7 +57,7 @@ export class TabsModel implements ITabsModel {
   /** `#previewTabId`에 반영하고 `IStorage`에 지속한다. */
   setPreviewTabId(id: string | null): void {
     this.#setPreviewTabId(id);
-    this.#storage.set(TabsModel.#PREVIEW_TAB_ID_KEY, id ?? '');
+    this.#storage.set(TabsModel.#PREVIEW_TAB_ID_KEY, id ?? "");
   }
 
   /** 새 스키마(트리)를 먼저 읽는다. 없거나 깨졌으면 구 스키마(flat 배열)를 단일 루트 leaf로
@@ -78,7 +78,7 @@ export class TabsModel implements ITabsModel {
   static #migrateLegacyTree(storage: IStorage): TabPaneNode {
     const tabs = TabsModel.#parseLegacyTabs(storage.get(TabsModel.#LEGACY_TABS_KEY));
     const activeTabId = TabsModel.#restoreId(storage, TabsModel.#LEGACY_ACTIVE_TAB_ID_KEY);
-    return { kind: 'leaf', id: ROOT_PANE_ID, tabs, activeTabId };
+    return { kind: "leaf", id: ROOT_PANE_ID, tabs, activeTabId };
   }
 
   static #parseLegacyTabs(raw: string | null): readonly OpenTab[] {
@@ -94,20 +94,20 @@ export class TabsModel implements ITabsModel {
   /** 얕은 판정이다(`kind`만 본다) — 구 코드의 flat 배열 판정(`Array.isArray`만 봄)과 같은 깊이다.
    * 저장한 값은 우리 자신이 `setTree`로 직렬화한 것뿐이라 더 깊이 검증할 위협 모델이 없다. */
   static #isPaneNode(value: unknown): value is TabPaneNode {
-    if (typeof value !== 'object' || value === null) return false;
+    if (typeof value !== "object" || value === null) return false;
     const kind = (value as { kind?: unknown }).kind;
-    return kind === 'leaf' || kind === 'split';
+    return kind === "leaf" || kind === "split";
   }
 
   static #restoreActiveLeafId(storage: IStorage): PaneId {
     const raw = storage.get(TabsModel.#ACTIVE_LEAF_ID_KEY);
-    return raw === null || raw === '' ? ROOT_PANE_ID : raw;
+    return raw === null || raw === "" ? ROOT_PANE_ID : raw;
   }
 
   /** 저장할 때 빈 문자열을 "없다"로 쓴다 — `localStorage`는 `null`을 값으로 담을 수 없다. */
   static #restoreId(storage: IStorage, key: string): string | null {
     const raw = storage.get(key);
-    return raw === null || raw === '' ? null : raw;
+    return raw === null || raw === "" ? null : raw;
   }
 
   readonly #changed = new Emitter();
@@ -134,5 +134,4 @@ export class TabsModel implements ITabsModel {
   onDidChange(listener: () => void): Disposable {
     return this.#changed.event(listener);
   }
-
 }

@@ -22,11 +22,11 @@
   box-shadow: var(--shadow-floating-small);
 }
 
-.item[data-severity='error'] {
+.item[data-severity="error"] {
   border-color: var(--borderColor-danger-emphasis);
 }
 
-.item[data-severity='warning'] {
+.item[data-severity="warning"] {
   border-color: var(--borderColor-attention-emphasis);
 }
 

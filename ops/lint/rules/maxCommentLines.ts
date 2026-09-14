@@ -12,7 +12,10 @@ const countTsdocLines = (value: string): number => {
   let n = 0;
   for (const raw of value.split("\n")) {
     const line = raw.replace(/^\s*\*\s?/u, "").trim();
-    if (/^@example\b/u.test(line)) { inExample = true; continue; }
+    if (/^@example\b/u.test(line)) {
+      inExample = true;
+      continue;
+    }
     if (inExample && /^@\w/u.test(line)) inExample = false;
     if (inExample || line === "") continue;
     n += 1;
@@ -35,17 +38,20 @@ export const maxCommentLines: Rule.RuleModule = {
     type: "suggestion",
     docs: { description: "주석 한 덩어리의 줄 수를 제한한다" },
     messages: {
-      tooLong: "{{kind}} 주석이 {{actual}}줄입니다(상한 {{max}}). 배경 설명은 ADR로 옮기고 `(→ ADR NNNN)` 링크만 남기세요.",
+      tooLong:
+        "{{kind}} 주석이 {{actual}}줄입니다(상한 {{max}}). 배경 설명은 ADR로 옮기고 `(→ ADR NNNN)` 링크만 남기세요.",
     },
-    schema: [{
-      type: "object",
-      properties: {
-        line: { type: "integer", minimum: 1 },
-        block: { type: "integer", minimum: 1 },
-        tsdoc: { type: "integer", minimum: 1 },
+    schema: [
+      {
+        type: "object",
+        properties: {
+          line: { type: "integer", minimum: 1 },
+          block: { type: "integer", minimum: 1 },
+          tsdoc: { type: "integer", minimum: 1 },
+        },
+        additionalProperties: false,
       },
-      additionalProperties: false,
-    }],
+    ],
   },
   create(context) {
     const opts: Options = { ...DEFAULTS, ...(context.options[0] as Partial<Options> | undefined) };
@@ -56,7 +62,8 @@ export const maxCommentLines: Rule.RuleModule = {
     return {
       Program(): void {
         // `loc`이 없는 주석은 자리를 짚을 수 없어 보고할 수 없다 — 세지도 않는다.
-        const comments = context.sourceCode.getAllComments()
+        const comments = context.sourceCode
+          .getAllComments()
           .flatMap((c) => (c.loc == null ? [] : [{ value: c.value, isLine: c.type === "Line", loc: c.loc }]));
 
         let run: typeof comments = [];
@@ -68,7 +75,10 @@ export const maxCommentLines: Rule.RuleModule = {
         };
 
         for (const comment of comments) {
-          if (DIRECTIVE.test(comment.value)) { flushRun(); continue; }
+          if (DIRECTIVE.test(comment.value)) {
+            flushRun();
+            continue;
+          }
 
           if (comment.isLine) {
             const previous = run.at(-1);

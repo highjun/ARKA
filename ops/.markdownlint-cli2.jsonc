@@ -18,7 +18,7 @@
     "first-line-heading": false,
     // 표는 `compact`로 고정한다. 기본값(`any`)은 `aligned`도 받는데 그건 **글자 수** 정렬이라
     // 한글 표에서 화면 정렬과 어긋난다 — 규칙이 재는 것과 사람이 보는 것이 달라진다.
-    "table-column-style": { "style": "compact" }
+    "table-column-style": { "style": "compact" },
   },
   "globs": [
     "**/*.md",
@@ -27,6 +27,6 @@
     // 추적하지 않는 사용자 개인 메모(→ CLAUDE.md).
     "!docs/USER_NOTE.md",
     // 테스트가 읽고 쓰는 자료다. 문서가 아니다.
-    "!packages/client/test/e2e/fixture/**"
-  ]
+    "!packages/client/test/e2e/fixture/**",
+  ],
 }

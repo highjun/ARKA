@@ -9,7 +9,13 @@ import path from "node:path";
 const DIR = path.resolve(import.meta.dirname, "../../docs/tasks");
 const STATUSES = ["To Do", "In Progress", "Done"] as const;
 
-type Task = { readonly num: number; readonly title: string; readonly status: string; readonly priority: string; readonly labels: readonly string[] };
+type Task = {
+  readonly num: number;
+  readonly title: string;
+  readonly status: string;
+  readonly priority: string;
+  readonly labels: readonly string[];
+};
 
 const field = (fm: string, key: string): string => new RegExp(`^${key}: *(.*)$`, "m").exec(fm)?.[1]?.trim() ?? "";
 
@@ -23,7 +29,10 @@ const readAll = (): Task[] =>
         title: field(fm, "title"),
         status: field(fm, "status"),
         priority: field(fm, "priority"),
-        labels: (/^labels: *\[(.*)\]$/mu.exec(fm)?.[1] ?? "").split(",").map((l) => l.trim()).filter(Boolean),
+        labels: (/^labels: *\[(.*)\]$/mu.exec(fm)?.[1] ?? "")
+          .split(",")
+          .map((l) => l.trim())
+          .filter(Boolean),
       };
     })
     .sort((a, b) => a.num - b.num);
@@ -49,7 +58,13 @@ const create = (title: string, options: Readonly<Record<string, string>>): void 
   const today = new Date().toISOString().slice(0, 10);
   const head = [`id: TASK-${String(num)}`, `title: ${title}`, "status: To Do"];
   if (options["priority"] !== undefined) head.push(`priority: ${options["priority"]}`);
-  if (options["labels"] !== undefined) head.push(`labels: [${options["labels"].split(",").map((l) => l.trim()).join(", ")}]`);
+  if (options["labels"] !== undefined)
+    head.push(
+      `labels: [${options["labels"]
+        .split(",")
+        .map((l) => l.trim())
+        .join(", ")}]`,
+    );
   head.push(`created: ${today}`);
   const body = `## 설명\n\n${options["description"] ?? "<무엇을·왜>"}\n\n## 인수 조건\n\n- [ ] <검증 가능한 것>\n`;
   const file = path.join(DIR, `${String(num).padStart(4, "0")}.md`);
@@ -60,7 +75,12 @@ const create = (title: string, options: Readonly<Record<string, string>>): void 
 const [command = "list", ...rest] = process.argv.slice(2);
 const positional = rest.filter((a) => !a.startsWith("--"));
 const options = Object.fromEntries(
-  rest.filter((a) => a.startsWith("--")).map((a) => { const [k, ...v] = a.slice(2).split("="); return [k ?? "", v.join("=")]; }),
+  rest
+    .filter((a) => a.startsWith("--"))
+    .map((a) => {
+      const [k, ...v] = a.slice(2).split("=");
+      return [k ?? "", v.join("=")];
+    }),
 );
 
 if (command === "list") list(options["status"]);

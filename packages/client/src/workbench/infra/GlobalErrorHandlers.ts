@@ -1,5 +1,5 @@
-import type { IErrorLog } from '../model/IErrorLog';
-import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
+import type { IErrorLog } from "../model/IErrorLog";
+import type { IWorkbenchStartup } from "../model/IWorkbenchStartup";
 
 /**
  * React 트리 밖에서 새는 오류 — 이벤트 핸들러·타이머·기다리지 않은 Promise — 를 `IErrorLog`로
@@ -9,19 +9,19 @@ import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
  */
 export const createGlobalErrorHandlers = ({ errorLog }: { errorLog: IErrorLog }): IWorkbenchStartup => {
   const onError = (event: ErrorEvent): void => {
-    errorLog.report(event.error ?? event.message, 'window.error');
+    errorLog.report(event.error ?? event.message, "window.error");
   };
   const onUnhandledRejection = (event: PromiseRejectionEvent): void => {
-    errorLog.report(event.reason, 'unhandledrejection');
+    errorLog.report(event.reason, "unhandledrejection");
   };
   return {
     start: () => {
-      window.addEventListener('error', onError);
-      window.addEventListener('unhandledrejection', onUnhandledRejection);
+      window.addEventListener("error", onError);
+      window.addEventListener("unhandledrejection", onUnhandledRejection);
     },
     stop: () => {
-      window.removeEventListener('error', onError);
-      window.removeEventListener('unhandledrejection', onUnhandledRejection);
+      window.removeEventListener("error", onError);
+      window.removeEventListener("unhandledrejection", onUnhandledRejection);
     },
   };
 };

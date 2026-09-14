@@ -1,10 +1,10 @@
-import type { HTMLAttributes, MouseEvent, Ref } from 'react';
-import { clsx } from 'clsx';
-import { ActionList } from '@primer/react';
-import { Icon } from '#component/Icon';
-import type { IconId } from '#component/Icon';
-import { Text } from '#component/Text';
-import styles from './ChangeList.module.css';
+import type { HTMLAttributes, MouseEvent, Ref } from "react";
+import { clsx } from "clsx";
+import { ActionList } from "@primer/react";
+import { Icon } from "#component/Icon";
+import type { IconId } from "#component/Icon";
+import { Text } from "#component/Text";
+import styles from "./ChangeList.module.css";
 
 /** 목록의 행 하나 — 어떤 파일이 어떻게 바뀌었나. 스테이지 여부는 목록이 안다. */
 interface ChangeListEntry {
@@ -37,7 +37,7 @@ interface ChangeListItemProps {
 }
 
 /** `children`·`role`·`onSelect`를 가로챈다 — 행은 `entries`가 정하고 `onSelect`는 고른 행을 준다. */
-export interface ChangeListProps extends Omit<HTMLAttributes<HTMLUListElement>, 'children' | 'role' | 'onSelect'> {
+export interface ChangeListProps extends Omit<HTMLAttributes<HTMLUListElement>, "children" | "role" | "onSelect"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLUListElement>;
   /** 머리글 문구(`'스테이지된 변경'`). 개수는 옆에 자동으로 붙는다. */
@@ -64,11 +64,11 @@ export interface ChangeListProps extends Omit<HTMLAttributes<HTMLUListElement>, 
 const ChangeListItem = ({ entry, action, onSelect }: ChangeListItemProps) => (
   <ActionList.Item onSelect={() => onSelect(entry)}>
     <ActionList.LeadingVisual>
-      <span className={styles['badge']} data-badge={entry.badge}>
+      <span className={styles["badge"]} data-badge={entry.badge}>
         {entry.badge}
       </span>
     </ActionList.LeadingVisual>
-    <span className={styles['path']}>{entry.path}</span>
+    <span className={styles["path"]}>{entry.path}</span>
     <ActionList.TrailingAction
       label={`${entry.path} ${action.label}`}
       icon={() => <Icon iconId={action.iconId} size="sm" />}
@@ -92,10 +92,10 @@ const ChangeListItem = ({ entry, action, onSelect }: ChangeListItemProps) => (
  * 묶음마다 `ul`이 하나씩 나오는 것은 시맨틱으로도 맞다.
  */
 const ChangeListRoot = ({ heading, entries, action, onSelect, className, ref, ...props }: ChangeListProps) => (
-  <ActionList ref={ref} {...props} data-component="ChangeList" className={clsx(className, styles['root'])}>
+  <ActionList ref={ref} {...props} data-component="ChangeList" className={clsx(className, styles["root"])}>
     <ActionList.Group>
       <ActionList.GroupHeading as="h3">
-        {heading}{' '}
+        {heading}{" "}
         <Text size="small" tone="muted">
           {entries.length}
         </Text>

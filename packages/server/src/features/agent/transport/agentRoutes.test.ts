@@ -14,7 +14,11 @@ const createSession = async (): Promise<string> => {
   const body = await expectResponse(
     probe,
     // 만들기는 201이다 — 계약에는 상태 코드도 들어간다.
-    { url: "/api/agent/sessions", init: { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({}) }, status: 201 },
+    {
+      url: "/api/agent/sessions",
+      init: { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({}) },
+      status: 201,
+    },
     SessionResponse,
   );
   return body.session.id;
@@ -50,7 +54,15 @@ describe("에이전트 라우트의 응답 계약", () => {
     const id = await createSession();
     const body = await expectResponse(
       probe,
-      { url: `/api/agent/sessions/${id}/runs`, init: { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input: "안녕" }) }, status: 202 },
+      {
+        url: `/api/agent/sessions/${id}/runs`,
+        init: {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ input: "안녕" }),
+        },
+        status: 202,
+      },
       RunResponse,
     );
     expect(body.runId).not.toBe("");
@@ -64,9 +76,29 @@ describe("에이전트 라우트의 응답 계약", () => {
   it("이미 도는 Run이 있으면 409와 AgentErrorBody다", async () => {
     const id = await createSession();
     const start = () =>
-      probe.app.request(`/api/agent/sessions/${id}/runs`, withProtocol({ method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input: "hi" }) }));
+      probe.app.request(
+        `/api/agent/sessions/${id}/runs`,
+        withProtocol({
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ input: "hi" }),
+        }),
+      );
     await start();
     const second = await start();
-    if (second.status === 409) await expectResponse(probe, { url: `/api/agent/sessions/${id}/runs`, init: { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input: "hi" }) }, status: 409 }, AgentErrorBody);
+    if (second.status === 409)
+      await expectResponse(
+        probe,
+        {
+          url: `/api/agent/sessions/${id}/runs`,
+          init: {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ input: "hi" }),
+          },
+          status: 409,
+        },
+        AgentErrorBody,
+      );
   });
 });

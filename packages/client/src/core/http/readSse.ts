@@ -20,14 +20,18 @@ export type SseOptions = {
  * `data:` 줄만 골라 `onData`로 넘긴다 — 이벤트 이름과 주석 줄은 버린다.
  * 조용한 채로 `idleTimeoutMs`가 지나면 던진다: 끊긴 연결은 열린 채로 남기 때문이다.
  */
-export const readSse = async (url: string, { headers, signal, idleTimeoutMs = DEFAULT_IDLE_TIMEOUT_MS }: SseOptions, onData: (data: string) => void): Promise<void> => {
+export const readSse = async (
+  url: string,
+  { headers, signal, idleTimeoutMs = DEFAULT_IDLE_TIMEOUT_MS }: SseOptions,
+  onData: (data: string) => void,
+): Promise<void> => {
   const response = await fetch(url, { headers, signal });
   if (!response.ok) throw new Error(`stream failed (${String(response.status)})`);
-  if (!response.body) throw new Error('stream has no body');
+  if (!response.body) throw new Error("stream has no body");
 
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
-  let buffer = '';
+  let buffer = "";
 
   for (;;) {
     const chunk = await readWithIdleTimeout(reader, signal, idleTimeoutMs);
@@ -35,21 +39,21 @@ export const readSse = async (url: string, { headers, signal, idleTimeoutMs = DE
     buffer += decoder.decode(chunk.value, { stream: true });
 
     // SSE는 빈 줄로 프레임을 가른다. 마지막 조각은 아직 안 끝났을 수 있어 버퍼에 남긴다.
-    let boundary = buffer.indexOf('\n\n');
+    let boundary = buffer.indexOf("\n\n");
     while (boundary !== -1) {
       const data = dataOf(buffer.slice(0, boundary));
       buffer = buffer.slice(boundary + 2);
       if (data !== null) onData(data);
-      boundary = buffer.indexOf('\n\n');
+      boundary = buffer.indexOf("\n\n");
     }
   }
 };
 
 /** 프레임의 `data:` 줄들을 이어 붙인다. 주석(`: ping`)만 있는 프레임은 `null`. */
 const dataOf = (frame: string): string | null => {
-  const lines = frame.split('\n').filter((line) => line.startsWith('data:'));
+  const lines = frame.split("\n").filter((line) => line.startsWith("data:"));
   if (lines.length === 0) return null;
-  return lines.map((line) => line.slice(5).trim()).join('');
+  return lines.map((line) => line.slice(5).trim()).join("");
 };
 
 /**
@@ -62,19 +66,19 @@ const readWithIdleTimeout = async (
   idleTimeoutMs: number,
   // `ReadableStreamReadResult`는 DOM lib에만 있는 이름이다 — Node 타입만 있는 곳(test/contract)에서도
   // 컴파일되도록 reader의 반환 타입에서 뽑는다.
-): Promise<Awaited<ReturnType<ReadableStreamDefaultReader<Uint8Array>['read']>>> => {
+): Promise<Awaited<ReturnType<ReadableStreamDefaultReader<Uint8Array>["read"]>>> => {
   let timer: ReturnType<typeof setTimeout> | undefined;
   let onAbort: (() => void) | undefined;
   const timeout = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => reject(new Error('stream idle timeout')), idleTimeoutMs);
+    timer = setTimeout(() => reject(new Error("stream idle timeout")), idleTimeoutMs);
   });
   const aborted = new Promise<never>((_, reject) => {
     if (signal.aborted) {
-      reject(new Error('stream aborted'));
+      reject(new Error("stream aborted"));
       return;
     }
-    onAbort = () => reject(new Error('stream aborted'));
-    signal.addEventListener('abort', onAbort, { once: true });
+    onAbort = () => reject(new Error("stream aborted"));
+    signal.addEventListener("abort", onAbort, { once: true });
   });
   try {
     return await Promise.race([reader.read(), timeout, aborted]);
@@ -84,7 +88,7 @@ const readWithIdleTimeout = async (
     throw error;
   } finally {
     clearTimeout(timer);
-    if (onAbort) signal.removeEventListener('abort', onAbort);
+    if (onAbort) signal.removeEventListener("abort", onAbort);
   }
 };
 
@@ -94,7 +98,7 @@ export const sleep = (ms: number, signal: AbortSignal): Promise<void> => {
   return new Promise<void>((resolve) => {
     const timer = setTimeout(resolve, ms);
     signal.addEventListener(
-      'abort',
+      "abort",
       () => {
         clearTimeout(timer);
         resolve();

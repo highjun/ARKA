@@ -1,11 +1,11 @@
-import { createToken } from '#core/di';
-import type { PendingInput, TranscriptItem } from '../model/IChatModel';
+import { createToken } from "#core/di";
+import type { PendingInput, TranscriptItem } from "../model/IChatModel";
 
 /** 세션 목록 한 줄. `status`는 컴포넌트(`StatusIndicator`)의 어휘로 바꾼 것이다. */
 export type ChatSessionRow = {
   readonly id: string;
   readonly title: string;
-  readonly status: 'running' | 'done' | 'waitingInput' | 'error' | null;
+  readonly status: "running" | "done" | "waitingInput" | "error" | null;
   readonly archived: boolean;
   /** ms since epoch — 마지막 활동. */
   readonly timestamp: number;
@@ -14,7 +14,7 @@ export type ChatSessionRow = {
 /** 입력창이 그대로 쓰는 모양 — 보낼 수 있는지 판단이 이미 `canSubmit`에 접혀 있다. */
 export type ChatComposerState = {
   readonly value: string;
-  readonly mode: 'action' | 'plan';
+  readonly mode: "action" | "plan";
   /** 보낼 수 있는가 — 빈 값이거나 보내는 중이거나 Run이 돌면(입력 대기 제외) 아니다. */
   readonly canSubmit: boolean;
   /** 요청이 나가 있는 동안. */
@@ -26,7 +26,7 @@ export type ChatComposerState = {
 export type ChatState = {
   readonly items: readonly TranscriptItem[];
   /** 헤더의 상태 표시. Run이 없으면 `null`. */
-  readonly status: 'running' | 'done' | 'waitingInput' | 'error' | null;
+  readonly status: "running" | "done" | "waitingInput" | "error" | null;
   readonly pendingInput: PendingInput | null;
   /** Run이 도는 중이라 끊을 수 있다. */
   readonly canCancel: boolean;
@@ -36,7 +36,7 @@ export type ChatState = {
   readonly failure: string | null;
 };
 
-export const ChatViewModelToken = createToken<IChatViewModel>('chatViewModel');
+export const ChatViewModelToken = createToken<IChatViewModel>("chatViewModel");
 /**
  * 세션 목록 패널과 대화 탭 둘 다 이 하나를 본다. 대화는 세션 id로 고른다 — 탭마다 세션이 하나이고
  * 어느 탭이 열렸는지는 Shell이 알기 때문이다.
@@ -61,7 +61,7 @@ export interface IChatViewModel {
   /** 열린 적 없으면 빈 대화를 준다 — 탭이 뜨자마자 그릴 것이 있어야 한다. */
   chatOf(id: string): ChatState;
   setDraft(id: string, value: string): void;
-  setMode(id: string, mode: 'action' | 'plan'): void;
+  setMode(id: string, mode: "action" | "plan"): void;
   /** 초안을 보낸다. 보낼 수 없으면 아무 일도 없다. */
   submit(id: string): void;
   cancel(id: string): void;

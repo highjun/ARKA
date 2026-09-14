@@ -1,17 +1,28 @@
-import { createContext, useContext, useRef } from 'react';
-import type { Dispatch, DragEventHandler, HTMLAttributes, KeyboardEvent, KeyboardEventHandler, MouseEventHandler, MutableRefObject, PointerEventHandler, ReactNode, SetStateAction } from 'react';
-import { clsx } from 'clsx';
-import { getStripItemStates, useStripScrollHandle, useTabStrip } from './useTabStrip';
-import { Container } from '#component/Container';
-import { Icon } from '#component/Icon';
-import { IconButton } from '#component/IconButton';
-import { Menu } from '#component/Menu';
-import type { StripDropPosition, TabClassNames, TabId, TabItem } from './shared';
-import { ClassNamesContext, useTabClassNames } from './TabContext';
-import { TabHeader } from './Header';
+import { createContext, useContext, useRef } from "react";
+import type {
+  Dispatch,
+  DragEventHandler,
+  HTMLAttributes,
+  KeyboardEvent,
+  KeyboardEventHandler,
+  MouseEventHandler,
+  MutableRefObject,
+  PointerEventHandler,
+  ReactNode,
+  SetStateAction,
+} from "react";
+import { clsx } from "clsx";
+import { getStripItemStates, useStripScrollHandle, useTabStrip } from "./useTabStrip";
+import { Container } from "#component/Container";
+import { Icon } from "#component/Icon";
+import { IconButton } from "#component/IconButton";
+import { Menu } from "#component/Menu";
+import type { StripDropPosition, TabClassNames, TabId, TabItem } from "./shared";
+import { ClassNamesContext, useTabClassNames } from "./TabContext";
+import { TabHeader } from "./Header";
 
 /** 콜백이 없으면 그 기능 자체가 꺼진다 — `onTabClose`가 없으면 닫기 버튼도 안 뜬다. */
-export interface TabStripProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+export interface TabStripProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
   /** 지금 선택된 탭의 id. */
   readonly activeTab: TabId;
   /** 스트립에 표시할 탭 목록. */
@@ -95,7 +106,7 @@ export interface StripItemState {
 const StripContext = createContext<StripContextValue | null>(null);
 const useStripContext = () => {
   const context = useContext(StripContext);
-  if (!context) throw new Error('Tab.Strip parts must be used within Tab.Strip');
+  if (!context) throw new Error("Tab.Strip parts must be used within Tab.Strip");
   return context;
 };
 
@@ -124,8 +135,8 @@ export const StripItems = () => {
             tabIndex={isActive ? 0 : -1}
             className={isDraggable ? classNames.stripDraggableHeader : undefined}
             data-tab-id={tab.id}
-            data-reorderable={isDraggable ? '' : undefined}
-            data-dragging={isDragging ? 'true' : 'false'}
+            data-reorderable={isDraggable ? "" : undefined}
+            data-dragging={isDragging ? "true" : "false"}
           />
         );
 
@@ -137,7 +148,7 @@ export const StripItems = () => {
             data-tab-drop-wrapper={tab.id}
             data-drop-target={indicatorPosition ?? undefined}
           >
-            {indicatorPosition === 'before' ? (
+            {indicatorPosition === "before" ? (
               <span aria-hidden="true" className={classNames.stripIndicatorBefore} />
             ) : null}
             {renderTabContextMenu ? (
@@ -148,7 +159,7 @@ export const StripItems = () => {
             ) : (
               header
             )}
-            {indicatorPosition === 'after' ? (
+            {indicatorPosition === "after" ? (
               <span aria-hidden="true" className={classNames.stripIndicatorAfter} />
             ) : null}
           </div>
@@ -183,7 +194,7 @@ export const StripRootImpl = ({
   onTabReorder,
   onTabPin,
   renderTabContextMenu,
-  stripEmptyLabel = 'No open tabs',
+  stripEmptyLabel = "No open tabs",
   overlay,
   className,
   classNames: providedClassNames,
@@ -213,7 +224,13 @@ export const StripRootImpl = ({
             자식은 role=tab 뿐이어야 한다. */}
         <div {...props} className={clsx(className, classNames.stripRoot)}>
           <Container ref={viewportRef} chrome="none" scroll="horizontal" className={classNames.stripListContainer}>
-            <div ref={listRef} role="tablist" aria-orientation="horizontal" className={classNames.stripList} {...listHandlers}>
+            <div
+              ref={listRef}
+              role="tablist"
+              aria-orientation="horizontal"
+              className={classNames.stripList}
+              {...listHandlers}
+            >
               {tabItems.length > 0 ? <StripItems /> : <div className={classNames.stripEmpty}>{stripEmptyLabel}</div>}
             </div>
           </Container>

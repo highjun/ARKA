@@ -1,0 +1,6 @@
+node_modules/
+.output/
+pnpm-lock.yaml
+# 마크다운은 markdownlint 가 든다(`ops/markdownlint.jsonc`). prettier 의 표 정렬은 **글자 수**로
+# 재서 한글 표에서 파이프가 어긋난다(2026-09-14 실측).
+*.md

@@ -41,12 +41,10 @@ export default [
       // `no-restricted-imports`는 **동적 `import()`를 놓친다**(2026-09-10 실측). 그래서 선택자가 형태별로 넷이다.
       "no-restricted-syntax": [
         "error",
-        ...(["ImportDeclaration", "ExportNamedDeclaration", "ExportAllDeclaration", "ImportExpression"].map(
-          (node) => ({
-            selector: `${node}[source.value=/^contracts(\\/|$)/]`,
-            message: "`#contracts`로 가져오세요 — 맨이름은 서드파티와 구분되지 않습니다.",
-          }),
-        )),
+        ...["ImportDeclaration", "ExportNamedDeclaration", "ExportAllDeclaration", "ImportExpression"].map((node) => ({
+          selector: `${node}[source.value=/^contracts(\\/|$)/]`,
+          message: "`#contracts`로 가져오세요 — 맨이름은 서드파티와 구분되지 않습니다.",
+        })),
       ],
       // 다른 패키지를 상대경로로 가져오는 것(`../../contracts/src/…`). 해석에 기대므로 바탕의
       // 리졸버가 서야 한다. `no-internal-modules`는 쓰지 않는다 — `#contracts`·`#core/di` 같은
@@ -59,7 +57,8 @@ export default [
             {
               target: "./src",
               from: "../client/src",
-              message: "server는 client를 import할 수 없습니다. 공유할 코드는 contracts로 옮기고 `#contracts`로 가져오세요.",
+              message:
+                "server는 client를 import할 수 없습니다. 공유할 코드는 contracts로 옮기고 `#contracts`로 가져오세요.",
             },
             ...SLICES.map((slice) => ({
               target: `./src/features/${slice}`,

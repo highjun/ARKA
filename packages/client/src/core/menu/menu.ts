@@ -1,5 +1,5 @@
-import type { Descriptor, Registry } from '#core/registry';
-import type { ContextRegistry } from '#core/action';
+import type { Descriptor, Registry } from "#core/registry";
+import type { ContextRegistry } from "#core/action";
 
 /**
  * Menu — 메뉴 id별로 커맨드를 기여하는 것. VSCode의 `contributes.menus`와 같은 모양이다.
@@ -38,11 +38,15 @@ export type MenuRegistry = Registry<MenuItemDescriptor>;
  * `matchKeybinding`과 달리 여럿을 돌려준다 — 메뉴는 "눌린 것 하나"가 아니라 "지금 보일 목록
  * 전체"를 그려야 하기 때문이다.
  */
-export const matchMenuItems = (registry: MenuRegistry, contextRegistry: ContextRegistry, menuId: string): MenuItemDescriptor[] =>
+export const matchMenuItems = (
+  registry: MenuRegistry,
+  contextRegistry: ContextRegistry,
+  menuId: string,
+): MenuItemDescriptor[] =>
   registry
     .list()
     .filter((item) => item.menuId === menuId && (item.when === undefined || item.when(contextRegistry)))
     .sort((a, b) => {
-      const byGroup = (a.group ?? '').localeCompare(b.group ?? '');
+      const byGroup = (a.group ?? "").localeCompare(b.group ?? "");
       return byGroup !== 0 ? byGroup : (a.order ?? 0) - (b.order ?? 0);
     });

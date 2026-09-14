@@ -1,33 +1,33 @@
-import { useState } from 'react';
-import type { HTMLAttributes, ReactNode, Ref } from 'react';
-import { clsx } from 'clsx';
-import { PortalProvider } from '#utils/portal';
-import styles from './Shell.module.css';
-import { SplitPageLayout, ThemeProvider } from '@primer/react';
-import { Container } from '#component/Container';
-import { Panel } from '#component/Panel';
-import { Icon } from '#component/Icon';
-import { IconButton } from '#component/IconButton';
-import { ActivityBar } from '../ActivityBar';
-import type { ActivityBarItem } from '../ActivityBar';
-import { Menu } from '#component/Menu';
+import { useState } from "react";
+import type { HTMLAttributes, ReactNode, Ref } from "react";
+import { clsx } from "clsx";
+import { PortalProvider } from "#utils/portal";
+import styles from "./Shell.module.css";
+import { SplitPageLayout, ThemeProvider } from "@primer/react";
+import { Container } from "#component/Container";
+import { Panel } from "#component/Panel";
+import { Icon } from "#component/Icon";
+import { IconButton } from "#component/IconButton";
+import { ActivityBar } from "../ActivityBar";
+import type { ActivityBarItem } from "../ActivityBar";
+import { Menu } from "#component/Menu";
 
 /** 패널이 없으면(아이콘 바만) 좁게, 있으면(아이콘 바+패널) 넓게 — 폭 값 자체는 워크벤치가 쓰던
  * 값을 그대로 컴포넌트 기본으로 가져온다. */
-const COLLAPSED_WIDTH = { min: '48px', default: '48px', max: '48px' } as const;
-const EXPANDED_WIDTH = { min: '304px', default: '304px', max: '304px' } as const;
+const COLLAPSED_WIDTH = { min: "48px", default: "48px", max: "48px" } as const;
+const EXPANDED_WIDTH = { min: "304px", default: "304px", max: "304px" } as const;
 /** `sidebarResizable`일 때 쓰는 기본 최소/최대 — 최소는 `sidebarMinWidth`로 덮어쓸 수 있다. */
-const RESIZABLE_DEFAULT_MIN_WIDTH = '240px';
-const RESIZABLE_MAX_WIDTH = '480px';
+const RESIZABLE_DEFAULT_MIN_WIDTH = "240px";
+const RESIZABLE_MAX_WIDTH = "480px";
 
 const hasContent = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
 
 /** `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다. */
-export interface ShellProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+export interface ShellProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLDivElement>;
   /** Primer `ThemeProvider`에 그대로 전달되는 색 모드. */
-  readonly colorMode: 'light' | 'dark';
+  readonly colorMode: "light" | "dark";
 
   /** 사이드바 토글 버튼(모바일 전용) 뒤에 이어지는 앱 정체성. */
   readonly brand?: ReactNode;
@@ -120,17 +120,17 @@ export const Shell = ({
 
   return (
     <ThemeProvider colorMode={colorMode}>
-      <div {...props} ref={ref} data-component="Shell" className={clsx(className, styles['root'])}>
+      <div {...props} ref={ref} data-component="Shell" className={clsx(className, styles["root"])}>
         <PortalProvider container={portalRoot ?? undefined}>
-          <SplitPageLayout className={styles['layout']}>
+          <SplitPageLayout className={styles["layout"]}>
             <SplitPageLayout.Header padding="none" divider="line">
-              <div className={styles['headerRow']}>
-                <span className={styles['headerGroup']}>
+              <div className={styles["headerRow"]}>
+                <span className={styles["headerGroup"]}>
                   {hasSidebar && (
                     <IconButton
                       variant="invisible"
                       size="small"
-                      className={styles['sidebarToggle']}
+                      className={styles["sidebarToggle"]}
                       aria-label="사이드바 열기"
                       onClick={() => setSidebarOpen(true)}
                       icon={() => <Icon iconId="layoutSidebarLeft" size="sm" />}
@@ -138,7 +138,7 @@ export const Shell = ({
                   )}
                   {brand}
                 </span>
-                <span className={styles['headerGroup']}>{actions}</span>
+                <span className={styles["headerGroup"]}>{actions}</span>
               </div>
             </SplitPageLayout.Header>
             {hasSidebar && (
@@ -150,17 +150,21 @@ export const Shell = ({
                   !expanded
                     ? COLLAPSED_WIDTH
                     : sidebarResizable
-                      ? { min: sidebarMinWidth ?? RESIZABLE_DEFAULT_MIN_WIDTH, default: EXPANDED_WIDTH.default, max: RESIZABLE_MAX_WIDTH }
+                      ? {
+                          min: sidebarMinWidth ?? RESIZABLE_DEFAULT_MIN_WIDTH,
+                          default: EXPANDED_WIDTH.default,
+                          max: RESIZABLE_MAX_WIDTH,
+                        }
                       : EXPANDED_WIDTH
                 }
                 resizable={expanded && sidebarResizable}
                 widthStorageKey={sidebarResizable ? sidebarWidthStorageKey : undefined}
                 aria-label={sidebarAriaLabel}
                 data-component="ShellSidebar"
-                className={clsx(styles['sidebar'], resolvedSidebarOpen && styles['sidebarOpen'])}
+                className={clsx(styles["sidebar"], resolvedSidebarOpen && styles["sidebarOpen"])}
               >
-                <div className={styles['sidebarInner']} data-state={resolvedSidebarOpen ? 'open' : 'closed'}>
-                  <div className={styles['sidebarCloseButtonRow']}>
+                <div className={styles["sidebarInner"]} data-state={resolvedSidebarOpen ? "open" : "closed"}>
+                  <div className={styles["sidebarCloseButtonRow"]}>
                     <IconButton
                       variant="invisible"
                       size="small"
@@ -169,12 +173,12 @@ export const Shell = ({
                       icon={() => <Icon iconId="close" size="sm" />}
                     />
                   </div>
-                  <div className={styles['sidebarBody']}>
+                  <div className={styles["sidebarBody"]}>
                     <ActivityBar items={activityItems} onSelect={onActivitySelect} />
                     {expanded && (
                       <Panel
                         density="compact"
-                        className={styles['sidebarPanel']}
+                        className={styles["sidebarPanel"]}
                         title={panelTitle}
                         actions={
                           hasContent(panelActions) ? (
@@ -192,7 +196,7 @@ export const Shell = ({
                           ) : undefined
                         }
                       >
-                        <Container chrome="none" className={styles['sidebarPanelBody']}>
+                        <Container chrome="none" className={styles["sidebarPanelBody"]}>
                           {panelContent}
                         </Container>
                       </Panel>
@@ -201,15 +205,14 @@ export const Shell = ({
                 </div>
               </SplitPageLayout.Sidebar>
             )}
-            <SplitPageLayout.Content padding="none" className={styles['content']}>
-              <div className={styles['contentFill']}>{children}</div>
+            <SplitPageLayout.Content padding="none" className={styles["content"]}>
+              <div className={styles["contentFill"]}>{children}</div>
             </SplitPageLayout.Content>
           </SplitPageLayout>
           {overlays}
         </PortalProvider>
-        <div ref={setPortalRoot} className={styles['portalRoot']} />
+        <div ref={setPortalRoot} className={styles["portalRoot"]} />
       </div>
     </ThemeProvider>
   );
 };
-

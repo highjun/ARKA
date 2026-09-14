@@ -9,7 +9,11 @@ const MAX_FILE_BYTES = 1024 * 1024;
 const PREVIEW_MAX = 200;
 
 /** 검색어를 정규식으로. 리터럴이면 이스케이프한다. `g`는 한 줄에 여러 번 찾기 위해서다. */
-export const compilePattern = ({ query, regex, caseSensitive }: Pick<SearchRequest, "query" | "regex" | "caseSensitive">): RegExp => {
+export const compilePattern = ({
+  query,
+  regex,
+  caseSensitive,
+}: Pick<SearchRequest, "query" | "regex" | "caseSensitive">): RegExp => {
   const source = regex ? query : query.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
   return new RegExp(source, caseSensitive ? "gu" : "giu");
 };
@@ -21,7 +25,12 @@ const looksBinary = (buffer: Buffer): boolean => buffer.includes(0);
  * 파일 하나를 줄 단위로 찾는다. 바이너리·상한 초과는 `null`(읽지 않은 것으로 센다).
  * `budget`은 남은 결과 수 — 0이 되면 멈춘다.
  */
-const searchFile = async (absolute: string, relative: string, pattern: RegExp, budget: number): Promise<readonly SearchMatch[] | null> => {
+const searchFile = async (
+  absolute: string,
+  relative: string,
+  pattern: RegExp,
+  budget: number,
+): Promise<readonly SearchMatch[] | null> => {
   const handle = await open(absolute, "r");
   try {
     const { size } = await handle.stat();
@@ -34,7 +43,12 @@ const searchFile = async (absolute: string, relative: string, pattern: RegExp, b
     for (const [index, text] of lines.entries()) {
       pattern.lastIndex = 0;
       for (let match = pattern.exec(text); match !== null; match = pattern.exec(text)) {
-        matches.push({ path: relative, line: index + 1, column: match.index + 1, preview: text.length > PREVIEW_MAX ? `${text.slice(0, PREVIEW_MAX)}…` : text });
+        matches.push({
+          path: relative,
+          line: index + 1,
+          column: match.index + 1,
+          preview: text.length > PREVIEW_MAX ? `${text.slice(0, PREVIEW_MAX)}…` : text,
+        });
         if (matches.length >= budget) return matches;
         // 빈 매치(`a*` 같은 정규식)는 lastIndex가 안 움직여 무한 루프가 된다.
         if (match[0] === "") pattern.lastIndex += 1;
@@ -54,7 +68,8 @@ const searchFile = async (absolute: string, relative: string, pattern: RegExp, b
  */
 export const searchFiles = async (root: string, request: SearchRequest): Promise<SearchResponse> => {
   const start = path.resolve(root, request.path.replace(/^\/+/u, ""));
-  if (start !== root && !start.startsWith(`${root}${path.sep}`)) return { matches: [], truncated: false, filesScanned: 0 };
+  if (start !== root && !start.startsWith(`${root}${path.sep}`))
+    return { matches: [], truncated: false, filesScanned: 0 };
   const pattern = compilePattern(request);
   const matches: SearchMatch[] = [];
   let filesScanned = 0;
@@ -76,7 +91,12 @@ export const searchFiles = async (root: string, request: SearchRequest): Promise
       if (entry.isDirectory()) {
         if (!SKIPPED_DIRS.has(entry.name)) await walk(absolute);
       } else if (entry.isFile()) {
-        const found = await searchFile(absolute, path.relative(root, absolute), pattern, request.maxResults - matches.length);
+        const found = await searchFile(
+          absolute,
+          path.relative(root, absolute),
+          pattern,
+          request.maxResults - matches.length,
+        );
         if (found === null) continue;
         filesScanned += 1;
         matches.push(...found);

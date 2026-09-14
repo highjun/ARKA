@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Icon } from '#component/Icon';
-import { ModeToggle } from './index';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Icon } from "#component/Icon";
+import { ModeToggle } from "./index";
 
 const meta = {
-  title: 'shared/ModeToggle',
+  title: "shared/ModeToggle",
   component: ModeToggle,
   args: {
-    values: ['light', 'dark'],
-    labels: ['다크 모드로', '라이트 모드로'],
+    values: ["light", "dark"],
+    labels: ["다크 모드로", "라이트 모드로"],
     children: [<Icon key="sun" iconId="sun" size="sm" />, <Icon key="moon" iconId="moon" size="sm" />],
     onValueChange: () => undefined,
   },
@@ -17,5 +17,5 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-export const Dark: Story = { args: { defaultValue: 'dark' } };
+export const Dark: Story = { args: { defaultValue: "dark" } };
 export const Disabled: Story = { args: { disabled: true } };

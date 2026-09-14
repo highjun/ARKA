@@ -17,17 +17,25 @@ import { arkaRules } from "./rules/index.ts";
  * `z.infer` 별칭은 뺀다 — 바로 위 스키마(`export const X`)가 문서를 들고 있고 이름도 같아,
  * 여기 문서를 달면 글자 그대로의 동어반복이 된다. 실측으로 476건 중 46건이 이 형태였다.
  */
-const REQUIRE_JSDOC: Linter.RuleEntry = ["error", {
-  publicOnly: true,
-  enableFixer: false,
-  exemptOverloadedImplementations: true,
-  require: { FunctionDeclaration: true, ClassDeclaration: true, MethodDefinition: true, ArrowFunctionExpression: true },
-  contexts: [
-    "TSInterfaceDeclaration",
-    "TSEnumDeclaration",
-    'TSTypeAliasDeclaration:not([typeAnnotation.typeName.right.name="infer"])',
-  ],
-}];
+const REQUIRE_JSDOC: Linter.RuleEntry = [
+  "error",
+  {
+    publicOnly: true,
+    enableFixer: false,
+    exemptOverloadedImplementations: true,
+    require: {
+      FunctionDeclaration: true,
+      ClassDeclaration: true,
+      MethodDefinition: true,
+      ArrowFunctionExpression: true,
+    },
+    contexts: [
+      "TSInterfaceDeclaration",
+      "TSEnumDeclaration",
+      'TSTypeAliasDeclaration:not([typeAnnotation.typeName.right.name="infer"])',
+    ],
+  },
+];
 
 // 주석 규칙이 자기 자신을 끄지 못하게 막을 목록(→ ADR 0004). `sonarjs/no-commented-code`만
 // 뺀다 — 주석 처리된 코드를 알아보는 휴리스틱이라 오탐이 있을 수 있다.
@@ -39,7 +47,6 @@ const COMMENT_RULES = [
   "line-comment-position",
   "@eslint-community/eslint-comments/*",
 ];
-
 
 /**
  * 이 저장소의 린트 바탕. **모든 패키지가 공유하는 것**만 든다.
@@ -65,7 +72,9 @@ const base: Linter.Config[] = [
   // 풀지 못해 zone과 비교할 것이 없어 **조용히 통과한다**(2026-09-10 실측).
   {
     plugins: { "import-x": importX },
-    settings: { "import-x/resolver-next": [createNodeResolver({ extensions: [".ts", ".tsx", ".js", ".jsx", ".json"] })] },
+    settings: {
+      "import-x/resolver-next": [createNodeResolver({ extensions: [".ts", ".tsx", ".js", ".jsx", ".json"] })],
+    },
   },
   {
     // **선언하지 않은 것을 import하면 잡는다**(→ ADR 0002). Node와 ESLint의 해석기가
@@ -123,10 +132,13 @@ const base: Linter.Config[] = [
       "@typescript-eslint/no-empty-object-type": "error",
       // `@ts-ignore`는 왜 껐는지를 남기지 않고 타입 오류를 숨긴다(→ ADR 0004). `@ts-expect-error`는
       // 오류가 사라지면 스스로 실패하므로 설명과 함께 허용한다.
-      "@typescript-eslint/ban-ts-comment": ["error", {
-        "ts-expect-error": "allow-with-description",
-        minimumDescriptionLength: 10,
-      }],
+      "@typescript-eslint/ban-ts-comment": [
+        "error",
+        {
+          "ts-expect-error": "allow-with-description",
+          minimumDescriptionLength: 10,
+        },
+      ],
     },
   },
 
@@ -141,11 +153,14 @@ const base: Linter.Config[] = [
     rules: {
       // 미룬 일은 주석이 아니라 `docs/tasks/`에 쌓는다. `decoration`은 `/** * TODO */`처럼
       // 별표로 꾸며진 줄도 같은 것으로 보게 한다.
-      "no-warning-comments": ["error", {
-        terms: ["todo", "fixme", "xxx", "hack"],
-        location: "start",
-        decoration: ["*"],
-      }],
+      "no-warning-comments": [
+        "error",
+        {
+          terms: ["todo", "fixme", "xxx", "hack"],
+          location: "start",
+          decoration: ["*"],
+        },
+      ],
       "@eslint-community/eslint-comments/require-description": "error",
       // 규칙 이름 없이 통째로 끄면 그 뒤에 생기는 위반까지 전부 묻힌다.
       "@eslint-community/eslint-comments/no-unlimited-disable": "error",
@@ -168,21 +183,24 @@ const base: Linter.Config[] = [
       // **대상을 최상위 선언로 좁히고 fixer는 끈다**(2026-09-10 실측). 기본 컨텍스트를 그대로 두면
       // 함수 본문 안 화살표까지 잡고, fixer는 **여러 줄 `//` 묶음의 마지막 줄만 바꿔** 앞 줄을
       // 매달린 채로 남긴다. `allowedPrefixes`는 손대지 않는다 — 기본값이 지시문을 이미 뺀다.
-      "jsdoc/convert-to-jsdoc-comments": ["error", {
-        enableFixer: false,
-        contexts: [
-          "ExportNamedDeclaration > FunctionDeclaration",
-          "ExportNamedDeclaration > ClassDeclaration",
-          "ExportNamedDeclaration > TSInterfaceDeclaration",
-          "ExportNamedDeclaration > TSTypeAliasDeclaration",
-          "ExportNamedDeclaration > TSEnumDeclaration",
-          "Program > FunctionDeclaration",
-          "Program > ClassDeclaration",
-          "Program > TSInterfaceDeclaration",
-          "Program > TSTypeAliasDeclaration",
-        ],
-        contextsBeforeAndAfter: [],
-      }],
+      "jsdoc/convert-to-jsdoc-comments": [
+        "error",
+        {
+          enableFixer: false,
+          contexts: [
+            "ExportNamedDeclaration > FunctionDeclaration",
+            "ExportNamedDeclaration > ClassDeclaration",
+            "ExportNamedDeclaration > TSInterfaceDeclaration",
+            "ExportNamedDeclaration > TSTypeAliasDeclaration",
+            "ExportNamedDeclaration > TSEnumDeclaration",
+            "Program > FunctionDeclaration",
+            "Program > ClassDeclaration",
+            "Program > TSInterfaceDeclaration",
+            "Program > TSTypeAliasDeclaration",
+          ],
+          contextsBeforeAndAfter: [],
+        },
+      ],
       // 내용이 없는 문서는 자리만 채운다 — 빈 블록이 있으면 다음 사람이 채워졌다고 믿는다.
       "jsdoc/require-description": "error",
       "jsdoc/no-blank-blocks": "error",
@@ -212,18 +230,24 @@ const base: Linter.Config[] = [
        * `it`/`test` 이름은 **한글 문장**이다(→ ADR 0004). `describe`는 대상의 식별자라 영문
        * 그대로다 — 실측 186건이 그 모양이고, 규약이 둘을 묶어 적던 것을 2026-09-14에 갈랐다.
        */
-      "vitest/valid-title": ["error", {
-        mustMatch: { it: ["[가-힣]", "`it()`/`test()` 이름은 한글 문장으로 쓰세요(→ ADR 0004)."] },
-      }],
+      "vitest/valid-title": [
+        "error",
+        {
+          mustMatch: { it: ["[가-힣]", "`it()`/`test()` 이름은 한글 문장으로 쓰세요(→ ADR 0004)."] },
+        },
+      ],
       /*
        * 단정이 없는 테스트는 "돌았다"만 알려 준다. **단정 헬퍼는 `expect`로 시작하는 이름을
        * 갖는다**(`expectNoA11yViolations`·`expectResponse`) — 그래야 이 규칙이 알아본다.
        */
       "vitest/expect-expect": ["error", { assertFunctionNames: ["expect", "expect*"] }],
       // 외부 `.snap`은 두지 않고 인라인만 쓴다(→ ADR 0010). 인라인도 커지면 읽히지 않는다.
-      "vitest/no-restricted-matchers": ["error", {
-        toMatchSnapshot: "외부 `.snap` 대신 `toMatchInlineSnapshot`을 쓰세요 — 갱신이 diff에 드러납니다(→ ADR 0010).",
-      }],
+      "vitest/no-restricted-matchers": [
+        "error",
+        {
+          toMatchSnapshot: "외부 `.snap` 대신 `toMatchInlineSnapshot`을 쓰세요 — 갱신이 diff에 드러납니다(→ ADR 0010).",
+        },
+      ],
       "vitest/no-large-snapshots": ["error", { maxSize: 20, inlineMaxSize: 12 }],
       // 대상 옆에 `<Name>.test.ts`로 둔다(→ ADR 0002).
       "vitest/consistent-test-filename": ["error", { pattern: String.raw`.*\.(test|spec)\.tsx?$` }],
@@ -249,26 +273,32 @@ const base: Linter.Config[] = [
     files: ["src/**/*", "test/**/*"],
     plugins: { "check-file": checkFile },
     rules: {
-      "check-file/filename-naming-convention": ["error", {
-        // 하이픈·밑줄을 쓰지 않는다. 대소문자는 export 이름이 정한다.
-        "src/**/*.{ts,tsx,css}": "+([a-zA-Z0-9])*(.+([a-z0-9]))",
-        "test/**/*.{ts,tsx}": "+([a-zA-Z0-9])*(.+([a-z0-9]))",
-        // 계약은 `I`로 시작한다 — `view/`가 만져도 되는 것이라는 레이어 표시다(→ ADR 0007).
-        "src/**/{model,viewmodel,domain}/I*.ts": "I+([A-Z])*([a-zA-Z0-9])",
-        // 흉내는 `Mock`으로 시작한다. 계약 스위트에 걸리는 구현이라는 표시다.
-        "src/**/Mock*.ts": "Mock+([A-Z])*([a-zA-Z0-9])",
-      }, { ignoreMiddleExtensions: true }],
-      "check-file/folder-naming-convention": ["error", {
-        // **와일드카드 자리마다 같은 규약이 걸린다** — 컴포넌트 폴더를 집으려고 `**`를 쓰면
-        // 그것이 잡은 계층 폴더(`workbench`)까지 PascalCase를 요구한다(2026-09-14 실측 148건).
-        // 그래서 컴포넌트 폴더는 `test/structure.test.ts`가 본다 — 그 정규식이 PascalCase를 이미
-        // 요구한다. 여기는 계층·기능 폴더만 본다.
-        "src/*/": "CAMEL_CASE",
-        "src/extensions/*/": "CAMEL_CASE",
-      }],
+      "check-file/filename-naming-convention": [
+        "error",
+        {
+          // 하이픈·밑줄을 쓰지 않는다. 대소문자는 export 이름이 정한다.
+          "src/**/*.{ts,tsx,css}": "+([a-zA-Z0-9])*(.+([a-z0-9]))",
+          "test/**/*.{ts,tsx}": "+([a-zA-Z0-9])*(.+([a-z0-9]))",
+          // 계약은 `I`로 시작한다 — `view/`가 만져도 되는 것이라는 레이어 표시다(→ ADR 0007).
+          "src/**/{model,viewmodel,domain}/I*.ts": "I+([A-Z])*([a-zA-Z0-9])",
+          // 흉내는 `Mock`으로 시작한다. 계약 스위트에 걸리는 구현이라는 표시다.
+          "src/**/Mock*.ts": "Mock+([A-Z])*([a-zA-Z0-9])",
+        },
+        { ignoreMiddleExtensions: true },
+      ],
+      "check-file/folder-naming-convention": [
+        "error",
+        {
+          // **와일드카드 자리마다 같은 규약이 걸린다** — 컴포넌트 폴더를 집으려고 `**`를 쓰면
+          // 그것이 잡은 계층 폴더(`workbench`)까지 PascalCase를 요구한다(2026-09-14 실측 148건).
+          // 그래서 컴포넌트 폴더는 `test/structure.test.ts`가 본다 — 그 정규식이 PascalCase를 이미
+          // 요구한다. 여기는 계층·기능 폴더만 본다.
+          "src/*/": "CAMEL_CASE",
+          "src/extensions/*/": "CAMEL_CASE",
+        },
+      ],
     },
   },
-
 ];
 
 export default { configs: { base } };

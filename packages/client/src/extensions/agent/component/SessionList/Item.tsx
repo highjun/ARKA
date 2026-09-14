@@ -1,10 +1,10 @@
-import { clsx } from 'clsx';
-import type { HTMLAttributes, KeyboardEvent } from 'react';
-import styles from './Item.module.css';
-import { CounterLabel } from '@primer/react';
-import { StatusIndicator } from '../StatusIndicator';
-import type { StatusIndicatorStatus } from '../StatusIndicator';
-import { Timestamp } from '#component/Timestamp';
+import { clsx } from "clsx";
+import type { HTMLAttributes, KeyboardEvent } from "react";
+import styles from "./Item.module.css";
+import { CounterLabel } from "@primer/react";
+import { StatusIndicator } from "../StatusIndicator";
+import type { StatusIndicatorStatus } from "../StatusIndicator";
+import { Timestamp } from "#component/Timestamp";
 
 /** 고를 수 있는지와 고르면 무엇을 하는지 — 행의 상호작용만 묶은 것이다. */
 export interface SessionListItemSelection {
@@ -37,13 +37,13 @@ const getInteractiveProps = ({ isActive = false, disabled = false, onSelect }: S
   };
 
   return {
-    role: 'option' as const,
-    'aria-selected': isActive,
-    'aria-disabled': disabled || undefined,
+    role: "option" as const,
+    "aria-selected": isActive,
+    "aria-disabled": disabled || undefined,
     tabIndex: disabled ? -1 : isActive ? 0 : -1,
     onClick: select,
     onKeyDown: (event: KeyboardEvent<HTMLElement>) => {
-      if (event.key !== 'Enter' && event.key !== ' ') return;
+      if (event.key !== "Enter" && event.key !== " ") return;
       event.preventDefault();
       select();
     },
@@ -51,7 +51,7 @@ const getInteractiveProps = ({ isActive = false, disabled = false, onSelect }: S
 };
 
 /** `title`을 가로챈다 — 네이티브 툴팁이 아니라 세션 제목이다. */
-export interface SessionListItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'title' | 'onSelect'> {
+export interface SessionListItemProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "title" | "onSelect"> {
   /** 세션 제목 — 목록의 첫 줄이자 `aria-label`로 그대로 쓰인다. */
   readonly title: string;
   /** 마지막 메시지 등 미리보기 한 줄. 없으면 빈 자리로 남는다. */
@@ -74,7 +74,7 @@ export interface SessionListItemProps extends Omit<HTMLAttributes<HTMLDivElement
 export const SessionListItem = ({
   title,
   excerpt,
-  status = 'done',
+  status = "done",
   timestamp,
   unread,
   isActive = false,
@@ -92,19 +92,19 @@ export const SessionListItem = ({
       data-active={isActive}
       data-disabled={disabled}
       data-component="SessionList.Item"
-      className={clsx(className, styles['root'])}
+      className={clsx(className, styles["root"])}
     >
-      <div className={styles['headerRow']}>
-        <div className={styles['title']}>{title}</div>
-        <div className={styles['badges']}>
+      <div className={styles["headerRow"]}>
+        <div className={styles["title"]}>{title}</div>
+        <div className={styles["badges"]}>
           {unreadText === null ? null : <CounterLabel variant="primary">{unreadText}</CounterLabel>}
           <StatusIndicator status={status} />
         </div>
       </div>
-      <div className={styles['metaRow']}>
-        <div className={styles['excerpt']}>{excerpt}</div>
+      <div className={styles["metaRow"]}>
+        <div className={styles["excerpt"]}>{excerpt}</div>
         {timestamp ? (
-          <div className={styles['timestamp']}>
+          <div className={styles["timestamp"]}>
             <Timestamp epoch={timestamp} mode="relative" />
           </div>
         ) : null}
@@ -112,4 +112,3 @@ export const SessionListItem = ({
     </div>
   );
 };
-

@@ -1,9 +1,9 @@
-import type { Disposable } from '#core/di';
-import { ViewModelBase } from '#core/viewmodel';
-import { atom } from 'nanostores';
-import type { IFileContentModel, OpenFile } from '../model/IFileContentModel';
-import type { IPinTab } from '../model/IPinTab';
-import type { IFileContentViewModel, FileRow, FileRowMap } from './IFileContentViewModel';
+import type { Disposable } from "#core/di";
+import { ViewModelBase } from "#core/viewmodel";
+import { atom } from "nanostores";
+import type { IFileContentModel, OpenFile } from "../model/IFileContentModel";
+import type { IPinTab } from "../model/IPinTab";
+import type { IFileContentViewModel, FileRow, FileRowMap } from "./IFileContentViewModel";
 
 /** `IFileContentViewModel`을 구현한다 — Model의 `OpenFile`을 화면용 `FileRow`로 변환한다. */
 export class FileContentViewModel extends ViewModelBase implements IFileContentViewModel {
@@ -30,9 +30,7 @@ export class FileContentViewModel extends ViewModelBase implements IFileContentV
   }
 
   #computeRows(): FileRowMap {
-    return Object.fromEntries(
-      Object.entries(this.#model.files).map(([path, file]) => [path, this.#toRow(file)]),
-    );
+    return Object.fromEntries(Object.entries(this.#model.files).map(([path, file]) => [path, this.#toRow(file)]));
   }
 
   /** `#rows`를 값으로 노출한다. */
@@ -81,26 +79,26 @@ export class FileContentViewModel extends ViewModelBase implements IFileContentV
   }
 
   #toRow(file: OpenFile): FileRow {
-    if (file.status === 'loading') return this.#locked('', null, true);
-    if (file.status === 'error') return this.#locked('', file.failure ?? '읽지 못했다', false);
-    if (file.binary) return this.#locked('', '텍스트가 아니라 보여줄 수 없다.', false);
+    if (file.status === "loading") return this.#locked("", null, true);
+    if (file.status === "error") return this.#locked("", file.failure ?? "읽지 못했다", false);
+    if (file.binary) return this.#locked("", "텍스트가 아니라 보여줄 수 없다.", false);
     // 잘린 파일은 내용은 보여주되(있는 부분까지는 읽을 이유가 있다) 편집은 막는다 — 다시 쓰면
     // 상한 뒤의 내용이 통째로 사라진다.
-    if (file.truncated) return this.#locked(file.content, '파일이 커서 앞부분만 보여준다. 편집할 수 없다.', false);
+    if (file.truncated) return this.#locked(file.content, "파일이 커서 앞부분만 보여준다. 편집할 수 없다.", false);
 
     return {
       content: file.content,
       notice: this.#saveNotice(file),
       readOnly: false,
       isDirty: file.content !== file.savedContent,
-      isSaving: file.saveStatus === 'saving',
+      isSaving: file.saveStatus === "saving",
       loading: false,
     };
   }
 
   /** 저장 중은 여기 담기지 않는다 — 저장 버튼 회전만으로 표현한다. 실패만 문장으로 남는다. */
   #saveNotice(file: OpenFile): string | null {
-    if (file.saveStatus === 'error') return `저장하지 못했다 — ${file.saveFailure ?? ''}`;
+    if (file.saveStatus === "error") return `저장하지 못했다 — ${file.saveFailure ?? ""}`;
     return null;
   }
 

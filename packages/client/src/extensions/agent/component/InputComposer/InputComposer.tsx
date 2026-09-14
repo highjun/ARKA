@@ -1,15 +1,15 @@
-import { clsx } from 'clsx';
-import { useCallback, useMemo, useState } from 'react';
-import type { ChangeEvent, FormHTMLAttributes, KeyboardEvent, Ref } from 'react';
-import { useControllableState } from '@radix-ui/react-use-controllable-state';
-import styles from './InputComposer.module.css';
-import { Button, SegmentedControl } from '@primer/react';
-import { Menu } from '#component/Menu';
-import { Icon } from '#component/Icon';
-import type { IconId } from '#component/Icon';
+import { clsx } from "clsx";
+import { useCallback, useMemo, useState } from "react";
+import type { ChangeEvent, FormHTMLAttributes, KeyboardEvent, Ref } from "react";
+import { useControllableState } from "@radix-ui/react-use-controllable-state";
+import styles from "./InputComposer.module.css";
+import { Button, SegmentedControl } from "@primer/react";
+import { Menu } from "#component/Menu";
+import { Icon } from "#component/Icon";
+import type { IconId } from "#component/Icon";
 
 /** `plan`은 실행 없이 계획만 세운다 — 서버의 `RunMode`와 같은 값이다. */
-export type InputComposerMode = 'action' | 'plan';
+export type InputComposerMode = "action" | "plan";
 
 /** 고를 수 있는 모델 하나. 목록은 밖에서 주입한다. */
 export interface InputComposerModelItem {
@@ -40,9 +40,9 @@ interface InputComposerState {
 }
 
 const DEFAULT_MODELS: readonly InputComposerModelItem[] = [
-  { id: 'gpt-5.5', label: 'GPT-5.5', iconId: 'brain' },
-  { id: 'claude-sonnet', label: 'Sonnet', iconId: 'monitor' },
-  { id: 'local', label: 'Local', iconId: 'settingsGear' },
+  { id: "gpt-5.5", label: "GPT-5.5", iconId: "brain" },
+  { id: "claude-sonnet", label: "Sonnet", iconId: "monitor" },
+  { id: "local", label: "Local", iconId: "settingsGear" },
 ];
 
 /**
@@ -54,20 +54,23 @@ const DEFAULT_MODELS: readonly InputComposerModelItem[] = [
  * 라벨로 그 확률 자체를 낮춘다.
  */
 const MODE_ITEMS = [
-  { id: 'action', iconId: 'wrench', label: 'Action' },
-  { id: 'plan', iconId: 'brain', label: 'Plan' },
+  { id: "action", iconId: "wrench", label: "Action" },
+  { id: "plan", iconId: "brain", label: "Plan" },
 ] as const satisfies readonly { id: InputComposerMode; iconId: IconId; label: string }[];
 
-const MODEL_LABEL = 'Model';
-const SUBMIT_LABEL = 'Submit';
+const MODEL_LABEL = "Model";
+const SUBMIT_LABEL = "Submit";
 
-const getSelectedModel = (models: readonly InputComposerModelItem[], modelId?: string): InputComposerModelItem | null => {
+const getSelectedModel = (
+  models: readonly InputComposerModelItem[],
+  modelId?: string,
+): InputComposerModelItem | null => {
   if (models.length === 0) return null;
   return models.find((model) => model.id === modelId) ?? models[0] ?? null;
 };
 
 /** `onSubmit`을 가로챈다 — 폼 이벤트가 아니라 입력 내용과 모드를 준다. */
-export interface InputComposerProps extends Omit<FormHTMLAttributes<HTMLFormElement>, 'children' | 'onSubmit'> {
+export interface InputComposerProps extends Omit<FormHTMLAttributes<HTMLFormElement>, "children" | "onSubmit"> {
   /** 루트 `form`으로 그대로 통과한다. */
   readonly ref?: Ref<HTMLFormElement>;
   /** controlled 모드의 현재 입력값. */
@@ -121,12 +124,12 @@ export interface InputComposerProps extends Omit<FormHTMLAttributes<HTMLFormElem
 export const InputComposer = ({
   ref,
   value,
-  defaultValue = '',
+  defaultValue = "",
   disabled = false,
   loading = false,
   submitOnEnter = true,
   mode,
-  defaultMode = 'action',
+  defaultMode = "action",
   onModeChange,
   models = DEFAULT_MODELS,
   modelId,
@@ -135,7 +138,7 @@ export const InputComposer = ({
   onModelIdChange,
   onValueChange,
   onSubmitValue,
-  placeholder = '요청 입력...',
+  placeholder = "요청 입력...",
   rows = 3,
   className,
   ...rest
@@ -143,14 +146,19 @@ export const InputComposer = ({
   const [internalValue, setInternalValue] = useState(defaultValue);
   const isValueControlled = value !== undefined;
   const currentValue = isValueControlled ? value : internalValue;
-  const [currentMode, setMode] = useControllableState<InputComposerMode>({ prop: mode, defaultProp: defaultMode, onChange: onModeChange, caller: 'InputComposer' });
+  const [currentMode, setMode] = useControllableState<InputComposerMode>({
+    prop: mode,
+    defaultProp: defaultMode,
+    onChange: onModeChange,
+    caller: "InputComposer",
+  });
   const [currentModelId, setModelId] = useControllableState<string | undefined>({
     prop: modelId,
     defaultProp: defaultModelId,
     onChange: (nextModelId) => {
       if (nextModelId !== undefined) onModelIdChange?.(nextModelId);
     },
-    caller: 'InputComposer',
+    caller: "InputComposer",
   });
   const selectedModel = useMemo(() => getSelectedModel(models, currentModelId), [currentModelId, models]);
   const canSubmit = !disabled && !loading && currentValue.trim().length > 0;
@@ -185,14 +193,17 @@ export const InputComposer = ({
   const submit = useCallback(() => {
     if (!canSubmit) return;
     onSubmitValue?.(currentValue);
-    if (!isValueControlled) setInternalValue('');
+    if (!isValueControlled) setInternalValue("");
   }, [canSubmit, currentValue, isValueControlled, onSubmitValue]);
 
-  const onTextareaChange = useCallback((event: ChangeEvent<HTMLTextAreaElement>) => setValue(event.target.value), [setValue]);
+  const onTextareaChange = useCallback(
+    (event: ChangeEvent<HTMLTextAreaElement>) => setValue(event.target.value),
+    [setValue],
+  );
 
   const onTextareaKeyDown = useCallback(
     (event: KeyboardEvent<HTMLTextAreaElement>) => {
-      if (!submitOnEnter || event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return;
+      if (!submitOnEnter || event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
       event.preventDefault();
       submit();
     },
@@ -217,7 +228,7 @@ export const InputComposer = ({
   return (
     <form
       ref={ref}
-      className={clsx(className, styles['root'])}
+      className={clsx(className, styles["root"])}
       onSubmit={(event) => {
         event.preventDefault();
         state.submit();
@@ -225,7 +236,7 @@ export const InputComposer = ({
       {...rest}
       data-component="InputComposer"
     >
-      <div className={styles['editor']}>
+      <div className={styles["editor"]}>
         <textarea
           value={state.value}
           disabled={state.disabled}
@@ -234,11 +245,11 @@ export const InputComposer = ({
           onKeyDown={state.onTextareaKeyDown}
           rows={rows}
           placeholder={placeholder}
-          className={styles['textarea']}
+          className={styles["textarea"]}
         />
       </div>
-      <div className={styles['toolbar']}>
-        <div className={styles['modes']}>
+      <div className={styles["toolbar"]}>
+        <div className={styles["modes"]}>
           <SegmentedControl
             aria-label="입력 모드"
             size="small"
@@ -246,7 +257,7 @@ export const InputComposer = ({
             // 기준 media query라), Primer가 정확히 이 문제(좁은 공간에서 라벨 넘침)를 위해
             // 만든 공식 탈출구라 방어선으로 얹는다 — 진짜 좁은 뷰포트(< 768px)에서는 아이콘만
             // 남는다.
-            variant={{ narrow: 'hideLabels' }}
+            variant={{ narrow: "hideLabels" }}
             onChange={(index) => {
               const id = MODE_ITEMS[index]?.id;
               if (id) state.selectMode(id);
@@ -263,14 +274,14 @@ export const InputComposer = ({
             ))}
           </SegmentedControl>
         </div>
-        <div className={styles['actions']}>
-          <span className={styles['modelLabel']}>{MODEL_LABEL}</span>
+        <div className={styles["actions"]}>
+          <span className={styles["modelLabel"]}>{MODEL_LABEL}</span>
           <Menu>
             <Menu.Trigger asChild>
               <Button aria-label={MODEL_LABEL} disabled={state.disabled || state.models.length === 0}>
-                <span className={styles['modelOption']}>
+                <span className={styles["modelOption"]}>
                   {state.selectedModel?.iconId ? <Icon iconId={state.selectedModel.iconId} size="sm" /> : null}
-                  <span className={styles['modelName']}>{state.selectedModel?.label ?? MODEL_LABEL}</span>
+                  <span className={styles["modelName"]}>{state.selectedModel?.label ?? MODEL_LABEL}</span>
                 </span>
               </Button>
             </Menu.Trigger>
@@ -286,11 +297,10 @@ export const InputComposer = ({
             </Menu.Content>
           </Menu>
           <Button aria-label={SUBMIT_LABEL} disabled={!state.canSubmit} onClick={state.submit} variant="primary">
-            <Icon iconId={state.loading ? 'close' : 'sendHorizontal'} size="sm" />
+            <Icon iconId={state.loading ? "close" : "sendHorizontal"} size="sm" />
           </Button>
         </div>
       </div>
     </form>
   );
 };
-

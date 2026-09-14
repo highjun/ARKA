@@ -1,7 +1,12 @@
-import { MockMarkdownSource } from './MockMarkdownSource';
-import { testMarkdownSourceContract } from './markdownSource.contract';
+import { MockMarkdownSource } from "./MockMarkdownSource";
+import { testMarkdownSourceContract } from "./markdownSource.contract";
 
-testMarkdownSourceContract('MockMarkdownSource', (files) => {
+testMarkdownSourceContract("MockMarkdownSource", (files) => {
   const source = new MockMarkdownSource(files);
-  return { source, write: (path, content) => { source.write(path, content); } };
+  return {
+    source,
+    write: (path, content) => {
+      source.write(path, content);
+    },
+  };
 });

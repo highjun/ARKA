@@ -1,5 +1,5 @@
-import type { Descriptor, Registry } from '#core/registry';
-import type { ContextRegistry } from '#core/action';
+import type { Descriptor, Registry } from "#core/registry";
+import type { ContextRegistry } from "#core/action";
 
 /**
  * Keybinding — Action Registry(무엇을 할 수 있는가)와 Context Registry(지금 상황이 어떤가)를

@@ -1,4 +1,4 @@
-import { createToken } from '#core/di';
+import { createToken } from "#core/di";
 
 /** 화면이 그대로 쓰는 행. `staged`로 어느 목록에 놓일지가 갈린다. */
 export type ChangeRow = {
@@ -15,7 +15,7 @@ export type DiffState = {
   readonly failure: string | null;
 };
 
-export const SourceControlViewModelToken = createToken<ISourceControlViewModel>('sourceControlViewModel');
+export const SourceControlViewModelToken = createToken<ISourceControlViewModel>("sourceControlViewModel");
 /** 소스 제어 패널과 diff 탭이 함께 보는 화면 상태. VSCode의 SCM 뷰에 해당한다. */
 export interface ISourceControlViewModel {
   /** 마운트에 상태를 읽는다. */

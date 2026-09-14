@@ -51,11 +51,7 @@ export function value<T>(instance: T): Provider<T> {
 }
 
 function isDisposable(candidate: unknown): candidate is Disposable {
-  return (
-    typeof candidate === "object" &&
-    candidate !== null &&
-    typeof (candidate as Disposable).dispose === "function"
-  );
+  return typeof candidate === "object" && candidate !== null && typeof (candidate as Disposable).dispose === "function";
 }
 
 class ContainerImpl implements Container {
@@ -77,10 +73,7 @@ class ContainerImpl implements Container {
 
   register<T>(token: Token<T>, provider: Provider<T>): void {
     // 자식에 같은 토큰을 다시 등록하면 그 스코프 안에서만 부모를 가린다(테스트 대역).
-    this.#providers.set(
-      token as Token<unknown>,
-      provider as Provider<unknown>,
-    );
+    this.#providers.set(token as Token<unknown>, provider as Provider<unknown>);
   }
 
   resolve<T>(token: Token<T>): T {
@@ -93,12 +86,7 @@ class ContainerImpl implements Container {
 
     // singleton은 등록된 스코프가, scoped는 요청한 스코프가 인스턴스를 보관한다.
     // transient는 아무도 보관하지 않는다.
-    const cacheHolder =
-      provider.lifetime === "singleton"
-        ? owner
-        : provider.lifetime === "scoped"
-          ? this
-          : undefined;
+    const cacheHolder = provider.lifetime === "singleton" ? owner : provider.lifetime === "scoped" ? this : undefined;
 
     if (cacheHolder && cacheHolder.#instances.has(token as Token<unknown>)) {
       return cacheHolder.#instances.get(token as Token<unknown>) as T;
@@ -133,11 +121,7 @@ class ContainerImpl implements Container {
     }
   }
 
-  #create<T>(
-    token: Token<T>,
-    provider: Provider<T>,
-    cacheHolder: ContainerImpl | undefined,
-  ): T {
+  #create<T>(token: Token<T>, provider: Provider<T>, cacheHolder: ContainerImpl | undefined): T {
     if (this.#resolving.includes(token.description)) {
       throw new CircularDependencyError([...this.#resolving, token.description]);
     }

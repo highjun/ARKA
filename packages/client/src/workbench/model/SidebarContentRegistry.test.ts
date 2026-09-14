@@ -1,5 +1,5 @@
-import { SidebarContentRegistry } from './SidebarContentRegistry';
-import type { ISidebarContentRegistry } from './ISidebarContentRegistry';
+import { SidebarContentRegistry } from "./SidebarContentRegistry";
+import type { ISidebarContentRegistry } from "./ISidebarContentRegistry";
 
 const make = (): ISidebarContentRegistry => {
   return new SidebarContentRegistry();
@@ -7,17 +7,17 @@ const make = (): ISidebarContentRegistry => {
 
 const NOOP_PANEL = () => null;
 
-describe('ISidebarContentRegistry', () => {
-  it('등록한 것을 조회할 수 있다', () => {
+describe("ISidebarContentRegistry", () => {
+  it("등록한 것을 조회할 수 있다", () => {
     const registry = make();
-    registry.add({ id: 'explorer', PanelComponent: NOOP_PANEL });
+    registry.add({ id: "explorer", PanelComponent: NOOP_PANEL });
 
-    expect(registry.get('explorer').PanelComponent).toBe(NOOP_PANEL);
+    expect(registry.get("explorer").PanelComponent).toBe(NOOP_PANEL);
   });
 
-  it('없는 항목은 tryGet이 undefined다', () => {
+  it("없는 항목은 tryGet이 undefined다", () => {
     const registry = make();
 
-    expect(registry.tryGet('nope')).toBeUndefined();
+    expect(registry.tryGet("nope")).toBeUndefined();
   });
 });

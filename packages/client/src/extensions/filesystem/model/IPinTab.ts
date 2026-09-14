@@ -1,4 +1,4 @@
-import { createToken } from '#core/di';
+import { createToken } from "#core/di";
 export const PinTabToken = createToken<IPinTab>("pinTab");
 /**
  * `FilesystemModule`이 `ShellModule`의 탭 고정(pin)을 부르기 위한 통로.

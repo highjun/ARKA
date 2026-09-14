@@ -1,4 +1,4 @@
-import { createWorkspaceWatchPort } from './HttpWorkspaceWatch';
+import { createWorkspaceWatchPort } from "./HttpWorkspaceWatch";
 
 /**
  * Port 에 바라는 것: **SSE 바이트를 "무엇이 바뀌었는지" 목록으로 바꾸고, 해지하면 더는 안 부른다.**
@@ -33,8 +33,7 @@ const serverSends = (chunks: readonly string[], status = 200): { url: () => stri
   return { url: () => captured, calls: () => calls };
 };
 
-describe('HttpWorkspaceWatch', () => {
-
+describe("HttpWorkspaceWatch", () => {
   afterEach(() => {
     globalThis.fetch = originalFetch;
     vi.useRealTimers();
@@ -50,52 +49,52 @@ describe('HttpWorkspaceWatch', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
   };
 
-  it('SSE 프레임을 바뀐 경로 목록으로 바꾼다', async () => {
-    serverSends([frame(['a.md']), frame(['b.md', 'c.md'])]);
+  it("SSE 프레임을 바뀐 경로 목록으로 바꾼다", async () => {
+    serverSends([frame(["a.md"]), frame(["b.md", "c.md"])]);
     const changes: (readonly string[])[] = [];
 
-    const unsubscribe = createWorkspaceWatchPort().watch(['a.md', 'b.md'], (changed) => changes.push(changed));
+    const unsubscribe = createWorkspaceWatchPort().watch(["a.md", "b.md"], (changed) => changes.push(changed));
     await flush();
     unsubscribe();
 
-    expect(changes).toEqual([['a.md'], ['b.md', 'c.md']]);
+    expect(changes).toEqual([["a.md"], ["b.md", "c.md"]]);
   });
 
-  it('나뉘어 도착한 프레임도 합쳐 읽는다', async () => {
-    const whole = frame(['a.md']);
+  it("나뉘어 도착한 프레임도 합쳐 읽는다", async () => {
+    const whole = frame(["a.md"]);
     serverSends([whole.slice(0, 9), whole.slice(9)]);
     const changes: (readonly string[])[] = [];
 
-    const unsubscribe = createWorkspaceWatchPort().watch(['a.md'], (changed) => changes.push(changed));
+    const unsubscribe = createWorkspaceWatchPort().watch(["a.md"], (changed) => changes.push(changed));
     await flush();
     unsubscribe();
 
-    expect(changes).toEqual([['a.md']]);
+    expect(changes).toEqual([["a.md"]]);
   });
 
-  it('깨진 프레임은 건너뛰고 나머지는 그대로 읽는다', async () => {
-    serverSends(['data: {부서진\n\n', frame(['a.md'])]);
+  it("깨진 프레임은 건너뛰고 나머지는 그대로 읽는다", async () => {
+    serverSends(["data: {부서진\n\n", frame(["a.md"])]);
     const changes: (readonly string[])[] = [];
 
-    const unsubscribe = createWorkspaceWatchPort().watch(['a.md'], (changed) => changes.push(changed));
+    const unsubscribe = createWorkspaceWatchPort().watch(["a.md"], (changed) => changes.push(changed));
     await flush();
     unsubscribe();
 
-    expect(changes).toEqual([['a.md']]);
+    expect(changes).toEqual([["a.md"]]);
   });
 
-  it('paths 를 복수의 path 쿼리 파라미터로 보낸다', async () => {
+  it("paths 를 복수의 path 쿼리 파라미터로 보낸다", async () => {
     const server = serverSends([frame([])]);
 
-    const unsubscribe = createWorkspaceWatchPort().watch(['a', 'b/c'], () => undefined);
+    const unsubscribe = createWorkspaceWatchPort().watch(["a", "b/c"], () => undefined);
     await flush();
     unsubscribe();
 
-    const url = new URL(server.url() ?? '', 'http://localhost');
-    expect(url.searchParams.getAll('path')).toEqual(['a', 'b/c']);
+    const url = new URL(server.url() ?? "", "http://localhost");
+    expect(url.searchParams.getAll("path")).toEqual(["a", "b/c"]);
   });
 
-  it('빈 경로로 부르면 연결하지 않는다', () => {
+  it("빈 경로로 부르면 연결하지 않는다", () => {
     const server = serverSends([]);
 
     const unsubscribe = createWorkspaceWatchPort().watch([], () => undefined);
@@ -104,15 +103,15 @@ describe('HttpWorkspaceWatch', () => {
     expect(server.calls()).toBe(0);
   });
 
-  it('해지하면 재시도 대기 중이어도 더는 연결하지 않는다', async () => {
+  it("해지하면 재시도 대기 중이어도 더는 연결하지 않는다", async () => {
     vi.useFakeTimers();
     let calls = 0;
     globalThis.fetch = (() => {
       calls += 1;
-      return Promise.reject(new Error('연결 끊김'));
+      return Promise.reject(new Error("연결 끊김"));
     }) as unknown as typeof fetch;
 
-    const unsubscribe = createWorkspaceWatchPort().watch(['a.md'], () => undefined);
+    const unsubscribe = createWorkspaceWatchPort().watch(["a.md"], () => undefined);
     // 첫 연결이 실패로 이어지기 전에 해지한다.
     unsubscribe();
     await vi.advanceTimersByTimeAsync(5_000);
@@ -120,37 +119,37 @@ describe('HttpWorkspaceWatch', () => {
     expect(calls).toBe(1);
   });
 
-  it('해지하지 않으면 연결이 끊긴 뒤 다시 붙는다', async () => {
+  it("해지하지 않으면 연결이 끊긴 뒤 다시 붙는다", async () => {
     vi.useFakeTimers();
     let calls = 0;
     globalThis.fetch = (() => {
       calls += 1;
-      return Promise.reject(new Error('연결 끊김'));
+      return Promise.reject(new Error("연결 끊김"));
     }) as unknown as typeof fetch;
 
-    const unsubscribe = createWorkspaceWatchPort().watch(['a.md'], () => undefined);
+    const unsubscribe = createWorkspaceWatchPort().watch(["a.md"], () => undefined);
     await vi.advanceTimersByTimeAsync(3_000);
     unsubscribe();
 
     expect(calls).toBeGreaterThanOrEqual(2);
   });
 
-  it('빈 paths(하트비트) 프레임은 onChange 를 안 부른다', async () => {
-    serverSends([frame([]), frame(['a.md']), frame([])]);
+  it("빈 paths(하트비트) 프레임은 onChange 를 안 부른다", async () => {
+    serverSends([frame([]), frame(["a.md"]), frame([])]);
     const changes: (readonly string[])[] = [];
 
-    const unsubscribe = createWorkspaceWatchPort().watch(['a.md'], (changed) => changes.push(changed));
+    const unsubscribe = createWorkspaceWatchPort().watch(["a.md"], (changed) => changes.push(changed));
     await flush();
     unsubscribe();
 
-    expect(changes).toEqual([['a.md']]);
+    expect(changes).toEqual([["a.md"]]);
   });
 
   /** `pull`에서 아무것도 enqueue하지 않는 스트림 — `reader.read()`가 절대 안 끝난다(idle-timeout·
    *  visibility 테스트에서 "연결이 조용히 죽었다"를 흉내내는 자리). */
   const neverRespondingStream = (): ReadableStream<Uint8Array> => new ReadableStream<Uint8Array>({ pull() {} });
 
-  it('idle-timeout 안에 아무 프레임도 안 오면 재연결한다', async () => {
+  it("idle-timeout 안에 아무 프레임도 안 오면 재연결한다", async () => {
     vi.useFakeTimers();
     let calls = 0;
     globalThis.fetch = (() => {
@@ -158,7 +157,7 @@ describe('HttpWorkspaceWatch', () => {
       return Promise.resolve({ ok: true, status: 200, body: neverRespondingStream() });
     }) as unknown as typeof fetch;
 
-    const unsubscribe = createWorkspaceWatchPort().watch(['a.md'], () => undefined);
+    const unsubscribe = createWorkspaceWatchPort().watch(["a.md"], () => undefined);
     await vi.advanceTimersByTimeAsync(1);
     expect(calls).toBe(1);
 
@@ -169,7 +168,7 @@ describe('HttpWorkspaceWatch', () => {
     expect(calls).toBe(2);
   });
 
-  it('하트비트가 idle-timeout 전에 도착하면 재연결하지 않는다', async () => {
+  it("하트비트가 idle-timeout 전에 도착하면 재연결하지 않는다", async () => {
     vi.useFakeTimers();
     let calls = 0;
     globalThis.fetch = (() => {
@@ -186,14 +185,14 @@ describe('HttpWorkspaceWatch', () => {
       });
     }) as unknown as typeof fetch;
 
-    const unsubscribe = createWorkspaceWatchPort().watch(['a.md'], () => undefined);
+    const unsubscribe = createWorkspaceWatchPort().watch(["a.md"], () => undefined);
     await vi.advanceTimersByTimeAsync(60_000);
     unsubscribe();
 
     expect(calls).toBe(1);
   });
 
-  it('visibilitychange(visible)가 오면 idle-timeout을 기다리지 않고 즉시 재연결한다', async () => {
+  it("visibilitychange(visible)가 오면 idle-timeout을 기다리지 않고 즉시 재연결한다", async () => {
     vi.useFakeTimers();
     let calls = 0;
     globalThis.fetch = (() => {
@@ -201,11 +200,11 @@ describe('HttpWorkspaceWatch', () => {
       return Promise.resolve({ ok: true, status: 200, body: neverRespondingStream() });
     }) as unknown as typeof fetch;
 
-    const unsubscribe = createWorkspaceWatchPort().watch(['a.md'], () => undefined);
+    const unsubscribe = createWorkspaceWatchPort().watch(["a.md"], () => undefined);
     await vi.advanceTimersByTimeAsync(1);
     expect(calls).toBe(1);
 
-    document.dispatchEvent(new Event('visibilitychange'));
+    document.dispatchEvent(new Event("visibilitychange"));
     // idle-timeout(45s)의 극히 일부인 재시도 대기(2s)만 지나도 재연결돼야 한다.
     await vi.advanceTimersByTimeAsync(2_000);
     unsubscribe();
@@ -213,7 +212,7 @@ describe('HttpWorkspaceWatch', () => {
     expect(calls).toBe(2);
   });
 
-  it('해지하면 visibilitychange 를 쏴도 더는 재연결하지 않는다', async () => {
+  it("해지하면 visibilitychange 를 쏴도 더는 재연결하지 않는다", async () => {
     vi.useFakeTimers();
     let calls = 0;
     globalThis.fetch = (() => {
@@ -221,11 +220,11 @@ describe('HttpWorkspaceWatch', () => {
       return Promise.resolve({ ok: true, status: 200, body: neverRespondingStream() });
     }) as unknown as typeof fetch;
 
-    const unsubscribe = createWorkspaceWatchPort().watch(['a.md'], () => undefined);
+    const unsubscribe = createWorkspaceWatchPort().watch(["a.md"], () => undefined);
     await vi.advanceTimersByTimeAsync(1);
     unsubscribe();
 
-    document.dispatchEvent(new Event('visibilitychange'));
+    document.dispatchEvent(new Event("visibilitychange"));
     await vi.advanceTimersByTimeAsync(5_000);
 
     expect(calls).toBe(1);

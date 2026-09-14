@@ -30,7 +30,9 @@ export class SqliteEventStore implements IEventStore {
     this.#db.exec("BEGIN IMMEDIATE");
     let event: AgentEvent;
     try {
-      const row = this.#db.prepare("SELECT COALESCE(MAX(seq), 0) + 1 AS seq FROM events WHERE session_id = ?").get(input.sessionId) as { seq: number };
+      const row = this.#db
+        .prepare("SELECT COALESCE(MAX(seq), 0) + 1 AS seq FROM events WHERE session_id = ?")
+        .get(input.sessionId) as { seq: number };
       event = { ...input, seq: row.seq, at } as AgentEvent;
       this.#db
         .prepare("INSERT INTO events (session_id, seq, run_id, at, type, payload) VALUES (?, ?, ?, ?, ?, ?)")
@@ -49,7 +51,9 @@ export class SqliteEventStore implements IEventStore {
    * 하나 때문에 세션 전체를 못 열면 손해가 더 크다.
    */
   listSince(sessionId: SessionId, since: number): readonly AgentEvent[] {
-    const rows = this.#db.prepare("SELECT payload FROM events WHERE session_id = ? AND seq > ? ORDER BY seq").all(sessionId, since) as Row[];
+    const rows = this.#db
+      .prepare("SELECT payload FROM events WHERE session_id = ? AND seq > ? ORDER BY seq")
+      .all(sessionId, since) as Row[];
     const events: AgentEvent[] = [];
     for (const row of rows) {
       const parsed = AgentEvent.safeParse(JSON.parse(row.payload));

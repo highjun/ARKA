@@ -1,19 +1,19 @@
-import type { Disposable } from '#core/di';
-import { ViewModelBase } from '#core/viewmodel';
-import { atom } from 'nanostores';
-import type { GitFileStatus } from '#contracts';
-import type { IGitModel } from '../model/IGitModel';
-import type { ChangeRow, DiffState, ISourceControlViewModel } from './ISourceControlViewModel';
+import type { Disposable } from "#core/di";
+import { ViewModelBase } from "#core/viewmodel";
+import { atom } from "nanostores";
+import type { GitFileStatus } from "#contracts";
+import type { IGitModel } from "../model/IGitModel";
+import type { ChangeRow, DiffState, ISourceControlViewModel } from "./ISourceControlViewModel";
 
-const BADGE = { added: 'A', modified: 'M', deleted: 'D', renamed: 'R', untracked: 'U' } as const;
+const BADGE = { added: "A", modified: "M", deleted: "D", renamed: "R", untracked: "U" } as const;
 
 /** diff 탭 id `staged:path` / `wt:path`를 푼다. 모양이 아니면 `null`. */
 export const parseDiffTabId = (tabId: string): { path: string; staged: boolean } | null => {
-  const colon = tabId.indexOf(':');
+  const colon = tabId.indexOf(":");
   if (colon === -1) return null;
   const kind = tabId.slice(0, colon);
-  if (kind !== 'staged' && kind !== 'wt') return null;
-  return { path: tabId.slice(colon + 1), staged: kind === 'staged' };
+  if (kind !== "staged" && kind !== "wt") return null;
+  return { path: tabId.slice(colon + 1), staged: kind === "staged" };
 };
 
 /** `ISourceControlViewModel`의 유일한 구현체. */
@@ -24,7 +24,7 @@ export class SourceControlViewModel extends ViewModelBase implements ISourceCont
   readonly #loading;
   readonly #staged;
   readonly #unstaged;
-  readonly #message = this.observe(atom(''));
+  readonly #message = this.observe(atom(""));
   readonly #busy = this.observe(atom(false));
   readonly #failure;
   readonly #lastCommit = this.observe(atom<string | null>(null));
@@ -41,7 +41,7 @@ export class SourceControlViewModel extends ViewModelBase implements ISourceCont
     this.#lastFiles = gitModel.files;
     this.#repository = this.observe(atom(gitModel.repository));
     this.#branch = this.observe(atom(gitModel.branch));
-    this.#loading = this.observe(atom(gitModel.status === 'loading'));
+    this.#loading = this.observe(atom(gitModel.status === "loading"));
     this.#staged = this.observe(atom(this.#rows(true)));
     this.#unstaged = this.observe(atom(this.#rows(false)));
     this.#failure = this.observe(atom(gitModel.failure));
@@ -92,7 +92,7 @@ export class SourceControlViewModel extends ViewModelBase implements ISourceCont
 
   /** 메시지가 있고, 스테이지가 비지 않았고, 다른 조작이 안 도는 중일 때만 참이다. */
   get canCommit(): boolean {
-    return this.#message.get().trim() !== '' && this.#staged.get().length > 0 && !this.#busy.get();
+    return this.#message.get().trim() !== "" && this.#staged.get().length > 0 && !this.#busy.get();
   }
 
   /** 마지막 실패의 메시지. 성공하면 지워진다. */
@@ -145,7 +145,7 @@ export class SourceControlViewModel extends ViewModelBase implements ISourceCont
       const hash = await this.#model.commit(message);
       if (hash !== null) {
         this.#lastCommit.set(hash.slice(0, 7));
-        this.#message.set('');
+        this.#message.set("");
       }
     });
   }
@@ -161,8 +161,8 @@ export class SourceControlViewModel extends ViewModelBase implements ISourceCont
   /** 아직 없는 탭이면 `loading` 상태를 돌려준다 — 화면이 빈 값을 다루지 않아도 된다. */
   diffOf(tabId: string): DiffState {
     const entry = this.#diffs.get()[tabId];
-    if (entry === undefined) return { loading: true, text: '', failure: null };
-    return { loading: entry.status === 'loading', text: entry.text, failure: entry.failure };
+    if (entry === undefined) return { loading: true, text: "", failure: null };
+    return { loading: entry.status === "loading", text: entry.text, failure: entry.failure };
   }
 
   async #run(work: () => Promise<void>): Promise<void> {
@@ -187,7 +187,7 @@ export class SourceControlViewModel extends ViewModelBase implements ISourceCont
   #recompute(): void {
     this.#repository.set(this.#model.repository);
     this.#branch.set(this.#model.branch);
-    this.#loading.set(this.#model.status === 'loading');
+    this.#loading.set(this.#model.status === "loading");
     this.#staged.set(this.#rows(true));
     this.#unstaged.set(this.#rows(false));
     this.#failure.set(this.#model.failure);

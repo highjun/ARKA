@@ -1,1 +1,1 @@
-export { KeybindingTable } from './KeybindingTable';
+export { KeybindingTable } from "./KeybindingTable";

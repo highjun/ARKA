@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import type { IWorkspaceWatch } from './IWorkspaceWatch';
+import { beforeEach, describe, expect, it } from "vitest";
+import type { IWorkspaceWatch } from "./IWorkspaceWatch";
 
 /** 구현마다 다른 준비 절차를 감싼다 — 스위트는 이 모양만 알면 된다. */
 export type WorkspaceWatchSetup = {
@@ -15,7 +15,7 @@ const waitFor = <T>(register: (resolve: (value: T) => void) => () => void, timeo
   new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       stop();
-      reject(new Error('no change notification'));
+      reject(new Error("no change notification"));
     }, timeoutMs);
     const stop = register((value) => {
       clearTimeout(timer);
@@ -26,51 +26,54 @@ const waitFor = <T>(register: (resolve: (value: T) => void) => () => void, timeo
 const settle = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** `IWorkspaceWatch`를 구현한 모든 것이 통과해야 하는 스위트. */
-export const testWorkspaceWatchContract = (name: string, setup: () => Promise<WorkspaceWatchSetup> | WorkspaceWatchSetup): void => {
+export const testWorkspaceWatchContract = (
+  name: string,
+  setup: () => Promise<WorkspaceWatchSetup> | WorkspaceWatchSetup,
+): void => {
   describe(`IWorkspaceWatch: ${name}`, () => {
     let s: WorkspaceWatchSetup;
     beforeEach(async () => {
       s = await setup();
     });
 
-    it('감시한 경로 안이 바뀌면 그 경로로 알린다', async () => {
+    it("감시한 경로 안이 바뀌면 그 경로로 알린다", async () => {
       const changed = await waitFor<readonly string[]>((resolve) => {
-        const unsubscribe = s.watch.watch([''], resolve);
-        void settle().then(() => s.change(''));
+        const unsubscribe = s.watch.watch([""], resolve);
+        void settle().then(() => s.change(""));
         return unsubscribe;
       });
-      expect(changed).toContain('');
+      expect(changed).toContain("");
     });
 
-    it('여러 경로를 감시하면 바뀐 것만 알린다', async () => {
-      await s.mkdir('a');
-      await s.mkdir('b');
+    it("여러 경로를 감시하면 바뀐 것만 알린다", async () => {
+      await s.mkdir("a");
+      await s.mkdir("b");
       const changed = await waitFor<readonly string[]>((resolve) => {
-        const unsubscribe = s.watch.watch(['a', 'b'], resolve);
-        void settle().then(() => s.change('b'));
+        const unsubscribe = s.watch.watch(["a", "b"], resolve);
+        void settle().then(() => s.change("b"));
         return unsubscribe;
       });
-      expect(changed).toEqual(['b']);
+      expect(changed).toEqual(["b"]);
     });
 
-    it('해지하면 더는 알리지 않는다', async () => {
+    it("해지하면 더는 알리지 않는다", async () => {
       let calls = 0;
-      const unsubscribe = s.watch.watch([''], () => {
+      const unsubscribe = s.watch.watch([""], () => {
         calls += 1;
       });
       await settle();
       unsubscribe();
-      await s.change('');
+      await s.change("");
       await settle(600);
       expect(calls).toBe(0);
     });
 
-    it('빈 배열은 아무것도 감시하지 않고 해지 함수도 무해하다', async () => {
+    it("빈 배열은 아무것도 감시하지 않고 해지 함수도 무해하다", async () => {
       let calls = 0;
       const unsubscribe = s.watch.watch([], () => {
         calls += 1;
       });
-      await s.change('');
+      await s.change("");
       await settle();
       unsubscribe();
       expect(calls).toBe(0);

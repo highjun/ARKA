@@ -1,10 +1,10 @@
-import { createToken, type Disposable } from '#core/di';
-import type { SearchQuery, SearchResponse } from './ISearchService';
+import { createToken, type Disposable } from "#core/di";
+import type { SearchQuery, SearchResponse } from "./ISearchService";
 
 /** 빈 질의로 `run`하면 `idle`로 되돌아간다 — `done`이 아니다. */
-export type SearchStatus = 'idle' | 'searching' | 'done' | 'error';
+export type SearchStatus = "idle" | "searching" | "done" | "error";
 
-export const SearchModelToken = createToken<ISearchModel>('searchModel');
+export const SearchModelToken = createToken<ISearchModel>("searchModel");
 /**
  * 마지막 검색 조건과 결과를 소유한다. 조건을 바꿔도 `run`을 부르기 전까지 결과는 그대로다 —
  * 타이핑마다 서버를 치지 않기 위해서다(디바운스는 ViewModel의 사정).

@@ -1,8 +1,8 @@
-import type { HTMLAttributes, Ref } from 'react';
-import { clsx } from 'clsx';
-import { ActionList } from '@primer/react';
-import { Text } from '#component/Text';
-import styles from './SearchResultList.module.css';
+import type { HTMLAttributes, Ref } from "react";
+import { clsx } from "clsx";
+import { ActionList } from "@primer/react";
+import { Text } from "#component/Text";
+import styles from "./SearchResultList.module.css";
 
 /** 한 파일 안에서 찾은 자리 하나. */
 interface SearchResultMatch {
@@ -31,7 +31,10 @@ interface SearchResultListItemProps {
 }
 
 /** `children`·`onSelect`를 가로챈다 — 행은 `files`가 정하고 `onSelect`는 고른 자리를 준다. */
-export interface SearchResultListProps extends Omit<HTMLAttributes<HTMLUListElement>, 'children' | 'role' | 'onSelect'> {
+export interface SearchResultListProps extends Omit<
+  HTMLAttributes<HTMLUListElement>,
+  "children" | "role" | "onSelect"
+> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLUListElement>;
   /** 파일별로 묶인 결과. 비면 아무것도 그리지 않는다 — 빈 상태 문구는 쓰는 쪽이 낸다. */
@@ -48,7 +51,7 @@ const SearchResultListItem = ({ match, onSelect }: SearchResultListItemProps) =>
         {match.line}
       </Text>
     </ActionList.LeadingVisual>
-    <span className={styles['preview']}>{match.preview.trim()}</span>
+    <span className={styles["preview"]}>{match.preview.trim()}</span>
   </ActionList.Item>
 );
 
@@ -59,7 +62,7 @@ const SearchResultListItem = ({ match, onSelect }: SearchResultListItemProps) =>
  * 구분이다(`ChangeList`는 묶음마다 따로 쓰이므로 자기 목록을 낸다).
  */
 const SearchResultListRoot = ({ files, onSelect, className, ref, ...props }: SearchResultListProps) => (
-  <ActionList ref={ref} {...props} data-component="SearchResultList" className={clsx(className, styles['root'])}>
+  <ActionList ref={ref} {...props} data-component="SearchResultList" className={clsx(className, styles["root"])}>
     {files.map((file) => (
       <ActionList.Group key={file.path}>
         <ActionList.GroupHeading as="h3">{file.path}</ActionList.GroupHeading>

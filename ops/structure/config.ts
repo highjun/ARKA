@@ -9,16 +9,19 @@ import { REPO_ROOT, TRACKED, read } from "./repo.ts";
  * 새 글롭을 만들면 이 목록에 한 줄을 더한다.
  */
 const PROBES: readonly (readonly [string, readonly string[]])[] = [
-  ["packages/client", [
-    "src/shared/component/Icon/Icon.tsx",
-    "src/shared/component/Icon/Icon.stories.tsx",
-    "src/shared/component/Icon/Icon.test.tsx",
-    "src/workbench/model/ThemeModel.ts",
-    "src/workbench/viewmodel/ShellViewModel.ts",
-    "src/workbench/view/ShellView.tsx",
-    ".storybook/main.ts",
-    "test/structure.test.ts",
-  ]],
+  [
+    "packages/client",
+    [
+      "src/shared/component/Icon/Icon.tsx",
+      "src/shared/component/Icon/Icon.stories.tsx",
+      "src/shared/component/Icon/Icon.test.tsx",
+      "src/workbench/model/ThemeModel.ts",
+      "src/workbench/viewmodel/ShellViewModel.ts",
+      "src/workbench/view/ShellView.tsx",
+      ".storybook/main.ts",
+      "test/structure.test.ts",
+    ],
+  ],
   ["packages/server", ["src/index.ts"]],
   ["packages/contracts", ["src/index.ts"]],
   ["ops", ["lint/index.ts", "pipeline/check.ts"]],

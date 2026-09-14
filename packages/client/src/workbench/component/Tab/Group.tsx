@@ -1,11 +1,11 @@
-import { createContext } from 'react';
-import type { HTMLAttributes, ReactNode, Ref } from 'react';
-import { clsx } from 'clsx';
-import { useControllableState } from '@radix-ui/react-use-controllable-state';
-import { Container } from '#component/Container';
-import type { TabChrome, TabClassNames, TabGroupItem, TabId, TabItem } from './shared';
-import { ClassNamesContext, useTabClassNames } from './TabContext';
-import { StripRootImpl } from './Strip';
+import { createContext } from "react";
+import type { HTMLAttributes, ReactNode, Ref } from "react";
+import { clsx } from "clsx";
+import { useControllableState } from "@radix-ui/react-use-controllable-state";
+import { Container } from "#component/Container";
+import type { TabChrome, TabClassNames, TabGroupItem, TabId, TabItem } from "./shared";
+import { ClassNamesContext, useTabClassNames } from "./TabContext";
+import { StripRootImpl } from "./Strip";
 
 /** `activeTab`이 목록에 없으면 첫 탭으로 떨어진다 — 그 보정 결과가 여기 담긴다. */
 export interface GroupState {
@@ -15,7 +15,7 @@ export interface GroupState {
 }
 
 /** `activeTab`의 유무로 controlled·uncontrolled가 갈린다. */
-export interface TabGroupProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+export interface TabGroupProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLElement>;
   /** 지금 선택된 탭의 id. 넘기면 controlled, 안 넘기면 `defaultActiveTab` 으로 컴포넌트가 자체 관리한다. */
@@ -74,7 +74,7 @@ const GroupContext = createContext<GroupState | null>(null);
 /** 실제 구현 — `data-component`를 스스로 찍지 않는다(공개 `Tab.Group`과 Split의 leaf 양쪽에서 재사용한다). */
 export const GroupImpl = ({
   activeTab,
-  defaultActiveTab = '',
+  defaultActiveTab = "",
   onActiveTabChange,
   tabItems,
   onTabClick,
@@ -82,9 +82,9 @@ export const GroupImpl = ({
   onTabClose,
   onTabReorder,
   onTabPin,
-  emptyMessage = 'No selected tab',
+  emptyMessage = "No selected tab",
   stripEmptyLabel,
-  panelLabel = 'Tab panel',
+  panelLabel = "Tab panel",
   renderPanel,
   panelOverlay,
   stripOverlay,
@@ -96,7 +96,12 @@ export const GroupImpl = ({
 }: TabGroupProps & { readonly classNames?: TabClassNames } & { readonly ref?: Ref<HTMLElement> }) => {
   const inherited = useTabClassNames();
   const classNames = providedClassNames ?? inherited;
-  const [currentActiveTab, setActiveTab] = useControllableState({ prop: activeTab, defaultProp: defaultActiveTab, onChange: onActiveTabChange, caller: 'Tab' });
+  const [currentActiveTab, setActiveTab] = useControllableState({
+    prop: activeTab,
+    defaultProp: defaultActiveTab,
+    onChange: onActiveTabChange,
+    caller: "Tab",
+  });
   const state = getGroupState(tabItems, currentActiveTab);
   const handleTabClick = (tabId: TabId) => {
     setActiveTab(tabId);
@@ -145,4 +150,4 @@ export const GroupImpl = ({
     </ClassNamesContext>
   );
 };
-GroupImpl.displayName = 'Tab.Group';
+GroupImpl.displayName = "Tab.Group";

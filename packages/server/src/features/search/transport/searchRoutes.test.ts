@@ -8,8 +8,22 @@ let probe: RouteProbe;
 let dispose: () => Promise<void>;
 
 const seed = async (path: string, content: string): Promise<void> => {
-  await probe.app.request("/api/files", withProtocol({ method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ path, type: "file" }) }));
-  await probe.app.request("/api/files/content", withProtocol({ method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ path, content }) }));
+  await probe.app.request(
+    "/api/files",
+    withProtocol({
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ path, type: "file" }),
+    }),
+  );
+  await probe.app.request(
+    "/api/files/content",
+    withProtocol({
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ path, content }),
+    }),
+  );
 };
 
 describe("검색 라우트의 응답 계약", () => {

@@ -16,13 +16,9 @@ const ContainerValue = createContext<Container | null>(null);
  * DataBinding 이 `useViewModel` 로 ViewModel 을 얻으려면 컨테이너가 트리에 있어야 한다.
  * View 는 이 provider 를 직접 소비하지 않는다 — DataBinding 만 쓴다.
  */
-export const ViewModelProvider = ({
-  container,
-  children,
-}: {
-  container: Container;
-  children: ReactNode;
-}) => <ContainerValue.Provider value={container}>{children}</ContainerValue.Provider>;
+export const ViewModelProvider = ({ container, children }: { container: Container; children: ReactNode }) => (
+  <ContainerValue.Provider value={container}>{children}</ContainerValue.Provider>
+);
 
 /**
  * 컨테이너를 그대로 준다. 이름에 `AppContext` 가 남은 것은 이게 "앱 조립의 결과에 닿는

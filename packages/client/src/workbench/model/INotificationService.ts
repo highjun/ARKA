@@ -1,7 +1,7 @@
-import { createToken, type Disposable } from '#core/di';
+import { createToken, type Disposable } from "#core/di";
 
 /** 아이콘과 색만 가른다 — 동작은 셋 다 같다. */
-export type NotificationSeverity = 'info' | 'warning' | 'error';
+export type NotificationSeverity = "info" | "warning" | "error";
 
 /** 스스로 사라지지 않는다 — `dismiss`를 부를 때까지 남는다. */
 export type Notification = {
@@ -12,7 +12,7 @@ export type Notification = {
   readonly at: number;
 };
 
-export const NotificationServiceToken = createToken<INotificationService>('notificationService');
+export const NotificationServiceToken = createToken<INotificationService>("notificationService");
 /**
  * 사용자에게 알릴 것을 모으는 자리. VSCode의 `INotificationService`에 해당한다.
  *

@@ -36,7 +36,8 @@ describe("문서의 상대 링크가 실재한다", () => {
  * (2026-09-14에 `docs/components.md`를 가리키는 주석이 남아 있는 것을 발견했다).
  */
 describe("코드가 인용한 ADR이 실재한다", () => {
-  const cited = (text: string) => [...text.matchAll(/→\s*ADR\s*(?<number>\d{4})/gu)].map((m) => m.groups?.["number"] ?? "");
+  const cited = (text: string) =>
+    [...text.matchAll(/→\s*ADR\s*(?<number>\d{4})/gu)].map((m) => m.groups?.["number"] ?? "");
 
   it("인용을 하나라도 찾는다", () => {
     expect(SOURCE.flatMap((file) => cited(read(file))).length).toBeGreaterThan(10);

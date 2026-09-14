@@ -1,12 +1,12 @@
-import type { HTMLAttributes, ReactNode } from 'react';
-import { clsx } from 'clsx';
-import { Icon } from '#component/Icon';
-import { IconButton } from '#component/IconButton';
-import type { IconId } from '#component/Icon';
-import { useTabClassNames } from './TabContext';
+import type { HTMLAttributes, ReactNode } from "react";
+import { clsx } from "clsx";
+import { Icon } from "#component/Icon";
+import { IconButton } from "#component/IconButton";
+import type { IconId } from "#component/Icon";
+import { useTabClassNames } from "./TabContext";
 
 /** `title`을 가로챈다 — 네이티브 툴팁이 아니라 탭 제목이다. */
-export interface TabHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'title'> {
+export interface TabHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "title"> {
   /** 이 탭이 지금 선택된(보이는) 탭인가. */
   readonly isActive?: boolean;
   /** 저장 안 된 변경이 있는가 — 제목 옆에 점으로 표시된다. */
@@ -54,10 +54,10 @@ export const TabHeader = ({
   return (
     <div
       {...props}
-      role={props.role ?? 'tab'}
-      aria-selected={props['aria-selected'] ?? isActive}
-      data-active={isActive ? '' : undefined}
-      data-dirty={isDirty ? '' : undefined}
+      role={props.role ?? "tab"}
+      aria-selected={props["aria-selected"] ?? isActive}
+      data-active={isActive ? "" : undefined}
+      data-dirty={isDirty ? "" : undefined}
       data-component="Tab.Header"
       className={clsx(className, classNames.header)}
     >
@@ -66,7 +66,7 @@ export const TabHeader = ({
       ) : (
         <Icon iconId={iconId} size="sm" className={classNames.headerIcon} />
       )}
-      <span data-preview={isPreview ? '' : undefined} className={classNames.headerLabel}>
+      <span data-preview={isPreview ? "" : undefined} className={classNames.headerLabel}>
         {title}
       </span>
       {/*

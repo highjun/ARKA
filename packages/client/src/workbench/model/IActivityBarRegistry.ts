@@ -1,5 +1,5 @@
-import { createToken } from '#core/di';
-import type { DescriptorMatch } from '#core';
+import { createToken } from "#core/di";
+import type { DescriptorMatch } from "#core";
 
 /** 활동 아이콘 바 항목 하나 — 어떤 아이콘이 있고, 눌렀을 때 부를 라벨이 뭔가. */
 export type ActivityBarDescriptor = {
