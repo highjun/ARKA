@@ -156,7 +156,7 @@ const Row = ({
 
   /**
    * disabled 행("비어 있다"/"불러오는 중…"/에러 자리표시)은 `onRowContextMenu`를 안 부르는 것만으론
-   * 부족하다 — 여기서 멈추면 이벤트가 그대로 위로 버블링돼, 감싸는 `ContextMenu.Trigger`(컴포넌트
+   * 부족하다 — 여기서 멈추면 이벤트가 그대로 위로 버블링돼, 감싸는 `Menu.Trigger`(컴포넌트
    * 밖, `onContextMenu` 자체를 모르는 계약이라 이 행이 disabled인지 알 길이 없다)가 그걸 받아 메뉴를
    * 열어 버린다. 그러면 `onContextMenu` 콜백이 한 번도 안 불렸으니 앱 쪽 "우클릭한 대상"은 이전
    * 값(주로 없음)에 머무는데, 메뉴는 뜬 채로 "새 파일"을 고르면 그 대상 없음이 조용히 워크스페이스
@@ -319,7 +319,7 @@ export interface FileTreeProps extends Omit<HTMLAttributes<HTMLElement>, 'childr
   /**
    * 행을 우클릭했다 — 어느 행인지만 알린다. 메뉴 자체(무엇을 보여줄지, 어디에 띄울지)는
    * 이 컴포넌트의 일이 아니다. `preventDefault`/`stopPropagation`을 하지 않으므로, 이 이벤트를
-   * 감싸는 컨텍스트 메뉴(예: `ContextMenu.Trigger`)가 있으면 그쪽으로 그대로 버블링된다.
+   * 감싸는 컨텍스트 메뉴(예: `Menu.Trigger`)가 있으면 그쪽으로 그대로 버블링된다.
    *
    * 우클릭한 행이 선택 밖에 있으면 이 콜백이 불리기 **전에** 선택을 그 행 하나로 정규화한다(그리고
    * `onSelectedIdsChange`가 먼저 불린다) — "메뉴의 대상 = 지금 하이라이트된 것"이 항상 참이 되게

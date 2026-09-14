@@ -1,6 +1,6 @@
 import { matchMenuItems } from '#core/menu';
 import { useViewModel } from '#core/viewmodel';
-import { ContextMenu } from '#component/ContextMenu';
+import { Menu } from '#component/Menu';
 import type { ReactNode } from 'react';
 import { CommandCenterRegistryToken } from './ICommandCenterRegistry';
 
@@ -41,17 +41,17 @@ export const CommandContextMenu = ({
   };
 
   return (
-    <ContextMenu onOpenChange={onOpenChange}>
-      <ContextMenu.Trigger>{children}</ContextMenu.Trigger>
+    <Menu kind="context" onOpenChange={onOpenChange}>
+      <Menu.Trigger>{children}</Menu.Trigger>
       {items.length === 0 ? null : (
-        <ContextMenu.Content>
+        <Menu.Content>
           {items.map((item) => (
-            <ContextMenu.Item key={item.id} onSelect={() => onSelect(item.id)}>
+            <Menu.Item key={item.id} onSelect={() => onSelect(item.id)}>
               {item.label}
-            </ContextMenu.Item>
+            </Menu.Item>
           ))}
-        </ContextMenu.Content>
+        </Menu.Content>
       )}
-    </ContextMenu>
+    </Menu>
   );
 };

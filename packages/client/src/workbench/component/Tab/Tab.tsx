@@ -35,7 +35,7 @@ import { Container } from '#component/Container';
 import { Icon } from '#component/Icon';
 import type { IconId } from '#component/Icon';
 import { IconButton } from '#component/IconButton';
-import { ContextMenu } from '#component/ContextMenu';
+import { Menu } from '#component/Menu';
 
 // ─── 공통 도메인 ───
 
@@ -94,7 +94,7 @@ export interface TabClassNames {
   /** 비활성 탭의 닫기 버튼 — `headerActionSlot`과 달리 폭을 차지하지 않고 `.header` 위에
    *  겹쳐 뜨지만, 이쪽도 항상 보이고 항상 눌린다. */
   readonly headerCloseButtonHover?: string;
-  /** `ContextMenu.Trigger`가 감쌀 때 씌운다 — `display: contents`로 자기 박스를 없애 안쪽 헤더의 flex 배치를 그대로 통과시킨다. */
+  /** `Menu.Trigger`가 감쌀 때 씌운다 — `display: contents`로 자기 박스를 없애 안쪽 헤더의 flex 배치를 그대로 통과시킨다. */
   readonly headerContextMenuTrigger?: string;
   readonly stripRoot?: string;
   readonly stripListContainer?: string;
@@ -276,7 +276,7 @@ export interface TabStripProps extends Omit<HTMLAttributes<HTMLDivElement>, 'chi
   readonly stripEmptyLabel?: ReactNode;
   /** 스트립 위에 겹쳐 그릴 내용(드롭존 표시 등) — 레이아웃에 영향을 주지 않는다. */
   readonly overlay?: ReactNode;
-  /** 주어지면 탭 헤더가 우클릭에 반응해 이 결과를 `ContextMenu.Content`로 띄운다 — 없으면 지금처럼 아무 일도 없다(옵트인). */
+  /** 주어지면 탭 헤더가 우클릭에 반응해 이 결과를 `Menu.Content`로 띄운다 — 없으면 지금처럼 아무 일도 없다(옵트인). */
   readonly renderTabContextMenu?: (tab: TabItem) => ReactNode;
 }
 
@@ -382,10 +382,10 @@ const StripItems = () => {
               <span aria-hidden="true" className={classNames.stripIndicatorBefore} />
             ) : null}
             {renderTabContextMenu ? (
-              <ContextMenu>
-                <ContextMenu.Trigger className={classNames.headerContextMenuTrigger}>{header}</ContextMenu.Trigger>
-                <ContextMenu.Content>{renderTabContextMenu(tab)}</ContextMenu.Content>
-              </ContextMenu>
+              <Menu kind="context">
+                <Menu.Trigger className={classNames.headerContextMenuTrigger}>{header}</Menu.Trigger>
+                <Menu.Content>{renderTabContextMenu(tab)}</Menu.Content>
+              </Menu>
             ) : (
               header
             )}
@@ -526,7 +526,7 @@ export interface TabGroupProps extends Omit<HTMLAttributes<HTMLDivElement>, 'chi
   readonly panelOverlay?: ReactNode;
   /** 스트립 위에 겹쳐 그릴 내용(드롭존 표시 등) — 레이아웃에 영향을 주지 않는다. */
   readonly stripOverlay?: ReactNode;
-  /** 주어지면 탭 헤더가 우클릭에 반응해 이 결과를 `ContextMenu.Content`로 띄운다 — 없으면 지금처럼 아무 일도 없다(옵트인). */
+  /** 주어지면 탭 헤더가 우클릭에 반응해 이 결과를 `Menu.Content`로 띄운다 — 없으면 지금처럼 아무 일도 없다(옵트인). */
   readonly renderTabContextMenu?: (tab: TabItem) => ReactNode;
   /** 프레임(테두리·radius·배경) 유무. 기본값 `'bordered'`. */
   readonly chrome?: TabChrome;
@@ -675,7 +675,7 @@ export interface TabSplitProps extends Omit<HTMLAttributes<HTMLDivElement>, 'chi
   readonly emptyMessage?: ReactNode;
   /** 리프의 `tabItems`가 빈 배열일 때 스트립 자리에 보여줄 내용. */
   readonly stripEmptyLabel?: ReactNode;
-  /** 주어지면 탭 헤더가 우클릭에 반응해 이 결과를 `ContextMenu.Content`로 띄운다 — 없으면 지금처럼 아무 일도 없다(옵트인). */
+  /** 주어지면 탭 헤더가 우클릭에 반응해 이 결과를 `Menu.Content`로 띄운다 — 없으면 지금처럼 아무 일도 없다(옵트인). */
   readonly renderTabContextMenu?: (tab: TabItem) => ReactNode;
   /** 프레임(테두리·radius·배경) 유무. 기본값 `'bordered'`. */
   readonly chrome?: TabChrome;

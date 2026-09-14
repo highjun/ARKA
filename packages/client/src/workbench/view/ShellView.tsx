@@ -5,7 +5,7 @@ import { ShellViewModelToken } from '../viewmodel/IShellViewModel';
 import { matchMenuItems } from '#core/menu';
 import { useViewModel } from '#core/viewmodel';
 import { Banner, ConfirmationDialog } from '@primer/react';
-import { ContextMenu } from '#component/ContextMenu';
+import { Menu } from '#component/Menu';
 import { Icon } from '#component/Icon';
 import { ModeToggle } from '#component/ModeToggle';
 import { Text } from '#component/Text';
@@ -97,9 +97,9 @@ const findLeafIdForTab = (node: TabTreeNode, tabId: string): string | null => {
 
 /**
  * 탭 우클릭 메뉴를 `menuId: 'shell.tab.context'`(`shellCommands.ts`가 등록) 조회로 그린다 —
- * `CommandContextMenu`(`CommandMenuView`)를 그대로 못 쓰는 이유는, 그건 자기 `ContextMenu.Trigger`
- * 를 새로 감싸는데 `Tab.tsx`가 `renderTabContextMenu`를 이미 `ContextMenu.Content` 안에서 부르기
- * 때문이다 — 여기선 항목(`ContextMenu.Item`)만 돌려준다.
+ * `CommandContextMenu`(`CommandMenuView`)를 그대로 못 쓰는 이유는, 그건 자기 `Menu.Trigger`
+ * 를 새로 감싸는데 `Tab.tsx`가 `renderTabContextMenu`를 이미 `Menu.Content` 안에서 부르기
+ * 때문이다 — 여기선 항목(`Menu.Item`)만 돌려준다.
  */
 const buildTabContextMenu = (tree: TabTreeNode, commandCenterRegistry: ICommandCenterRegistry) => (tab: TabItem) => {
   const leafId = findLeafIdForTab(tree, tab.id);
@@ -116,9 +116,9 @@ const buildTabContextMenu = (tree: TabTreeNode, commandCenterRegistry: ICommandC
   return (
     <>
       {items.map((item) => (
-        <ContextMenu.Item key={item.id} onSelect={() => commandCenterRegistry.commandRegistry.tryGet(item.commandId)?.execute(context)}>
+        <Menu.Item key={item.id} onSelect={() => commandCenterRegistry.commandRegistry.tryGet(item.commandId)?.execute(context)}>
           {item.label}
-        </ContextMenu.Item>
+        </Menu.Item>
       ))}
     </>
   );

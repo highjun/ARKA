@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { expectNoA11yViolations } from '#utils/axe';
 import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from '#utils/testing';
 import { Shell } from './Shell';
-import { ContextMenu } from '#component/ContextMenu';
+import { Menu } from '#component/Menu';
 
 const ACTIVITY_ITEMS = [{ id: 'a', iconId: 'files' as const, label: '탐색기', isActive: true }];
 
@@ -175,12 +175,12 @@ describe('Shell', () => {
       <Shell
         colorMode="light"
         overlays={
-          <ContextMenu open>
-            <ContextMenu.Trigger>트리거</ContextMenu.Trigger>
-            <ContextMenu.Content>
-              <ContextMenu.Item>항목</ContextMenu.Item>
-            </ContextMenu.Content>
-          </ContextMenu>
+          <Menu kind="context" open>
+            <Menu.Trigger>트리거</Menu.Trigger>
+            <Menu.Content>
+              <Menu.Item>항목</Menu.Item>
+            </Menu.Content>
+          </Menu>
         }
       >
         본문

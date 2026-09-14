@@ -551,7 +551,7 @@ describe('FileTree', () => {
 
     /**
      * `onContextMenu`를 안 부르는 것만으론 부족하다 — 실제 소비처(`apps/workbench`)는 이 컴포넌트를
-     * `ContextMenu.Trigger`(Radix, `onContextMenu`를 모르는 채로 그저 감싸는 조상)로 감싸는데, 이
+     * `Menu.Trigger`(Radix, `onContextMenu`를 모르는 채로 그저 감싸는 조상)로 감싸는데, 이
      * 이벤트가 거기까지 버블링돼 버리면 "우클릭 대상 없음" 상태로 메뉴가 열려 버린다(그 메뉴에서
      * "새 파일"을 고르면 대상이 없으니 워크스페이스 루트에 파일이 생기는 사고로 이어졌다 — 실제로
      * 겪은 회귀). 그래서 disabled 행에서는 조상까지 아예 못 나가게 막아야 한다.
