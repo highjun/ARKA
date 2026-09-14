@@ -213,7 +213,7 @@
 - **스모크** — view가 렌더되고 이벤트가 연결되는지만. 스타일은 Storybook 담당.
 - **Storybook** — 시각 검증. 최소 세트는 기본 / 빈 / 로딩 / 에러 — **그 상태가 실제로 있는 것만**이다. `SettingsTabView`처럼 ViewModel에 로딩·실패가 없는 화면에 그 스토리를 만들면 일어날 수 없는 상태를 그리게 된다.
     - `shared/component/`와 슬라이스의 `component/`는 **전부** 스토리를 갖는다. → [ADR 0010](adr/0010-ui-verification.md)
-    - `view/`는 **조합이 드러나는 것만** 갖는다 — 화면 한 구역을 실제로 채우는 view. 컴포넌트 하나에 값을 꽂는 얇은 바인딩은 그 컴포넌트 스토리가 이미 같은 그림을 덮는다. 대상 목록은 `.storybook/main.ts`에 있다.
+    - `view/`는 **조합이 드러나는 것만** 갖는다 — 화면 한 구역을 실제로 채우는 view. 컴포넌트 하나에 값을 꽂는 얇은 바인딩은 그 컴포넌트 스토리가 이미 같은 그림을 덮는다. 어느 view가 대상인지는 `.storybook/main.ts`의 주석이 이름으로 적는다 — **글롭은 전부를 집으므로 기계가 보는 목록은 아니다**. 새 view에 스토리가 없어도 아무도 알려주지 않는다.
 - **E2E** — `test/e2e/*.spec.ts`.
 - **VRT** — 스토리를 순회해 찍는다. `pnpm --filter client test:vrt`(비교). 기준을 만들 때는 **스토리를 골라** 인자를 넘긴다 — `test:vrt -g "<스토리 id>" --update-snapshots`. **Docker에서만** 생성·비교한다.
     - **기준 이미지는 검토에서 그 스토리를 Accept할 때 만든다.** 아직 아무도 안 본 그림을 기준으로 삼으면 "검토 안 함"이 "승인됨"으로 기록된다. VRT가 잡으려는 것은 승인된 뒤의 변형이다.
@@ -235,7 +235,7 @@ E2E는 `pnpm --filter client test:e2e`로 돌린다. 조립이 맞물리는지�
 
 ## 제출 전 확인
 
-- [ ] `pnpm --filter ops check` 통과 (typecheck → lint → test)
+- [ ] `pnpm --filter ops check` 통과 (typecheck → lint → test → build). **CI의 `check` 잡이 부르는 것과 같은 명령이다.**
 - [ ] 이번 라운드가 한 가지 관심사인가
 - [ ] 스스로 판단한 지점을 신고했는가
 - [ ] 패키지의 `src/` 밖을 건드렸다면 PR 본문에 **무엇을 왜 바꿨는지** 적었는가 — 승인은 사용자가 PR에서 한다 → [ADR 0003](adr/0003-approval-outside-src.md)

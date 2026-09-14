@@ -57,7 +57,7 @@ printf '%s' "feat(client): 검색 패널을 연다" | pnpm --filter ops exec com
 
 | 단계 | 로컬에서 같은 것 |
 |---|---|
-| lint → typecheck → test → build | `pnpm -r --if-present run lint` … |
+| typecheck → lint → test → build | `pnpm --filter ops check` — **CI가 부르는 것이 이 명령 그대로다** |
 | PR 제목 형식(PR일 때만) | `printf '%s' "제목" \| pnpm --filter ops exec commitlint` |
 | 새 커밋에 시크릿이 있는지 | `docker run --rm -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.30.1 git /repo --gitleaks-ignore-path /repo/ops/.gitleaksignore --redact --no-banner` |
 | 이미지를 굽는다 | `node ops/deploy/build.ts arka:local` |

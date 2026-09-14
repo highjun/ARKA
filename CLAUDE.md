@@ -27,7 +27,7 @@ pnpm --filter ops check      라운드마다
 pnpm --filter ops verify     내보내기 전에
 ```
 
-**파이프라인은 `ops/pipeline/`이 든다** — `check.ts`·`verify.ts`. 루트 `package.json`에는 단일 단계만 있다: JSON이라 왜 그 순서인지 적을 자리가 없고, 타입 검사도 린트도 안 받는다. `check`는 typecheck → lint → test 순서고 앞에서 걸리면 뒤를 안 돌린다.
+**파이프라인은 `ops/pipeline/`이 든다** — `check.ts`·`verify.ts`. 루트 `package.json`에는 단일 단계만 있다: JSON이라 왜 그 순서인지 적을 자리가 없고, 타입 검사도 린트도 안 받는다. `check`는 typecheck → lint → test → build 순서고 앞에서 걸리면 뒤를 안 돌린다. **CI의 `check` 잡도 이 파일을 부른다** — 목록이 두 벌이면 손과 CI가 갈린다.
 
 `verify`는 `check` + 빌드 + E2E + VRT + Docker 경계 스모크다. **병합 전 강제는 CI가 들고(→ [ADR 0005](docs/adr/0005-ci-gate.md)), `verify`는 내보내기 전 손에 남는다** — CI에 아직 없는 VRT와 `ops/deploy/smoke.ts`가 여기에만 있다. 특히 스모크는 빈 컨테이너에서 `pnpm install --frozen-lockfile`부터 다시 하므로 "내 기계에서만 되는 것"을 잡는다. 몇 분 걸리니 라운드마다 돌리지 않는다.
 

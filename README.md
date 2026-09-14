@@ -22,7 +22,7 @@ pnpm --filter server run dev        # 서버
 pnpm --filter client run dev        # 클라이언트
 pnpm --filter client run dev:storybook   # 컴포넌트만 따로
 
-pnpm -r --if-present run lint typecheck test   # CI의 `check`가 도는 것과 같다
+pnpm --filter ops check                   # CI의 `check` 잡이 부르는 것과 같은 명령
 ```
 
 ## 읽을 것

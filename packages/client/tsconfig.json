@@ -28,7 +28,6 @@
     "test",
     "vite.config.ts",
     ".storybook/main.ts",
-    ".storybook/run.ts",
     ".storybook/preview.ts"
   ]
 }

@@ -25,10 +25,10 @@
 - **ESLint 메이저를 올릴 때 플러그인 여섯이 전부 따라와야 한다.** 하나가 늦으면 올림이 막힌다 — 지금 열린 TypeScript 메이저 PR이 같은 모양이다.
 
 ## 강제:
-- **린트** `primer/*`·`jsx-a11y/*`·`@eslint-react/no-forward-ref`·`no-restricted-syntax`(한글 테스트 이름·`view/`의 훅)·`import-x/no-restricted-paths`(패키지·슬라이스)·`no-restricted-imports`(Primer `IconButton`)·`@typescript-eslint/no-restricted-imports`(`model/`의 상태 라이브러리).
+- **린트** `primer-react/*`·`jsx-a11y/*`·`@eslint-react/no-forward-ref`·`no-restricted-syntax`(한글 테스트 이름·`view/`의 훅)·`import-x/no-restricted-paths`(패키지·슬라이스)·`no-restricted-imports`(Primer `IconButton`)·`@typescript-eslint/no-restricted-imports`(`model/`의 상태 라이브러리).
 - **stylelint** `@primer/stylelint-config` — 색·테두리·그림자·글꼴을 토큰으로만 쓰게 한다.
 - **테스트** `packages/client/test/structure.test.ts` — 컴포넌트마다 스토리·테스트·배럴이 있는지, 그룹 배럴이 없는지.
-- **파이프라인** `ops/pipeline/check.ts` — typecheck → lint → test 순서로 돌리고 앞에서 걸리면 뒤를 안 돌린다.
+- **파이프라인** `ops/pipeline/check.ts` — typecheck → lint → test → build 순서로 돌리고 앞에서 걸리면 뒤를 안 돌린다. CI의 `check` 잡이 이 파일을 부른다.
 - **테스트** `ops/lint/rules/*.test.ts` — 자작 규칙에 valid/invalid를 둔다. 규칙이 하나니 파일도 하나다.
 - **리뷰** — "이 규칙을 만들기 전에 찾아봤는가"와 프리셋을 통째로 켤지는 사람만 판정한다.
 

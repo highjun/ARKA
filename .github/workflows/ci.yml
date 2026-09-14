@@ -41,14 +41,10 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/setup
 
-      # 순서에 이유가 있다 — **싼 것부터** 돌려야 원인이 가려지지 않는다.
-      #
-      # **`--if-present`가 없으면 모든 PR이 빨간불이다**: contracts와 ops에는 `build`가 없어
-      # pnpm이 `ERR_PNPM_RECURSIVE_RUN_NO_SCRIPT`로 exit 1을 낸다(2026-09-10 실측).
-      - run: pnpm -r --if-present run lint
-      - run: pnpm -r --if-present run typecheck
-      - run: pnpm -r --if-present run test
-      - run: pnpm -r --if-present run build
+      # **목록은 `ops/pipeline/check.ts`에 하나뿐이다.** 여기 단계를 늘어놓으면 손으로 도는
+      # `pnpm --filter ops check`와 갈린다 — 2026-09-14까지 실제로 순서가 달랐고 `build`는
+      # CI에만 있었다. 무엇을 어떤 순서로 도는지와 그 이유는 그 파일이 적는다.
+      - run: pnpm --filter ops check
 
       # squash merge라 **PR 제목이 그대로 main의 커밋 메시지가 된다.** 개별 커밋이 아니라 이것을 본다.
       # 제목을 인자가 아니라 env로 넘긴다 — 제목에 든 따옴표·백틱이 셸에 해석되지 않게.
