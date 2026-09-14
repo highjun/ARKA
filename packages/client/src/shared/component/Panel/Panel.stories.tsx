@@ -27,3 +27,6 @@ export const Default: Story = {};
 export const TitleOnly: Story = { args: { actions: undefined } };
 /** 제목·액션이 둘 다 없으면 헤더 행 자체를 그리지 않는다. */
 export const NoHeader: Story = { args: { title: undefined, actions: undefined } };
+
+/** 사이드바에 쓰는 빽빽한 머리 — 낮은 행에 작은 대문자 제목(VS Code 탐색기와 같은 자리). */
+export const Compact: Story = { args: { density: 'compact' } };

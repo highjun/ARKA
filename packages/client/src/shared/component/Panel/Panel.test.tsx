@@ -42,4 +42,16 @@ describe('Panel', () => {
 
     expect(container.querySelector('header')).not.toBeInTheDocument();
   });
+
+  it('밀도를 data-density 로 드러낸다 — 값마다 어느 크기를 쓸지는 CSS가 고른다', () => {
+    const { container } = render(<Panel density="compact">본문</Panel>);
+
+    expect(container.querySelector('[data-density="compact"]')).toBeInTheDocument();
+  });
+
+  it('밀도를 안 주면 comfortable 이다', () => {
+    const { container } = render(<Panel>본문</Panel>);
+
+    expect(container.querySelector('[data-density="comfortable"]')).toBeInTheDocument();
+  });
 });

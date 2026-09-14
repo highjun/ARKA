@@ -5,6 +5,7 @@ import { PortalProvider } from '#utils/portal';
 import styles from './Shell.module.css';
 import { SplitPageLayout, ThemeProvider } from '@primer/react';
 import { Container } from '#component/Container';
+import { Panel } from '#component/Panel';
 import { Icon } from '#component/Icon';
 import { IconButton } from '#component/IconButton';
 import { ActivityBar } from '../ActivityBar';
@@ -171,29 +172,30 @@ export const Shell = ({
                   <div className={styles['sidebarBody']}>
                     <ActivityBar items={activityItems} onSelect={onActivitySelect} />
                     {expanded && (
-                      <div className={styles['sidebarPanel']}>
-                        {(panelTitle !== undefined || hasContent(panelActions)) && (
-                          <div className={styles['sidebarPanelHeader']}>
-                            <span className={styles['sidebarPanelTitle']}>{panelTitle}</span>
-                            {hasContent(panelActions) && (
-                              <Menu>
-                                <Menu.Trigger asChild>
-                                  <IconButton
-                                    variant="invisible"
-                                    size="small"
-                                    aria-label="더 보기"
-                                    icon={() => <Icon iconId="ellipsis" size="sm" />}
-                                  />
-                                </Menu.Trigger>
-                                <Menu.Content>{panelActions}</Menu.Content>
-                              </Menu>
-                            )}
-                          </div>
-                        )}
+                      <Panel
+                        density="compact"
+                        className={styles['sidebarPanel']}
+                        title={panelTitle}
+                        actions={
+                          hasContent(panelActions) ? (
+                            <Menu>
+                              <Menu.Trigger asChild>
+                                <IconButton
+                                  variant="invisible"
+                                  size="small"
+                                  aria-label="더 보기"
+                                  icon={() => <Icon iconId="ellipsis" size="sm" />}
+                                />
+                              </Menu.Trigger>
+                              <Menu.Content>{panelActions}</Menu.Content>
+                            </Menu>
+                          ) : undefined
+                        }
+                      >
                         <Container chrome="none" className={styles['sidebarPanelBody']}>
                           {panelContent}
                         </Container>
-                      </div>
+                      </Panel>
                     )}
                   </div>
                 </div>

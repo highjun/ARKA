@@ -205,42 +205,6 @@
   border-color: var(--borderColor-default);
 }
 
-/* VSCode Explorer 헤더와 같은 자리 — 제목(대문자·muted) + "..." 더보기 버튼. 없어도(둘 다
-   `undefined`) 이 행 자체가 안 뜬다(Shell.tsx). */
-.sidebarPanelHeader {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-xs);
-  height: var(--control-medium-size);
-  padding-inline: var(--space-sm);
-  border-style: solid;
-  border-width: 0 0 var(--borderWidth-thin) 0;
-  border-color: var(--borderColor-muted);
-}
-
-/* 더보기 버튼(`common/IconButton`, 32px)이 coarse-pointer에서 44px로 커지면(2026-09-02,
-   "모바일에서 버튼이 작다" 대응) 이 행(기존 --control-medium-size, 32px)을 벗어난다 — 같이
-   키운다. */
-@media (pointer: coarse) {
-  .sidebarPanelHeader {
-    height: var(--control-minTarget-coarse);
-  }
-}
-
-.sidebarPanelTitle {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: var(--base-text-size-xs);
-  font-weight: var(--base-text-weight-semibold);
-  line-height: var(--base-text-lineHeight-tight);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--fgColor-muted);
-}
-
 .sidebarPanelBody {
   min-height: 0;
   flex-grow: 1;
