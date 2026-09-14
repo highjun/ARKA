@@ -35,12 +35,12 @@
 
 /* VS Code 탐색기 머리와 같은 자리 — 낮은 행에 작은 대문자 제목. 사이드바처럼 세로가 귀한
    자리에서 쓴다. */
-.root[data-density='compact'] .header {
+.root[data-density="compact"] .header {
   height: var(--control-medium-size);
   padding-inline: var(--space-sm);
 }
 
-.root[data-density='compact'] .title {
+.root[data-density="compact"] .title {
   font-size: var(--base-text-size-xs);
   font-weight: var(--base-text-weight-semibold);
   line-height: var(--base-text-lineHeight-tight);

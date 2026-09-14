@@ -30,10 +30,19 @@ describe("ScriptedRunner", () => {
     const { ctx, emitted } = contextOf("안녕 세상");
     await runner().run(ctx);
     expect(emitted.map((e) => e.type)).toEqual([
-      "thinking.delta", "thinking.done", "tool.call", "tool.result",
-      "assistant.delta", "assistant.delta", "assistant.delta", "assistant.done",
+      "thinking.delta",
+      "thinking.done",
+      "tool.call",
+      "tool.result",
+      "assistant.delta",
+      "assistant.delta",
+      "assistant.delta",
+      "assistant.done",
     ]);
-    const text = emitted.filter((e) => e.type === "assistant.delta").map((e) => ("text" in e ? e.text : "")).join("");
+    const text = emitted
+      .filter((e) => e.type === "assistant.delta")
+      .map((e) => ("text" in e ? e.text : ""))
+      .join("");
     expect(text.trim()).toBe("받은 입력: 안녕 세상");
   });
 
@@ -41,7 +50,10 @@ describe("ScriptedRunner", () => {
     const { ctx, emitted, prompts } = contextOf("이게 뭐야?");
     await runner().run(ctx);
     expect(prompts).toHaveLength(1);
-    const text = emitted.filter((e) => e.type === "assistant.delta").map((e) => ("text" in e ? e.text : "")).join("");
+    const text = emitted
+      .filter((e) => e.type === "assistant.delta")
+      .map((e) => ("text" in e ? e.text : ""))
+      .join("");
     expect(text).toContain("준님,");
   });
 
@@ -55,6 +67,8 @@ describe("ScriptedRunner", () => {
     const abort = new AbortController();
     const { ctx } = contextOf("x");
     abort.abort();
-    await expect(new ScriptedRunner({ chunkMs: 10 }).run({ ...ctx, signal: abort.signal })).rejects.toThrow(/cancelled/u);
+    await expect(new ScriptedRunner({ chunkMs: 10 }).run({ ...ctx, signal: abort.signal })).rejects.toThrow(
+      /cancelled/u,
+    );
   });
 });

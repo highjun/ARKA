@@ -73,7 +73,10 @@ describe("git 조작 (실제 저장소)", () => {
     await stage(git, ["a.txt", "b.txt"]);
     expect((await status(git, root)).files.map((f) => f.staged)).toEqual(["modified", "added"]);
     await unstage(git, ["b.txt"]);
-    expect((await status(git, root)).files.find((f) => f.path === "b.txt")).toMatchObject({ staged: null, unstaged: "untracked" });
+    expect((await status(git, root)).files.find((f) => f.path === "b.txt")).toMatchObject({
+      staged: null,
+      unstaged: "untracked",
+    });
     const hash = await commit(git, "second");
     expect(hash).toMatch(/^[0-9a-f]{40}$/u);
     expect((await status(git, root)).files).toEqual([{ path: "b.txt", staged: null, unstaged: "untracked" }]);

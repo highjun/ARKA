@@ -10,17 +10,17 @@ import type { RouteProbe } from "../../../responseContract";
 let probe: RouteProbe;
 let dispose: () => Promise<void>;
 
-beforeEach(async () => {
-  const started = await probeApp();
-  probe = started;
-  dispose = started.dispose;
-});
-
-afterEach(async () => {
-  await dispose();
-});
-
 describe("git 라우트의 응답 계약", () => {
+  beforeEach(async () => {
+    const started = await probeApp();
+    probe = started;
+    dispose = started.dispose;
+  });
+
+  afterEach(async () => {
+    await dispose();
+  });
+
   it("저장소가 아니어도 GitStatusResponse다", async () => {
     const body = await expectResponse(probe, { url: "/api/git/status" }, GitStatusResponse);
     expect(body).toEqual({ repository: false, branch: null, files: [] });

@@ -1,6 +1,6 @@
-import { match as compileMatcher, type MatchFunction } from 'path-to-regexp';
-import type { Descriptor, DescriptorMatch } from './descriptor';
-import { DescriptorNotFoundError, DuplicateDescriptorError } from './errors';
+import { match as compileMatcher, type MatchFunction } from "path-to-regexp";
+import type { Descriptor, DescriptorMatch } from "./descriptor";
+import { DescriptorNotFoundError, DuplicateDescriptorError } from "./errors";
 
 /**
  * Registry 는 확장 지점별 descriptor 를 저장하고 조회한다. **실행하지 않는다** —
@@ -23,7 +23,7 @@ export interface Registry<TDescriptor extends Descriptor> {
  * `:param` 을 포함하지 않는 id 는 exact Map 조회로 끝나므로 matcher 를 만들지 않는다.
  * wildcard(`*name`)도 path-to-regexp 문법이라 함께 pattern 으로 취급한다.
  */
-const isPatternId = (id: string) => id.includes(':') || id.includes('*');
+const isPatternId = (id: string) => id.includes(":") || id.includes("*");
 
 class DescriptorRegistry<TDescriptor extends Descriptor> implements Registry<TDescriptor> {
   readonly #descriptors = new Map<string, TDescriptor>();
@@ -64,8 +64,8 @@ class DescriptorRegistry<TDescriptor extends Descriptor> implements Registry<TDe
 
       const params: Record<string, string> = {};
       for (const [key, value] of Object.entries(result.params)) {
-        if (typeof value === 'string') params[key] = value;
-        else if (Array.isArray(value)) params[key] = value.join('/');
+        if (typeof value === "string") params[key] = value;
+        else if (Array.isArray(value)) params[key] = value.join("/");
       }
 
       matches.push({ descriptor: this.#descriptors.get(patternId) as TDescriptor, params });

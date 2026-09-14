@@ -53,12 +53,16 @@ export const expectResponse = async <T>(
   const response = await probe.app.request(request.url, withProtocol(request.init));
   const expected = request.status ?? 200;
   if (response.status !== expected) {
-    throw new Error(`${request.url} — 상태가 ${String(expected)}이어야 하는데 ${String(response.status)}: ${await response.text()}`);
+    throw new Error(
+      `${request.url} — 상태가 ${String(expected)}이어야 하는데 ${String(response.status)}: ${await response.text()}`,
+    );
   }
   const body: unknown = await response.json();
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
-    throw new Error(`${request.url} — 응답이 계약에 어긋난다:\n${parsed.error.message}\n받은 것: ${JSON.stringify(body)}`);
+    throw new Error(
+      `${request.url} — 응답이 계약에 어긋난다:\n${parsed.error.message}\n받은 것: ${JSON.stringify(body)}`,
+    );
   }
   return parsed.data;
 };

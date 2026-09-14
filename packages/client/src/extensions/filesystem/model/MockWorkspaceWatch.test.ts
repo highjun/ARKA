@@ -1,7 +1,7 @@
-import { MockWorkspaceWatch } from './MockWorkspaceWatch';
-import { testWorkspaceWatchContract } from './workspaceWatch.contract';
+import { MockWorkspaceWatch } from "./MockWorkspaceWatch";
+import { testWorkspaceWatchContract } from "./workspaceWatch.contract";
 
-testWorkspaceWatchContract('MockWorkspaceWatch', () => {
+testWorkspaceWatchContract("MockWorkspaceWatch", () => {
   const watch = new MockWorkspaceWatch();
   return {
     watch,

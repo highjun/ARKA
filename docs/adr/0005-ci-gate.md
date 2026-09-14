@@ -31,7 +31,8 @@
   `ops/hooks/prePush.ts`의 로컬 차단은 그 앞의 미끄럼 방지턱으로 남는다.
 - **commitlint** `ops/commitlint.config.ts` — PR 제목의 타입·scope·길이. `check`의 한 단계다.
 - **gitleaks** `ops/.gitleaksignore` — 새로 더해지는 커밋만 훑는다.
+- **actionlint** `.github/actionlint.yaml` — 워크플로의 뜻(없는 `uses`·잘못된 `needs`·러너 라벨·셸 문법). 형태는 `yml/*`가 본다. 공식 이미지를 `docker run`으로 쓴다 — gitleaks와 같은 방식이다.
 - **CODEOWNERS** `.github/CODEOWNERS` — 배치·설정·결정이 사는 자리에 리뷰가 자동으로 붙는다.
 
 ## 상태:
-승인됨 (2026-09-10). 2026-09-13 개정 — 검사 잡을 `check` 하나로 모으고 `edited` 트리거를 걷었다.
+승인됨 (2026-09-10). 2026-09-13 개정 — 검사 잡을 `check` 하나로 모았다. 2026-09-14 개정 — 잡이 `pnpm --filter ops check`를 부르고 actionlint 단계가 붙었다.

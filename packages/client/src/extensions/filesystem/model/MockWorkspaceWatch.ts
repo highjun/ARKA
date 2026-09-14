@@ -1,4 +1,4 @@
-import type { IWorkspaceWatch, WorkspaceWatchUnsubscribe } from './IWorkspaceWatch';
+import type { IWorkspaceWatch, WorkspaceWatchUnsubscribe } from "./IWorkspaceWatch";
 
 /**
  * 메모리 안의 `IWorkspaceWatch`. 테스트가 `emit`으로 변경을 흉내 낸다 — 실물처럼 구독한 경로만 걸러 알린다.

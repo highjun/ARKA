@@ -22,6 +22,7 @@
 - **`style`을 `Omit`으로 막기** — 인라인 style을 막으면 동적 값이 `classNames` 같은 탈출구 prop으로 새어 나간다.
 - **타입 있는 다형 `as`** — 텍스트류는 Primer 것을 직접 쓰므로 이미 딸려 오고, 우리 컴포넌트는 낼 원소가 정해져 있다.
 - **Primer의 상태 등급(draft/alpha/beta)과 `/experimental` 진입점** — 바깥 소비자가 없는 앱이라 얻는 것이 없다.
+- **`primer-react/spread-props-first`** — 이 결정과 반대다. 우리는 `data-component`·`className`을 **스프레드 뒤**에 두어 호출자가 못 덮게 하고 하네스가 그것을 단정하는데, 규칙은 "이 속성만 마지막"을 표현할 수 없어 그 자리를 전부 위반으로 본다(2026-09-14 실측 97건, 전부 의도한 것).
 
 ## 대가:
 - **Primer 컴포넌트와 우리 것의 모양이 다르다** — 저쪽은 `forwardRef`, 이쪽은 prop이다. 섞어 쓰는 자리에서 ref 타입이 갈린다.
@@ -29,9 +30,10 @@
 
 ## 강제:
 - **린트** `@eslint-react/no-forward-ref` — `forwardRef` 사용을 막는다.
-- **린트** `primer/direct-slot-children`·`primer/spread-props-first` — 슬롯 감싸기와 props 덮어쓰기 순서를 막는다.
+- **린트** `primer-react/direct-slot-children` — 슬롯을 다른 원소로 감싸는 것을 막는다.
 - **테스트** `packages/client/test/structure.test.ts` — 컴포넌트 폴더에 스토리·테스트·배럴이 있고 그룹 배럴이 없기를 요구한다.
 - **타입** — `aria-label` XOR `aria-labelledby`, `<Name>Props`의 원소 속성 상속.
+- **린트** `no-restricted-syntax` — props 바탕에 `HTMLAttributes<HTMLXElement>`를 쓰지 못하게 한다. 루트 태그가 갈리는 컴포넌트만 예외이고 그 자리는 사유를 적은 `eslint-disable`로 드러난다(지금 하나 — `FileTree`).
 - **리뷰** — "이 슬롯이 둘인가 셋인가"와 "이 축이 변형인가 다른 컴포넌트인가"는 사람만 판정한다.
 
 ## 상태:

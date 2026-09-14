@@ -21,10 +21,7 @@ const PORT = 5199;
 export default defineConfig({
   timeout: 60_000,
   outputDir: path.join(clientRoot, ".output/playwright/test-results"),
-  reporter: [
-    ["list"],
-    ["html", { outputFolder: path.join(clientRoot, ".output/playwright/report"), open: "never" }],
-  ],
+  reporter: [["list"], ["html", { outputFolder: path.join(clientRoot, ".output/playwright/report"), open: "never" }]],
   use: { baseURL: `http://127.0.0.1:${PORT}` },
   webServer: {
     // 클라이언트를 빌드해 서버가 그것을 정적으로 서빙하게 한다 — 배포와 같은 모양이다.

@@ -1,16 +1,28 @@
-import { createToken, type Disposable } from '#core/di';
-import type { AgentSession, RunId, RunMode, RunStatus, SessionId } from '#contracts';
+import { createToken, type Disposable } from "#core/di";
+import type { AgentSession, RunId, RunMode, RunStatus, SessionId } from "#contracts";
 
 /**
  * 이벤트 로그를 화면이 읽을 수 있는 대화로 접은 것 — **투영**이다. 원본은 서버의 이벤트다.
  * `id`는 이벤트가 준 식별자(messageId·blockId·callId)라 조각(delta)이 같은 항목에 이어 붙는다.
  */
 export type TranscriptItem =
-  | { readonly kind: 'user'; readonly id: string; readonly text: string; readonly at: number }
-  | { readonly kind: 'assistant'; readonly id: string; readonly text: string; readonly done: boolean; readonly at: number }
-  | { readonly kind: 'thinking'; readonly id: string; readonly text: string; readonly done: boolean; readonly at: number }
+  | { readonly kind: "user"; readonly id: string; readonly text: string; readonly at: number }
   | {
-      readonly kind: 'tool';
+      readonly kind: "assistant";
+      readonly id: string;
+      readonly text: string;
+      readonly done: boolean;
+      readonly at: number;
+    }
+  | {
+      readonly kind: "thinking";
+      readonly id: string;
+      readonly text: string;
+      readonly done: boolean;
+      readonly at: number;
+    }
+  | {
+      readonly kind: "tool";
       readonly id: string;
       readonly toolId: string;
       readonly input: unknown;
@@ -19,7 +31,7 @@ export type TranscriptItem =
       readonly done: boolean;
       readonly at: number;
     }
-  | { readonly kind: 'error'; readonly id: string; readonly message: string; readonly at: number };
+  | { readonly kind: "error"; readonly id: string; readonly message: string; readonly at: number };
 
 /** 에이전트가 사용자에게 물어 멈춘 상태. `send`가 이것을 답으로 보낸다. */
 export type PendingInput = {
@@ -29,7 +41,7 @@ export type PendingInput = {
 };
 
 /** 스트림 연결 상태. `live`는 붙어 있다는 뜻이지 Run이 돈다는 뜻이 아니다(그건 `runStatus`). */
-export type ChatConnection = 'idle' | 'connecting' | 'live' | 'error';
+type ChatConnection = "idle" | "connecting" | "live" | "error";
 
 /** 세션 하나의 대화 상태 전부. 스트림이 붙어 있는 동안 계속 갱신된다. */
 export type SessionChat = {
@@ -48,9 +60,9 @@ export type SessionChat = {
 };
 
 /** 세션 **목록**의 상태다 — 개별 대화는 `SessionChat.connection`이 든다. */
-export type SessionsStatus = 'idle' | 'loading' | 'loaded' | 'error';
+export type SessionsStatus = "idle" | "loading" | "loaded" | "error";
 
-export const ChatModelToken = createToken<IChatModel>('chatModel');
+export const ChatModelToken = createToken<IChatModel>("chatModel");
 /**
  * 세션 목록과, 열어 둔 세션들의 대화(투영)를 소유한다. VSCode의 `IChatService`에 해당한다.
  *

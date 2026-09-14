@@ -33,8 +33,17 @@ export class SqliteSessionStore implements ISessionStore {
   /** 같은 id면 SQLite가 제약 위반으로 던진다 — 메모리 구현과 달리 덮어쓰지 않는다. */
   create(session: AgentSession): void {
     this.#db
-      .prepare("INSERT INTO sessions (id, title, created_at, updated_at, archived, last_run_status) VALUES (?, ?, ?, ?, ?, ?)")
-      .run(session.id, session.title, session.createdAt, session.updatedAt, session.archived ? 1 : 0, session.lastRunStatus);
+      .prepare(
+        "INSERT INTO sessions (id, title, created_at, updated_at, archived, last_run_status) VALUES (?, ?, ?, ?, ?, ?)",
+      )
+      .run(
+        session.id,
+        session.title,
+        session.createdAt,
+        session.updatedAt,
+        session.archived ? 1 : 0,
+        session.lastRunStatus,
+      );
   }
 
   /** 없으면 `null`이다. 던지는 것은 `update`뿐이다. */

@@ -1,7 +1,7 @@
-import { createRef } from 'react';
-import type { ReactElement, Ref } from 'react';
-import { render, screen } from '@testing-library/react';
-import { expectNoA11yViolations } from './axe';
+import { createRef } from "react";
+import type { ReactElement, Ref } from "react";
+import { render, screen } from "@testing-library/react";
+import { expectNoA11yViolations } from "./axe";
 
 /**
  * 컴포넌트의 정형 계약(→ ADR 0010)을 함수로 만든 것 — primer/react의
@@ -14,29 +14,31 @@ import { expectNoA11yViolations } from './axe';
  * 있으면 컴파일이 안 되던 문제가 없다.
  */
 
-const TEST_ID = 'testing-tsx-target';
+const TEST_ID = "testing-tsx-target";
 
 /** `it()` 하나를 만든다 — 부르는 쪽의 `describe` 안에서 부른다. */
-export function implementsClassName(renderElement: (extra: { className: string; 'data-testid': string }) => ReactElement): void {
-  it('넘긴 className 을 그대로 싣는다', () => {
-    render(renderElement({ className: 'test-class', 'data-testid': TEST_ID }));
-    expect(screen.getByTestId(TEST_ID)).toHaveClass('test-class');
+export function implementsClassName(
+  renderElement: (extra: { className: string; "data-testid": string }) => ReactElement,
+): void {
+  it("넘긴 className 을 그대로 싣는다", () => {
+    render(renderElement({ className: "test-class", "data-testid": TEST_ID }));
+    expect(screen.getByTestId(TEST_ID)).toHaveClass("test-class");
   });
 }
 
 /** `it()` **둘**을 만든다 — 이름이 실리는지와, prop으로 덮어쓰이지 않는지. */
 export function implementsDataComponent(
-  renderElement: (extra: { 'data-testid': string; 'data-component'?: string }) => ReactElement,
+  renderElement: (extra: { "data-testid": string; "data-component"?: string }) => ReactElement,
   name: string,
 ): void {
-  it('data-component 로 컴포넌트 이름을 노출한다', () => {
-    render(renderElement({ 'data-testid': TEST_ID }));
-    expect(screen.getByTestId(TEST_ID)).toHaveAttribute('data-component', name);
+  it("data-component 로 컴포넌트 이름을 노출한다", () => {
+    render(renderElement({ "data-testid": TEST_ID }));
+    expect(screen.getByTestId(TEST_ID)).toHaveAttribute("data-component", name);
   });
 
-  it('data-component 는 prop 으로 오버라이드되지 않는다', () => {
-    render(renderElement({ 'data-testid': TEST_ID, 'data-component': `Custom${name}` }));
-    expect(screen.getByTestId(TEST_ID)).toHaveAttribute('data-component', name);
+  it("data-component 는 prop 으로 오버라이드되지 않는다", () => {
+    render(renderElement({ "data-testid": TEST_ID, "data-component": `Custom${name}` }));
+    expect(screen.getByTestId(TEST_ID)).toHaveAttribute("data-component", name);
   });
 }
 
@@ -49,7 +51,7 @@ export function implementsRef<T>(
   renderElement: (extra: { ref: Ref<T> }) => ReactElement,
   elementType: new () => T,
 ): void {
-  it('ref 로 실제 엘리먼트에 접근할 수 있다', () => {
+  it("ref 로 실제 엘리먼트에 접근할 수 있다", () => {
     const ref = createRef<T>();
     render(renderElement({ ref }));
     expect(ref.current).toBeInstanceOf(elementType);
@@ -58,7 +60,7 @@ export function implementsRef<T>(
 
 /** 예외 옵션을 받지 않는다 — 규칙을 빼야 하면 `expectNoA11yViolations`를 직접 부른다. */
 export function implementsNoA11yViolations(renderElement: () => ReactElement): void {
-  it('axe 접근성 위반이 없다', async () => {
+  it("axe 접근성 위반이 없다", async () => {
     const { container } = render(renderElement());
     await expectNoA11yViolations(container);
   });

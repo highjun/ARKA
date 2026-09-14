@@ -17,7 +17,7 @@
 
 ### 계약 우선 리뷰
 
-```
+```text
 1. 인터페이스·타입만 제출
 2. 검토 (10~30줄)
 3. 승인 후 구현
@@ -29,7 +29,7 @@
 ### 검토 강도
 
 | 정독 (전체의 10~15%) | 훑기 | 도구 위임 |
-|---|---|---|
+| --- | --- | --- |
 | 폴더 단위(분해가 맞는가) | `model/` 구현 | 구조 → 린트 |
 | `contracts/` | `infra/` | 계약 → 테스트 |
 | `model/`·`viewmodel/`의 `I*.ts` | `viewmodel/` 구현 | UI → Storybook |
@@ -49,7 +49,7 @@
 
 ### 브랜치
 
-- **한 번에 한 슬라이스. 브랜치 = 슬라이스** — 여러 슬라이스를 한 브랜치에서 건드리면 검토가 뒤섞인다.
+- **한 번에 한 슬라이스. 브랜치 = 슬라이스** — 여러 슬라이스를 한 브랜치에서 건드리면 검토가 뒤섞인다. **저장소 전체를 다스리는 라운드(린트·파이프라인·규약)는 예외다** — 규칙 하나를 켜면 닿는 슬라이스가 전부다. 그래서 이것은 기계가 아니라 리뷰가 본다(→ [ADR 0011](adr/0011-lint-off-the-shelf.md)).
 - **`core/`·`contracts/` 변경은 별도 브랜치로 먼저 머지한다.** 파급이 어디까지 갈지 정적으로 알 수 없다.
 - 브랜치 수명은 짧게. 에이전트는 빠르게 많이 만들어내므로 오래 두면 충돌 규모가 감당 불가가 된다.
 
@@ -107,13 +107,13 @@
 - **결정** — 정한 것만. 구현 세부·릴리스 노트를 쓰지 않는다.
 - **기각** — 실제로 고려하고 버린 대안과 사유. `<대안> — <사유>` 한 줄씩, 대안마다 한 불릿.
 - **대가** — Consequences의 **부정 절반만**. "결과"로 두면 자화자찬 절이 된다. **`기각:`으로 설명되는 것은 여기 다시 쓰지 않는다** — 대안을 버려서 잃은 것(예: Turborepo를 기각했으니 빌드 캐싱이 없다)은 이미 `기각:`의 대우다. `대가:`에는 **고른 길 자체가 무는 값**만 적는다.
-- **강제** — 값은 넷뿐: **린트 / 타입 / 테스트 / 리뷰.** 의 "이 코드가 잘못 동작하면 누가 알려주는가"를 결정 자신에게 되묻는 절이다.
-    - **`아무도`라는 값은 없다.** 결정이 ADR에 적혀 있고 이 저장소가 리뷰를 하는 한 최소한 `리뷰`가 본다. "아무도 안 본다"는 사실이 아니고, ADR이 스스로를 무의미하다고 선언하게 만든다.
-    - **린트는 규칙 ID로 적는다** — `import-x/no-restricted-paths`, `@eslint-react/no-forward-ref` 처럼. 산문으로 적으면 기계가 실재를 대조할 수 없다. 규칙 하나가 여러 설정을 갖는 경우(zone 등)는 ID 뒤에 무엇을 막는지 덧붙인다.
-    - **`리뷰`만 적힌 줄이 다음 린트 규칙의 대기열**이다. `grep -- '- \*\*리뷰\*\*' docs/adr/*.md`로 뽑는다 — 따로 목록을 두지 않는다.
-- **상태** — 한 줄. 어휘는 셋뿐이다.
+- **강제** — "이 코드가 잘못 동작하면 누가 알려주는가"를 결정 자신에게 되묻는 절이다. 줄마다 **알려주는 장치를 이름으로** 먼저 적는다(`- **린트**`·`- **테스트**`·`- **타입**`·`- **리뷰**`·`- **stylelint**`·`- **룰셋**`·`- **CODEOWNERS**` …). 쓸 수 있는 이름의 집합은 `ops/structure/adr.test.ts`가 들고 있다 — 늘리려면 그 파일을 고쳐야 하고, 그것이 리뷰 지점이다.
+  - **`아무도`라는 값은 없다.** 결정이 ADR에 적혀 있고 이 저장소가 리뷰를 하는 한 최소한 `리뷰`가 본다. "아무도 안 본다"는 사실이 아니고, ADR이 스스로를 무의미하다고 선언하게 만든다.
+  - **린트는 규칙 ID로 적는다** — `import-x/no-restricted-paths`, `@eslint-react/no-forward-ref` 처럼. 산문으로 적으면 기계가 실재를 대조할 수 없다. 규칙 하나가 여러 설정을 갖는 경우(zone 등)는 ID 뒤에 무엇을 막는지 덧붙인다. **`ops/structure/adr.test.ts`가 그 ID를 실효 설정과 대조한다** — 접두를 빼먹은 인용이 네 번 났다.
+  - **`리뷰`만 적힌 줄이 다음 린트 규칙의 대기열**이다. `grep -- '- \*\*리뷰\*\*' docs/adr/*.md`로 뽑는다 — 따로 목록을 두지 않는다.
+- **상태** — **한 줄.** 첫 낱말의 어휘는 셋뿐이다. 개정은 같은 줄에 이어 적는다.
 
-```
+```text
 승인됨 (2026-09-08)
 승인됨 (2026-09-08, 사후 기록)
 대체됨 (2026-09-08 → 2026-09-09, )
@@ -148,12 +148,12 @@
 
 - 한글로 쓴다. 코드 식별자와 런타임 문자열(`throw new Error(...)` 등)만 영문.
 - **주석은 자리가 형태와 필수 여부를 정한다.** → [ADR 0004](adr/0004-comment-rules.md)
-    - **공개 선언에는 `/** */`가 필수다** — export function·최상위 화살표·export class·public 메서드·export interface/type/enum. `private`·`protected`·`#private`·constructor는 제외.
-    - 그 밖의 선언 위도 `/** */`다. `//`·`/* */`는 전환한다.
-    - 함수 본문 안에서만 `//`를 쓴다 — 연속 4줄까지, 코드 줄 끝에는 달지 않는다.
-    - 타입 표기(`@param {T}`)는 하지 않는다. 시그니처가 말한다.
-    - 주석 처리된 코드와 `TODO`·`FIXME`·`XXX`·`HACK`은 남기지 않는다. 미룬 일은 `docs/tasks/`에.
-    - 배경 설명은 ADR로 옮기고 `(→ ADR NNNN)` 링크만 남긴다.
+  - **공개 선언에는 `/** */`가 필수다** — export function·최상위 화살표·export class·public 메서드·export interface/type/enum. `private`·`protected`·`#private`·constructor는 제외.
+  - 선언 위에 주석을 달면 `/** */`다. `//`·`/* */`는 전환한다. 비공개 선언에 문서 블록을 **요구하지는 않는다**.
+  - 함수 본문 안에서만 `//`를 쓴다 — 연속 4줄까지, 코드 줄 끝에는 달지 않는다.
+  - 타입 표기(`@param {T}`)는 하지 않는다. 시그니처가 말한다.
+  - 주석 처리된 코드와 `TODO`·`FIXME`·`XXX`·`HACK`은 남기지 않는다. 미룬 일은 `docs/tasks/`에.
+  - 배경 설명은 ADR로 옮기고 `(→ ADR NNNN)` 링크만 남긴다.
 
 ## 자리
 
@@ -178,18 +178,19 @@
 
 - 코드는 도메인별 슬라이스 아래에 모은다. 레이어를 최상위로 두지 않는다.
 - 도메인을 모르는 것(DI·설정·부팅)만 `core/`에 둔다.
-- 슬라이스 내부 — client는 `model/` `infra/` `viewmodel/` `view/` `component/`, server는 `domain/` `infra/` `services/` `transport/`.
+- 슬라이스 내부 — client는 `model/` `infra/` `viewmodel/` `view/` `component/`, server는 `domain/` `infra/` `services/` `runtime/` `transport/`. `runtime/`은 **요청보다 오래 사는 것**을 든다(`RunManager`) — 요청 하나로 끝나는 `services/`와 수명이 다르다. 두 목록은 `eslint.config.ts`의 zone과 구조 테스트가 닫힌 집합으로 든다.
 - 의존은 안쪽(`model`/`domain`)을 향한다. 어느 구현이 꽂힐지는 조립부(client는 `workbench/registerServices.tsx`)가 정한다.
-- `index.ts`에는 바깥이 실제로 부르는 것만 넣는다. 내부 구현·에러 타입·유틸은 내보내지 않는다.
+- `index.ts`에는 바깥이 실제로 부르는 것만 넣는다. 내부 구현·에러 타입·유틸은 내보내지 않는다. **`knip`이 본다** — 아무도 안 부르는 export는 관문에서 막힌다. → [ADR 0011](adr/0011-lint-off-the-shelf.md)
 - 슬라이스끼리 직접 import하지 않는다. DI 토큰이나 이벤트로만 소통한다.
 - `shared/`는 아무것도 import할 수 없다. 공통 추출은 아래로만 한다.
-- client는 `core/ workbench/ extensions/ shared/` 넷이다. 의존 방향은 `eslint.config.ts`의 zone이 강제한다.
+- client는 `core/ workbench/ extensions/ shared/` 넷이다. **의존 방향·슬라이스 경계·`shared/`의 고립을 세 패키지 모두 `eslint.config.ts`의 zone이 강제한다** — server는 2026-09-14까지 비어 있었다.
 - **빈 레이어를 미리 만들지 않는다.** 실제 I/O나 유스케이스가 생길 때 폴더를 만든다.
-- 파일 이름: 클래스·React 컴포넌트·계약(`I<Name>.ts`)은 PascalCase, 함수 모듈은 camelCase. 폴더는 camelCase(컴포넌트 폴더는 그 컴포넌트 이름). 하이픈·밑줄은 쓰지 않는다. **지금은 리뷰로 본다** — 이것을 보던 자작 규칙은 껐다. → [ADR 0011](adr/0011-lint-off-the-shelf.md)
+- 파일 이름: 클래스·React 컴포넌트·계약(`I<Name>.ts`)은 PascalCase, 함수 모듈은 camelCase. 폴더는 camelCase(컴포넌트 폴더는 그 컴포넌트 이름). 하이픈·밑줄은 쓰지 않는다 — `public/`의 자산만 예외다. **`check-file`이 하이픈·밑줄과 계층 폴더·접두를 보고, 컴포넌트 폴더의 PascalCase는 구조 테스트가 본다.** PascalCase냐 camelCase냐는 파일이 내보내는 이름을 따르므로 기계가 판정하지 못한다 — 그 한 칸만 리뷰다. → [ADR 0011](adr/0011-lint-off-the-shelf.md)
 - **`model/`은 사실과 사건을, `viewmodel/`은 화면 상태를 다룬다.** `model`→`viewmodel`은 이벤트로, `viewmodel`→`view`는 바인딩으로 잇는다. atom은 ViewModel이 소유한다. → [ADR 0007](adr/0007-client-layers.md)
 - **`model/`은 도메인 타입·규칙(순수 로직)과 `infra/`가 구현할 인터페이스 선언까지다.** React·fetch·window·전역 상태를 런타임으로 알지 않는다.
 - **`view/`가 부르는 훅은 `useViewModel` 하나뿐이다.** 로컬 상태가 필요하면 ViewModel로 옮긴다. DI 접근(`useAppContext`·`resolve`)도 하지 않는다.
 - **위 두 줄은 린트가 본다** — `no-restricted-syntax`가 `view/`의 훅과 DI 접근을, `@typescript-eslint/no-restricted-imports`가 `model/`의 상태 라이브러리를 막는다(`import type`은 허용한다). → [ADR 0011](adr/0011-lint-off-the-shelf.md)
+- **코드의 모양은 `prettier`가 정한다.** 손으로 맞추지 않는다 — 고치려면 `pnpm --filter ops run format`이고, 관문은 `--check`만 한다. 마크다운은 `markdownlint`가 든다.
 - CSS는 `stylelint`가 본다 — client의 `lint`가 ESLint에 이어 돌린다. 값은 Primer 토큰만 참조한다 — 색·간격·테두리·그림자·글꼴에 리터럴을 쓰지 않는다. → [ADR 0009](adr/0009-primer-first.md)
 
 ## 컴포넌트
@@ -207,22 +208,23 @@
 기준은 하나다 — **이 코드가 잘못 동작하면 누가 알려주는가.** 타입 체커·린트·계약 테스트가 알려주면 안 쓰고, 아무도 안 알려주면 쓴다. "눈으로 보면 안다"는 답이 아니다.
 
 - **계약** — 두 방향이다. 한쪽이 빠지면 계약이 반쪽이다.
-    - **인터페이스 계약** — 인터페이스마다 모든 구현이 통과할 스위트. `<name>.contract.ts`, 함수 export. **mock도 통과시킨다.**
-    - **응답 계약** — 서버가 자기 응답을 `contracts`의 zod 스키마에 넣어 본다(`responseContract.ts`). **클라이언트를 모른다** — 어댑터를 붙이지 않는다. 양쪽이 서로를 모른 채 같은 스키마에 각자 대는 것이 계약 테스트다. 클라이언트가 둘이 되어도 서버 쪽은 그대로다.
+  - **인터페이스 계약** — 인터페이스마다 모든 구현이 통과할 스위트. `<name>.contract.ts`, 함수 export. **mock도 통과시킨다.**
+  - **응답 계약** — 서버가 자기 응답을 `contracts`의 zod 스키마에 넣어 본다(`responseContract.ts`). **클라이언트를 모른다** — 어댑터를 붙이지 않는다. 양쪽이 서로를 모른 채 같은 스키마에 각자 대는 것이 계약 테스트다. 클라이언트가 둘이 되어도 서버 쪽은 그대로다.
 - **단위** — 계약이 못 잡는 것만. 대상 옆 `*.test.ts`. 적을수록 좋은 신호다.
 - **스모크** — view가 렌더되고 이벤트가 연결되는지만. 스타일은 Storybook 담당.
 - **Storybook** — 시각 검증. 최소 세트는 기본 / 빈 / 로딩 / 에러 — **그 상태가 실제로 있는 것만**이다. `SettingsTabView`처럼 ViewModel에 로딩·실패가 없는 화면에 그 스토리를 만들면 일어날 수 없는 상태를 그리게 된다.
-    - `shared/component/`와 슬라이스의 `component/`는 **전부** 스토리를 갖는다. → [ADR 0010](adr/0010-ui-verification.md)
-    - `view/`는 **조합이 드러나는 것만** 갖는다 — 화면 한 구역을 실제로 채우는 view. 컴포넌트 하나에 값을 꽂는 얇은 바인딩은 그 컴포넌트 스토리가 이미 같은 그림을 덮는다. 대상 목록은 `.storybook/main.ts`에 있다.
+  - `shared/component/`와 슬라이스의 `component/`는 **전부** 스토리를 갖는다. → [ADR 0010](adr/0010-ui-verification.md)
+  - `view/`는 **조합이 드러나는 것만** 갖는다 — 화면 한 구역을 실제로 채우는 view. 컴포넌트 하나에 값을 꽂는 얇은 바인딩은 그 컴포넌트 스토리가 이미 같은 그림을 덮는다. 어느 view가 대상인지는 `.storybook/main.ts`의 주석이 이름으로 적는다 — **글롭은 전부를 집으므로 기계가 보는 목록은 아니다**. 새 view에 스토리가 없어도 아무도 알려주지 않는다.
 - **E2E** — `test/e2e/*.spec.ts`.
 - **VRT** — 스토리를 순회해 찍는다. `pnpm --filter client test:vrt`(비교). 기준을 만들 때는 **스토리를 골라** 인자를 넘긴다 — `test:vrt -g "<스토리 id>" --update-snapshots`. **Docker에서만** 생성·비교한다.
-    - **기준 이미지는 검토에서 그 스토리를 Accept할 때 만든다.** 아직 아무도 안 본 그림을 기준으로 삼으면 "검토 안 함"이 "승인됨"으로 기록된다. VRT가 잡으려는 것은 승인된 뒤의 변형이다.
-    - 그래서 기준이 없는 스토리는 **실패가 아니라 건너뜀**이다. 없는 것이 정상인 기간이 있다.
+  - **기준 이미지는 검토에서 그 스토리를 Accept할 때 만든다.** 아직 아무도 안 본 그림을 기준으로 삼으면 "검토 안 함"이 "승인됨"으로 기록된다. VRT가 잡으려는 것은 승인된 뒤의 변형이다.
+  - 그래서 기준이 없는 스토리는 **실패가 아니라 건너뜀**이다. 없는 것이 정상인 기간이 있다.
 - **모든 테스트가 자기 패키지 안에 있다.** 자리는 *무엇이 돌리는가*로 갈린다 — 단위·계약·스모크·스토리는 **대상 옆**에 두고(vitest가 소스와 함께 본다), **대상을 특정할 수 없는 것**만 패키지의 `test/` 아래로 묶는다 — 앱 전체를 보는 E2E(`test/e2e/`), 스토리 전부를 도는 VRT(`test/vrt/`), 테스트 환경 자체를 세우는 설정(`test/vitestSetup.ts`). 단위 테스트를 소스에서 떼어내는 `tests/` 폴더나 던더 폴더는 쓰지 않는다.
-- Mock은 `Mock<Name>.ts`. **테스트와 스토리가 데이터를 공유하지 않는다** — 스토리는 그럴듯한 그림 하나를, 테스트는 단언마다 가장 작은 입력을 원한다. 억지로 합치면 둘 다 나빠진다.
-- `toMatchSnapshot`은 쓰지 않는다 — 무비판적으로 갱신하게 된다.
+- Mock은 `Mock<Name>.ts`.
+- **렌더 테스트는 스토리를 가져다 쓸 수 있다** — `composeStories`(portable stories)가 Storybook이 정한 길이다. 로직 테스트(훅·ViewModel)는 단언마다 자기 최소 입력을 쓴다. → [ADR 0010](adr/0010-ui-verification.md)
+- 스냅샷은 인라인(`toMatchInlineSnapshot`)만 쓴다. 외부 `.snap` 파일은 두지 않는다 — 안 열고 갱신하게 된다.
 - 커버리지 목표를 두지 않는다.
-- `describe`/`it` 이름은 한글로 쓴다. TSDoc의 `@throws`에 적은 경우는 각각 테스트로 확인한다 — 적어두기만 하면 주장일 뿐이다.
+- `it`/`test` 이름은 한글 문장으로 쓴다. `describe`는 **대상의 식별자**라 영문 그대로다(`describe('Timestamp')`). 파일마다 최상위 `describe` 하나가 전부를 감싸고 훅도 그 안에 둔다. 단정 헬퍼는 `expect`로 시작하는 이름을 갖는다 — 그래야 `vitest/expect-expect`가 알아본다. TSDoc의 `@throws`에 적은 경우는 각각 테스트로 확인한다 — 적어두기만 하면 주장일 뿐이다.
 - 설정 파일은 갈라질 때만 만든다. 기본값으로 도는 동안에는 두지 않는다.
 
 E2E는 `pnpm --filter client test:e2e`로 돌린다. 조립이 맞물리는지는 `workbench/registerServices.test.tsx`가 본다 — 대상(`registerServices.tsx`) 옆에 있는 단위 테스트다.
@@ -234,7 +236,7 @@ E2E는 `pnpm --filter client test:e2e`로 돌린다. 조립이 맞물리는지�
 
 ## 제출 전 확인
 
-- [ ] `pnpm --filter ops check` 통과 (typecheck → lint → test)
+- [ ] `pnpm --filter ops check` 통과 (typecheck → lint → test → build). **CI의 `check` 잡이 부르는 것과 같은 명령이다.**
 - [ ] 이번 라운드가 한 가지 관심사인가
 - [ ] 스스로 판단한 지점을 신고했는가
 - [ ] 패키지의 `src/` 밖을 건드렸다면 PR 본문에 **무엇을 왜 바꿨는지** 적었는가 — 승인은 사용자가 PR에서 한다 → [ADR 0003](adr/0003-approval-outside-src.md)

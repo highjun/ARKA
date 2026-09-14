@@ -1,7 +1,7 @@
-import { useMemo, useRef, useState } from 'react';
-import type { KeyboardEvent } from 'react';
-import { isApplePlatform } from './shared';
-import type { FileTreeItem, FileTreeItemId } from './FileTree';
+import { useMemo, useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
+import { isApplePlatform } from "./shared";
+import type { FileTreeItem, FileTreeItemId } from "./FileTree";
 
 /** `level`은 들여쓰기용 깊이다. 접힌 자식은 애초에 이 목록에 없다. */
 export interface FlatTreeNode {
@@ -20,7 +20,7 @@ export const flattenVisible = (
   const out: FlatTreeNode[] = [];
   for (const item of items) {
     out.push({ item, level, parentId });
-    if (item.type === 'folder' && expandedIds.has(item.id) && item.children) {
+    if (item.type === "folder" && expandedIds.has(item.id) && item.children) {
       out.push(...flattenVisible(item.children, expandedIds, level + 1, item.id));
     }
   }
@@ -29,7 +29,7 @@ export const flattenVisible = (
 
 /** mac은 Cmd+A, 그 외는 Ctrl+A. `selectionIntentOf`와 같은 플랫폼 분기를 쓴다. */
 const isSelectAllEvent = (event: KeyboardEvent<HTMLElement>): boolean =>
-  (isApplePlatform() ? event.metaKey : event.ctrlKey) && (event.key === 'a' || event.key === 'A');
+  (isApplePlatform() ? event.metaKey : event.ctrlKey) && (event.key === "a" || event.key === "A");
 
 /**
  * 트리 하나 분량의 roving tabindex + 방향키 이동 — WAI-ARIA APG의 tree 패턴(포커스 가능한 항목은
@@ -90,7 +90,7 @@ export const useTreeNavigation = (
     const index = flat.findIndex((entry) => entry.item.id === node.item.id);
 
     switch (event.key) {
-      case 'ArrowDown': {
+      case "ArrowDown": {
         event.preventDefault();
         event.stopPropagation();
         const next = flat[index + 1];
@@ -100,7 +100,7 @@ export const useTreeNavigation = (
         else onFocusMoved(next.item.id);
         return;
       }
-      case 'ArrowUp': {
+      case "ArrowUp": {
         event.preventDefault();
         event.stopPropagation();
         const prev = flat[index - 1];
@@ -110,7 +110,7 @@ export const useTreeNavigation = (
         else onFocusMoved(prev.item.id);
         return;
       }
-      case 'Home': {
+      case "Home": {
         event.preventDefault();
         event.stopPropagation();
         const first = flat[0];
@@ -119,7 +119,7 @@ export const useTreeNavigation = (
         onFocusMoved(first.item.id);
         return;
       }
-      case 'End': {
+      case "End": {
         event.preventDefault();
         event.stopPropagation();
         const last = flat[flat.length - 1];
@@ -128,8 +128,8 @@ export const useTreeNavigation = (
         onFocusMoved(last.item.id);
         return;
       }
-      case 'ArrowRight': {
-        if (node.item.type !== 'folder') return;
+      case "ArrowRight": {
+        if (node.item.type !== "folder") return;
         event.preventDefault();
         event.stopPropagation();
         if (expandedIds.has(node.item.id)) {
@@ -142,10 +142,10 @@ export const useTreeNavigation = (
         }
         return;
       }
-      case 'ArrowLeft': {
+      case "ArrowLeft": {
         event.preventDefault();
         event.stopPropagation();
-        if (node.item.type === 'folder' && expandedIds.has(node.item.id)) {
+        if (node.item.type === "folder" && expandedIds.has(node.item.id)) {
           onToggleFolder?.(node.item, false);
         } else if (node.parentId !== null) {
           focusNode(node.parentId);
@@ -153,8 +153,8 @@ export const useTreeNavigation = (
         }
         return;
       }
-      case 'Enter':
-      case ' ': {
+      case "Enter":
+      case " ": {
         event.preventDefault();
         event.stopPropagation();
         onActivateRow(node);

@@ -2,7 +2,7 @@
 
 PR의 앱을 **실제로 만져 봐야 할 때** 쓴다. 사용자 기계에서 돌리지 않는다.
 
-```
+```text
 GitHub → Code → Codespaces → Create codespace on this branch
 ```
 

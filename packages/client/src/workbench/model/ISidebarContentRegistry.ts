@@ -1,6 +1,6 @@
-import { createToken } from '#core/di';
-import type { ComponentType } from 'react';
-import type { DescriptorMatch } from '#core';
+import { createToken } from "#core/di";
+import type { ComponentType } from "react";
+import type { DescriptorMatch } from "#core";
 
 /**
  * 활동 아이콘 바에서 고른 것에 대응하는 사이드바 내용. 없으면(`tryGet`이 `undefined`) 패널이 빈다.

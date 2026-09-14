@@ -1,4 +1,4 @@
-import { createToken, type Disposable } from '#core/di';
+import { createToken, type Disposable } from "#core/di";
 
 /** 잡힌 오류 하나. 원본 `Error`를 그대로 두지 않고 값만 옮긴다 — 화면이 참조를 오래 쥐지 않게. */
 export type ErrorEntry = {
@@ -11,7 +11,7 @@ export type ErrorEntry = {
   readonly stack: string | undefined;
 };
 
-export const ErrorLogToken = createToken<IErrorLog>('errorLog');
+export const ErrorLogToken = createToken<IErrorLog>("errorLog");
 /**
  * 아무도 잡지 않은 오류가 마지막으로 닿는 자리. VSCode의 `onUnexpectedError`에 해당한다.
  *

@@ -1,6 +1,6 @@
-import { useEffect, useSyncExternalStore } from 'react';
-import type { Token } from '#core/di';
-import { useAppContext } from './ViewModelProvider';
+import { useEffect, useSyncExternalStore } from "react";
+import type { Token } from "#core/di";
+import { useAppContext } from "./ViewModelProvider";
 
 /** VM이 선택적으로 구현하는 생명주기 — 있으면 `useViewModel`이 마운트/언마운트에 걸어준다. */
 interface ViewModelLifecycle {
@@ -8,7 +8,7 @@ interface ViewModelLifecycle {
   onDispose?(): void;
 }
 
-const hasLifecycle = (vm: object): vm is ViewModelLifecycle => 'onMount' in vm || 'onDispose' in vm;
+const hasLifecycle = (vm: object): vm is ViewModelLifecycle => "onMount" in vm || "onDispose" in vm;
 
 /**
  * `<Name>View.tsx`는 훅을 `useViewModel` 하나만 부른다(`view-only-uses-view-model`) — `useEffect`로
@@ -37,8 +37,8 @@ interface Observable {
 }
 
 const isObservable = (vm: object): vm is Observable =>
-  typeof (vm as Partial<Observable>).subscribe === 'function' &&
-  typeof (vm as Partial<Observable>).getVersion === 'function';
+  typeof (vm as Partial<Observable>).subscribe === "function" &&
+  typeof (vm as Partial<Observable>).getVersion === "function";
 
 const noSubscription = () => () => {};
 const noVersion = () => 0;

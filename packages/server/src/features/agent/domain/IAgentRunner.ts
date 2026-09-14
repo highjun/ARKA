@@ -1,13 +1,14 @@
 import type { AgentEvent, AgentEventInput, RunId, RunMode, SessionId } from "#contracts";
 
 /** Run 안에서 실행기가 낼 수 있는 이벤트 — 세션·Run 식별자는 런타임이 붙이므로 뺀 모양이다. */
-export type RunEventInput = Extract<AgentEventInput, { runId: string }> extends infer E
-  ? E extends { type: "run.started" | "run.finished" }
-    ? never
-    : E extends object
-      ? Omit<E, "sessionId" | "runId">
-      : never
-  : never;
+export type RunEventInput =
+  Extract<AgentEventInput, { runId: string }> extends infer E
+    ? E extends { type: "run.started" | "run.finished" }
+      ? never
+      : E extends object
+        ? Omit<E, "sessionId" | "runId">
+        : never
+    : never;
 
 /** 실행기가 Run 하나를 굴리며 쓰는 것. 런타임(`RunManager`)이 만들어 넘긴다. */
 export interface RunContext {

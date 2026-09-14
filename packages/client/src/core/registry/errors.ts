@@ -1,4 +1,4 @@
-import { CoreError } from '#core/errors';
+import { CoreError } from "#core/errors";
 
 /**
  * Registry 가 세는 것은 **Descriptor** 다 — `todo.add` 처럼 사람이 적고 패턴 매칭까지 하는 문자열

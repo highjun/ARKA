@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { TextEditor } from './index';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { TextEditor } from "./index";
 
 const CONTENT = `import { greet } from './greet';
 
@@ -13,7 +13,7 @@ main();
 `;
 
 const meta = {
-  title: 'filesystem/TextEditor',
+  title: "filesystem/TextEditor",
   component: TextEditor,
   decorators: [
     (Story) => (
@@ -22,15 +22,19 @@ const meta = {
       </div>
     ),
   ],
-  args: { path: 'src/main.ts', content: CONTENT },
+  args: { path: "src/main.ts", content: CONTENT },
 } satisfies Meta<typeof TextEditor>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-export const Empty: Story = { args: { content: '' } };
+export const Empty: Story = { args: { content: "" } };
 export const Loading: Story = { args: { loading: true } };
-export const NoChrome: Story = { args: { chrome: 'none' } };
-export const Editable: Story = { args: { readOnly: false, onChange: () => undefined, onSave: () => undefined, isDirty: true } };
-export const Saving: Story = { args: { readOnly: false, onChange: () => undefined, onSave: () => undefined, isDirty: true, isSaving: true } };
+export const NoChrome: Story = { args: { chrome: "none" } };
+export const Editable: Story = {
+  args: { readOnly: false, onChange: () => undefined, onSave: () => undefined, isDirty: true },
+};
+export const Saving: Story = {
+  args: { readOnly: false, onChange: () => undefined, onSave: () => undefined, isDirty: true, isSaving: true },
+};

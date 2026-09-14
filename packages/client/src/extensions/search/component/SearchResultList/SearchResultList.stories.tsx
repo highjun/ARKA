@@ -1,22 +1,22 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { SearchResultList } from './index';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { SearchResultList } from "./index";
 
 const FILES = [
   {
-    path: 'packages/client/src/workbench/view/ShellView.tsx',
+    path: "packages/client/src/workbench/view/ShellView.tsx",
     matches: [
       { line: 12, column: 8, preview: "  const viewModel = useViewModel(ShellViewModelToken);" },
       { line: 184, column: 20, preview: "      {viewModel.isClientOutdated ? (" },
     ],
   },
   {
-    path: 'docs/adr/0008-component-surface.md',
-    matches: [{ line: 3, column: 1, preview: '## 맥락:' }],
+    path: "docs/adr/0008-component-surface.md",
+    matches: [{ line: 3, column: 1, preview: "## 맥락:" }],
   },
 ];
 
 const meta = {
-  title: 'search/SearchResultList',
+  title: "search/SearchResultList",
   component: SearchResultList,
   args: { files: FILES, onSelect: () => undefined },
 } satisfies Meta<typeof SearchResultList>;
@@ -35,8 +35,14 @@ export const LongPreview: Story = {
   args: {
     files: [
       {
-        path: 'a.ts',
-        matches: [{ line: 1, column: 1, preview: 'export const veryLongIdentifierName = someOtherVeryLongFunctionName(withArguments, andMore);' }],
+        path: "a.ts",
+        matches: [
+          {
+            line: 1,
+            column: 1,
+            preview: "export const veryLongIdentifierName = someOtherVeryLongFunctionName(withArguments, andMore);",
+          },
+        ],
       },
     ],
   },

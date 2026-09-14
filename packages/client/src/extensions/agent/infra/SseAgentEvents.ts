@@ -1,6 +1,6 @@
-import { apiHeaders, readSse, sleep } from '#core/http';
-import { AgentEvent, type SessionId } from '#contracts';
-import type { IAgentEvents } from '../model/IAgentEvents';
+import { apiHeaders, readSse, sleep } from "#core/http";
+import { AgentEvent, type SessionId } from "#contracts";
+import type { IAgentEvents } from "../model/IAgentEvents";
 
 /** 끊기면 이만큼 쉬고 다시 붙는다. */
 const RETRY_MS = 2_000;
@@ -16,17 +16,26 @@ class SseAgentEventsAdapter implements IAgentEvents {
     return () => controller.abort();
   }
 
-  async #loop(sessionId: SessionId, since: number, onEvent: (event: AgentEvent) => void, signal: AbortSignal): Promise<void> {
+  async #loop(
+    sessionId: SessionId,
+    since: number,
+    onEvent: (event: AgentEvent) => void,
+    signal: AbortSignal,
+  ): Promise<void> {
     let last = since;
     while (!signal.aborted) {
       try {
-        await readSse(`/api/agent/sessions/${encodeURIComponent(sessionId)}/events?since=${String(last)}`, { headers: apiHeaders(), signal }, (data) => {
-          const parsed = AgentEvent.safeParse(JSON.parse(data));
-          // 모르는 type은 버린다 — 옛 클라이언트가 새 서버의 이벤트를 만나도 죽지 않는다.
-          if (!parsed.success || parsed.data.seq <= last) return;
-          last = parsed.data.seq;
-          onEvent(parsed.data);
-        });
+        await readSse(
+          `/api/agent/sessions/${encodeURIComponent(sessionId)}/events?since=${String(last)}`,
+          { headers: apiHeaders(), signal },
+          (data) => {
+            const parsed = AgentEvent.safeParse(JSON.parse(data));
+            // 모르는 type은 버린다 — 옛 클라이언트가 새 서버의 이벤트를 만나도 죽지 않는다.
+            if (!parsed.success || parsed.data.seq <= last) return;
+            last = parsed.data.seq;
+            onEvent(parsed.data);
+          },
+        );
       } catch {
         // 연결 실패거나 중간에 끊겼다 — 해지된 게 아니면 아래서 다시 시도한다.
       }

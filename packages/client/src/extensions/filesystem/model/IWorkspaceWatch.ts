@@ -1,4 +1,4 @@
-import { createToken } from '#core/di';
+import { createToken } from "#core/di";
 /**
  * 워크스페이스의 파일·디렉터리 변경을 구독하는 통로.
  *

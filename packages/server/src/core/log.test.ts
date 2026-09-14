@@ -3,7 +3,10 @@ import { createLogger, maskSecrets, serializeError } from "./log";
 
 const capture = () => {
   const lines: string[] = [];
-  const log = createLogger((line) => lines.push(line), () => new Date("2026-09-09T00:00:00.000Z"));
+  const log = createLogger(
+    (line) => lines.push(line),
+    () => new Date("2026-09-09T00:00:00.000Z"),
+  );
   return { lines, log };
 };
 
@@ -42,15 +45,26 @@ describe("serializeError", () => {
 });
 
 describe("비밀 마스킹 — 이름이 곧 장치다", () => {
-  const parse = (line: string | undefined): Record<string, unknown> => JSON.parse(line ?? "") as Record<string, unknown>;
+  const parse = (line: string | undefined): Record<string, unknown> =>
+    JSON.parse(line ?? "") as Record<string, unknown>;
 
   it("접미사가 붙은 필드를 가린다 — 환경변수 꼴과 camelCase 둘 다", () => {
     const { lines, log } = capture();
 
-    log.info("x", { ARKA_ANTHROPIC_API_KEY: "sk-real", apiKey: "sk-real", accessToken: "t", dbPassword: "p", tunnelSecret: "s" });
+    log.info("x", {
+      ARKA_ANTHROPIC_API_KEY: "sk-real",
+      apiKey: "sk-real",
+      accessToken: "t",
+      dbPassword: "p",
+      tunnelSecret: "s",
+    });
 
     expect(parse(lines[0])).toMatchObject({
-      ARKA_ANTHROPIC_API_KEY: "***", apiKey: "***", accessToken: "***", dbPassword: "***", tunnelSecret: "***",
+      ARKA_ANTHROPIC_API_KEY: "***",
+      apiKey: "***",
+      accessToken: "***",
+      dbPassword: "***",
+      tunnelSecret: "***",
     });
   });
 
@@ -63,7 +77,9 @@ describe("비밀 마스킹 — 이름이 곧 장치다", () => {
   });
 
   it("배열 안도 본다", () => {
-    expect(maskSecrets({ items: [{ token: "t" }, { name: "n" }] })).toEqual({ items: [{ token: "***" }, { name: "n" }] });
+    expect(maskSecrets({ items: [{ token: "t" }, { name: "n" }] })).toEqual({
+      items: [{ token: "***" }, { name: "n" }],
+    });
   });
 
   it("비밀이 아닌 필드는 그대로 둔다 — 가리기만 하면 로그가 쓸모없어진다", () => {

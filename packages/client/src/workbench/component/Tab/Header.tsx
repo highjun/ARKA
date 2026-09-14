@@ -1,18 +1,12 @@
-import type { HTMLAttributes, ReactNode } from 'react';
-import { clsx } from 'clsx';
-import { Icon } from '#component/Icon';
-import { IconButton } from '#component/IconButton';
-import type { IconId } from '#component/Icon';
-import { useTabClassNames } from './TabContext';
-
-/** 헤더가 그릴 때 보는 파생 상태. prop의 `undefined`가 여기서 `false`로 굳는다. */
-export interface HeaderState {
-  readonly active: boolean;
-  readonly dirty: boolean;
-}
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import { clsx } from "clsx";
+import { Icon } from "#component/Icon";
+import { IconButton } from "#component/IconButton";
+import type { IconId } from "#component/Icon";
+import { useTabClassNames } from "./TabContext";
 
 /** `title`을 가로챈다 — 네이티브 툴팁이 아니라 탭 제목이다. */
-export interface TabHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'title'> {
+export interface TabHeaderProps extends Omit<ComponentPropsWithoutRef<"div">, "children" | "title"> {
   /** 이 탭이 지금 선택된(보이는) 탭인가. */
   readonly isActive?: boolean;
   /** 저장 안 된 변경이 있는가 — 제목 옆에 점으로 표시된다. */
@@ -33,12 +27,6 @@ export interface TabHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'ch
   /** 탭 제목. */
   readonly title: string;
 }
-
-/** 순수 함수라 스토리와 테스트가 렌더 없이 상태 조합을 확인한다. */
-export const getHeaderState = (isActive: boolean, isDirty: boolean): HeaderState => ({
-  active: Boolean(isActive),
-  dirty: Boolean(isDirty),
-});
 
 /** 닫기 버튼 클릭 — 헤더 자신의 클릭(탭 활성화)으로 안 번지게 막고 나서 닫는다. */
 const handleHeaderCloseClick = (onClose: () => void) => (event: { stopPropagation: () => void }) => {
@@ -66,10 +54,10 @@ export const TabHeader = ({
   return (
     <div
       {...props}
-      role={props.role ?? 'tab'}
-      aria-selected={props['aria-selected'] ?? isActive}
-      data-active={isActive ? '' : undefined}
-      data-dirty={isDirty ? '' : undefined}
+      role={props.role ?? "tab"}
+      aria-selected={props["aria-selected"] ?? isActive}
+      data-active={isActive ? "" : undefined}
+      data-dirty={isDirty ? "" : undefined}
       data-component="Tab.Header"
       className={clsx(className, classNames.header)}
     >
@@ -78,7 +66,7 @@ export const TabHeader = ({
       ) : (
         <Icon iconId={iconId} size="sm" className={classNames.headerIcon} />
       )}
-      <span data-preview={isPreview ? '' : undefined} className={classNames.headerLabel}>
+      <span data-preview={isPreview ? "" : undefined} className={classNames.headerLabel}>
         {title}
       </span>
       {/*

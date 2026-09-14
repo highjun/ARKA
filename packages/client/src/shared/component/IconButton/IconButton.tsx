@@ -1,8 +1,8 @@
-import type { Ref } from 'react';
-import { clsx } from 'clsx';
-import styles from './IconButton.module.css';
-import { IconButton as PrimerIconButton } from '@primer/react';
-import type { IconButtonProps as PrimerIconButtonProps } from '@primer/react';
+import type { Ref } from "react";
+import { clsx } from "clsx";
+import styles from "./IconButton.module.css";
+import { IconButton as PrimerIconButton } from "@primer/react";
+import type { IconButtonProps as PrimerIconButtonProps } from "@primer/react";
 
 /** Primer `IconButtonProps` 계약을 그대로 재수출한다 — "다른 API의 아이콘 버튼"이 아니라
  *  "그 API 그대로에 CSS 한 줄만 더한 아이콘 버튼"이라, 계약을 새로 선언하면 오히려 둘이
@@ -27,7 +27,6 @@ export const IconButton = ({ ref, ...props }: IconButtonProps) => (
     {...props}
     ref={ref}
     data-component="IconButton"
-    className={clsx(props.className, styles['root'])}
+    className={clsx(props.className, styles["root"])}
   />
 );
-

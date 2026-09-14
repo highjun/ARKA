@@ -1,2 +1,2 @@
-export { Tab } from './Tab';
-export type { SplitDropPosition, SplitEdgeDropPosition, StripDropPosition, TabChrome, TabDropZone, TabGroupItem, TabGroupProps, TabHeaderProps, TabId, TabItem, TabProps, TabSplitOrientation, TabSplitProps, TabStripProps, TabTreeLeaf, TabTreeNode, TabTreeSplit } from './Tab';
+export { Tab } from "./Tab";
+export type { TabGroupItem, TabGroupProps, TabItem, TabSplitProps, TabTreeNode, TabTreeSplit } from "./Tab";

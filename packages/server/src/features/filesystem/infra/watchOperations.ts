@@ -1,6 +1,6 @@
-import { watch as fsWatch, type FSWatcher } from 'node:fs';
-import path from 'node:path';
-import { resolveWithin } from './fileOperations';
+import { watch as fsWatch, type FSWatcher } from "node:fs";
+import path from "node:path";
+import { resolveWithin } from "./fileOperations";
 
 /**
  * 워크스페이스의 파일·디렉터리 변경을 감시한다.
@@ -63,7 +63,7 @@ export const watchPaths = (
         dirty.add(relativeOf(absPath));
         scheduleFlush();
       });
-      watcher.on('error', () => {
+      watcher.on("error", () => {
         dirty.add(relativeOf(absPath));
         scheduleFlush();
         watcher.close();

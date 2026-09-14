@@ -1,10 +1,10 @@
-import type { Disposable } from '#core/di';
-import { Emitter } from '#core/events';
-import type { AgentSession, RunMode, SessionId } from '#contracts';
-import type { IAgentApi } from './IAgentApi';
-import type { IAgentEvents } from './IAgentEvents';
-import type { IChatModel, SessionChat, SessionsStatus } from './IChatModel';
-import { emptyChat, foldEvent } from './transcript';
+import type { Disposable } from "#core/di";
+import { Emitter } from "#core/events";
+import type { AgentSession, RunMode, SessionId } from "#contracts";
+import type { IAgentApi } from "./IAgentApi";
+import type { IAgentEvents } from "./IAgentEvents";
+import type { IChatModel, SessionChat, SessionsStatus } from "./IChatModel";
+import { emptyChat, foldEvent } from "./transcript";
 
 const messageOf = (error: unknown): string => (error instanceof Error ? error.message : String(error));
 
@@ -15,14 +15,22 @@ export class ChatModel implements IChatModel {
   readonly #changed = new Emitter();
   readonly #subscriptions = new Map<SessionId, () => void>();
   #sessions: readonly AgentSession[] = [];
-  #sessionsStatus: SessionsStatus = 'idle';
+  #sessionsStatus: SessionsStatus = "idle";
   #sessionsFailure: string | null = null;
   #chats: Readonly<Record<SessionId, SessionChat>> = {};
 
   readonly confirmWrites: () => boolean;
 
   /** `confirmWrites`는 설정에서 온다 — 이 Model이 설정 Model을 직접 보지 않게 함수로 받는다. */
-  constructor({ api, events, confirmWrites = () => true }: { api: IAgentApi; events: IAgentEvents; confirmWrites?: () => boolean }) {
+  constructor({
+    api,
+    events,
+    confirmWrites = () => true,
+  }: {
+    api: IAgentApi;
+    events: IAgentEvents;
+    confirmWrites?: () => boolean;
+  }) {
     this.#api = api;
     this.#events = events;
     this.confirmWrites = confirmWrites;
@@ -50,14 +58,14 @@ export class ChatModel implements IChatModel {
 
   /** 실패해도 던지지 않는다 — `sessionsStatus`가 `error`가 되고 사유가 남는다. */
   async loadSessions(): Promise<void> {
-    this.#sessionsStatus = 'loading';
+    this.#sessionsStatus = "loading";
     this.#changed.fire();
     try {
       this.#sessions = await this.#api.listSessions();
-      this.#sessionsStatus = 'loaded';
+      this.#sessionsStatus = "loaded";
       this.#sessionsFailure = null;
     } catch (error) {
-      this.#sessionsStatus = 'error';
+      this.#sessionsStatus = "error";
       this.#sessionsFailure = messageOf(error);
     }
     this.#changed.fire();
@@ -85,17 +93,21 @@ export class ChatModel implements IChatModel {
   open(sessionId: SessionId): void {
     if (this.#subscriptions.has(sessionId)) return;
     const chat = this.#chats[sessionId] ?? emptyChat(sessionId);
-    this.#setChat({ ...chat, connection: 'connecting' });
+    this.#setChat({ ...chat, connection: "connecting" });
     const unsubscribe = this.#events.subscribe(sessionId, chat.lastSeq, (event) => {
       const current = this.#chats[sessionId];
       if (current === undefined) return;
-      this.#setChat({ ...foldEvent(current, event), connection: 'live' });
+      this.#setChat({ ...foldEvent(current, event), connection: "live" });
       // 세션 요약도 투영이다 — 제목·상태를 목록에 반영한다.
-      if (event.type === 'session.renamed') this.#patchSession(sessionId, { title: event.title, updatedAt: event.at });
-      if (event.type === 'session.archived') this.#patchSession(sessionId, { archived: event.archived, updatedAt: event.at });
-      if (event.type === 'run.started') this.#patchSession(sessionId, { lastRunStatus: 'running', updatedAt: event.at });
-      if (event.type === 'input.requested') this.#patchSession(sessionId, { lastRunStatus: 'waitingInput', updatedAt: event.at });
-      if (event.type === 'run.finished') this.#patchSession(sessionId, { lastRunStatus: event.status, updatedAt: event.at });
+      if (event.type === "session.renamed") this.#patchSession(sessionId, { title: event.title, updatedAt: event.at });
+      if (event.type === "session.archived")
+        this.#patchSession(sessionId, { archived: event.archived, updatedAt: event.at });
+      if (event.type === "run.started")
+        this.#patchSession(sessionId, { lastRunStatus: "running", updatedAt: event.at });
+      if (event.type === "input.requested")
+        this.#patchSession(sessionId, { lastRunStatus: "waitingInput", updatedAt: event.at });
+      if (event.type === "run.finished")
+        this.#patchSession(sessionId, { lastRunStatus: event.status, updatedAt: event.at });
     });
     this.#subscriptions.set(sessionId, unsubscribe);
   }
@@ -148,7 +160,9 @@ export class ChatModel implements IChatModel {
   }
 
   #replaceSession(session: AgentSession): void {
-    this.#sessions = this.#sessions.some((s) => s.id === session.id) ? this.#sessions.map((s) => (s.id === session.id ? session : s)) : [session, ...this.#sessions];
+    this.#sessions = this.#sessions.some((s) => s.id === session.id)
+      ? this.#sessions.map((s) => (s.id === session.id ? session : s))
+      : [session, ...this.#sessions];
     this.#changed.fire();
   }
 

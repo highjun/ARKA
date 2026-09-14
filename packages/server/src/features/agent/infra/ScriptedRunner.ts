@@ -15,7 +15,10 @@ export class ScriptedRunner implements IAgentRunner {
   readonly #newId: () => string;
 
   /** `chunkMs`를 0으로 주면 기다리지 않는다 — 테스트가 그렇게 쓴다. */
-  constructor({ chunkMs = DEFAULT_CHUNK_MS, newId = () => crypto.randomUUID() }: { chunkMs?: number; newId?: () => string } = {}) {
+  constructor({
+    chunkMs = DEFAULT_CHUNK_MS,
+    newId = () => crypto.randomUUID(),
+  }: { chunkMs?: number; newId?: () => string } = {}) {
     this.#chunkMs = chunkMs;
     this.#newId = newId;
   }

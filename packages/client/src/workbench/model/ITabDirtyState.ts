@@ -1,4 +1,4 @@
-import { createToken, type Disposable } from '#core/di';
+import { createToken, type Disposable } from "#core/di";
 
 export const TabDirtyStateToken = createToken<ITabDirtyState>("tabDirtyState");
 /**

@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import type { ReactNode } from 'react';
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { PortalProvider } from '#utils/portal';
-import { Icon } from '#component/Icon';
-import { IconButton } from '#component/IconButton';
-import { Menu } from './index';
-import styles from './Menu.module.css';
+import { useState } from "react";
+import type { ReactNode } from "react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { PortalProvider } from "#utils/portal";
+import { Icon } from "#component/Icon";
+import { IconButton } from "#component/IconButton";
+import { Menu } from "./index";
+import styles from "./Menu.module.css";
 
 /**
  * 메뉴는 포탈로 `document.body`에 뜨는데 VRT는 `#storybook-root`만 찍는다 — 포탈 대상을 이 상자
@@ -14,7 +14,7 @@ import styles from './Menu.module.css';
 const OverlayStage = ({ children }: { readonly children: ReactNode }) => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   return (
-    <div style={{ position: 'relative', height: 480, width: 720, overflow: 'hidden', transform: 'translateZ(0)' }}>
+    <div style={{ position: "relative", height: 480, width: 720, overflow: "hidden", transform: "translateZ(0)" }}>
       <PortalProvider container={container ?? undefined}>{children}</PortalProvider>
       <div ref={setContainer} />
     </div>
@@ -22,7 +22,7 @@ const OverlayStage = ({ children }: { readonly children: ReactNode }) => {
 };
 
 const meta = {
-  title: 'shared/Menu',
+  title: "shared/Menu",
   component: Menu,
   decorators: [
     (Story) => (
@@ -34,7 +34,12 @@ const meta = {
   render: (args) => (
     <Menu {...args}>
       <Menu.Trigger asChild>
-        <IconButton variant="invisible" size="small" aria-label="더 보기" icon={() => <Icon iconId="ellipsis" size="sm" />} />
+        <IconButton
+          variant="invisible"
+          size="small"
+          aria-label="더 보기"
+          icon={() => <Icon iconId="ellipsis" size="sm" />}
+        />
       </Menu.Trigger>
       <Menu.Content>
         <Menu.Label>세션</Menu.Label>
@@ -59,11 +64,11 @@ export const Closed: Story = { args: { defaultOpen: false } };
  * 자리를 눈에 보이게 하나 빌려 준다.
  */
 export const Context: Story = {
-  args: { kind: 'context', defaultOpen: true },
+  args: { kind: "context", defaultOpen: true },
   render: (args) => (
     <Menu {...args}>
       <Menu.Trigger>
-        <div className={styles['demoTrigger']}>여기를 우클릭</div>
+        <div className={styles["demoTrigger"]}>여기를 우클릭</div>
       </Menu.Trigger>
       <Menu.Content>
         <Menu.Label>파일</Menu.Label>

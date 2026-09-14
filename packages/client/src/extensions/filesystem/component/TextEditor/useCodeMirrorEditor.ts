@@ -1,18 +1,25 @@
-import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
-import { css } from '@codemirror/lang-css';
-import { html } from '@codemirror/lang-html';
-import { javascript } from '@codemirror/lang-javascript';
-import { json } from '@codemirror/lang-json';
-import { markdown } from '@codemirror/lang-markdown';
-import { python } from '@codemirror/lang-python';
-import { HighlightStyle, foldGutter, syntaxHighlighting } from '@codemirror/language';
-import { highlightSelectionMatches, openSearchPanel, search, searchKeymap } from '@codemirror/search';
-import { Compartment, EditorState, type Extension } from '@codemirror/state';
-import { EditorView, drawSelection, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers } from '@codemirror/view';
-import { tags } from '@lezer/highlight';
-import { useCallback, useEffect, useRef } from 'react';
-import type { RefObject } from 'react';
-import { fileExtensionOf, getKeymapForExtension } from './shared';
+import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import { css } from "@codemirror/lang-css";
+import { html } from "@codemirror/lang-html";
+import { javascript } from "@codemirror/lang-javascript";
+import { json } from "@codemirror/lang-json";
+import { markdown } from "@codemirror/lang-markdown";
+import { python } from "@codemirror/lang-python";
+import { HighlightStyle, foldGutter, syntaxHighlighting } from "@codemirror/language";
+import { highlightSelectionMatches, openSearchPanel, search, searchKeymap } from "@codemirror/search";
+import { Compartment, EditorState, type Extension } from "@codemirror/state";
+import {
+  EditorView,
+  drawSelection,
+  highlightActiveLine,
+  highlightActiveLineGutter,
+  keymap,
+  lineNumbers,
+} from "@codemirror/view";
+import { tags } from "@lezer/highlight";
+import { useCallback, useEffect, useRef } from "react";
+import type { RefObject } from "react";
+import { fileExtensionOf, getKeymapForExtension } from "./shared";
 
 /**
  * 파일 이름에서 문법을 고른다.
@@ -24,25 +31,26 @@ import { fileExtensionOf, getKeymapForExtension } from './shared';
  * 언어를 다 넣지 않는다. 번들이 언어마다 붙으므로 **이 워크스페이스에서 실제로 자주 여는 것**만
  * 둔다. 모르는 확장자는 강조 없이 그냥 보여준다 — 그래도 줄번호와 읽기는 된다.
  */
-export type CodeLanguage = 'javascript' | 'typescript' | 'jsx' | 'tsx' | 'json' | 'markdown' | 'css' | 'html' | 'python';
+export type CodeLanguage =
+  "javascript" | "typescript" | "jsx" | "tsx" | "json" | "markdown" | "css" | "html" | "python";
 
 const BY_EXTENSION: Readonly<Record<string, CodeLanguage>> = {
-  js: 'javascript',
-  mjs: 'javascript',
-  cjs: 'javascript',
-  jsx: 'jsx',
-  ts: 'typescript',
-  mts: 'typescript',
-  cts: 'typescript',
-  tsx: 'tsx',
-  json: 'json',
-  jsonc: 'json',
-  md: 'markdown',
-  mdx: 'markdown',
-  css: 'css',
-  html: 'html',
-  htm: 'html',
-  py: 'python',
+  js: "javascript",
+  mjs: "javascript",
+  cjs: "javascript",
+  jsx: "jsx",
+  ts: "typescript",
+  mts: "typescript",
+  cts: "typescript",
+  tsx: "tsx",
+  json: "json",
+  jsonc: "json",
+  md: "markdown",
+  mdx: "markdown",
+  css: "css",
+  html: "html",
+  htm: "html",
+  py: "python",
 };
 
 /** 모르는 확장자면 `undefined` — 강조 없이 그냥 보여준다. */
@@ -80,14 +88,21 @@ const LANGUAGE_EXTENSION: Readonly<Record<CodeLanguage, () => Extension>> = {
  * 것과 같은 것이라 두 컴포넌트의 코드 색이 갈리지도 않는다.
  */
 const highlight = HighlightStyle.define([
-  { tag: [tags.keyword, tags.modifier, tags.operatorKeyword], color: 'var(--codeMirror-syntax-fgColor-keyword)' },
-  { tag: [tags.string, tags.special(tags.string)], color: 'var(--codeMirror-syntax-fgColor-string)' },
-  { tag: [tags.comment, tags.lineComment, tags.blockComment], color: 'var(--codeMirror-syntax-fgColor-comment)', fontStyle: 'italic' },
-  { tag: [tags.number, tags.bool, tags.null], color: 'var(--codeMirror-syntax-fgColor-constant)' },
-  { tag: [tags.function(tags.variableName), tags.function(tags.propertyName)], color: 'var(--codeMirror-syntax-fgColor-entity)' },
-  { tag: [tags.punctuation, tags.separator, tags.bracket], color: 'var(--fgColor-muted)' },
-  { tag: [tags.heading, tags.strong], color: 'var(--codeMirror-syntax-fgColor-keyword)', fontWeight: 'bold' },
-  { tag: tags.link, color: 'var(--codeMirror-syntax-fgColor-constant)', textDecoration: 'underline' },
+  { tag: [tags.keyword, tags.modifier, tags.operatorKeyword], color: "var(--codeMirror-syntax-fgColor-keyword)" },
+  { tag: [tags.string, tags.special(tags.string)], color: "var(--codeMirror-syntax-fgColor-string)" },
+  {
+    tag: [tags.comment, tags.lineComment, tags.blockComment],
+    color: "var(--codeMirror-syntax-fgColor-comment)",
+    fontStyle: "italic",
+  },
+  { tag: [tags.number, tags.bool, tags.null], color: "var(--codeMirror-syntax-fgColor-constant)" },
+  {
+    tag: [tags.function(tags.variableName), tags.function(tags.propertyName)],
+    color: "var(--codeMirror-syntax-fgColor-entity)",
+  },
+  { tag: [tags.punctuation, tags.separator, tags.bracket], color: "var(--fgColor-muted)" },
+  { tag: [tags.heading, tags.strong], color: "var(--codeMirror-syntax-fgColor-keyword)", fontWeight: "bold" },
+  { tag: tags.link, color: "var(--codeMirror-syntax-fgColor-constant)", textDecoration: "underline" },
 ]);
 
 /**
@@ -102,19 +117,25 @@ const highlight = HighlightStyle.define([
  * 전용 토큰(`--codeMirror-*`)을 쓴다 — 일반 토큰으로 "얼마나 진하게"를 추측하지 않아도 된다.
  */
 const theme = EditorView.theme({
-  '&': { backgroundColor: 'transparent', color: 'var(--codeMirror-fgColor)' },
-  '.cm-content': { caretColor: 'var(--codeMirror-cursor-fgColor)' },
-  '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--codeMirror-cursor-fgColor)' },
-  '.cm-gutters': { backgroundColor: 'transparent', border: 'none', color: 'var(--codeMirror-lineNumber-fgColor)' },
-  '.cm-activeLine': { backgroundColor: 'var(--codeMirror-activeline-bgColor)' },
-  '.cm-activeLineGutter': { backgroundColor: 'var(--codeMirror-activeline-bgColor)', color: 'var(--codeMirror-fgColor)' },
-  '.cm-selectionBackground, &.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, ::selection': {
-    backgroundColor: 'var(--codeMirror-selection-bgColor)',
+  "&": { backgroundColor: "transparent", color: "var(--codeMirror-fgColor)" },
+  ".cm-content": { caretColor: "var(--codeMirror-cursor-fgColor)" },
+  ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--codeMirror-cursor-fgColor)" },
+  ".cm-gutters": { backgroundColor: "transparent", border: "none", color: "var(--codeMirror-lineNumber-fgColor)" },
+  ".cm-activeLine": { backgroundColor: "var(--codeMirror-activeline-bgColor)" },
+  ".cm-activeLineGutter": {
+    backgroundColor: "var(--codeMirror-activeline-bgColor)",
+    color: "var(--codeMirror-fgColor)",
   },
-  '.cm-searchMatch': { backgroundColor: 'var(--bgColor-attention-muted)', outline: '1px solid var(--borderColor-accent-emphasis)' },
-  '.cm-searchMatch.cm-searchMatch-selected': { backgroundColor: 'var(--codeMirror-selection-bgColor)' },
-  '.cm-panels': { backgroundColor: 'var(--codeMirror-bgColor)', color: 'var(--codeMirror-fgColor)' },
-  '.cm-panels input, .cm-panels button': { color: 'var(--codeMirror-fgColor)' },
+  ".cm-selectionBackground, &.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, ::selection": {
+    backgroundColor: "var(--codeMirror-selection-bgColor)",
+  },
+  ".cm-searchMatch": {
+    backgroundColor: "var(--bgColor-attention-muted)",
+    outline: "1px solid var(--borderColor-accent-emphasis)",
+  },
+  ".cm-searchMatch.cm-searchMatch-selected": { backgroundColor: "var(--codeMirror-selection-bgColor)" },
+  ".cm-panels": { backgroundColor: "var(--codeMirror-bgColor)", color: "var(--codeMirror-fgColor)" },
+  ".cm-panels input, .cm-panels button": { color: "var(--codeMirror-fgColor)" },
 });
 
 /** "이 위치를 보여 달라"는 요청. `seq`가 바뀔 때마다 같은 줄이어도 다시 간다. 줄·열은 1부터. */
@@ -159,7 +180,7 @@ const readOnlyExtensions = (
       ? []
       : [
           {
-            key: 'Mod-s',
+            key: "Mod-s",
             preventDefault: true,
             run: () => {
               onSaveRef.current?.();
@@ -180,7 +201,14 @@ const readOnlyExtensions = (
 ];
 
 /** `path`가 바뀌면 에디터를 다시 만들고, `content`만 바뀌면 dispatch로 반영한다 — 스크롤과 선택을 지키기 위해서다. */
-export const useCodeMirrorEditor = ({ path, content, readOnly, onChange, onSave, revealAt = null }: UseCodeMirrorEditorOptions): UseCodeMirrorEditorResult => {
+export const useCodeMirrorEditor = ({
+  path,
+  content,
+  readOnly,
+  onChange,
+  onSave,
+  revealAt = null,
+}: UseCodeMirrorEditorOptions): UseCodeMirrorEditorResult => {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<EditorView | null>(null);
   const readOnlyCompartmentRef = useRef<Compartment | null>(null);
@@ -234,14 +262,19 @@ export const useCodeMirrorEditor = ({ path, content, readOnly, onChange, onSave,
           // 폰에서 긴 파일을 훑는 유일한 수단이다 — 스크롤만으로는 못 찾는다.
           search({ top: true }),
           history(),
-          keymap.of([...getKeymapForExtension(fileExtensionOf(path)), ...searchKeymap, ...historyKeymap, ...defaultKeymap]),
+          keymap.of([
+            ...getKeymapForExtension(fileExtensionOf(path)),
+            ...searchKeymap,
+            ...historyKeymap,
+            ...defaultKeymap,
+          ]),
           syntaxHighlighting(highlight, { fallback: true }),
           theme,
           readOnlyCompartment.of(readOnlyExtensions(readOnly, onSaveRef, onChangeRef)),
           // 읽기 전용이면 본문이 포커스를 못 받아 단축키가 닿지 않는다 — 검색을 쓰려면 필요하다.
           // CodeMirror는 `.cm-content`에 항상 `role="textbox"`를 붙이므로(읽기 전용이어도) 이름이
           // 없으면 `aria-input-field-name` 위반이다 — `aria-label`로 채운다.
-          EditorView.contentAttributes.of({ tabindex: '0', 'aria-label': `${path} 내용` }),
+          EditorView.contentAttributes.of({ tabindex: "0", "aria-label": `${path} 내용` }),
           EditorView.lineWrapping,
           ...(language === undefined ? [] : [LANGUAGE_EXTENSION[language]()]),
         ],
@@ -253,11 +286,11 @@ export const useCodeMirrorEditor = ({ path, content, readOnly, onChange, onSave,
     if (remembered !== undefined) editor.scrollDOM.scrollTop = remembered;
 
     const remember = () => scrollByPathRef.current.set(path, editor.scrollDOM.scrollTop);
-    editor.scrollDOM.addEventListener('scroll', remember, { passive: true });
+    editor.scrollDOM.addEventListener("scroll", remember, { passive: true });
 
     return () => {
       remember();
-      editor.scrollDOM.removeEventListener('scroll', remember);
+      editor.scrollDOM.removeEventListener("scroll", remember);
       editor.destroy();
       viewRef.current = null;
       readOnlyCompartmentRef.current = null;
@@ -292,7 +325,7 @@ export const useCodeMirrorEditor = ({ path, content, readOnly, onChange, onSave,
     const line = doc.line(revealAt.line);
     const pos = Math.min(line.from + Math.max(revealAt.column - 1, 0), line.to);
     appliedRevealRef.current = revealAt.seq;
-    editor.dispatch({ selection: { anchor: pos }, effects: EditorView.scrollIntoView(pos, { y: 'center' }) });
+    editor.dispatch({ selection: { anchor: pos }, effects: EditorView.scrollIntoView(pos, { y: "center" }) });
     editor.focus();
   }, [revealAt, content]);
 

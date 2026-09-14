@@ -1,5 +1,5 @@
-import { createRegistry, type DescriptorMatch, type Registry } from '#core';
-import type { WorkbenchStartupDescriptor, IWorkbenchStartupRegistry } from './IWorkbenchStartup';
+import { createRegistry, type DescriptorMatch, type Registry } from "#core";
+import type { WorkbenchStartupDescriptor, IWorkbenchStartupRegistry } from "./IWorkbenchStartup";
 
 /** `IWorkbenchStartupRegistry`의 유일한 구현체 — core의 `createRegistry()`를 그대로 감싼다. */
 export class WorkbenchStartupRegistry implements IWorkbenchStartupRegistry {

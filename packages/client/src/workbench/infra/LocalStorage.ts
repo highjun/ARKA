@@ -1,4 +1,4 @@
-import type { IStorage } from '../model/IStorage';
+import type { IStorage } from "../model/IStorage";
 
 class LocalStorageAdapter implements IStorage {
   get(key: string): string | null {

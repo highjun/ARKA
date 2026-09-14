@@ -1,14 +1,14 @@
-import { clsx } from 'clsx';
-import { useState } from 'react';
-import type { HTMLAttributes, ReactNode } from 'react';
-import { useSessionList } from './useSessionList';
-import styles from './SessionList.module.css';
-import { IconButton } from '#component/IconButton';
-import { Icon } from '#component/Icon';
-import { Panel } from '#component/Panel';
-import { Menu } from '#component/Menu';
-import { SessionListItem } from './Item';
-import type { StatusIndicatorStatus } from '../StatusIndicator';
+import { clsx } from "clsx";
+import { useState } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import { useSessionList } from "./useSessionList";
+import styles from "./SessionList.module.css";
+import { IconButton } from "#component/IconButton";
+import { Icon } from "#component/Icon";
+import { Panel } from "#component/Panel";
+import { Menu } from "#component/Menu";
+import { SessionListItem } from "./Item";
+import type { StatusIndicatorStatus } from "../StatusIndicator";
 
 const hasContent = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
 
@@ -26,7 +26,7 @@ export interface AgentSession {
 }
 
 /** `children`을 막는다 — 항목은 `sessions`로만 들어온다. */
-export interface SessionListProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+export interface SessionListProps extends Omit<ComponentPropsWithoutRef<"div">, "children"> {
   /** 표시할 세션 목록. */
   readonly sessions: readonly AgentSession[];
   /** 넘기면 controlled, 안 넘기면 `defaultActiveId`로 컴포넌트가 자체 관리한다. */
@@ -61,15 +61,20 @@ const SessionListRoot = ({
   defaultActiveId,
   onActiveChange,
   onActiveIdChange,
-  emptyLabel = '세션이 없습니다.',
-  heading = 'Sessions',
+  emptyLabel = "세션이 없습니다.",
+  heading = "Sessions",
   onCreateSession,
-  createLabel = '새 세션 만들기',
+  createLabel = "새 세션 만들기",
   moreActions,
   className,
   ...props
 }: SessionListProps) => {
-  const { activeId: currentActiveId, selectSession } = useSessionList({ activeId, defaultActiveId, onActiveChange, onActiveIdChange });
+  const { activeId: currentActiveId, selectSession } = useSessionList({
+    activeId,
+    defaultActiveId,
+    onActiveChange,
+    onActiveIdChange,
+  });
   const [showArchived, setShowArchived] = useState(false);
   const visibleSessions = showArchived ? sessions : sessions.filter((session) => !session.archived);
 
@@ -77,7 +82,12 @@ const SessionListRoot = ({
     <>
       <Menu>
         <Menu.Trigger asChild>
-          <IconButton variant="invisible" size="small" aria-label="세션 필터" icon={() => <Icon iconId="archive" size="sm" />} />
+          <IconButton
+            variant="invisible"
+            size="small"
+            aria-label="세션 필터"
+            icon={() => <Icon iconId="archive" size="sm" />}
+          />
         </Menu.Trigger>
         <Menu.Content>
           <Menu.Item onSelect={() => setShowArchived((current) => !current)}>
@@ -87,12 +97,23 @@ const SessionListRoot = ({
         </Menu.Content>
       </Menu>
       {onCreateSession ? (
-        <IconButton variant="invisible" size="small" aria-label={createLabel} onClick={onCreateSession} icon={() => <Icon iconId="add" size="sm" />} />
+        <IconButton
+          variant="invisible"
+          size="small"
+          aria-label={createLabel}
+          onClick={onCreateSession}
+          icon={() => <Icon iconId="add" size="sm" />}
+        />
       ) : null}
       {hasContent(moreActions) ? (
         <Menu>
           <Menu.Trigger asChild>
-            <IconButton variant="invisible" size="small" aria-label="더 보기" icon={() => <Icon iconId="ellipsis" size="sm" />} />
+            <IconButton
+              variant="invisible"
+              size="small"
+              aria-label="더 보기"
+              icon={() => <Icon iconId="ellipsis" size="sm" />}
+            />
           </Menu.Trigger>
           <Menu.Content>{moreActions}</Menu.Content>
         </Menu>
@@ -101,12 +122,12 @@ const SessionListRoot = ({
   );
 
   return (
-    <div className={clsx(className, styles['root'])} {...props} data-component="SessionList">
-      <Panel title={<span className={styles['heading']}>{heading}</span>} actions={actions}>
+    <div className={clsx(className, styles["root"])} {...props} data-component="SessionList">
+      <Panel title={<span className={styles["heading"]}>{heading}</span>} actions={actions}>
         {visibleSessions.length === 0 ? (
-          <div className={styles['empty']}>{emptyLabel}</div>
+          <div className={styles["empty"]}>{emptyLabel}</div>
         ) : (
-          <div role="listbox" aria-label="Agent sessions" className={styles['list']}>
+          <div role="listbox" aria-label="Agent sessions" className={styles["list"]}>
             {visibleSessions.map((session) => (
               <SessionListItem
                 key={session.id}

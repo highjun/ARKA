@@ -12,20 +12,19 @@ import { createGitRunner } from "./gitCommand";
  */
 let root: string;
 
-beforeAll(async () => {
-  root = await mkdtemp(path.join(os.tmpdir(), "arka-gitenv-"));
-  await createGitRunner(root)(["init", "-q"]);
-});
-
-afterAll(async () => {
-  await rm(root, { recursive: true, force: true });
-});
-
 /** git에게 환경을 통째로 찍게 시킨다 — `--exec-path`를 쓰지 않고 git이 실제로 본 것을 받는다. */
-const childEnv = async (): Promise<string> =>
-  createGitRunner(root)(["-c", "alias.dumpenv=!env", "dumpenv"]);
+const childEnv = async (): Promise<string> => createGitRunner(root)(["-c", "alias.dumpenv=!env", "dumpenv"]);
 
 describe("git 자식 프로세스의 환경", () => {
+  beforeAll(async () => {
+    root = await mkdtemp(path.join(os.tmpdir(), "arka-gitenv-"));
+    await createGitRunner(root)(["init", "-q"]);
+  });
+
+  afterAll(async () => {
+    await rm(root, { recursive: true, force: true });
+  });
+
   it("부모의 비밀을 넘기지 않는다 — 통째로 넘기면 워크스페이스의 훅이 읽는다", async () => {
     process.env["ARKA_TEST_LEAK_TOKEN"] = "sk-must-not-reach-git";
 

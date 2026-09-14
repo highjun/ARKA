@@ -12,7 +12,14 @@ describe("빌드 명령", () => {
 
   it("저장소의 Dockerfile과 태그를 쓴다", () => {
     expect(buildCommand("arka:pr-12", "abc1234").args).toEqual([
-      "build", "-f", "ops/deploy/Dockerfile", "--build-arg", "ARKA_GIT_SHA=abc1234", "-t", "arka:pr-12", ".",
+      "build",
+      "-f",
+      "ops/deploy/Dockerfile",
+      "--build-arg",
+      "ARKA_GIT_SHA=abc1234",
+      "-t",
+      "arka:pr-12",
+      ".",
     ]);
   });
 

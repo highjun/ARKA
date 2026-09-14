@@ -1,8 +1,8 @@
-import { useViewModel } from '#core/viewmodel';
-import { Spinner } from '@primer/react';
-import { Blankslate } from '@primer/react/experimental';
-import { DiffView } from '../component/DiffView';
-import { SourceControlViewModelToken } from '../viewmodel/ISourceControlViewModel';
+import { useViewModel } from "#core/viewmodel";
+import { Spinner } from "@primer/react";
+import { Blankslate } from "@primer/react/experimental";
+import { DiffView } from "../component/DiffView";
+import { SourceControlViewModelToken } from "../viewmodel/ISourceControlViewModel";
 
 /**
  * diff 탭. 어느 변경인지는 탭 id(`staged:path` / `wt:path`)가 말한다. `openDiff`는 멱등이라 렌더마다 부른다.
@@ -13,7 +13,7 @@ export const DiffTabView = ({ tabId }: { readonly tabId: string }) => {
   viewModel.openDiff(tabId);
   const diff = viewModel.diffOf(tabId);
 
-  if (diff.loading && diff.text === '') {
+  if (diff.loading && diff.text === "") {
     return (
       <Blankslate>
         <Blankslate.Visual>
@@ -30,7 +30,7 @@ export const DiffTabView = ({ tabId }: { readonly tabId: string }) => {
       </Blankslate>
     );
   }
-  if (diff.text === '') {
+  if (diff.text === "") {
     return (
       <Blankslate>
         <Blankslate.Heading as="h2">차이가 없다</Blankslate.Heading>

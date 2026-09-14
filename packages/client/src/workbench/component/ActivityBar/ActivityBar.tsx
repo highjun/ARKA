@@ -1,12 +1,12 @@
-import type { HTMLAttributes, ReactNode, Ref } from 'react';
-import { clsx } from 'clsx';
-import { useControllableState } from '@radix-ui/react-use-controllable-state';
-import styles from './ActivityBar.module.css';
-import { Container } from '#component/Container';
-import { Icon } from '#component/Icon';
-import { IconButton } from '#component/IconButton';
-import { Menu } from '#component/Menu';
-import type { IconId } from '#component/Icon';
+import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
+import { clsx } from "clsx";
+import { useControllableState } from "@radix-ui/react-use-controllable-state";
+import styles from "./ActivityBar.module.css";
+import { Container } from "#component/Container";
+import { Icon } from "#component/Icon";
+import { IconButton } from "#component/IconButton";
+import { Menu } from "#component/Menu";
+import type { IconId } from "#component/Icon";
 
 /** 세로 막대의 아이콘 하나. `isActive`를 직접 주면 `activeId` 계산을 건너뛴다. */
 export interface ActivityBarItem {
@@ -18,7 +18,7 @@ export interface ActivityBarItem {
 }
 
 /** `onSelect`를 가로챈다 — 표준 `onSelect`가 아니라 항목 선택이다. */
-export interface ActivityBarProps extends Omit<HTMLAttributes<HTMLElement>, 'onSelect'> {
+export interface ActivityBarProps extends Omit<ComponentPropsWithoutRef<"nav">, "onSelect"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLElement>;
   /** 세로로 나열할 아이콘 항목들. */
@@ -45,25 +45,40 @@ export interface ActivityBarProps extends Omit<HTMLAttributes<HTMLElement>, 'onS
  * children 안쪽에 있어야 한다 — `Container`의 `className`은 바깥 chrome 박스에 붙지, 실제로
  * 스크롤되는 Viewport 안 배치까지 건드리지 않는다.
  */
-export const ActivityBar = ({ items, onSelect, activeId, defaultActiveId = '', onActiveIdChange, renderItemContextMenu, className, ref, ...props }: ActivityBarProps) => {
-  const [currentActiveId, setActiveId] = useControllableState({ prop: activeId, defaultProp: defaultActiveId, onChange: onActiveIdChange, caller: 'ActivityBar' });
+export const ActivityBar = ({
+  items,
+  onSelect,
+  activeId,
+  defaultActiveId = "",
+  onActiveIdChange,
+  renderItemContextMenu,
+  className,
+  ref,
+  ...props
+}: ActivityBarProps) => {
+  const [currentActiveId, setActiveId] = useControllableState({
+    prop: activeId,
+    defaultProp: defaultActiveId,
+    onChange: onActiveIdChange,
+    caller: "ActivityBar",
+  });
   const handleSelect = (id: string) => {
     setActiveId(id);
     onSelect?.(id);
   };
 
   return (
-    <nav ref={ref} {...props} data-component="ActivityBar" className={clsx(className, styles['nav'])}>
-      <Container chrome="none" className={styles['container']}>
-        <div className={styles['rail']}>
+    <nav ref={ref} {...props} data-component="ActivityBar" className={clsx(className, styles["nav"])}>
+      <Container chrome="none" className={styles["container"]}>
+        <div className={styles["rail"]}>
           {items.map((item) => {
             const isActive = item.isActive ?? item.id === currentActiveId;
 
             return renderItemContextMenu ? (
               <Menu kind="context" key={item.id}>
-                <Menu.Trigger className={styles['itemContextMenuTrigger']}>
+                <Menu.Trigger className={styles["itemContextMenuTrigger"]}>
                   <IconButton
-                    variant={isActive ? 'default' : 'invisible'}
+                    variant={isActive ? "default" : "invisible"}
                     size="medium"
                     aria-label={item.label}
                     aria-pressed={isActive}
@@ -76,7 +91,7 @@ export const ActivityBar = ({ items, onSelect, activeId, defaultActiveId = '', o
             ) : (
               <IconButton
                 key={item.id}
-                variant={isActive ? 'default' : 'invisible'}
+                variant={isActive ? "default" : "invisible"}
                 size="medium"
                 aria-label={item.label}
                 aria-pressed={isActive}
@@ -90,4 +105,3 @@ export const ActivityBar = ({ items, onSelect, activeId, defaultActiveId = '', o
     </nav>
   );
 };
-

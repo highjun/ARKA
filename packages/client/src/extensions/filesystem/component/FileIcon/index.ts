@@ -1,2 +1,1 @@
-export { FileIcon } from './FileIcon';
-export type { FileIconId, FileIconProps } from './FileIcon';
+export { FileIcon } from "./FileIcon";

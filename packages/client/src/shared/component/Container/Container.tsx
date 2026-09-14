@@ -1,9 +1,9 @@
-import type { HTMLAttributes, Ref } from 'react';
-import { clsx } from 'clsx';
-import styles from './Container.module.css';
+import type { ComponentPropsWithoutRef, Ref } from "react";
+import { clsx } from "clsx";
+import styles from "./Container.module.css";
 
 /** `none`은 테두리와 배경을 지운다 — 자리는 그대로 차지한다. */
-export type ContainerChrome = 'visible' | 'none';
+type ContainerChrome = "visible" | "none";
 
 /**
  * 어느 축이 넘칠 때 스크롤할지. `'none'`은 아예 자르지 않는다(높이 제약 없는 카드).
@@ -12,10 +12,10 @@ export type ContainerChrome = 'visible' | 'none';
  * 하는데 양쪽을 켜면 아이콘의 1px 광학 보정 같은 미세한 세로 오버플로에도 세로 스크롤바가
  * 함께 뜬다(2026-08-31 지적).
  */
-export type ContainerScroll = 'auto' | 'none' | 'horizontal' | 'vertical';
+type ContainerScroll = "auto" | "none" | "horizontal" | "vertical";
 
 /** 자기 치수를 갖지 않는다 — 높이·폭은 쓰는 쪽이 `className`으로 준다. */
-export interface ContainerProps extends HTMLAttributes<HTMLDivElement> {
+export interface ContainerProps extends ComponentPropsWithoutRef<"div"> {
   /** 스크롤하는 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLDivElement>;
   /** 테두리·배경·radius. 프레임 안쪽 우물로 쓸 때는 `none`. */
@@ -36,14 +36,21 @@ export interface ContainerProps extends HTMLAttributes<HTMLDivElement> {
  *
  * `ref`는 실제로 스크롤되는 원소에 꽂힌다 — 이제 그것이 루트 자신이다.
  */
-export const Container = ({ children, chrome = 'visible', scroll = 'auto', className, ref, ...props }: ContainerProps) => (
+export const Container = ({
+  children,
+  chrome = "visible",
+  scroll = "auto",
+  className,
+  ref,
+  ...props
+}: ContainerProps) => (
   <div
     {...props}
     ref={ref}
     data-component="Container"
     data-chrome={chrome}
     data-scroll={scroll}
-    className={clsx(className, styles['root'])}
+    className={clsx(className, styles["root"])}
   >
     {children}
   </div>

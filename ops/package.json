@@ -9,6 +9,7 @@
     "test": "vitest run",
     "test:smoke": "node deploy/smoke.ts",
     "check": "node pipeline/check.ts",
+    "format": "prettier --config prettier.config.ts --write ..",
     "verify": "node pipeline/verify.ts",
     "task": "node tasks/main.ts"
   },
@@ -17,20 +18,27 @@
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
     "@commitlint/types": "^21.2.0",
     "@eslint-community/eslint-plugin-eslint-comments": "^4.8.0",
     "@eslint/js": "^10.0.1",
     "@eslint/json": "^2.1.0",
     "@types/node": "^26.5.1",
+    "@vitest/eslint-plugin": "^1.6.27",
     "eslint": "^10.10.0",
+    "eslint-plugin-check-file": "^3.3.2",
     "eslint-plugin-import-x": "^4.17.1",
     "eslint-plugin-jsdoc": "^64.3.8",
+    "eslint-plugin-package-json": "^1.8.1",
     "eslint-plugin-sonarjs": "^4.2.0",
     "eslint-plugin-tsdoc": "^0.5.2",
+    "eslint-plugin-yml": "^3.8.1",
     "jiti": "^2.7.0",
+    "knip": "^6.35.1",
+    "markdownlint-cli2": "^0.23.2",
+    "prettier": "^3.9.6",
     "typescript": "catalog:",
     "typescript-eslint": "^8.70.0",
-    "vitest": "catalog:",
-    "zod": "catalog:"
+    "vitest": "catalog:"
   }
 }

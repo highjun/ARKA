@@ -18,6 +18,7 @@ CSS 표준이 된 자리(스크롤 영역)를 가려낼 근거가 없었다.
 - **자체 디자인 시스템** — 토큰 두 겹(`--arka-*` → Primer)을 설계했다가 짓지 않았다. 겹을 두면 Primer가 값을 바꿀 때 우리 겹이 낡은 채 남는다. 밀도(`--arka-row-height`) 하나만 우리 것이다.
 - **Radix + 자체 스타일로 통일** — 헤드리스는 모양이 없어서 자유롭지만, 그 자유의 값이 컴포넌트마다 CSS 한 벌이다. 우리가 필요한 것은 GitHub과 같은 모양이다.
 - **`PageLayout`으로 셸을 세우기** — 문서 흐름 레이아웃(페이지가 스크롤한다)이라 뷰포트에 고정된 IDE 셸과 전제가 다르다.
+- **`primer-react/use-deprecated-from-deprecated`** — 규칙의 목록이 Primer 38.38보다 낡았다. `Dialog`를 `@primer/react/deprecated`에서 받으라고 하는데 그것은 **DialogV1**이고, 우리가 쓰는 것은 main 진입점의 v2다. 자동 고침을 따르면 폐기된 쪽으로 갈아탄다(2026-09-14 실측).
 - **Primer 컴포넌트를 전부 우리 이름으로 한 겹 감싸 교체 지점을 만들기** — 교체한 적이 없는데 42개 전부에 겹이 생기고, 슬롯 표식이 깨지는 위험을 매번 무릎쓴다.
 
 ## 대가:
@@ -26,7 +27,7 @@ CSS 표준이 된 자리(스크롤 영역)를 가려낼 근거가 없었다.
 - **Primer 문서(`components.json`)와 `.d.ts`가 어긋난다** — 실측으로 열 군데 이상 달랐다. 타입이 정본이라고 보고 쓴다.
 
 ## 강제:
-- **린트** `primer/no-deprecated-props`·`no-deprecated-entrypoints`·`no-deprecated-experimental-components`·`use-deprecated-from-deprecated` — 폐기된 API와 진입점을 막는다.
+- **린트** `primer-react/no-deprecated-props`·`no-deprecated-entrypoints`·`no-deprecated-experimental-components`·`no-wildcard-imports` — 폐기된 API와 진입점, 무엇을 쓰는지 감추는 import를 막는다.
 - **린트** `no-restricted-imports` — Primer `IconButton` 직접 import를 막는다(우리 겹이 아이콘 id를 잇는다).
 - **stylelint** `@primer/stylelint-config` — 색·간격·테두리·그림자·글꼴을 토큰으로만 쓰게 한다.
 - **리뷰** — "이것을 감쌀 축이 있는가"와 예외를 더하는 판단은 사람만 한다. 예외는 이 ADR을 고쳐서 늘린다.

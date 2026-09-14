@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Icon } from '#component/Icon';
-import { IconButton } from '#component/IconButton';
-import { Panel } from './index';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Icon } from "#component/Icon";
+import { IconButton } from "#component/IconButton";
+import { Panel } from "./index";
 
 const meta = {
-  title: 'shared/Panel',
+  title: "shared/Panel",
   component: Panel,
   decorators: [
     (Story) => (
@@ -14,8 +14,15 @@ const meta = {
     ),
   ],
   args: {
-    title: '탐색기',
-    actions: <IconButton variant="invisible" size="small" aria-label="새 파일" icon={() => <Icon iconId="newFile" size="sm" />} />,
+    title: "탐색기",
+    actions: (
+      <IconButton
+        variant="invisible"
+        size="small"
+        aria-label="새 파일"
+        icon={() => <Icon iconId="newFile" size="sm" />}
+      />
+    ),
     children: <div style={{ padding: 8 }}>본문 내용</div>,
   },
 } satisfies Meta<typeof Panel>;
@@ -29,4 +36,4 @@ export const TitleOnly: Story = { args: { actions: undefined } };
 export const NoHeader: Story = { args: { title: undefined, actions: undefined } };
 
 /** 사이드바에 쓰는 빽빽한 머리 — 낮은 행에 작은 대문자 제목(VS Code 탐색기와 같은 자리). */
-export const Compact: Story = { args: { density: 'compact' } };
+export const Compact: Story = { args: { density: "compact" } };

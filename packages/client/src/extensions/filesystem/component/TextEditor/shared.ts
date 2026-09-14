@@ -1,13 +1,13 @@
-import { foldKeymap } from '@codemirror/language';
-import type { KeyBinding } from '@codemirror/view';
+import { foldKeymap } from "@codemirror/language";
+import type { KeyBinding } from "@codemirror/view";
 
 /**
  * 파일 경로에서 확장자만 뽑는다(소문자, 점 제외) — `.gitignore`처럼 이름 전체가 확장자인 경우와
  * 확장자가 없는 경우 모두 `undefined`다.
  */
 export const fileExtensionOf = (path: string): string | undefined => {
-  const name = path.split('/').pop() ?? path;
-  const dot = name.lastIndexOf('.');
+  const name = path.split("/").pop() ?? path;
+  const dot = name.lastIndexOf(".");
   if (dot <= 0) return undefined;
   return name.slice(dot + 1).toLowerCase();
 };

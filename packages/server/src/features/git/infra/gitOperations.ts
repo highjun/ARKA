@@ -74,7 +74,8 @@ export const status = async (git: GitRunner, workspaceRoot: string): Promise<Git
     });
     return { repository: true, branch: branch === "" ? null : branch, files };
   } catch (error) {
-    if (error instanceof GitError && error.code === "NotARepository") return { repository: false, branch: null, files: [] };
+    if (error instanceof GitError && error.code === "NotARepository")
+      return { repository: false, branch: null, files: [] };
     throw error;
   }
 };

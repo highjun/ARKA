@@ -6,7 +6,7 @@
  */
 
 /** `debug`는 두지 않는다 — 끄고 켤 장치가 없으면 결국 아무도 안 읽는다. */
-export type LogLevel = "info" | "warn" | "error";
+type LogLevel = "info" | "warn" | "error";
 
 /** JSON 한 줄에 그대로 펼쳐진다. 키가 겹치면 뒤가 이긴다. */
 export type LogFields = Readonly<Record<string, unknown>>;
@@ -63,7 +63,9 @@ export const maskSecrets = (fields: LogFields): LogFields => maskValue(fields, 0
 /** `write`와 `now`를 받는 이유는 테스트가 출력과 시각을 붙잡기 위해서다. */
 export const createLogger = (write: (line: string) => void, now: () => Date = () => new Date()): Logger => {
   const emit = (level: LogLevel, event: string, fields: LogFields | undefined): void => {
-    write(`${JSON.stringify({ time: now().toISOString(), level, event, ...(fields === undefined ? {} : maskSecrets(fields)) })}\n`);
+    write(
+      `${JSON.stringify({ time: now().toISOString(), level, event, ...(fields === undefined ? {} : maskSecrets(fields)) })}\n`,
+    );
   };
   return {
     info: (event, fields) => emit("info", event, fields),

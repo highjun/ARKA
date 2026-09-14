@@ -1,4 +1,4 @@
-import type { IMarkdownSource, MarkdownDocument } from './IMarkdownSource';
+import type { IMarkdownSource, MarkdownDocument } from "./IMarkdownSource";
 
 /** 메모리 안의 `IMarkdownSource`. `write`로 바꾸면 감시자가 불린다. */
 export class MockMarkdownSource implements IMarkdownSource {

@@ -1,8 +1,14 @@
-import type { ICommandCenterRegistry } from '#core/commands';
-import { ViewModelBase } from '#core/viewmodel';
-import { atom } from 'nanostores';
-import type { IMarkdownPreviewModel } from '../model/IMarkdownPreviewModel';
-import { PREVIEW_TAB_KIND, pathOfPreviewTab, previewTabIdOf, type IMarkdownPreviewViewModel, type PreviewState } from './IMarkdownPreviewViewModel';
+import type { ICommandCenterRegistry } from "#core/commands";
+import { ViewModelBase } from "#core/viewmodel";
+import { atom } from "nanostores";
+import type { IMarkdownPreviewModel } from "../model/IMarkdownPreviewModel";
+import {
+  PREVIEW_TAB_KIND,
+  pathOfPreviewTab,
+  previewTabIdOf,
+  type IMarkdownPreviewViewModel,
+  type PreviewState,
+} from "./IMarkdownPreviewViewModel";
 
 const isMarkdown = (path: string): boolean => /\.(?:md|mdx|markdown)$/iu.test(path);
 
@@ -33,8 +39,16 @@ export class MarkdownPreviewViewModel extends ViewModelBase implements IMarkdown
     this.#previews = this.observe(atom(previewModel.previews));
     previewModel.onDidChange(() => this.#previews.set(previewModel.previews));
 
-    commandCenterRegistry.registerCommand({ id: 'markdown.openPreview', label: '마크다운 미리보기 열기', execute: () => this.openActivePreview() });
-    commandCenterRegistry.registerKeybinding({ id: 'markdown.openPreview.keybinding', keybinding: 'ctrl+shift+v', actionId: 'markdown.openPreview' });
+    commandCenterRegistry.registerCommand({
+      id: "markdown.openPreview",
+      label: "마크다운 미리보기 열기",
+      execute: () => this.openActivePreview(),
+    });
+    commandCenterRegistry.registerKeybinding({
+      id: "markdown.openPreview.keybinding",
+      keybinding: "ctrl+shift+v",
+      actionId: "markdown.openPreview",
+    });
   }
 
   /** 미리보기 탭이 아니면 아무 일도 안 한다. 탭이 그려질 때 불린다. */
@@ -47,15 +61,20 @@ export class MarkdownPreviewViewModel extends ViewModelBase implements IMarkdown
   previewOf(tabId: string): PreviewState {
     const path = pathOfPreviewTab(tabId);
     const preview = path === null ? undefined : this.#previews.get()[path];
-    if (preview === undefined) return { loading: true, markdown: '', truncated: false, failure: null };
-    return { loading: preview.status === 'loading', markdown: preview.markdown, truncated: preview.truncated, failure: preview.failure };
+    if (preview === undefined) return { loading: true, markdown: "", truncated: false, failure: null };
+    return {
+      loading: preview.status === "loading",
+      markdown: preview.markdown,
+      truncated: preview.truncated,
+      failure: preview.failure,
+    };
   }
 
   /** 활성 탭이 마크다운 파일이 아니면 아무 일도 안 한다. */
   openActivePreview(): void {
     const path = this.#activeFile();
     if (path === null || !isMarkdown(path)) return;
-    const name = path.split('/').pop() ?? path;
+    const name = path.split("/").pop() ?? path;
     this.#openTab({ id: previewTabIdOf(path), kind: PREVIEW_TAB_KIND, title: `미리보기 ${name}` });
   }
 }

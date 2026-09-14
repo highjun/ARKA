@@ -1,8 +1,8 @@
-import type { Disposable } from '#core/di';
-import { Emitter } from '#core/events';
-import type { FileEntryType, IWorkspaceFiles } from '../model/IWorkspaceFiles';
-import type { IWorkspaceWatch, WorkspaceWatchUnsubscribe } from '../model/IWorkspaceWatch';
-import type { DirectoryMap, IDirectoryTreeModel } from './IDirectoryTreeModel';
+import type { Disposable } from "#core/di";
+import { Emitter } from "#core/events";
+import type { FileEntryType, IWorkspaceFiles } from "../model/IWorkspaceFiles";
+import type { IWorkspaceWatch, WorkspaceWatchUnsubscribe } from "../model/IWorkspaceWatch";
+import type { DirectoryMap, IDirectoryTreeModel } from "./IDirectoryTreeModel";
 
 /** `IDirectoryTreeModel`을 구현한다 — 프리페치와 debounce된 감시 재구독을 내부에 둔다. */
 export class DirectoryTreeModel implements IDirectoryTreeModel {
@@ -78,8 +78,8 @@ export class DirectoryTreeModel implements IDirectoryTreeModel {
 
   /** 루트를 읽고, 그 자식을 미리 읽어 두고, 감시 구독을 갱신한다. */
   async load(): Promise<void> {
-    await this.#read('');
-    this.#prefetchChildren('');
+    await this.#read("");
+    this.#prefetchChildren("");
     this.#rewatch();
   }
 
@@ -167,7 +167,7 @@ export class DirectoryTreeModel implements IDirectoryTreeModel {
 
     this.#watchDebounce = setTimeout(() => {
       this.#watchDebounce = undefined;
-      const paths = ['', ...this.#expanded];
+      const paths = ["", ...this.#expanded];
       if (DirectoryTreeModel.#sameSet(paths, this.#watchedPaths)) return;
 
       this.#unwatch?.();
@@ -192,7 +192,7 @@ export class DirectoryTreeModel implements IDirectoryTreeModel {
    */
   async #read(path: string): Promise<void> {
     const known = this.#directories[path];
-    if (known?.status === 'loaded') return;
+    if (known?.status === "loaded") return;
 
     const nagging = this.#inFlight.get(path);
     if (nagging !== undefined) return nagging;
@@ -215,13 +215,13 @@ export class DirectoryTreeModel implements IDirectoryTreeModel {
   }
 
   async #fetch(path: string): Promise<void> {
-    this.#write(path, { status: 'loading', entries: this.#directories[path]?.entries ?? [], failure: null });
+    this.#write(path, { status: "loading", entries: this.#directories[path]?.entries ?? [], failure: null });
     try {
       const listing = await this.#files.list(path);
-      this.#write(path, { status: 'loaded', entries: listing.entries, failure: null });
+      this.#write(path, { status: "loaded", entries: listing.entries, failure: null });
     } catch (error) {
       this.#write(path, {
-        status: 'error',
+        status: "error",
         entries: [],
         failure: error instanceof Error ? error.message : String(error),
       });
@@ -244,9 +244,9 @@ export class DirectoryTreeModel implements IDirectoryTreeModel {
   #prefetchChildren(path: string): void {
     const generation = (this.#prefetchGeneration += 1);
     const queue = (this.#directories[path]?.entries ?? [])
-      .filter((entry) => entry.type === 'dir')
+      .filter((entry) => entry.type === "dir")
       .slice(0, DirectoryTreeModel.#PREFETCH_LIMIT)
-      .map((entry) => (path === '' ? entry.name : `${path}/${entry.name}`));
+      .map((entry) => (path === "" ? entry.name : `${path}/${entry.name}`));
 
     const worker = async (): Promise<void> => {
       for (let next = queue.shift(); next !== undefined; next = queue.shift()) {
@@ -265,16 +265,16 @@ export class DirectoryTreeModel implements IDirectoryTreeModel {
 
   /** `a/b/c` → `a/b`. 한 단계뿐이면(`a`) 루트(`''`)다. */
   static #parentOf(path: string): string {
-    const slash = path.lastIndexOf('/');
-    return slash === -1 ? '' : path.slice(0, slash);
+    const slash = path.lastIndexOf("/");
+    return slash === -1 ? "" : path.slice(0, slash);
   }
 
   static #join(parent: string, name: string): string {
-    return parent === '' ? name : `${parent}/${name}`;
+    return parent === "" ? name : `${parent}/${name}`;
   }
 
   static #basename(path: string): string {
-    return path.split('/').pop() ?? path;
+    return path.split("/").pop() ?? path;
   }
 
   /** `candidate`가 `ancestor` 자신이거나 그 아래(후손)인지 — 경로 문자열 prefix로 본다. */
@@ -308,10 +308,8 @@ export class DirectoryTreeModel implements IDirectoryTreeModel {
     this.#changed.fire();
   }
 
-
   /** 상태가 바뀔 때마다 부른다. 돌려받은 `dispose()`로 끊는다. */
   onDidChange(listener: () => void): Disposable {
     return this.#changed.event(listener);
   }
-
 }

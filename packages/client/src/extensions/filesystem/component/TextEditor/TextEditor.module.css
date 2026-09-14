@@ -4,7 +4,7 @@
   overflow: hidden;
 }
 
-.root[data-chrome='bordered'] {
+.root[data-chrome="bordered"] {
   border-radius: var(--borderRadius-medium);
   border-style: solid;
   border-width: var(--borderWidth-thin);

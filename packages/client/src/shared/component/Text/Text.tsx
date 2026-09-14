@@ -1,13 +1,13 @@
-import type { HTMLAttributes, Ref } from 'react';
-import { clsx } from 'clsx';
-import styles from './Text.module.css';
+import type { HTMLAttributes, Ref } from "react";
+import { clsx } from "clsx";
+import styles from "./Text.module.css";
 
 /** `caption`은 크기가 고정이라 `size`와 다른 축이다. */
-export type TextVariant = 'body' | 'caption';
+type TextVariant = "body" | "caption";
 /** `variant='body'`일 때만 듣는다. 기본값은 `medium`. */
-export type TextSize = 'small' | 'medium' | 'large';
+type TextSize = "small" | "medium" | "large";
 /** 색만 바꾼다 — 굵기나 크기는 그대로다. */
-export type TextTone = 'default' | 'muted' | 'danger';
+type TextTone = "default" | "muted" | "danger";
 
 /** `<span>`이라 블록이 필요하면 감싸는 쪽이 만든다. */
 export interface TextProps extends HTMLAttributes<HTMLSpanElement> {
@@ -31,7 +31,7 @@ export interface TextProps extends HTMLAttributes<HTMLSpanElement> {
  * 여기 두지 않는다. `variant="caption"`+`tone="muted"` 조합이 옛 `Caption` 컴포넌트와
  * 동일해, 그 중복을 없애며 여기로 흡수했다(2026-09-06).
  */
-export const Text = ({ variant = 'body', size = 'medium', tone = 'default', className, ref, ...props }: TextProps) => (
+export const Text = ({ variant = "body", size = "medium", tone = "default", className, ref, ...props }: TextProps) => (
   <span
     ref={ref}
     {...props}
@@ -39,7 +39,6 @@ export const Text = ({ variant = 'body', size = 'medium', tone = 'default', clas
     data-text-size={size}
     data-text-tone={tone}
     data-component="Text"
-    className={clsx(className, styles['Text'])}
+    className={clsx(className, styles["Text"])}
   />
 );
-

@@ -1,6 +1,6 @@
-import { createContext, useContext } from 'react';
-import styles from './Tab.module.css';
-import type { TabClassNames } from './shared';
+import { createContext, useContext } from "react";
+import styles from "./Tab.module.css";
+import type { TabClassNames } from "./shared";
 
 /**
  * 클래스 전용 context. 공개 루트(`Tab.Strip`/`Tab.Group`/`Tab.Split`)에서 한 번만 주입하고 나머지
@@ -20,13 +20,12 @@ export const useTabClassNames = () => useContext(ClassNamesContext);
  * `Tab.module.css`의 속성 선택자가 그대로 처리한다.
  */
 export const buildClassNames = (): TabClassNames => {
-
   return {
-    header: styles['header'],
+    header: styles["header"],
     // 미리보기 탭은 제목을 기울인다 — VSCode 와 같은 신호다(`[data-preview]`, Tab.module.css).
-    headerLabel: styles['headerLabel'],
-    headerActionSlot: styles['headerActionSlot'],
-    headerCloseButtonHover: styles['headerCloseButtonHover'],
+    headerLabel: styles["headerLabel"],
+    headerActionSlot: styles["headerActionSlot"],
+    headerCloseButtonHover: styles["headerCloseButtonHover"],
     /**
      * 글자 옆 아이콘을 1px 내린다.
      *
@@ -35,43 +34,43 @@ export const buildClassNames = (): TabClassNames => {
      * 그만큼 아이콘이 떠 보인다(실측 1px). 아이콘 혼자 놓이는 자리(활동 바 등)에는 걸지 않는다 —
      * 거기서는 지금이 맞다.
      */
-    headerIcon: styles['headerIcon'],
-    headerCloseButtonPinned: styles['headerCloseButtonPinned'],
-    headerContextMenuTrigger: styles['headerContextMenuTrigger'],
+    headerIcon: styles["headerIcon"],
+    headerCloseButtonPinned: styles["headerCloseButtonPinned"],
+    headerContextMenuTrigger: styles["headerContextMenuTrigger"],
 
-    stripRoot: styles['stripRoot'],
-    stripListContainer: styles['stripListContainer'],
-    stripList: styles['stripList'],
-    stripEmpty: styles['stripEmpty'],
-    stripTail: styles['stripTail'],
-    stripItemWrapper: styles['stripItemWrapper'],
-    stripIndicatorBefore: styles['stripIndicatorBefore'],
-    stripIndicatorAfter: styles['stripIndicatorAfter'],
-    stripDraggableHeader: styles['stripDraggableHeader'],
-    stripDropOverlay: styles['stripDropOverlay'],
-    stripScrollHandle: styles['stripScrollHandle'],
+    stripRoot: styles["stripRoot"],
+    stripListContainer: styles["stripListContainer"],
+    stripList: styles["stripList"],
+    stripEmpty: styles["stripEmpty"],
+    stripTail: styles["stripTail"],
+    stripItemWrapper: styles["stripItemWrapper"],
+    stripIndicatorBefore: styles["stripIndicatorBefore"],
+    stripIndicatorAfter: styles["stripIndicatorAfter"],
+    stripDraggableHeader: styles["stripDraggableHeader"],
+    stripDropOverlay: styles["stripDropOverlay"],
+    stripScrollHandle: styles["stripScrollHandle"],
 
-    group: styles['group'],
-    groupStrip: styles['groupStrip'],
-    groupPanelWrapper: styles['groupPanelWrapper'],
+    group: styles["group"],
+    groupStrip: styles["groupStrip"],
+    groupPanelWrapper: styles["groupPanelWrapper"],
     // 패널은 여백을 두지 않는다 — 여백을 주면 안에 놓인 것이 영역을 채우지 못하고 카드처럼 뜬다.
     // 여백이 필요한 내용은 스스로 준다.
-    groupPanel: styles['groupPanel'],
-    groupPanelContent: styles['groupPanelContent'],
-    groupPanelEmpty: styles['groupPanelEmpty'],
-    panelDropIndicator: styles['panelDropIndicator'],
+    groupPanel: styles["groupPanel"],
+    groupPanelContent: styles["groupPanelContent"],
+    groupPanelEmpty: styles["groupPanelEmpty"],
+    panelDropIndicator: styles["panelDropIndicator"],
 
-    splitRootHorizontal: styles['splitRootHorizontal'],
-    splitRootVertical: styles['splitRootVertical'],
-    splitBranchHorizontal: styles['splitBranchHorizontal'],
-    splitBranchVertical: styles['splitBranchVertical'],
-    splitBranchDividerHorizontal: styles['splitBranchDividerHorizontal'],
-    splitBranchDividerVertical: styles['splitBranchDividerVertical'],
-    leafSection: styles['leafSection'],
-    leafSectionActive: styles['leafSectionActive'],
-    leafGroup: styles['leafGroup'],
-    rootLeafSection: styles['rootLeafSection'],
-    rootLeafGroup: styles['rootLeafGroup'],
-    resizeHandle: styles['resizeHandle'],
+    splitRootHorizontal: styles["splitRootHorizontal"],
+    splitRootVertical: styles["splitRootVertical"],
+    splitBranchHorizontal: styles["splitBranchHorizontal"],
+    splitBranchVertical: styles["splitBranchVertical"],
+    splitBranchDividerHorizontal: styles["splitBranchDividerHorizontal"],
+    splitBranchDividerVertical: styles["splitBranchDividerVertical"],
+    leafSection: styles["leafSection"],
+    leafSectionActive: styles["leafSectionActive"],
+    leafGroup: styles["leafGroup"],
+    rootLeafSection: styles["rootLeafSection"],
+    rootLeafGroup: styles["rootLeafGroup"],
+    resizeHandle: styles["resizeHandle"],
   };
 };

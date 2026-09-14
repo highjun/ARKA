@@ -5,7 +5,9 @@ const head = { seq: 1, sessionId: "s1", runId: "r1", at: 0 };
 
 describe("AgentEvent", () => {
   it("type으로 분기하는 union이다 — 각 type이 자기 필드를 요구한다", () => {
-    expect(AgentEvent.parse({ ...head, type: "assistant.delta", messageId: "m1", text: "안" }).type).toBe("assistant.delta");
+    expect(AgentEvent.parse({ ...head, type: "assistant.delta", messageId: "m1", text: "안" }).type).toBe(
+      "assistant.delta",
+    );
     expect(() => AgentEvent.parse({ ...head, type: "assistant.delta", text: "안" })).toThrow();
   });
 
@@ -20,7 +22,9 @@ describe("AgentEvent", () => {
 
   it("세션 수준 이벤트는 runId가 null일 수 있고, Run 이벤트는 그럴 수 없다", () => {
     expect(AgentEvent.safeParse({ ...head, runId: null, type: "session.renamed", title: "t" }).success).toBe(true);
-    expect(AgentEvent.safeParse({ ...head, runId: null, type: "run.started", mode: "action", input: "x" }).success).toBe(false);
+    expect(
+      AgentEvent.safeParse({ ...head, runId: null, type: "run.started", mode: "action", input: "x" }).success,
+    ).toBe(false);
   });
 
   it("seq는 1 이상이다", () => {
@@ -28,7 +32,14 @@ describe("AgentEvent", () => {
   });
 
   it("AgentEventInput은 seq와 at을 뺀 모양이다", () => {
-    const input: AgentEventInput = { sessionId: "s", runId: "r", type: "tool.call", callId: "c", toolId: "fs.read", input: { path: "a" } };
+    const input: AgentEventInput = {
+      sessionId: "s",
+      runId: "r",
+      type: "tool.call",
+      callId: "c",
+      toolId: "fs.read",
+      input: { path: "a" },
+    };
     expect(AgentEvent.parse({ ...input, seq: 1, at: 0 }).type).toBe("tool.call");
   });
 });

@@ -1,6 +1,6 @@
-import { apiHeaders, readSse, sleep } from '#core/http';
-import { WatchEvent } from '#contracts';
-import type { IWorkspaceWatch, WorkspaceWatchUnsubscribe } from '../model/IWorkspaceWatch';
+import { apiHeaders, readSse, sleep } from "#core/http";
+import { WatchEvent } from "#contracts";
+import type { IWorkspaceWatch, WorkspaceWatchUnsubscribe } from "../model/IWorkspaceWatch";
 
 /** 서버 재시작 등으로 스트림이 뜻하지 않게 끊기면 이만큼 쉬고 다시 붙는다. */
 const RETRY_MS = 2_000;
@@ -8,10 +8,11 @@ const RETRY_MS = 2_000;
 /** `document` 중 여기서 쓰는 것만 — Node 타입만 있는 곳(test/contract)에서도 컴파일되게 DOM 타입을 피한다. */
 type VisibilityDocument = {
   readonly visibilityState: string;
-  addEventListener(type: 'visibilitychange', listener: () => void): void;
-  removeEventListener(type: 'visibilitychange', listener: () => void): void;
+  addEventListener(type: "visibilitychange", listener: () => void): void;
+  removeEventListener(type: "visibilitychange", listener: () => void): void;
 };
-const documentOf = (): VisibilityDocument | null => ('document' in globalThis ? (globalThis as unknown as { document: VisibilityDocument }).document : null);
+const documentOf = (): VisibilityDocument | null =>
+  "document" in globalThis ? (globalThis as unknown as { document: VisibilityDocument }).document : null;
 
 /**
  * 서버의 파일 변경 SSE(`/api/files/watch`)를 읽는 구현. 스트림 읽기는 `core/http/readSse`가 맡는다
@@ -35,24 +36,28 @@ class HttpWorkspaceWatchAdapter implements IWorkspaceWatch {
    * 그쪽으로 전달한다 — 포그라운드로 돌아올 때 "지금 시도만 끊고 다시 붙는다"(`visibilitychange`)와
    * "완전히 해지한다"를 같은 메커니즘으로 다루면서 구분할 수 있다.
    */
-  async #loop(paths: readonly string[], onChange: (changed: readonly string[]) => void, controller: AbortController): Promise<void> {
+  async #loop(
+    paths: readonly string[],
+    onChange: (changed: readonly string[]) => void,
+    controller: AbortController,
+  ): Promise<void> {
     const query = new URLSearchParams();
-    for (const path of paths) query.append('path', path);
+    for (const path of paths) query.append("path", path);
     const url = `/api/files/watch?${query.toString()}`;
 
     let attempt: AbortController | null = null;
     const doc = documentOf();
     const onVisible = (): void => {
-      if (doc?.visibilityState === 'visible') attempt?.abort();
+      if (doc?.visibilityState === "visible") attempt?.abort();
     };
-    doc?.addEventListener('visibilitychange', onVisible);
+    doc?.addEventListener("visibilitychange", onVisible);
 
     try {
       for (;;) {
         if (controller.signal.aborted) return;
         attempt = new AbortController();
         const forwardAbort = (): void => attempt?.abort();
-        controller.signal.addEventListener('abort', forwardAbort, { once: true });
+        controller.signal.addEventListener("abort", forwardAbort, { once: true });
         try {
           await readSse(url, { headers: apiHeaders(), signal: attempt.signal }, (data) => {
             const changed = parse(data);
@@ -62,13 +67,13 @@ class HttpWorkspaceWatchAdapter implements IWorkspaceWatch {
         } catch {
           // 연결 실패거나 중간에 끊겼다(idle 타임아웃·visibility 강제 재연결 포함) — 해지된 게 아니면 아래서 다시 시도한다.
         } finally {
-          controller.signal.removeEventListener('abort', forwardAbort);
+          controller.signal.removeEventListener("abort", forwardAbort);
         }
         if (controller.signal.aborted) return;
         await sleep(RETRY_MS, controller.signal);
       }
     } finally {
-      doc?.removeEventListener('visibilitychange', onVisible);
+      doc?.removeEventListener("visibilitychange", onVisible);
     }
   }
 }

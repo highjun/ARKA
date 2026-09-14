@@ -26,7 +26,14 @@ import { createAgentApiPort } from "../extensions/agent/infra/HttpAgentApi";
 import { createAgentEventsPort } from "../extensions/agent/infra/SseAgentEvents";
 import { ChatSessionsView } from "../extensions/agent/view/ChatSessionsView";
 import { ChatTabView } from "../extensions/agent/view/ChatTabView";
-import { DIFF_TAB_KIND, GitModel, GitModelToken, GitServiceToken, SourceControlViewModel, SourceControlViewModelToken } from "../extensions/git";
+import {
+  DIFF_TAB_KIND,
+  GitModel,
+  GitModelToken,
+  GitServiceToken,
+  SourceControlViewModel,
+  SourceControlViewModelToken,
+} from "../extensions/git";
 import { createGitServicePort } from "../extensions/git/infra/HttpGitService";
 import { DiffTabView } from "../extensions/git/view/DiffTabView";
 import { SourceControlView } from "../extensions/git/view/SourceControlView";
@@ -39,7 +46,13 @@ import {
   PREVIEW_TAB_KIND,
 } from "../extensions/markdown";
 import { MarkdownPreviewTabView } from "../extensions/markdown/view/MarkdownPreviewTabView";
-import { SearchModel, SearchModelToken, SearchServiceToken, SearchViewModel, SearchViewModelToken } from "../extensions/search";
+import {
+  SearchModel,
+  SearchModelToken,
+  SearchServiceToken,
+  SearchViewModel,
+  SearchViewModelToken,
+} from "../extensions/search";
 import { createSearchServicePort } from "../extensions/search/infra/HttpSearchService";
 import { SearchView } from "../extensions/search/view/SearchView";
 import { createWorkspaceMarkdownSource } from "../extensions/markdown/infra/WorkspaceMarkdownSource";
@@ -141,15 +154,39 @@ export function createApplication(): Container {
   container.register(AgentEventsToken, singleton(createAgentEventsPort));
   container.register(StorageToken, singleton(createStoragePort));
   container.register(ServerInfoToken, singleton(createServerInfoPort));
-  container.register(CommandCenterRegistryToken, singleton(() => new CommandCenterRegistry()));
-  container.register(ActivityBarRegistryToken, singleton(() => new ActivityBarRegistry()));
-  container.register(SidebarContentRegistryToken, singleton(() => new SidebarContentRegistry()));
-  container.register(TabContentRegistryToken, singleton(() => new TabContentRegistry()));
-  container.register(WorkbenchStartupRegistryToken, singleton(() => new WorkbenchStartupRegistry()));
+  container.register(
+    CommandCenterRegistryToken,
+    singleton(() => new CommandCenterRegistry()),
+  );
+  container.register(
+    ActivityBarRegistryToken,
+    singleton(() => new ActivityBarRegistry()),
+  );
+  container.register(
+    SidebarContentRegistryToken,
+    singleton(() => new SidebarContentRegistry()),
+  );
+  container.register(
+    TabContentRegistryToken,
+    singleton(() => new TabContentRegistry()),
+  );
+  container.register(
+    WorkbenchStartupRegistryToken,
+    singleton(() => new WorkbenchStartupRegistry()),
+  );
 
-  container.register(ErrorLogToken, singleton(() => new ErrorLog()));
-  container.register(NotificationServiceToken, singleton(() => new NotificationService()));
-  container.register(ActivityModelToken, singleton(() => new ActivityModel()));
+  container.register(
+    ErrorLogToken,
+    singleton(() => new ErrorLog()),
+  );
+  container.register(
+    NotificationServiceToken,
+    singleton(() => new NotificationService()),
+  );
+  container.register(
+    ActivityModelToken,
+    singleton(() => new ActivityModel()),
+  );
   container.register(
     TabsModelToken,
     singleton((c) => new TabsModel({ storage: c.resolve(StorageToken) })),
@@ -158,10 +195,16 @@ export function createApplication(): Container {
     ThemeModelToken,
     singleton((c) => new ThemeModel({ storage: c.resolve(StorageToken) })),
   );
-  container.register(SettingsModelToken, singleton((c) => new SettingsModel({ storage: c.resolve(StorageToken) })));
+  container.register(
+    SettingsModelToken,
+    singleton((c) => new SettingsModel({ storage: c.resolve(StorageToken) })),
+  );
   container.register(
     SettingsViewModelToken,
-    scoped((c) => new SettingsViewModel({ themeModel: c.resolve(ThemeModelToken), settingsModel: c.resolve(SettingsModelToken) })),
+    scoped(
+      (c) =>
+        new SettingsViewModel({ themeModel: c.resolve(ThemeModelToken), settingsModel: c.resolve(SettingsModelToken) }),
+    ),
   );
   container.register(
     DirectoryTreeModelToken,
@@ -199,10 +242,22 @@ export function createApplication(): Container {
 
   // ViewModel은 scoped다 — 화면 하나가 사는 동안만 유지되고, 그 스코프를 dispose하면
   // 구독까지 함께 정리된다.
-  container.register(ChatViewModelToken, scoped((c) => new ChatViewModel({ chatModel: c.resolve(ChatModelToken) })));
-  container.register(SearchModelToken, singleton((c) => new SearchModel({ searchService: c.resolve(SearchServiceToken) })));
-  container.register(SearchViewModelToken, scoped((c) => new SearchViewModel({ searchModel: c.resolve(SearchModelToken) })));
-  container.register(GitModelToken, singleton((c) => new GitModel({ gitService: c.resolve(GitServiceToken) })));
+  container.register(
+    ChatViewModelToken,
+    scoped((c) => new ChatViewModel({ chatModel: c.resolve(ChatModelToken) })),
+  );
+  container.register(
+    SearchModelToken,
+    singleton((c) => new SearchModel({ searchService: c.resolve(SearchServiceToken) })),
+  );
+  container.register(
+    SearchViewModelToken,
+    scoped((c) => new SearchViewModel({ searchModel: c.resolve(SearchModelToken) })),
+  );
+  container.register(
+    GitModelToken,
+    singleton((c) => new GitModel({ gitService: c.resolve(GitServiceToken) })),
+  );
   // markdown은 filesystem을 모른다 — 두 포트를 markdown이 바라는 모양으로 감싸는 어댑터에 넘기는
   // 것까지가 조립부의 일이다. 감싸는 방법 자체는 markdown의 infra가 안다.
   container.register(
@@ -211,8 +266,14 @@ export function createApplication(): Container {
       createWorkspaceMarkdownSource({ files: c.resolve(WorkspaceFilesToken), watch: c.resolve(WorkspaceWatchToken) }),
     ),
   );
-  container.register(MarkdownPreviewModelToken, singleton((c) => new MarkdownPreviewModel({ source: c.resolve(MarkdownSourceToken) })));
-  container.register(SourceControlViewModelToken, scoped((c) => new SourceControlViewModel({ gitModel: c.resolve(GitModelToken) })));
+  container.register(
+    MarkdownPreviewModelToken,
+    singleton((c) => new MarkdownPreviewModel({ source: c.resolve(MarkdownSourceToken) })),
+  );
+  container.register(
+    SourceControlViewModelToken,
+    scoped((c) => new SourceControlViewModel({ gitModel: c.resolve(GitModelToken) })),
+  );
   container.register(
     MarkdownPreviewViewModelToken,
     scoped(
@@ -251,12 +312,9 @@ export function createApplication(): Container {
   container.register(
     TabDirtyStateToken,
     scoped((c) => ({
-      isDirty: (tabId: string) =>
-        c.resolve(FileContentViewModelToken).rows[tabId]?.isDirty ?? false,
-      hasAnyDirty: () =>
-        Object.values(c.resolve(FileContentViewModelToken).rows).some((row) => row.isDirty),
-      onDidChange: (listener: () => void) =>
-        c.resolve(FileContentViewModelToken).onDidChange(listener),
+      isDirty: (tabId: string) => c.resolve(FileContentViewModelToken).rows[tabId]?.isDirty ?? false,
+      hasAnyDirty: () => Object.values(c.resolve(FileContentViewModelToken).rows).some((row) => row.isDirty),
+      onDidChange: (listener: () => void) => c.resolve(FileContentViewModelToken).onDidChange(listener),
     })),
   );
   // 셸이 뜨고 질 때 켜고 끌 것들. 셸은 무엇이 켜지는지 모르고 목록만 받는다.
@@ -285,7 +343,9 @@ export function createApplication(): Container {
   );
   container.register(
     ErrorNotifierToken,
-    scoped((c) => createErrorNotifier({ errorLog: c.resolve(ErrorLogToken), notifications: c.resolve(NotificationServiceToken) })),
+    scoped((c) =>
+      createErrorNotifier({ errorLog: c.resolve(ErrorLogToken), notifications: c.resolve(NotificationServiceToken) }),
+    ),
   );
   container.register(
     MarkdownActivationToken,
@@ -298,9 +358,7 @@ export function createApplication(): Container {
   );
   container.register(
     GlobalKeybindingsToken,
-    scoped((c) =>
-      createGlobalKeybindings({ commandCenterRegistry: c.resolve(CommandCenterRegistryToken) }),
-  ),
+    scoped((c) => createGlobalKeybindings({ commandCenterRegistry: c.resolve(CommandCenterRegistryToken) })),
   );
   // 등록된 것을 스코프에서 resolve해 하나로 합친다 — descriptor가 토큰을 담는 이유가 여기다.
   container.register(
@@ -358,23 +416,47 @@ export function createApplication(): Container {
   startupRegistry.add({ id: "markdown", token: MarkdownActivationToken });
 
   // Registry 전부 singleton이라 루트에서 한 번만 채운다.
-  container.resolve(ActivityBarRegistryToken).add({ id: EXPLORER_ID, title: "탐색기", iconId: "files", keybinding: "ctrl+shift+e" });
+  container
+    .resolve(ActivityBarRegistryToken)
+    .add({ id: EXPLORER_ID, title: "탐색기", iconId: "files", keybinding: "ctrl+shift+e" });
   container.resolve(SidebarContentRegistryToken).add({ id: EXPLORER_ID, PanelComponent: DirectoryTreeView });
   container.resolve(TabContentRegistryToken).add({
     id: FILE_TAB_KIND,
     iconId: "fileCode",
     TabComponent: ({ tabId, reveal }) => <FileContentView path={tabId} reveal={reveal} />,
   });
-  container.resolve(ActivityBarRegistryToken).add({ id: SEARCH_ID, title: "검색", iconId: "search", keybinding: "ctrl+shift+f" });
-  container.resolve(SidebarContentRegistryToken).add({ id: SEARCH_ID, PanelComponent: ({ onFileOpen }) => <SearchView onFileOpen={onFileOpen} /> });
-  container.resolve(ActivityBarRegistryToken).add({ id: SCM_ID, title: "소스 제어", iconId: "sourceControl", keybinding: "ctrl+shift+g" });
-  container.resolve(SidebarContentRegistryToken).add({ id: SCM_ID, PanelComponent: ({ onOpenTab }) => <SourceControlView onOpenTab={onOpenTab} /> });
-  container.resolve(TabContentRegistryToken).add({ id: DIFF_TAB_KIND, iconId: "sourceControl", TabComponent: ({ tabId }) => <DiffTabView tabId={tabId} /> });
-  container.resolve(ActivityBarRegistryToken).add({ id: AGENT_ID, title: "에이전트", iconId: "brain", keybinding: "ctrl+shift+a" });
-  container.resolve(SidebarContentRegistryToken).add({ id: AGENT_ID, PanelComponent: ({ onOpenTab }) => <ChatSessionsView onOpenTab={onOpenTab} /> });
-  container.resolve(TabContentRegistryToken).add({ id: "keybindings", iconId: "keyboard", TabComponent: () => <KeybindingsTabView /> });
-  container.resolve(TabContentRegistryToken).add({ id: "settings", iconId: "settingsGear", TabComponent: () => <SettingsTabView /> });
-  container.resolve(TabContentRegistryToken).add({ id: PREVIEW_TAB_KIND, iconId: "bookOpen", TabComponent: ({ tabId }) => <MarkdownPreviewTabView tabId={tabId} /> });
+  container
+    .resolve(ActivityBarRegistryToken)
+    .add({ id: SEARCH_ID, title: "검색", iconId: "search", keybinding: "ctrl+shift+f" });
+  container
+    .resolve(SidebarContentRegistryToken)
+    .add({ id: SEARCH_ID, PanelComponent: ({ onFileOpen }) => <SearchView onFileOpen={onFileOpen} /> });
+  container
+    .resolve(ActivityBarRegistryToken)
+    .add({ id: SCM_ID, title: "소스 제어", iconId: "sourceControl", keybinding: "ctrl+shift+g" });
+  container
+    .resolve(SidebarContentRegistryToken)
+    .add({ id: SCM_ID, PanelComponent: ({ onOpenTab }) => <SourceControlView onOpenTab={onOpenTab} /> });
+  container
+    .resolve(TabContentRegistryToken)
+    .add({ id: DIFF_TAB_KIND, iconId: "sourceControl", TabComponent: ({ tabId }) => <DiffTabView tabId={tabId} /> });
+  container
+    .resolve(ActivityBarRegistryToken)
+    .add({ id: AGENT_ID, title: "에이전트", iconId: "brain", keybinding: "ctrl+shift+a" });
+  container
+    .resolve(SidebarContentRegistryToken)
+    .add({ id: AGENT_ID, PanelComponent: ({ onOpenTab }) => <ChatSessionsView onOpenTab={onOpenTab} /> });
+  container
+    .resolve(TabContentRegistryToken)
+    .add({ id: "keybindings", iconId: "keyboard", TabComponent: () => <KeybindingsTabView /> });
+  container
+    .resolve(TabContentRegistryToken)
+    .add({ id: "settings", iconId: "settingsGear", TabComponent: () => <SettingsTabView /> });
+  container.resolve(TabContentRegistryToken).add({
+    id: PREVIEW_TAB_KIND,
+    iconId: "bookOpen",
+    TabComponent: ({ tabId }) => <MarkdownPreviewTabView tabId={tabId} />,
+  });
   container.resolve(TabContentRegistryToken).add({
     id: CHAT_TAB_KIND,
     iconId: "brain",

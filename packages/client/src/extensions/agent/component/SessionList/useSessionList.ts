@@ -1,6 +1,6 @@
-import { useCallback } from 'react';
-import { useControllableState } from '@radix-ui/react-use-controllable-state';
-import type { AgentSession } from './SessionList';
+import { useCallback } from "react";
+import { useControllableState } from "@radix-ui/react-use-controllable-state";
+import type { AgentSession } from "./SessionList";
 
 /** `activeId`의 유무로 controlled·uncontrolled가 갈린다. */
 export interface UseSessionListOptions {
@@ -28,14 +28,19 @@ export interface UseSessionListResult {
  * 세션 객체 전체가 필요한 `onActiveChange`는 id만 받는 그 콜백 모양과 안 맞아 `selectSession`에서
  * 별도로 호출한다(둘 다 같은 시점에 함께 불린다).
  */
-export function useSessionList({ activeId, defaultActiveId, onActiveChange, onActiveIdChange }: UseSessionListOptions): UseSessionListResult {
+export function useSessionList({
+  activeId,
+  defaultActiveId,
+  onActiveChange,
+  onActiveIdChange,
+}: UseSessionListOptions): UseSessionListResult {
   const [currentActiveId, setActiveId] = useControllableState<string | undefined>({
     prop: activeId,
     defaultProp: defaultActiveId,
     onChange: (nextActiveId) => {
       if (nextActiveId !== undefined) onActiveIdChange?.(nextActiveId);
     },
-    caller: 'useSessionList',
+    caller: "useSessionList",
   });
 
   const selectSession = useCallback(

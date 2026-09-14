@@ -1,14 +1,14 @@
-import type { Disposable } from '#core/di';
-import { Emitter } from '#core/events';
-import type { ISearchModel, SearchStatus } from './ISearchModel';
-import type { ISearchService, SearchQuery, SearchResponse } from './ISearchService';
+import type { Disposable } from "#core/di";
+import { Emitter } from "#core/events";
+import type { ISearchModel, SearchStatus } from "./ISearchModel";
+import type { ISearchService, SearchQuery, SearchResponse } from "./ISearchService";
 
 /** `ISearchModel`의 유일한 구현체. 늦게 끝난 옛 검색이 새 결과를 덮지 않게 순번을 센다. */
 export class SearchModel implements ISearchModel {
   readonly #service: ISearchService;
   readonly #changed = new Emitter();
-  #query: SearchQuery = { query: '', path: '', regex: false, caseSensitive: false };
-  #status: SearchStatus = 'idle';
+  #query: SearchQuery = { query: "", path: "", regex: false, caseSensitive: false };
+  #status: SearchStatus = "idle";
   #result: SearchResponse | null = null;
   #failure: string | null = null;
   #generation = 0;
@@ -47,25 +47,25 @@ export class SearchModel implements ISearchModel {
   /** 세대 번호로 늦게 온 응답을 버린다 — 빨리 친 다음 질의가 앞의 결과에 덮이지 않게. */
   async run(): Promise<void> {
     const generation = ++this.#generation;
-    if (this.#query.query.trim() === '') {
+    if (this.#query.query.trim() === "") {
       this.#result = null;
-      this.#status = 'idle';
+      this.#status = "idle";
       this.#failure = null;
       this.#changed.fire();
       return;
     }
-    this.#status = 'searching';
+    this.#status = "searching";
     this.#changed.fire();
     try {
       const result = await this.#service.search(this.#query);
       // 그 사이 새 검색이 나갔다.
       if (generation !== this.#generation) return;
       this.#result = result;
-      this.#status = 'done';
+      this.#status = "done";
       this.#failure = null;
     } catch (error) {
       if (generation !== this.#generation) return;
-      this.#status = 'error';
+      this.#status = "error";
       this.#failure = error instanceof Error ? error.message : String(error);
     }
     this.#changed.fire();

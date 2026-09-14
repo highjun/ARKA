@@ -1,5 +1,5 @@
-import type { ReadableAtom } from 'nanostores';
-import type { Descriptor, Registry } from '#core/registry';
+import type { ReadableAtom } from "nanostores";
+import type { Descriptor, Registry } from "#core/registry";
 
 /**
  * Context — Model/ViewModel 이 이미 갖고 있는 atom 을 id 로 등록해두는 것뿐이다.

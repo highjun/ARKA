@@ -42,9 +42,7 @@ export class URI {
     const authority = match?.[2];
     const path = match?.[3];
     if (scheme === undefined || authority === undefined || path === undefined) {
-      throw new Error(
-        `URI.parse: not a valid "scheme://authority/path" URI: ${value}`,
-      );
+      throw new Error(`URI.parse: not a valid "scheme://authority/path" URI: ${value}`);
     }
 
     return new URI(scheme, authority, path);

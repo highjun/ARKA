@@ -14,20 +14,20 @@ export interface SelectableRow {
 }
 
 /** 수식키가 무엇을 뜻하는지. 플랫폼 차이는 `selectionIntentOf`가 흡수한다. */
-export type SelectionIntent = 'replace' | 'toggle' | 'range';
+export type SelectionIntent = "replace" | "toggle" | "range";
 
 /** `navigator.platform`을 여기서만 읽는다 — 나머지는 이 값을 인자로 받아 테스트에서 양쪽을 다 본다. */
 export const isApplePlatform = (): boolean =>
-  typeof navigator !== 'undefined' && /mac|iphone|ipad|ipod/iu.test(navigator.platform ?? navigator.userAgent ?? '');
+  typeof navigator !== "undefined" && /mac|iphone|ipad|ipod/iu.test(navigator.platform ?? navigator.userAgent ?? "");
 
 /** mac은 `metaKey`, 그 외는 `ctrlKey`가 토글이다. `apple`을 넘기면 테스트가 양쪽을 다 본다. */
 export const selectionIntentOf = (
   event: { readonly metaKey: boolean; readonly ctrlKey: boolean; readonly shiftKey: boolean },
   apple: boolean = isApplePlatform(),
 ): SelectionIntent => {
-  if (event.shiftKey) return 'range';
-  if (apple ? event.metaKey : event.ctrlKey) return 'toggle';
-  return 'replace';
+  if (event.shiftKey) return "range";
+  if (apple ? event.metaKey : event.ctrlKey) return "toggle";
+  return "replace";
 };
 
 const withoutDisabled = (order: readonly SelectableRow[], ids: readonly string[]): readonly string[] => {
@@ -60,10 +60,16 @@ export interface NextSelectionResult {
  *   그 자리부터 잰다 — VSCode의 `if (!anchor) setAnchor(focus)`와 같다. 있으면 앵커~대상 구간을
  *   `order`(= "지금 화면에 보이는 순서") 기준으로 자른다.
  */
-export const nextSelection = ({ intent, current, order, anchorId, targetId }: NextSelectionInput): NextSelectionResult => {
-  if (intent === 'replace') return { ids: [targetId], anchorId: targetId };
+export const nextSelection = ({
+  intent,
+  current,
+  order,
+  anchorId,
+  targetId,
+}: NextSelectionInput): NextSelectionResult => {
+  if (intent === "replace") return { ids: [targetId], anchorId: targetId };
 
-  if (intent === 'toggle') {
+  if (intent === "toggle") {
     const ids = current.includes(targetId) ? current.filter((id) => id !== targetId) : [...current, targetId];
     return { ids, anchorId: targetId };
   }
@@ -81,7 +87,10 @@ export const nextSelection = ({ intent, current, order, anchorId, targetId }: Ne
 
 /** 보이는 행 전부(disabled 제외) — Ctrl/Cmd+A. */
 export const selectAll = (order: readonly SelectableRow[]): readonly string[] =>
-  withoutDisabled(order, order.map((row) => row.id));
+  withoutDisabled(
+    order,
+    order.map((row) => row.id),
+  );
 
 /**
  * 대상이 이미 선택 안에 있으면 선택 전체를, 아니면 대상 하나만 돌려준다 — "우클릭 메뉴의 대상 =
@@ -95,7 +104,7 @@ export const selectionIncluding = (current: readonly string[], targetId: string)
 export interface CompactableItem {
   readonly id: string;
   readonly name: string;
-  readonly type: 'folder' | 'file';
+  readonly type: "folder" | "file";
   readonly children?: readonly CompactableItem[];
 }
 
@@ -114,15 +123,15 @@ export interface CompactableItem {
  */
 export const compactFolderChains = <T extends CompactableItem>(items: readonly T[]): readonly T[] =>
   items.map((item) => {
-    if (item.type !== 'folder' || item.children === undefined) return item;
+    if (item.type !== "folder" || item.children === undefined) return item;
 
     const segments = [item.name];
     let terminal: CompactableItem = item;
     while (
-      terminal.type === 'folder' &&
+      terminal.type === "folder" &&
       terminal.children !== undefined &&
       terminal.children.length === 1 &&
-      terminal.children[0]!.type === 'folder'
+      terminal.children[0]!.type === "folder"
     ) {
       terminal = terminal.children[0]!;
       segments.push(terminal.name);
@@ -130,5 +139,5 @@ export const compactFolderChains = <T extends CompactableItem>(items: readonly T
 
     const compactedChildren = terminal.children === undefined ? undefined : compactFolderChains(terminal.children);
     if (segments.length === 1) return { ...item, children: compactedChildren } as T;
-    return { ...(terminal as T), name: segments.join('/'), children: compactedChildren };
+    return { ...(terminal as T), name: segments.join("/"), children: compactedChildren };
   });

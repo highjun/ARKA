@@ -23,12 +23,5 @@
   //
   // `eslint.config.ts`는 뺀다 — `ops/lint`가 TS 원본이라 이 패키지의 옵션으로 ops 소스를
   // 컴파일하게 된다(→ ADR 0001의 대가).
-  "include": [
-    "src",
-    "test",
-    "vite.config.ts",
-    ".storybook/main.ts",
-    ".storybook/run.ts",
-    ".storybook/preview.ts"
-  ]
+  "include": ["src", "test", "vite.config.ts", ".storybook/main.ts", ".storybook/preview.ts"]
 }

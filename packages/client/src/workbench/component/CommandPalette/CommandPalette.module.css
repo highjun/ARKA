@@ -111,7 +111,7 @@
   color: var(--buttonKeybindingHint-default-fgColor-rest);
 }
 
-.content [cmdk-item][data-selected='true'] {
+.content [cmdk-item][data-selected="true"] {
   background-color: var(--bgColor-accent-emphasis);
   color: var(--fgColor-onEmphasis);
 }
@@ -119,7 +119,7 @@
 /* 선택된 행 위에서는 kbd 도 강조 배경에 맞춰 반전한다 — Primer가 강조 배경 위 키바인딩 힌트용으로
    갖고 있는 토큰과 정확히 같은 짝(`Button`의 `keybindingHint`가 `primary` variant 위에서 쓰는 것과
    동일)이다. */
-.content [cmdk-item][data-selected='true'] .shortcutKey {
+.content [cmdk-item][data-selected="true"] .shortcutKey {
   background-color: var(--buttonKeybindingHint-primary-bgColor-rest);
   border-color: var(--buttonKeybindingHint-primary-borderColor-rest);
   color: var(--buttonKeybindingHint-primary-fgColor-rest);

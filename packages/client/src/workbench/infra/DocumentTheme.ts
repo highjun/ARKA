@@ -1,6 +1,6 @@
-import type { IThemeModel } from '../model/IThemeModel';
-import type { IWorkbenchStartup } from '../model/IWorkbenchStartup';
-import type { Disposable } from '#core/di';
+import type { IThemeModel } from "../model/IThemeModel";
+import type { IWorkbenchStartup } from "../model/IWorkbenchStartup";
+import type { Disposable } from "#core/di";
 
 /**
  * 테마를 `<html>`의 `color-scheme`에 반영한다.

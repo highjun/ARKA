@@ -13,25 +13,25 @@
   scrollbar-color: var(--control-transparent-bgColor-active) transparent;
 }
 
-.root[data-scroll='auto'] {
+.root[data-scroll="auto"] {
   overflow: auto;
 }
 
 /* 한 축만 켠다 — 반대 축은 `hidden`이어야 미세한 오버플로로 스크롤바가 따라 뜨지 않는다. */
-.root[data-scroll='horizontal'] {
+.root[data-scroll="horizontal"] {
   overflow: auto hidden;
 }
 
-.root[data-scroll='vertical'] {
+.root[data-scroll="vertical"] {
   overflow: hidden auto;
 }
 
 /* 내용이 넘쳐도 자르지 않는다. */
-.root[data-scroll='none'] {
+.root[data-scroll="none"] {
   overflow: visible;
 }
 
-.root[data-chrome='visible'] {
+.root[data-chrome="visible"] {
   border-radius: var(--borderRadius-medium);
   border-style: solid;
   border-width: var(--borderWidth-thin);

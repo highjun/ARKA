@@ -1,6 +1,6 @@
-import { mkdir, open, readdir, realpath, rename, rm, writeFile } from 'node:fs/promises';
-import path from 'node:path';
-import type { DirectoryListing, FileContent, FileEntry, FileEntryType } from '#contracts';
+import { mkdir, open, readdir, realpath, rename, rm, writeFile } from "node:fs/promises";
+import path from "node:path";
+import type { DirectoryListing, FileContent, FileEntry, FileEntryType } from "#contracts";
 
 /**
  * 워크스페이스를 읽고 쓴다 — 목록·읽기·쓰기·생성·이동·삭제.
@@ -32,10 +32,10 @@ const MAX_BYTES = 512 * 1024;
 export const resolveWithin = async (rootDir: string, requested: string): Promise<string | null> => {
   // **여기서 디코딩하지 않는다.** 호출부가 `URLSearchParams` 로 이미 풀어서 준다. 한 번 더 풀면
   // `a%20b.txt` 라는 이름의 파일이 `a b.txt` 로 열린다 — 조용히 다른 파일을 여는 종류의 버그다.
-  if (requested.includes('\0')) return null;
+  if (requested.includes("\0")) return null;
 
   // 선행 슬래시를 떼어 상대경로로 만든다 — 그러지 않으면 resolve 가 root 를 통째로 무시한다.
-  const relative = requested.replace(/^\/+/u, '');
+  const relative = requested.replace(/^\/+/u, "");
   const full = path.resolve(rootDir, relative);
 
   // 1차 — 문자열 경계(심링크 이전). `..` 는 resolve 가 이미 접었다.
@@ -64,8 +64,8 @@ export const resolveWithin = async (rootDir: string, requested: string): Promise
  * 뜻이 된다.
  */
 export const resolveNewEntry = async (rootDir: string, requested: string): Promise<string | null> => {
-  if (requested.includes('\0')) return null;
-  const relative = requested.replace(/^\/+/u, '');
+  if (requested.includes("\0")) return null;
+  const relative = requested.replace(/^\/+/u, "");
   const full = path.resolve(rootDir, relative);
   if (full === rootDir) return null;
   if (!full.startsWith(`${rootDir}${path.sep}`)) return null;
@@ -78,7 +78,7 @@ export const resolveNewEntry = async (rootDir: string, requested: string): Promi
 };
 
 /** 이름 비교기를 한 번만 만든다 — `localeCompare` 는 부를 때마다 collator 를 새로 세운다. */
-const byName = new Intl.Collator('ko').compare;
+const byName = new Intl.Collator("ko").compare;
 
 /**
  * 디렉터리 목록. **디렉터리 먼저, 그다음 이름순**(한국어 로캘) — 탐색기에서 눈이 가는 순서다.
@@ -96,16 +96,16 @@ export const listDirectory = async (rootDir: string, absDir: string): Promise<Di
     // 소켓·디바이스 등은 목록에 없다. 심링크는 무엇을 가리키는지 모르는 채로 파일로 둔다 —
     // 알아내려면 링크마다 `stat` 을 해야 하고, 그게 방금 걷어낸 비용이다.
     .filter((entry) => entry.isDirectory() || entry.isFile() || entry.isSymbolicLink())
-    .map((entry): FileEntry => ({ name: entry.name, type: entry.isDirectory() ? 'dir' : 'file' }));
+    .map((entry): FileEntry => ({ name: entry.name, type: entry.isDirectory() ? "dir" : "file" }));
 
   entries.sort((a, b) => {
-    if (a.type !== b.type) return a.type === 'dir' ? -1 : 1;
+    if (a.type !== b.type) return a.type === "dir" ? -1 : 1;
     return byName(a.name, b.name);
   });
 
   // 루트면 ''
   const relative = path.relative(rootDir, absDir);
-  const parent = relative === '' ? null : path.dirname(relative) === '.' ? '' : path.dirname(relative);
+  const parent = relative === "" ? null : path.dirname(relative) === "." ? "" : path.dirname(relative);
   return { path: relative, parent, entries };
 };
 
@@ -125,7 +125,7 @@ const looksBinary = (buffer: Buffer): boolean => buffer.includes(0);
  */
 export const readFileContent = async (rootDir: string, absPath: string): Promise<FileContent> => {
   const relative = path.relative(rootDir, absPath);
-  const handle = await open(absPath, 'r');
+  const handle = await open(absPath, "r");
 
   try {
     const { size } = await handle.stat();
@@ -133,9 +133,9 @@ export const readFileContent = async (rootDir: string, absPath: string): Promise
     if (buffer.byteLength > 0) await handle.read(buffer, 0, buffer.byteLength, 0);
 
     if (looksBinary(buffer)) {
-      return { path: relative, content: '', truncated: false, encoding: 'binary' };
+      return { path: relative, content: "", truncated: false, encoding: "binary" };
     }
-    return { path: relative, content: buffer.toString('utf8'), truncated: size > MAX_BYTES, encoding: 'utf8' };
+    return { path: relative, content: buffer.toString("utf8"), truncated: size > MAX_BYTES, encoding: "utf8" };
   } finally {
     await handle.close();
   }
@@ -153,7 +153,7 @@ export const readFileContent = async (rootDir: string, absPath: string): Promise
  * 치를 이유가 없다.
  */
 export const writeFileContent = async (absPath: string, content: string): Promise<void> => {
-  await writeFile(absPath, content, 'utf8');
+  await writeFile(absPath, content, "utf8");
 };
 
 /**
@@ -163,8 +163,8 @@ export const writeFileContent = async (absPath: string, content: string): Promis
  * 다른 이름으로 다시 시도하는 것(디렉터리)의 몫이지, 이 함수가 조용히 흡수할 일이 아니다.
  */
 export const createEntry = async (absPath: string, type: FileEntryType): Promise<void> => {
-  if (type === 'dir') await mkdir(absPath);
-  else await writeFile(absPath, '', { flag: 'wx' });
+  if (type === "dir") await mkdir(absPath);
+  else await writeFile(absPath, "", { flag: "wx" });
 };
 
 /**

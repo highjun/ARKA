@@ -1,10 +1,10 @@
-import type { Disposable } from '#core/di';
-import { ViewModelBase } from '#core/viewmodel';
-import { atom } from 'nanostores';
-import type { DirectoryMap, IDirectoryTreeModel } from '../model/IDirectoryTreeModel';
-import type { ICommandCenterRegistry } from '#core/commands';
-import type { ContextMenuTarget, IDirectoryTreeViewModel, EditingEntry, FileTreeRow } from './IDirectoryTreeViewModel';
-import { GHOST_ID } from './share';
+import type { Disposable } from "#core/di";
+import { ViewModelBase } from "#core/viewmodel";
+import { atom } from "nanostores";
+import type { DirectoryMap, IDirectoryTreeModel } from "../model/IDirectoryTreeModel";
+import type { ICommandCenterRegistry } from "#core/commands";
+import type { ContextMenuTarget, IDirectoryTreeViewModel, EditingEntry, FileTreeRow } from "./IDirectoryTreeViewModel";
+import { GHOST_ID } from "./share";
 
 /** `IDirectoryTreeViewModel`을 구현한다 — Model의 평평한 상태를 `computed`로 중첩 트리·컨텍스트 메뉴 대상으로 접는다. */
 export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryTreeViewModel {
@@ -126,8 +126,8 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
   }
 
   /** 화면 어휘(`'folder'`/`'file'`)를 Model 어휘(`'dir'`/`'file'`)로 바꿔 `#model.createEntry`에 위임한다. */
-  createEntry(parentId: string, name: string, type: 'folder' | 'file'): Promise<void> {
-    return this.#model.createEntry(parentId, name, type === 'folder' ? 'dir' : 'file');
+  createEntry(parentId: string, name: string, type: "folder" | "file"): Promise<void> {
+    return this.#model.createEntry(parentId, name, type === "folder" ? "dir" : "file");
   }
 
   /** `#model.renameEntry`에 위임한다. */
@@ -157,7 +157,7 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
     try {
       return await this.#model.moveToFolder(id, toParentId);
     } catch (error) {
-      this.#reportFailure('옮기지 못했다')(error);
+      this.#reportFailure("옮기지 못했다")(error);
       throw error;
     }
   }
@@ -191,23 +191,23 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
   get editingId(): string | undefined {
     const editing = this.#editingEntry.get();
     if (editing === null) return undefined;
-    return editing.kind === 'rename' ? editing.id : GHOST_ID;
+    return editing.kind === "rename" ? editing.id : GHOST_ID;
   }
 
   /** `#editingEntry`를 `newFile`로 채운다 — 부모가 아직 안 펼쳐졌으면 먼저 펼친다(유령 행이
    *  보이려면 그 부모가 펼쳐져 있어야 한다). */
   requestNewFile(): void {
-    this.#startCreating('newFile');
+    this.#startCreating("newFile");
   }
 
   /** `#editingEntry`를 `newFolder`로 채운다. */
   requestNewFolder(): void {
-    this.#startCreating('newFolder');
+    this.#startCreating("newFolder");
   }
 
-  #startCreating(kind: 'newFile' | 'newFolder'): void {
+  #startCreating(kind: "newFile" | "newFolder"): void {
     const parentId = this.#parentIdFor(this.#contextTarget.get());
-    if (parentId !== '') void this.#model.setExpanded(parentId, true);
+    if (parentId !== "") void this.#model.setExpanded(parentId, true);
     this.#editingEntry.set({ kind, parentId });
   }
 
@@ -215,7 +215,7 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
   requestRename(): void {
     const target = this.#contextTarget.get();
     if (target === null) return;
-    this.#editingEntry.set({ kind: 'rename', id: target.id, initialValue: target.name });
+    this.#editingEntry.set({ kind: "rename", id: target.id, initialValue: target.name });
   }
 
   /** `#editingEntry.kind`에 따라 `createEntry`/`renameEntry`를 부르고 `#editingEntry`를 비운다. */
@@ -225,13 +225,16 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
     if (editing === null) return;
 
     const name = value.trim();
-    if (name === '') return;
+    if (name === "") return;
 
-    if (editing.kind === 'rename') {
-      if (name !== editing.initialValue) this.renameEntry(editing.id, name).catch(this.#reportFailure('이름을 바꾸지 못했다'));
+    if (editing.kind === "rename") {
+      if (name !== editing.initialValue)
+        this.renameEntry(editing.id, name).catch(this.#reportFailure("이름을 바꾸지 못했다"));
       return;
     }
-    this.createEntry(editing.parentId, name, editing.kind === 'newFile' ? 'file' : 'folder').catch(this.#reportFailure('만들지 못했다'));
+    this.createEntry(editing.parentId, name, editing.kind === "newFile" ? "file" : "folder").catch(
+      this.#reportFailure("만들지 못했다"),
+    );
   }
 
   /** `#editingEntry`를 비운다. */
@@ -254,7 +257,7 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
     const targets = this.#deleteTargets.get();
     this.#deleteTargets.set([]);
     if (targets.length === 0) return;
-    this.removeEntries(targets.map((target) => target.id)).catch(this.#reportFailure('지우지 못했다'));
+    this.removeEntries(targets.map((target) => target.id)).catch(this.#reportFailure("지우지 못했다"));
   }
 
   /** `#deleteTargets`를 비운다. */
@@ -286,10 +289,14 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
    * 아니면 조용히 아무 일도 하지 않는다.
    */
   #registerFilesystemCommands(commandCenterRegistry: ICommandCenterRegistry): void {
-    const toContextMenuTarget = (row: FileTreeRow): ContextMenuTarget => ({ id: row.id, name: row.name, type: row.type });
+    const toContextMenuTarget = (row: FileTreeRow): ContextMenuTarget => ({
+      id: row.id,
+      name: row.name,
+      type: row.type,
+    });
 
     const isContextMenuTarget = (value: unknown): value is ContextMenuTarget =>
-      typeof value === 'object' && value !== null && 'id' in value && 'name' in value && 'type' in value;
+      typeof value === "object" && value !== null && "id" in value && "name" in value && "type" in value;
 
     /** 우클릭이면 클릭한 행이 이미 `context`로 온다 — 키보드/팔레트 실행이면 현재 선택의 첫 항목으로 대신한다. */
     const targetOf = (context: unknown): ContextMenuTarget | null => {
@@ -301,8 +308,8 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
     };
 
     commandCenterRegistry.registerCommand({
-      id: 'filesystem.delete',
-      label: '탐색기: 선택한 항목 삭제',
+      id: "filesystem.delete",
+      label: "탐색기: 선택한 항목 삭제",
       execute: (context) => {
         const target = targetOf(context);
         if (target === null) return;
@@ -311,15 +318,15 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
       },
     });
     commandCenterRegistry.registerKeybinding({
-      id: 'filesystem.delete.keybinding',
-      keybinding: 'delete',
-      actionId: 'filesystem.delete',
+      id: "filesystem.delete.keybinding",
+      keybinding: "delete",
+      actionId: "filesystem.delete",
       when: () => !this.#isTypingSurface(),
     });
 
     commandCenterRegistry.registerCommand({
-      id: 'filesystem.rename',
-      label: '탐색기: 선택한 항목 이름 바꾸기',
+      id: "filesystem.rename",
+      label: "탐색기: 선택한 항목 이름 바꾸기",
       execute: (context) => {
         // 여러 개를 동시에 같은 이름으로 바꿀 방법이 없다 — 정확히 하나일 때만 연다(키보드 경로).
         // 메뉴 경로는 위 doc의 "알려진 단순화" 참고.
@@ -331,15 +338,15 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
       },
     });
     commandCenterRegistry.registerKeybinding({
-      id: 'filesystem.rename.keybinding',
-      keybinding: 'f2',
-      actionId: 'filesystem.rename',
+      id: "filesystem.rename.keybinding",
+      keybinding: "f2",
+      actionId: "filesystem.rename",
       when: () => !this.#isTypingSurface(),
     });
 
     commandCenterRegistry.registerCommand({
-      id: 'filesystem.newFile',
-      label: '탐색기: 새 파일 만들기',
+      id: "filesystem.newFile",
+      label: "탐색기: 새 파일 만들기",
       execute: (context) => {
         this.setContextTarget(targetOf(context));
         this.requestNewFile();
@@ -348,8 +355,8 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
     // 새 파일/폴더는 기본 키바인딩을 안 둔다 — VSCode도 안 둔다(우클릭·팔레트로 충분히 닿는다).
 
     commandCenterRegistry.registerCommand({
-      id: 'filesystem.newFolder',
-      label: '탐색기: 새 폴더 만들기',
+      id: "filesystem.newFolder",
+      label: "탐색기: 새 폴더 만들기",
       execute: (context) => {
         this.setContextTarget(targetOf(context));
         this.requestNewFolder();
@@ -362,8 +369,8 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
      * 대상·클립보드 상태까지 포함한 온전한 구현은 이번 범위 밖이다(Port 확장이 먼저 필요).
      */
     commandCenterRegistry.registerCommand({
-      id: 'filesystem.copyPath',
-      label: '탐색기: 경로 복사',
+      id: "filesystem.copyPath",
+      label: "탐색기: 경로 복사",
       execute: (context) => {
         const target = targetOf(context);
         if (target === null) return;
@@ -376,19 +383,49 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
      * `CommandContextMenu`로 그린다. `group`은 VSCode 관례를 따른다 — `1_create`가 만들기,
      * `2_modify`가 변경, `9_danger`가 파괴적 동작(사전순으로 갈린다, `matchMenuItems` 참고).
      */
-    commandCenterRegistry.registerMenuItem({ id: 'filesystem.explorer.context.newFile', menuId: 'filesystem.explorer.context', commandId: 'filesystem.newFile', group: '1_create', order: 0 });
-    commandCenterRegistry.registerMenuItem({ id: 'filesystem.explorer.context.newFolder', menuId: 'filesystem.explorer.context', commandId: 'filesystem.newFolder', group: '1_create', order: 1 });
-    commandCenterRegistry.registerMenuItem({ id: 'filesystem.explorer.context.rename', menuId: 'filesystem.explorer.context', commandId: 'filesystem.rename', group: '2_modify', order: 0 });
-    commandCenterRegistry.registerMenuItem({ id: 'filesystem.explorer.context.delete', menuId: 'filesystem.explorer.context', commandId: 'filesystem.delete', group: '9_danger', order: 0 });
-    commandCenterRegistry.registerMenuItem({ id: 'filesystem.explorer.context.copyPath', menuId: 'filesystem.explorer.context', commandId: 'filesystem.copyPath', group: '3_copy', order: 0 });
+    commandCenterRegistry.registerMenuItem({
+      id: "filesystem.explorer.context.newFile",
+      menuId: "filesystem.explorer.context",
+      commandId: "filesystem.newFile",
+      group: "1_create",
+      order: 0,
+    });
+    commandCenterRegistry.registerMenuItem({
+      id: "filesystem.explorer.context.newFolder",
+      menuId: "filesystem.explorer.context",
+      commandId: "filesystem.newFolder",
+      group: "1_create",
+      order: 1,
+    });
+    commandCenterRegistry.registerMenuItem({
+      id: "filesystem.explorer.context.rename",
+      menuId: "filesystem.explorer.context",
+      commandId: "filesystem.rename",
+      group: "2_modify",
+      order: 0,
+    });
+    commandCenterRegistry.registerMenuItem({
+      id: "filesystem.explorer.context.delete",
+      menuId: "filesystem.explorer.context",
+      commandId: "filesystem.delete",
+      group: "9_danger",
+      order: 0,
+    });
+    commandCenterRegistry.registerMenuItem({
+      id: "filesystem.explorer.context.copyPath",
+      menuId: "filesystem.explorer.context",
+      commandId: "filesystem.copyPath",
+      group: "3_copy",
+      order: 0,
+    });
   }
 
   /** `parentId 안에 새로 만든다`는 우클릭한 대상이 폴더면 그 안, 파일이면 그 부모, 빈 곳이면 루트다. */
   #parentIdFor(target: ContextMenuTarget | null): string {
-    if (target === null) return '';
-    if (target.type === 'folder') return target.id;
-    const slash = target.id.lastIndexOf('/');
-    return slash === -1 ? '' : target.id.slice(0, slash);
+    if (target === null) return "";
+    if (target.type === "folder") return target.id;
+    const slash = target.id.lastIndexOf("/");
+    return slash === -1 ? "" : target.id.slice(0, slash);
   }
 
   #reportFailure(verb: string): (error: unknown) => void {
@@ -406,15 +443,15 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
     if (node === undefined) return [];
 
     return node.entries.map((entry) => {
-      const id = path === '' ? entry.name : `${path}/${entry.name}`;
-      if (entry.type === 'file') return { id, name: entry.name, type: 'file' as const };
+      const id = path === "" ? entry.name : `${path}/${entry.name}`;
+      if (entry.type === "file") return { id, name: entry.name, type: "file" as const };
       return {
         id,
         name: entry.name,
-        type: 'folder' as const,
+        type: "folder" as const,
         // 읽는 중이면 **그 폴더 행 자체가** 돈다 — 자식 행으로 흉내내면 진짜 파일과 구분되지 않는다.
         // **펼친 것만 돈다**: 프리페치까지 돌면 루트를 연 직후 폴더 24개가 한꺼번에 돌아 버벅여 보인다.
-        loading: expanded.has(id) && directories[id]?.status === 'loading',
+        loading: expanded.has(id) && directories[id]?.status === "loading",
         children: this.#folderChildren(directories, expanded, id),
       };
     });
@@ -431,8 +468,8 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
   #folderChildren(directories: DirectoryMap, expanded: ReadonlySet<string>, id: string): readonly FileTreeRow[] {
     const node = directories[id];
     if (node === undefined) return [];
-    if (node.status === 'error') {
-      return [{ id: `${id}/…`, name: node.failure ?? '읽지 못했다', type: 'file', disabled: true }];
+    if (node.status === "error") {
+      return [{ id: `${id}/…`, name: node.failure ?? "읽지 못했다", type: "file", disabled: true }];
     }
     return this.#childrenOf(directories, expanded, id);
   }
@@ -447,9 +484,9 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
    * 보이는 것은 이 구조적 위험을 피하기 위한 의도적인 절충이다.
    */
   #withEditingGhost(rows: readonly FileTreeRow[], editing: EditingEntry | null): readonly FileTreeRow[] {
-    if (editing === null || editing.kind === 'rename') return rows;
-    const ghost: FileTreeRow = { id: GHOST_ID, name: '', type: 'file' };
-    if (editing.parentId === '') return [...rows, ghost];
+    if (editing === null || editing.kind === "rename") return rows;
+    const ghost: FileTreeRow = { id: GHOST_ID, name: "", type: "file" };
+    if (editing.parentId === "") return [...rows, ghost];
     return rows.map((row) => {
       if (row.id === editing.parentId) return { ...row, children: [...(row.children ?? []), ghost] };
       if (row.children === undefined) return row;
@@ -473,7 +510,7 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
 
   #computeRows(): readonly FileTreeRow[] {
     return this.#withEditingGhost(
-      this.#childrenOf(this.#model.directories, new Set(this.#model.expanded), ''),
+      this.#childrenOf(this.#model.directories, new Set(this.#model.expanded), ""),
       this.#editingEntry.get(),
     );
   }
@@ -481,11 +518,11 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
   /** 아직 아무 요청도 안 나갔으면 `idle` — 그 상태의 화면은 `loading`과 같지만, 둘을 합치면
    *  "다 읽었는데 비어 있음"까지 같이 뭉개진다. */
   #computeStatus() {
-    return this.#model.directories['']?.status ?? 'idle';
+    return this.#model.directories[""]?.status ?? "idle";
   }
 
   #computeFailure(): string | null {
-    return this.#model.directories['']?.failure ?? null;
+    return this.#model.directories[""]?.failure ?? null;
   }
 
   /** `contextTarget`이 지금 선택 안에 있으면 선택 전체, 아니면 그 행 하나다. */
@@ -499,5 +536,4 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
       return row === undefined ? [] : [this.#toContextMenuTarget(row)];
     });
   }
-
 }

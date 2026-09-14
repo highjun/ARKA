@@ -32,7 +32,10 @@ for (const id of storyIds) {
     // 그때까지 기준이 없는 것은 정상이라 건너뛴다 — 아무도 안 본 그림을 기준으로 삼으면 "검토 안 함"이
     // "승인됨"으로 기록된다. 다만 기준을 만들러 온 실행에서는 건너뛰면 안 되므로,
     // 기본값(`updateSnapshots: "none"`)일 때만 건너뛴다.
-    test.skip(!existsSync(baselineOf(id)) && testInfo.config.updateSnapshots === "none", "기준 이미지 없음 — 검토에서 승인되지 않은 스토리다");
+    test.skip(
+      !existsSync(baselineOf(id)) && testInfo.config.updateSnapshots === "none",
+      "기준 이미지 없음 — 검토에서 승인되지 않은 스토리다",
+    );
     await page.goto(`/iframe.html?id=${id}&viewMode=story`);
     await page.locator("#storybook-root").waitFor({ state: "visible" });
     await expect(page.locator("#storybook-root")).toHaveScreenshot(`${id}.png`);

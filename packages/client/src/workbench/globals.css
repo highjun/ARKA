@@ -1,6 +1,6 @@
 /* Font Family Hosting: Pretendard for Sans, Cascadia Code for Monospace */
-@import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
-@import '@fontsource-variable/cascadia-code';
+@import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
+@import "@fontsource-variable/cascadia-code";
 
 /*
  * `@primer/primitives` 토큰 CSS — 이걸 아무도 import 한 적이 없었다(2026-08-23 발견). 그동안
@@ -12,10 +12,10 @@
  * 선택자와 맞물린다(기본값 둘 다 `light`/`dark` — `useThemeProvider`의 `defaultDayScheme`/
  * `defaultNightScheme` 확인).
  */
-@import '@primer/primitives/dist/css/primitives.css';
-@import '@primer/primitives/dist/css/functional/themes/light.css';
-@import '@primer/primitives/dist/css/functional/themes/dark.css';
-@import './reset.css';
+@import "@primer/primitives/dist/css/primitives.css";
+@import "@primer/primitives/dist/css/functional/themes/light.css";
+@import "@primer/primitives/dist/css/functional/themes/dark.css";
+@import "./reset.css";
 
 /*
  * 밀도 토큰 — 셸이 `<html data-density>`로 정하고(설정 → DocumentDensity 기여) 컴포넌트는 변수만 본다.
@@ -25,6 +25,6 @@
   --arka-row-height: 28px;
 }
 
-[data-density='touch'] {
+[data-density="touch"] {
   --arka-row-height: 44px;
 }

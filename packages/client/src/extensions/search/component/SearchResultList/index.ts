@@ -1,7 +1,2 @@
-export { SearchResultList } from './SearchResultList';
-export type {
-  SearchResultFile,
-  SearchResultListItemProps,
-  SearchResultListProps,
-  SearchResultMatch,
-} from './SearchResultList';
+export { SearchResultList } from "./SearchResultList";
+export type {} from "./SearchResultList";

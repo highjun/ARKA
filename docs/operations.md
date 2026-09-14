@@ -3,14 +3,14 @@
 실배포는 **사용자 PC 한 대**에서 돈다. 이 문서는 그것을 다시 세우거나 고치는 사람을
 위한 것이다. 왜 이 모양인지는 [ADR 0006](adr/0006-deploy-shape.md)에 있다.
 
-```
+```text
 GitHub ──▶ self-hosted 러너 ──▶ docker compose ──▶ cloudflared 터널 ──▶ Cloudflare Access ──▶ 사람
 ```
 
 ## 지금 도는 것
 
 | | |
-|---|---|
+| --- | --- |
 | 실배포 | compose 프로젝트 `arka`(`arka-app` + `arka-tunnel`). 호스트 이름은 `ARKA_ORIGIN`에 있다 |
 | 정본 | `ops/deploy/compose.yml` **한 장.** 로컬·CI·실배포가 같은 파일로 뜬다 |
 | 이미지 | `ghcr.io/highjun/arka:<커밋 SHA>`. **CI가 굽고 검사한 그것**을 러너가 당겨 띄운다 |
@@ -144,8 +144,8 @@ systemctl --user daemon-reload && systemctl --user enable --now arka-runner
 
 ## 저장소 쪽에서 필요한 것
 
-| | |
-|---|---|
+| 무엇 | 값 |
+| --- | --- |
 | 러너 라벨 | `self-hosted`, `linux`, `arka` |
 
 `main`은 룰셋이 지킨다(2026-09-13, 저장소 공개 뒤) — PR 필수, 승인 1, 코드 오너 리뷰, 필수 검사 `check`,

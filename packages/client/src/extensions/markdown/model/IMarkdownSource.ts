@@ -1,4 +1,4 @@
-import { createToken } from '#core/di';
+import { createToken } from "#core/di";
 
 /** 이 익스텐션이 파일에서 필요한 것 — 내용 하나. `filesystem`의 `FileContent`와 모양이 겹치지만 여기서 다시 선언한다(슬라이스끼리 import하지 않는다). */
 export type MarkdownDocument = {
@@ -7,7 +7,7 @@ export type MarkdownDocument = {
   readonly truncated: boolean;
 };
 
-export const MarkdownSourceToken = createToken<IMarkdownSource>('markdownSource');
+export const MarkdownSourceToken = createToken<IMarkdownSource>("markdownSource");
 /**
  * 마크다운 파일을 읽고 바뀜을 듣는 통로. 조립부가 `filesystem`의 포트를 이 모양으로 감싸 넘긴다 —
  * 익스텐션끼리는 서로 모르고 조립부만 둘을 안다.

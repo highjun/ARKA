@@ -1,6 +1,6 @@
-import type { Disposable } from '#core/di';
-import { Emitter } from '#core/events';
-import type { INotificationService, Notification, NotificationSeverity } from './INotificationService';
+import type { Disposable } from "#core/di";
+import { Emitter } from "#core/events";
+import type { INotificationService, Notification, NotificationSeverity } from "./INotificationService";
 
 /** `INotificationService`의 유일한 구현체. 최근 `MAX`개만 남긴다 — 그 이상은 어차피 못 읽는다. */
 export class NotificationService implements INotificationService {
@@ -12,7 +12,10 @@ export class NotificationService implements INotificationService {
   #notifications: readonly Notification[] = [];
 
   /** `now`·`newId`를 받는 이유는 테스트가 시각과 식별자를 붙잡기 위해서다. */
-  constructor({ now = () => Date.now(), newId = () => crypto.randomUUID() }: { now?: () => number; newId?: () => string } = {}) {
+  constructor({
+    now = () => Date.now(),
+    newId = () => crypto.randomUUID(),
+  }: { now?: () => number; newId?: () => string } = {}) {
     this.#now = now;
     this.#newId = newId;
   }

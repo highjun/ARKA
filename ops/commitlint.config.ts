@@ -15,9 +15,7 @@ const config: UserConfig = {
   extends: ["@commitlint/config-conventional"],
   rules: {
     // 되돌리기(`revert`)까지 포함한 열 가지. 이 저장소에 없는 타입(`style`·`wip`)은 뺐다.
-    "type-enum": [2, "always", [
-      "feat", "fix", "refactor", "perf", "docs", "test", "build", "ci", "chore", "revert",
-    ]],
+    "type-enum": [2, "always", ["feat", "fix", "refactor", "perf", "docs", "test", "build", "ci", "chore", "revert"]],
     // 워크스페이스 패키지 이름과 `repo`(루트 설정·문서·`.github`)만. 오타 scope를 잡는 것이 목적이다.
     "scope-enum": [2, "always", ["contracts", "client", "server", "ops", "repo"]],
     // scope는 선택이다 — 여러 패키지에 걸친 변경에 억지로 하나를 고르게 하지 않는다.

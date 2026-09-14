@@ -25,10 +25,12 @@
 - 슬라이스가 서로를 모르니 **둘이 같은 것을 쓰려면 먼저 위로 올려야 한다**. 올릴 자리를 고르는 판단이 매번 든다.
 
 ## 강제:
-- **린트** `import-x/no-restricted-paths` — 슬라이스끼리의 import를 막는다(zone에 슬라이스를 열거한다).
+- **린트** `import-x/no-restricted-paths` — 슬라이스끼리의 import, **계층의 방향**(계층마다 볼 수 있는 것을 `LAYER_ALLOW`가 든다), `shared/`의 고립, `core/`의 도메인 무지를 막는다. zone에 슬라이스를 열거한다. **client·server 둘 다** — server는 2026-09-14까지 비어 있었다.
+- **린트** `no-restricted-globals` — `model/`·`viewmodel/`이 플랫폼(fetch·window·document·navigator·스토리지)에 직접 닿는 것을 막는다. 조립부가 얇은 함수로 주입한다.
 - **린트** `@typescript-eslint/no-restricted-imports` — `model/`의 상태 라이브러리·React를 막는다. `import type`은 허용한다 — 컴파일에서 지워져 결합이 아니다.
 - **린트** `no-restricted-syntax` — `view/`에서 `useViewModel` 아닌 훅과 DI 접근을 막는다.
+- **테스트** `packages/server/test/structure.test.ts` — 슬라이스마다 배럴이 있고, 슬라이스 안의 폴더가 정해진 계층 다섯뿐이고, 빈 계층 폴더가 없기를 요구한다.
 - **리뷰** — "이 조각이 도메인을 모르는가"와 "이것을 위로 올릴 자리가 맞는가"는 사람만 판정한다.
 
 ## 상태:
-승인됨 (2026-09-14, 사후 기록). 2026-09-12에 지워진 결정을 강제와 함께 되세운 것이다.
+승인됨 (2026-09-14, 사후 기록). 같은 날 개정 — server를 client와 같은 선으로 올리고 `runtime/`을 계층 목록에 적었다.

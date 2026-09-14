@@ -1,8 +1,8 @@
-import { useViewModel } from '#core/viewmodel';
-import { Banner } from '@primer/react';
-import { TextEditor } from '../component/TextEditor';
-import { FileContentViewModelToken } from '../viewmodel/IFileContentViewModel';
-import styles from './FileContentView.module.css';
+import { useViewModel } from "#core/viewmodel";
+import { Banner } from "@primer/react";
+import { TextEditor } from "../component/TextEditor";
+import { FileContentViewModelToken } from "../viewmodel/IFileContentViewModel";
+import styles from "./FileContentView.module.css";
 
 /**
  * 어느 파일인지는 **props 로 받는다** — 탭 하나가 파일 하나이고, 어느 탭이 열려 있는지는 Shell 이
@@ -17,7 +17,13 @@ import styles from './FileContentView.module.css';
  * 안내 한 줄뿐이다. **편집·저장은 `TextEditor`에 그대로 위임한다** — 버퍼 관리·저장 버튼·Ctrl+S는
  * 전부 그 컴포넌트가 갖고, 여기서는 ViewModel이 이미 접어 준 값을 그대로 넘길 뿐이다.
  */
-export const FileContentView = ({ path, reveal = null }: { readonly path: string; readonly reveal?: { readonly line: number; readonly column: number; readonly seq: number } | null }) => {
+export const FileContentView = ({
+  path,
+  reveal = null,
+}: {
+  readonly path: string;
+  readonly reveal?: { readonly line: number; readonly column: number; readonly seq: number } | null;
+}) => {
   const viewModel = useViewModel(FileContentViewModelToken);
   viewModel.openFile(path);
 
@@ -27,13 +33,13 @@ export const FileContentView = ({ path, reveal = null }: { readonly path: string
   const loading = row === undefined || row.loading;
 
   return (
-    <div className={styles['root']}>
+    <div className={styles["root"]}>
       {row?.notice == null ? null : <Banner variant="info" title={row.notice} layout="compact" />}
       <TextEditor
-        className={styles['textEditor']}
+        className={styles["textEditor"]}
         chrome="none"
         path={path}
-        content={row?.content ?? ''}
+        content={row?.content ?? ""}
         readOnly={row?.readOnly ?? true}
         onChange={(content) => viewModel.editFile(path, content)}
         onSave={() => viewModel.saveFile(path)}

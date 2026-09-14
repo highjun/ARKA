@@ -1,8 +1,8 @@
-import type { Disposable } from '#core/di';
-import { Emitter } from '#core/events';
-import type { IWorkspaceFiles } from '../model/IWorkspaceFiles';
-import type { IWorkspaceWatch, WorkspaceWatchUnsubscribe } from '../model/IWorkspaceWatch';
-import type { IFileContentModel, OpenFile, OpenFileMap } from './IFileContentModel';
+import type { Disposable } from "#core/di";
+import { Emitter } from "#core/events";
+import type { IWorkspaceFiles } from "../model/IWorkspaceFiles";
+import type { IWorkspaceWatch, WorkspaceWatchUnsubscribe } from "../model/IWorkspaceWatch";
+import type { IFileContentModel, OpenFile, OpenFileMap } from "./IFileContentModel";
 
 /** `IFileContentModel`을 구현한다 — 열린 파일 집합 변화에 debounce된 감시 재구독을 붙인다. */
 export class FileContentModel implements IFileContentModel {
@@ -44,7 +44,7 @@ export class FileContentModel implements IFileContentModel {
    */
   async open(path: string): Promise<void> {
     const known = this.#open[path];
-    if (known !== undefined && known.status !== 'error') return;
+    if (known !== undefined && known.status !== "error") return;
     await this.reload(path);
     this.#rewatch();
   }
@@ -53,38 +53,38 @@ export class FileContentModel implements IFileContentModel {
   async reload(path: string): Promise<void> {
     this.#write({
       path,
-      status: 'loading',
-      savedContent: '',
-      content: '',
+      status: "loading",
+      savedContent: "",
+      content: "",
       truncated: false,
       binary: false,
       failure: null,
-      saveStatus: 'idle',
+      saveStatus: "idle",
       saveFailure: null,
     });
     try {
       const file = await this.#files.read(path);
       this.#write({
         path,
-        status: 'loaded',
+        status: "loaded",
         savedContent: file.content,
         content: file.content,
         truncated: file.truncated,
-        binary: file.encoding === 'binary',
+        binary: file.encoding === "binary",
         failure: null,
-        saveStatus: 'idle',
+        saveStatus: "idle",
         saveFailure: null,
       });
     } catch (error) {
       this.#write({
         path,
-        status: 'error',
-        savedContent: '',
-        content: '',
+        status: "error",
+        savedContent: "",
+        content: "",
         truncated: false,
         binary: false,
         failure: error instanceof Error ? error.message : String(error),
-        saveStatus: 'idle',
+        saveStatus: "idle",
         saveFailure: null,
       });
     }
@@ -111,22 +111,22 @@ export class FileContentModel implements IFileContentModel {
    */
   async save(path: string): Promise<void> {
     const file = this.#editable(path);
-    if (file === undefined || file.saveStatus === 'saving' || file.content === file.savedContent) return;
+    if (file === undefined || file.saveStatus === "saving" || file.content === file.savedContent) return;
 
     const sent = file.content;
-    this.#write({ ...file, saveStatus: 'saving', saveFailure: null });
+    this.#write({ ...file, saveStatus: "saving", saveFailure: null });
     try {
       await this.#files.write(path, sent);
       const latest = this.#open[path];
       // 저장 중에 탭이 닫혔다
       if (latest === undefined) return;
-      this.#write({ ...latest, savedContent: sent, saveStatus: 'idle', saveFailure: null });
+      this.#write({ ...latest, savedContent: sent, saveStatus: "idle", saveFailure: null });
     } catch (error) {
       const latest = this.#open[path];
       if (latest === undefined) return;
       this.#write({
         ...latest,
-        saveStatus: 'error',
+        saveStatus: "error",
         saveFailure: error instanceof Error ? error.message : String(error),
       });
     }
@@ -203,7 +203,7 @@ export class FileContentModel implements IFileContentModel {
   /** `edit`·`save` 가 공유하는 자격 검사 — 다 읽혔고, 잘리지 않았고, 텍스트인 파일만 통과한다. */
   #editable(path: string): OpenFile | undefined {
     const file = this.#open[path];
-    if (file === undefined || file.status !== 'loaded' || file.truncated || file.binary) return undefined;
+    if (file === undefined || file.status !== "loaded" || file.truncated || file.binary) return undefined;
     return file;
   }
 
@@ -225,10 +225,8 @@ export class FileContentModel implements IFileContentModel {
     this.#changed.fire();
   }
 
-
   /** 상태가 바뀔 때마다 부른다. 돌려받은 `dispose()`로 끊는다. */
   onDidChange(listener: () => void): Disposable {
     return this.#changed.event(listener);
   }
-
 }

@@ -23,7 +23,11 @@ describe("createRequestLog", () => {
   it("요청마다 method·path·status·ms를 한 줄 남긴다", async () => {
     const { app, lines } = capture();
     await app.request("/ok");
-    expect(lines[0]).toMatchObject({ level: "info", event: "request", fields: { method: "GET", path: "/ok", status: 200, user: null } });
+    expect(lines[0]).toMatchObject({
+      level: "info",
+      event: "request",
+      fields: { method: "GET", path: "/ok", status: 200, user: null },
+    });
     expect(typeof lines[0]?.fields?.["ms"]).toBe("number");
   });
 

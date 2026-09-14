@@ -12,19 +12,19 @@
   padding: 0 var(--space-sm);
 }
 
-.line[data-kind='add'] {
+.line[data-kind="add"] {
   background-color: var(--bgColor-success-muted);
 }
 
-.line[data-kind='del'] {
+.line[data-kind="del"] {
   background-color: var(--bgColor-danger-muted);
 }
 
-.line[data-kind='hunk'] {
+.line[data-kind="hunk"] {
   color: var(--fgColor-accent);
   background-color: var(--bgColor-accent-muted);
 }
 
-.line[data-kind='meta'] {
+.line[data-kind="meta"] {
   color: var(--fgColor-muted);
 }

@@ -1,4 +1,4 @@
-import { createToken } from '#core/di';
+import { createToken } from "#core/di";
 /**
  * 화면이 그리는 트리.
  *
@@ -14,7 +14,7 @@ export type FileTreeRow = {
   /** 워크스페이스 루트 기준 경로. 트리에서 유일하다. */
   readonly id: string;
   readonly name: string;
-  readonly type: 'folder' | 'file';
+  readonly type: "folder" | "file";
   /** 자리 표시(아직 안 읽음·빈 폴더)라 누를 수 없다. */
   readonly disabled?: boolean;
   /** 자식을 읽어 오는 중 — 그 폴더 행 자체가 돈다. */
@@ -28,7 +28,7 @@ export type FileTreeRow = {
  * **비어 있는 것과 읽는 중인 것은 다르다.** 예전에는 둘을 구분하지 않고 "행이 없으면 읽는 중"
  * 이라고 적어서, 워크스페이스가 정말 비어 있으면 "읽는 중…" 이 영원히 남았다.
  */
-export type DirectoryTreeStatus = 'idle' | 'loading' | 'loaded' | 'error';
+export type DirectoryTreeStatus = "idle" | "loading" | "loaded" | "error";
 
 /**
  * 우클릭 메뉴·삭제 확인이 다루는 최소 정보 — "무슨 행인가"만 있으면 된다.
@@ -40,7 +40,7 @@ export type DirectoryTreeStatus = 'idle' | 'loading' | 'loaded' | 'error';
 export type ContextMenuTarget = {
   readonly id: string;
   readonly name: string;
-  readonly type: 'folder' | 'file';
+  readonly type: "folder" | "file";
 };
 
 /**
@@ -49,8 +49,8 @@ export type ContextMenuTarget = {
  * 임시 행을 그 부모의 자식 목록 끝에 끼워 넣어 표현한다(`#withEditingGhost`).
  */
 export type EditingEntry =
-  | { readonly kind: 'rename'; readonly id: string; readonly initialValue: string }
-  | { readonly kind: 'newFile' | 'newFolder'; readonly parentId: string };
+  | { readonly kind: "rename"; readonly id: string; readonly initialValue: string }
+  | { readonly kind: "newFile" | "newFolder"; readonly parentId: string };
 
 export const DirectoryTreeViewModelToken = createToken<IDirectoryTreeViewModel>("directoryTreeViewModel");
 /**
@@ -89,7 +89,7 @@ export interface IDirectoryTreeViewModel {
    * 넷 다 실패를 던진다(`void` 로 삼키지 않는다) — 호출부(`confirmPrompt`/`confirmDelete`)가
    * 실패를 `failure`로 옮겨 담는다. 직접 부르는 테스트는 여전히 거절을 그대로 받는다.
    */
-  createEntry(parentId: string, name: string, type: 'folder' | 'file'): Promise<void>;
+  createEntry(parentId: string, name: string, type: "folder" | "file"): Promise<void>;
   renameEntry(id: string, newName: string): Promise<void>;
   removeEntry(id: string): Promise<void>;
   /**

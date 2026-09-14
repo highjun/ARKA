@@ -1,6 +1,6 @@
 /* `chrome` 변형 — 클래스 합성이 아니라 루트의 `data-chrome`이 고른다(→ ADR 0008). 프레임이
    붙는 자리는 단일 그룹(`.group`)과 분할 루트(`.splitRoot*`) 셋뿐이다. */
-[data-chrome='bordered'] {
+[data-chrome="bordered"] {
   border-radius: var(--borderRadius-small);
   border-style: solid;
   border-width: var(--borderWidth-thin);
@@ -322,19 +322,19 @@
   pointer-events: none;
 }
 
-.panelDropIndicator[data-position='left'] {
+.panelDropIndicator[data-position="left"] {
   right: 50%;
 }
 
-.panelDropIndicator[data-position='right'] {
+.panelDropIndicator[data-position="right"] {
   left: 50%;
 }
 
-.panelDropIndicator[data-position='top'] {
+.panelDropIndicator[data-position="top"] {
   bottom: 50%;
 }
 
-.panelDropIndicator[data-position='bottom'] {
+.panelDropIndicator[data-position="bottom"] {
   top: 50%;
 }
 
@@ -448,7 +448,7 @@
 }
 
 .resizeHandle::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -461,7 +461,7 @@
   box-shadow: var(--shadow-resting-small);
 }
 
-.resizeHandle[data-orientation='horizontal'] {
+.resizeHandle[data-orientation="horizontal"] {
   top: 0;
   right: 0;
   transform: translateX(50%);
@@ -470,12 +470,12 @@
   cursor: col-resize;
 }
 
-.resizeHandle[data-orientation='horizontal']::after {
+.resizeHandle[data-orientation="horizontal"]::after {
   width: 4px;
   height: var(--control-small-size);
 }
 
-.resizeHandle[data-orientation='vertical'] {
+.resizeHandle[data-orientation="vertical"] {
   bottom: 0;
   left: 0;
   transform: translateY(50%);
@@ -484,7 +484,7 @@
   cursor: row-resize;
 }
 
-.resizeHandle[data-orientation='vertical']::after {
+.resizeHandle[data-orientation="vertical"]::after {
   width: var(--control-small-size);
   height: 4px;
 }
@@ -510,7 +510,7 @@
 }
 
 .stripScrollHandle::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;

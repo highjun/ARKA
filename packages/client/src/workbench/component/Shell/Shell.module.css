@@ -21,11 +21,11 @@
  * collapse도 안 끊는다) 앞서 겪은 부수 피해가 없다. `:has()`가 전부 "Shell을 담고 있을 때만"으로
  * 좁혀 걸려 있어 Shell이 없는 스토리는 이 규칙 자체가 매치되지 않는다.
  */
-:global(:has(> [data-component='ThemeProvider']:has([data-component='Shell']))) {
+:global(:has(> [data-component="ThemeProvider"]:has([data-component="Shell"]))) {
   position: relative;
 }
 
-:global([data-component='ThemeProvider']:has([data-component='Shell'])) {
+:global([data-component="ThemeProvider"]:has([data-component="Shell"])) {
   position: absolute;
   inset: 0;
 }

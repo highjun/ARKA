@@ -1,8 +1,8 @@
-import type { Disposable } from '#core/di';
-import { Emitter } from '#core/events';
-import type { GitFileStatus } from '#contracts';
-import { diffKeyOf, type DiffEntry, type GitLoadStatus, type IGitModel } from './IGitModel';
-import type { IGitService } from './IGitService';
+import type { Disposable } from "#core/di";
+import { Emitter } from "#core/events";
+import type { GitFileStatus } from "#contracts";
+import { diffKeyOf, type DiffEntry, type GitLoadStatus, type IGitModel } from "./IGitModel";
+import type { IGitService } from "./IGitService";
 
 const messageOf = (error: unknown): string => (error instanceof Error ? error.message : String(error));
 
@@ -13,7 +13,7 @@ export class GitModel implements IGitModel {
   #repository = false;
   #branch: string | null = null;
   #files: readonly GitFileStatus[] = [];
-  #status: GitLoadStatus = 'idle';
+  #status: GitLoadStatus = "idle";
   #failure: string | null = null;
   #diffs: Readonly<Record<string, DiffEntry>> = {};
 
@@ -54,17 +54,17 @@ export class GitModel implements IGitModel {
 
   /** 실패해도 던지지 않는다 — `status`가 `error`가 되고 `failure`에 남는다. */
   async refresh(): Promise<void> {
-    this.#status = 'loading';
+    this.#status = "loading";
     this.#changed.fire();
     try {
       const result = await this.#service.status();
       this.#repository = result.repository;
       this.#branch = result.branch;
       this.#files = result.files;
-      this.#status = 'loaded';
+      this.#status = "loaded";
       this.#failure = null;
     } catch (error) {
-      this.#status = 'error';
+      this.#status = "error";
       this.#failure = messageOf(error);
     }
     this.#changed.fire();
@@ -92,11 +92,11 @@ export class GitModel implements IGitModel {
   /** 읽는 동안 직전 텍스트를 유지한다. 실패하면 그 항목만 `error`가 된다. */
   async loadDiff(path: string, staged: boolean): Promise<void> {
     const key = diffKeyOf(path, staged);
-    this.#setDiff(key, { status: 'loading', text: this.#diffs[key]?.text ?? '', failure: null });
+    this.#setDiff(key, { status: "loading", text: this.#diffs[key]?.text ?? "", failure: null });
     try {
-      this.#setDiff(key, { status: 'loaded', text: await this.#service.diff(path, staged), failure: null });
+      this.#setDiff(key, { status: "loaded", text: await this.#service.diff(path, staged), failure: null });
     } catch (error) {
-      this.#setDiff(key, { status: 'error', text: '', failure: messageOf(error) });
+      this.#setDiff(key, { status: "error", text: "", failure: messageOf(error) });
     }
   }
 

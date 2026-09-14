@@ -1,14 +1,37 @@
-import { createContext, useContext } from 'react';
-import type { CSSProperties, Dispatch, DragEventHandler, FocusEventHandler, HTMLAttributes, KeyboardEventHandler, MutableRefObject, PointerEventHandler, ReactNode, Ref, RefCallback, SetStateAction } from 'react';
-import { clsx } from 'clsx';
-import { getRootLeafState, useSplitBranch, useTabSplit } from './useTabSplit';
-import type { SplitDropPosition, SplitEdgeDropPosition, TabChrome, TabClassNames, TabDropZone, TabGroupItem, TabId, TabItem, TabSplitOrientation } from './shared';
-import { ClassNamesContext, useTabClassNames } from './TabContext';
-import { GroupImpl } from './Group';
+import { createContext, useContext } from "react";
+import type {
+  CSSProperties,
+  ComponentPropsWithoutRef,
+  Dispatch,
+  DragEventHandler,
+  FocusEventHandler,
+  KeyboardEventHandler,
+  MutableRefObject,
+  PointerEventHandler,
+  ReactNode,
+  Ref,
+  RefCallback,
+  SetStateAction,
+} from "react";
+import { clsx } from "clsx";
+import { getRootLeafState, useSplitBranch, useTabSplit } from "./useTabSplit";
+import type {
+  SplitDropPosition,
+  SplitEdgeDropPosition,
+  TabChrome,
+  TabClassNames,
+  TabDropZone,
+  TabGroupItem,
+  TabId,
+  TabItem,
+  TabSplitOrientation,
+} from "./shared";
+import { ClassNamesContext, useTabClassNames } from "./TabContext";
+import { GroupImpl } from "./Group";
 
 /** 잎은 탭 그룹 하나다. `size`는 형제 사이의 비율(%)이다. */
 export interface TabTreeLeaf {
-  readonly kind: 'leaf';
+  readonly kind: "leaf";
   readonly id: string;
   readonly activeTab: TabId;
   readonly tabItems: readonly TabGroupItem[];
@@ -17,7 +40,7 @@ export interface TabTreeLeaf {
 
 /** 가지는 방향과 자식만 갖는다 — 자식이 또 가지일 수 있어 재귀다. */
 export interface TabTreeSplit {
-  readonly kind: 'split';
+  readonly kind: "split";
   readonly id: string;
   readonly orientation: TabSplitOrientation;
   readonly children: readonly TabTreeNode[];
@@ -28,7 +51,7 @@ export interface TabTreeSplit {
 export type TabTreeNode = TabTreeLeaf | TabTreeSplit;
 
 /** 드래그 핸들러를 가로챈다 — 분할·재정렬을 이 컴포넌트가 직접 다룬다. */
-export interface TabSplitProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'onDragStart' | 'onDrop'> {
+export interface TabSplitProps extends Omit<ComponentPropsWithoutRef<"div">, "children" | "onDragStart" | "onDrop"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLElement>;
   /** 분할 레이아웃 자체 — 리프(탭 그룹)와 가지(분할 방향+자식)가 재귀적으로 중첩된다. */
@@ -81,7 +104,7 @@ export interface SplitLeafHandlers {
 }
 
 /** 나누는 선(버튼)이 받는 핸들러 — 포인터와 키보드 둘 다로 크기를 바꾼다. */
-export interface SplitResizeHandlers {
+interface SplitResizeHandlers {
   readonly onPointerEnter: PointerEventHandler<HTMLElement>;
   readonly onPointerLeave: PointerEventHandler<HTMLElement>;
   readonly onFocus: FocusEventHandler<HTMLElement>;
@@ -106,14 +129,6 @@ export interface SplitChildState {
   readonly resizeHandlers: SplitResizeHandlers;
 }
 
-/** 가지 하나가 그릴 때 보는 파생 상태. `ref`는 크기 계산에 실제 픽셀이 필요해서 든다. */
-export interface SplitBranchState {
-  readonly ref: MutableRefObject<HTMLElement | null>;
-  readonly orientation: TabSplitOrientation;
-  readonly disabledResize: boolean;
-  readonly childStates: readonly SplitChildState[];
-}
-
 /** 트리 전체가 잎 하나일 때 — 가지가 없어 나누는 선도 없다. */
 export interface SplitRootLeafState {
   readonly node: TabTreeLeaf;
@@ -125,8 +140,8 @@ export interface SplitRootLeafState {
 
 /** `strip`에는 위치가 없다 — 스트립 자체의 표시는 `StripDropIndicator`가 든다. */
 export type SplitDropIndicator =
-  | { readonly leafId: string; readonly zone: 'panel'; readonly position: SplitDropPosition }
-  | { readonly leafId: string; readonly zone: 'strip' };
+  | { readonly leafId: string; readonly zone: "panel"; readonly position: SplitDropPosition }
+  | { readonly leafId: string; readonly zone: "strip" };
 
 /** 분할이 자식들에게 내려보내는 것 전부. `visibleTree`는 드래그 중 미리보기가 반영된 트리다. */
 export interface SplitContextValue {
@@ -154,7 +169,7 @@ const mergeRefs =
   (node) => {
     for (const ref of refs) {
       if (ref == null) continue;
-      if (typeof ref === 'function') ref(node);
+      if (typeof ref === "function") ref(node);
       else (ref as MutableRefObject<T | null>).current = node;
     }
   };
@@ -162,15 +177,18 @@ const mergeRefs =
 // ─────────────────────────── TabSplit leaf → TabGroup 콜백 바인딩 ───────────────────────────
 
 /** TabSplit 의 leaf 하나가 자기 id 를 미리 채운 채로 안쪽 TabGroup 에 콜백을 넘긴다(LeafSection/RootLeafSection 공용). */
-const handleLeafTabClick = (onTabClick: (leafId: string, tabId: TabId) => void, leafId: string) => (tabId: TabId) => onTabClick(leafId, tabId);
+const handleLeafTabClick = (onTabClick: (leafId: string, tabId: TabId) => void, leafId: string) => (tabId: TabId) =>
+  onTabClick(leafId, tabId);
 
 const handleLeafMenuClick = (onMenuClick: (leafId: string) => void, leafId: string) => () => onMenuClick(leafId);
 
 const handleLeafTabClose = (onTabClose: ((leafId: string, tabId: TabId) => void) | undefined, leafId: string) =>
   onTabClose ? (tabId: TabId) => onTabClose(leafId, tabId) : undefined;
 
-const handleLeafTabReorder = (onTabReorder: ((leafId: string, nextItems: TabGroupItem[]) => void) | undefined, leafId: string) =>
-  onTabReorder ? (nextItems: TabGroupItem[]) => onTabReorder(leafId, nextItems) : undefined;
+const handleLeafTabReorder = (
+  onTabReorder: ((leafId: string, nextItems: TabGroupItem[]) => void) | undefined,
+  leafId: string,
+) => (onTabReorder ? (nextItems: TabGroupItem[]) => onTabReorder(leafId, nextItems) : undefined);
 
 const handleLeafTabPin = (onTabPin: ((leafId: string, tabId: TabId) => void) | undefined, leafId: string) =>
   onTabPin ? (tabId: TabId) => onTabPin(leafId, tabId) : undefined;
@@ -178,7 +196,7 @@ const handleLeafTabPin = (onTabPin: ((leafId: string, tabId: TabId) => void) | u
 const SplitContext = createContext<SplitContextValue | null>(null);
 const useSplitContext = () => {
   const context = useContext(SplitContext);
-  if (!context) throw new Error('Tab.Split parts must be used within Tab.Split');
+  if (!context) throw new Error("Tab.Split parts must be used within Tab.Split");
   return context;
 };
 
@@ -194,10 +212,10 @@ const ResizeHandle = ({ state }: { state: SplitChildState }) => {
       role="separator"
       tabIndex={0}
       aria-label={`Resize tab group ${state.node.id}`}
-      aria-orientation={state.orientation === 'horizontal' ? 'vertical' : 'horizontal'}
+      aria-orientation={state.orientation === "horizontal" ? "vertical" : "horizontal"}
       data-orientation={state.orientation}
-      data-resizing={state.isResizing ? 'true' : 'false'}
-      data-visible={state.isHandleVisible ? 'true' : 'false'}
+      data-resizing={state.isResizing ? "true" : "false"}
+      data-visible={state.isHandleVisible ? "true" : "false"}
       className={classNames.resizeHandle}
     />
   );
@@ -205,7 +223,14 @@ const ResizeHandle = ({ state }: { state: SplitChildState }) => {
 
 type LeafPassthrough = Pick<
   TabSplitProps,
-  'onTabClick' | 'onMenuClick' | 'onTabClose' | 'onTabReorder' | 'onTabPin' | 'emptyMessage' | 'stripEmptyLabel' | 'renderTabContextMenu'
+  | "onTabClick"
+  | "onMenuClick"
+  | "onTabClose"
+  | "onTabReorder"
+  | "onTabPin"
+  | "emptyMessage"
+  | "stripEmptyLabel"
+  | "renderTabContextMenu"
 >;
 
 const LeafSection = ({
@@ -225,7 +250,7 @@ const LeafSection = ({
   return (
     <section
       {...state.handlers}
-      data-active={state.isActive ? '' : undefined}
+      data-active={state.isActive ? "" : undefined}
       className={clsx(undefined, classNames.leafSection, state.isActive && classNames.leafSectionActive)}
       style={state.style}
     >
@@ -243,11 +268,13 @@ const LeafSection = ({
         className={classNames.leafGroup}
         panelLabel={`Tab group ${leaf.id}`}
         panelOverlay={
-          state.dropZone === 'panel' && state.dropPosition ? (
+          state.dropZone === "panel" && state.dropPosition ? (
             <span aria-hidden="true" data-position={state.dropPosition} className={classNames.panelDropIndicator} />
           ) : undefined
         }
-        stripOverlay={state.dropZone === 'strip' ? <span aria-hidden="true" className={classNames.stripDropOverlay} /> : undefined}
+        stripOverlay={
+          state.dropZone === "strip" ? <span aria-hidden="true" className={classNames.stripDropOverlay} /> : undefined
+        }
       />
       <ResizeHandle state={state} />
     </section>
@@ -272,14 +299,14 @@ const SplitBranch = ({
 }: {
   node: TabTreeSplit;
   isRoot?: boolean;
-  rootProps?: Omit<HTMLAttributes<HTMLDivElement>, 'children'>;
+  rootProps?: Omit<ComponentPropsWithoutRef<"div">, "children">;
   className?: string;
   childState?: SplitChildState;
 } & LeafPassthrough & { readonly ref?: Ref<HTMLElement> }) => {
   const classNames = useTabClassNames();
   const shared = useSplitContext();
   const branch = useSplitBranch(node, shared);
-  const isHorizontal = branch.orientation === 'horizontal';
+  const isHorizontal = branch.orientation === "horizontal";
   const showDivider = Boolean(childState && !childState.isLast);
 
   return (
@@ -298,13 +325,13 @@ const SplitBranch = ({
             ? classNames.splitBranchHorizontal
             : classNames.splitBranchVertical,
         showDivider &&
-          (childState?.orientation === 'horizontal'
+          (childState?.orientation === "horizontal"
             ? classNames.splitBranchDividerHorizontal
             : classNames.splitBranchDividerVertical),
       )}
     >
       {branch.childStates.map((state) =>
-        state.node.kind === 'leaf' ? (
+        state.node.kind === "leaf" ? (
           <LeafSection
             key={state.node.id}
             state={state}
@@ -337,24 +364,32 @@ const SplitBranch = ({
     </div>
   );
 };
-SplitBranch.displayName = 'Tab.Split.Branch';
+SplitBranch.displayName = "Tab.Split.Branch";
 
-const RootLeafSection = ({ leaf, rootProps, className, onTabClick, onMenuClick, onTabClose, onTabReorder, onTabPin, emptyMessage, stripEmptyLabel, renderTabContextMenu, ref }: {
-    leaf: TabTreeLeaf;
-    rootProps: Omit<HTMLAttributes<HTMLDivElement>, 'children'>;
-    className?: string;
-  } & LeafPassthrough & { readonly ref?: Ref<HTMLElement> }) => {
+const RootLeafSection = ({
+  leaf,
+  rootProps,
+  className,
+  onTabClick,
+  onMenuClick,
+  onTabClose,
+  onTabReorder,
+  onTabPin,
+  emptyMessage,
+  stripEmptyLabel,
+  renderTabContextMenu,
+  ref,
+}: {
+  leaf: TabTreeLeaf;
+  rootProps: Omit<ComponentPropsWithoutRef<"div">, "children">;
+  className?: string;
+} & LeafPassthrough & { readonly ref?: Ref<HTMLElement> }) => {
   const classNames = useTabClassNames();
   const shared = useSplitContext();
   const state = getRootLeafState(leaf, shared);
 
   return (
-    <section
-      {...rootProps}
-      {...state.handlers}
-      ref={ref}
-      className={clsx(className, classNames.rootLeafSection)}
-    >
+    <section {...rootProps} {...state.handlers} ref={ref} className={clsx(className, classNames.rootLeafSection)}>
       <GroupImpl
         activeTab={leaf.activeTab}
         tabItems={leaf.tabItems}
@@ -369,16 +404,18 @@ const RootLeafSection = ({ leaf, rootProps, className, onTabClick, onMenuClick, 
         className={classNames.rootLeafGroup}
         panelLabel={`Tab group ${leaf.id}`}
         panelOverlay={
-          state.dropZone === 'panel' && state.dropPosition ? (
+          state.dropZone === "panel" && state.dropPosition ? (
             <span aria-hidden="true" data-position={state.dropPosition} className={classNames.panelDropIndicator} />
           ) : undefined
         }
-        stripOverlay={state.dropZone === 'strip' ? <span aria-hidden="true" className={classNames.stripDropOverlay} /> : undefined}
+        stripOverlay={
+          state.dropZone === "strip" ? <span aria-hidden="true" className={classNames.stripDropOverlay} /> : undefined
+        }
       />
     </section>
   );
 };
-RootLeafSection.displayName = 'Tab.Split.RootLeafSection';
+RootLeafSection.displayName = "Tab.Split.RootLeafSection";
 
 /** 실제 구현 — `data-component`를 스스로 찍지 않는다(공개 `Tab.Split`이 필요하면 감싸서 찍는다). */
 export const SplitRootImpl = ({
@@ -414,19 +451,41 @@ export const SplitRootImpl = ({
     onNodeResize,
   });
 
-  const passthrough = { onTabClick, onMenuClick, onTabClose, onTabReorder, onTabPin, emptyMessage, stripEmptyLabel, renderTabContextMenu };
-  const rootPropsWithData = { ...rootProps, 'data-component': 'Tab' };
+  const passthrough = {
+    onTabClick,
+    onMenuClick,
+    onTabClose,
+    onTabReorder,
+    onTabPin,
+    emptyMessage,
+    stripEmptyLabel,
+    renderTabContextMenu,
+  };
+  const rootPropsWithData = { ...rootProps, "data-component": "Tab" };
 
   return (
     <ClassNamesContext value={classNames}>
       <SplitContext value={context}>
-        {visibleTree.kind === 'leaf' ? (
-          <RootLeafSection ref={ref} leaf={visibleTree} rootProps={rootPropsWithData} className={className} {...passthrough} />
+        {visibleTree.kind === "leaf" ? (
+          <RootLeafSection
+            ref={ref}
+            leaf={visibleTree}
+            rootProps={rootPropsWithData}
+            className={className}
+            {...passthrough}
+          />
         ) : (
-          <SplitBranch ref={ref} node={visibleTree} isRoot rootProps={rootPropsWithData} className={className} {...passthrough} />
+          <SplitBranch
+            ref={ref}
+            node={visibleTree}
+            isRoot
+            rootProps={rootPropsWithData}
+            className={className}
+            {...passthrough}
+          />
         )}
       </SplitContext>
     </ClassNamesContext>
   );
 };
-SplitRootImpl.displayName = 'Tab.Split';
+SplitRootImpl.displayName = "Tab.Split";

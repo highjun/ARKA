@@ -1,17 +1,18 @@
-import type { HTMLAttributes, Ref } from 'react';
-import { clsx } from 'clsx';
-import styles from './Timestamp.module.css';
-import { formatTimestamp } from './shared';
+import type { ComponentPropsWithoutRef, Ref } from "react";
+import { clsx } from "clsx";
+import styles from "./Timestamp.module.css";
+import { formatTimestamp } from "./shared";
 
 /** `relative`·`duration`은 `now`를 기준으로 다시 계산된다 — 스스로 흐르지는 않는다. */
-export type TimestampMode = 'datetime' | 'relative' | 'duration';
+export type TimestampMode = "datetime" | "relative" | "duration";
 
 /** epoch ms와 Date 중 정확히 하나만 — 판별 유니온이라 컴파일 단계에서 강제된다. */
-export type TimestampInput = { readonly epoch: number; readonly date?: never } | { readonly date: Date; readonly epoch?: never };
+type TimestampInput =
+  { readonly epoch: number; readonly date?: never } | { readonly date: Date; readonly epoch?: never };
 
 /** `children`을 막는다 — 내용은 `mode`와 입력이 정한다. */
 export type TimestampProps = TimestampInput &
-  Omit<HTMLAttributes<HTMLSpanElement>, 'children'> & {
+  Omit<ComponentPropsWithoutRef<"span">, "children"> & {
     /** 루트 `span`으로 그대로 통과한다. */
     readonly ref?: Ref<HTMLSpanElement>;
     readonly mode: TimestampMode;
@@ -46,7 +47,7 @@ export const Timestamp = ({
     <span
       ref={ref}
       aria-label={`시각: ${text}`}
-      className={clsx(className, styles['Timestamp'])}
+      className={clsx(className, styles["Timestamp"])}
       {...props}
       data-component="Timestamp"
     >
@@ -54,4 +55,3 @@ export const Timestamp = ({
     </span>
   );
 };
-

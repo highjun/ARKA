@@ -1,9 +1,7 @@
-import { createToken } from '#core/di';
-import type { AgentEvent, SessionId } from '#contracts';
+import { createToken } from "#core/di";
+import type { AgentEvent, SessionId } from "#contracts";
 
-export type { AgentEvent };
-
-export const AgentEventsToken = createToken<IAgentEvents>('agentEvents');
+export const AgentEventsToken = createToken<IAgentEvents>("agentEvents");
 /**
  * 세션의 이벤트 로그를 `since` 뒤부터 이어 받는 통로. SSE인지 무엇인지는 Adapter의 사정이다.
  *

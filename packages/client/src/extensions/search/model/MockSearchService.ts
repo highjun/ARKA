@@ -1,4 +1,4 @@
-import type { ISearchService, SearchMatch, SearchQuery, SearchResponse } from './ISearchService';
+import type { ISearchService, SearchMatch, SearchQuery, SearchResponse } from "./ISearchService";
 
 /** 메모리 안의 `ISearchService` — 경로 → 내용의 표를 찾는다. 실물과 같은 스위트(`searchService.contract.ts`)를 통과한다. */
 export class MockSearchService implements ISearchService {
@@ -18,13 +18,13 @@ export class MockSearchService implements ISearchService {
 
   /** `regex`가 아니면 질의를 이스케이프한다 — 리터럴 검색에서 `.`이 와일드카드가 되지 않게. */
   search({ query, path, regex, caseSensitive }: SearchQuery): Promise<SearchResponse> {
-    const source = regex ? query : query.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
-    const pattern = new RegExp(source, caseSensitive ? 'gu' : 'giu');
-    const prefix = path === '' ? '' : `${path.replace(/\/+$/u, '')}/`;
+    const source = regex ? query : query.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+    const pattern = new RegExp(source, caseSensitive ? "gu" : "giu");
+    const prefix = path === "" ? "" : `${path.replace(/\/+$/u, "")}/`;
     const matches: SearchMatch[] = [];
     let filesScanned = 0;
     let truncated = false;
-    for (const [file, content] of [...this.#files].sort(([a], [b]) => a.localeCompare(b, 'en'))) {
+    for (const [file, content] of [...this.#files].sort(([a], [b]) => a.localeCompare(b, "en"))) {
       if (!file.startsWith(prefix)) continue;
       filesScanned += 1;
       for (const [index, text] of content.split(/\r?\n/u).entries()) {
@@ -35,7 +35,7 @@ export class MockSearchService implements ISearchService {
             truncated = true;
             return Promise.resolve({ matches, truncated, filesScanned });
           }
-          if (match[0] === '') pattern.lastIndex += 1;
+          if (match[0] === "") pattern.lastIndex += 1;
         }
       }
     }

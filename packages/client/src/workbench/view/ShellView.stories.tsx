@@ -1,15 +1,15 @@
-import { CommandCenterRegistry, CommandCenterRegistryToken } from '#core/commands';
-import { createContainer, singleton } from '#core/di';
-import { ViewModelProvider } from '#core/viewmodel';
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Text } from '#component/Text';
-import { SidebarContentRegistry } from '../model/SidebarContentRegistry';
-import { SidebarContentRegistryToken } from '../model/ISidebarContentRegistry';
-import { TabContentRegistry } from '../model/TabContentRegistry';
-import { TabContentRegistryToken } from '../model/ITabContentRegistry';
-import { ShellViewModelToken } from '../viewmodel/IShellViewModel';
-import type { IShellViewModel, ShellTabPaneNode } from '../viewmodel/IShellViewModel';
-import { ShellView } from './ShellView';
+import { CommandCenterRegistry, CommandCenterRegistryToken } from "#core/commands";
+import { createContainer, singleton } from "#core/di";
+import { ViewModelProvider } from "#core/viewmodel";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Text } from "#component/Text";
+import { SidebarContentRegistry } from "../model/SidebarContentRegistry";
+import { SidebarContentRegistryToken } from "../model/ISidebarContentRegistry";
+import { TabContentRegistry } from "../model/TabContentRegistry";
+import { TabContentRegistryToken } from "../model/ITabContentRegistry";
+import { ShellViewModelToken } from "../viewmodel/IShellViewModel";
+import type { IShellViewModel, ShellTabPaneNode } from "../viewmodel/IShellViewModel";
+import { ShellView } from "./ShellView";
 
 /**
  * 셸은 "무엇이 꽂혔는지"를 두 레지스트리로만 안다. 그래서 스토리도 **진짜 레지스트리**에 자리
@@ -21,32 +21,37 @@ const tab = (label: string) => () => <Text>{label} 탭의 내용</Text>;
 
 const registries = () => {
   const sidebar = new SidebarContentRegistry();
-  sidebar.add({ id: 'explorer', PanelComponent: panel('탐색기') });
-  sidebar.add({ id: 'search', PanelComponent: panel('검색') });
+  sidebar.add({ id: "explorer", PanelComponent: panel("탐색기") });
+  sidebar.add({ id: "search", PanelComponent: panel("검색") });
   const tabs = new TabContentRegistry();
-  tabs.add({ id: 'file', iconId: 'file', TabComponent: tab('파일') });
-  tabs.add({ id: 'chat', iconId: 'brain', TabComponent: tab('대화') });
+  tabs.add({ id: "file", iconId: "file", TabComponent: tab("파일") });
+  tabs.add({ id: "chat", iconId: "brain", TabComponent: tab("대화") });
   return { sidebar, tabs };
 };
 
 const ONE_PANE: ShellTabPaneNode = {
-  kind: 'leaf',
-  id: 'leaf-1',
-  activeTabId: 'src/main.tsx',
+  kind: "leaf",
+  id: "leaf-1",
+  activeTabId: "src/main.tsx",
   tabs: [
-    { id: 'src/main.tsx', kind: 'file', title: 'main.tsx', isPreview: false, isDirty: false },
-    { id: 'CONVENTIONS.md', kind: 'file', title: 'CONVENTIONS.md', isPreview: false, isDirty: true },
-    { id: 'chat:1', kind: 'chat', title: '빌드 실패 분석', isPreview: true, isDirty: false },
+    { id: "src/main.tsx", kind: "file", title: "main.tsx", isPreview: false, isDirty: false },
+    { id: "CONVENTIONS.md", kind: "file", title: "CONVENTIONS.md", isPreview: false, isDirty: true },
+    { id: "chat:1", kind: "chat", title: "빌드 실패 분석", isPreview: true, isDirty: false },
   ],
 };
 
 const SPLIT: ShellTabPaneNode = {
-  kind: 'split',
-  id: 'root',
-  orientation: 'horizontal',
+  kind: "split",
+  id: "root",
+  orientation: "horizontal",
   children: [
     ONE_PANE,
-    { kind: 'leaf', id: 'leaf-2', activeTabId: 'chat:1', tabs: [{ id: 'chat:1', kind: 'chat', title: '빌드 실패 분석', isPreview: false, isDirty: false }] },
+    {
+      kind: "leaf",
+      id: "leaf-2",
+      activeTabId: "chat:1",
+      tabs: [{ id: "chat:1", kind: "chat", title: "빌드 실패 분석", isPreview: false, isDirty: false }],
+    },
   ],
 };
 
@@ -54,12 +59,12 @@ const viewModel = (state: Partial<IShellViewModel>): IShellViewModel => ({
   onMount: () => undefined,
   onDispose: () => undefined,
   activities: [
-    { id: 'explorer', title: '탐색기', iconId: 'files', isActive: true },
-    { id: 'search', title: '검색', iconId: 'search', isActive: false },
+    { id: "explorer", title: "탐색기", iconId: "files", isActive: true },
+    { id: "search", title: "검색", iconId: "search", isActive: false },
   ],
   tree: ONE_PANE,
-  activeLeafId: 'leaf-1',
-  activeTab: { id: 'src/main.tsx', kind: 'file' },
+  activeLeafId: "leaf-1",
+  activeTab: { id: "src/main.tsx", kind: "file" },
   selectActivity: () => undefined,
   selectTab: () => undefined,
   closeTab: () => undefined,
@@ -77,13 +82,13 @@ const viewModel = (state: Partial<IShellViewModel>): IShellViewModel => ({
   reveal: null,
   openTab: () => undefined,
   pinTab: () => undefined,
-  buildId: 'ab90700',
-  workspaceName: 'ARKASHIC',
+  buildId: "ab90700",
+  workspaceName: "ARKASHIC",
   isClientOutdated: false,
   reloadApp: () => undefined,
   notifications: [],
   dismissNotification: () => undefined,
-  theme: 'light',
+  theme: "light",
   toggleTheme: () => undefined,
   showActivity: () => undefined,
   isSidebarOpen: true,
@@ -94,7 +99,7 @@ const viewModel = (state: Partial<IShellViewModel>): IShellViewModel => ({
 });
 
 const meta = {
-  title: 'workbench/ShellView',
+  title: "workbench/ShellView",
   component: ShellView,
 } satisfies Meta<typeof ShellView>;
 
@@ -105,13 +110,25 @@ const story = (state: Partial<IShellViewModel>): Story => ({
   decorators: [
     (Story) => {
       const { sidebar, tabs } = registries();
-      const container = createContainer('story');
-      container.register(ShellViewModelToken, singleton(() => viewModel(state)));
-      container.register(SidebarContentRegistryToken, singleton(() => sidebar));
-      container.register(TabContentRegistryToken, singleton(() => tabs));
-      container.register(CommandCenterRegistryToken, singleton(() => new CommandCenterRegistry()));
+      const container = createContainer("story");
+      container.register(
+        ShellViewModelToken,
+        singleton(() => viewModel(state)),
+      );
+      container.register(
+        SidebarContentRegistryToken,
+        singleton(() => sidebar),
+      );
+      container.register(
+        TabContentRegistryToken,
+        singleton(() => tabs),
+      );
+      container.register(
+        CommandCenterRegistryToken,
+        singleton(() => new CommandCenterRegistry()),
+      );
       return (
-        <ViewModelProvider container={container.createScope('view')}>
+        <ViewModelProvider container={container.createScope("view")}>
           <div style={{ height: 640, width: 1100 }}>
             <Story />
           </div>
@@ -125,18 +142,18 @@ export const Default: Story = story({});
 
 /** 탭이 하나도 없을 때 — 셸의 뼈대만 남는다. */
 export const Empty: Story = story({
-  tree: { kind: 'leaf', id: 'leaf-1', activeTabId: null, tabs: [] },
+  tree: { kind: "leaf", id: "leaf-1", activeTabId: null, tabs: [] },
   activeTab: null,
 });
 
 /** 좌우로 나뉜 pane 둘 — 이 조합은 컴포넌트 스토리로는 볼 수 없다. */
-export const Split: Story = story({ tree: SPLIT, activeLeafId: 'leaf-2' });
+export const Split: Story = story({ tree: SPLIT, activeLeafId: "leaf-2" });
 
 /** 알림이 쌓인 상태. */
 export const Notifications: Story = story({
   notifications: [
-    { id: '1', severity: 'error', message: '파일을 저장하지 못했다 — EACCES' },
-    { id: '2', severity: 'warning', message: '연결이 불안정하다' },
+    { id: "1", severity: "error", message: "파일을 저장하지 못했다 — EACCES" },
+    { id: "2", severity: "warning", message: "연결이 불안정하다" },
   ],
 });
 
@@ -144,7 +161,7 @@ export const Notifications: Story = story({
 export const Outdated: Story = story({ isClientOutdated: true });
 
 /** 저장 안 된 탭을 닫으려 할 때의 확인. */
-export const ConfirmClose: Story = story({ pendingTabClose: { leafId: 'leaf-1', tabId: 'CONVENTIONS.md' } });
+export const ConfirmClose: Story = story({ pendingTabClose: { leafId: "leaf-1", tabId: "CONVENTIONS.md" } });
 
 /** 커맨드 팔레트가 열린 상태. */
 export const PaletteOpen: Story = story({ isPaletteOpen: true });

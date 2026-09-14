@@ -38,4 +38,6 @@ for (const name of kept.slice(0, Math.max(0, kept.length - KEEP))) {
   rmSync(path.join(target, name), { force: true });
 }
 
-process.stdout.write(`${destination} (${String(statSync(destination).size)} bytes), 보관 ${String(Math.min(kept.length, KEEP))}개\n`);
+process.stdout.write(
+  `${destination} (${String(statSync(destination).size)} bytes), 보관 ${String(Math.min(kept.length, KEEP))}개\n`,
+);

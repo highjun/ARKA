@@ -1,5 +1,5 @@
-import type { GitFileStatus, GitStatusResponse } from '#contracts';
-import type { IGitService } from './IGitService';
+import type { GitFileStatus, GitStatusResponse } from "#contracts";
+import type { IGitService } from "./IGitService";
 
 type Entry = { readonly committed: string | null; readonly index: string | null; readonly worktree: string | null };
 
@@ -11,7 +11,7 @@ export class MockGitService implements IGitService {
   readonly #entries = new Map<string, Entry>();
   #commits = 0;
   repository = true;
-  branch: string | null = 'main';
+  branch: string | null = "main";
 
   /** 작업 트리에 쓴다(없던 파일이면 추적 안 됨). */
   write(path: string, content: string): void {
@@ -29,10 +29,14 @@ export class MockGitService implements IGitService {
   status(): Promise<GitStatusResponse> {
     if (!this.repository) return Promise.resolve({ repository: false, branch: null, files: [] });
     const files: GitFileStatus[] = [];
-    for (const [path, { committed, index, worktree }] of [...this.#entries].sort(([a], [b]) => a.localeCompare(b, 'en'))) {
-      const staged = index === committed ? null : index === null ? 'deleted' : committed === null ? 'added' : 'modified';
+    for (const [path, { committed, index, worktree }] of [...this.#entries].sort(([a], [b]) =>
+      a.localeCompare(b, "en"),
+    )) {
+      const staged =
+        index === committed ? null : index === null ? "deleted" : committed === null ? "added" : "modified";
       const base = index ?? committed;
-      const unstaged = worktree === base ? null : worktree === null ? 'deleted' : base === null ? 'untracked' : 'modified';
+      const unstaged =
+        worktree === base ? null : worktree === null ? "deleted" : base === null ? "untracked" : "modified";
       if (staged === null && unstaged === null) continue;
       files.push({ path, staged, unstaged });
     }
@@ -42,11 +46,11 @@ export class MockGitService implements IGitService {
   /** 심어 둔 diff가 없으면 빈 문자열이다 — 던지지 않는다. */
   diff(path: string, staged: boolean): Promise<string> {
     const entry = this.#entries.get(path);
-    if (entry === undefined) return Promise.resolve('');
+    if (entry === undefined) return Promise.resolve("");
     const [before, after] = staged ? [entry.committed, entry.index] : [entry.index ?? entry.committed, entry.worktree];
-    if (before === after) return Promise.resolve('');
-    const minus = before === null ? '' : `-${before.trimEnd()}\n`;
-    const plus = after === null ? '' : `+${after.trimEnd()}\n`;
+    if (before === after) return Promise.resolve("");
+    const minus = before === null ? "" : `-${before.trimEnd()}\n`;
+    const plus = after === null ? "" : `+${after.trimEnd()}\n`;
     return Promise.resolve(`--- a/${path}\n+++ b/${path}\n@@ @@\n${minus}${plus}`);
   }
 
@@ -70,14 +74,14 @@ export class MockGitService implements IGitService {
 
   /** 스테이지가 비어 있으면 던진다 — 실물과 같은 실패 경로다. */
   commit(message: string): Promise<string> {
-    if (message.trim() === '') return Promise.reject(new Error('커밋 메시지가 비었다.'));
+    if (message.trim() === "") return Promise.reject(new Error("커밋 메시지가 비었다."));
     const staged = [...this.#entries.values()].some((e) => e.index !== e.committed);
-    if (!staged) return Promise.reject(new Error('스테이지된 변경이 없다.'));
+    if (!staged) return Promise.reject(new Error("스테이지된 변경이 없다."));
     for (const [path, entry] of this.#entries) {
       if (entry.index === null && entry.worktree === null) this.#entries.delete(path);
       else this.#entries.set(path, { ...entry, committed: entry.index });
     }
     this.#commits += 1;
-    return Promise.resolve(String(this.#commits).padStart(40, '0'));
+    return Promise.resolve(String(this.#commits).padStart(40, "0"));
   }
 }

@@ -26,7 +26,15 @@ export type Application = {
  *
  * `serve()` 없이 `app.request()`로 통째로 테스트할 수 있게 `Hono`를 돌려준다.
  */
-export const createApp = ({ config, log, startedAt }: { config: ServerConfig; log: Logger; startedAt: string }): Application => {
+export const createApp = ({
+  config,
+  log,
+  startedAt,
+}: {
+  config: ServerConfig;
+  log: Logger;
+  startedAt: string;
+}): Application => {
   const app = new Hono<{ Variables: AppVariables }>();
   const workspace = createWorkspace(config.workspaceRoot);
   // 에이전트 툴은 filesystem의 유스케이스로 파일을 다룬다 — 두 feature를 잇는 것은 조립부의 일이다.
@@ -44,7 +52,14 @@ export const createApp = ({ config, log, startedAt }: { config: ServerConfig; lo
   // 아래 둘은 프로토콜 헤더 없이 부를 수 있다 — 낡은 클라이언트도 자기가 낡았다는 것을 알아야 한다.
   app.get("/api/health", (c) => c.json({ status: "ok" }));
   app.get("/api/version", (c) =>
-    c.json({ builtAt: startedAt, protocolVersion: PROTOCOL_VERSION, protocolHeader: PROTOCOL_HEADER, workspaceName: workspace.name, gitSha: config.gitSha }));
+    c.json({
+      builtAt: startedAt,
+      protocolVersion: PROTOCOL_VERSION,
+      protocolHeader: PROTOCOL_HEADER,
+      workspaceName: workspace.name,
+      gitSha: config.gitSha,
+    }),
+  );
 
   // 그 밖의 /api/*는 헤더가 맞아야 통과한다. 등록 순서가 곧 적용 범위다(→ core/protocol.ts).
   app.use("/api/*", createProtocolGuard([PROTOCOL_VERSION]));

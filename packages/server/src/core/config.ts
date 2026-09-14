@@ -102,9 +102,14 @@ const parseEnv = <T>(schema: z.ZodType<T>, env: Readonly<Record<string, string |
  *
  * @throws ConfigError 값이 스키마에 맞지 않거나, 가리키는 디렉터리가 없거나 디렉터리가 아닐 때.
  */
-export const loadConfig = async (env: Readonly<Record<string, string | undefined>> = process.env): Promise<ServerConfig> => {
+export const loadConfig = async (
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): Promise<ServerConfig> => {
   const present = withoutEmpty(env);
-  const { ARKA_WORKSPACE, ARKA_PORT, ARKA_HOST, ARKA_CLIENT_ROOT, ARKA_DATA_DIR, ARKA_GIT_SHA } = parseEnv(CoreEnv, present);
+  const { ARKA_WORKSPACE, ARKA_PORT, ARKA_HOST, ARKA_CLIENT_ROOT, ARKA_DATA_DIR, ARKA_GIT_SHA } = parseEnv(
+    CoreEnv,
+    present,
+  );
   const agent = parseEnv(AgentEnv, present);
 
   // 데이터 디렉터리는 워크스페이스와 달리 우리가 소유한다 — 없으면 만든다.
@@ -112,14 +117,17 @@ export const loadConfig = async (env: Readonly<Record<string, string | undefined
   try {
     await mkdir(dataDir, { recursive: true });
   } catch (error) {
-    throw new ConfigError(`ARKA_DATA_DIR: cannot create ${dataDir}: ${error instanceof Error ? error.message : String(error)}`);
+    throw new ConfigError(
+      `ARKA_DATA_DIR: cannot create ${dataDir}: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 
   return {
     workspaceRoot: await resolveDirectory("ARKA_WORKSPACE", ARKA_WORKSPACE ?? process.cwd()),
     port: ARKA_PORT,
     host: ARKA_HOST,
-    clientRoot: ARKA_CLIENT_ROOT === undefined ? undefined : await resolveDirectory("ARKA_CLIENT_ROOT", ARKA_CLIENT_ROOT),
+    clientRoot:
+      ARKA_CLIENT_ROOT === undefined ? undefined : await resolveDirectory("ARKA_CLIENT_ROOT", ARKA_CLIENT_ROOT),
     dataDir: await resolveDirectory("ARKA_DATA_DIR", dataDir),
     agent,
     gitSha: ARKA_GIT_SHA,

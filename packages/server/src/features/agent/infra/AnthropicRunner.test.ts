@@ -8,7 +8,16 @@ import { AnthropicRunner, historyToMessages, type MessagesClient } from "./Anthr
 type Scripted = { readonly events: Anthropic.MessageStreamEvent[]; readonly final: Anthropic.Message };
 
 const message = (content: Anthropic.ContentBlock[], stop_reason: Anthropic.Message["stop_reason"]): Anthropic.Message =>
-  ({ id: "m", type: "message", role: "assistant", model: "test", content, stop_reason, stop_sequence: null, usage: { input_tokens: 1, output_tokens: 1 } }) as unknown as Anthropic.Message;
+  ({
+    id: "m",
+    type: "message",
+    role: "assistant",
+    model: "test",
+    content,
+    stop_reason,
+    stop_sequence: null,
+    usage: { input_tokens: 1, output_tokens: 1 },
+  }) as unknown as Anthropic.Message;
 
 const textTurn = (text: string, stop: Anthropic.Message["stop_reason"] = "end_turn"): Scripted => ({
   events: [
@@ -54,8 +63,16 @@ const clientOf = (turns: Scripted[]): MessagesClient & { requests: Anthropic.Mes
 };
 
 const tools: IAgentTools = {
-  definitions: [{ name: "read_file", description: "read", inputSchema: { type: "object" } }, { name: "ask_user", description: "ask", inputSchema: { type: "object" } }],
-  execute: (name, input) => Promise.resolve(name === "read_file" ? { output: { content: `내용 of ${String((input as { path: string }).path)}` }, isError: false } : { output: { error: "unknown" }, isError: true }),
+  definitions: [
+    { name: "read_file", description: "read", inputSchema: { type: "object" } },
+    { name: "ask_user", description: "ask", inputSchema: { type: "object" } },
+  ],
+  execute: (name, input) =>
+    Promise.resolve(
+      name === "read_file"
+        ? { output: { content: `내용 of ${String((input as { path: string }).path)}` }, isError: false }
+        : { output: { error: "unknown" }, isError: true },
+    ),
 };
 
 const contextOf = (input: string, answer = "예") => {
@@ -84,7 +101,11 @@ describe("AnthropicRunner", () => {
     const { ctx, emitted } = contextOf("안녕");
     await new AnthropicRunner({ client, model: "test", tools, newId: () => "id" }).run(ctx);
     expect(emitted.map((e) => e.type)).toEqual(["assistant.delta", "assistant.delta", "assistant.done"]);
-    expect(client.requests[0]).toMatchObject({ model: "test", thinking: { type: "adaptive" }, messages: [{ role: "user", content: "안녕" }] });
+    expect(client.requests[0]).toMatchObject({
+      model: "test",
+      thinking: { type: "adaptive" },
+      messages: [{ role: "user", content: "안녕" }],
+    });
     expect(client.requests[0]?.tools?.map((t) => ("name" in t ? t.name : ""))).toEqual(["read_file", "ask_user"]);
   });
 
@@ -93,11 +114,26 @@ describe("AnthropicRunner", () => {
     const { ctx, emitted } = contextOf("a.md 읽어");
     await new AnthropicRunner({ client, model: "test", tools }).run(ctx);
     const types = emitted.map((e) => e.type);
-    expect(types).toEqual(["thinking.delta", "thinking.delta", "thinking.done", "tool.call", "tool.result", "assistant.delta", "assistant.delta", "assistant.done"]);
-    expect(emitted.find((e) => e.type === "tool.result")).toMatchObject({ output: { content: "내용 of a.md" }, isError: false });
+    expect(types).toEqual([
+      "thinking.delta",
+      "thinking.delta",
+      "thinking.done",
+      "tool.call",
+      "tool.result",
+      "assistant.delta",
+      "assistant.delta",
+      "assistant.done",
+    ]);
+    expect(emitted.find((e) => e.type === "tool.result")).toMatchObject({
+      output: { content: "내용 of a.md" },
+      isError: false,
+    });
     const second = client.requests[1]?.messages ?? [];
     expect(second).toHaveLength(3);
-    expect(second[2]).toMatchObject({ role: "user", content: [{ type: "tool_result", tool_use_id: "tu1", is_error: false }] });
+    expect(second[2]).toMatchObject({
+      role: "user",
+      content: [{ type: "tool_result", tool_use_id: "tu1", is_error: false }],
+    });
   });
 
   it("ask_user 툴은 사용자에게 묻고 답을 툴 결과로 돌려준다", async () => {
@@ -126,7 +162,10 @@ describe("AnthropicRunner", () => {
 
     const allowed = clientOf([toolTurn("write_file", { path: "a.md", content: "x" }), textTurn("했다")]);
     const approved = contextOf("고쳐", "예");
-    await new AnthropicRunner({ client: allowed, model: "test", tools: writing }).run({ ...approved.ctx, confirmWrites: true });
+    await new AnthropicRunner({ client: allowed, model: "test", tools: writing }).run({
+      ...approved.ctx,
+      confirmWrites: true,
+    });
     expect(executed).toEqual(["write_file"]);
   });
 

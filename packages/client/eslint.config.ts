@@ -18,17 +18,81 @@ const RESTRICTED_SYNTAX = [
     selector: `${node}[source.value=/^contracts(\\/|$)/]`,
     message: "`#contracts`로 가져오세요 — 맨이름은 서드파티와 구분되지 않습니다.",
   })),
+  // 테스트 이름을 보던 셀렉터 둘은 `vitest/valid-title`로 갈았다(→ ADR 0011).
+  /*
+   * **props 바탕은 `ComponentPropsWithoutRef<'tag'>`다**(→ ADR 0008). `HTMLAttributes<HTMLXElement>`는
+   * 원소 고유 속성을 빠뜨린다 — `href`·`disabled`·`type`이 없어서 소비처가 캐스트하게 된다.
+   * 루트 태그가 갈리는 컴포넌트만 예외이고, 그 자리는 사유를 적은 `eslint-disable`로 드러난다.
+   */
   {
-    selector: 'CallExpression[callee.name=/^(it|test)$/] > Literal:first-child:not([value=/[가-힣]/])',
-    message: "`it()`/`test()` 이름은 한글 문장으로 쓰세요(→ ADR 0004).",
-  },
-  {
-    selector: 'CallExpression[callee.name=/^(it|test)$/] > TemplateLiteral:first-child:not(:has(TemplateElement[value.cooked=/[가-힣]/]))',
-    message: "`it()`/`test()` 이름은 한글 문장으로 쓰세요(→ ADR 0004).",
+    selector: "TSTypeReference > Identifier[name=/^(?:[A-Za-z]+)?HTMLAttributes$/]",
+    message: "props 바탕은 `ComponentPropsWithoutRef<'tag'>`를 쓰세요 — 원소 고유 속성이 빠집니다(→ ADR 0008).",
   },
 ];
 
+/** client의 슬라이스. 새 슬라이스를 더할 때 여기 한 줄을 빼먹으면 그 슬라이스만 검사에서 빠진다. */
+const SLICES = ["agent", "filesystem", "git", "markdown", "search"];
+
+/**
+ * **의존은 안쪽을 향한다**(→ ADR 0007). 계층마다 *자기 슬라이스 안에서* 볼 수 있는 것.
+ *
+ * `view`가 `model`을 보는 것은 DI 토큰과 타입 때문이다 — 값을 읽는 길은 `useViewModel` 하나고
+ * 그건 위 선택자가 따로 본다.
+ */
+const LAYER_ALLOW: Readonly<Record<string, readonly string[]>> = {
+  model: ["model"],
+  infra: ["model", "infra"],
+  viewmodel: ["model", "viewmodel"],
+  view: ["model", "viewmodel", "view", "component"],
+  component: ["component"],
+};
+
+/** 슬라이스를 품는 뿌리마다 계층 zone을 낸다. `core/`·`shared/`는 계층이 없어 대상이 아니다. */
+const LAYER_ZONES = ["./src/workbench", ...SLICES.map((slice) => `./src/extensions/${slice}`)].flatMap((root) =>
+  Object.entries(LAYER_ALLOW).map(([layer, allowed]) => ({
+    target: `${root}/${layer}`,
+    from: root,
+    except: allowed.map((name) => `./${name}`),
+    message: "의존은 안쪽을 향합니다 — 이 계층은 자기 아래만 봅니다(→ ADR 0007).",
+  })),
+);
+
 /** `view/`에만 더 걸리는 것 — 훅 하나와 DI 접근 금지(→ ADR 0007). */
+/*
+ * **브라우저 패키지에 Node 전역이 보인다** — `tsconfig`의 `types: ["vitest/globals"]`가
+ * `@types/node`를 전이로 끌고 온다(→ TASK-44). `types` 배열은 전역 자동 포함만 통제하고 전이
+ * 의존은 못 막으니 여기서 막는다. `test/`·`vite.config.ts`·`.storybook/`은 Node에서 돌아 대상이 아니다.
+ */
+const NODE_GLOBALS = [
+  { name: "process", message: "브라우저 패키지입니다 — 빌드 타임 값은 `import.meta.env`를 쓰세요." },
+  { name: "Buffer", message: "브라우저 패키지입니다 — `Uint8Array`나 `TextEncoder`를 쓰세요." },
+  { name: "__dirname", message: "브라우저 패키지입니다 — 경로는 `import.meta.url`을 쓰세요." },
+  { name: "__filename", message: "브라우저 패키지입니다 — 경로는 `import.meta.url`을 쓰세요." },
+  { name: "global", message: "브라우저 패키지입니다 — `globalThis`를 쓰세요." },
+  { name: "require", message: "ESM입니다 — `import`를 쓰세요." },
+];
+
+/*
+ * **`model/`·`viewmodel/`은 브라우저 API를 직접 보지 않는다**(→ ADR 0007). 플랫폼에 닿는 것은
+ * 조립부(`registerServices.tsx`)가 얇은 함수로 주입한다 — 그래야 이 계층이 jsdom 없이도 돈다.
+ * 규약과 코드 주석이 이 규칙을 인용해 왔는데 정작 설정에는 없었다(2026-09-14 실측).
+ */
+const PLATFORM_GLOBALS = [
+  "fetch",
+  "window",
+  "document",
+  "navigator",
+  "location",
+  "localStorage",
+  "sessionStorage",
+  "alert",
+  "confirm",
+  "prompt",
+].map((name) => ({
+  name,
+  message: "`model/`·`viewmodel/`은 플랫폼에 직접 닿지 않습니다 — 조립부가 주입하는 함수를 받으세요(→ ADR 0007).",
+}));
+
 const VIEW_ONLY_SYNTAX = [
   {
     selector: 'CallExpression[callee.name=/^use[A-Z]/]:not([callee.name="useViewModel"])',
@@ -61,7 +125,19 @@ export default [
     files: ["src/**/*.tsx"],
     plugins: { "primer-react": primerReact },
     settings: primerReact.configs.recommended.settings,
-    rules: primerReact.configs.recommended.rules,
+    rules: {
+      ...primerReact.configs.recommended.rules,
+      /*
+       * 프리셋 밖의 규칙. ADR이 인용하던 셋 중 **이것만** 켠다 — 나머지 둘은 우리 결정과
+       * 어긋난다는 것을 실측으로 확인했고 그 ADR의 `기각:`으로 옮겼다.
+       */
+      // 폐기된 진입점(→ ADR 0009).
+      "primer-react/no-deprecated-entrypoints": "error",
+      // 와일드카드 import — 무엇을 쓰는지 감춘다.
+      "primer-react/no-wildcard-imports": "error",
+      // CSS Modules 는 default import 로 받는다.
+      "primer-react/enforce-css-module-default-import": "error",
+    },
   },
 
   {
@@ -83,12 +159,13 @@ export default [
     rules: { "@eslint-react/no-forward-ref": "error", "@eslint-react/no-context-provider": "error" },
   },
 
-  {
-    // 스토리 파일의 모양.
-    files: ["src/**/*.stories.tsx"],
-    plugins: { storybook },
-    rules: storybook.configs["flat/recommended"].at(-1)?.rules ?? {},
-  },
+  /*
+   * 스토리 파일의 모양. **프리셋을 그대로 펴야 한다** — 블록이 셋이고(설정·스토리 글롭·
+   * `.storybook/main` 글롭) `.at(-1)`로 하나만 집으면 규칙 12개가 조용히 빠진 채 초록이
+   * 된다(2026-09-14에 그 상태로 머지됐다). 글롭도 프리셋의 것을 쓴다 — `.storybook/main.ts`를
+   * 보는 `no-uninstalled-addons`는 스토리 파일에 걸 규칙이 아니다.
+   */
+  ...storybook.configs["flat/recommended"],
 
   {
     files: ["src/**/*.{ts,tsx}", "test/**/*.ts", ".storybook/*.{ts,tsx}", "*.config.ts"],
@@ -108,13 +185,33 @@ export default [
         "error",
         {
           zones: [
-            { target: "./src", from: "../server/src", message: "client는 server를 import할 수 없습니다. 공유할 코드는 contracts로 옮기고 `#contracts`로 가져오세요." },
-            ...["agent", "filesystem", "git", "markdown", "search"].map((slice) => ({
+            {
+              target: "./src",
+              from: "../server/src",
+              message:
+                "client는 server를 import할 수 없습니다. 공유할 코드는 contracts로 옮기고 `#contracts`로 가져오세요.",
+            },
+            ...SLICES.map((slice) => ({
               target: `./src/extensions/${slice}`,
               from: "./src/extensions",
               except: [`./${slice}`],
               message: "슬라이스끼리 직접 import하지 않습니다 — DI 토큰이나 이벤트로 소통하세요(→ ADR 0007).",
             })),
+            // `shared/`는 아무것도 import할 수 없다 — 공통 추출은 아래로만 한다(→ ADR 0007).
+            {
+              target: "./src/shared",
+              from: "./src",
+              except: ["./shared"],
+              message: "`shared/`는 아무것도 import하지 않습니다 — 공통 추출은 아래로만 합니다(→ ADR 0007).",
+            },
+            // `core/`는 도메인을 모른다. 아래(`shared/`)만 본다.
+            {
+              target: "./src/core",
+              from: "./src",
+              except: ["./core", "./shared"],
+              message: "`core/`는 도메인을 모릅니다 — `workbench/`·`extensions/`를 import하지 않습니다(→ ADR 0007).",
+            },
+            ...LAYER_ZONES,
           ],
         },
       ],
@@ -160,7 +257,8 @@ export default [
           paths: ["react", "react-dom", "nanostores", "zustand", "jotai", "valtio", "@primer/react"].map((name) => ({
             name,
             allowTypeImports: true,
-            message: "`model/`은 상태 라이브러리와 React를 런타임으로 모릅니다 — 화면 상태는 ViewModel이 소유합니다(→ ADR 0007).",
+            message:
+              "`model/`은 상태 라이브러리와 React를 런타임으로 모릅니다 — 화면 상태는 ViewModel이 소유합니다(→ ADR 0007).",
           })),
           patterns: [
             {
@@ -172,6 +270,19 @@ export default [
         },
       ],
     },
+  },
+
+  {
+    // Node 전역(→ TASK-44). `src/`만이다 — `test/`·`vite.config.ts`·`.storybook/`은 Node에서 돈다.
+    files: ["src/**/*.{ts,tsx}"],
+    rules: { "no-restricted-globals": ["error", ...NODE_GLOBALS] },
+  },
+
+  {
+    // 플랫폼 전역. **Node 쪽까지 함께 펴 준다** — `no-restricted-globals`도 한 파일에 한 배열이라
+    // 나중 블록이 앞의 것을 통째로 덮는다(위 `RESTRICTED_SYNTAX` 주석과 같은 함정).
+    files: ["src/**/model/**/*.{ts,tsx}", "src/**/viewmodel/**/*.{ts,tsx}"],
+    rules: { "no-restricted-globals": ["error", ...NODE_GLOBALS, ...PLATFORM_GLOBALS] },
   },
 
   {

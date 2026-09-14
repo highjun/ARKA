@@ -1,4 +1,4 @@
-import { createToken, type Disposable } from '#core/di';
+import { createToken, type Disposable } from "#core/di";
 
 /**
  * `Tab`의 `TabSplitOrientation`과 값이 같다 — 그대로 import 하지 않는 것은 Model이 기반
@@ -6,7 +6,7 @@ import { createToken, type Disposable } from '#core/di';
  * 때문이다(`MODEL-13`). 값만 맞춰 독자적으로 선언한다 — 구조적 타이핑이라 `Tab`에
  * 그대로 흘려 넣어도 별도 변환이 필요 없다.
  */
-export type TabSplitOrientation = 'horizontal' | 'vertical';
+export type TabSplitOrientation = "horizontal" | "vertical";
 
 /**
  * 열린 탭 하나. **직렬화 가능한 것만 담는다** — `ReactNode`를 담는 순간 이 계약이 React를 알게
@@ -38,15 +38,15 @@ export type PaneId = string;
  * 지속한다.
  */
 export interface TabPaneLeaf {
-  readonly kind: 'leaf';
+  readonly kind: "leaf";
   readonly id: PaneId;
   readonly tabs: readonly OpenTab[];
   readonly activeTabId: string | null;
   readonly size?: number;
 }
 /** `TabPaneLeaf`와 짝을 이루는 분할 노드. */
-export interface TabPaneSplit {
-  readonly kind: 'split';
+interface TabPaneSplit {
+  readonly kind: "split";
   readonly id: PaneId;
   readonly orientation: TabSplitOrientation;
   readonly children: readonly TabPaneNode[];
@@ -78,5 +78,4 @@ export interface ITabsModel {
 
   /** 상태가 바뀔 때마다 부른다. */
   onDidChange(listener: () => void): Disposable;
-
 }

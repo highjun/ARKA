@@ -1,7 +1,7 @@
-import { createToken } from '#core/di';
+import { createToken } from "#core/di";
 
 /** 줄·열은 1부터. `preview`는 그 줄의 원문이라 화면이 잘라 쓴다. */
-export type SearchMatchRow = {
+type SearchMatchRow = {
   readonly line: number;
   readonly column: number;
   readonly preview: string;
@@ -13,7 +13,7 @@ export type SearchFileRow = {
   readonly matches: readonly SearchMatchRow[];
 };
 
-export const SearchViewModelToken = createToken<ISearchViewModel>('searchViewModel');
+export const SearchViewModelToken = createToken<ISearchViewModel>("searchViewModel");
 /** 검색 패널의 화면 상태. 입력은 곧바로 Model 조건에 반영하고, 검색은 짧은 디바운스 뒤에 나간다. */
 export interface ISearchViewModel {
   readonly query: string;

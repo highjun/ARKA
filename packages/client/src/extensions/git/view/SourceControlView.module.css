@@ -46,16 +46,16 @@
   color: var(--fgColor-muted);
 }
 
-.badge[data-badge='A'],
-.badge[data-badge='U'] {
+.badge[data-badge="A"],
+.badge[data-badge="U"] {
   color: var(--fgColor-success);
 }
 
-.badge[data-badge='D'] {
+.badge[data-badge="D"] {
   color: var(--fgColor-danger);
 }
 
-.badge[data-badge='M'] {
+.badge[data-badge="M"] {
   color: var(--fgColor-attention);
 }
 

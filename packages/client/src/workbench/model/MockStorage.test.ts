@@ -1,4 +1,4 @@
-import { MockStorage } from './MockStorage';
-import { testStorageContract } from './storage.contract';
+import { MockStorage } from "./MockStorage";
+import { testStorageContract } from "./storage.contract";
 
-testStorageContract('MockStorage', () => new MockStorage());
+testStorageContract("MockStorage", () => new MockStorage());

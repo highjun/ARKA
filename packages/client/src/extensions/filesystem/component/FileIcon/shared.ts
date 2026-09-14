@@ -1,4 +1,4 @@
-import { extensionMapData, fileIconMapData, filenameMapData } from './data';
+import { extensionMapData, fileIconMapData, filenameMapData } from "./data";
 
 /** 세트에 실재하는 아이콘 이름만 통과한다 — 오타가 타입에서 걸린다. */
 export type FileIconId = keyof typeof fileIconMapData;
@@ -13,15 +13,15 @@ export const fileIconIdOf = (name: string): FileIconId => {
 
   const byFilename = FILENAME_MAP[lower];
   if (byFilename !== undefined) return byFilename;
-  if (lower.endsWith('.lock')) return 'fileTypeLock';
+  if (lower.endsWith(".lock")) return "fileTypeLock";
 
-  const dotIndex = lower.indexOf('.');
-  if (dotIndex < 0) return 'fileTypeDefault';
+  const dotIndex = lower.indexOf(".");
+  if (dotIndex < 0) return "fileTypeDefault";
 
-  const segments = lower.slice(dotIndex + 1).split('.');
+  const segments = lower.slice(dotIndex + 1).split(".");
   for (let i = 0; i < segments.length; i += 1) {
-    const byExtension = EXTENSION_MAP[segments.slice(i).join('.')];
+    const byExtension = EXTENSION_MAP[segments.slice(i).join(".")];
     if (byExtension !== undefined) return byExtension;
   }
-  return 'fileTypeDefault';
+  return "fileTypeDefault";
 };

@@ -43,7 +43,11 @@ export const createAgentFeature = ({ dataDir, log, workspace, agent }: AgentFeat
   const runner: IAgentRunner =
     agent.runner === "scripted"
       ? new ScriptedRunner()
-      : new AnthropicRunner({ client: new Anthropic({ apiKey: agent.apiKey }), model: agent.model, tools: createWorkspaceTools(workspace) });
+      : new AnthropicRunner({
+          client: new Anthropic({ apiKey: agent.apiKey }),
+          model: agent.model,
+          tools: createWorkspaceTools(workspace),
+        });
   log.info("agent.runner", { kind: agent.runner, model: agent.runner === "anthropic" ? agent.model : null });
   const runManager = new RunManager({ events, sessions, runner, log });
   return {

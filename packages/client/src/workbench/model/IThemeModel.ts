@@ -1,7 +1,7 @@
-import { createToken, type Disposable } from '#core/di';
+import { createToken, type Disposable } from "#core/di";
 
 /** 화면 밝기. `Shell`이 Primer `ThemeProvider`의 `colorMode`로 넘겨 토큰을 갈아 끼운다. */
-export type Theme = 'light' | 'dark';
+export type Theme = "light" | "dark";
 
 export const ThemeModelToken = createToken<IThemeModel>("themeModel");
 /**
@@ -13,5 +13,4 @@ export interface IThemeModel {
 
   /** 상태가 바뀔 때마다 부른다. */
   onDidChange(listener: () => void): Disposable;
-
 }
