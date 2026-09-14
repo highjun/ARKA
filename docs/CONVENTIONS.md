@@ -220,7 +220,7 @@
   - 그래서 기준이 없는 스토리는 **실패가 아니라 건너뜀**이다. 없는 것이 정상인 기간이 있다.
 - **모든 테스트가 자기 패키지 안에 있다.** 자리는 *무엇이 돌리는가*로 갈린다 — 단위·계약·스모크·스토리는 **대상 옆**에 두고(vitest가 소스와 함께 본다), **대상을 특정할 수 없는 것**만 패키지의 `test/` 아래로 묶는다 — 앱 전체를 보는 E2E(`test/e2e/`), 스토리 전부를 도는 VRT(`test/vrt/`), 테스트 환경 자체를 세우는 설정(`test/vitestSetup.ts`). 단위 테스트를 소스에서 떼어내는 `tests/` 폴더나 던더 폴더는 쓰지 않는다.
 - Mock은 `Mock<Name>.ts`.
-- **렌더·상호작용 테스트는 스토리를 가져다 쓴다** — `composeStories`로 가져와 `await Story.run()`으로 `play`까지 돌린다. 로직 테스트(훅·ViewModel)는 단언마다 자기 최소 입력을 쓴다. → [ADR 0010](adr/0010-ui-verification.md)
+- **렌더 테스트는 스토리를 가져다 쓸 수 있다** — `composeStories`(portable stories)가 Storybook이 정한 길이다. 로직 테스트(훅·ViewModel)는 단언마다 자기 최소 입력을 쓴다. → [ADR 0010](adr/0010-ui-verification.md)
 - 스냅샷은 인라인(`toMatchInlineSnapshot`)만 쓴다. 외부 `.snap` 파일은 두지 않는다 — 안 열고 갱신하게 된다.
 - 커버리지 목표를 두지 않는다.
 - `it`/`test` 이름은 한글 문장으로 쓴다. `describe`는 **대상의 식별자**라 영문 그대로다(`describe('Timestamp')`). 파일마다 최상위 `describe` 하나가 전부를 감싸고 훅도 그 안에 둔다. 단정 헬퍼는 `expect`로 시작하는 이름을 갖는다 — 그래야 `vitest/expect-expect`가 알아본다. TSDoc의 `@throws`에 적은 경우는 각각 테스트로 확인한다 — 적어두기만 하면 주장일 뿐이다.

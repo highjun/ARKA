@@ -1,7 +1,15 @@
+import { composeStories } from '@storybook/react-vite';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from '#utils/testing';
 import { Panel } from './Panel';
+import * as stories from './Panel.stories';
+
+/**
+ * 스토리를 그대로 가져다 단정한다(→ ADR 0010). 그림과 테스트가 **같은 입력**을 보므로, 스토리가
+ * 낡으면 테스트가 알려준다 — 값을 두 곳에 적어 두면 한쪽만 고쳐지는 일이 생긴다.
+ */
+const { Compact, NoHeader } = composeStories(stories);
 
 describe('Panel', () => {
   implementsClassName((extra) => <Panel {...extra}>content</Panel>);
@@ -12,6 +20,18 @@ describe('Panel', () => {
       content
     </Panel>
   ));
+
+  it('`NoHeader` 스토리는 머리 행을 그리지 않는다', () => {
+    const { container } = render(<NoHeader />);
+
+    expect(container.querySelector('header')).toBeNull();
+  });
+
+  it('`Compact` 스토리는 `data-density`에 compact를 싣는다', () => {
+    render(<Compact />);
+
+    expect(screen.getByText('탐색기').closest('[data-component="Panel"]')).toHaveAttribute('data-density', 'compact');
+  });
 
   it('본문을 렌더한다', () => {
     render(<Panel>본문 내용</Panel>);
