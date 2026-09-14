@@ -1,3 +1,4 @@
+import checkFile from "eslint-plugin-check-file";
 import comments from "@eslint-community/eslint-plugin-eslint-comments";
 import vitest from "@vitest/eslint-plugin";
 import js from "@eslint/js";
@@ -235,6 +236,36 @@ const base: Linter.Config[] = [
       "vitest/no-identical-title": "error",
       // 주석 처리된 테스트는 지운다 — 미룬 일은 `docs/tasks/`에 적는다(→ ADR 0004).
       "vitest/no-commented-out-tests": "error",
+    },
+  },
+
+  {
+    /*
+     * **이름.** 규약이 정한 것을 여기서 본다 — 2026-09-14까지 "지금은 리뷰로 본다"였다.
+     * PascalCase냐 camelCase냐는 **파일이 내보내는 이름**을 따르므로 기계가 판정하지 못한다.
+     * 기계가 판정하는 것은 그 아래의 것들이다 — 하이픈·밑줄 금지, 계층 폴더의 대소문자, 계약(`I<Name>.ts`)과
+     * 흉내(`Mock<Name>.ts`)의 접두. 네 패키지가 같은 규약을 쓰므로 바탕에 둔다.
+     */
+    files: ["src/**/*", "test/**/*"],
+    plugins: { "check-file": checkFile },
+    rules: {
+      "check-file/filename-naming-convention": ["error", {
+        // 하이픈·밑줄을 쓰지 않는다. 대소문자는 export 이름이 정한다.
+        "src/**/*.{ts,tsx,css}": "+([a-zA-Z0-9])*(.+([a-z0-9]))",
+        "test/**/*.{ts,tsx}": "+([a-zA-Z0-9])*(.+([a-z0-9]))",
+        // 계약은 `I`로 시작한다 — `view/`가 만져도 되는 것이라는 레이어 표시다(→ ADR 0007).
+        "src/**/{model,viewmodel,domain}/I*.ts": "I+([A-Z])*([a-zA-Z0-9])",
+        // 흉내는 `Mock`으로 시작한다. 계약 스위트에 걸리는 구현이라는 표시다.
+        "src/**/Mock*.ts": "Mock+([A-Z])*([a-zA-Z0-9])",
+      }, { ignoreMiddleExtensions: true }],
+      "check-file/folder-naming-convention": ["error", {
+        // **와일드카드 자리마다 같은 규약이 걸린다** — 컴포넌트 폴더를 집으려고 `**`를 쓰면
+        // 그것이 잡은 계층 폴더(`workbench`)까지 PascalCase를 요구한다(2026-09-14 실측 148건).
+        // 그래서 컴포넌트 폴더는 `test/structure.test.ts`가 본다 — 그 정규식이 PascalCase를 이미
+        // 요구한다. 여기는 계층·기능 폴더만 본다.
+        "src/*/": "CAMEL_CASE",
+        "src/extensions/*/": "CAMEL_CASE",
+      }],
     },
   },
 

@@ -27,7 +27,7 @@
 - **ESLint 메이저를 올릴 때 플러그인 여섯이 전부 따라와야 한다.** 하나가 늦으면 올림이 막힌다 — 지금 열린 TypeScript 메이저 PR이 같은 모양이다.
 
 ## 강제:
-- **린트** `primer-react/*`·`jsx-a11y/*`·`@eslint-react/no-forward-ref`·`vitest/*`(테스트 규율)·`no-restricted-syntax`(`view/`의 훅)·`import-x/no-restricted-paths`(패키지·슬라이스)·`no-restricted-imports`(Primer `IconButton`)·`@typescript-eslint/no-restricted-imports`(`model/`의 상태 라이브러리).
+- **린트** `primer-react/*`·`jsx-a11y/*`·`@eslint-react/no-forward-ref`·`vitest/*`(테스트 규율)·`check-file/*`(파일·폴더 이름)·`no-restricted-syntax`(`view/`의 훅)·`import-x/no-restricted-paths`(패키지·슬라이스)·`no-restricted-imports`(Primer `IconButton`)·`@typescript-eslint/no-restricted-imports`(`model/`의 상태 라이브러리).
 - **stylelint** `@primer/stylelint-config` — 색·테두리·그림자·글꼴을 토큰으로만 쓰게 한다.
 - **markdownlint** `ops/markdownlint.jsonc` — 문서의 형태. ADR 형식과 맞서는 규칙(줄 길이·절 앞 빈 줄·제목 끝 콜론)은 끄고 그 이유를 그 파일에 적는다.
 - **테스트** `packages/client/test/structure.test.ts` — 컴포넌트마다 스토리·테스트·배럴이 있는지, 그룹 배럴이 없는지.

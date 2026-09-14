@@ -48,6 +48,21 @@ describe('컴포넌트 폴더 구조', () => {
     expect(missing).toEqual([]);
   });
 
+  it('`component/` 바로 아래 폴더는 PascalCase이고 같은 이름의 `.tsx`를 갖는다', () => {
+    const folders = new Set(
+      FILES.filter((file) => /(?:^|\/)component\//u.test(file)).map((file) => {
+        const after = file.split('component/')[1] ?? '';
+        return `${file.slice(0, file.length - after.length)}${after.split('/')[0] ?? ''}`;
+      }),
+    );
+    const wrong = [...folders].filter((folder) => {
+      const name = folder.split('/').at(-1) ?? '';
+      return !/^[A-Z][A-Za-z0-9]*$/u.test(name) || !FILES.includes(`${folder}/${name}.tsx`);
+    });
+
+    expect(wrong).toEqual([]);
+  });
+
   it('컴포넌트 폴더 밖에는 `component/` 배럴이 없다 — 경로로 가져온다(→ ADR 0008)', () => {
     const groupBarrels = FILES.filter((file) => /(?:^|\/)components?\/index\.ts$/u.test(file));
 

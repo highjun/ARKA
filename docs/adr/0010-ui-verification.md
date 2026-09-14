@@ -28,7 +28,7 @@
 - **VRT가 비어 있는 동안은 그림을 아무도 지키지 않는다.** 기준을 쌓는 속도가 검토 속도에 묶인다.
 
 ## 강제:
-- **테스트** `packages/client/test/structure.test.ts` — `<Name>.tsx` 옆에 스토리·테스트·배럴이 있기를 요구한다. 린트가 아닌 이유는 구문이 아니라 파일 시스템 질문이어서다(→ [ADR 0011](0011-lint-off-the-shelf.md)).
+- **테스트** `packages/client/test/structure.test.ts` — `<Name>.tsx` 옆에 스토리·테스트·배럴이 있고 폴더 이름이 PascalCase로 그것과 같기를 요구한다. 린트가 아닌 이유는 구문이 아니라 파일 시스템 질문이어서다(→ [ADR 0011](0011-lint-off-the-shelf.md)).
 - **린트** `storybook/*`(recommended) — 스토리 파일의 모양을 본다.
 - **테스트** `packages/client/src/shared/utils/testing.tsx` — 하네스 넷. 부르지 않은 컴포넌트는 계약이 비어 있다.
 - **리뷰** — 최소 세트에 무엇이 실제로 있는 상태인지, 그리고 기준 이미지를 Accept할지는 사람만 판정한다.
