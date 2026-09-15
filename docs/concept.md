@@ -158,7 +158,6 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
   - 트리·목록 공통 부품 — 키보드 이동, 다중 선택, 필터
 - 명령과 이동
   - 명령 팔레트
-  - 빠른 열기 — 파일 이름으로, 기호로, 줄 번호로
   - 단축키 — 표 화면, 충돌 감지, 내보내기
 - 파일
   - 탐색기 — 트리, 만들기·이름 바꾸기·옮기기, 여러 개 한꺼번에
@@ -190,9 +189,11 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
 
 ##### 익스텐션 — 내장과 써드파티
 
-- 언어 기본 48개 — 문법 색칠, 들여쓰기 규칙, 짝 괄호, 코드 조각. 언어마다 하나씩이다
-  - typescript, xml, yaml, sql, css, html, json, javascript, latex, python,  shellscript
-  - dotenv, groovy, markdown, kotlin
+- 언어 기본 15개 — 문법 색칠, 들여쓰기 규칙, 짝 괄호, 코드 조각. 언어마다 하나씩이다
+  - 웹 — `html` `css` `javascript` `typescript`
+  - 데이터·설정 — `json` `yaml` `xml` `dotenv` `sql`
+  - 글 — `markdown` `latex`
+  - 그 밖 — `python` `shellscript` `kotlin` `groovy`
 - Preview — **VSCode에 대응이 없다. PDF와 `.db` 둘 다 직접 만든다**
   - 뒤로 미룬 것: `media-preview`(이미지·오디오·비디오), `markdown-math`(수식), `simple-browser`(웹 한 칸), Live Server
 
