@@ -8,6 +8,13 @@ import { expect, test, type Page } from "@playwright/test";
  * 조립이 맞물리는지는 `src/workbench/registerServices.test.tsx`가 이미 본다.
  */
 
+/*
+ * **`@critical`은 "이것이 깨지면 앱이 앱이 아니다"만 붙인다** — 워크스페이스가 보이고, 파일을
+ * 열고, 편집한 것을 잃지 않고, 에이전트가 답한다. 나머지는 기능이라 `main`이 든다.
+ *
+ * 태그를 늘리고 싶으면 먼저 물어라 — **이것 없이도 앱을 쓸 수 있나.** 쓸 수 있으면 기능이다.
+ */
+
 const PHONE = { width: 390, height: 844 };
 const DESKTOP = { width: 1280, height: 800 };
 
@@ -20,7 +27,7 @@ const treeRow = (page: Page, name: string) => page.getByRole("treeitem", { name,
 test.describe("폰", () => {
   test.use({ viewport: PHONE });
 
-  test("사이드바를 열면 워크스페이스 트리가 읽힌다", async ({ page }) => {
+  test("사이드바를 열면 워크스페이스 트리가 읽힌다", { tag: "@critical" }, async ({ page }) => {
     await page.goto("/");
     await page.getByLabel("사이드바 열기").click();
 
@@ -52,7 +59,7 @@ test.describe("폰", () => {
     expect(opaque).toBe(true);
   });
 
-  test("파일을 누르면 탭이 열리고 내용이 보인다", async ({ page }) => {
+  test("파일을 누르면 탭이 열리고 내용이 보인다", { tag: "@critical" }, async ({ page }) => {
     await page.goto("/");
     await page.getByLabel("사이드바 열기").click();
     await treeRow(page, "README.md").click();
@@ -65,7 +72,7 @@ test.describe("폰", () => {
 test.describe("데스크톱", () => {
   test.use({ viewport: DESKTOP });
 
-  test("사이드바가 드로어 없이 항상 보인다", async ({ page }) => {
+  test("사이드바가 드로어 없이 항상 보인다", { tag: "@critical" }, async ({ page }) => {
     await page.goto("/");
 
     await expect(page.getByText("src", { exact: true })).toBeVisible();
@@ -112,7 +119,7 @@ test.describe("데스크톱", () => {
 test.describe("저장하지 않은 변경", () => {
   test.use({ viewport: DESKTOP });
 
-  test("편집하면 탭이 dirty로 표시되고, 닫으려 하면 확인을 구한다", async ({ page }) => {
+  test("편집하면 탭이 dirty로 표시되고, 닫으려 하면 확인을 구한다", { tag: "@critical" }, async ({ page }) => {
     await page.goto("/");
     await treeRow(page, "edit-me.md").click();
 
