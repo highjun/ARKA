@@ -25,7 +25,7 @@
 - **플러그인이 여섯 늘고 전이 의존성이 그만큼 딸려 온다.** 이 저장소는 이미 같은 이유로 넷을 들였다(→ [ADR 0004](0004-comment-rules.md)).
 - **남의 규칙이라 메시지를 우리말로 바꾸거나 대안을 적어 넣을 수 없다.** 자작 규칙의 `message`가 하던 안내가 사라진다.
 - **ESLint 메이저를 올릴 때 플러그인이 전부 따라와야 한다.** 하나가 늦으면 올림이 막힌다 — 지금 열린 TypeScript 메이저 PR이 같은 모양이다.
-- **타입 인식 린트가 관문을 늘린다** — `check` 전체가 31초다(client 린트가 2.5초에서 7.7초로). 그 값으로 사는 것은 `await` 빠진 Promise인데, 그것을 잡는 다른 것이 없다.
+- **타입 인식 린트가 관문을 늘린다.** 그 값으로 사는 것은 `await` 빠진 Promise인데, 그것을 잡는 다른 것이 없다.
 
 ## 강제:
 - **린트** `primer-react/*`·`jsx-a11y/*`·`@eslint-react/no-forward-ref`·`vitest/*`(테스트 규율)·`check-file/*`(이름)·`@typescript-eslint/no-floating-promises`·`no-misused-promises`·`await-thenable`(타입 인식)·`no-restricted-syntax`(`view/`의 훅)·`import-x/no-restricted-paths`(패키지·슬라이스)·`no-restricted-imports`(Primer `IconButton`)·`@typescript-eslint/no-restricted-imports`(`model/`의 상태 라이브러리).

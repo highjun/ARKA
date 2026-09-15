@@ -16,7 +16,7 @@
 - **`pre-push` 훅만으로 관문을 삼기** — 훅은 `--no-verify`로 지나가고 남는 기록이 없다. 다만 룰셋을 못 거는 동안은 그것이 `main` 직접 푸시를 막는 유일한 장치다(→ `ops/hooks/prePush.ts`).
 
 ## 대가:
-- **설정이 저장소 안에서 세 벌이 된다** — `ops/pipeline/`·`ops/deploy/`·`.github/workflows/`. 갈라지면 워크플로가 정본이다.
+- **설정이 저장소 안에서 세 벌이 된다** — `ops/pipeline/`·`ops/deploy/`·`.github/workflows/`. 갈라지면 `ops/pipeline/check.ts`가 정본이다 — 워크플로는 그것을 부르기만 한다.
 - **머지가 러너에 묶인다.** GitHub가 느리면 병합이 느리다.
 - **`.github/`가 루트 항목을 하나 늘린다**(→ ADR 0002). 위치를 고를 수 없는 자리라 예외로 둔다.
 
