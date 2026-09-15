@@ -164,7 +164,6 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
   - 탐색기 — 트리, 만들기·이름 바꾸기·옮기기, 여러 개 한꺼번에
   - 열기·저장·자동 저장, 바깥 변경 감지, 충돌 처리
   - 로컬 히스토리 — 저장할 때마다 자국을 남겨 되돌린다
-  - 타임라인 — 한 파일에 일어난 일(저장·커밋)을 시간순으로
   - 작업 폴더와 다중 루트 워크스페이스
 - 찾기
   - 폴더 전체 찾기·바꾸기 — 정규식, 포함·제외 글롭
@@ -173,7 +172,6 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
   - 여러 파일을 한 번에 고치는 미리보기(bulk edit)
   - 사용자 지정 편집기 — 확장이 자기 화면으로 파일을 연다
   - 웹뷰 — 확장이 그리는 임의의 화면
-  - 개요(outline) — 파일 안 구조를 사이드바에
 - 터미널
   - 통합 터미널 — 여러 개, 분할, 프로필
   - 셸 통합 — 명령 단위로 자르기, 종료 코드 표시, 출력으로 이동
@@ -208,11 +206,6 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
 - 테마·아이콘
   - `theme-defaults` — Dark+/Light+ 기본
   - `theme-seti` — 파일 아이콘
-- 시각화 및 개발 도구
-  - Draw.io Integration — 편집기 안에서 다이어그램
-  - Docker — 이미지·컨테이너를 사이드바에서
-  - Thunder Client — 화면으로 API를 친다
-  - SQLTools / Database Client — DB에 붙어 질의한다
 
 #### v1.1 — VCS
 
