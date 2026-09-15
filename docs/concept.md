@@ -59,12 +59,12 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
   - CodeMirror 6 기반으로 VSCode Monaco 수준
   - 단, LSP 연동은 Ver 1에서 제외
 - UI: 개별 파일 프리뷰
-  - PDF와 `.db` 둘만. 나머지 종류는 뒤로 미룬다
+  - 종류 전부. PDF와 `.db`는 직접 만든다
 - Model: Settings
 - Model: Terminal
 - UI: Terminal
 
-프리뷰는 **PDF와 `.db` 둘이 먼저다. 둘 다 VSCode에 대응이 없어 직접 만든다.** 문서(XLSX·Slides·PPTX)와 미디어(이미지·비디오·오디오)는 뒤로 미룬다.
+프리뷰는 종류를 전부 v1.0에서 다룬다 — 미디어(이미지·오디오·비디오), 웹·브라우저, 문서(PDF·XLSX·Slides·PPTX), `.db`. 이 중 **PDF와 `.db`는 VSCode에 대응이 없어 직접 만든다.**
 
 ##### 모델 — v1.0이 지는 규칙
 
@@ -191,11 +191,16 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
 
 - 언어 기본 15개 — 문법 색칠, 들여쓰기 규칙, 짝 괄호, 코드 조각. 언어마다 하나씩이다
   - 웹 — `html` `css` `javascript` `typescript`
-  - 데이터·설정 — `json` `yaml` `xml` `dotenv` `sql`
+  - 데이터·설정 — `json` `yaml` `xml` `dotenv` `sql` `shellscript`
+  - 안드로이드 — `kotlin` `groovy`
   - 글 — `markdown` `latex`
-  - 그 밖 — `python` `shellscript` `kotlin` `groovy`
-- Preview — **VSCode에 대응이 없다. PDF와 `.db` 둘 다 직접 만든다**
-  - 뒤로 미룬 것: `media-preview`(이미지·오디오·비디오), `markdown-math`(수식), `simple-browser`(웹 한 칸), Live Server
+    - Markdown에 katex, math, Github Flavor 등 같이
+  - 분석 및 딥러닝 — `python`  
+- Preview
+  - `media-preview` — 이미지·오디오·비디오
+  - `simple-browser` — 편집기 안에 웹 한 칸
+  - **PDF와 `.db` — VSCode에 대응이 없다. 직접 만든다**
+  - **문서(XLSX·Slides·PPTX) — 대응이 없다. 직접 만든다**
 
 - Search
   - `search-result` — 검색 결과 파일(`.code-search`)을 다룬다
