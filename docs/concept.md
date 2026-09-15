@@ -59,12 +59,55 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
   - CodeMirror 6 기반으로 VSCode Monaco 수준
   - 단, LSP 연동은 Ver 1에서 제외
 - UI: 개별 파일 프리뷰
-  - Markdown, PDF, 이미지, 비디오/오디오
+  - PDF와 `.db` 둘만. 나머지 종류는 뒤로 미룬다
 - Model: Settings
 - Model: Terminal
 - UI: Terminal
 
-프리뷰가 다루는 것: ① 텍스트 파일 ② 문서(PDF·XLSX·Slides·PPTX) ③ `.db` ④ 미디어(이미지·비디오·오디오).
+프리뷰는 **PDF와 `.db` 둘이 먼저다. 둘 다 VSCode에 대응이 없어 직접 만든다.** 문서(XLSX·Slides·PPTX)와 미디어(이미지·비디오·오디오)는 뒤로 미룬다.
+
+##### 모델 — v1.0이 지는 규칙
+
+**화면이 어떻게 생기든 바뀌지 않는 것들이다.** 전제에서 곧바로 따라오는 것은 그냥 적었고, 아직 안 정한 것은 `물음`으로 뒀다. 정해지면 ADR로, 안 정해진 채 남으면 `docs/tasks/`로 간다.
+
+- **Workspace — 무엇이 작업 범위인가**
+  - 루트는 서버(개인 원격 노드)의 경로다. 클라이언트에는 파일이 없다
+  - 경로는 문자열이 아니라 `URI`로 가리킨다
+  - 루트 밖은 보이지 않는다. 심볼릭 링크가 밖을 가리켜도 따라가지 않는다
+  - `물음` 루트를 여럿 둘 수 있나
+  - `물음` 루트를 바꾸는 일(폴더 열기)이 v1.0에 있나
+- **FileSystem — 읽고 쓰는 규칙**
+  - 읽기·쓰기·목록·만들기·이름 바꾸기·옮기기·지우기. 전부 서버가 한다
+  - 텍스트냐 아니냐가 **무엇으로 열지를 정한다** — 텍스트는 편집, 나머지는 보기
+  - `물음` 크기 상한. 몇 MB를 넘으면 열지 않나 — 모바일이 있어서 필요하다
+  - `물음` 인코딩. UTF-8로 고정하나, 감지하나
+  - `물음` 줄끝. 파일이 가진 것을 보존하나, LF로 통일하나
+  - `물음` 지울 때 휴지통인가 영구인가
+- **Watch — 바깥에서 바뀌는 것**
+  - 열린 파일과 디렉토리를 둘 다 본다
+  - 바깥이 바뀌었고 내가 안 고쳤으면 조용히 반영한다
+  - `물음` **바깥도 바뀌고 나도 고쳤으면 누가 이기나.** 이게 제일 크다
+  - `물음` 열어 둔 파일이 사라지면 탭을 닫나, 내용을 든 채 남기나
+- **Document — 편집 중인 문서**
+  - **한 파일에 문서 하나.** 탭 둘이 같은 파일을 열면 같은 문서를 본다
+  - 디스크 내용과 메모리 내용을 따로 든다. 둘이 다르면 dirty다
+  - `물음` 자동 저장이 기본인가 — 폰에서 저장을 누르기는 번거롭다
+  - `물음` 되돌리기 스택이 저장 뒤에도 남나. 탭을 닫으면 사라지나
+  - `물음` 저장 못 한 편집이 서버에 남나 — 연결이 끊겼다 돌아왔을 때 무엇을 보나
+- **Terminal — 세션**
+  - 세션은 서버에 산다. 클라이언트는 화면과 입력만 나른다
+  - `물음` **클라이언트가 끊겨도 세션이 사나.** 폰은 화면을 끄면 끊긴다 — 기능 동등을 지키려면 살아야 한다
+  - `물음` 출력을 얼마나 들고 있나
+  - `물음` 여러 개를 허용하나
+- **Settings — 설정**
+  - 서버에 산다. 기기가 여럿이므로 한 곳에 둔다
+  - 기본값 위에 사용자값을 얹는다
+  - `물음` 기기마다 달라야 하는 값이 있나 — 글꼴 크기는 폰과 데스크톱이 다르다
+  - `물음` 바꾸면 즉시 듣나, 다시 띄워야 하나
+- **전체에 걸리는 것**
+  - 무거운 것은 전부 서버다. 클라이언트는 그리기만 한다
+  - 앱 셸만 캐시하고 API는 캐시하지 않는다 — **끊기면 읽기도 안 된다**
+  - `물음` 끊겼을 때 무엇을 보여주나
 
 ---
 
@@ -105,31 +148,12 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
   - 짝 괄호 강조
   - 색 값 옆에 색상판
   - 빈 에디터 안내 문구
-  - 미니맵
   - 아주 긴 줄·큰 파일 다루기
-- 언어 지능 — 언어 서버(LSP)가 채운다. **v1에서 제외하기로 한 자리다**
-  - 자동완성 목록
-  - 인자 힌트 — 함수를 부르는 중에 몇 번째 인자인지
-  - 마우스를 올리면 설명
-  - 빠른 수정·리팩터
-  - 선언 위 정보 줄(CodeLens) — 참조 수, 테스트 실행
-  - 이름 한꺼번에 바꾸기
-  - 서식 맞추기 — 파일 전체, 선택 영역, 입력하는 중
-  - 파일 안 기호 목록과 기호로 이동
-  - 오류·경고로 이동
-  - 자리를 안 옮기고 들여다보기(Peek)
-  - 본문에 겹쳐 쓰는 타입·인자 이름(inlay hint)
-  - 회색으로 미리 보이는 제안(inline completion)
-  - 의미 기반 색칠 — 같은 이름이라도 변수냐 타입이냐로 다르게
-
-##### 코어 — 워크벤치가 하는 일
-
 - 화면 골격
   - 액티비티 바 — 사이드바를 고르는 아이콘 줄
   - 사이드바와 보조 사이드바
   - 에디터 그룹 — 탭, 분할, 끌어서 재배치
   - 패널 — 터미널·문제·출력·디버그 콘솔
-  - 상태 표시줄
   - 구역 경계를 끌어 크기 조절
   - 트리·목록 공통 부품 — 키보드 이동, 다중 선택, 필터
 - 명령과 이동
@@ -148,27 +172,16 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
 - 편집기 주변
   - 여러 파일을 한 번에 고치는 미리보기(bulk edit)
   - 차이 보기 — 두 파일, 여러 파일 한 화면(multi diff)
-  - 병합 편집기 — 충돌을 셋으로 놓고 고른다
   - 사용자 지정 편집기 — 확장이 자기 화면으로 파일을 연다
   - 웹뷰 — 확장이 그리는 임의의 화면
   - 노트북 — 셀 실행, 결과 렌더러, REPL
   - 개요(outline) — 파일 안 구조를 사이드바에
   - 코드에 달린 리뷰 코멘트
-  - 호출 계층·타입 계층
 - 터미널
   - 통합 터미널 — 여러 개, 분할, 프로필
   - 셸 통합 — 명령 단위로 자르기, 종료 코드 표시, 출력으로 이동
   - 링크 감지 — 출력의 경로를 눌러 연다
   - 바깥 터미널 열기
-- 소스 제어
-  - SCM 뷰 — 변경 목록, 스테이징, 커밋, 브랜치
-- 실행과 진단
-  - 디버그 — 중단점, 단계 실행, 변수·조사식, 디버그 콘솔
-  - 테스트 — 테스트 트리, 실행, 결과 표시
-  - 태스크 — 빌드·감시 명령을 정의해 돌린다
-  - 문제 패널 — 오류·경고 모음
-  - 출력 채널, 로그
-  - 성능·프로세스 탐색기
 - 확장
   - 확장 뷰 — 찾기, 설치, 켜고 끄기, 권장 목록
   - 확장 개발 거들기 — `package.json` 기여 지점 검사
@@ -184,114 +197,39 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
   - 터널 — 바깥에서 들어오는 통로
   - 편집 세션 — 저장 안 한 편집을 다른 기기로 넘긴다
   - 공유
-- 에이전트·AI
-  - 채팅
-  - 인라인 채팅 — 에디터 안에서 바로
-  - 인라인 제안
-  - MCP — 바깥 도구를 부르는 규약
-  - 음성 입력
-  - 원격 코딩 에이전트
-- 접근성
-  - 스크린 리더 대응
-  - 소리·신호 — 오류 줄, 중단점 같은 것을 소리로
 - 열기와 인증
-  - URI 열기 — 바깥 링크, `vscode://` 처리
+  - URI 열기 — 바깥 링크, `arka://` 처리
   - 인증 — 계정 연결과 토큰 보관
   - 비밀값 암호화 저장
 - 언어 감지
   - 확장자·내용으로 언어 판정
-  - 언어별 상태 표시
-- 온보딩
-  - 시작 화면, 둘러보기, 빈 뷰 안내
 - 운영
   - 업데이트, 다시 시작
   - 원격 측정·설문·이슈 신고
 
-##### 내장 익스텐션 97개
+##### 익스텐션 — 내장과 써드파티
 
 - 언어 기본 48개 — 문법 색칠, 들여쓰기 규칙, 짝 괄호, 코드 조각. 언어마다 하나씩이다
-  - `bat` `clojure` `coffeescript` `cpp` `csharp` `css` `dart` `diff` `docker` `dotenv` `fsharp` `go` `groovy` `handlebars` `hlsl` `html` `ini` `java` `javascript` `json` `julia` `latex` `less` `log` `lua` `make` `markdown-basics` `objective-c` `perl` `php` `powershell` `prompt-basics` `pug` `python` `r` `razor` `restructuredtext` `ruby` `rust` `scss` `shaderlab` `shellscript` `sql` `swift` `typescript-basics` `vb` `xml` `yaml`
-- 언어 지능 6개 — 서버가 붙어 자동완성·정의 이동·진단까지 한다
-  - `typescript-language-features` — TS·JS. `tsserver`를 물고 있다
-  - `html-language-features` — HTML. 안에 든 CSS·JS까지
-  - `css-language-features` — CSS·SCSS·Less
-  - `json-language-features` — JSON. 스키마로 검사한다
-  - `markdown-language-features` — 마크다운. 미리보기, 링크 검증, 목차
-  - `php-language-features` — PHP 문법 검사
-- 기능 26개
-  - `git` — 소스 제어 본체. 스테이징·커밋·브랜치·원격
-  - `git-base` — 다른 확장이 쓰는 git 기초 API
-  - `github` — 이슈·PR 연동, 리포지터리 열기
-  - `github-authentication` · `microsoft-authentication` — 계정 로그인
-  - `merge-conflict` — 충돌 표시자를 눌러서 고르기
-  - `emmet` — `div.a>ul>li*3` 같은 축약을 펼친다
-  - `npm` — `package.json` 스크립트를 태스크로, 의존성 자동완성
-  - `grunt` · `gulp` · `jake` — 각 빌드 도구의 작업을 태스크로
-  - `references-view` — 참조·호출 계층을 사이드바 트리로
+  - typescript, xml, yaml, sql, css, html, json, javascript, latex, python,  shellscript
+  - dotenv, groovy, markdown, kotlin
+- Preview — **VSCode에 대응이 없다. PDF와 `.db` 둘 다 직접 만든다**
+  - 뒤로 미룬 것: `media-preview`(이미지·오디오·비디오), `markdown-math`(수식), `simple-browser`(웹 한 칸), Live Server
+
+- Search
   - `search-result` — 검색 결과 파일(`.code-search`)을 다룬다
-  - `simple-browser` — 편집기 안에 웹 브라우저 한 칸
-  - `media-preview` — 이미지·오디오·비디오 미리보기
-  - `notebook-renderers` — 노트북 출력(이미지·HTML·에러)을 그린다
-  - `ipynb` — Jupyter 노트북 파일 읽기·쓰기
-  - `markdown-math` — 마크다운 안 수식(KaTeX)
-  - `mermaid-markdown-features` — 마크다운 안 다이어그램
-  - `configuration-editing` — `settings.json`·`launch.json` 자동완성과 검사
-  - `extension-editing` — 확장 만들 때 `package.json` 검사
-  - `debug-auto-launch` — Node 프로세스가 뜨면 디버거를 자동으로 붙인다
-  - `debug-server-ready` — 서버가 준비되면 브라우저를 연다
+
+- Terminal
   - `terminal-suggest` — 터미널에서 명령·경로 자동완성
   - `tunnel-forwarding` — 포트를 바깥으로 연다
-  - `copilot` — AI 기능 진입점
-- 테마·아이콘 12개
+
+- 테마·아이콘
   - `theme-defaults` — Dark+/Light+ 기본
-  - `theme-abyss` `theme-kimbie-dark` `theme-monokai` `theme-monokai-dimmed` `theme-quietlight` `theme-red` `theme-solarized-dark` `theme-solarized-light` `theme-tomorrow-night-blue`
   - `theme-seti` — 파일 아이콘
-  - `theme-modern-icons` — 제품 아이콘
-- 저장소 안에만 있는 것 5개 — 제품이 아니다
-  - `types` `vscode-api-tests` `vscode-colorize-tests` `vscode-colorize-perf-tests` `vscode-test-resolver`
-
-##### 써드파티 — 많이 쓰는 것과 결이 다른 것
-
-- 서식·검사
-  - Prettier — 저장할 때 코드 모양을 맞춘다
-  - ESLint — JS·TS 정적 검사, 빠른 수정
-  - Code Spell Checker — 주석·식별자의 오타
-  - Error Lens — 오류·경고를 그 줄 끝에 바로 띄운다
-- Git
-  - GitLens — 줄마다 누가 언제 왜 고쳤는지, 이력 그래프
-  - Git Graph — 브랜치 그래프
-  - GitHub Pull Requests — PR을 편집기 안에서 읽고 리뷰한다
-- 언어·런타임
-  - Python (+ Pylance) — 인터프리터 고르기, 디버깅, 타입 검사
-  - C/C++ — IntelliSense, 디버깅
-  - Java Extension Pack
-  - Jupyter — 노트북 실행
-  - Tailwind CSS IntelliSense — 클래스 이름 자동완성과 미리보기
-- AI
-  - GitHub Copilot — 인라인 제안과 채팅
-  - IntelliCode — 쓰던 패턴을 보고 자동완성 순서를 바꾼다
-- 원격·컨테이너
-  - Remote - SSH — 원격 기계에서 편집한다
-  - Dev Containers — 컨테이너 안에서 편집한다
+- 시각화 및 개발 도구
+  - Draw.io Integration — 편집기 안에서 다이어그램
   - Docker — 이미지·컨테이너를 사이드바에서
-  - Live Share — 같은 세션을 둘이 연다
-- 바깥과 통신
-  - REST Client — `.http` 파일로 요청을 쏜다
   - Thunder Client — 화면으로 API를 친다
   - SQLTools / Database Client — DB에 붙어 질의한다
-- 편집 보조
-  - Path Intellisense — 경로 문자열 자동완성
-  - Auto Rename Tag — 짝 태그 함께 고치기
-  - Markdown All in One — 목차, 표 정렬, 단축키
-  - Todo Tree — 코드의 `TODO`를 트리로 모은다
-  - Better Comments — 주석을 종류별로 색을 달리
-  - indent-rainbow — 들여쓰기 깊이를 색으로
-- 겉모습·조작
-  - Material Icon Theme — 파일 아이콘
-  - VSCodeVim — Vim 키 조작
-- 그리기
-  - Draw.io Integration — 편집기 안에서 다이어그램
-  - Live Server — 정적 파일을 띄우고 고치면 새로고침
 
 #### v1.1 — VCS
 
