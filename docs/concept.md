@@ -64,7 +64,7 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
 - Model: Terminal
 - UI: Terminal
 
-프리뷰는 종류를 전부 v1.0에서 다룬다 — 미디어(이미지·오디오·비디오), 웹·브라우저, 문서(PDF·XLSX·Slides·PPTX), `.db`. 이 중 **PDF와 `.db`는 VSCode에 대응이 없어 직접 만든다.**
+프리뷰는 파일 종류로 가른다 — 이미지, 오디오·비디오, PDF, `.db`. 이 중 **PDF와 `.db`는 VSCode에 대응이 없어 직접 만든다.** 오피스 문서(XLSX·Slides·PPTX)는 v1.0에서 다루지 않는다.
 
 ##### 모델 — v1.0이 지는 규칙
 
@@ -196,11 +196,12 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
   - 글 — `markdown` `latex`
     - Markdown에 katex, math, Github Flavor 등 같이
   - 분석 및 딥러닝 — `python`  
-- Preview
-  - `media-preview` — 이미지·오디오·비디오
-  - `simple-browser` — 편집기 안에 웹 한 칸
-  - **PDF와 `.db` — VSCode에 대응이 없다. 직접 만든다**
-  - **문서(XLSX·Slides·PPTX) — 대응이 없다. 직접 만든다**
+- Preview — 파일 종류로 가른다
+  - 이미지 — `png` `jpg` `gif` `webp` `svg`
+  - 오디오·비디오 — `mp3` `wav` `mp4` `webm`
+  - **PDF — VSCode에 대응이 없다. 직접 만든다**
+  - **`.db`(SQLite) — 대응이 없다. 직접 만든다**
+  - 웹 페이지 — 파일이 아니라 URL이다. 원격 노드의 포트를 봐야 해서 `tunnel-forwarding`과 짝이다
 
 - Search
   - `search-result` — 검색 결과 파일(`.code-search`)을 다룬다
