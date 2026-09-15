@@ -6,7 +6,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "node lint/run.ts",
-    "test": "vitest run",
+    "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
     "test:smoke": "node deploy/smoke.ts",
     "check": "node pipeline/check.ts",
     "format": "prettier --config prettier.config.ts --write ..",
