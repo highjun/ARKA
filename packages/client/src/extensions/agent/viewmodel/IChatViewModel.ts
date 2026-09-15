@@ -49,6 +49,10 @@ export interface IChatViewModel {
   onDispose(): void;
 
   readonly sessions: readonly ChatSessionRow[];
+  /** 보관된 세션도 보여줄 것인가. 화면 상태지만 목록과 그 머리의 토글이 따로 살아서 ViewModel이
+   *  든다 — 크롬은 커널이 그리고 본문은 확장이 그리므로 둘이 같은 곳을 봐야 한다(→ ADR 0007). */
+  readonly showArchived: boolean;
+  setShowArchived(showArchived: boolean): void;
   readonly sessionsLoading: boolean;
   readonly sessionsFailure: string | null;
 

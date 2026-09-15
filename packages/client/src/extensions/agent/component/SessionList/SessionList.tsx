@@ -49,6 +49,14 @@ export interface SessionListProps extends Omit<ComponentPropsWithoutRef<"div">, 
   /** 주어지면 헤더에 "..." 더보기 메뉴가 나타난다 — `Menu.Item` 모양의 children을 그대로
    * `Menu.Content`에 넣는다(Shell의 `panelActions`와 같은 관용구). */
   readonly moreActions?: ReactNode;
+  /**
+   * 머리를 직접 그릴 것인가. 기본값 `'panel'`.
+   *
+   * `'none'`이면 목록만 그린다 — 사이드바처럼 **커널이 이미 패널을 두른 자리**에 쓴다.
+   * 이때 보관 세션을 거르는 것도 부르는 쪽 몫이다. 거르는 토글이 머리에 살기 때문이다
+   * (`TextEditor`의 `chrome`과 같은 관용구).
+   */
+  readonly chrome?: "panel" | "none";
 }
 
 /**
@@ -66,6 +74,7 @@ const SessionListRoot = ({
   onCreateSession,
   createLabel = "새 세션 만들기",
   moreActions,
+  chrome = "panel",
   className,
   ...props
 }: SessionListProps) => {
@@ -76,7 +85,9 @@ const SessionListRoot = ({
     onActiveIdChange,
   });
   const [showArchived, setShowArchived] = useState(false);
-  const visibleSessions = showArchived ? sessions : sessions.filter((session) => !session.archived);
+  // `chrome='none'`이면 거르는 토글이 없다 — 부르는 쪽이 이미 걸러서 준다.
+  const visibleSessions =
+    chrome === "none" || showArchived ? sessions : sessions.filter((session) => !session.archived);
 
   const actions = (
     <>
@@ -121,29 +132,36 @@ const SessionListRoot = ({
     </>
   );
 
+  const body =
+    visibleSessions.length === 0 ? (
+      <div className={styles["empty"]}>{emptyLabel}</div>
+    ) : (
+      <div role="listbox" aria-label="Agent sessions" className={styles["list"]}>
+        {visibleSessions.map((session) => (
+          <SessionListItem
+            key={session.id}
+            title={session.title}
+            excerpt={session.excerpt}
+            status={session.status}
+            timestamp={session.timestamp}
+            unread={session.unread}
+            isActive={session.id === currentActiveId}
+            disabled={session.disabled}
+            onSelect={() => selectSession(session)}
+          />
+        ))}
+      </div>
+    );
+
   return (
     <div className={clsx(className, styles["root"])} {...props} data-component="SessionList">
-      <Panel title={<span className={styles["heading"]}>{heading}</span>} actions={actions}>
-        {visibleSessions.length === 0 ? (
-          <div className={styles["empty"]}>{emptyLabel}</div>
-        ) : (
-          <div role="listbox" aria-label="Agent sessions" className={styles["list"]}>
-            {visibleSessions.map((session) => (
-              <SessionListItem
-                key={session.id}
-                title={session.title}
-                excerpt={session.excerpt}
-                status={session.status}
-                timestamp={session.timestamp}
-                unread={session.unread}
-                isActive={session.id === currentActiveId}
-                disabled={session.disabled}
-                onSelect={() => selectSession(session)}
-              />
-            ))}
-          </div>
-        )}
-      </Panel>
+      {chrome === "none" ? (
+        body
+      ) : (
+        <Panel title={<span className={styles["heading"]}>{heading}</span>} actions={actions}>
+          {body}
+        </Panel>
+      )}
     </div>
   );
 };

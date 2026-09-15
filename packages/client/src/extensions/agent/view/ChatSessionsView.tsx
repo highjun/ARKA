@@ -1,6 +1,9 @@
 import { useViewModel } from "#core/viewmodel";
 import { Spinner } from "@primer/react";
 import { Blankslate } from "@primer/react/experimental";
+import { Icon } from "#component/Icon";
+import { IconButton } from "#component/IconButton";
+import { Menu } from "#component/Menu";
 import { SessionList } from "../component/SessionList";
 import { ChatViewModelToken } from "../viewmodel/IChatViewModel";
 import styles from "./ChatSessionsView.module.css";
@@ -30,11 +33,16 @@ export const ChatSessionsView = ({
     );
   }
 
+  // 머리는 커널이 그린다(`SidebarContentDescriptor`) — 그래서 거르는 것도 여기서 한다.
+  const visible = viewModel.showArchived
+    ? viewModel.sessions
+    : viewModel.sessions.filter((session) => !session.archived);
+
   return (
     <SessionList
+      chrome="none"
       className={styles["root"]}
-      heading="에이전트"
-      sessions={viewModel.sessions.map((session) => ({
+      sessions={visible.map((session) => ({
         id: session.id,
         title: session.title,
         status: session.status ?? undefined,
@@ -43,12 +51,39 @@ export const ChatSessionsView = ({
       }))}
       emptyLabel={viewModel.sessionsFailure ?? "대화가 없다 — 새로 시작하세요."}
       onActiveChange={(session) => open(session.id, session.title)}
-      onCreateSession={() => {
+    />
+  );
+};
+
+/** 패널 머리에 그대로 놓이는 것 — 새 대화 하나다(`SidebarContentDescriptor.InlineActions`). */
+export const ChatSessionsInlineActions = ({
+  onOpenTab,
+}: {
+  readonly onOpenTab: (tab: { readonly id: string; readonly kind: string; readonly title: string }) => void;
+}) => {
+  const viewModel = useViewModel(ChatViewModelToken);
+  return (
+    <IconButton
+      variant="invisible"
+      size="small"
+      aria-label="새 대화"
+      onClick={() => {
         void viewModel.createSession().then((id) => {
-          if (id !== null) open(id, "새 대화");
+          if (id !== null) onOpenTab({ id, kind: CHAT_TAB_KIND, title: "새 대화" });
         });
       }}
-      createLabel="새 대화"
+      icon={() => <Icon iconId="add" size="sm" />}
     />
+  );
+};
+
+/** `'...'` 뒤로 접히는 것(`SidebarContentDescriptor.MenuActions`). */
+export const ChatSessionsMenuActions = () => {
+  const viewModel = useViewModel(ChatViewModelToken);
+  return (
+    <Menu.Item onSelect={() => viewModel.setShowArchived(!viewModel.showArchived)}>
+      {viewModel.showArchived ? <Icon iconId="check" size="sm" /> : null}
+      보관된 세션 표시
+    </Menu.Item>
   );
 };

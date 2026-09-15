@@ -35,6 +35,7 @@ export class ChatViewModel extends ViewModelBase implements IChatViewModel {
   readonly #sessionsFailure;
   readonly #chats;
   readonly #drafts = this.observe(atom<Readonly<Record<string, Draft>>>({}));
+  readonly #showArchived = this.observe(atom(false));
   #subscription: Disposable | null = null;
 
   /** 구독은 `onMount`에서 시작한다 — 만드는 것만으로는 서버를 부르지 않는다. */
@@ -62,6 +63,16 @@ export class ChatViewModel extends ViewModelBase implements IChatViewModel {
   /** 화면이 그대로 쓰는 행이다. 보관된 것도 함께 온다. */
   get sessions(): readonly ChatSessionRow[] {
     return this.#sessions.get();
+  }
+
+  /** 보관된 세션도 보여줄 것인가. 기본은 감춘다. */
+  get showArchived(): boolean {
+    return this.#showArchived.get();
+  }
+
+  /** 머리의 토글이 부른다 — 목록과 토글이 따로 살아서 여기가 둘의 유일한 진실이다. */
+  setShowArchived(showArchived: boolean): void {
+    this.#showArchived.set(showArchived);
   }
 
   /** 목록을 읽는 중인가. 개별 대화의 연결 상태와 무관하다. */
