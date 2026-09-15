@@ -28,7 +28,7 @@ test("스토리가 하나는 있다", () => {
 
 for (const id of storyIds) {
   test(id, async ({ page }, testInfo) => {
-    // 기준 이미지는 **검토에서 Accept할 때** 만든다(`test:vrt -g "<스토리 id>" --update-snapshots`).
+    // 기준 이미지는 **검토에서 Accept할 때** 만든다(`test:visual-regression -g "<스토리 id>" --update-snapshots`).
     // 그때까지 기준이 없는 것은 정상이라 건너뛴다 — 아무도 안 본 그림을 기준으로 삼으면 "검토 안 함"이
     // "승인됨"으로 기록된다. 다만 기준을 만들러 온 실행에서는 건너뛰면 안 되므로,
     // 기본값(`updateSnapshots: "none"`)일 때만 건너뛴다.

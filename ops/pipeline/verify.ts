@@ -14,5 +14,5 @@ step("pnpm", "--filter", "ops", "run", "check");
 // 아래 세 줄에 **한 번도 닿지 못했다**(2026-09-13 발견).
 step("pnpm", "-r", "--if-present", "run", "build");
 step("pnpm", "--filter", "client", "run", "test:e2e");
-step("pnpm", "--filter", "client", "run", "test:vrt");
+step("pnpm", "--filter", "client", "run", "test:visual-regression");
 step("pnpm", "--filter", "ops", "run", "test:smoke");

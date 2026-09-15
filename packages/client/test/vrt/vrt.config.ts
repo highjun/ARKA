@@ -17,7 +17,7 @@ export const STORYBOOK_STATIC = ".output/storybook-static";
  * 스토리 하나하나를 그려 **이전과 같은 그림인지** 본다. E2E(`../e2e/`)와 목적이 다르다 —
  * 저쪽은 "동작하는가", 여기는 "모양이 변했는가"다.
  *
- * **Docker에서만 돌린다**(`pnpm --filter client test:vrt` → `run.ts`). 폰트 렌더링과 서브픽셀이 기계마다 달라
+ * **Docker에서만 돌린다**(`pnpm --filter client test:visual-regression` → `run.ts`). 폰트 렌더링과 서브픽셀이 기계마다 달라
  * 호스트에서 만든 기준 이미지는 다른 기계에서 무조건 깨진다 — 고정하지 않으면 기준이
  * 아니라 소음이 된다.
  */

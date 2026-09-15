@@ -6,7 +6,7 @@ import path from "node:path";
  * 기준 이미지를 만들 때는 **스토리를 골라서** 준다:
  *
  * ```
- * pnpm --filter client test:vrt -g "workbench-shell--default" --update-snapshots
+ * pnpm --filter client test:visual-regression -g "workbench-shell--default" --update-snapshots
  * ```
  *
  * 전체를 한 번에 갱신하는 스크립트를 두지 않는 이유는, 기준이 **검토에서 그 스토리를 Accept할

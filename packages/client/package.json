@@ -13,7 +13,7 @@
     "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
     "test:e2e": "playwright test -c test/e2e/playwright.config.ts",
     "test:e2e:critical": "playwright test -c test/e2e/playwright.config.ts --grep @critical",
-    "test:vrt": "node test/vrt/run.ts"
+    "test:visual-regression": "node test/vrt/run.ts"
   },
   "dependencies": {
     "@codemirror/commands": "^6.11.0",
