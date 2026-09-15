@@ -48,6 +48,9 @@ export interface ShellProps extends Omit<ComponentPropsWithoutRef<"div">, "child
   /** 패널 헤더의 "..." 더보기 버튼 안에 뜨는 메뉴 항목들(`Menu.Item` 등). 없으면 버튼 자체가
    * 없다. */
   readonly panelActions?: ReactNode;
+  /** 패널 머리 오른쪽에 **그대로** 놓이는 아이콘 버튼들. `panelActions`가 `'...'` 뒤로 접히는
+   *  것과 달리 접히지 않는다 — 자주 쓰는 것 한둘을 위한 자리다(VSCode 뷰 제목 줄과 같다). */
+  readonly panelInlineActions?: ReactNode;
   /** 사이드바를 드래그로 폭 조절 가능하게 한다. 기본 `false`(고정폭) — 켜면 240~480px 사이에서
    * 늘리고 줄일 수 있다(최소는 `sidebarMinWidth`로 덮어쓸 수 있다). */
   readonly sidebarResizable?: boolean;
@@ -95,6 +98,7 @@ export const Shell = ({
   panelContent,
   panelTitle,
   panelActions,
+  panelInlineActions,
   sidebarResizable,
   sidebarMinWidth,
   sidebarWidthStorageKey,
@@ -181,18 +185,23 @@ export const Shell = ({
                         className={styles["sidebarPanel"]}
                         title={panelTitle}
                         actions={
-                          hasContent(panelActions) ? (
-                            <Menu>
-                              <Menu.Trigger asChild>
-                                <IconButton
-                                  variant="invisible"
-                                  size="small"
-                                  aria-label="더 보기"
-                                  icon={() => <Icon iconId="ellipsis" size="sm" />}
-                                />
-                              </Menu.Trigger>
-                              <Menu.Content>{panelActions}</Menu.Content>
-                            </Menu>
+                          hasContent(panelInlineActions) || hasContent(panelActions) ? (
+                            <>
+                              {panelInlineActions}
+                              {hasContent(panelActions) ? (
+                                <Menu>
+                                  <Menu.Trigger asChild>
+                                    <IconButton
+                                      variant="invisible"
+                                      size="small"
+                                      aria-label="더 보기"
+                                      icon={() => <Icon iconId="ellipsis" size="sm" />}
+                                    />
+                                  </Menu.Trigger>
+                                  <Menu.Content>{panelActions}</Menu.Content>
+                                </Menu>
+                              ) : null}
+                            </>
                           ) : undefined
                         }
                       >

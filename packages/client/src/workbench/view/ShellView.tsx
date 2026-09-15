@@ -1,5 +1,6 @@
 import { CommandCenterRegistryToken } from "#core/commands";
 import { SidebarContentRegistryToken } from "../model/ISidebarContentRegistry";
+import type { SidebarSlotProps } from "../model/ISidebarContentRegistry";
 import { TabContentRegistryToken } from "../model/ITabContentRegistry";
 import { ShellViewModelToken } from "../viewmodel/IShellViewModel";
 import { matchMenuItems } from "#core/menu";
@@ -15,7 +16,7 @@ import { Shell } from "../component/Shell";
 import { Tab } from "../component/Tab";
 import type { IconId } from "#component/Icon";
 import type { TabItem, TabTreeNode } from "../component/Tab";
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import type { ICommandCenterRegistry } from "#core/commands";
 import type { ITabContentRegistry } from "../model/ITabContentRegistry";
 import type { ShellTabPaneNode, ShellTabRow, TabContextTarget } from "../viewmodel/IShellViewModel";
@@ -175,16 +176,15 @@ export const ShellView = () => {
     return TabComponent ? <TabComponent tabId={tab.id} reveal={reveal} /> : null;
   };
 
-  const renderPanel = (activityId: string): ReactNode => {
-    const PanelComponent = sidebarContentRegistry.tryGet(activityId)?.PanelComponent;
-    return PanelComponent ? (
-      <PanelComponent onFileOpen={onFileOpen} onFileMove={onFileMove} onFilePin={onFilePin} onOpenTab={onOpenTab} />
-    ) : null;
-  };
+  // 확장이 내는 본문·액션은 모두 같은 통로를 받는다 — 커널이 크롬을 그리므로 제목은 값으로 온다.
+  const slotProps = { onFileOpen, onFileMove, onFilePin, onOpenTab };
+  const renderSlot = (Slot: ComponentType<SidebarSlotProps> | undefined): ReactNode =>
+    Slot === undefined ? null : <Slot {...slotProps} />;
 
   const treeWithDirty = mergeTabDisplay(viewModel.tree, tabContentRegistry);
   const activeActivityId = viewModel.activities.find((activity) => activity.isActive)?.id ?? null;
-  const panelContent = activeActivityId === null ? null : renderPanel(activeActivityId);
+  const sidebar = activeActivityId === null ? undefined : sidebarContentRegistry.tryGet(activeActivityId);
+  const panelContent = renderSlot(sidebar?.ContentComponent);
   const uiTree = buildTree(treeWithDirty, renderTab);
 
   // 팔레트 목록은 커맨드 registry를 그대로 옮긴 것이다 — 등록은 부팅 시 한 번 끝나므로 매 렌더
@@ -262,6 +262,8 @@ export const ShellView = () => {
         }))}
         onActivitySelect={(id) => viewModel.selectActivity(id)}
         panelContent={panelContent}
+        panelInlineActions={renderSlot(sidebar?.InlineActions)}
+        panelActions={renderSlot(sidebar?.MenuActions)}
         sidebarOpen={viewModel.isSidebarOpen}
         onSidebarOpenChange={(open) => viewModel.setSidebarOpen(open)}
         sidebarAriaLabel="사이드바"

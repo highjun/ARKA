@@ -21,8 +21,8 @@ const tab = (label: string) => () => <Text>{label} 탭의 내용</Text>;
 
 const registries = () => {
   const sidebar = new SidebarContentRegistry();
-  sidebar.add({ id: "explorer", PanelComponent: panel("탐색기") });
-  sidebar.add({ id: "search", PanelComponent: panel("검색") });
+  sidebar.add({ id: "explorer", ContentComponent: panel("탐색기") });
+  sidebar.add({ id: "search", ContentComponent: panel("검색") });
   const tabs = new TabContentRegistry();
   tabs.add({ id: "file", iconId: "file", TabComponent: tab("파일") });
   tabs.add({ id: "chat", iconId: "brain", TabComponent: tab("대화") });
