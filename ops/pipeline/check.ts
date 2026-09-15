@@ -13,7 +13,11 @@ import { step } from "./run.ts";
  */
 step("pnpm", "-r", "--if-present", "run", "typecheck");
 step("pnpm", "-r", "--if-present", "run", "lint");
-step("pnpm", "-r", "--if-present", "run", "test");
+step("pnpm", "-r", "--if-present", "run", "test:unit");
+// **통합은 따로 부른다** — 앱을 세우고 라우트를 두드리는 것이라 단위와 실패의 뜻이 다르다.
+// 이름이 갈려 있어야 CI가 이 둘을 따로 실을 때 **손에서 부르는 것과 같은 명령**을 부른다
+// (→ ADR 0005). 한쪽만 이름이 있으면 CI에만 있는 검사가 생긴다.
+step("pnpm", "-r", "--if-present", "run", "test:integration");
 step("pnpm", "-r", "--if-present", "run", "build");
 
 /*

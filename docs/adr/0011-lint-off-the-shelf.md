@@ -32,7 +32,7 @@
 - **markdownlint** `ops/.markdownlint-cli2.jsonc` — 문서의 형태. ADR 형식과 맞서는 규칙(줄 길이·절 앞 빈 줄·제목 끝 콜론)은 끄고 그 이유를 그 파일에 적는다.
 - **prettier** `ops/prettier.config.ts` — 코드의 모양. `printWidth`만 기본값과 다르다(120). 마크다운은 대상이 아니다 — 표를 글자 수로 정렬해 한글에서 어긋난다.
 - **테스트** `ops/structure/`·`packages/*/test/structure.test.ts` — 기성품이 없어 만든 단정들. 무엇을 보는지는 → [ADR 0012](0012-where-enforcement-lives.md).
-- **파이프라인** `ops/pipeline/check.ts` — typecheck → lint → test → build → knip 순서로 돌리고 앞에서 걸리면 뒤를 안 돌린다. CI의 `check` 잡이 이 파일을 부른다.
+- **파이프라인** `ops/pipeline/check.ts` — typecheck → lint → test:unit → test:integration → build → knip 순서로 돌리고 앞에서 걸리면 뒤를 안 돌린다. CI의 `check` 잡이 이 파일을 부른다.
 - **knip** `ops/knip.ts` — 안 쓰는 파일·export·의존성, phantom, 안 쓰는 catalog 항목. 패키지 하나만 봐서는 알 수 없어 파이프라인에 있다. `index.ts`에 "바깥이 부르는 것만"이라는 규약은 이것 없이는 검사할 수 없다.
 - **테스트** `ops/lint/rules/*.test.ts` — 자작 규칙에 valid/invalid를 둔다. 규칙이 하나니 파일도 하나다.
 - **리뷰** — "이 규칙을 만들기 전에 찾아봤는가"와 프리셋을 통째로 켤지는 사람만 판정한다.

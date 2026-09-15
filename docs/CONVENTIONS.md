@@ -216,7 +216,7 @@
 
 - **계약** — 두 방향이다. 한쪽이 빠지면 계약이 반쪽이다.
   - **인터페이스 계약** — 인터페이스마다 모든 구현이 통과할 스위트. `<name>.contract.ts`, 함수 export. **mock도 통과시킨다.**
-  - **응답 계약** — 서버가 자기 응답을 `contracts`의 zod 스키마에 넣어 본다(`responseContract.ts`). **클라이언트를 모른다** — 어댑터를 붙이지 않는다. 양쪽이 서로를 모른 채 같은 스키마에 각자 대는 것이 계약 테스트다. 클라이언트가 둘이 되어도 서버 쪽은 그대로다.
+  - **응답 계약** — 서버가 자기 응답을 `contracts`의 zod 스키마에 넣어 본다(`responseContract.ts`). **클라이언트를 모른다** — 어댑터를 붙이지 않는다. 양쪽이 서로를 모른 채 같은 스키마에 각자 대는 것이 계약 테스트다. 클라이언트가 둘이 되어도 서버 쪽은 그대로다. **파일 이름은 `*.integration.test.ts`다** — `probeApp()`으로 앱을 세우고 라우트를 두드리므로 단위와 실패의 뜻이 다르고, 그래서 도는 자리도 다르다(`test:integration`).
 - **단위** — 계약이 못 잡는 것만. 대상 옆 `*.test.ts`. 적을수록 좋은 신호다.
 - **스모크** — view가 렌더되고 이벤트가 연결되는지만. 스타일은 Storybook 담당.
 - **Storybook** — 시각 검증. 최소 세트는 기본 / 빈 / 로딩 / 에러 — **그 상태가 실제로 있는 것만**이다. `SettingsTabView`처럼 ViewModel에 로딩·실패가 없는 화면에 그 스토리를 만들면 일어날 수 없는 상태를 그리게 된다.
@@ -243,7 +243,7 @@ E2E는 `pnpm --filter client test:e2e`로 돌린다. 조립이 맞물리는지�
 
 ## 제출 전 확인
 
-- [ ] `pnpm --filter ops check` 통과 (typecheck → lint → test → build). **CI의 `check` 잡이 부르는 것과 같은 명령이다.**
+- [ ] `pnpm --filter ops check` 통과 (typecheck → lint → test:unit → test:integration → build). **CI의 `check` 잡이 부르는 것과 같은 명령이다.**
 - [ ] 이번 라운드가 한 가지 관심사인가
 - [ ] 스스로 판단한 지점을 신고했는가
 - [ ] 패키지의 `src/` 밖을 건드렸다면 PR 본문에 **무엇을 왜 바꿨는지** 적었는가 — 승인은 사용자가 PR에서 한다 → [ADR 0003](adr/0003-approval-outside-src.md)
