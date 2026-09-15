@@ -9,7 +9,7 @@ const DESKTOP = { width: 1280, height: 800 };
 test.describe("에이전트", () => {
   test.use({ viewport: DESKTOP });
 
-  test("새 대화를 열고 보내면 답이 온다", async ({ page }) => {
+  test("새 대화를 열고 보내면 답이 온다", { tag: "@critical" }, async ({ page }) => {
     await page.goto("/");
     await page.getByRole("button", { name: "에이전트" }).click();
     await page.getByRole("button", { name: /새 대화/u }).click();

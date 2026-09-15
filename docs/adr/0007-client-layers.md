@@ -6,7 +6,7 @@
 `component/`가 무엇을 모르는지가 먼저 정해져 있어야 한다.
 
 ## 결정:
-- **슬라이스 안은 `model/ infra/ viewmodel/ view/ component/`다.** 의존은 안쪽(`model/`)을 향한다.
+- **슬라이스 안은 계층으로 갈리고 의존은 안쪽을 향한다.** client는 `model/ infra/ viewmodel/ view/ component/`, server는 `domain/ infra/ services/ runtime/ transport/`다 — 이름이 다른 것은 다스리는 것이 달라서다.
 - **`component/`는 props만 받아 그린다** — ViewModel·Model·DI를 런타임으로 모른다. 그래서 스토리 하나로 모든 상태를 그릴 수 있다.
 - **`view/`가 부르는 훅은 `useViewModel` 하나다.** 로컬 상태가 필요하면 ViewModel로 올리고, DI 접근(`useAppContext`·`resolve`)도 하지 않는다.
 - **`model/`은 React와 상태 라이브러리를 런타임으로 모른다.** 도메인 타입·순수 로직과 `infra/`가 구현할 인터페이스 선언까지다. `import type`은 컴파일에서 지워지므로 결합이 아니다.
@@ -21,7 +21,7 @@
 - **`model/`에 nanostores atom을 두기** — 화면 상태와 사실이 한 자리에 섞인다. atom은 ViewModel이 소유한다.
 
 ## 대가:
-- **ViewModel이 두꺼워진다.** view가 훅을 못 쓰니 사소한 토글 하나도 ViewModel의 공개 면이 된다 — `IShellViewModel`이 46멤버다.
+- **ViewModel이 두꺼워진다.** view가 훅을 못 쓰니 사소한 토글 하나도 ViewModel의 공개 면이 된다.
 - 슬라이스가 서로를 모르니 **둘이 같은 것을 쓰려면 먼저 위로 올려야 한다**. 올릴 자리를 고르는 판단이 매번 든다.
 
 ## 강제:

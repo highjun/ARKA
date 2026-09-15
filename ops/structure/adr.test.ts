@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ADRS, read } from "./repo.ts";
-import { activeEslintRules, declaredPackages } from "./config.ts";
+import { activeEslintRules, declaredPackages, workflowJobs } from "./config.ts";
 
 /** 자리가 고정된 절. `대가:`만 선택이다(→ ADR 0004의 이웃, `docs/CONVENTIONS.md`). */
 const SECTIONS = ["맥락", "결정", "기각", "대가", "강제", "상태"] as const;
@@ -107,6 +107,19 @@ describe("ADR 형식", () => {
     expect(STATUS_WORDS).toContain(status[0]?.split(" ")[0]);
   });
 
+  /*
+   * **낡은 ADR은 지우지 않고 상태로 표시한다**(→ `docs/CONVENTIONS.md`의 ADR 절). 그런데
+   * `대체됨`만 적고 어디로 갔는지를 빼면 읽는 사람이 갈 곳을 잃는다 — 규약의 형식 예시가
+   * 그 자리를 **빈 괄호로** 두고 있었다. 가리키는 곳이 ADR이면 번호와 경로가 맞는지는
+   * `reference.test.ts`가 이어서 본다.
+   */
+  it.each(ADRS)("%s — `대체됨`이면 대체 위치를 적는다", (file) => {
+    const status = (sectionsOf(read(file)).get("상태") ?? []).filter((line) => line.trim() !== "");
+    const superseded = status.filter((line) => line.startsWith("대체됨"));
+
+    expect(superseded.filter((line) => !/→\s*\[[^\]]+\]\([^)]+\)/u.test(line))).toEqual([]);
+  });
+
   it.each(ADRS)("%s — `강제:` 줄이 장치 이름으로 시작하고 `아무도`가 없다", (file) => {
     const lines = (sectionsOf(read(file)).get("강제") ?? []).filter((line) => line.startsWith("- "));
     const labels = lines.map((line) => /^- \*\*(?<label>[^*]+)\*\*/u.exec(line)?.groups?.["label"]);
@@ -149,5 +162,29 @@ describe("ADR이 인용한 강제 장치가 실재한다", async () => {
     }
 
     expect(missing).toEqual([]);
+  });
+});
+
+/**
+ * **ADR이 인용한 잡 이름이 실재한다.** 없는 `container` 잡을 두 ADR이 인용했는데(하나는
+ * `기각:`, 하나는 `강제:`) 둘 다 초록으로 `main`에 들어갔다 — 실제 잡은 `check`·`deploy`뿐이었다.
+ *
+ * 위의 `isCitable`은 한 낱말 백틱을 일부러 거른다(브랜치·패키지 이름과 구별이 안 되어서다).
+ * 그 판단은 찾을 곳이 없던 그때는 맞았다. 그래서 그 규칙을 고치지 않고 **뒤에 `잡`이 오는
+ * 자리**만 따로 본다 — 오인용 둘이 정확히 그 모양이었다.
+ *
+ * **`강제:`가 아니라 본문 전체를 본다.** 오인용 하나가 `기각:`에 있었다.
+ */
+describe("ADR이 인용한 잡 이름이 워크플로에 실재한다", () => {
+  const jobs = workflowJobs();
+
+  it("잡 이름을 하나라도 찾는다 — 워크플로를 못 읽으면 이 검사가 조용히 빈다", () => {
+    expect(jobs.size).toBeGreaterThan(1);
+  });
+
+  it.each(ADRS)("%s — 인용한 잡 이름이 있다", (file) => {
+    const cited = [...read(file).matchAll(/`(?<name>[^`]+)`\s*잡/gu)].map((m) => m.groups?.["name"] ?? "");
+
+    expect(cited.filter((name) => !jobs.has(name))).toEqual([]);
   });
 });

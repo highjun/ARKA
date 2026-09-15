@@ -41,6 +41,7 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
 - Leveraging VSCode OSS
   - 대부분의 v1 기능은 VSCode와 겹치되, 실제 사용자가 인터랙션하는 클라이언트를 재설계하는 부분이 크다.
   - VSCode의 검증된 계약을 벤치마킹하되, 우리가 원하는 기능에 맞춰서 단순화하여 가져온다.
+  - **구조 결정은 VSCode의 대응 개념을 따르고 ADR로 남긴다** — contribution point(확장이 기능을 끼우는 자리)·command·service·extension host. 같은 것을 새 이름으로 부르지 않는다.
 - VSCode 대비 변경 1: 에디터 코어 - **CodeMirror 6**
   - VSCode에서 제공하는 Monaco는 무겁고, 모바일을 지원하지 않는다.
   - 따라서, Mobile 지원 커버가 가능한 CodeMirror 6를 활용한다.

@@ -72,3 +72,27 @@ export const declaredPackages = (): ReadonlySet<string> => {
   }
   return names;
 };
+
+/**
+ * `.github/workflows/*.yml`이 선언한 잡 — **id와 `name:` 둘 다 담는다.** 두 이름이 갈린 자리가
+ * 실제로 있다(`storybook.yml`은 id가 `publish`, `name`이 `storybook`). ADR은 사람이 보는 이름으로
+ * 인용하므로 어느 쪽이든 받는다.
+ *
+ * **YAML 파서를 들이지 않는다** — 워크플로가 둘이고 잡 선언이 들여쓰기 두 칸으로 평평해,
+ * 의존성 하나가 이 정규식보다 비싸다(→ ADR 0003).
+ */
+export const workflowJobs = (): ReadonlySet<string> => {
+  const names = new Set<string>();
+  for (const file of TRACKED.filter((f) => /^\.github\/workflows\/.+\.ya?ml$/u.test(f))) {
+    const body = read(file);
+    const start = body.indexOf("\njobs:");
+    if (start < 0) continue;
+    for (const line of body.slice(start).split("\n")) {
+      const id = /^ {2}(?<id>[A-Za-z_][\w-]*):\s*$/u.exec(line)?.groups?.["id"];
+      const name = /^ {4}name:\s*(?<name>.+?)\s*$/u.exec(line)?.groups?.["name"];
+      if (id !== undefined) names.add(id);
+      if (name !== undefined && !name.includes("${{")) names.add(name.replace(/^["']|["']$/gu, ""));
+    }
+  }
+  return names;
+};
