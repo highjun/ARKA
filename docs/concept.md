@@ -4,7 +4,7 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
 
 - **Agent**: 에이전트를 통한 작업 수행이 주축이다
 - **Knowledge & Retrieval**: 개인 지식 관리 시스템으로서, 사용자가 아는 것과 그 맥락을 에이전트와 공유한다
-- **Archiving**: 사용자가 데이터를 개인 워크스페이스에 명시적으로 쌓는다
+- **Archiving**: 사용자의 데이터를 개인 워크스페이스에 저장하도록 한다
 
 ## 차별성
 
@@ -201,7 +201,7 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
   - 오디오·비디오 — `mp3` `wav` `mp4` `webm`
   - **PDF — VSCode에 대응이 없다. 직접 만든다**
   - **`.db`(SQLite) — 대응이 없다. 직접 만든다**
-  - 웹 페이지 — 파일이 아니라 URL이다. 원격 노드의 포트를 봐야 해서 `tunnel-forwarding`과 짝이다
+  - 웹 페이지 — 파일이 아니라 URL이다. **원격 노드의 포트만 본다**(`tunnel-forwarding`과 짝이다). 바깥 사이트는 v3다
 
 - Search
   - `search-result` — 검색 결과 파일(`.code-search`)을 다룬다
@@ -232,3 +232,7 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
 ### v3 — "기록의 수집"
 
 **미정.** SNS·웹·논문에서 기록을 모아 개인 워크스페이스에 쌓는 자리다.
+
+**열람 맥락이 여기 산다.** 에이전트가 사용자가 보는 것을 정확히 짚으려면 브라우저가 ARKA 안에 있어야 한다 — 바깥 브라우저 탭은 우리가 볼 수 없는 자리다. 길은 **원격 노드에서 진짜 브라우저를 돌리고 화면을 흘려보내는 것**이다. 클라이언트에 엔진을 넣는 길은 막힌다(브라우저 안이라 `fetch`가 CORS에 걸리고, 남의 사이트를 iframe에 넣으면 `X-Frame-Options`가 막는다).
+
+**v1.0·v1.2가 아니라 여기인 이유** — 수주~수개월짜리다. 한글 입력(IME) 조합을 서버로 넘기는 것, 화면 대역폭, Chromium 한 대당 메모리 300~800MB, 임의 사이트의 JS를 내 PC가 돌리는 것에 대한 컨테이너 격리가 각각 따로 설계다. 앞 마일스톤에 얹으면 그 마일스톤을 삼킨다.
