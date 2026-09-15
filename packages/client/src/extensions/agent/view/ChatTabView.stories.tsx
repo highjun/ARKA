@@ -38,6 +38,8 @@ const viewModel = (state: ChatState): IChatViewModel => ({
   sessions: [],
   sessionsLoading: false,
   sessionsFailure: null,
+  showArchived: false,
+  setShowArchived: () => undefined,
   createSession: () => Promise.resolve(null),
   archiveSession: () => undefined,
   openSession: () => undefined,

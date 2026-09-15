@@ -182,7 +182,8 @@ export const ShellView = () => {
     Slot === undefined ? null : <Slot {...slotProps} />;
 
   const treeWithDirty = mergeTabDisplay(viewModel.tree, tabContentRegistry);
-  const activeActivityId = viewModel.activities.find((activity) => activity.isActive)?.id ?? null;
+  const activeActivity = viewModel.activities.find((activity) => activity.isActive);
+  const activeActivityId = activeActivity?.id ?? null;
   const sidebar = activeActivityId === null ? undefined : sidebarContentRegistry.tryGet(activeActivityId);
   const panelContent = renderSlot(sidebar?.ContentComponent);
   const uiTree = buildTree(treeWithDirty, renderTab);
@@ -262,6 +263,7 @@ export const ShellView = () => {
         }))}
         onActivitySelect={(id) => viewModel.selectActivity(id)}
         panelContent={panelContent}
+        panelTitle={sidebar === undefined ? undefined : activeActivity?.title}
         panelInlineActions={renderSlot(sidebar?.InlineActions)}
         panelActions={renderSlot(sidebar?.MenuActions)}
         sidebarOpen={viewModel.isSidebarOpen}

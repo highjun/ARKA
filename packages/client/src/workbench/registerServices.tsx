@@ -24,7 +24,11 @@ import {
 } from "../extensions/agent";
 import { createAgentApiPort } from "../extensions/agent/infra/HttpAgentApi";
 import { createAgentEventsPort } from "../extensions/agent/infra/SseAgentEvents";
-import { ChatSessionsView } from "../extensions/agent/view/ChatSessionsView";
+import {
+  ChatSessionsInlineActions,
+  ChatSessionsMenuActions,
+  ChatSessionsView,
+} from "../extensions/agent/view/ChatSessionsView";
 import { ChatTabView } from "../extensions/agent/view/ChatTabView";
 import {
   DIFF_TAB_KIND,
@@ -443,9 +447,12 @@ export function createApplication(): Container {
   container
     .resolve(ActivityBarRegistryToken)
     .add({ id: AGENT_ID, title: "에이전트", iconId: "brain", keybinding: "ctrl+shift+a" });
-  container
-    .resolve(SidebarContentRegistryToken)
-    .add({ id: AGENT_ID, ContentComponent: ({ onOpenTab }) => <ChatSessionsView onOpenTab={onOpenTab} /> });
+  container.resolve(SidebarContentRegistryToken).add({
+    id: AGENT_ID,
+    ContentComponent: ({ onOpenTab }) => <ChatSessionsView onOpenTab={onOpenTab} />,
+    InlineActions: ({ onOpenTab }) => <ChatSessionsInlineActions onOpenTab={onOpenTab} />,
+    MenuActions: () => <ChatSessionsMenuActions />,
+  });
   container
     .resolve(TabContentRegistryToken)
     .add({ id: "keybindings", iconId: "keyboard", TabComponent: () => <KeybindingsTabView /> });
