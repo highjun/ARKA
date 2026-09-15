@@ -12,7 +12,7 @@
     "lint": "eslint . --max-warnings 0 && stylelint \"**/*.css\" --max-warnings 0",
     "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
     "test:e2e": "playwright test -c test/e2e/playwright.config.ts",
-    "test:vrt": "node test/vrt/run.ts"
+    "test:visual-regression": "node test/vrt/run.ts"
   },
   "dependencies": {
     "@codemirror/commands": "^6.11.0",
