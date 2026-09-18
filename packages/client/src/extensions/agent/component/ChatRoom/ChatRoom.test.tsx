@@ -17,7 +17,7 @@ const MESSAGES: ChatRoomMessage[] = [
 describe("ChatRoom", () => {
   implementsClassName((extra) => <ChatRoom {...extra} />);
   implementsDataComponent((extra) => <ChatRoom {...extra} />, "ChatRoom");
-  implementsRef<HTMLDivElement>((extra) => <ChatRoom {...extra} />, HTMLDivElement);
+  implementsRef<HTMLElement>((extra) => <ChatRoom {...extra} />, HTMLElement);
   implementsNoA11yViolations(() => <ChatRoom />);
 
   it("messages를 로그 영역에 순서대로 렌더한다", () => {

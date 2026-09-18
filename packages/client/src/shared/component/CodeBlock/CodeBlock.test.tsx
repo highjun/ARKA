@@ -11,7 +11,9 @@ import { CodeBlock } from "./CodeBlock";
 describe("CodeBlock", () => {
   describe("Markup", () => {
     it("모든 줄에 번호를 붙이고 구문 토큰에 data-token 을 단다", () => {
-      const { container } = render(<CodeBlock content={"const x = 1;\nreturn x;"} language="ts" title="example.ts" />);
+      const { container } = render(
+        <CodeBlock content={"const x = 1;\nreturn x;"} language="ts" fileName="example.ts" />,
+      );
 
       expect(screen.getByText("ts")).toBeInTheDocument();
       expect(screen.getByText("example.ts")).toBeInTheDocument();

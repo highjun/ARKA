@@ -14,30 +14,22 @@ describe("Text", () => {
   implementsRef((extra) => <Text {...extra} />, HTMLSpanElement);
   implementsNoA11yViolations(() => <Text>안내 문구</Text>);
 
-  it('variant="body", size="medium", tone="default" 가 기본값이다', () => {
+  it('size="medium", tone="default" 가 기본값이다', () => {
     render(<Text>내용</Text>);
 
-    expect(screen.getByText("내용")).toHaveAttribute("data-text-variant", "body");
     expect(screen.getByText("내용")).toHaveAttribute("data-text-size", "medium");
     expect(screen.getByText("내용")).toHaveAttribute("data-text-tone", "default");
   });
 
-  it("variant, size, tone props 를 data 속성에 반영한다", () => {
+  it("size, tone props 를 data 속성에 반영한다", () => {
     render(
-      <Text variant="caption" size="small" tone="muted">
+      <Text size="small" tone="muted">
         내용
       </Text>,
     );
 
-    expect(screen.getByText("내용")).toHaveAttribute("data-text-variant", "caption");
     expect(screen.getByText("내용")).toHaveAttribute("data-text-size", "small");
     expect(screen.getByText("내용")).toHaveAttribute("data-text-tone", "muted");
-  });
-
-  it.each(["body", "caption"] as const)('variant="%s" 를 받는다', (variant) => {
-    render(<Text variant={variant}>내용</Text>);
-
-    expect(screen.getByText("내용")).toHaveAttribute("data-text-variant", variant);
   });
 
   it.each(["small", "medium", "large"] as const)('size="%s" 를 받는다', (size) => {

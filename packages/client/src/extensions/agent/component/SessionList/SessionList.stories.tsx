@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Menu } from "#component/Menu";
 import { SessionList } from "./index";
 import type { AgentSession } from "./index";
 
@@ -42,9 +41,3 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 export const Empty: Story = { args: { sessions: [] } };
-export const WithActions: Story = {
-  args: {
-    onCreateSession: () => undefined,
-    moreActions: <Menu.Item onSelect={() => undefined}>모두 보관</Menu.Item>,
-  },
-};

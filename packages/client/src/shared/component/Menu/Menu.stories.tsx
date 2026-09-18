@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { PortalProvider } from "#utils/portal";
 import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
+import { Kbd } from "#component/Kbd";
 import { Menu } from "./index";
 import styles from "./Menu.module.css";
 
@@ -43,7 +44,9 @@ const meta = {
       </Menu.Trigger>
       <Menu.Content>
         <Menu.Label>세션</Menu.Label>
-        <Menu.Item onSelect={() => undefined}>이름 바꾸기</Menu.Item>
+        <Menu.Item onSelect={() => undefined} shortcut={<Kbd>F2</Kbd>}>
+          이름 바꾸기
+        </Menu.Item>
         <Menu.Item onSelect={() => undefined}>보관</Menu.Item>
         <Menu.Separator />
         <Menu.Item disabled>삭제</Menu.Item>

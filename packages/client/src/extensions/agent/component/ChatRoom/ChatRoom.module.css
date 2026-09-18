@@ -15,6 +15,34 @@
   color: var(--fgColor-default);
 }
 
+/* `Panel` 의 comfortable 머리와 같은 값 — 확장은 `Panel` 을 못 써 여기서 같은 토큰으로 그린다. */
+.header {
+  display: flex;
+  height: var(--control-large-size);
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  border-style: solid;
+  border-width: 0 0 var(--borderWidth-thin) 0;
+  border-color: var(--borderColor-muted);
+  padding-inline: var(--space-lg);
+}
+
+.actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.body {
+  display: flex;
+  min-height: 0;
+  flex-grow: 1;
+  flex-direction: column;
+}
+
 .titleGroup {
   display: flex;
   min-width: 0;

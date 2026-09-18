@@ -1,0 +1,26 @@
+.root {
+  display: inline-flex;
+  min-width: 1.5em;
+  align-items: center;
+  justify-content: center;
+  border-style: solid;
+  border-width: var(--borderWidth-thin);
+  border-radius: var(--borderRadius-small);
+  padding-inline: var(--space-xs);
+
+  /* 2px 미만 base-size 토큰이 없다 — 키캡 칩의 미세 조정값이라 리터럴이 불가피하다. */
+  padding-block: 1px;
+  font-family: var(--fontStack-monospace);
+  font-size: var(--base-text-size-xs);
+  line-height: var(--base-text-lineHeight-tight);
+  background-color: var(--buttonKeybindingHint-default-bgColor-rest);
+  border-color: var(--buttonKeybindingHint-default-borderColor-rest);
+  color: var(--buttonKeybindingHint-default-fgColor-rest);
+}
+
+/* 강조 면 위 — `Button`의 `keybindingHint`가 `primary` variant 위에서 쓰는 것과 같은 짝이다. */
+.root[data-tone="onEmphasis"] {
+  background-color: var(--buttonKeybindingHint-primary-bgColor-rest);
+  border-color: var(--buttonKeybindingHint-primary-borderColor-rest);
+  color: var(--buttonKeybindingHint-primary-fgColor-rest);
+}

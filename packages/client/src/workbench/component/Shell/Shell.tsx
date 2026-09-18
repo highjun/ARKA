@@ -5,10 +5,10 @@ import { PortalProvider } from "#utils/portal";
 import styles from "./Shell.module.css";
 import { SplitPageLayout, ThemeProvider } from "@primer/react";
 import { Container } from "#component/Container";
-import { Panel } from "#component/Panel";
 import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
 import { ActivityBar } from "../ActivityBar";
+import { Panel } from "../Panel";
 import type { ActivityBarItem } from "../ActivityBar";
 import { Menu } from "#component/Menu";
 

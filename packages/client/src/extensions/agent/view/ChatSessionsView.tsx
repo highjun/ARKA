@@ -40,7 +40,6 @@ export const ChatSessionsView = ({
 
   return (
     <SessionList
-      chrome="none"
       className={styles["root"]}
       sessions={visible.map((session) => ({
         id: session.id,

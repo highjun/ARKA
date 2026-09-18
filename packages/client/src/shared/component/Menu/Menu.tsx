@@ -2,7 +2,6 @@ import { createContext, useContext } from "react";
 import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
 import { clsx } from "clsx";
 import { usePortalContainer } from "#utils/portal";
-import { Icon } from "#component/Icon";
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import styles from "./Menu.module.css";
 import * as Context from "@radix-ui/react-context-menu";
@@ -66,6 +65,8 @@ interface MenuContentProps extends ComponentPropsWithoutRef<"div"> {
 interface MenuItemProps extends Omit<ComponentPropsWithoutRef<"div">, "onSelect"> {
   /** true면 선택할 수 없고 흐리게 표시된다. */
   readonly disabled?: boolean;
+  /** 오른쪽 끝에 붙는 단축키 — 보통 `Kbd` 여럿. 없으면 자리도 안 잡는다. */
+  readonly shortcut?: ReactNode;
   /** 항목을 고르면 호출된다. */
   readonly onSelect?: (event: Event) => void;
 }
@@ -77,24 +78,6 @@ interface MenuLabelProps extends ComponentPropsWithoutRef<"div"> {}
 /** 묶음 사이의 줄. 포커스를 받지 않는다. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- 커스텀 필드는 필요해지면 추가한다.
 interface MenuSeparatorProps extends ComponentPropsWithoutRef<"div"> {}
-
-/** 하나만 고를 수 있는 묶음. 안에는 `Menu.RadioItem`만 둔다. */
-interface MenuRadioGroupProps extends Omit<ComponentPropsWithoutRef<"div">, "onChange"> {
-  /** 지금 고른 값. */
-  readonly value?: string;
-  /** 다른 값을 고르면 호출된다. */
-  readonly onValueChange?: (value: string) => void;
-}
-
-/** 고른 것에 표시가 붙는 한 줄. `Menu.RadioGroup` 안에서만 뜻이 있다. */
-interface MenuRadioItemProps extends Omit<ComponentPropsWithoutRef<"div">, "onSelect"> {
-  /** 이 줄이 나타내는 값. */
-  readonly value: string;
-  /** true면 고를 수 없고 흐리게 표시된다. */
-  readonly disabled?: boolean;
-  /** 줄을 고르면 호출된다. 보통은 `RadioGroup`의 `onValueChange`로 받는다. */
-  readonly onSelect?: (event: Event) => void;
-}
 
 /**
  * 부품이 어느 Radix를 쓸지 알려 주는 통로. 부품마다 `kind`를 다시 받게 하면 루트와 어긋날 수
@@ -170,11 +153,21 @@ const MenuContent = ({ className, children, ref, ...props }: MenuContentProps) =
   );
 };
 
-/** 클릭·키보드로 선택 가능한 메뉴 항목 하나. */
-const MenuItem = ({ className, ...props }: MenuItemProps) => {
+/** 클릭·키보드로 선택 가능한 메뉴 항목 하나. 단축키는 오른쪽 끝에 붙는다. */
+const MenuItem = ({ className, shortcut, children, ...props }: MenuItemProps) => {
   const shared = { className: clsx(className, styles["item"]), ...props };
+  const body = (
+    <>
+      {children}
+      {shortcut === undefined ? null : <span className={styles["itemShortcut"]}>{shortcut}</span>}
+    </>
+  );
 
-  return useKind() === "context" ? <Context.Item {...shared} /> : <Dropdown.Item {...shared} />;
+  return useKind() === "context" ? (
+    <Context.Item {...shared}>{body}</Context.Item>
+  ) : (
+    <Dropdown.Item {...shared}>{body}</Dropdown.Item>
+  );
 };
 
 /** 선택할 수 없는 섹션 제목. */
@@ -191,47 +184,10 @@ const MenuSeparator = ({ className, ...props }: MenuSeparatorProps) => {
   return useKind() === "context" ? <Context.Separator {...shared} /> : <Dropdown.Separator {...shared} />;
 };
 
-/** 하나만 고르는 묶음 — 고른 줄에만 표시가 붙는다. */
-const MenuRadioGroup = ({ className, ...props }: MenuRadioGroupProps) => {
-  const shared = { className, ...props };
-
-  return useKind() === "context" ? <Context.RadioGroup {...shared} /> : <Dropdown.RadioGroup {...shared} />;
-};
-
 /**
- * 고른 것에 체크 표시가 붙는 한 줄.
+ * `RadioGroup`·`RadioItem`은 `Select`로 옮겼다(2026-09-18) — 메뉴는 동작 목록이고 값을 고르는 것은
+ * 다른 부품이다.
  *
- * 표시를 `ItemIndicator`로 그리고 자리를 항상 차지하게 둔다(`.itemIndicator`) — 고른 줄만 들여쓰기가
- * 생기면 목록이 들쭉날쭉해진다.
- */
-const MenuRadioItem = ({ className, children, ...props }: MenuRadioItemProps) => {
-  const kind = useKind();
-  const shared = { className: clsx(className, styles["item"]), ...props };
-  const body = (
-    <>
-      <span className={styles["itemIndicator"]}>
-        {kind === "context" ? (
-          <Context.ItemIndicator>
-            <Icon iconId="check" size="sm" />
-          </Context.ItemIndicator>
-        ) : (
-          <Dropdown.ItemIndicator>
-            <Icon iconId="check" size="sm" />
-          </Dropdown.ItemIndicator>
-        )}
-      </span>
-      {children}
-    </>
-  );
-
-  return kind === "context" ? (
-    <Context.RadioItem {...shared}>{body}</Context.RadioItem>
-  ) : (
-    <Dropdown.RadioItem {...shared}>{body}</Dropdown.RadioItem>
-  );
-};
-
-/**
  * 부품을 `Object.assign`으로 네임스페이스에 붙인다. 부품 함수의 이름이 `Menu<부품>`인 것은
  * react-docgen-typescript가 파일의 최상위 export만 컴포넌트로 인식해서다 — Docs 페이지의
  * 서브컴포넌트 Props 표가 그 이름으로 붙는다(2026-09-06 실측).
@@ -242,6 +198,4 @@ export const Menu = Object.assign(MenuRoot, {
   Item: MenuItem,
   Label: MenuLabel,
   Separator: MenuSeparator,
-  RadioGroup: MenuRadioGroup,
-  RadioItem: MenuRadioItem,
 });

@@ -3,7 +3,6 @@ import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
 import styles from "./ChatRoom.module.css";
 import { IconButton } from "#component/IconButton";
 import { Icon } from "#component/Icon";
-import { Panel } from "#component/Panel";
 import { InputComposer } from "../InputComposer";
 import { Message } from "../Message";
 import { StatusIndicator } from "../StatusIndicator";
@@ -26,9 +25,9 @@ export interface ChatRoomMessage {
 }
 
 /** `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다. */
-export interface ChatRoomProps extends Omit<ComponentPropsWithoutRef<"div">, "title" | "children"> {
-  /** 루트 `Panel`로 그대로 통과한다. */
-  readonly ref?: Ref<HTMLDivElement>;
+export interface ChatRoomProps extends Omit<ComponentPropsWithoutRef<"section">, "title" | "children"> {
+  /** 루트 원소로 그대로 통과한다. */
+  readonly ref?: Ref<HTMLElement>;
   /** 헤더에 표시할 채팅방 제목. */
   readonly title?: string;
   /** 헤더의 상태 인디케이터. */
@@ -105,17 +104,16 @@ export const ChatRoom = ({
   );
 
   return (
-    <section className={clsx(className, styles["root"])} {...props} data-component="ChatRoom">
-      <Panel
-        ref={ref}
-        title={
-          <div className={styles["titleGroup"]}>
-            <StatusIndicator status={status} />
-            <div className={styles["title"]}>{title}</div>
-          </div>
-        }
-        actions={actions ?? defaultActions}
-      >
+    <section ref={ref} className={clsx(className, styles["root"])} {...props} data-component="ChatRoom">
+      {/* 머리는 제가 그린다 — `Panel` 은 워크벤치의 것이라 확장이 못 쓴다(2026-09-18). 토큰은 `Panel` 머리와 같다. */}
+      <header className={styles["header"]}>
+        <div className={styles["titleGroup"]}>
+          <StatusIndicator status={status} />
+          <div className={styles["title"]}>{title}</div>
+        </div>
+        <div className={styles["actions"]}>{actions ?? defaultActions}</div>
+      </header>
+      <div className={styles["body"]}>
         <div role="log" aria-live="polite" className={styles["log"]}>
           {children ??
             (isEmpty ? (
@@ -131,7 +129,7 @@ export const ChatRoom = ({
         <div className={styles["composerSlot"]}>
           {composer ?? <InputComposer mode={mode} defaultMode={defaultMode} onModeChange={onModeChange} />}
         </div>
-      </Panel>
+      </div>
     </section>
   );
 };

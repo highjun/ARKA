@@ -41,4 +41,3 @@ export const Tones: Story = {
     </span>
   ),
 };
-export const Caption: Story = { args: { variant: "caption", tone: "muted", children: "캡션 한 줄" } };

@@ -1,16 +1,9 @@
 import { clsx } from "clsx";
-import { useState } from "react";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { useSessionList } from "./useSessionList";
 import styles from "./SessionList.module.css";
-import { IconButton } from "#component/IconButton";
-import { Icon } from "#component/Icon";
-import { Panel } from "#component/Panel";
-import { Menu } from "#component/Menu";
 import { SessionListItem } from "./Item";
 import type { StatusIndicatorStatus } from "../StatusIndicator";
-
-const hasContent = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
 
 /** 목록이 그리는 데 필요한 최소 정보. 대화 내용은 여기 없다. */
 export interface AgentSession {
@@ -40,27 +33,15 @@ export interface SessionListProps extends Omit<ComponentPropsWithoutRef<"div">, 
   readonly onActiveIdChange?: (activeId: string) => void;
   /** 세션이 하나도 없을 때 보여줄 안내. */
   readonly emptyLabel?: ReactNode;
-  /** 목록 상단 제목. */
-  readonly heading?: ReactNode;
-  /** 넘기면 헤더에 세션 생성 버튼이 나타난다. */
-  readonly onCreateSession?: () => void;
-  /** 세션 생성 버튼의 접근성 라벨. */
-  readonly createLabel?: string;
-  /** 주어지면 헤더에 "..." 더보기 메뉴가 나타난다 — `Menu.Item` 모양의 children을 그대로
-   * `Menu.Content`에 넣는다(Shell의 `panelActions`와 같은 관용구). */
-  readonly moreActions?: ReactNode;
   /**
-   * 머리를 직접 그릴 것인가. 기본값 `'panel'`.
-   *
-   * `'none'`이면 목록만 그린다 — 사이드바처럼 **커널이 이미 패널을 두른 자리**에 쓴다.
-   * 이때 보관 세션을 거르는 것도 부르는 쪽 몫이다. 거르는 토글이 머리에 살기 때문이다
-   * (`TextEditor`의 `chrome`과 같은 관용구).
+   * 머리는 그리지 않는다 — 커널이 사이드바 패널을 두르고 제목·액션을 놓는다(`SidebarContentDescriptor`).
+   * 보관 세션을 거르는 것도 부르는 쪽 몫이다(거르는 토글이 그 머리에 산다). 2026-09-18 까지 있던
+   * 제 머리 경로(제목 + 필터 메뉴 + 생성 버튼)는 앱에서 쓰이지 않아 걷었다.
    */
-  readonly chrome?: "panel" | "none";
 }
 
 /**
- * 에이전트 세션 목록 — 헤더(제목 + 생성 버튼)와 세션 행(`SessionList.Item`)들을 그린다. 활성 세션 선택은
+ * 에이전트 세션 목록 — 세션 행(`SessionList.Item`)들을 그린다. 활성 세션 선택은
  * `useSessionList`가 controlled/uncontrolled 하이브리드로 관리하며, disabled 세션은 선택되지 않는다.
  */
 const SessionListRoot = ({
@@ -70,11 +51,6 @@ const SessionListRoot = ({
   onActiveChange,
   onActiveIdChange,
   emptyLabel = "세션이 없습니다.",
-  heading = "Sessions",
-  onCreateSession,
-  createLabel = "새 세션 만들기",
-  moreActions,
-  chrome = "panel",
   className,
   ...props
 }: SessionListProps) => {
@@ -84,53 +60,7 @@ const SessionListRoot = ({
     onActiveChange,
     onActiveIdChange,
   });
-  const [showArchived, setShowArchived] = useState(false);
-  // `chrome='none'`이면 거르는 토글이 없다 — 부르는 쪽이 이미 걸러서 준다.
-  const visibleSessions =
-    chrome === "none" || showArchived ? sessions : sessions.filter((session) => !session.archived);
-
-  const actions = (
-    <>
-      <Menu>
-        <Menu.Trigger asChild>
-          <IconButton
-            variant="invisible"
-            size="small"
-            aria-label="세션 필터"
-            icon={() => <Icon iconId="archive" size="sm" />}
-          />
-        </Menu.Trigger>
-        <Menu.Content>
-          <Menu.Item onSelect={() => setShowArchived((current) => !current)}>
-            {showArchived ? <Icon iconId="check" size="sm" /> : null}
-            보관된 세션 표시
-          </Menu.Item>
-        </Menu.Content>
-      </Menu>
-      {onCreateSession ? (
-        <IconButton
-          variant="invisible"
-          size="small"
-          aria-label={createLabel}
-          onClick={onCreateSession}
-          icon={() => <Icon iconId="add" size="sm" />}
-        />
-      ) : null}
-      {hasContent(moreActions) ? (
-        <Menu>
-          <Menu.Trigger asChild>
-            <IconButton
-              variant="invisible"
-              size="small"
-              aria-label="더 보기"
-              icon={() => <Icon iconId="ellipsis" size="sm" />}
-            />
-          </Menu.Trigger>
-          <Menu.Content>{moreActions}</Menu.Content>
-        </Menu>
-      ) : null}
-    </>
-  );
+  const visibleSessions = sessions;
 
   const body =
     visibleSessions.length === 0 ? (
@@ -155,13 +85,7 @@ const SessionListRoot = ({
 
   return (
     <div className={clsx(className, styles["root"])} {...props} data-component="SessionList">
-      {chrome === "none" ? (
-        body
-      ) : (
-        <Panel title={<span className={styles["heading"]}>{heading}</span>} actions={actions}>
-          {body}
-        </Panel>
-      )}
+      {body}
     </div>
   );
 };

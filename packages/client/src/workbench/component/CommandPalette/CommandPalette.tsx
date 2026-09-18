@@ -2,6 +2,7 @@ import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
 import { clsx } from "clsx";
 import { usePortalContainer } from "#utils/portal";
+import { Kbd } from "#component/Kbd";
 import styles from "./CommandPalette.module.css";
 import { Command } from "cmdk";
 
@@ -9,7 +10,7 @@ import { Command } from "cmdk";
 export type CommandPaletteItem = {
   readonly id: string;
   readonly label: string;
-  /** 키 하나당 `<kbd>` 하나로 그려지는 키바인딩. 예: `['Ctrl', 'Shift', 'P']`. */
+  /** 키 하나당 `Kbd` 하나로 그려지는 키바인딩. 예: `['Ctrl', 'Shift', 'P']`. */
   readonly shortcut?: readonly string[];
 };
 
@@ -69,9 +70,7 @@ const PaletteDialog = ({
             {item.shortcut !== undefined && item.shortcut.length > 0 && (
               <span className={styles["shortcuts"]}>
                 {item.shortcut.map((key) => (
-                  <kbd key={key} className={styles["shortcutKey"]}>
-                    {key}
-                  </kbd>
+                  <Kbd key={key}>{key}</Kbd>
                 ))}
               </span>
             )}

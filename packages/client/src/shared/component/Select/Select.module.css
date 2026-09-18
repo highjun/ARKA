@@ -1,0 +1,54 @@
+/* `Menu.Content`와 같은 면 — 값 목록도 메뉴와 같은 자리에 같은 모양으로 뜬다. */
+.content {
+  z-index: var(--zIndex-popover);
+  overflow: hidden;
+  min-width: 180px;
+  border-radius: var(--borderRadius-small);
+  border-style: solid;
+  border-width: var(--borderWidth-thin);
+  border-color: var(--borderColor-muted);
+  background-color: var(--bgColor-default);
+  padding: var(--space-xs);
+  color: var(--fgColor-default);
+  box-shadow: var(--shadow-floating-medium);
+
+  /* Shell의 portal root(`pointer-events: none`)로 포탈될 수 있어 여기서 되살린다. */
+  pointer-events: auto;
+}
+
+/* `Menu.Item`과 같은 줄 높이(`--control-xsmall-size`)와 여백. */
+.item {
+  position: relative;
+  display: flex;
+  height: var(--control-xsmall-size);
+  cursor: default;
+  user-select: none;
+  align-items: center;
+  gap: var(--space-sm);
+  border-radius: var(--borderRadius-small);
+  padding-inline: var(--space-md);
+  padding-block: 0;
+  font-size: var(--text-body-size-small);
+  line-height: var(--text-body-lineHeight-small);
+  outline: none;
+  transition: background-color var(--motion-duration-short) var(--motion-easing-move);
+}
+
+/* 표시 자리를 항상 잡아 둔다 — 고른 줄만 들여쓰기가 생기면 목록이 들쭉날쭉해진다. */
+.indicator {
+  display: inline-flex;
+  width: var(--base-size-16);
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  color: var(--fgColor-accent);
+}
+
+.item:hover {
+  background-color: var(--control-transparent-bgColor-hover);
+}
+
+.item[data-disabled] {
+  pointer-events: none;
+  color: var(--fgColor-muted);
+}

@@ -8,14 +8,11 @@ import {
 } from "#utils/testing";
 import { SessionList } from "./SessionList";
 import type { AgentSession } from "./SessionList";
-import { Menu } from "#component/Menu";
 
 const SESSIONS: AgentSession[] = [
   { id: "a", title: "첫 세션" },
   { id: "b", title: "둘째 세션", disabled: true },
 ];
-
-const SESSIONS_WITH_ARCHIVED: AgentSession[] = [...SESSIONS, { id: "c", title: "보관된 세션", archived: true }];
 
 describe("SessionList", () => {
   implementsClassName((extra) => <SessionList sessions={SESSIONS} {...extra} />);
@@ -43,22 +40,6 @@ describe("SessionList", () => {
 
       expect(screen.getByText("비어 있음")).toBeInTheDocument();
     });
-
-    it("heading을 커스터마이즈할 수 있다", () => {
-      render(<SessionList sessions={SESSIONS} heading="진행 중" />);
-
-      expect(screen.getByText("진행 중")).toBeInTheDocument();
-    });
-
-    it("onCreateSession을 넘겼을 때만 생성 버튼이 나타난다", () => {
-      const { rerender } = render(<SessionList sessions={SESSIONS} />);
-
-      expect(screen.queryByRole("button", { name: "새 세션 만들기" })).not.toBeInTheDocument();
-
-      rerender(<SessionList sessions={SESSIONS} onCreateSession={() => {}} />);
-
-      expect(screen.getByRole("button", { name: "새 세션 만들기" })).toBeInTheDocument();
-    });
   });
 
   describe("Interaction", () => {
@@ -78,35 +59,6 @@ describe("SessionList", () => {
       fireEvent.click(screen.getByText("둘째 세션"));
 
       expect(onActiveChange).not.toHaveBeenCalled();
-    });
-
-    it("생성 버튼을 클릭하면 onCreateSession을 부른다", () => {
-      const onCreateSession = vi.fn();
-      render(<SessionList sessions={SESSIONS} onCreateSession={onCreateSession} />);
-
-      fireEvent.click(screen.getByRole("button", { name: "새 세션 만들기" }));
-
-      expect(onCreateSession).toHaveBeenCalledTimes(1);
-    });
-
-    it("moreActions를 넘겼을 때만 더 보기 버튼이 나타난다", () => {
-      const { rerender } = render(<SessionList sessions={SESSIONS} />);
-
-      expect(screen.queryByRole("button", { name: "더 보기" })).not.toBeInTheDocument();
-
-      rerender(<SessionList sessions={SESSIONS} moreActions={<Menu.Item>내보내기</Menu.Item>} />);
-
-      expect(screen.getByRole("button", { name: "더 보기" })).toBeInTheDocument();
-    });
-
-    it("더 보기 메뉴를 열면 moreActions로 넘긴 항목이 보인다", () => {
-      const onSelect = vi.fn();
-      render(<SessionList sessions={SESSIONS} moreActions={<Menu.Item onSelect={onSelect}>내보내기</Menu.Item>} />);
-
-      fireEvent.pointerDown(screen.getByRole("button", { name: "더 보기" }), { button: 0 });
-      fireEvent.click(screen.getByRole("menuitem", { name: "내보내기" }));
-
-      expect(onSelect).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -135,30 +87,6 @@ describe("SessionList", () => {
       fireEvent.click(screen.getByText("셋째 세션"));
 
       expect(screen.getByText("셋째 세션").closest('[role="option"]')).toHaveAttribute("aria-selected", "true");
-    });
-
-    it("기본으로는 archived 세션을 숨기고, 필터를 켜면 나타난다", () => {
-      render(<SessionList sessions={SESSIONS_WITH_ARCHIVED} />);
-
-      expect(screen.queryByText("보관된 세션")).not.toBeInTheDocument();
-
-      fireEvent.pointerDown(screen.getByRole("button", { name: "세션 필터" }), { button: 0 });
-      fireEvent.click(screen.getByRole("menuitem", { name: "보관된 세션 표시" }));
-
-      expect(screen.getByText("보관된 세션")).toBeInTheDocument();
-    });
-
-    it("필터를 다시 끄면 archived 세션이 사라진다", () => {
-      render(<SessionList sessions={SESSIONS_WITH_ARCHIVED} />);
-
-      fireEvent.pointerDown(screen.getByRole("button", { name: "세션 필터" }), { button: 0 });
-      fireEvent.click(screen.getByRole("menuitem", { name: "보관된 세션 표시" }));
-      expect(screen.getByText("보관된 세션")).toBeInTheDocument();
-
-      fireEvent.pointerDown(screen.getByRole("button", { name: "세션 필터" }), { button: 0 });
-      fireEvent.click(screen.getByRole("menuitem", { name: "보관된 세션 표시" }));
-
-      expect(screen.queryByText("보관된 세션")).not.toBeInTheDocument();
     });
   });
 });

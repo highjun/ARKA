@@ -73,10 +73,8 @@
 /* `kind='tool'`일 때 `.title`과 같이 붙어 toolId를 모노스페이스로 보여준다 — `data-kind`
    속성선택자로는 못 잡는다(title span이 `data-kind`를 가진 루트의 자손이라서). */
 .toolId {
-  /* stylelint-disable-next-line primer/typography -- Primer의 --fontStack-monospace는 시스템
-     폰트 스택이다, 우리는 자체 임베드 웹폰트(Cascadia Code, globals.css에서 로드)를 브랜드
-     선택으로 쓴다 */
-  font-family: "Cascadia Code Variable", "Pretendard Variable", ui-monospace, monospace;
+  /* 브랜드 모노 서체는 `globals.css` 가 토큰에 실었다(2026-09-18) — 여기서 따로 박지 않는다. */
+  font-family: var(--fontStack-monospace);
   font-size: var(--text-codeInline-size);
 }
 

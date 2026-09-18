@@ -9,11 +9,6 @@
 
 /* `Panel`의 기본 title 타이포(ChatRoom 헤더와 같은 일반 캡션)를 이 컴포넌트에서만
  * 오버라이드한다 — 대문자+muted "섹션 라벨" 느낌을 유지해달라는 요청으로 확인(2026-09-01). */
-.heading {
-  text-transform: uppercase;
-  color: var(--fgColor-muted);
-}
-
 .empty {
   margin: var(--space-sm);
   border-radius: var(--borderRadius-small);
