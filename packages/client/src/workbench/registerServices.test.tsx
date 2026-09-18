@@ -1,4 +1,5 @@
-import { ViewModelProvider } from "#core/viewmodel";
+import type { Container } from "#core/di";
+import { ContainerProvider } from "#core/viewmodel";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { IWorkspaceFiles } from "../extensions/filesystem";
@@ -26,19 +27,28 @@ import { createApplication } from "./registerServices";
  */
 
 describe("registerServices", () => {
+  /** 테스트마다 만든 컨테이너. 앱은 하나뿐이라 실제로는 페이지가 닫힐 때까지 살지만, 여기서는 다음 테스트에
+   *  전역 리스너(beforeunload·keydown)가 새지 않게 끝에 dispose한다. */
+  const containers: Container[] = [];
+  const track = (container: Container): Container => {
+    containers.push(container);
+    return container;
+  };
+
   afterEach(() => {
+    for (const container of containers.splice(0)) container.dispose();
     localStorage.clear();
   });
 
   const mountWith = (workspaceFiles: IWorkspaceFiles) => {
-    const container = createApplication().createChild("test");
+    const container = track(createApplication().createChild("test"));
     // 자식 스코프에 다시 등록해 그 스코프 안에서만 부모를 가린다.
     container.register("arka.filesystem.workspaceFiles", "singleton", () => workspaceFiles);
     container.register("arka.search.service", "singleton", () => new MockSearchService({ "a.md": "원본" }));
     render(
-      <ViewModelProvider container={container}>
+      <ContainerProvider container={container}>
         <RootView />
-      </ViewModelProvider>,
+      </ContainerProvider>,
     );
     return container;
   };
@@ -139,7 +149,7 @@ describe("registerServices", () => {
     it("탭이 렌더 중 던지면 CrashScreen이 뜨고 IErrorLog에 남는다", async () => {
       // React가 잡힌 오류를 console.error로도 내보낸다 — 테스트 출력이 그걸로 덮이지 않게 막는다.
       const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
-      const container = createApplication().createChild("test");
+      const container = track(createApplication().createChild("test"));
       container.register("arka.filesystem.workspaceFiles", "singleton", () => new MockWorkspaceFiles({ "a.md": "" }));
       // 파일 탭을 그리는 컴포넌트를 터지는 것으로 바꾼다 — 자식 스코프에 다시 등록해 부모를 가린다.
       container.register("arka.workbench.tabContentRegistry", "singleton", () => {
@@ -154,9 +164,9 @@ describe("registerServices", () => {
         return registry;
       });
       render(
-        <ViewModelProvider container={container}>
+        <ContainerProvider container={container}>
           <RootView />
-        </ViewModelProvider>,
+        </ContainerProvider>,
       );
 
       fireEvent.click(await screen.findByText("a.md"));

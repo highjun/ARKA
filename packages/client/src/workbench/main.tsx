@@ -1,6 +1,6 @@
 import "./reset.css";
 import "./globals.css";
-import { ViewModelProvider } from "#core/viewmodel";
+import { ContainerProvider } from "#core/viewmodel";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RootView } from "./view/RootView";
@@ -14,8 +14,8 @@ if (!root) {
 // 컨테이너는 앱에 하나다. React 리렌더와 무관하게 살아야 하므로 트리 밖에서 만든다.
 createRoot(root).render(
   <StrictMode>
-    <ViewModelProvider container={createApplication()}>
+    <ContainerProvider container={createApplication()}>
       <RootView />
-    </ViewModelProvider>
+    </ContainerProvider>
   </StrictMode>,
 );

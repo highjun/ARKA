@@ -1,5 +1,5 @@
 import { Container } from "#core/di";
-import { ViewModelProvider } from "#core/viewmodel";
+import { ContainerProvider } from "#core/viewmodel";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { ISettingsViewModel } from "../viewmodel/ISettingsViewModel";
 import { SettingsTabView } from "./SettingsTabView";
@@ -30,11 +30,11 @@ const story = (state: Partial<ISettingsViewModel>): Story => ({
       const container = new Container("story");
       container.register("arka.workbench.settingsViewModel", "singleton", () => viewModel(state));
       return (
-        <ViewModelProvider container={container.createChild("view")}>
+        <ContainerProvider container={container.createChild("view")}>
           <div style={{ width: 560 }}>
             <Story />
           </div>
-        </ViewModelProvider>
+        </ContainerProvider>
       );
     },
   ],

@@ -54,7 +54,7 @@ export class FileContentViewModel implements IFileContentViewModel {
     this.rowsState = this.#computeRows();
   }
 
-  /** `#model.open`에 위임한다. */
+  /** `#model.open`에 위임한다. 렌더 중에 부르면 안 된다 — 상태가 그리는 중에 바뀐다. 조립부가 효과에서 부른다. */
   openFile(path: string): void {
     void this.#model.open(path);
   }

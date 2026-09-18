@@ -1,6 +1,6 @@
 import { CommandService } from "#core/commands";
 import { Container } from "#core/di";
-import { ViewModelProvider } from "#core/viewmodel";
+import { ContainerProvider } from "#core/viewmodel";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Text } from "#component/Text";
 import { SidebarContentRegistry } from "../model/SidebarContentRegistry";
@@ -53,8 +53,7 @@ const SPLIT: ShellTabPaneNode = {
 };
 
 const viewModel = (state: Partial<IShellViewModel>): IShellViewModel => ({
-  onMount: () => undefined,
-  onDispose: () => undefined,
+  dispose: () => undefined,
   activities: [
     { id: "explorer", title: "탐색기", iconId: "files", isActive: true },
     { id: "search", title: "검색", iconId: "search", isActive: false },
@@ -121,11 +120,11 @@ const story = (state: Partial<IShellViewModel>): Story => ({
           }),
       );
       return (
-        <ViewModelProvider container={container.createChild("view")}>
+        <ContainerProvider container={container.createChild("view")}>
           <div style={{ height: 640, width: 1100 }}>
             <Story />
           </div>
-        </ViewModelProvider>
+        </ContainerProvider>
       );
     },
   ],

@@ -37,7 +37,7 @@ export class ShellViewModel implements IShellViewModel {
    * 열린 파일들을 감시하는 생명주기만 여기서 잡는다(다른 필드는 아무 것도 안 쓴다) — 파일 감시
    * ("열려 있는 동안"이라는 개념)가 탭 단위가 아니라 **앱 전체 단위**이기 때문이다(비활성 탭의
    * 파일도 감시 대상이어야 하는데, 비활성 탭은 렌더 자체가 안 될 수 있다). Shell은 앱 전체에서
-   * 한 번만 마운트되는 루트라, 그 생명주기(`onMount`/`onDispose`)에 얹는 게 정확히 "앱이 사는
+   * 한 번만 만들어지는 루트라, 그 수명(생성자/`dispose`)에 얹는 게 정확히 "앱이 사는
    * 동안"과 같다. 탭 ViewModel에 얹지 않는 이유 — 그건 탭마다 마운트/언마운트되는
    * `FileContentView`가 부르므로, 탭 하나만 닫혀도 감시가 통째로 꺼진다(2026-09-04).
    */
@@ -162,19 +162,11 @@ export class ShellViewModel implements IShellViewModel {
     );
 
     this.#registerCommands(commandCenterRegistry);
-  }
 
-  /** `useViewModel`이 Shell 마운트에 자동으로 건다(`view-only-uses-view-model`) — Shell은 앱
-   *  전체에서 한 번만 뜨는 루트라 이게 곧 "앱이 사는 동안"이다. */
-  onMount(): void {
-    this.#startup.start();
-    void this.#appLifetime.load();
-    void this.#workspace.load();
-  }
-
-  /** `#startup.stop()`에 위임한다 — 무엇이 꺼지는지는 조립부만 안다. */
-  onDispose(): void {
-    this.#startup.stop();
+    // 만들어지는 순간이 곧 "앱이 사는 동안"의 시작이다 — Shell은 앱에 하나고 컨테이너가 살아 있는 한 산다.
+    startup.start();
+    void appLifetime.load();
+    void workspace.load();
   }
 
   /** `#activities`를 값으로 노출한다. */
@@ -785,9 +777,10 @@ export class ShellViewModel implements IShellViewModel {
     return this.#activityBar.tryGet(id) !== undefined;
   }
 
-  /** 구독을 끊는다. 컨테이너가 이 VM을 정리할 때 불린다. */
+  /** 구독을 끊고 시작 작업을 끈다. 컨테이너가 이 VM을 정리할 때 불린다 — 무엇이 꺼지는지는 조립부만 안다. */
   dispose(): void {
     for (const subscription of this.#subscriptions) subscription.dispose();
+    this.#startup.stop();
   }
 
   private recomputeLifetime(): void {

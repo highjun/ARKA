@@ -169,8 +169,8 @@ describe("자리 표시 — 화살표는 type만으로 산다", () => {
  * 있으면 "읽는 중…" 이 영원히 남았다. 상태는 Model 에 이미 있었고 ViewModel 이 안 내보냈을 뿐이다.
  */
 describe("status — 화면이 로딩과 빈 상태를 가르는 근거", () => {
-  it("시작 전에는 idle 이다", () => {
-    expect(viewModel({ "": [] }).status).toBe("idle");
+  it("만들어지면 곧 읽기 시작한다 — loading", () => {
+    expect(viewModel({ "": [] }).status).toBe("loading");
   });
 
   it("읽는 동안은 loading 이다", () => {

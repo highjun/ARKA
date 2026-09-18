@@ -795,20 +795,17 @@ describe("requestCloseTab / confirmCloseTab / cancelCloseTab", () => {
  * 직접 얹지 않고 여기 얹는 이유(탭 단위가 아니라 앱 전체 단위)는 `ShellViewModel`의 필드
  * 주석 참고.
  */
-describe("onMount / onDispose — 파일 감시 생명주기 위임", () => {
-  it("onMount는 등록된 시작 작업을 켠다", () => {
-    const { viewModel, startup } = make();
-
-    viewModel.onMount();
+describe("수명 — 시작 작업 위임", () => {
+  it("만들어지면 등록된 시작 작업을 켠다", () => {
+    const { startup } = make();
 
     expect(startup.started).toBe(true);
   });
 
-  it("onDispose는 감시를 멈춘다", () => {
+  it("dispose하면 끈다", () => {
     const { viewModel, startup } = make();
-    viewModel.onMount();
 
-    viewModel.onDispose();
+    viewModel.dispose();
 
     expect(startup.started).toBe(false);
   });
@@ -827,7 +824,6 @@ describe("IShellViewModel — 낡은 클라이언트", () => {
           workspaceName: "ws",
         }),
     });
-    viewModel.onMount?.();
     await settled();
     expect(viewModel.isClientOutdated).toBe(true);
     expect(viewModel.buildId).not.toBe("");
@@ -844,7 +840,6 @@ describe("IShellViewModel — 낡은 클라이언트", () => {
           workspaceName: "ws",
         }),
     });
-    viewModel.onMount?.();
     await settled();
     expect(viewModel.isClientOutdated).toBe(true);
   });
@@ -859,7 +854,6 @@ describe("IShellViewModel — 낡은 클라이언트", () => {
           workspaceName: "ws",
         }),
     });
-    viewModel.onMount?.();
     await settled();
     expect(viewModel.isClientOutdated).toBe(false);
   });
@@ -875,7 +869,6 @@ describe("IShellViewModel — 낡은 클라이언트", () => {
           gitSha: "0123456789ab",
         }),
     });
-    viewModel.onMount?.();
     await settled();
     expect(viewModel.buildId).toMatch(/ · 0123456$/u);
   });
@@ -891,7 +884,6 @@ describe("IShellViewModel — 낡은 클라이언트", () => {
           gitSha: "0123456789ab-dirty",
         }),
     });
-    viewModel.onMount?.();
     await settled();
     expect(viewModel.buildId).toMatch(/ · 0123456-dirty$/u);
   });
@@ -906,14 +898,12 @@ describe("IShellViewModel — 낡은 클라이언트", () => {
           workspaceName: "ws",
         }),
     });
-    viewModel.onMount?.();
     await settled();
     expect(viewModel.buildId).toMatch(/^v\d{4}\.\d{2}\.\d{2} \d{2}:\d{2}$/u);
   });
 
   it("서버 정보를 못 읽으면 낡지 않은 것으로 둔다 — 진단이 기능을 막지 않는다", async () => {
     const { viewModel } = make();
-    viewModel.onMount?.();
     await settled();
     expect(viewModel.isClientOutdated).toBe(false);
     expect(viewModel.buildId).toBe("");

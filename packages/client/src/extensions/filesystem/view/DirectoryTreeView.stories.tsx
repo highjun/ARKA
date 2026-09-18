@@ -1,6 +1,6 @@
 import { CommandService } from "#core/commands";
 import { Container } from "#core/di";
-import { ViewModelProvider } from "#core/viewmodel";
+import { ContainerProvider } from "#core/viewmodel";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { FileTreeRow, IDirectoryTreeViewModel } from "../viewmodel/IDirectoryTreeViewModel";
 import type { IFileContentViewModel } from "../viewmodel/IFileContentViewModel";
@@ -12,8 +12,7 @@ import { DirectoryTreeView } from "./DirectoryTreeView";
  * 레지스트리의 실제 모양을 훑으므로 흉내로는 부족하다.
  */
 const viewModel = (state: Partial<IDirectoryTreeViewModel>): IDirectoryTreeViewModel => ({
-  onMount: () => undefined,
-  onDispose: () => undefined,
+  dispose: () => undefined,
   rows: [],
   expandedIds: [],
   selectedIds: [],
@@ -49,6 +48,7 @@ const viewModel = (state: Partial<IDirectoryTreeViewModel>): IDirectoryTreeViewM
 });
 
 const fileContentViewModel: IFileContentViewModel = {
+  dispose: () => undefined,
   rows: {},
   onDidChange: () => ({ dispose: () => undefined }),
   openFile: () => undefined,
@@ -112,11 +112,11 @@ const story = (state: Partial<IDirectoryTreeViewModel>): Story => ({
           }),
       );
       return (
-        <ViewModelProvider container={container.createChild("view")}>
+        <ContainerProvider container={container.createChild("view")}>
           <div style={{ height: 520, width: 320 }}>
             <Story />
           </div>
-        </ViewModelProvider>
+        </ContainerProvider>
       );
     },
   ],

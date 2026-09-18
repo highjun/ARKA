@@ -1,3 +1,4 @@
+import type { Disposable } from "#core/di";
 /**
  * 화면이 그리는 트리.
  *
@@ -62,14 +63,7 @@ declare module "#core/di" {
  *
  * 관찰 property는 전부 값 그대로다. 구현은 MobX observable 클래스고, 화면은 `observer`로 감싸 따라온다.
  */
-export interface IDirectoryTreeViewModel {
-  /**
-   * `useViewModel`이 View 마운트/언마운트에 자동으로 건다(`view-only-uses-view-model` — View는
-   * 이 훅을 직접 걸 수 없다). 루트를 읽고 감시를 시작·정지하는 자리다.
-   */
-  onMount(): void;
-  onDispose(): void;
-
+export interface IDirectoryTreeViewModel extends Disposable {
   readonly rows: readonly FileTreeRow[];
   readonly expandedIds: readonly string[];
   /** 선택된 경로들(다중선택). 빈 배열이 "선택 없음"이다. */

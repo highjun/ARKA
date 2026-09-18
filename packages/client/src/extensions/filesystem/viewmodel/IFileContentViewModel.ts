@@ -43,7 +43,7 @@ declare module "#core/di" {
  *
  * 관찰 property는 전부 값 그대로다. 구현은 MobX observable 클래스고, 화면은 `observer`로 감싸 따라온다.
  */
-export interface IFileContentViewModel {
+export interface IFileContentViewModel extends Disposable {
   readonly rows: FileRowMap;
   /**
    * `rows`가 바뀌었음을 알린다 — 화면 밖에서 이 값을 지켜봐야 하는 쪽(예: 탭의 dirty 표시)이

@@ -82,6 +82,10 @@ export class DirectoryTreeViewModel implements IDirectoryTreeViewModel {
     );
 
     this.#registerFilesystemCommands(commandCenterRegistry);
+
+    // 만들어지는 순간 루트를 읽고 감시를 켠다 — VM은 화면보다 오래 살고, 끄는 것은 컨테이너가 dispose할 때다.
+    this.start();
+    this.startWatching();
   }
 
   /** `#rows`를 값으로 노출한다. */
@@ -112,18 +116,6 @@ export class DirectoryTreeViewModel implements IDirectoryTreeViewModel {
   /** `#model.load`에 위임한다. */
   start(): void {
     void this.#model.load();
-  }
-
-  /** `useViewModel`이 View 마운트에 자동으로 건다(`view-only-uses-view-model`) — View는 이 훅을
-   *  직접 걸 수 없다. */
-  onMount(): void {
-    this.start();
-    this.startWatching();
-  }
-
-  /** `stopWatching`에 위임한다. */
-  onDispose(): void {
-    this.stopWatching();
   }
 
   /** `#model.setExpanded`에 위임한다. */
@@ -504,9 +496,10 @@ export class DirectoryTreeViewModel implements IDirectoryTreeViewModel {
     });
   }
 
-  /** 구독을 끊는다. 컨테이너가 이 VM을 정리할 때 불린다. */
+  /** 구독과 감시를 끊는다. 컨테이너가 이 VM을 정리할 때 불린다. */
   dispose(): void {
     this.#subscription.dispose();
+    this.stopWatching();
   }
 
   private recompute(): void {

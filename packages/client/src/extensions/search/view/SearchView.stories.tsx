@@ -1,5 +1,5 @@
 import { Container } from "#core/di";
-import { ViewModelProvider } from "#core/viewmodel";
+import { ContainerProvider } from "#core/viewmodel";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { ISearchViewModel } from "../viewmodel/ISearchViewModel";
 import { SearchView } from "./SearchView";
@@ -20,7 +20,7 @@ const viewModel = (state: Partial<ISearchViewModel>): ISearchViewModel => ({
   toggleRegex: () => undefined,
   toggleCaseSensitive: () => undefined,
   submit: () => undefined,
-  onDispose: () => undefined,
+  dispose: () => undefined,
   ...state,
 });
 
@@ -42,11 +42,11 @@ type Story = StoryObj<typeof meta>;
 const story = (state: Partial<ISearchViewModel>): Story => ({
   decorators: [
     (Story) => (
-      <ViewModelProvider container={withViewModel(state)}>
+      <ContainerProvider container={withViewModel(state)}>
         <div style={{ height: 480, width: 320 }}>
           <Story />
         </div>
-      </ViewModelProvider>
+      </ContainerProvider>
     ),
   ],
 });

@@ -1,2 +1,2 @@
-export { ViewModelProvider } from "./ViewModelProvider";
+export { ContainerProvider, MissingContainerProviderError } from "./ContainerProvider";
 export { useViewModel } from "./useViewModel";

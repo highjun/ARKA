@@ -1,5 +1,5 @@
 import { Container } from "#core/di";
-import { ViewModelProvider } from "#core/viewmodel";
+import { ContainerProvider } from "#core/viewmodel";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { MockSearchService } from "../model/MockSearchService";
@@ -20,9 +20,9 @@ const mount = (onFileOpen = vi.fn()) => {
     (c) => new SearchViewModel({ searchModel: c.resolve("arka.search.model"), debounceMs: 1 }),
   );
   render(
-    <ViewModelProvider container={container.createChild("view")}>
+    <ContainerProvider container={container.createChild("view")}>
       <SearchView onFileOpen={onFileOpen} />
-    </ViewModelProvider>,
+    </ContainerProvider>,
   );
   return { onFileOpen };
 };

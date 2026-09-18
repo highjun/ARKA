@@ -42,6 +42,7 @@ export class Container {
   /** 지금 만들고 있는 id들. 여기 다시 들어오면 순환이다. */
   readonly #resolving: InstanceId[] = [];
   #disposed = false;
+  #disposing = false;
 
   /** 부모 없이 만들면 루트다. 자식은 `createChild`로만 난다. */
   constructor(name = "root", parent?: Container) {
@@ -81,10 +82,13 @@ export class Container {
     return child;
   }
 
-  /** 자식 컨테이너를 먼저 정리한 뒤 자기가 만든 Disposable을 역순으로 부른다. 부모의 목록에서도 빠진다. 두 번 불러도 안전하다. */
+  /**
+   * 자식 컨테이너를 먼저 정리한 뒤 자기가 만든 Disposable을 역순으로 부른다. 부모의 목록에서도 빠진다.
+   * 두 번 불러도 안전하다. **정리하는 동안은 아직 꺼낼 수 있다** — 정리 코드가 이웃을 찾아 끄기 때문이다.
+   */
   dispose(): void {
-    if (this.#disposed) return;
-    this.#disposed = true;
+    if (this.#disposed || this.#disposing) return;
+    this.#disposing = true;
 
     for (const child of [...this.#children]) child.dispose();
     this.#children.clear();
@@ -94,6 +98,7 @@ export class Container {
     this.#instances.clear();
 
     if (this.#parent !== undefined) this.#parent.#children.delete(this);
+    this.#disposed = true;
   }
 
   /** 이름을 그대로 — 오류 메시지와 디버거가 읽는다. */

@@ -1,5 +1,7 @@
 import { CommandService } from "#core/commands";
 import { Container } from "#core/di";
+import { useViewModel } from "#core/viewmodel";
+import { useEffect } from "react";
 import {
   DirectoryTreeModel,
   DirectoryTreeViewModel,
@@ -70,6 +72,23 @@ const SEARCH_ID = "search";
 const KEYBINDING_OVERRIDES_KEY = "workbench.keybindings";
 /** 파일 탭의 kind. `IShellViewModel.previewFile`이 여는 탭의 kind와 같아야 TabContent가 찾는다. */
 const FILE_TAB_KIND = "file";
+
+/**
+ * 파일 탭. 탭이 뜨면 그 파일을 열고, 그리는 것은 `FileContentView`에 맡긴다. 여는 일을 효과에 두는 이유 —
+ * 렌더 중에 Model을 바꾸면 React와 MobX가 둘 다 막는다. `view/`는 훅이 `useViewModel` 하나뿐이라 여기(조립부)다.
+ * R11에서 TabProvider가 `openTab`에서 파일을 읽으면 이 자리는 사라진다.
+ */
+const FileTab = ({
+  tabId,
+  reveal,
+}: {
+  readonly tabId: string;
+  readonly reveal?: { readonly line: number; readonly column: number; readonly seq: number } | null;
+}) => {
+  const fileContent = useViewModel("arka.filesystem.fileContentViewModel");
+  useEffect(() => fileContent.openFile(tabId), [fileContent, tabId]);
+  return <FileContentView path={tabId} reveal={reveal} />;
+};
 
 /**
  * 조립은 여기 한 곳이다. 이 파일만 읽으면 무엇이 도는지 다 보인다.
@@ -328,11 +347,9 @@ export function createApplication(): Container {
   container
     .resolve("arka.workbench.sidebarContentRegistry")
     .add({ id: EXPLORER_ID, ContentComponent: DirectoryTreeView });
-  container.resolve("arka.workbench.tabContentRegistry").add({
-    id: FILE_TAB_KIND,
-    iconId: "fileCode",
-    TabComponent: ({ tabId, reveal }) => <FileContentView path={tabId} reveal={reveal} />,
-  });
+  container
+    .resolve("arka.workbench.tabContentRegistry")
+    .add({ id: FILE_TAB_KIND, iconId: "fileCode", TabComponent: FileTab });
   container
     .resolve("arka.workbench.activityBarRegistry")
     .add({ id: SEARCH_ID, title: "검색", iconId: "search", keybinding: "ctrl+shift+f" });

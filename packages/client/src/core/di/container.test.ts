@@ -160,6 +160,23 @@ describe("Container", () => {
       expect(dispose).toHaveBeenCalledTimes(1);
     });
 
+    it("정리하는 동안에는 아직 꺼낼 수 있다 — 정리 코드가 이웃을 찾아 끈다", () => {
+      const c = new Container();
+      const stopped: string[] = [];
+      c.register("test.first", "singleton", () => ({ dispose: () => stopped.push("first") }));
+      c.register("test.second", "singleton", (container) => ({
+        dispose: () => {
+          container.resolve("test.first");
+          stopped.push("second");
+        },
+      }));
+      c.resolve("test.first");
+      c.resolve("test.second");
+
+      expect(() => c.dispose()).not.toThrow();
+      expect(stopped).toEqual(["second", "first"]);
+    });
+
     it("dispose된 컨테이너에서 꺼내면 ContainerDisposedError에 이름을 담아 던진다", () => {
       const c = new Container();
       c.register("test.counter", "scoped", () => ({ id: 1 }));

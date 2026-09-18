@@ -1,3 +1,4 @@
+import type { Disposable } from "#core/di";
 import type { OpenTab, PaneId } from "../model/ITabLayout";
 
 /**
@@ -90,16 +91,7 @@ declare module "#core/di" {
  *
  * 관찰 property는 전부 값 그대로다. 구현은 MobX observable 클래스고, 화면은 `observer`로 감싸 따라온다.
  */
-export interface IShellViewModel {
-  /**
-   * `useViewModel`이 Shell 마운트/언마운트에 자동으로 건다(`view-only-uses-view-model` — View는
-   * 이 훅을 직접 걸 수 없다, `core`의 `useViewModel` 생명주기 참고). 열린 파일 감시 시작·
-   * 정지를 여기 얹는다 — Shell은 앱 전체에서 한 번만 마운트되는 루트라 그 생명주기가 곧 "앱이
-   * 사는 동안"과 같다.
-   */
-  onMount(): void;
-  onDispose(): void;
-
+export interface IShellViewModel extends Disposable {
   readonly activities: readonly ShellActivityRow[];
 
   readonly tree: ShellTabPaneNode;

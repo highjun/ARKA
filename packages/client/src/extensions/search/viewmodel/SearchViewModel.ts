@@ -56,8 +56,8 @@ export class SearchViewModel implements ISearchViewModel {
     );
   }
 
-  /** 구독과 예약된 타이머를 함께 끊는다 — 스코프가 정리될 때 컨테이너가 부른다. */
-  onDispose(): void {
+  /** 구독과 예약된 타이머를 함께 끊는다 — 컨테이너가 정리할 때 부른다. */
+  dispose(): void {
     this.#subscription.dispose();
     if (this.#timer !== null) clearTimeout(this.#timer);
   }
