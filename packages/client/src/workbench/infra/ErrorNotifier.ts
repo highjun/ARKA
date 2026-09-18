@@ -1,6 +1,6 @@
 import type { Disposable } from "#core/di";
 import type { IErrorLog } from "../model/IErrorLog";
-import type { INotificationService } from "../model/INotificationService";
+import type { INotifications } from "../model/INotifications";
 import type { IWorkbenchStartup } from "../model/IWorkbenchStartup";
 
 /**
@@ -12,7 +12,7 @@ export const createErrorNotifier = ({
   notifications,
 }: {
   errorLog: IErrorLog;
-  notifications: INotificationService;
+  notifications: INotifications;
 }): IWorkbenchStartup => {
   let subscription: Disposable | null = null;
   let seen = 0;

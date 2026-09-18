@@ -1,3 +1,4 @@
+import { URI } from "#contracts";
 import type { ICommandService } from "#core/commands";
 import { ViewModelBase } from "#core/viewmodel";
 import { atom } from "nanostores";
@@ -17,7 +18,7 @@ export class MarkdownPreviewViewModel extends ViewModelBase implements IMarkdown
   readonly #model: IMarkdownPreviewModel;
   readonly #previews;
   readonly #activeFile: () => string | null;
-  readonly #openTab: (tab: { id: string; kind: string; title: string }) => void;
+  readonly #openTab: (tab: { id: string; kind: string; uri: URI; title: string }) => void;
 
   /** 만들 때 커맨드와 단축키(Ctrl+Shift+V)를 스스로 등록한다 — 조립부가 따로 부르지 않는다. */
   constructor({
@@ -30,7 +31,7 @@ export class MarkdownPreviewViewModel extends ViewModelBase implements IMarkdown
     commandCenterRegistry: ICommandService;
     /** 지금 활성 탭이 파일이면 그 경로, 아니면 `null` — 조립부가 셸에서 읽어 준다. */
     activeFile: () => string | null;
-    openTab: (tab: { id: string; kind: string; title: string }) => void;
+    openTab: (tab: { id: string; kind: string; uri: URI; title: string }) => void;
   }) {
     super();
     this.#model = previewModel;
@@ -71,6 +72,11 @@ export class MarkdownPreviewViewModel extends ViewModelBase implements IMarkdown
     const path = this.#activeFile();
     if (path === null || !isMarkdown(path)) return;
     const name = path.split("/").pop() ?? path;
-    this.#openTab({ id: previewTabIdOf(path), kind: PREVIEW_TAB_KIND, title: `미리보기 ${name}` });
+    this.#openTab({
+      id: previewTabIdOf(path),
+      kind: PREVIEW_TAB_KIND,
+      uri: URI.parse(`markdown-preview:///${path}`),
+      title: `미리보기 ${name}`,
+    });
   }
 }

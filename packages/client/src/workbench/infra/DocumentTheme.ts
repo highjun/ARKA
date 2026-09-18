@@ -1,4 +1,4 @@
-import type { IThemeModel } from "../model/IThemeModel";
+import type { IColorMode } from "../model/IColorMode";
 import type { IWorkbenchStartup } from "../model/IWorkbenchStartup";
 import type { Disposable } from "#core/di";
 
@@ -9,15 +9,15 @@ import type { Disposable } from "#core/di";
  * React로는 닿지 않는다. `viewmodel/`은 DOM 조작이 금지고 `model/`은 `document`를 모르므로
  * `infra/`가 남는다.
  */
-export const createDocumentTheme = ({ themeModel }: { themeModel: IThemeModel }): IWorkbenchStartup => {
+export const createDocumentTheme = ({ colorMode }: { colorMode: IColorMode }): IWorkbenchStartup => {
   let subscription: Disposable | null = null;
   const apply = () => {
-    document.documentElement.style.colorScheme = themeModel.theme;
+    document.documentElement.style.colorScheme = colorMode.mode;
   };
   return {
     start: () => {
       apply();
-      subscription = themeModel.onDidChange(apply);
+      subscription = colorMode.onDidChange(apply);
     },
     stop: () => {
       subscription?.dispose();

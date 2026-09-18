@@ -24,7 +24,9 @@ describe("MarkdownPreviewViewModel", () => {
   it("커맨드가 활성 .md 파일의 미리보기 탭을 연다", () => {
     const { openTab, registry } = make("docs/a.md");
     registry.execute("markdown.openPreview");
-    expect(openTab).toHaveBeenCalledWith({ id: "preview:docs/a.md", kind: "markdownPreview", title: "미리보기 a.md" });
+    expect(openTab).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "preview:docs/a.md", kind: "markdownPreview", title: "미리보기 a.md" }),
+    );
     expect(registry.dispatchKeydown(new KeyboardEvent("keydown", { key: "V", ctrlKey: true, shiftKey: true }))).toBe(
       true,
     );

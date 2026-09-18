@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import type { OpenTab } from "./ITabLayout";
 
 /**
  * 활동 아이콘 바에서 고른 것에 대응하는 사이드바 내용. 없으면(`tryGet`이 `undefined`) 패널이 빈다.
@@ -17,7 +18,7 @@ export type SidebarSlotProps = {
    *  더블클릭과 같은 뜻). */
   readonly onFilePin: (path: string) => void;
   /** 파일이 아닌 탭을 연다(`IShellViewModel.openTab`) — 대화 세션 같은 것. */
-  readonly onOpenTab: (tab: { readonly id: string; readonly kind: string; readonly title: string }) => void;
+  readonly onOpenTab: (tab: OpenTab) => void;
 };
 
 /**

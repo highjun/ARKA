@@ -32,11 +32,14 @@ import { WorkbenchStartupRegistry } from "./model/WorkbenchStartupRegistry";
 import { ActivityBarRegistry } from "./model/ActivityBarRegistry";
 import { ActivityModel } from "./model/ActivityModel";
 import { ErrorLog } from "./model/ErrorLog";
-import { NotificationService } from "./model/NotificationService";
+import { Notifications } from "./model/Notifications";
 import { SidebarContentRegistry } from "./model/SidebarContentRegistry";
 import { TabContentRegistry } from "./model/TabContentRegistry";
-import { TabsModel } from "./model/TabsModel";
-import { ThemeModel } from "./model/ThemeModel";
+import { TabLayout } from "./model/TabLayout";
+import { ColorMode } from "./model/ColorMode";
+import { AppLifetime } from "./model/AppLifetime";
+import { Workspace } from "./model/Workspace";
+import type { ServerInfo } from "./model/IServerInfo";
 import { ShellViewModel } from "./viewmodel/ShellViewModel";
 import type { IWorkbenchStartup } from "./model/IWorkbenchStartup";
 
@@ -96,7 +99,12 @@ export function createApplication(): Container {
   container.register("arka.filesystem.workspaceWatch", "singleton", createWorkspaceWatchPort);
   container.register("arka.search.service", "singleton", createSearchServicePort);
   container.register("arka.workbench.storage", "singleton", createStoragePort);
-  container.register("arka.workbench.serverInfo", "singleton", createServerInfoPort);
+  // 앱 수명과 워크스페이스가 같은 답을 읽는다 — 한 번만 묻고 나눈다.
+  const serverInfoPort = createServerInfoPort();
+  let serverInfoLoading: Promise<ServerInfo | null> | undefined;
+  container.register("arka.workbench.serverInfo", "singleton", () => ({
+    load: () => (serverInfoLoading ??= serverInfoPort.load()),
+  }));
   // 재정의는 localStorage에 산다 — 서버 settings.json은 나중 라운드. 실행 오류는 오류 기록으로 간다.
   container.register("arka.commands", "singleton", (c) => {
     const storage = c.resolve("arka.workbench.storage");
@@ -114,17 +122,27 @@ export function createApplication(): Container {
   container.register("arka.workbench.startupRegistry", "singleton", () => new WorkbenchStartupRegistry());
 
   container.register("arka.workbench.errorLog", "singleton", () => new ErrorLog());
-  container.register("arka.workbench.notifications", "singleton", () => new NotificationService());
-  container.register("arka.workbench.activityModel", "singleton", () => new ActivityModel());
+  container.register("arka.workbench.notifications", "singleton", () => new Notifications());
   container.register(
-    "arka.workbench.tabsModel",
+    "arka.workbench.appLifetime",
     "singleton",
-    (c) => new TabsModel({ storage: c.resolve("arka.workbench.storage") }),
+    (c) => new AppLifetime({ serverInfo: c.resolve("arka.workbench.serverInfo"), reload: reloadApp }),
   );
   container.register(
-    "arka.workbench.themeModel",
+    "arka.workbench.workspace",
     "singleton",
-    (c) => new ThemeModel({ storage: c.resolve("arka.workbench.storage") }),
+    (c) => new Workspace({ serverInfo: c.resolve("arka.workbench.serverInfo") }),
+  );
+  container.register("arka.workbench.activityModel", "singleton", () => new ActivityModel());
+  container.register(
+    "arka.workbench.tabLayout",
+    "singleton",
+    (c) => new TabLayout({ storage: c.resolve("arka.workbench.storage") }),
+  );
+  container.register(
+    "arka.workbench.colorMode",
+    "singleton",
+    (c) => new ColorMode({ storage: c.resolve("arka.workbench.storage") }),
   );
   container.register(
     "arka.workbench.settingsModel",
@@ -136,7 +154,7 @@ export function createApplication(): Container {
     "scoped",
     (c) =>
       new SettingsViewModel({
-        themeModel: c.resolve("arka.workbench.themeModel"),
+        colorMode: c.resolve("arka.workbench.colorMode"),
         settingsModel: c.resolve("arka.workbench.settingsModel"),
       }),
   );
@@ -227,7 +245,7 @@ export function createApplication(): Container {
     stop: () => c.resolve("arka.filesystem.fileContentViewModel").stopWatching(),
   }));
   container.register("arka.workbench.startup.documentTheme", "scoped", (c) =>
-    createDocumentTheme({ themeModel: c.resolve("arka.workbench.themeModel") }),
+    createDocumentTheme({ colorMode: c.resolve("arka.workbench.colorMode") }),
   );
   container.register("arka.workbench.startup.documentDensity", "scoped", (c) =>
     createDocumentDensity({ settingsModel: c.resolve("arka.workbench.settingsModel") }),
@@ -279,16 +297,16 @@ export function createApplication(): Container {
     (c) =>
       new ShellViewModel({
         activityModel: c.resolve("arka.workbench.activityModel"),
-        tabsModel: c.resolve("arka.workbench.tabsModel"),
-        themeModel: c.resolve("arka.workbench.themeModel"),
+        tabLayout: c.resolve("arka.workbench.tabLayout"),
+        colorMode: c.resolve("arka.workbench.colorMode"),
         activityBarRegistry: c.resolve("arka.workbench.activityBarRegistry"),
         tabDirtyState: c.resolve("arka.workbench.tabDirtyState"),
         startup: c.resolve("arka.workbench.startup"),
-        serverInfo: c.resolve("arka.workbench.serverInfo"),
-        notificationService: c.resolve("arka.workbench.notifications"),
+        appLifetime: c.resolve("arka.workbench.appLifetime"),
+        workspace: c.resolve("arka.workbench.workspace"),
+        notifications: c.resolve("arka.workbench.notifications"),
         commandCenterRegistry: c.resolve("arka.commands"),
         copyToClipboard,
-        reloadApp,
       }),
   );
 

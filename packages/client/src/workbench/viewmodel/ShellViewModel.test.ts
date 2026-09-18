@@ -2,14 +2,17 @@ import { PROTOCOL_HEADER, PROTOCOL_VERSION } from "#contracts";
 import type { ITabDirtyState } from "../model/ITabDirtyState";
 import type { IWorkbenchStartup } from "../model/IWorkbenchStartup";
 import type { IServerInfo } from "../model/IServerInfo";
-import { NotificationService } from "../model/NotificationService";
+import { Notifications } from "../model/Notifications";
+import { AppLifetime } from "../model/AppLifetime";
+import { Workspace } from "../model/Workspace";
+import { URI } from "#contracts";
 import { CommandService, type ICommandService } from "#core/commands";
 import { Registry } from "#core/registry";
 import { ActivityModel } from "../model/ActivityModel";
 import { ROOT_PANE_ID } from "../model/tabsShare";
-import { TabsModel } from "../model/TabsModel";
-import type { ITabsModel } from "../model/ITabsModel";
-import { ThemeModel } from "../model/ThemeModel";
+import { TabLayout } from "../model/TabLayout";
+import type { ITabLayout } from "../model/ITabLayout";
+import { ColorMode } from "../model/ColorMode";
 import type { IStorage } from "../model/IStorage";
 import type { IActivityBarRegistry } from "../model/IActivityBarRegistry";
 import { ShellViewModel } from "./ShellViewModel";
@@ -61,35 +64,35 @@ const fakeStartup = (): IWorkbenchStartup & { started: boolean } => {
 const make = (
   serverInfo: IServerInfo = { load: () => Promise.resolve(null) },
 ): {
-  tabsModel: ITabsModel;
+  tabLayout: ITabLayout;
   viewModel: IShellViewModel;
   tabDirtyState: ITabDirtyState & { dirty: Set<string> };
   startup: IWorkbenchStartup & { started: boolean };
-  notificationService: NotificationService;
+  notifications: Notifications;
 } => {
   const activityBarRegistry: IActivityBarRegistry = new Registry();
   activityBarRegistry.add({ id: "explorer", title: "탐색기", iconId: "files" });
   const tabDirtyState = fakeTabDirtyState();
   const startup = fakeStartup();
-  const notificationService = new NotificationService({ newId: () => "n" });
+  const notifications = new Notifications({ newId: () => "n" });
   const storage = fakeStorage();
   const activityModel = new ActivityModel();
-  const tabsModel = new TabsModel({ storage });
-  const themeModel = new ThemeModel({ storage });
+  const tabLayout = new TabLayout({ storage });
+  const colorMode = new ColorMode({ storage });
   const viewModel = new ShellViewModel({
     activityModel,
-    tabsModel,
-    themeModel,
+    tabLayout,
+    colorMode,
     activityBarRegistry,
     tabDirtyState,
     startup,
-    serverInfo,
-    notificationService,
+    appLifetime: new AppLifetime({ serverInfo, reload: () => undefined }),
+    workspace: new Workspace({ serverInfo }),
+    notifications,
     commandCenterRegistry: fakeCommandCenterRegistry(),
     copyToClipboard: () => undefined,
-    reloadApp: () => undefined,
   });
-  return { tabsModel, viewModel, tabDirtyState, startup, notificationService };
+  return { tabLayout, viewModel, tabDirtyState, startup, notifications };
 };
 
 const activeIds = (viewModel: IShellViewModel): string[] =>
@@ -243,12 +246,12 @@ describe("IShellViewModel — 탭", () => {
   });
 
   it("Model 의 트리가 그대로 비친다", () => {
-    const { tabsModel, viewModel } = make();
+    const { tabLayout, viewModel } = make();
 
-    tabsModel.setTree({
+    tabLayout.setTree({
       kind: "leaf",
       id: ROOT_PANE_ID,
-      tabs: [{ id: "a", kind: "file", title: "a" }],
+      tabs: [{ id: "a", kind: "file", uri: URI.file("a"), title: "a" }],
       activeTabId: "a",
     });
 
@@ -261,14 +264,14 @@ describe("IShellViewModel — 탭", () => {
   });
 
   it("닫으면 이웃이 활성화된다 — 오른쪽 먼저, 없으면 왼쪽", () => {
-    const { tabsModel, viewModel } = make();
+    const { tabLayout, viewModel } = make();
 
-    tabsModel.setTree({
+    tabLayout.setTree({
       kind: "leaf",
       id: ROOT_PANE_ID,
       tabs: [
-        { id: "a", kind: "file", title: "1" },
-        { id: "b", kind: "file", title: "2" },
+        { id: "a", kind: "file", uri: URI.file("a"), title: "1" },
+        { id: "b", kind: "file", uri: URI.file("b"), title: "2" },
       ],
       activeTabId: "b",
     });
@@ -278,12 +281,12 @@ describe("IShellViewModel — 탭", () => {
   });
 
   it("마지막 탭을 닫으면 빈 루트 leaf로 돌아간다", () => {
-    const { tabsModel, viewModel } = make();
+    const { tabLayout, viewModel } = make();
 
-    tabsModel.setTree({
+    tabLayout.setTree({
       kind: "leaf",
       id: ROOT_PANE_ID,
-      tabs: [{ id: "a", kind: "file", title: "1" }],
+      tabs: [{ id: "a", kind: "file", uri: URI.file("a"), title: "1" }],
       activeTabId: "a",
     });
     viewModel.closeTab(ROOT_PANE_ID, "a");
@@ -295,18 +298,18 @@ describe("IShellViewModel — 탭", () => {
 
 describe("IShellViewModel — closeOtherTabs", () => {
   const threeTabs = () => {
-    const { tabsModel, viewModel } = make();
-    tabsModel.setTree({
+    const { tabLayout, viewModel } = make();
+    tabLayout.setTree({
       kind: "leaf",
       id: ROOT_PANE_ID,
       tabs: [
-        { id: "a", kind: "file", title: "a" },
-        { id: "b", kind: "file", title: "b" },
-        { id: "c", kind: "file", title: "c" },
+        { id: "a", kind: "file", uri: URI.file("a"), title: "a" },
+        { id: "b", kind: "file", uri: URI.file("b"), title: "b" },
+        { id: "c", kind: "file", uri: URI.file("c"), title: "c" },
       ],
       activeTabId: "b",
     });
-    return { tabsModel, viewModel };
+    return { tabLayout, viewModel };
   };
 
   it("넘긴 탭만 남기고 나머지를 닫는다", () => {
@@ -345,18 +348,18 @@ describe("IShellViewModel — closeOtherTabs", () => {
 
 describe("IShellViewModel — closeTabsToRight", () => {
   const threeTabs = () => {
-    const { tabsModel, viewModel } = make();
-    tabsModel.setTree({
+    const { tabLayout, viewModel } = make();
+    tabLayout.setTree({
       kind: "leaf",
       id: ROOT_PANE_ID,
       tabs: [
-        { id: "a", kind: "file", title: "a" },
-        { id: "b", kind: "file", title: "b" },
-        { id: "c", kind: "file", title: "c" },
+        { id: "a", kind: "file", uri: URI.file("a"), title: "a" },
+        { id: "b", kind: "file", uri: URI.file("b"), title: "b" },
+        { id: "c", kind: "file", uri: URI.file("c"), title: "c" },
       ],
       activeTabId: "c",
     });
-    return { tabsModel, viewModel };
+    return { tabLayout, viewModel };
   };
 
   it("기준 탭보다 뒤에 있는 탭을 전부 닫는다", () => {
@@ -439,13 +442,13 @@ describe("IShellViewModel — 미리보기 표시", () => {
 
 describe("IShellViewModel — 분할", () => {
   it("가장자리로 분할하면 새 pane이 생기고 그리로 포커스가 옮겨간다", () => {
-    const { tabsModel, viewModel } = make();
-    tabsModel.setTree({
+    const { tabLayout, viewModel } = make();
+    tabLayout.setTree({
       kind: "leaf",
       id: ROOT_PANE_ID,
       tabs: [
-        { id: "a", kind: "file", title: "a" },
-        { id: "b", kind: "file", title: "b" },
+        { id: "a", kind: "file", uri: URI.file("a"), title: "a" },
+        { id: "b", kind: "file", uri: URI.file("b"), title: "b" },
       ],
       activeTabId: "a",
     });
@@ -464,13 +467,13 @@ describe("IShellViewModel — 분할", () => {
   });
 
   it("왼쪽/위로 분할하면 새 pane이 먼저 그려지는 자리에 온다", () => {
-    const { tabsModel, viewModel } = make();
-    tabsModel.setTree({
+    const { tabLayout, viewModel } = make();
+    tabLayout.setTree({
       kind: "leaf",
       id: ROOT_PANE_ID,
       tabs: [
-        { id: "a", kind: "file", title: "a" },
-        { id: "b", kind: "file", title: "b" },
+        { id: "a", kind: "file", uri: URI.file("a"), title: "a" },
+        { id: "b", kind: "file", uri: URI.file("b"), title: "b" },
       ],
       activeTabId: "a",
     });
@@ -494,13 +497,13 @@ describe("IShellViewModel — 분할", () => {
   });
 
   it("분할된 pane에서 마지막 탭을 닫으면 다시 단일 leaf로 접힌다", () => {
-    const { tabsModel, viewModel } = make();
-    tabsModel.setTree({
+    const { tabLayout, viewModel } = make();
+    tabLayout.setTree({
       kind: "leaf",
       id: ROOT_PANE_ID,
       tabs: [
-        { id: "a", kind: "file", title: "a" },
-        { id: "b", kind: "file", title: "b" },
+        { id: "a", kind: "file", uri: URI.file("a"), title: "a" },
+        { id: "b", kind: "file", uri: URI.file("b"), title: "b" },
       ],
       activeTabId: "a",
     });
@@ -520,13 +523,13 @@ describe("IShellViewModel — 분할", () => {
 
 describe("IShellViewModel — 리사이즈", () => {
   it("분할된 branch 안 자식의 비율을 바꾼다", () => {
-    const { tabsModel, viewModel } = make();
-    tabsModel.setTree({
+    const { tabLayout, viewModel } = make();
+    tabLayout.setTree({
       kind: "leaf",
       id: ROOT_PANE_ID,
       tabs: [
-        { id: "a", kind: "file", title: "a" },
-        { id: "b", kind: "file", title: "b" },
+        { id: "a", kind: "file", uri: URI.file("a"), title: "a" },
+        { id: "b", kind: "file", uri: URI.file("b"), title: "b" },
       ],
       activeTabId: "a",
     });
@@ -543,13 +546,13 @@ describe("IShellViewModel — 리사이즈", () => {
 
 describe("IShellViewModel — 재정렬", () => {
   it("leaf 안에서 탭 순서를 바꾼다", () => {
-    const { tabsModel, viewModel } = make();
-    tabsModel.setTree({
+    const { tabLayout, viewModel } = make();
+    tabLayout.setTree({
       kind: "leaf",
       id: ROOT_PANE_ID,
       tabs: [
-        { id: "a", kind: "file", title: "a" },
-        { id: "b", kind: "file", title: "b" },
+        { id: "a", kind: "file", uri: URI.file("a"), title: "a" },
+        { id: "b", kind: "file", uri: URI.file("b"), title: "b" },
       ],
       activeTabId: "a",
     });
@@ -560,13 +563,13 @@ describe("IShellViewModel — 재정렬", () => {
   });
 
   it("id 개수가 안 맞으면 무시한다 — View 가 들고 있던 탭 집합이 어긋난 것이다", () => {
-    const { tabsModel, viewModel } = make();
-    tabsModel.setTree({
+    const { tabLayout, viewModel } = make();
+    tabLayout.setTree({
       kind: "leaf",
       id: ROOT_PANE_ID,
       tabs: [
-        { id: "a", kind: "file", title: "a" },
-        { id: "b", kind: "file", title: "b" },
+        { id: "a", kind: "file", uri: URI.file("a"), title: "a" },
+        { id: "b", kind: "file", uri: URI.file("b"), title: "b" },
       ],
       activeTabId: "a",
     });
@@ -579,13 +582,13 @@ describe("IShellViewModel — 재정렬", () => {
 
 describe("IShellViewModel — 분할된 상태에서 미리보기", () => {
   it("활성 pane 기준으로 연다 — 다른 pane 의 탭은 건드리지 않는다", () => {
-    const { tabsModel, viewModel } = make();
-    tabsModel.setTree({
+    const { tabLayout, viewModel } = make();
+    tabLayout.setTree({
       kind: "leaf",
       id: ROOT_PANE_ID,
       tabs: [
-        { id: "a", kind: "file", title: "a" },
-        { id: "b", kind: "file", title: "b" },
+        { id: "a", kind: "file", uri: URI.file("a"), title: "a" },
+        { id: "b", kind: "file", uri: URI.file("b"), title: "b" },
       ],
       activeTabId: "a",
     });
@@ -678,14 +681,14 @@ describe("IShellViewModel — retargetTabs", () => {
   });
 
   it("폴더 이동이면 그 아래 전부를 접두어째로 옮긴다", () => {
-    const { tabsModel, viewModel } = make();
-    tabsModel.setTree({
+    const { tabLayout, viewModel } = make();
+    tabLayout.setTree({
       kind: "leaf",
       id: ROOT_PANE_ID,
       tabs: [
-        { id: "old/a.md", kind: "file", title: "a.md" },
-        { id: "old/nested/b.md", kind: "file", title: "b.md" },
-        { id: "unrelated.md", kind: "file", title: "unrelated.md" },
+        { id: "old/a.md", kind: "file", uri: URI.file("old/a.md"), title: "a.md" },
+        { id: "old/nested/b.md", kind: "file", uri: URI.file("old/nested/b.md"), title: "b.md" },
+        { id: "unrelated.md", kind: "file", uri: URI.file("unrelated.md"), title: "unrelated.md" },
       ],
       activeTabId: "old/a.md",
     });
@@ -920,7 +923,7 @@ describe("IShellViewModel — 낡은 클라이언트", () => {
 describe("IShellViewModel — openTab", () => {
   it("파일이 아닌 탭을 고정으로 열고 활성으로 만든다", () => {
     const { viewModel } = make();
-    viewModel.openTab({ id: "chat-1", kind: "chat", title: "대화" });
+    viewModel.openTab({ id: "chat-1", kind: "chat", uri: URI.parse("chat:///1"), title: "대화" });
     const leaf = activeLeafOf(viewModel);
     expect(leaf.tabs).toEqual([{ id: "chat-1", kind: "chat", title: "대화", isPreview: false, isDirty: false }]);
     expect(leaf.activeTabId).toBe("chat-1");
@@ -928,9 +931,9 @@ describe("IShellViewModel — openTab", () => {
 
   it("이미 열려 있으면 그 탭으로 갈 뿐 복제하지 않는다", () => {
     const { viewModel } = make();
-    viewModel.openTab({ id: "chat-1", kind: "chat", title: "대화" });
+    viewModel.openTab({ id: "chat-1", kind: "chat", uri: URI.parse("chat:///1"), title: "대화" });
     viewModel.previewFile("a.md");
-    viewModel.openTab({ id: "chat-1", kind: "chat", title: "대화" });
+    viewModel.openTab({ id: "chat-1", kind: "chat", uri: URI.parse("chat:///1"), title: "대화" });
     expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(["chat-1", "a.md"]);
     expect(activeLeafOf(viewModel).activeTabId).toBe("chat-1");
   });
@@ -938,8 +941,8 @@ describe("IShellViewModel — openTab", () => {
 
 describe("IShellViewModel — 알림", () => {
   it("알림 서비스의 것을 그대로 내고, 닫으면 사라진다", () => {
-    const { viewModel, notificationService } = make();
-    notificationService.notify("error", "실패");
+    const { viewModel, notifications } = make();
+    notifications.notify("error", "실패");
     expect(viewModel.notifications).toEqual([{ id: "n", severity: "error", message: "실패" }]);
     viewModel.dismissNotification("n");
     expect(viewModel.notifications).toEqual([]);

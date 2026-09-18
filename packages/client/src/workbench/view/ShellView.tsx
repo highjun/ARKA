@@ -13,6 +13,7 @@ import type { IconId } from "#component/Icon";
 import type { TabItem, TabTreeNode } from "../component/Tab";
 import type { ComponentType, ReactNode } from "react";
 import type { ICommandService } from "#core/commands";
+import type { OpenTab } from "../model/ITabLayout";
 import type { ITabContentRegistry } from "../model/ITabContentRegistry";
 import type { ShellTabPaneNode, ShellTabRow, TabContextTarget } from "../viewmodel/IShellViewModel";
 import styles from "./ShellView.module.css";
@@ -155,8 +156,7 @@ export const ShellView = () => {
   const onFilePin = (path: string) => viewModel.pinTab(path);
   /** 탭이 가리키는 경로만 옮긴다 — 편집 버퍼는 그것을 소유한 쪽이 스스로 옮긴다. */
   const onFileMove = (oldPath: string, newPath: string) => viewModel.retargetTabs(oldPath, newPath);
-  const onOpenTab = (tab: { readonly id: string; readonly kind: string; readonly title: string }) =>
-    viewModel.openTab(tab);
+  const onOpenTab = (tab: OpenTab) => viewModel.openTab(tab);
 
   /** 저장 안 된 탭을 닫으려 하면 확인을 구한다 — dirty 여부는 ViewModel이 `ITabDirtyState`에 묻는다. */
   const onTabClose = (leafId: string, tabId: string) => {

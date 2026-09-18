@@ -1,4 +1,4 @@
-import type { PaneId } from "../model/ITabsModel";
+import type { OpenTab, PaneId } from "../model/ITabLayout";
 
 /**
  * `Tab`의 `TabSplitOrientation`·`SplitEdgeDropPosition`과 값이 같다 — ViewModel도 Model과
@@ -165,7 +165,7 @@ export interface IShellViewModel {
    * 파일이 아닌 탭을 **고정으로** 연다 — 대화, 설정 같은 것. 이미 열려 있으면 그 탭으로 간다.
    * `kind`는 `ITabContentRegistry`가 아는 것이어야 화면에 내용이 생긴다. 지금 포커스된 leaf 기준이다.
    */
-  openTab(tab: { readonly id: string; readonly kind: string; readonly title: string }): void;
+  openTab(tab: OpenTab): void;
 
   /**
    * 미리보기 탭(`isPreview`)을 고정한다 — 이미 고정돼 있으면(또는 다른 탭이 미리보기 자리에
