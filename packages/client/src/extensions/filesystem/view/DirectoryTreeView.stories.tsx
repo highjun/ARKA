@@ -51,7 +51,7 @@ const fileContentViewModel: IFileContentViewModel = {
   dispose: () => undefined,
   rows: {},
   onDidChange: () => ({ dispose: () => undefined }),
-  openFile: () => undefined,
+  openFile: () => Promise.resolve(true),
   editFile: () => undefined,
   saveFile: () => undefined,
   retargetOpenFile: () => undefined,

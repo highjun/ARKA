@@ -18,6 +18,17 @@ type StoredNode =
     };
 
 /**
+ * 옛 저장본의 `kind`는 화면 종류의 이름이었다. 지금은 provider의 id다 — 이름이 바뀐 것을 옮긴다.
+ * 모르는 것은 그대로 둔다 — provider가 없으면 복원이 그 탭을 뺀다.
+ */
+const KIND_OF_LEGACY: Readonly<Record<string, string>> = {
+  file: "arka.filesystem.text",
+  settings: "arka.workbench.settings",
+  keybindings: "arka.workbench.keybindings",
+  markdownPreview: "arka.markdown.preview",
+};
+
+/**
  * 트리 도입 전·`uri` 도입 전 탭을 지금 모양으로 옮긴다. 옛 탭은 `kind`와 `id`로 무엇이었는지 안다.
  * 모르는 것은 버린다 — 열 수 없는 탭을 복원해 봐야 빈 칸이다.
  */
@@ -42,7 +53,7 @@ const restoreTab = (value: unknown): OpenTab | null => {
   if (typeof id !== "string" || typeof kind !== "string" || typeof title !== "string") return null;
   try {
     const parsed = typeof uri === "string" ? URI.parse(uri) : legacyUriOf(kind, id);
-    return parsed === null ? null : { id, kind, uri: parsed, title };
+    return parsed === null ? null : { id, kind: KIND_OF_LEGACY[kind] ?? kind, uri: parsed, title };
   } catch {
     return null;
   }

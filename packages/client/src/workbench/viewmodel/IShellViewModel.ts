@@ -1,5 +1,7 @@
-import type { Disposable } from "#core/di";
-import type { OpenTab, PaneId } from "../model/ITabLayout";
+import type { URI } from "#contracts";
+import type { Container, Disposable } from "#core/di";
+import type { PaneId } from "../model/ITabLayout";
+import type { OpenOptions, TabDescriptor } from "../model/ITabProviderDescriptor";
 
 /**
  * `Tab`의 `TabSplitOrientation`·`SplitEdgeDropPosition`과 값이 같다 — ViewModel도 Model과
@@ -18,18 +20,17 @@ export type TabContextTarget = { readonly leafId: PaneId; readonly tabId: string
 /**
  * 화면이 그릴 탭 한 줄.
  *
- * Model 의 `OpenTab` 과 거의 같지만 **내용(`ReactNode`)은 없다** — `ITabContentRegistry`가
- * `kind`로 찾아 그린다(View가 안다, ViewModel은 모른다). 아이콘은 탭마다 registry 조회가
- * 필요해 View에서 병합한다.
+ * Model 의 `OpenTab` 과 거의 같지만 **내용(`ReactNode`)은 없다** — View가 `descriptorOf`로 그 탭의
+ * `TabDescriptor`를 꺼내 아이콘과 본문을 그린다. 제목·더티는 descriptor를 따라 여기서 파생된다.
  */
 export type ShellTabRow = {
-  /** 워크스페이스 루트 기준 경로다. */
+  /** 탭 id — 연 uri의 문자열이다. */
   readonly id: string;
   readonly kind: string;
   readonly title: string;
   /** 미리보기 자리에 있다 — 다음 파일을 열면 이 탭이 갈린다. 화면은 기울임으로 알린다. */
   readonly isPreview: boolean;
-  /** 저장 안 된 변경이 있다. 답은 `ITabDirtyState`가 주고, 셸은 무엇이 더러운지 모른다. */
+  /** 저장 안 된 변경이 있다. 답은 그 탭의 `TabDescriptor`가 주고, 셸은 무엇이 더러운지 모른다. */
   readonly isDirty: boolean;
 };
 
@@ -98,14 +99,14 @@ export interface IShellViewModel extends Disposable {
   /** 지금 포커스된 pane(leaf). Split이 여러 개여도 "지금 조작 대상"은 하나뿐이다. */
   readonly activeLeafId: PaneId;
   /** 활성 leaf의 활성 탭. 없으면 `null`. 익스텐션 커맨드("지금 파일의 미리보기")가 조립부를 통해 읽는다. */
-  readonly activeTab: { readonly id: string; readonly kind: string } | null;
+  readonly activeTab: { readonly id: string; readonly kind: string; readonly uri: URI } | null;
 
   selectActivity(id: string): void;
   selectTab(leafId: PaneId, tabId: string): void;
   closeTab(leafId: PaneId, tabId: string): void;
 
   /**
-   * 저장 안 된 탭을 닫을 때 확인을 구하는 흐름 — `ITabDirtyState`에 물어 거짓이면 바로
+   * 저장 안 된 탭을 닫을 때 확인을 구하는 흐름 — 그 탭의 `TabDescriptor.isDirty`가 거짓이면 바로
    * `closeTab`과 같다. 참이면
    * `pendingTabClose`를 채워 View의 `Dialog`가 뜨게 하고, `confirmCloseTab`/`cancelCloseTab`이
    * 이어받는다. 네이티브 `window.confirm` 대신이다(2026-09-04 — UI 일관성).
@@ -118,7 +119,7 @@ export interface IShellViewModel extends Disposable {
   /**
    * `leafId` 안에서 `tabId`만 남기고 나머지를 닫는다. `protectedTabIds`에 있는 탭은 저장 안 된
    * 변경을 잃지 않도록 건너뛰고 남긴다 — 확인창을 여러 개 띄우는 대신 조용히 보존하는 쪽을
-   * 기본값으로 택했다. 인자를 생략하면 `ITabDirtyState`에 물어 스스로 채운다.
+   * 기본값으로 택했다. 인자를 생략하면 descriptor에 물어 스스로 채운다.
    */
   closeOtherTabs(leafId: PaneId, tabId: string, protectedTabIds?: readonly string[]): void;
   /** `leafId` 안에서 `tabId`보다 뒤에 있는 탭을 전부 닫는다. `protectedTabIds`는 `closeOtherTabs`와 같다. */
@@ -130,16 +131,17 @@ export interface IShellViewModel extends Disposable {
   splitTab(sourceLeafId: PaneId, tabId: string, position: SplitEdgeDropPosition): void;
   /** `branchId` split 노드 안 `childId` 자식의 비율을 바꾼다. */
   resizeNode(branchId: PaneId, childId: PaneId, nextSize: number): void;
-  /** 파일 탭의 경로가 바뀌었다 — `oldPrefix` 로 시작하는 탭을 전부 `newPrefix` 로 옮긴다. */
+  /**
+   * 파일 탭의 경로가 바뀌었다 — `oldPrefix` 로 시작하는 `file:` 탭을 전부 `newPrefix` 로 옮긴다.
+   * 탭 id가 uri라 id도 바뀐다 — 옮긴 탭은 provider에게 다시 물어 그릴 것을 새로 받는다.
+   */
   retargetTabs(oldPrefix: string, newPrefix: string): void;
 
   /**
-   * 파일을 **미리보기로** 연다. 한 번 더 열면 고정된다. **지금 포커스된 leaf 기준**이다 —
-   * 사이드바에서 고른 파일이 지금 보고 있는 pane 에 뜨는 게 자연스럽다.
-   *
-   * 탭 제목은 경로가 아니라 파일 이름이다 — 폰의 좁은 스트립에 경로 전체가 들어가지 않는다.
+   * 파일을 **미리보기로** 연다(`open`의 `preview: true`). 한 번 더 열면 고정된다. 열리면 모바일 드로어를 닫는다.
+   * `arka.workbench.open` 명령이 생기면(R12) 사이드바가 그것을 직접 부르고 이 메서드는 빠진다.
    */
-  previewFile(path: string, position?: { readonly line: number; readonly column: number }): void;
+  previewFile(path: string, position?: { readonly line: number; readonly column: number }): Promise<void>;
 
   /**
    * 마지막 위치 요청 — 어느 탭의 몇 줄·몇 열. View가 그 탭의 내용에 넘긴다. `seq`는 요청마다 오른다.
@@ -152,11 +154,16 @@ export interface IShellViewModel extends Disposable {
     readonly seq: number;
   } | null;
 
+  /** 무엇이든 탭으로 연다 — `ITabSystem.open`에 위임한다. 지금 포커스된 leaf 기준이다. */
+  open(uri: URI, options?: OpenOptions): Promise<void>;
+
+  /** 그 탭이 그릴 것 — View가 아이콘과 본문을 여기서 꺼낸다. 아직 없으면(복원 중) `undefined`. */
+  descriptorOf(tabId: string): TabDescriptor | undefined;
   /**
-   * 파일이 아닌 탭을 **고정으로** 연다 — 대화, 설정 같은 것. 이미 열려 있으면 그 탭으로 간다.
-   * `kind`는 `ITabContentRegistry`가 아는 것이어야 화면에 내용이 생긴다. 지금 포커스된 leaf 기준이다.
+   * 그 탭의 자식 컨테이너 — View가 탭 본문을 `ContainerProvider`로 감쌀 때 쓴다.
+   * @throws DescriptorNotFoundError 그 id의 탭이 없다.
    */
-  openTab(tab: OpenTab): void;
+  containerOf(tabId: string): Container;
 
   /**
    * 미리보기 탭(`isPreview`)을 고정한다 — 이미 고정돼 있으면(또는 다른 탭이 미리보기 자리에

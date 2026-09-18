@@ -1,20 +1,17 @@
 import type { Disposable } from "#core/di";
 import { makeAutoObservable, observableRef, reaction } from "mobx";
 import type { IFileContentModel, OpenFile } from "../model/IFileContentModel";
-import type { IPinTab } from "../model/IPinTab";
 import type { IFileContentViewModel, FileRow, FileRowMap } from "./IFileContentViewModel";
 
 /** `IFileContentViewModel`을 구현한다 — Model의 `OpenFile`을 화면용 `FileRow`로 변환한다. */
 export class FileContentViewModel implements IFileContentViewModel {
   readonly #model: IFileContentModel;
-  readonly #pinTab: IPinTab;
   private rowsState: FileRowMap;
   readonly #subscription: Disposable;
 
-  /** `pinTab`을 받는 이유는 편집이 시작되면 미리보기 탭을 고정해야 해서다. */
-  constructor({ fileContentModel, pinTab }: { fileContentModel: IFileContentModel; pinTab: IPinTab }) {
+  /** Model을 구독해 화면용 행으로 편다. */
+  constructor({ fileContentModel }: { fileContentModel: IFileContentModel }) {
     this.#model = fileContentModel;
-    this.#pinTab = pinTab;
     // Model은 값과 이벤트만 준다 — 화면 상태는 여기서 소유한다.
     this.rowsState = this.#computeRows();
     this.#subscription = fileContentModel.onDidChange(() => this.syncRows());
@@ -54,19 +51,18 @@ export class FileContentViewModel implements IFileContentViewModel {
     this.rowsState = this.#computeRows();
   }
 
-  /** `#model.open`에 위임한다. 렌더 중에 부르면 안 된다 — 상태가 그리는 중에 바뀐다. 조립부가 효과에서 부른다. */
-  openFile(path: string): void {
-    void this.#model.open(path);
+  /** `#model.open`으로 읽은 뒤 판정한다. 읽기 실패·바이너리는 텍스트 탭이 열 수 없는 것이라 닫고 `false`다. */
+  async openFile(path: string): Promise<boolean> {
+    await this.#model.open(path);
+    const file = this.#model.files[path];
+    if (file !== undefined && file.status !== "error" && !file.binary) return true;
+    this.#model.close(path);
+    return false;
   }
 
-  /**
-   * `#model.edit`에 위임한다. 편집이 이 파일을 처음 dirty로 만드는 순간 탭을 고정한다 —
-   * 미리보기(italic) 상태로 남아 있으면 "아직 안 읽어본 파일"이라는 원래 뜻과 어긋난다.
-   */
+  /** `#model.edit`에 위임한다. 미리보기 탭 고정은 셸이 `isDirty`가 켜지는 순간을 보고 한다. */
   editFile(path: string, content: string): void {
-    const wasDirty = this.rowsState[path]?.isDirty ?? false;
     this.#model.edit(path, content);
-    if (!wasDirty && this.rowsState[path]?.isDirty) this.#pinTab.pin(path);
   }
 
   /** `#model.save`에 위임한다. */

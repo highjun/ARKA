@@ -1,17 +1,19 @@
+import { URI } from "#contracts";
 import { CommandService } from "#core/commands";
 import { Container } from "#core/di";
 import { ContainerProvider } from "#core/viewmodel";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Icon } from "#component/Icon";
 import { Text } from "#component/Text";
 import { SidebarContentRegistry } from "../model/SidebarContentRegistry";
-import { TabContentRegistry } from "../model/TabContentRegistry";
+import type { TabDescriptor } from "../model/ITabProviderDescriptor";
 import type { IShellViewModel, ShellTabPaneNode } from "../viewmodel/IShellViewModel";
 import { ShellView } from "./ShellView";
 
 /**
- * 셸은 "무엇이 꽂혔는지"를 두 레지스트리로만 안다. 그래서 스토리도 **진짜 레지스트리**에 자리
- * 표시 컴포넌트를 등록한다 — 여기서 볼 것은 사이드바·탭·분할이 실제로 맞물리는 모양이고, 그
- * 조회 경로를 흉내로 바꾸면 정작 보려던 것이 사라진다. 반대로 ViewModel은 고정된 값을 준다.
+ * 셸은 사이드바를 레지스트리로, 탭을 `TabDescriptor`로 안다. 그래서 스토리도 **진짜 레지스트리**와 진짜
+ * 모양의 descriptor에 자리 표시 컴포넌트를 둔다 — 여기서 볼 것은 사이드바·탭·분할이 실제로 맞물리는
+ * 모양이고, 그 조회 경로를 흉내로 바꾸면 정작 보려던 것이 사라진다. 반대로 ViewModel은 고정된 값을 준다.
  */
 const panel = (label: string) => () => <Text>{label} 패널</Text>;
 const tab = (label: string) => () => <Text>{label} 탭의 내용</Text>;
@@ -20,20 +22,39 @@ const registries = () => {
   const sidebar = new SidebarContentRegistry();
   sidebar.add({ id: "explorer", ContentComponent: panel("탐색기") });
   sidebar.add({ id: "search", ContentComponent: panel("검색") });
-  const tabs = new TabContentRegistry();
-  tabs.add({ id: "file", iconId: "file", TabComponent: tab("파일") });
-  tabs.add({ id: "chat", iconId: "brain", TabComponent: tab("대화") });
-  return { sidebar, tabs };
+  return { sidebar };
+};
+
+/** 탭 id → 그릴 것. 트리에 있는 탭마다 하나씩이다. */
+const DESCRIPTORS: Readonly<Record<string, TabDescriptor>> = {
+  "file:///src/main.tsx": {
+    icon: <Icon iconId="file" size="sm" />,
+    title: "main.tsx",
+    isDirty: false,
+    Content: tab("파일"),
+  },
+  "file:///CONVENTIONS.md": {
+    icon: <Icon iconId="file" size="sm" />,
+    title: "CONVENTIONS.md",
+    isDirty: true,
+    Content: tab("파일"),
+  },
+  "chat:///1": {
+    icon: <Icon iconId="brain" size="sm" />,
+    title: "빌드 실패 분석",
+    isDirty: false,
+    Content: tab("대화"),
+  },
 };
 
 const ONE_PANE: ShellTabPaneNode = {
   kind: "leaf",
   id: "leaf-1",
-  activeTabId: "src/main.tsx",
+  activeTabId: "file:///src/main.tsx",
   tabs: [
-    { id: "src/main.tsx", kind: "file", title: "main.tsx", isPreview: false, isDirty: false },
-    { id: "CONVENTIONS.md", kind: "file", title: "CONVENTIONS.md", isPreview: false, isDirty: true },
-    { id: "chat:1", kind: "chat", title: "빌드 실패 분석", isPreview: true, isDirty: false },
+    { id: "file:///src/main.tsx", kind: "file", title: "main.tsx", isPreview: false, isDirty: false },
+    { id: "file:///CONVENTIONS.md", kind: "file", title: "CONVENTIONS.md", isPreview: false, isDirty: true },
+    { id: "chat:///1", kind: "chat", title: "빌드 실패 분석", isPreview: true, isDirty: false },
   ],
 };
 
@@ -46,13 +67,13 @@ const SPLIT: ShellTabPaneNode = {
     {
       kind: "leaf",
       id: "leaf-2",
-      activeTabId: "chat:1",
-      tabs: [{ id: "chat:1", kind: "chat", title: "빌드 실패 분석", isPreview: false, isDirty: false }],
+      activeTabId: "chat:///1",
+      tabs: [{ id: "chat:///1", kind: "chat", title: "빌드 실패 분석", isPreview: false, isDirty: false }],
     },
   ],
 };
 
-const viewModel = (state: Partial<IShellViewModel>): IShellViewModel => ({
+const viewModel = (state: Partial<IShellViewModel>, container: Container): IShellViewModel => ({
   dispose: () => undefined,
   activities: [
     { id: "explorer", title: "탐색기", iconId: "files", isActive: true },
@@ -60,7 +81,7 @@ const viewModel = (state: Partial<IShellViewModel>): IShellViewModel => ({
   ],
   tree: ONE_PANE,
   activeLeafId: "leaf-1",
-  activeTab: { id: "src/main.tsx", kind: "file" },
+  activeTab: { id: "file:///src/main.tsx", kind: "file", uri: URI.file("src/main.tsx") },
   selectActivity: () => undefined,
   selectTab: () => undefined,
   closeTab: () => undefined,
@@ -74,9 +95,11 @@ const viewModel = (state: Partial<IShellViewModel>): IShellViewModel => ({
   splitTab: () => undefined,
   resizeNode: () => undefined,
   retargetTabs: () => undefined,
-  previewFile: () => undefined,
+  previewFile: () => Promise.resolve(),
   reveal: null,
-  openTab: () => undefined,
+  open: () => Promise.resolve(),
+  descriptorOf: (tabId) => DESCRIPTORS[tabId],
+  containerOf: () => container,
   pinTab: () => undefined,
   buildId: "ab90700",
   workspaceName: "ARKASHIC",
@@ -105,11 +128,10 @@ type Story = StoryObj<typeof meta>;
 const story = (state: Partial<IShellViewModel>): Story => ({
   decorators: [
     (Story) => {
-      const { sidebar, tabs } = registries();
+      const { sidebar } = registries();
       const container = new Container("story");
-      container.register("arka.workbench.shellViewModel", "singleton", () => viewModel(state));
+      container.register("arka.workbench.shellViewModel", "singleton", () => viewModel(state, container));
       container.register("arka.workbench.sidebarContentRegistry", "singleton", () => sidebar);
-      container.register("arka.workbench.tabContentRegistry", "singleton", () => tabs);
       container.register(
         "arka.commands",
         "singleton",
@@ -153,7 +175,7 @@ export const Notifications: Story = story({
 export const Outdated: Story = story({ isClientOutdated: true });
 
 /** 저장 안 된 탭을 닫으려 할 때의 확인. */
-export const ConfirmClose: Story = story({ pendingTabClose: { leafId: "leaf-1", tabId: "CONVENTIONS.md" } });
+export const ConfirmClose: Story = story({ pendingTabClose: { leafId: "leaf-1", tabId: "file:///CONVENTIONS.md" } });
 
 /** 커맨드 팔레트가 열린 상태. */
 export const PaletteOpen: Story = story({ isPaletteOpen: true });

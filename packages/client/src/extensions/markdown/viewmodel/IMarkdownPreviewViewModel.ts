@@ -6,14 +6,6 @@ export type PreviewState = {
   readonly failure: string | null;
 };
 
-/** 미리보기 탭의 kind와 id 규약. 조립부의 `TabContentRegistry` 등록과 같아야 한다. */
-export const PREVIEW_TAB_KIND = "markdownPreview";
-/** 경로에서 탭 id를 만든다 — 같은 파일은 언제나 같은 탭이 된다. */
-export const previewTabIdOf = (path: string): string => `preview:${path}`;
-/** 미리보기 탭이 아니면 `null` — 셸이 넘긴 아무 탭 id나 넣어도 된다. */
-export const pathOfPreviewTab = (tabId: string): string | null =>
-  tabId.startsWith("preview:") ? tabId.slice("preview:".length) : null;
-
 declare module "#core/di" {
   /** `IMarkdownPreviewViewModel`를 컨테이너에서 꺼내는 자리. */
   interface InstanceMap {
@@ -22,12 +14,14 @@ declare module "#core/di" {
 }
 /**
  * 미리보기 탭의 화면 상태. "마크다운 미리보기 열기" 커맨드(Ctrl+Shift+V)도 여기서 등록한다 — 지금 보고
- * 있는 파일이 무엇인지와 탭을 여는 방법은 조립부가 함수로 넣어 준다(익스텐션은 셸을 모른다).
+ * 있는 파일이 무엇인지와 uri를 여는 방법은 조립부가 함수로 넣어 준다(익스텐션은 셸을 모른다).
+ *
+ * 경로로 말한다 — 탭 id가 아니다. 미리보기 탭 provider가 `markdown-preview:///<path>`에서 경로를 꺼내 준다.
  */
 export interface IMarkdownPreviewViewModel {
-  /** 탭이 렌더마다 부른다 — 멱등. */
-  openPreview(tabId: string): void;
-  previewOf(tabId: string): PreviewState;
+  /** 원문을 읽고 감시하기 시작한다 — 멱등. 탭 provider가 탭을 열 때 부른다. */
+  openPreview(path: string): void;
+  previewOf(path: string): PreviewState;
   /** 지금 활성 파일의 미리보기를 연다. 활성 파일이 `.md`가 아니면 아무 일도 없다. */
   openActivePreview(): void;
 }

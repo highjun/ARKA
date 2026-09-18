@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { URI } from "#contracts";
 import type { OpenTab, PaneNode, PaneSplit } from "./ITabLayout";
-import { collectTabs, findLeaf, firstLeafId, neighbourOf, pruneTree, replaceLeaf } from "./paneTree";
+import {
+  collectTabs,
+  findLeaf,
+  firstLeafId,
+  leafOfTab,
+  neighbourOf,
+  pruneTree,
+  replaceLeaf,
+  withoutTabs,
+} from "./paneTree";
 
 const tab = (id: string): OpenTab => ({ id, kind: "file", uri: URI.file(id), title: id });
 const leaf = (id: string, ...tabs: OpenTab[]): PaneNode => ({
@@ -64,5 +73,31 @@ describe("paneTree", () => {
     expect(neighbourOf(tabs, 1)).toBe("c");
     expect(neighbourOf(tabs, 2)).toBe("c");
     expect(neighbourOf([], 0)).toBeNull();
+  });
+
+  it("leafOfTab은 그 탭을 담은 잎이다 — 없으면 null", () => {
+    const tree = split("s", leaf("a", tab("1")), leaf("b", tab("2"), tab("3")));
+
+    expect(leafOfTab(tree, "3")?.id).toBe("b");
+    expect(leafOfTab(tree, "zzz")).toBeNull();
+  });
+
+  it("withoutTabs는 어느 잎에서든 그 탭을 빼고, 활성 탭이 빠지면 이웃으로 옮긴다", () => {
+    const tree = split("s", leaf("a", tab("1"), tab("2"), tab("3")), leaf("b", tab("4")));
+
+    const next = withoutTabs(tree, new Set(["1", "4"]));
+
+    expect(findLeaf(next, "a")).toEqual({ kind: "leaf", id: "a", tabs: [tab("2"), tab("3")], activeTabId: "2" });
+    // 빈 잎은 남는다 — 걷어내는 것은 pruneTree의 몫이다.
+    expect(findLeaf(next, "b")).toEqual({ kind: "leaf", id: "b", tabs: [], activeTabId: null });
+  });
+
+  it("withoutTabs는 뺄 것이 없는 잎의 참조를 유지한다", () => {
+    const a = leaf("a", tab("1"));
+    const tree = split("s", a, leaf("b", tab("2")));
+
+    const next = withoutTabs(tree, new Set(["2"]));
+
+    expect(next.kind === "split" && next.children[0]).toBe(a);
   });
 });

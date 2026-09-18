@@ -5,7 +5,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { IWorkspaceFiles } from "../extensions/filesystem";
 import { MockWorkspaceFiles } from "../extensions/filesystem/model/MockWorkspaceFiles";
 import { MockSearchService } from "../extensions/search/model/MockSearchService";
-import { TabContentRegistry } from "./model/TabContentRegistry";
 import { RootView } from "./view/RootView";
 import { createApplication } from "./registerServices";
 
@@ -24,6 +23,9 @@ import { createApplication } from "./registerServices";
  * `createApplication()`이 실제 저장소(→ `localStorage`)를 쓴다 — 매 테스트가 새 컨테이너를
  * 만들어도 jsdom의 `localStorage`는 파일 전체가 공유한다. 안 지우면 앞 테스트가 연 탭이
  * 다음 테스트에서 부팅 시 복원돼 같은 텍스트가 사이드바와 탭 양쪽에 뜬다.
+ *
+ * 대역은 **루트에 다시 물린다** — 전부 singleton이라 자식에 물리면 탭 컨테이너(루트의 자식)가 못 본다.
+ * `createApplication()`은 돌아오기 전에 아무것도 만들지 않으므로(빈 저장소면 복원할 탭도 없다) 늦지 않다.
  */
 
 describe("registerServices", () => {
@@ -41,8 +43,7 @@ describe("registerServices", () => {
   });
 
   const mountWith = (workspaceFiles: IWorkspaceFiles) => {
-    const container = track(createApplication().createChild("test"));
-    // 자식 스코프에 다시 등록해 그 스코프 안에서만 부모를 가린다.
+    const container = track(createApplication());
     container.register("arka.filesystem.workspaceFiles", "singleton", () => workspaceFiles);
     container.register("arka.search.service", "singleton", () => new MockSearchService({ "a.md": "원본" }));
     render(
@@ -70,9 +71,9 @@ describe("registerServices", () => {
   });
 
   /**
-   * **저장 안 된 변경이 Shell까지 실제로 닿는지**를 본다 — `ShellView`가 `fileContentViewModel`을
-   * `FileContentView`와 같은 컨테이너에서 꺼내는지가 이 배선의 전부다. 하나라도 다른 컨테이너를
-   * 가리키면 dirty가 조용히 `false`로 굳는다.
+   * **저장 안 된 변경이 Shell까지 실제로 닿는지**를 본다 — 텍스트 탭 provider가 돌려준 descriptor의 `isDirty`가
+   * 탭 컨테이너 안의 `FileContentView`가 편집하는 것과 같은 `fileContentViewModel`을 읽는지가 이 배선의 전부다.
+   * 하나라도 다른 인스턴스를 가리키면 dirty가 조용히 `false`로 굳는다.
    *
    * `editFile`을 직접 부르는 것은 CodeMirror 타이핑을 jsdom이 흉내내지 못해서다.
    */
@@ -149,19 +150,21 @@ describe("registerServices", () => {
     it("탭이 렌더 중 던지면 CrashScreen이 뜨고 IErrorLog에 남는다", async () => {
       // React가 잡힌 오류를 console.error로도 내보낸다 — 테스트 출력이 그걸로 덮이지 않게 막는다.
       const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
-      const container = track(createApplication().createChild("test"));
+      const container = track(createApplication());
       container.register("arka.filesystem.workspaceFiles", "singleton", () => new MockWorkspaceFiles({ "a.md": "" }));
-      // 파일 탭을 그리는 컴포넌트를 터지는 것으로 바꾼다 — 자식 스코프에 다시 등록해 부모를 가린다.
-      container.register("arka.workbench.tabContentRegistry", "singleton", () => {
-        const registry = new TabContentRegistry();
-        registry.add({
-          id: "file",
-          iconId: "file",
-          TabComponent: () => {
-            throw new Error("탭이 터졌다");
-          },
-        });
-        return registry;
+      // 무엇이든 먼저 받아 터지는 본문을 돌려주는 provider를 얹는다 — 텍스트 provider보다 먼저 묻는다.
+      container.resolve("arka.workbench.tabSystem").add({
+        id: "test.crashing",
+        priority: 1000,
+        openTab: () =>
+          Promise.resolve({
+            icon: null,
+            title: "터지는 탭",
+            isDirty: false,
+            Content: () => {
+              throw new Error("탭이 터졌다");
+            },
+          }),
       });
       render(
         <ContainerProvider container={container}>

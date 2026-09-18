@@ -20,7 +20,7 @@ const make = (storage: IStorage = fakeStorage()): ITabLayout => new TabLayout({ 
 const tabsOf = (node: PaneNode): readonly OpenTab[] => (node.kind === "leaf" ? node.tabs : []);
 const activeOf = (node: PaneNode): string | null => (node.kind === "leaf" ? node.activeTabId : null);
 
-const tab = (id: string): OpenTab => ({ id, kind: "file", uri: URI.file(id), title: id });
+const tab = (id: string): OpenTab => ({ id, kind: "arka.filesystem.text", uri: URI.file(id), title: id });
 const rootLeaf = (tabs: readonly OpenTab[], activeTabId: string | null = null): PaneNode => ({
   kind: "leaf",
   id: ROOT_PANE_ID,
@@ -65,7 +65,7 @@ describe("ITabLayout — 지속", () => {
     expect(JSON.parse(storage.get("workbench.tabTree") ?? "")).toEqual({
       kind: "leaf",
       id: ROOT_PANE_ID,
-      tabs: [{ id: "docs/a.md", kind: "file", uri: "file:///docs/a.md", title: "docs/a.md" }],
+      tabs: [{ id: "docs/a.md", kind: "arka.filesystem.text", uri: "file:///docs/a.md", title: "docs/a.md" }],
       activeTabId: "docs/a.md",
     });
   });
@@ -98,7 +98,7 @@ describe("ITabLayout — 지속", () => {
 });
 
 describe("ITabLayout — 옛 스키마 이식", () => {
-  it("uri가 없는 file 탭은 경로로 uri를 만든다", () => {
+  it("uri가 없는 file 탭은 경로로 uri를 만들고, kind는 텍스트 provider의 id가 된다", () => {
     const storage = fakeStorage({
       "workbench.tabTree": JSON.stringify(rootLeaf([{ id: "a", kind: "file", title: "a" } as OpenTab], "a")),
     });
@@ -122,6 +122,7 @@ describe("ITabLayout — 옛 스키마 이식", () => {
 
     const tree = make(storage).tree;
     expect(tabsOf(tree).map((t) => t.uri.toString())).toEqual(["arka:///settings", "markdown-preview:///docs/a.md"]);
+    expect(tabsOf(tree).map((t) => t.kind)).toEqual(["arka.workbench.settings", "arka.markdown.preview"]);
     expect(activeOf(tree)).toBe("settings");
   });
 

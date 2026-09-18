@@ -33,6 +33,32 @@ export const firstLeafId = (node: PaneNode): PaneId => {
   return first === undefined ? ROOT_PANE_ID : firstLeafId(first);
 };
 
+/** `tabId`를 담고 있는 잎. 없으면 `null`. */
+export const leafOfTab = (node: PaneNode, tabId: string): PaneLeaf | null => {
+  if (node.kind === "leaf") return node.tabs.some((tab) => tab.id === tabId) ? node : null;
+  for (const child of node.children) {
+    const found = leafOfTab(child, tabId);
+    if (found !== null) return found;
+  }
+  return null;
+};
+
+/**
+ * `ids`의 탭을 어느 잎에서든 뺀 새 트리. 활성 탭이 빠지면 `neighbourOf`로 옮긴다.
+ * 빈 잎은 남긴다 — 걷어내는 것은 `pruneTree`의 몫이다.
+ */
+export const withoutTabs = (node: PaneNode, ids: ReadonlySet<string>): PaneNode => {
+  if (node.kind === "split") return { ...node, children: node.children.map((child) => withoutTabs(child, ids)) };
+  const index = node.tabs.findIndex((tab) => tab.id === node.activeTabId);
+  const tabs = node.tabs.filter((tab) => !ids.has(tab.id));
+  if (tabs.length === node.tabs.length) return node;
+  const activeTabId =
+    node.activeTabId !== null && ids.has(node.activeTabId)
+      ? neighbourOf(tabs, Math.min(index, tabs.length))
+      : node.activeTabId;
+  return { ...node, tabs, activeTabId };
+};
+
 /** 트리의 탭 전부, 그리는 순서로. */
 export const collectTabs = (node: PaneNode): readonly OpenTab[] =>
   node.kind === "leaf" ? node.tabs : node.children.flatMap(collectTabs);

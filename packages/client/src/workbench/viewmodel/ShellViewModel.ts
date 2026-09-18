@@ -1,6 +1,7 @@
-import type { Disposable } from "#core/di";
-import { makeAutoObservable, observable, observableRef } from "mobx";
-import type { ITabDirtyState } from "../model/ITabDirtyState";
+import type { Container, Disposable } from "#core/di";
+import { makeAutoObservable, observable, observableRef, reaction } from "mobx";
+import type { ITabSystem } from "../model/ITabSystem";
+import type { OpenOptions, TabDescriptor } from "../model/ITabProviderDescriptor";
 import type { IWorkbenchStartup } from "../model/IWorkbenchStartup";
 import { URI } from "#contracts";
 import type { INotifications } from "../model/INotifications";
@@ -11,7 +12,7 @@ import type { IActivityModel } from "../model/IActivityModel";
 import type { ICommandService } from "#core/commands";
 import { ROOT_PANE_ID } from "../model/tabsShare";
 import type { ITabLayout, OpenTab, PaneId, PaneLeaf, PaneNode, SplitOrientation } from "../model/ITabLayout";
-import { findLeaf, firstLeafId, neighbourOf, pruneTree, replaceLeaf } from "../model/paneTree";
+import { collectTabs, findLeaf, firstLeafId, neighbourOf, pruneTree, replaceLeaf } from "../model/paneTree";
 import type { IColorMode, Mode } from "../model/IColorMode";
 import type {
   ShellActivityRow,
@@ -30,7 +31,7 @@ export class ShellViewModel implements IShellViewModel {
 
   readonly #activityModel: IActivityModel;
   readonly #tabLayout: ITabLayout;
-  readonly #subscriptions: readonly Disposable[];
+  readonly #subscriptions: Disposable[];
   readonly #colorMode: IColorMode;
   readonly #activityBar: IActivityBarRegistry;
   /**
@@ -41,7 +42,7 @@ export class ShellViewModel implements IShellViewModel {
    * 동안"과 같다. 탭 ViewModel에 얹지 않는 이유 — 그건 탭마다 마운트/언마운트되는
    * `FileContentView`가 부르므로, 탭 하나만 닫혀도 감시가 통째로 꺼진다(2026-09-04).
    */
-  readonly #tabDirtyState: ITabDirtyState;
+  readonly #tabs: ITabSystem;
   readonly #startup: IWorkbenchStartup;
   readonly #appLifetime: IAppLifetime;
   readonly #workspace: IWorkspace;
@@ -53,7 +54,8 @@ export class ShellViewModel implements IShellViewModel {
   private revealState: IShellViewModel["reveal"] = null;
   #revealSeq = 0;
   private activityRows: readonly ShellActivityRow[];
-  private treeState: ShellTabPaneNode;
+  /** 탭 Model의 스냅샷 — `tree`는 여기에 descriptor(제목·더티)를 겹쳐 파생한다. */
+  private layoutState: { readonly tree: PaneNode; readonly previewTabId: string | null };
   private activeLeafIdState: PaneId;
   /**
    * 이 ViewModel 이 갖는 유일한 자기 상태다.
@@ -76,7 +78,7 @@ export class ShellViewModel implements IShellViewModel {
     tabLayout,
     colorMode,
     activityBarRegistry,
-    tabDirtyState,
+    tabs,
     startup,
     appLifetime,
     workspace,
@@ -88,7 +90,7 @@ export class ShellViewModel implements IShellViewModel {
     tabLayout: ITabLayout;
     colorMode: IColorMode;
     activityBarRegistry: IActivityBarRegistry;
-    tabDirtyState: ITabDirtyState;
+    tabs: ITabSystem;
     startup: IWorkbenchStartup;
     appLifetime: IAppLifetime;
     workspace: IWorkspace;
@@ -102,7 +104,7 @@ export class ShellViewModel implements IShellViewModel {
     this.#tabLayout = tabLayout;
     this.#colorMode = colorMode;
     this.#activityBar = activityBarRegistry;
-    this.#tabDirtyState = tabDirtyState;
+    this.#tabs = tabs;
     this.#startup = startup;
     this.#appLifetime = appLifetime;
     this.#workspace = workspace;
@@ -112,7 +114,7 @@ export class ShellViewModel implements IShellViewModel {
 
     // Model은 값과 이벤트만 준다 — 파생된 화면 상태(atom)는 전부 여기서 소유한다.
     this.activityRows = this.#computeActivities();
-    this.treeState = this.#computeTree();
+    this.layoutState = this.#snapshotLayout();
     this.activeLeafIdState = tabLayout.activePaneId;
     this.themeState = colorMode.mode;
 
@@ -120,8 +122,8 @@ export class ShellViewModel implements IShellViewModel {
       activityModel.onDidChange(() => this.recompute()),
       tabLayout.onDidChange(() => this.recompute()),
       colorMode.onDidChange(() => this.recompute()),
-      // dirty가 바뀌면 탭 표시가 달라진다 — 무엇이 더러워졌는지는 모르고 다시 계산만 한다.
-      tabDirtyState.onDidChange(() => this.recompute()),
+      // 복원이 끝나 descriptor가 뒤늦게 붙으면 제목·아이콘이 달라진다 — 다시 계산만 한다.
+      tabs.onDidChange(() => this.recompute()),
       notifications.onDidChange(() => this.syncNotifications()),
       appLifetime.onDidChange(() => this.recomputeLifetime()),
       workspace.onDidChange(() => this.syncWorkspace()),
@@ -131,7 +133,7 @@ export class ShellViewModel implements IShellViewModel {
     makeAutoObservable<
       this,
       | "activityRows"
-      | "treeState"
+      | "layoutState"
       | "notificationRows"
       | "revealState"
       | "pendingTabCloseState"
@@ -146,7 +148,7 @@ export class ShellViewModel implements IShellViewModel {
       this,
       {
         activityRows: observableRef,
-        treeState: observableRef,
+        layoutState: observableRef,
         notificationRows: observableRef,
         revealState: observableRef,
         pendingTabCloseState: observableRef,
@@ -161,6 +163,19 @@ export class ShellViewModel implements IShellViewModel {
       { autoBind: true },
     );
 
+    // 미리보기 탭이 더러워지는 순간 고정한다 — 편집을 시작한 파일이 기울임(아직 안 읽어본 파일)으로 남으면 뜻이 어긋난다.
+    this.#subscriptions.push({
+      dispose: reaction(
+        () => {
+          const preview = this.layoutState.previewTabId;
+          return preview !== null && this.#isDirty(preview) ? preview : null;
+        },
+        (dirtyPreview) => {
+          if (dirtyPreview !== null) this.pinTab(dirtyPreview);
+        },
+      ),
+    });
+
     this.#registerCommands(commandCenterRegistry);
 
     // 만들어지는 순간이 곧 "앱이 사는 동안"의 시작이다 — Shell은 앱에 하나고 컨테이너가 살아 있는 한 산다.
@@ -174,9 +189,9 @@ export class ShellViewModel implements IShellViewModel {
     return this.activityRows;
   }
 
-  /** `#tree`를 값으로 노출한다. */
+  /** 탭 Model의 스냅샷에 descriptor의 제목·더티를 겹친다 — descriptor는 observable이라 더티가 바뀌면 따라온다. */
   get tree(): ShellTabPaneNode {
-    return this.treeState;
+    return this.#toShellTree(this.layoutState.tree, this.layoutState.previewTabId);
   }
 
   /** `#activeLeafId`를 값으로 노출한다. */
@@ -237,8 +252,7 @@ export class ShellViewModel implements IShellViewModel {
 
   /** `isDirty`가 거짓이면 바로 `closeTab`, 참이면 `#pendingTabClose`에 담아 확인을 기다린다. */
   requestCloseTab(leafId: PaneId, tabId: string): void {
-    const isDirty = this.#tabDirtyState.isDirty(tabId);
-    if (!isDirty) {
+    if (!this.#isDirty(tabId)) {
       this.closeTab(leafId, tabId);
       return;
     }
@@ -356,25 +370,34 @@ export class ShellViewModel implements IShellViewModel {
     this.#tabLayout.setTree(this.#resizeChild(tree, branchId, childId, nextSize));
   }
 
-  /** 트리와 미리보기 탭의 경로를 전부 새 접두사로 옮긴다. */
+  /**
+   * `file:` 탭의 경로를 전부 새 접두사로 옮긴다. id가 uri라 id도 바뀌고, 활성·미리보기 포인터도 따라간다.
+   * 옮긴 탭은 provider에게 다시 물어 그릴 것을 받는다 — 옛 descriptor는 옛 경로를 쥐고 있다.
+   */
   retargetTabs(oldPrefix: string, newPrefix: string): void {
-    const retarget = (id: string): string => {
-      if (id === oldPrefix) return newPrefix;
-      if (id.startsWith(`${oldPrefix}/`)) return `${newPrefix}${id.slice(oldPrefix.length)}`;
-      return id;
+    const retargetPath = (path: string): string | null => {
+      if (path === oldPrefix) return newPrefix;
+      if (path.startsWith(`${oldPrefix}/`)) return `${newPrefix}${path.slice(oldPrefix.length)}`;
+      return null;
     };
 
     const tree = this.#tabLayout.tree;
-    const nextTree = this.#retargetTree(tree, retarget);
-    // 바뀐 게 없으면 새 트리를 만들지 않는다 — atom은 참조로 변경을 알리므로, 매번 새 트리를
-    // 주면 관련 없는 구독자까지 다시 그린다.
-    if (nextTree !== tree) this.#tabLayout.setTree(nextTree);
-
-    const preview = this.#tabLayout.previewTabId;
-    if (preview !== null) {
-      const nextPreview = retarget(preview);
-      if (nextPreview !== preview) this.#tabLayout.setPreviewTabId(nextPreview);
+    const moved = new Map<string, OpenTab>();
+    for (const tab of collectTabs(tree)) {
+      if (tab.uri.scheme !== "file") continue;
+      const nextPath = retargetPath(tab.uri.path);
+      if (nextPath === null) continue;
+      const uri = URI.file(nextPath);
+      moved.set(tab.id, { ...tab, id: uri.toString(), uri, title: this.#nameOf(nextPath) });
     }
+    // 바뀐 게 없으면 새 트리를 만들지 않는다 — 참조로 변경을 알리므로 관련 없는 구독자까지 다시 그린다.
+    if (moved.size === 0) return;
+
+    this.#tabLayout.setTree(this.#retargetTree(tree, moved));
+    const preview = this.#tabLayout.previewTabId;
+    const movedPreview = preview === null ? undefined : moved.get(preview);
+    if (movedPreview !== undefined) this.#tabLayout.setPreviewTabId(movedPreview.id);
+    void this.#tabs.restore([...moved.values()]);
   }
 
   /** `#isSidebarOpen`을 값으로 노출한다. */
@@ -442,27 +465,26 @@ export class ShellViewModel implements IShellViewModel {
     this.#colorMode.setMode(this.#colorMode.mode === "dark" ? "light" : "dark");
   }
 
-  /** 고정 탭으로 연다. 이미 있으면 그 탭을 활성으로만 만든다 — 미리보기 자리와 무관하다. */
-  openTab(tab: OpenTab): void {
-    const tree = this.#tabLayout.tree;
-    const activeLeafId = this.#tabLayout.activePaneId;
-    const leaf = findLeaf(tree, activeLeafId);
-    if (!leaf) return;
-    const open = tab;
-    const already = leaf.tabs.some((existing) => existing.id === open.id);
-    const nextTree = replaceLeaf(tree, activeLeafId, (l) => ({
-      ...l,
-      tabs: already ? l.tabs : [...l.tabs, open],
-      activeTabId: open.id,
-    }));
-    this.#tabLayout.setTree(nextTree);
+  /** `ITabSystem.open`에 그대로 위임한다. */
+  open(uri: URI, options?: OpenOptions): Promise<void> {
+    return this.#tabs.open(uri, options);
+  }
+
+  /** `ITabSystem.descriptorOf`에 그대로 위임한다. */
+  descriptorOf(tabId: string): TabDescriptor | undefined {
+    return this.#tabs.descriptorOf(tabId);
+  }
+
+  /** `ITabSystem.containerOf`에 그대로 위임한다. */
+  containerOf(tabId: string): Container {
+    return this.#tabs.containerOf(tabId);
   }
 
   /** 활성 leaf 기준이다. 열린 탭이 없으면 `null`. */
-  get activeTab(): { readonly id: string; readonly kind: string } | null {
-    const leaf = findLeaf(this.#tabLayout.tree, this.#tabLayout.activePaneId);
+  get activeTab(): { readonly id: string; readonly kind: string; readonly uri: URI } | null {
+    const leaf = findLeaf(this.layoutState.tree, this.#tabLayout.activePaneId);
     const active = leaf?.tabs.find((tab) => tab.id === leaf.activeTabId);
-    return active === undefined ? null : { id: active.id, kind: active.kind };
+    return active === undefined ? null : { id: active.id, kind: active.kind, uri: active.uri };
   }
 
   /** 위치 요청이 없으면 `null`. 같은 위치를 다시 요청해도 `seq`로 구분된다. */
@@ -470,42 +492,15 @@ export class ShellViewModel implements IShellViewModel {
     return this.revealState;
   }
 
-  /** 활성 leaf 기준으로 미리보기 탭을 열거나, 이미 열려 있으면 고정한다. `position`은 그 탭의 내용에 전달된다. */
-  previewFile(path: string, position?: { readonly line: number; readonly column: number }): void {
+  /** 미리보기로 연다. `position`은 그 탭의 내용에 전달된다. 열리면 모바일 드로어를 닫는다. */
+  async previewFile(path: string, position?: { readonly line: number; readonly column: number }): Promise<void> {
+    const uri = URI.file(path);
     if (position !== undefined) {
       this.#revealSeq += 1;
-      this.revealState = { tabId: path, line: position.line, column: position.column, seq: this.#revealSeq };
+      this.revealState = { tabId: uri.toString(), line: position.line, column: position.column, seq: this.#revealSeq };
     }
-    const tab: OpenTab = { id: path, kind: "file", uri: URI.file(path), title: this.#nameOf(path) };
-    const tree = this.#tabLayout.tree;
-    const activeLeafId = this.#tabLayout.activePaneId;
-    const leaf = findLeaf(tree, activeLeafId);
-    // activeLeafId 는 항상 존재하는 leaf 를 가리킨다(불변) — 방어적으로만 무시한다.
-    if (!leaf) return;
-
-    const already = leaf.tabs.some((open) => open.id === tab.id);
-    let nextTree: PaneNode;
-
-    if (already) {
-      // 미리보기 자리에 있던 것을 다시 열었다 = 같은 것을 두 번 눌렀다 → 고정한다.
-      if (this.#tabLayout.previewTabId === tab.id) this.#tabLayout.setPreviewTabId(null);
-      nextTree = replaceLeaf(tree, activeLeafId, (l) => ({ ...l, activeTabId: tab.id }));
-    } else {
-      const replaced = this.#tabLayout.previewTabId;
-      // 미리보기는 **자리 하나**다 — 밀어내는 게 아니라 갈아끼운다. 옛 미리보기 탭이 지금 이
-      // leaf 에 있으면 걷어내고 갈아끼운다. 다른 pane 에 있으면 거기까지 건드리지 않는다 — 안 보고
-      // 있는 다른 pane 의 탭을 이 leaf 의 조작만으로 지우는 건 사용자가 예상 못 할 부작용이다.
-      // (그 탭은 그냥 조용히 "고정"된 채로 남는다, isPreview 만 꺼진다.)
-      nextTree = replaceLeaf(tree, activeLeafId, (l) => ({
-        ...l,
-        tabs: [...l.tabs.filter((open) => open.id !== replaced), tab],
-        activeTabId: tab.id,
-      }));
-      this.#tabLayout.setPreviewTabId(tab.id);
-    }
-
-    this.#tabLayout.setTree(nextTree);
-    this.isSidebarOpenState = false;
+    await this.#tabs.open(uri, { preview: true });
+    this.setSidebarOpen(false);
   }
 
   /** 미리보기 탭이면 `previewTabId`를 비워 고정한다. */
@@ -525,7 +520,7 @@ export class ShellViewModel implements IShellViewModel {
    * `registerServices.tsx`는 `commandCenterRegistryBinding`을 등록하기만 하면 되고, "scope를 만든
    * 다음에 불러야 한다"는 순서 제약 자체가 없어졌다.
    *
-   * `dirtyTabIdsIn`이 `#tabDirtyState`(셸이 선언한 계약, 조립부가 채운다)를 본다 —
+   * `dirtyTabIdsIn`이 탭의 descriptor(셸이 선언한 계약, provider가 채운다)를 본다 —
    * 저장 안 된 탭은 배치로 닫지 않는다.
    */
   #registerCommands(commandCenterRegistry: ICommandService): void {
@@ -580,8 +575,7 @@ export class ShellViewModel implements IShellViewModel {
     commandCenterRegistry.actions.add({
       id: "shell.openSettings",
       label: "설정 열기",
-      execute: () =>
-        this.openTab({ id: "settings", kind: "settings", uri: URI.parse("arka:///settings"), title: "설정" }),
+      execute: () => void this.open(URI.parse("arka:///settings")),
     });
     commandCenterRegistry.keybindings.add({
       keybinding: "ctrl+,",
@@ -591,13 +585,7 @@ export class ShellViewModel implements IShellViewModel {
     commandCenterRegistry.actions.add({
       id: "shell.openKeybindings",
       label: "키보드 단축키 보기",
-      execute: () =>
-        this.openTab({
-          id: "keybindings",
-          kind: "keybindings",
-          uri: URI.parse("arka:///keybindings"),
-          title: "키보드 단축키",
-        }),
+      execute: () => void this.open(URI.parse("arka:///keybindings")),
     });
 
     const isTabContextTarget = (value: unknown): value is TabContextTarget =>
@@ -632,7 +620,7 @@ export class ShellViewModel implements IShellViewModel {
     /** 이 leaf 안에서, 저장 안 된 변경이 있어 배치로 닫으면 안 되는 탭 id들. */
     const dirtyTabIdsIn = (leafId: PaneId): readonly string[] => {
       const tabs = findLeafTabs(this.tree, leafId) ?? [];
-      return tabs.filter((tab) => this.#tabDirtyState.isDirty(tab.id)).map((tab) => tab.id);
+      return tabs.filter((tab) => this.#isDirty(tab.id)).map((tab) => tab.id);
     };
 
     const registerSplit = (id: string, label: string, position: SplitEdgeDropPosition): void => {
@@ -684,11 +672,12 @@ export class ShellViewModel implements IShellViewModel {
     commandCenterRegistry.actions.add({
       id: "shell.tab.copyPath",
       label: "탭: 경로 복사",
-      // 탭 id가 곧 워크스페이스 루트 기준 경로다(`ShellTabRow` 계약 참고).
+      // 탭 id는 uri다 — 복사하는 것은 그 uri의 경로(워크스페이스 루트 기준)다.
       execute: (context) => {
         const target = targetOf(context);
         if (target === null) return;
-        this.#copyToClipboard(target.tabId);
+        const tab = collectTabs(this.layoutState.tree).find((open) => open.id === target.tabId);
+        this.#copyToClipboard(tab === undefined ? target.tabId : tab.uri.path);
       },
     });
 
@@ -708,19 +697,31 @@ export class ShellViewModel implements IShellViewModel {
     commandCenterRegistry.menus.add({ menuId: "shell.tab.context", actionId: "shell.tab.copyPath", order: 7 });
   }
 
-  /** Model 의 트리를 화면용 트리로 바꾼다 — leaf 의 탭마다 `isPreview`·`isDirty` 를 파생시킨다. */
+  /** 그 탭의 descriptor가 말하는 더티. descriptor가 아직 없으면(복원 중) 더럽지 않다. */
+  #isDirty(tabId: string): boolean {
+    return this.#tabs.descriptorOf(tabId)?.isDirty ?? false;
+  }
+
+  #snapshotLayout(): { readonly tree: PaneNode; readonly previewTabId: string | null } {
+    return { tree: this.#tabLayout.tree, previewTabId: this.#tabLayout.previewTabId };
+  }
+
+  /** Model 의 트리를 화면용 트리로 바꾼다 — leaf 의 탭마다 `isPreview`·`isDirty`·제목을 파생시킨다. */
   #toShellTree(node: PaneNode, previewId: string | null): ShellTabPaneNode {
     if (node.kind === "leaf") {
       return {
         kind: "leaf",
         id: node.id,
-        tabs: node.tabs.map((tab) => ({
-          id: tab.id,
-          kind: tab.kind,
-          title: tab.title,
-          isPreview: tab.id === previewId,
-          isDirty: this.#tabDirtyState.isDirty(tab.id),
-        })),
+        tabs: node.tabs.map((tab) => {
+          const descriptor = this.#tabs.descriptorOf(tab.id);
+          return {
+            id: tab.id,
+            kind: tab.kind,
+            title: descriptor?.title ?? tab.title,
+            isPreview: tab.id === previewId,
+            isDirty: descriptor?.isDirty ?? false,
+          };
+        }),
         activeTabId: node.activeTabId,
         size: node.size,
       };
@@ -745,18 +746,14 @@ export class ShellViewModel implements IShellViewModel {
     return { ...node, children: node.children.map((child) => this.#resizeChild(child, branchId, childId, nextSize)) };
   }
 
-  #retargetTree(node: PaneNode, retarget: (id: string) => string): PaneNode {
+  #retargetTree(node: PaneNode, moved: ReadonlyMap<string, OpenTab>): PaneNode {
     if (node.kind === "leaf") {
-      const tabs = node.tabs.map((tab) => {
-        const id = retarget(tab.id);
-        if (id === tab.id) return tab;
-        return { ...tab, id, uri: tab.uri.scheme === "file" ? URI.file(id) : tab.uri, title: this.#nameOf(id) };
-      });
-      const activeTabId = node.activeTabId === null ? null : retarget(node.activeTabId);
+      const tabs = node.tabs.map((tab) => moved.get(tab.id) ?? tab);
+      const activeTabId = node.activeTabId === null ? null : (moved.get(node.activeTabId)?.id ?? node.activeTabId);
       const changed = activeTabId !== node.activeTabId || tabs.some((tab, index) => tab !== node.tabs[index]);
       return changed ? { ...node, tabs, activeTabId } : node;
     }
-    const children = node.children.map((child) => this.#retargetTree(child, retarget));
+    const children = node.children.map((child) => this.#retargetTree(child, moved));
     return children.some((child, index) => child !== node.children[index]) ? { ...node, children } : node;
   }
 
@@ -798,7 +795,7 @@ export class ShellViewModel implements IShellViewModel {
 
   private recompute(): void {
     this.activityRows = this.#computeActivities();
-    this.treeState = this.#computeTree();
+    this.layoutState = this.#snapshotLayout();
     this.activeLeafIdState = this.#tabLayout.activePaneId;
     this.themeState = this.#colorMode.mode;
   }
@@ -808,9 +805,5 @@ export class ShellViewModel implements IShellViewModel {
     return this.#activityBar
       .list()
       .map((entry) => ({ id: entry.id, title: entry.title, iconId: entry.iconId, isActive: entry.id === activeId }));
-  }
-
-  #computeTree() {
-    return this.#toShellTree(this.#tabLayout.tree, this.#tabLayout.previewTabId);
   }
 }

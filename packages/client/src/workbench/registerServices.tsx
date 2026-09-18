@@ -1,15 +1,14 @@
 import { CommandService } from "#core/commands";
 import { Container } from "#core/di";
-import { useViewModel } from "#core/viewmodel";
-import { useEffect } from "react";
+import { Registry } from "#core/registry";
 import {
   DirectoryTreeModel,
   DirectoryTreeViewModel,
   FileContentModel,
   FileContentViewModel,
 } from "../extensions/filesystem";
-import { MarkdownPreviewModel, MarkdownPreviewViewModel, PREVIEW_TAB_KIND } from "../extensions/markdown";
-import { MarkdownPreviewTabView } from "../extensions/markdown/view/MarkdownPreviewTabView";
+import { MarkdownPreviewModel, MarkdownPreviewViewModel } from "../extensions/markdown";
+import { createPreviewTabProvider } from "../extensions/markdown/view/previewTabProvider";
 import { SearchModel, SearchViewModel } from "../extensions/search";
 import { createSearchServicePort } from "../extensions/search/infra/HttpSearchService";
 import { SearchView } from "../extensions/search/view/SearchView";
@@ -17,7 +16,7 @@ import { createWorkspaceMarkdownSource } from "../extensions/markdown/infra/Work
 import { createWorkspaceFilesPort } from "../extensions/filesystem/infra/HttpWorkspaceFiles";
 import { createWorkspaceWatchPort } from "../extensions/filesystem/infra/HttpWorkspaceWatch";
 import { DirectoryTreeView } from "../extensions/filesystem/view/DirectoryTreeView";
-import { FileContentView } from "../extensions/filesystem/view/FileContentView";
+import { createTextTabProvider } from "../extensions/filesystem/view/textTabProvider";
 import { createDocumentDensity } from "./infra/DocumentDensity";
 import { createDocumentTheme } from "./infra/DocumentTheme";
 import { createErrorNotifier } from "./infra/ErrorNotifier";
@@ -26,8 +25,8 @@ import { createGlobalKeybindings } from "./infra/GlobalKeybindings";
 import { createServerInfoPort } from "./infra/HttpServerInfo";
 import { createUnloadGuard } from "./infra/UnloadGuard";
 import { createStoragePort } from "./infra/LocalStorage";
-import { KeybindingsTabView } from "./view/KeybindingsTabView";
-import { SettingsTabView } from "./view/SettingsTabView";
+import { keybindingsTabProvider } from "./view/keybindingsTabProvider";
+import { settingsTabProvider } from "./view/settingsTabProvider";
 import { SettingsModel } from "./model/SettingsModel";
 import { SettingsViewModel } from "./viewmodel/SettingsViewModel";
 import { WorkbenchStartupRegistry } from "./model/WorkbenchStartupRegistry";
@@ -36,8 +35,9 @@ import { ActivityModel } from "./model/ActivityModel";
 import { ErrorLog } from "./model/ErrorLog";
 import { Notifications } from "./model/Notifications";
 import { SidebarContentRegistry } from "./model/SidebarContentRegistry";
-import { TabContentRegistry } from "./model/TabContentRegistry";
 import { TabLayout } from "./model/TabLayout";
+import { TabSystem } from "./model/TabSystem";
+import { collectTabs } from "./model/paneTree";
 import { ColorMode } from "./model/ColorMode";
 import { AppLifetime } from "./model/AppLifetime";
 import { Workspace } from "./model/Workspace";
@@ -70,31 +70,16 @@ const EXPLORER_ID = "explorer";
 const SEARCH_ID = "search";
 /** 사용자 단축키 재정의가 저장되는 키. */
 const KEYBINDING_OVERRIDES_KEY = "workbench.keybindings";
-/** 파일 탭의 kind. `IShellViewModel.previewFile`이 여는 탭의 kind와 같아야 TabContent가 찾는다. */
-const FILE_TAB_KIND = "file";
-
-/**
- * 파일 탭. 탭이 뜨면 그 파일을 열고, 그리는 것은 `FileContentView`에 맡긴다. 여는 일을 효과에 두는 이유 —
- * 렌더 중에 Model을 바꾸면 React와 MobX가 둘 다 막는다. `view/`는 훅이 `useViewModel` 하나뿐이라 여기(조립부)다.
- * R11에서 TabProvider가 `openTab`에서 파일을 읽으면 이 자리는 사라진다.
- */
-const FileTab = ({
-  tabId,
-  reveal,
-}: {
-  readonly tabId: string;
-  readonly reveal?: { readonly line: number; readonly column: number; readonly seq: number } | null;
-}) => {
-  const fileContent = useViewModel("arka.filesystem.fileContentViewModel");
-  useEffect(() => fileContent.openFile(tabId), [fileContent, tabId]);
-  return <FileContentView path={tabId} reveal={reveal} />;
-};
 
 /**
  * 조립은 여기 한 곳이다. 이 파일만 읽으면 무엇이 도는지 다 보인다.
  *
- * Shell의 확장 지점(ActivityBar·SidebarContent·TabContent)도 여기서 채운다 — filesystem이
+ * Shell의 확장 지점(ActivityBar·SidebarContent·TabSystem)도 여기서 채운다 — filesystem이
  * shell 타입을 거꾸로 import하는 순환을 피하기 위해서다(지금은 shell → filesystem 단방향).
+ *
+ * **전부 singleton이다.** 탭마다 자식 컨테이너가 생기므로 scoped면 탭 안에서 꺼낸 ViewModel이 셸이 보는 것과
+ * 갈린다 — 탭마다 따로여야 하는 인스턴스는 아직 없다. 돌아오기 전에 아무것도 만들지 않는다(탭 복원만 빼고) —
+ * 테스트가 루트에 대역을 다시 물릴 수 있어야 한다.
  */
 export function createApplication(): Container {
   const container = new Container("app");
@@ -137,7 +122,7 @@ export function createApplication(): Container {
   });
   container.register("arka.workbench.activityBarRegistry", "singleton", () => new ActivityBarRegistry());
   container.register("arka.workbench.sidebarContentRegistry", "singleton", () => new SidebarContentRegistry());
-  container.register("arka.workbench.tabContentRegistry", "singleton", () => new TabContentRegistry());
+  container.register("arka.workbench.tabSystem", "singleton", () => new Registry());
   container.register("arka.workbench.startupRegistry", "singleton", () => new WorkbenchStartupRegistry());
 
   container.register("arka.workbench.errorLog", "singleton", () => new ErrorLog());
@@ -158,6 +143,18 @@ export function createApplication(): Container {
     "singleton",
     (c) => new TabLayout({ storage: c.resolve("arka.workbench.storage") }),
   );
+  // 탭 컨테이너의 부모는 앱 루트다 — 탭 안에서 꺼내는 것이 셸이 보는 것과 같은 인스턴스가 된다.
+  container.register(
+    "arka.workbench.tabs",
+    "singleton",
+    (c) =>
+      new TabSystem({
+        layout: c.resolve("arka.workbench.tabLayout"),
+        providers: c.resolve("arka.workbench.tabSystem"),
+        notifications: c.resolve("arka.workbench.notifications"),
+        root: container,
+      }),
+  );
   container.register(
     "arka.workbench.colorMode",
     "singleton",
@@ -170,7 +167,7 @@ export function createApplication(): Container {
   );
   container.register(
     "arka.workbench.settingsViewModel",
-    "scoped",
+    "singleton",
     (c) =>
       new SettingsViewModel({
         colorMode: c.resolve("arka.workbench.colorMode"),
@@ -196,8 +193,7 @@ export function createApplication(): Container {
       }),
   );
 
-  // ViewModel은 scoped다 — 화면 하나가 사는 동안만 유지되고, 그 스코프를 dispose하면
-  // 구독까지 함께 정리된다.
+  // ViewModel도 singleton이다 — 앱에 화면은 하나고, 앱 컨테이너를 dispose하면 구독까지 함께 정리된다.
   container.register(
     "arka.search.model",
     "singleton",
@@ -205,7 +201,7 @@ export function createApplication(): Container {
   );
   container.register(
     "arka.search.viewModel",
-    "scoped",
+    "singleton",
     (c) => new SearchViewModel({ searchModel: c.resolve("arka.search.model") }),
   );
   // markdown은 filesystem을 모른다 — 두 포트를 markdown이 바라는 모양으로 감싸는 어댑터에 넘기는
@@ -223,21 +219,21 @@ export function createApplication(): Container {
   );
   container.register(
     "arka.markdown.previewViewModel",
-    "scoped",
+    "singleton",
     (c) =>
       new MarkdownPreviewViewModel({
         previewModel: c.resolve("arka.markdown.previewModel"),
         commandCenterRegistry: c.resolve("arka.commands"),
         activeFile: () => {
           const active = c.resolve("arka.workbench.shellViewModel").activeTab;
-          return active !== null && active.kind === FILE_TAB_KIND ? active.id : null;
+          return active !== null && active.uri.scheme === "file" ? active.uri.path : null;
         },
-        openTab: (tab) => c.resolve("arka.workbench.shellViewModel").openTab(tab),
+        openUri: (uri) => void c.resolve("arka.workbench.tabs").open(uri),
       }),
   );
   container.register(
     "arka.filesystem.directoryTreeViewModel",
-    "scoped",
+    "singleton",
     (c) =>
       new DirectoryTreeViewModel({
         directoryTreeModel: c.resolve("arka.filesystem.directoryTreeModel"),
@@ -246,52 +242,40 @@ export function createApplication(): Container {
         isTypingSurface,
       }),
   );
-  // filesystem은 shell을 모른다 — 탭 고정이라는 "무엇"만 계약으로 알고, 그게 ShellViewModel
-  // 이라는 "누구"는 이 조립부만 안다.
-  container.register("arka.filesystem.pinTab", "scoped", (c) => ({
-    pin: (path: string) => c.resolve("arka.workbench.shellViewModel").pinTab(path),
-  }));
-  // 셸은 "이 탭이 dirty인가"라는 계약만 알고, 그게 filesystem이라는 것은 이 조립부만 안다
-  // — `"arka.filesystem.pinTab"`을 뒤집은 모양이다. 스코프에서 resolve해야 View가 보는 것과 같은 인스턴스다.
-  container.register("arka.workbench.tabDirtyState", "scoped", (c) => ({
-    isDirty: (tabId: string) => c.resolve("arka.filesystem.fileContentViewModel").rows[tabId]?.isDirty ?? false,
-    hasAnyDirty: () => Object.values(c.resolve("arka.filesystem.fileContentViewModel").rows).some((row) => row.isDirty),
-    onDidChange: (listener: () => void) => c.resolve("arka.filesystem.fileContentViewModel").onDidChange(listener),
-  }));
   // 셸이 뜨고 질 때 켜고 끌 것들. 셸은 무엇이 켜지는지 모르고 목록만 받는다.
-  container.register("arka.workbench.startup.fileWatch", "scoped", (c) => ({
+  container.register("arka.workbench.startup.fileWatch", "singleton", (c) => ({
     start: () => c.resolve("arka.filesystem.fileContentViewModel").startWatching(),
     stop: () => c.resolve("arka.filesystem.fileContentViewModel").stopWatching(),
   }));
-  container.register("arka.workbench.startup.documentTheme", "scoped", (c) =>
+  container.register("arka.workbench.startup.documentTheme", "singleton", (c) =>
     createDocumentTheme({ colorMode: c.resolve("arka.workbench.colorMode") }),
   );
-  container.register("arka.workbench.startup.documentDensity", "scoped", (c) =>
+  container.register("arka.workbench.startup.documentDensity", "singleton", (c) =>
     createDocumentDensity({ settingsModel: c.resolve("arka.workbench.settingsModel") }),
   );
-  container.register("arka.workbench.startup.unloadGuard", "scoped", (c) =>
-    createUnloadGuard({ tabDirtyState: c.resolve("arka.workbench.tabDirtyState") }),
+  container.register("arka.workbench.startup.unloadGuard", "singleton", (c) =>
+    createUnloadGuard({ tabs: c.resolve("arka.workbench.tabs") }),
   );
-  container.register("arka.workbench.startup.globalErrorHandlers", "scoped", (c) =>
+  container.register("arka.workbench.startup.globalErrorHandlers", "singleton", (c) =>
     createGlobalErrorHandlers({ errorLog: c.resolve("arka.workbench.errorLog") }),
   );
-  container.register("arka.workbench.startup.errorNotifier", "scoped", (c) =>
+  container.register("arka.workbench.startup.errorNotifier", "singleton", (c) =>
     createErrorNotifier({
       errorLog: c.resolve("arka.workbench.errorLog"),
       notifications: c.resolve("arka.workbench.notifications"),
     }),
   );
-  container.register("arka.workbench.startup.markdown", "scoped", (c) => ({
+  container.register("arka.workbench.startup.markdown", "singleton", (c) => ({
     start: () => {
       c.resolve("arka.markdown.previewViewModel");
     },
     stop: () => undefined,
   }));
-  container.register("arka.workbench.startup.globalKeybindings", "scoped", (c) =>
+  container.register("arka.workbench.startup.globalKeybindings", "singleton", (c) =>
     createGlobalKeybindings({ commands: c.resolve("arka.commands") }),
   );
   // 등록된 것을 스코프에서 resolve해 하나로 합친다 — descriptor가 토큰을 담는 이유가 여기다.
-  container.register("arka.workbench.startup", "scoped", (c) => {
+  container.register("arka.workbench.startup", "singleton", (c) => {
     const items = c
       .resolve("arka.workbench.startupRegistry")
       .list()
@@ -303,23 +287,22 @@ export function createApplication(): Container {
   });
   container.register(
     "arka.filesystem.fileContentViewModel",
-    "scoped",
+    "singleton",
     (c) =>
       new FileContentViewModel({
         fileContentModel: c.resolve("arka.filesystem.fileContentModel"),
-        pinTab: c.resolve("arka.filesystem.pinTab"),
       }),
   );
   container.register(
     "arka.workbench.shellViewModel",
-    "scoped",
+    "singleton",
     (c) =>
       new ShellViewModel({
         activityModel: c.resolve("arka.workbench.activityModel"),
         tabLayout: c.resolve("arka.workbench.tabLayout"),
         colorMode: c.resolve("arka.workbench.colorMode"),
         activityBarRegistry: c.resolve("arka.workbench.activityBarRegistry"),
-        tabDirtyState: c.resolve("arka.workbench.tabDirtyState"),
+        tabs: c.resolve("arka.workbench.tabs"),
         startup: c.resolve("arka.workbench.startup"),
         appLifetime: c.resolve("arka.workbench.appLifetime"),
         workspace: c.resolve("arka.workbench.workspace"),
@@ -348,25 +331,33 @@ export function createApplication(): Container {
     .resolve("arka.workbench.sidebarContentRegistry")
     .add({ id: EXPLORER_ID, ContentComponent: DirectoryTreeView });
   container
-    .resolve("arka.workbench.tabContentRegistry")
-    .add({ id: FILE_TAB_KIND, iconId: "fileCode", TabComponent: FileTab });
-  container
     .resolve("arka.workbench.activityBarRegistry")
     .add({ id: SEARCH_ID, title: "검색", iconId: "search", keybinding: "ctrl+shift+f" });
   container
     .resolve("arka.workbench.sidebarContentRegistry")
     .add({ id: SEARCH_ID, ContentComponent: ({ onFileOpen }) => <SearchView onFileOpen={onFileOpen} /> });
-  container
-    .resolve("arka.workbench.tabContentRegistry")
-    .add({ id: "keybindings", iconId: "keyboard", TabComponent: () => <KeybindingsTabView /> });
-  container
-    .resolve("arka.workbench.tabContentRegistry")
-    .add({ id: "settings", iconId: "settingsGear", TabComponent: () => <SettingsTabView /> });
-  container.resolve("arka.workbench.tabContentRegistry").add({
-    id: PREVIEW_TAB_KIND,
-    iconId: "bookOpen",
-    TabComponent: ({ tabId }) => <MarkdownPreviewTabView tabId={tabId} />,
+  // 탭 provider — 여는 쪽이 자기 ViewModel을 그때 꺼낸다. 부팅 때 미리 만들면 테스트 대역이 끼어들 틈이 없다.
+  const tabProviders = container.resolve("arka.workbench.tabSystem");
+  tabProviders.add(settingsTabProvider);
+  tabProviders.add(keybindingsTabProvider);
+  const textTabProvider = createTextTabProvider({
+    get fileContent() {
+      return container.resolve("arka.filesystem.fileContentViewModel");
+    },
   });
+  tabProviders.add(textTabProvider);
+  tabProviders.add(
+    createPreviewTabProvider({
+      get preview() {
+        return container.resolve("arka.markdown.previewViewModel");
+      },
+    }),
+  );
+
+  // 새로고침 전에 열려 있던 탭을 provider에게 다시 묻는다 — 못 여는 것은 여기서 빠진다.
+  void container
+    .resolve("arka.workbench.tabs")
+    .restore(collectTabs(container.resolve("arka.workbench.tabLayout").tree));
 
   return container;
 }

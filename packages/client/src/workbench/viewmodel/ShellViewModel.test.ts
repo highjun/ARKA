@@ -1,5 +1,8 @@
 import { PROTOCOL_HEADER, PROTOCOL_VERSION } from "#contracts";
-import type { ITabDirtyState } from "../model/ITabDirtyState";
+import { Container } from "#core/di";
+import { observable, observableRef, runInAction } from "mobx";
+import type { TabDescriptor, TabProviderDescriptor } from "../model/ITabProviderDescriptor";
+import { TabSystem } from "../model/TabSystem";
 import type { IWorkbenchStartup } from "../model/IWorkbenchStartup";
 import type { IServerInfo } from "../model/IServerInfo";
 import { Notifications } from "../model/Notifications";
@@ -31,16 +34,42 @@ const fakeStorage = (): IStorage => {
   };
 };
 
-/** 셸이 선언한 계약의 가짜다 — filesystem을 알 필요가 없다. `dirty`에 탭 id를 넣으면 그
- *  탭이 저장 안 된 것으로 보인다. */
-const fakeTabDirtyState = (): ITabDirtyState & { dirty: Set<string> } => {
-  const dirty = new Set<string>();
-  return {
-    dirty,
-    isDirty: (tabId) => dirty.has(tabId),
-    hasAnyDirty: () => dirty.size > 0,
-    onDidChange: () => ({ dispose: () => undefined }),
-  };
+/** 탭 id는 uri 문자열이다 — 경로로 쓰는 테스트가 짧게 적는 길. */
+const fileId = (path: string): string => URI.file(path).toString();
+
+/**
+ * 셸이 탭 안을 모른다는 계약의 가짜다 — filesystem을 알 필요가 없다. `file:`과 `chat:`을 받는 provider 둘을
+ * 두고, `markDirty(id)`로 그 탭이 저장 안 된 것으로 보이게 한다(descriptor는 observable이라 화면이 따라온다).
+ */
+const fakeProviders = (): { registry: Registry<TabProviderDescriptor>; markDirty: (id: string) => void } => {
+  const dirty = observable(new Set<string>());
+  const registry = new Registry<TabProviderDescriptor>();
+  const descriptor = (id: string, title: string): TabDescriptor =>
+    observable(
+      {
+        icon: null,
+        title,
+        get isDirty() {
+          return dirty.has(id);
+        },
+        Content: () => null,
+      },
+      { Content: observableRef },
+    );
+  registry.add({
+    id: "file",
+    priority: 0,
+    openTab: (uri) =>
+      Promise.resolve(
+        uri.scheme === "file" ? descriptor(uri.toString(), uri.path.split("/").pop() ?? uri.path) : undefined,
+      ),
+  });
+  registry.add({
+    id: "chat",
+    priority: 0,
+    openTab: (uri) => Promise.resolve(uri.scheme === "chat" ? descriptor(uri.toString(), "대화") : undefined),
+  });
+  return { registry, markDirty: (id) => runInAction(() => void dirty.add(id)) };
 };
 
 /** 켜졌는지만 본다 — 무엇이 켜지는지는 셸의 관심이 아니다. */
@@ -66,25 +95,26 @@ const make = (
 ): {
   tabLayout: ITabLayout;
   viewModel: IShellViewModel;
-  tabDirtyState: ITabDirtyState & { dirty: Set<string> };
+  markDirty: (id: string) => void;
   startup: IWorkbenchStartup & { started: boolean };
   notifications: Notifications;
 } => {
   const activityBarRegistry: IActivityBarRegistry = new Registry();
   activityBarRegistry.add({ id: "explorer", title: "탐색기", iconId: "files" });
-  const tabDirtyState = fakeTabDirtyState();
+  const { registry, markDirty } = fakeProviders();
   const startup = fakeStartup();
   const notifications = new Notifications({ newId: () => "n" });
   const storage = fakeStorage();
   const activityModel = new ActivityModel();
   const tabLayout = new TabLayout({ storage });
   const colorMode = new ColorMode({ storage });
+  const tabs = new TabSystem({ layout: tabLayout, providers: registry, notifications, root: new Container("test") });
   const viewModel = new ShellViewModel({
     activityModel,
     tabLayout,
     colorMode,
     activityBarRegistry,
-    tabDirtyState,
+    tabs,
     startup,
     appLifetime: new AppLifetime({ serverInfo, reload: () => undefined }),
     workspace: new Workspace({ serverInfo }),
@@ -92,7 +122,7 @@ const make = (
     commandCenterRegistry: fakeCommandCenterRegistry(),
     copyToClipboard: () => undefined,
   });
-  return { tabLayout, viewModel, tabDirtyState, startup, notifications };
+  return { tabLayout, viewModel, markDirty, startup, notifications };
 };
 
 const activeIds = (viewModel: IShellViewModel): string[] =>
@@ -141,13 +171,13 @@ describe("IShellViewModel — 활동", () => {
 });
 
 describe("IShellViewModel — 파일 미리보기", () => {
-  it("탭 제목은 경로가 아니라 파일 이름이다 — 폰의 좁은 스트립에 경로가 들어가지 않는다", () => {
+  it("탭 제목은 경로가 아니라 파일 이름이다 — 폰의 좁은 스트립에 경로가 들어가지 않는다", async () => {
     const { viewModel } = make();
 
-    viewModel.previewFile("projects/dev-kit/STATUS.md");
+    await viewModel.previewFile("projects/dev-kit/STATUS.md");
 
     expect(activeLeafOf(viewModel).tabs.at(-1)).toEqual({
-      id: "projects/dev-kit/STATUS.md",
+      id: fileId("projects/dev-kit/STATUS.md"),
       kind: "file",
       title: "STATUS.md",
       isPreview: true,
@@ -155,76 +185,76 @@ describe("IShellViewModel — 파일 미리보기", () => {
     });
   });
 
-  it("미리보기는 자리 하나를 갈아끼운다 — 훑는 것만으로 탭이 쌓이지 않는다", () => {
+  it("미리보기는 자리 하나를 갈아끼운다 — 훑는 것만으로 탭이 쌓이지 않는다", async () => {
     const { viewModel } = make();
 
-    viewModel.previewFile("a.md");
-    viewModel.previewFile("b.md");
-    viewModel.previewFile("c.md");
+    await viewModel.previewFile("a.md");
+    await viewModel.previewFile("b.md");
+    await viewModel.previewFile("c.md");
 
     const leaf = activeLeafOf(viewModel);
-    expect(tabIdsOf(leaf)).toEqual(["c.md"]);
-    expect(leaf.activeTabId).toBe("c.md");
+    expect(tabIdsOf(leaf)).toEqual([fileId("c.md")]);
+    expect(leaf.activeTabId).toBe(fileId("c.md"));
   });
 
-  it("같은 파일을 두 번 열면 고정된다 — 다음 미리보기가 밀어내지 못한다", () => {
+  it("같은 파일을 두 번 열면 고정된다 — 다음 미리보기가 밀어내지 못한다", async () => {
     const { viewModel } = make();
 
-    viewModel.previewFile("a.md");
-    viewModel.previewFile("a.md");
-    viewModel.previewFile("b.md");
+    await viewModel.previewFile("a.md");
+    await viewModel.previewFile("a.md");
+    await viewModel.previewFile("b.md");
 
-    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(["a.md", "b.md"]);
+    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual([fileId("a.md"), fileId("b.md")]);
   });
 
-  it("고정한 탭이 있어도 미리보기 자리는 계속 하나다", () => {
+  it("고정한 탭이 있어도 미리보기 자리는 계속 하나다", async () => {
     const { viewModel } = make();
 
-    viewModel.previewFile("a.md");
+    await viewModel.previewFile("a.md");
     // 고정
-    viewModel.previewFile("a.md");
-    viewModel.previewFile("b.md");
-    viewModel.previewFile("c.md");
+    await viewModel.previewFile("a.md");
+    await viewModel.previewFile("b.md");
+    await viewModel.previewFile("c.md");
 
-    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(["a.md", "c.md"]);
+    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual([fileId("a.md"), fileId("c.md")]);
   });
 
-  it("미리보기 탭을 닫으면 다음 미리보기가 새 탭이 된다", () => {
+  it("미리보기 탭을 닫으면 다음 미리보기가 새 탭이 된다", async () => {
     const { viewModel } = make();
 
-    viewModel.previewFile("a.md");
-    viewModel.closeTab(ROOT_PANE_ID, "a.md");
-    viewModel.previewFile("b.md");
+    await viewModel.previewFile("a.md");
+    viewModel.closeTab(ROOT_PANE_ID, fileId("a.md"));
+    await viewModel.previewFile("b.md");
 
-    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(["b.md"]);
+    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual([fileId("b.md")]);
   });
 
-  it("루트 바로 아래 파일은 경로가 곧 이름이다", () => {
+  it("루트 바로 아래 파일은 경로가 곧 이름이다", async () => {
     const { viewModel } = make();
 
-    viewModel.previewFile("AGENTS.md");
+    await viewModel.previewFile("AGENTS.md");
 
     expect(activeLeafOf(viewModel).tabs.at(-1)?.title).toBe("AGENTS.md");
   });
 });
 
 describe("IShellViewModel — 탭 고르기", () => {
-  it("없는 leaf를 고르면 활성이 바뀌지 않는다", () => {
+  it("없는 leaf를 고르면 활성이 바뀌지 않는다", async () => {
     const { viewModel } = make();
 
-    viewModel.previewFile("a.md");
-    viewModel.selectTab("없는pane", "a.md");
+    await viewModel.previewFile("a.md");
+    viewModel.selectTab("없는pane", fileId("a.md"));
 
-    expect(activeLeafOf(viewModel).activeTabId).toBe("a.md");
+    expect(activeLeafOf(viewModel).activeTabId).toBe(fileId("a.md"));
   });
 
-  it("있는 leaf여도 그 leaf에 없는 탭을 고르면 무시한다", () => {
+  it("있는 leaf여도 그 leaf에 없는 탭을 고르면 무시한다", async () => {
     const { viewModel } = make();
 
-    viewModel.previewFile("a.md");
+    await viewModel.previewFile("a.md");
     viewModel.selectTab(ROOT_PANE_ID, "없는탭");
 
-    expect(activeLeafOf(viewModel).activeTabId).toBe("a.md");
+    expect(activeLeafOf(viewModel).activeTabId).toBe(fileId("a.md"));
   });
 });
 
@@ -236,13 +266,13 @@ describe("IShellViewModel — 탭", () => {
     expect(viewModel.tree).toEqual({ kind: "leaf", id: ROOT_PANE_ID, tabs: [], activeTabId: null });
   });
 
-  it("없는 탭을 닫으면 아무 일도 일어나지 않는다", () => {
+  it("없는 탭을 닫으면 아무 일도 일어나지 않는다", async () => {
     const { viewModel } = make();
 
-    viewModel.previewFile("a.md");
+    await viewModel.previewFile("a.md");
     viewModel.closeTab(ROOT_PANE_ID, "없는탭");
 
-    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(["a.md"]);
+    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual([fileId("a.md")]);
   });
 
   it("Model 의 트리가 그대로 비친다", () => {
@@ -397,46 +427,46 @@ describe("IShellViewModel — closeTabsToRight", () => {
 });
 
 describe("IShellViewModel — 미리보기 표시", () => {
-  it("미리보기 탭만 isPreview 다 — 화면이 기울임으로 알린다", () => {
+  it("미리보기 탭만 isPreview 다 — 화면이 기울임으로 알린다", async () => {
     const { viewModel } = make();
 
-    viewModel.previewFile("a.md");
+    await viewModel.previewFile("a.md");
     // 고정
-    viewModel.previewFile("a.md");
-    viewModel.previewFile("b.md");
+    await viewModel.previewFile("a.md");
+    await viewModel.previewFile("b.md");
 
     const rows = activeLeafOf(viewModel).tabs;
-    expect(rows.filter((tab) => tab.isPreview).map((tab) => tab.id)).toEqual(["b.md"]);
+    expect(rows.filter((tab) => tab.isPreview).map((tab) => tab.id)).toEqual([fileId("b.md")]);
   });
 
-  it("고정하면 표시가 사라진다", () => {
+  it("고정하면 표시가 사라진다", async () => {
     const { viewModel } = make();
 
-    viewModel.previewFile("a.md");
-    viewModel.previewFile("a.md");
+    await viewModel.previewFile("a.md");
+    await viewModel.previewFile("a.md");
 
     expect(activeLeafOf(viewModel).tabs.every((tab) => !tab.isPreview)).toBe(true);
   });
 
-  it("pinTab을 부르면 미리보기 표시가 사라진다", () => {
+  it("pinTab을 부르면 미리보기 표시가 사라진다", async () => {
     const { viewModel } = make();
 
-    viewModel.previewFile("a.md");
-    viewModel.pinTab("a.md");
+    await viewModel.previewFile("a.md");
+    viewModel.pinTab(fileId("a.md"));
 
-    expect(activeLeafOf(viewModel).tabs.find((tab) => tab.id === "a.md")?.isPreview).toBe(false);
+    expect(activeLeafOf(viewModel).tabs.find((tab) => tab.id === fileId("a.md"))?.isPreview).toBe(false);
   });
 
-  it("미리보기 자리가 아닌 탭에 pinTab을 불러도 아무 일도 없다", () => {
+  it("미리보기 자리가 아닌 탭에 pinTab을 불러도 아무 일도 없다", async () => {
     const { viewModel } = make();
 
-    viewModel.previewFile("a.md");
+    await viewModel.previewFile("a.md");
     // a.md는 밀려나 고정된다
-    viewModel.previewFile("b.md");
+    await viewModel.previewFile("b.md");
 
-    viewModel.pinTab("a.md");
+    viewModel.pinTab(fileId("a.md"));
 
-    expect(activeLeafOf(viewModel).tabs.find((tab) => tab.id === "b.md")?.isPreview).toBe(true);
+    expect(activeLeafOf(viewModel).tabs.find((tab) => tab.id === fileId("b.md"))?.isPreview).toBe(true);
   });
 });
 
@@ -486,11 +516,11 @@ describe("IShellViewModel — 분할", () => {
     expect(tree.children.map((child) => child.id)).toEqual([`${ROOT_PANE_ID}-split-b`, ROOT_PANE_ID]);
   });
 
-  it("없는 leaf·탭을 분할하려 하면 무시한다", () => {
+  it("없는 leaf·탭을 분할하려 하면 무시한다", async () => {
     const { viewModel } = make();
-    viewModel.previewFile("a.md");
+    await viewModel.previewFile("a.md");
 
-    viewModel.splitTab("없는pane", "a.md", "right");
+    viewModel.splitTab("없는pane", fileId("a.md"), "right");
     viewModel.splitTab(ROOT_PANE_ID, "없는탭", "right");
 
     expect(viewModel.tree.kind).toBe("leaf");
@@ -581,7 +611,7 @@ describe("IShellViewModel — 재정렬", () => {
 });
 
 describe("IShellViewModel — 분할된 상태에서 미리보기", () => {
-  it("활성 pane 기준으로 연다 — 다른 pane 의 탭은 건드리지 않는다", () => {
+  it("활성 pane 기준으로 연다 — 다른 pane 의 탭은 건드리지 않는다", async () => {
     const { tabLayout, viewModel } = make();
     tabLayout.setTree({
       kind: "leaf",
@@ -598,20 +628,20 @@ describe("IShellViewModel — 분할된 상태에서 미리보기", () => {
     expect(viewModel.activeLeafId).toBe(otherLeafId);
 
     // otherLeafId 에서 미리보기 하나 생김
-    viewModel.previewFile("preview.md");
+    await viewModel.previewFile("preview.md");
     // 다시 root 로 포커스 이동
     viewModel.selectTab(ROOT_PANE_ID, "a");
     // root 에서 새로 미리보기
-    viewModel.previewFile("other.md");
+    await viewModel.previewFile("other.md");
 
     const otherLeaf = findLeaf(viewModel.tree, otherLeafId);
     // 옛 미리보기 탭('preview.md')이 다른 pane 에 그대로 남아 있다 — 활성 pane 조작만으로 지워지지 않는다.
-    expect(otherLeaf && tabIdsOf(otherLeaf)).toEqual(["b", "preview.md"]);
+    expect(otherLeaf && tabIdsOf(otherLeaf)).toEqual(["b", fileId("preview.md")]);
     expect(otherLeaf?.tabs.every((tab) => !tab.isPreview)).toBe(true);
 
     const rootLeaf = findLeaf(viewModel.tree, ROOT_PANE_ID);
-    expect(rootLeaf && tabIdsOf(rootLeaf)).toEqual(["a", "other.md"]);
-    expect(rootLeaf?.tabs.find((tab) => tab.id === "other.md")?.isPreview).toBe(true);
+    expect(rootLeaf && tabIdsOf(rootLeaf)).toEqual(["a", fileId("other.md")]);
+    expect(rootLeaf?.tabs.find((tab) => tab.id === fileId("other.md"))?.isPreview).toBe(true);
   });
 });
 
@@ -620,11 +650,11 @@ describe("IShellViewModel — 모바일 드로어", () => {
     expect(make().viewModel.isSidebarOpen).toBe(false);
   });
 
-  it("파일을 열면 닫힌다 — 폰에서 드로어가 방금 연 파일을 가린다", () => {
+  it("파일을 열면 닫힌다 — 폰에서 드로어가 방금 연 파일을 가린다", async () => {
     const { viewModel } = make();
     viewModel.setSidebarOpen(true);
 
-    viewModel.previewFile("a.md");
+    await viewModel.previewFile("a.md");
 
     expect(viewModel.isSidebarOpen).toBe(false);
   });
@@ -671,13 +701,13 @@ describe("IShellViewModel — 커맨드 팔레트(2026-09-05, 옛 CommandCenterM
  * 가리킨 채로 끊긴다 — `retargetTabs` 가 없으면 탭은 남아도 다시는 아무 파일과도 안 이어진다.
  */
 describe("IShellViewModel — retargetTabs", () => {
-  it("경로가 정확히 같은 파일 탭의 id·제목을 바꾼다", () => {
+  it("경로가 정확히 같은 파일 탭의 id·제목을 바꾼다", async () => {
     const { viewModel } = make();
-    viewModel.previewFile("old.txt");
+    await viewModel.previewFile("old.txt");
 
     viewModel.retargetTabs("old.txt", "new.txt");
 
-    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(["new.txt"]);
+    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual([fileId("new.txt")]);
   });
 
   it("폴더 이동이면 그 아래 전부를 접두어째로 옮긴다", () => {
@@ -695,36 +725,36 @@ describe("IShellViewModel — retargetTabs", () => {
 
     viewModel.retargetTabs("old", "new");
 
-    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(["new/a.md", "new/nested/b.md", "unrelated.md"]);
+    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual([fileId("new/a.md"), fileId("new/nested/b.md"), "unrelated.md"]);
   });
 
-  it("겹치는 접두어를 가진 다른 파일은 건드리지 않는다 — old.txt 는 old 의 하위가 아니다", () => {
+  it("겹치는 접두어를 가진 다른 파일은 건드리지 않는다 — old.txt 는 old 의 하위가 아니다", async () => {
     const { viewModel } = make();
-    viewModel.previewFile("old.txt");
+    await viewModel.previewFile("old.txt");
 
     viewModel.retargetTabs("old", "new");
 
-    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(["old.txt"]);
+    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual([fileId("old.txt")]);
   });
 
-  it("활성 탭·미리보기 탭도 같이 따라간다", () => {
+  it("활성 탭·미리보기 탭도 같이 따라간다", async () => {
     const { viewModel } = make();
-    viewModel.previewFile("old.txt");
+    await viewModel.previewFile("old.txt");
 
     viewModel.retargetTabs("old.txt", "new.txt");
 
     const leaf = activeLeafOf(viewModel);
-    expect(leaf.activeTabId).toBe("new.txt");
+    expect(leaf.activeTabId).toBe(fileId("new.txt"));
     expect(leaf.tabs[0]?.isPreview).toBe(true);
   });
 
-  it("해당하는 탭이 없으면 아무것도 바뀌지 않는다", () => {
+  it("해당하는 탭이 없으면 아무것도 바뀌지 않는다", async () => {
     const { viewModel } = make();
-    viewModel.previewFile("a.md");
+    await viewModel.previewFile("a.md");
 
     viewModel.retargetTabs("nope", "new");
 
-    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(["a.md"]);
+    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual([fileId("a.md")]);
   });
 });
 
@@ -733,35 +763,35 @@ describe("IShellViewModel — retargetTabs", () => {
  * 그 답을 물어 확인 흐름만 관리한다. 셸은 파일이라는 개념을 모른다.
  */
 describe("requestCloseTab / confirmCloseTab / cancelCloseTab", () => {
-  it("dirty가 아니면 바로 닫는다 — 확인을 구하지 않는다", () => {
+  it("dirty가 아니면 바로 닫는다 — 확인을 구하지 않는다", async () => {
     const { viewModel } = make();
-    viewModel.previewFile("a.md");
-    viewModel.pinTab("a.md");
+    await viewModel.previewFile("a.md");
+    viewModel.pinTab(fileId("a.md"));
 
-    viewModel.requestCloseTab(ROOT_PANE_ID, "a.md");
+    viewModel.requestCloseTab(ROOT_PANE_ID, fileId("a.md"));
 
     expect(viewModel.pendingTabClose).toBeNull();
     expect(tabIdsOf(activeLeafOf(viewModel))).toEqual([]);
   });
 
-  it("dirty면 즉시 닫지 않고 확인 대상을 담아 둔다", () => {
-    const { viewModel, tabDirtyState } = make();
-    viewModel.previewFile("a.md");
-    viewModel.pinTab("a.md");
-    tabDirtyState.dirty.add("a.md");
+  it("dirty면 즉시 닫지 않고 확인 대상을 담아 둔다", async () => {
+    const { viewModel, markDirty } = make();
+    await viewModel.previewFile("a.md");
+    viewModel.pinTab(fileId("a.md"));
+    markDirty(fileId("a.md"));
 
-    viewModel.requestCloseTab(ROOT_PANE_ID, "a.md");
+    viewModel.requestCloseTab(ROOT_PANE_ID, fileId("a.md"));
 
-    expect(viewModel.pendingTabClose).toEqual({ leafId: ROOT_PANE_ID, tabId: "a.md" });
-    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(["a.md"]);
+    expect(viewModel.pendingTabClose).toEqual({ leafId: ROOT_PANE_ID, tabId: fileId("a.md") });
+    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual([fileId("a.md")]);
   });
 
-  it("confirmCloseTab은 담아 둔 대상을 실제로 닫고 비운다", () => {
-    const { viewModel, tabDirtyState } = make();
-    viewModel.previewFile("a.md");
-    viewModel.pinTab("a.md");
-    tabDirtyState.dirty.add("a.md");
-    viewModel.requestCloseTab(ROOT_PANE_ID, "a.md");
+  it("confirmCloseTab은 담아 둔 대상을 실제로 닫고 비운다", async () => {
+    const { viewModel, markDirty } = make();
+    await viewModel.previewFile("a.md");
+    viewModel.pinTab(fileId("a.md"));
+    markDirty(fileId("a.md"));
+    viewModel.requestCloseTab(ROOT_PANE_ID, fileId("a.md"));
 
     viewModel.confirmCloseTab();
 
@@ -769,17 +799,17 @@ describe("requestCloseTab / confirmCloseTab / cancelCloseTab", () => {
     expect(tabIdsOf(activeLeafOf(viewModel))).toEqual([]);
   });
 
-  it("cancelCloseTab은 닫지 않고 비운다", () => {
-    const { viewModel, tabDirtyState } = make();
-    viewModel.previewFile("a.md");
-    viewModel.pinTab("a.md");
-    tabDirtyState.dirty.add("a.md");
-    viewModel.requestCloseTab(ROOT_PANE_ID, "a.md");
+  it("cancelCloseTab은 닫지 않고 비운다", async () => {
+    const { viewModel, markDirty } = make();
+    await viewModel.previewFile("a.md");
+    viewModel.pinTab(fileId("a.md"));
+    markDirty(fileId("a.md"));
+    viewModel.requestCloseTab(ROOT_PANE_ID, fileId("a.md"));
 
     viewModel.cancelCloseTab();
 
     expect(viewModel.pendingTabClose).toBeNull();
-    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(["a.md"]);
+    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual([fileId("a.md")]);
   });
 
   it("confirmCloseTab은 담아 둔 것이 없으면 아무 일도 하지 않는다", () => {
@@ -911,21 +941,52 @@ describe("IShellViewModel — 낡은 클라이언트", () => {
 });
 
 describe("IShellViewModel — openTab", () => {
-  it("파일이 아닌 탭을 고정으로 열고 활성으로 만든다", () => {
+  it("파일이 아닌 탭을 고정으로 열고 활성으로 만든다", async () => {
     const { viewModel } = make();
-    viewModel.openTab({ id: "chat-1", kind: "chat", uri: URI.parse("chat:///1"), title: "대화" });
+    await viewModel.open(URI.parse("chat:///1"));
     const leaf = activeLeafOf(viewModel);
-    expect(leaf.tabs).toEqual([{ id: "chat-1", kind: "chat", title: "대화", isPreview: false, isDirty: false }]);
-    expect(leaf.activeTabId).toBe("chat-1");
+    expect(leaf.tabs).toEqual([{ id: "chat:///1", kind: "chat", title: "대화", isPreview: false, isDirty: false }]);
+    expect(leaf.activeTabId).toBe("chat:///1");
   });
 
-  it("이미 열려 있으면 그 탭으로 갈 뿐 복제하지 않는다", () => {
+  it("이미 열려 있으면 그 탭으로 갈 뿐 복제하지 않는다", async () => {
     const { viewModel } = make();
-    viewModel.openTab({ id: "chat-1", kind: "chat", uri: URI.parse("chat:///1"), title: "대화" });
-    viewModel.previewFile("a.md");
-    viewModel.openTab({ id: "chat-1", kind: "chat", uri: URI.parse("chat:///1"), title: "대화" });
-    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(["chat-1", "a.md"]);
-    expect(activeLeafOf(viewModel).activeTabId).toBe("chat-1");
+    await viewModel.open(URI.parse("chat:///1"));
+    await viewModel.previewFile("a.md");
+    await viewModel.open(URI.parse("chat:///1"));
+    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(["chat:///1", fileId("a.md")]);
+    expect(activeLeafOf(viewModel).activeTabId).toBe("chat:///1");
+  });
+});
+
+describe("IShellViewModel — 편집이 시작되면 고정", () => {
+  it("미리보기 탭이 더러워지는 순간 고정된다 — 기울임(아직 안 읽어본 파일)으로 남지 않는다", async () => {
+    const { viewModel, markDirty } = make();
+    await viewModel.previewFile("a.md");
+    expect(activeLeafOf(viewModel).tabs[0]?.isPreview).toBe(true);
+
+    markDirty(fileId("a.md"));
+
+    expect(activeLeafOf(viewModel).tabs[0]).toMatchObject({ isPreview: false, isDirty: true });
+  });
+});
+
+describe("IShellViewModel — 탭 시스템 위임", () => {
+  it("descriptorOf·containerOf는 탭 시스템의 것을 그대로 준다", async () => {
+    const { viewModel } = make();
+    await viewModel.previewFile("a.md");
+
+    expect(viewModel.descriptorOf(fileId("a.md"))?.title).toBe("a.md");
+    expect(viewModel.containerOf(fileId("a.md")).toString()).toBe(`Container(tab:${fileId("a.md")})`);
+  });
+
+  it("아무 provider도 못 여는 uri는 탭이 생기지 않고 알림이 남는다", async () => {
+    const { viewModel, notifications } = make();
+
+    await viewModel.open(URI.parse("nope:///x"));
+
+    expect(activeLeafOf(viewModel).tabs).toEqual([]);
+    expect(notifications.items.map((item) => item.severity)).toEqual(["error"]);
   });
 });
 
@@ -940,15 +1001,15 @@ describe("IShellViewModel — 알림", () => {
 });
 
 describe("IShellViewModel — 위치 요청", () => {
-  it("위치와 함께 열면 reveal이 그 탭을 가리키고 요청마다 seq가 오른다", () => {
+  it("위치와 함께 열면 reveal이 그 탭을 가리키고 요청마다 seq가 오른다", async () => {
     const { viewModel } = make();
     expect(viewModel.reveal).toBeNull();
-    viewModel.previewFile("a.md", { line: 3, column: 2 });
-    expect(viewModel.reveal).toEqual({ tabId: "a.md", line: 3, column: 2, seq: 1 });
-    viewModel.previewFile("a.md", { line: 3, column: 2 });
+    await viewModel.previewFile("a.md", { line: 3, column: 2 });
+    expect(viewModel.reveal).toEqual({ tabId: fileId("a.md"), line: 3, column: 2, seq: 1 });
+    await viewModel.previewFile("a.md", { line: 3, column: 2 });
     expect(viewModel.reveal?.seq).toBe(2);
-    viewModel.previewFile("b.md");
-    expect(viewModel.reveal?.tabId).toBe("a.md");
+    await viewModel.previewFile("b.md");
+    expect(viewModel.reveal?.tabId).toBe(fileId("a.md"));
   });
 });
 
@@ -963,10 +1024,10 @@ describe("IShellViewModel — showActivity", () => {
 });
 
 describe("IShellViewModel — activeTab", () => {
-  it("활성 leaf의 활성 탭을 준다", () => {
+  it("활성 leaf의 활성 탭을 준다", async () => {
     const { viewModel } = make();
     expect(viewModel.activeTab).toBeNull();
-    viewModel.previewFile("a.md");
-    expect(viewModel.activeTab).toEqual({ id: "a.md", kind: "file" });
+    await viewModel.previewFile("a.md");
+    expect(viewModel.activeTab).toEqual({ id: fileId("a.md"), kind: "file", uri: URI.file("a.md") });
   });
 });

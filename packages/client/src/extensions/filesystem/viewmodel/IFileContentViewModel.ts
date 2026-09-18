@@ -50,7 +50,11 @@ export interface IFileContentViewModel extends Disposable {
    * 쓴다. MobX 구독은 구현 안의 일이라 계약에 두지 않고, 이 메서드로 감싼다.
    */
   onDidChange(listener: () => void): Disposable;
-  openFile(path: string): void;
+  /**
+   * 읽어 보고 텍스트 탭으로 열 수 있으면 `true`. 읽기 실패·바이너리면 닫고 `false` — 텍스트 provider가
+   * 다른 provider에게 넘길지 판정하는 자리다. 이미 열려 있으면 다시 읽지 않는다.
+   */
+  openFile(path: string): Promise<boolean>;
   /** 타이핑할 때마다 부른다 — 로컬 버퍼만 바뀐다. */
   editFile(path: string, content: string): void;
   /** 지금 버퍼를 서버에 쓴다. */

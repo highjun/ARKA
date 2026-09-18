@@ -1,5 +1,6 @@
+import { URI } from "#contracts";
 import type { SidebarSlotProps } from "../model/ISidebarContentRegistry";
-import { useViewModel } from "#core/viewmodel";
+import { ContainerProvider, useViewModel } from "#core/viewmodel";
 import { observer } from "mobx-react-lite";
 import { Banner, ConfirmationDialog } from "@primer/react";
 import { Menu } from "#component/Menu";
@@ -14,8 +15,7 @@ import type { IconId } from "#component/Icon";
 import type { TabItem, TabTreeNode } from "../component/Tab";
 import type { ComponentType, ReactNode } from "react";
 import type { ICommandService } from "#core/commands";
-import type { OpenTab } from "../model/ITabLayout";
-import type { ITabContentRegistry } from "../model/ITabContentRegistry";
+import type { TabDescriptor } from "../model/ITabProviderDescriptor";
 import type { ShellTabPaneNode, ShellTabRow, TabContextTarget } from "../viewmodel/IShellViewModel";
 import styles from "./ShellView.module.css";
 
@@ -33,7 +33,7 @@ import styles from "./ShellView.module.css";
  */
 const DOES_NOTHING_YET = () => {};
 
-type ShellTabDisplayRow = ShellTabRow & { readonly iconId: string };
+type ShellTabDisplayRow = ShellTabRow & { readonly descriptor: TabDescriptor | undefined };
 type ShellTabDisplayNode =
   | {
       readonly kind: "leaf";
@@ -51,25 +51,23 @@ type ShellTabDisplayNode =
     };
 
 /**
- * `IShellViewModel.tree` 에는 없는 `iconId` 를 이 트리 전체에 병합한다 — 탭마다 registry 조회가
- * 필요해 ViewModel 이 모른다. 순수 함수라 훅이 아니다 — 렌더 본문에서 그냥 부른다.
+ * `IShellViewModel.tree` 에는 없는 `TabDescriptor`(아이콘·본문)를 이 트리 전체에 병합한다 — React 값이라
+ * ViewModel 이 들지 않는다. 순수 함수라 훅이 아니다 — 렌더 본문에서 그냥 부른다.
  */
-const mergeTabDisplay = (node: ShellTabPaneNode, tabContentRegistry: ITabContentRegistry): ShellTabDisplayNode => {
+const mergeTabDisplay = (
+  node: ShellTabPaneNode,
+  descriptorOf: (tabId: string) => TabDescriptor | undefined,
+): ShellTabDisplayNode => {
   if (node.kind === "leaf") {
-    return {
-      ...node,
-      tabs: node.tabs.map((tab) => ({
-        ...tab,
-        iconId: tabContentRegistry.tryGet(tab.kind)?.iconId ?? "file",
-      })),
-    };
+    return { ...node, tabs: node.tabs.map((tab) => ({ ...tab, descriptor: descriptorOf(tab.id) })) };
   }
-  return { ...node, children: node.children.map((child) => mergeTabDisplay(child, tabContentRegistry)) };
+  return { ...node, children: node.children.map((child) => mergeTabDisplay(child, descriptorOf)) };
 };
 
 /** ViewModel 의 트리를 `Tab`이 요구하는 트리로 바꾼다 — 탭마다 `content`를 여기서
- *  처음이자 마지막으로 채워 넣는다(Model·ViewModel 은 `ReactNode`를 갖지 않는다는 원칙). */
-const buildTree = (node: ShellTabDisplayNode, renderTab: (tab: ShellTabRow) => ReactNode): TabTreeNode => {
+ *  처음이자 마지막으로 채워 넣는다(Model·ViewModel 은 `ReactNode`를 갖지 않는다는 원칙).
+ *  `iconId`는 `Tab`이 아직 요구하는 자리라 채울 뿐이고, 실제 아이콘은 descriptor의 `icon`이다. */
+const buildTree = (node: ShellTabDisplayNode, renderTab: (tab: ShellTabDisplayRow) => ReactNode): TabTreeNode => {
   if (node.kind === "leaf") {
     return {
       kind: "leaf",
@@ -80,7 +78,8 @@ const buildTree = (node: ShellTabDisplayNode, renderTab: (tab: ShellTabRow) => R
         title: tab.title,
         isPreview: tab.isPreview,
         isDirty: tab.isDirty,
-        iconId: tab.iconId as IconId,
+        iconId: "file" as IconId,
+        icon: tab.descriptor === undefined ? undefined : () => tab.descriptor?.icon,
         content: renderTab(tab),
       })),
       size: node.size,
@@ -140,42 +139,47 @@ const buildTabContextMenu = (tree: TabTreeNode, commands: ICommandService) => (t
 };
 
 /**
- * 다른 모듈을 Shell 에 잇는 **유일한 자리** — `sidebarContentRegistry`·`tabContentRegistry`를
- * 조회해서 그릴 뿐이다. 어떤 모듈이 무엇을 등록했는지는 `registerServices.tsx`만 안다.
+ * 다른 모듈을 Shell 에 잇는 **유일한 자리** — `sidebarContentRegistry`를 조회해서 그리고, 탭은 ViewModel이
+ * 준 `TabDescriptor`로 그린다. 어떤 모듈이 무엇을 등록했는지는 `registerServices.tsx`만 안다.
  *
- * **파일을 모른다.** 탭의 dirty 여부는 ViewModel이 `ITabDirtyState`에 물어 트리에 담아 주고,
- * 무엇이 그 답을 채우는지는 조립부(`registerServices`)만 안다.
+ * **파일을 모른다.** 탭의 dirty 여부는 그 탭의 descriptor가 말하고, 셸은 그것을 트리에 담아 그릴 뿐이다.
+ * 탭 본문은 그 탭의 자식 컨테이너로 감싼다 — 탭 안에서 `useViewModel`이 꺼내는 것은 거기서 온다.
  */
 export const ShellView = observer(function ShellView() {
   const viewModel = useViewModel("arka.workbench.shellViewModel");
   const sidebarContentRegistry = useViewModel("arka.workbench.sidebarContentRegistry");
-  const tabContentRegistry = useViewModel("arka.workbench.tabContentRegistry");
   const commandCenterRegistry = useViewModel("arka.commands");
 
   const onFileOpen = (path: string, position?: { readonly line: number; readonly column: number }) =>
-    viewModel.previewFile(path, position);
-  const onFilePin = (path: string) => viewModel.pinTab(path);
+    void viewModel.previewFile(path, position);
+  /** 사이드바는 경로로 말한다 — 탭 id는 그 경로의 `file:` uri다. */
+  const onFilePin = (path: string) => viewModel.pinTab(URI.file(path).toString());
   /** 탭이 가리키는 경로만 옮긴다 — 편집 버퍼는 그것을 소유한 쪽이 스스로 옮긴다. */
   const onFileMove = (oldPath: string, newPath: string) => viewModel.retargetTabs(oldPath, newPath);
-  const onOpenTab = (tab: OpenTab) => viewModel.openTab(tab);
 
-  /** 저장 안 된 탭을 닫으려 하면 확인을 구한다 — dirty 여부는 ViewModel이 `ITabDirtyState`에 묻는다. */
+  /** 저장 안 된 탭을 닫으려 하면 확인을 구한다 — dirty 여부는 ViewModel이 descriptor에 묻는다. */
   const onTabClose = (leafId: string, tabId: string) => {
     viewModel.requestCloseTab(leafId, tabId);
   };
 
-  const renderTab = (tab: ShellTabRow): ReactNode => {
-    const TabComponent = tabContentRegistry.tryGet(tab.kind)?.TabComponent;
+  /** descriptor가 아직 없는 탭(복원 중)은 빈 채로 둔다 — 붙는 순간 ViewModel이 다시 계산한다. */
+  const renderTab = (tab: ShellTabDisplayRow): ReactNode => {
+    const descriptor = tab.descriptor;
+    if (descriptor === undefined) return null;
     const reveal = viewModel.reveal !== null && viewModel.reveal.tabId === tab.id ? viewModel.reveal : null;
-    return TabComponent ? <TabComponent tabId={tab.id} reveal={reveal} /> : null;
+    return (
+      <ContainerProvider container={viewModel.containerOf(tab.id)}>
+        <descriptor.Content tabId={tab.id} reveal={reveal} />
+      </ContainerProvider>
+    );
   };
 
   // 확장이 내는 본문·액션은 모두 같은 통로를 받는다 — 커널이 크롬을 그리므로 제목은 값으로 온다.
-  const slotProps = { onFileOpen, onFileMove, onFilePin, onOpenTab };
+  const slotProps = { onFileOpen, onFileMove, onFilePin };
   const renderSlot = (Slot: ComponentType<SidebarSlotProps> | undefined): ReactNode =>
     Slot === undefined ? null : <Slot {...slotProps} />;
 
-  const treeWithDirty = mergeTabDisplay(viewModel.tree, tabContentRegistry);
+  const treeWithDirty = mergeTabDisplay(viewModel.tree, (tabId) => viewModel.descriptorOf(tabId));
   const activeActivity = viewModel.activities.find((activity) => activity.isActive);
   const activeActivityId = activeActivity?.id ?? null;
   const sidebar = activeActivityId === null ? undefined : sidebarContentRegistry.tryGet(activeActivityId);
