@@ -1,7 +1,6 @@
 import { URI } from "#contracts";
 import type { ICommandService } from "#core/commands";
-import { ViewModelBase } from "#core/viewmodel";
-import { atom } from "nanostores";
+import { makeAutoObservable, observableRef, runInAction } from "mobx";
 import type { IMarkdownPreviewModel } from "../model/IMarkdownPreviewModel";
 import {
   PREVIEW_TAB_KIND,
@@ -14,9 +13,9 @@ import {
 const isMarkdown = (path: string): boolean => /\.(?:md|mdx|markdown)$/iu.test(path);
 
 /** `IMarkdownPreviewViewModel`의 유일한 구현체. */
-export class MarkdownPreviewViewModel extends ViewModelBase implements IMarkdownPreviewViewModel {
+export class MarkdownPreviewViewModel implements IMarkdownPreviewViewModel {
   readonly #model: IMarkdownPreviewModel;
-  readonly #previews;
+  private previewsState: IMarkdownPreviewModel["previews"];
   readonly #activeFile: () => string | null;
   readonly #openTab: (tab: { id: string; kind: string; uri: URI; title: string }) => void;
 
@@ -33,12 +32,18 @@ export class MarkdownPreviewViewModel extends ViewModelBase implements IMarkdown
     activeFile: () => string | null;
     openTab: (tab: { id: string; kind: string; uri: URI; title: string }) => void;
   }) {
-    super();
     this.#model = previewModel;
     this.#activeFile = activeFile;
     this.#openTab = openTab;
-    this.#previews = this.observe(atom(previewModel.previews));
-    previewModel.onDidChange(() => this.#previews.set(previewModel.previews));
+    this.previewsState = previewModel.previews;
+    makeAutoObservable<this, "previewsState">(
+      this,
+      {
+        previewsState: observableRef,
+      },
+      { autoBind: true },
+    );
+    previewModel.onDidChange(() => runInAction(() => (this.previewsState = previewModel.previews)));
 
     commandCenterRegistry.actions.add({
       id: "markdown.openPreview",
@@ -57,7 +62,7 @@ export class MarkdownPreviewViewModel extends ViewModelBase implements IMarkdown
   /** 아직 없는 탭이면 `loading` 상태를 돌려준다 — 화면이 빈 값을 다루지 않아도 된다. */
   previewOf(tabId: string): PreviewState {
     const path = pathOfPreviewTab(tabId);
-    const preview = path === null ? undefined : this.#previews.get()[path];
+    const preview = path === null ? undefined : this.previewsState[path];
     if (preview === undefined) return { loading: true, markdown: "", truncated: false, failure: null };
     return {
       loading: preview.status === "loading",

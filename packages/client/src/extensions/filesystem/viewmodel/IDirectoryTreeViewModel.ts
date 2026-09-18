@@ -60,8 +60,7 @@ declare module "#core/di" {
 /**
  * `FileTree` 컴포넌트가 필요로 하는 상태·조작을 모두 노출하는 ViewModel 계약.
  *
- * atom은 React 경계를 넘지 않는다((C), 2026-09-05) — 관찰 property는 전부 값 그대로다. 구현은
- * `ViewModelBase.observe()`로 atom을 감싸 값을 getter로 노출한다.
+ * 관찰 property는 전부 값 그대로다. 구현은 MobX observable 클래스고, 화면은 `observer`로 감싸 따라온다.
  */
 export interface IDirectoryTreeViewModel {
   /**

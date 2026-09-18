@@ -1,4 +1,5 @@
 import { useViewModel } from "#core/viewmodel";
+import { observer } from "mobx-react-lite";
 import { ConfirmationDialog, Dialog, Spinner } from "@primer/react";
 import { Blankslate } from "@primer/react/experimental";
 import { Container } from "#component/Container";
@@ -53,7 +54,7 @@ const deleteSubtitleOf = (targets: readonly ContextMenuTarget[]) =>
     : "되돌릴 수 없다.";
 
 /** 사이드바의 파일 탐색기. 트리 컴포넌트에 ViewModel의 행을 그대로 넘기고 배치만 한다. */
-export const DirectoryTreeView = ({
+export const DirectoryTreeView = observer(function DirectoryTreeView({
   onFileOpen,
   onFileMove,
   onFilePin,
@@ -62,7 +63,7 @@ export const DirectoryTreeView = ({
   readonly onFileMove: (oldPath: string, newPath: string) => void;
   /** 파일 행을 더블클릭했다 — 미리보기 탭을 고정한다(Tab 헤더 더블클릭과 같은 뜻). */
   readonly onFilePin: (path: string) => void;
-}) => {
+}) {
   const viewModel = useViewModel("arka.filesystem.directoryTreeViewModel");
   const fileContentViewModel = useViewModel("arka.filesystem.fileContentViewModel");
 
@@ -175,4 +176,4 @@ export const DirectoryTreeView = ({
       )}
     </>
   );
-};
+});

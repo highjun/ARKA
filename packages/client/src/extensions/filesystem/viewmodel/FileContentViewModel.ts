@@ -1,27 +1,30 @@
 import type { Disposable } from "#core/di";
-import { ViewModelBase } from "#core/viewmodel";
-import { atom } from "nanostores";
+import { makeAutoObservable, observableRef, reaction } from "mobx";
 import type { IFileContentModel, OpenFile } from "../model/IFileContentModel";
 import type { IPinTab } from "../model/IPinTab";
 import type { IFileContentViewModel, FileRow, FileRowMap } from "./IFileContentViewModel";
 
 /** `IFileContentViewModel`을 구현한다 — Model의 `OpenFile`을 화면용 `FileRow`로 변환한다. */
-export class FileContentViewModel extends ViewModelBase implements IFileContentViewModel {
+export class FileContentViewModel implements IFileContentViewModel {
   readonly #model: IFileContentModel;
   readonly #pinTab: IPinTab;
-  readonly #rows;
+  private rowsState: FileRowMap;
   readonly #subscription: Disposable;
 
   /** `pinTab`을 받는 이유는 편집이 시작되면 미리보기 탭을 고정해야 해서다. */
   constructor({ fileContentModel, pinTab }: { fileContentModel: IFileContentModel; pinTab: IPinTab }) {
-    super();
     this.#model = fileContentModel;
     this.#pinTab = pinTab;
-    // Model은 값과 이벤트만 준다 — 화면 상태(atom)는 여기서 소유한다.
-    this.#rows = this.observe(atom(this.#computeRows()));
-    this.#subscription = fileContentModel.onDidChange(() => {
-      this.#rows.set(this.#computeRows());
-    });
+    // Model은 값과 이벤트만 준다 — 화면 상태는 여기서 소유한다.
+    this.rowsState = this.#computeRows();
+    this.#subscription = fileContentModel.onDidChange(() => this.syncRows());
+    makeAutoObservable<this, "rowsState">(
+      this,
+      {
+        rowsState: observableRef,
+      },
+      { autoBind: true },
+    );
   }
 
   /** 구독을 끊는다. 컨테이너가 이 VM을 정리할 때 불린다. */
@@ -35,12 +38,20 @@ export class FileContentViewModel extends ViewModelBase implements IFileContentV
 
   /** `#rows`를 값으로 노출한다. */
   get rows(): FileRowMap {
-    return this.#rows.get();
+    return this.rowsState;
   }
 
-  /** `ViewModelBase.subscribe`(React 배선)를 계약이 쓰는 `Disposable` 모양으로 감싼다. */
+  /** `rows`가 바뀔 때마다 부른다 — 화면 밖(탭의 더티 표시)이 지켜보는 통로다. */
   onDidChange(listener: () => void): Disposable {
-    return { dispose: this.subscribe(listener) };
+    const stop = reaction(
+      () => this.rowsState,
+      () => listener(),
+    );
+    return { dispose: stop };
+  }
+
+  private syncRows(): void {
+    this.rowsState = this.#computeRows();
   }
 
   /** `#model.open`에 위임한다. */
@@ -53,9 +64,9 @@ export class FileContentViewModel extends ViewModelBase implements IFileContentV
    * 미리보기(italic) 상태로 남아 있으면 "아직 안 읽어본 파일"이라는 원래 뜻과 어긋난다.
    */
   editFile(path: string, content: string): void {
-    const wasDirty = this.#rows.get()[path]?.isDirty ?? false;
+    const wasDirty = this.rowsState[path]?.isDirty ?? false;
     this.#model.edit(path, content);
-    if (!wasDirty && this.#rows.get()[path]?.isDirty) this.#pinTab.pin(path);
+    if (!wasDirty && this.rowsState[path]?.isDirty) this.#pinTab.pin(path);
   }
 
   /** `#model.save`에 위임한다. */

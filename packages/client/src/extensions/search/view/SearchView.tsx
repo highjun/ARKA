@@ -1,4 +1,5 @@
 import { useViewModel } from "#core/viewmodel";
+import { observer } from "mobx-react-lite";
 import { Button, Spinner, TextInput } from "@primer/react";
 import { Text } from "#component/Text";
 import { SearchResultList } from "../component/SearchResultList";
@@ -7,11 +8,11 @@ import styles from "./SearchView.module.css";
 /**
  * 사이드바의 검색 패널. 결과를 누르면 그 파일을 그 줄·열로 연다.
  */
-export const SearchView = ({
+export const SearchView = observer(function SearchView({
   onFileOpen,
 }: {
   readonly onFileOpen: (path: string, position?: { readonly line: number; readonly column: number }) => void;
-}) => {
+}) {
   const viewModel = useViewModel("arka.search.viewModel");
   return (
     <div data-component="SearchView" className={styles["root"]}>
@@ -66,4 +67,4 @@ export const SearchView = ({
       </div>
     </div>
   );
-};
+});

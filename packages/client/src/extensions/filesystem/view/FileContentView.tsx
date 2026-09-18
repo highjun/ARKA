@@ -1,4 +1,5 @@
 import { useViewModel } from "#core/viewmodel";
+import { observer } from "mobx-react-lite";
 import { Banner } from "@primer/react";
 import { TextEditor } from "../component/TextEditor";
 import styles from "./FileContentView.module.css";
@@ -16,13 +17,13 @@ import styles from "./FileContentView.module.css";
  * 안내 한 줄뿐이다. **편집·저장은 `TextEditor`에 그대로 위임한다** — 버퍼 관리·저장 버튼·Ctrl+S는
  * 전부 그 컴포넌트가 갖고, 여기서는 ViewModel이 이미 접어 준 값을 그대로 넘길 뿐이다.
  */
-export const FileContentView = ({
+export const FileContentView = observer(function FileContentView({
   path,
   reveal = null,
 }: {
   readonly path: string;
   readonly reveal?: { readonly line: number; readonly column: number; readonly seq: number } | null;
-}) => {
+}) {
   const viewModel = useViewModel("arka.filesystem.fileContentViewModel");
   viewModel.openFile(path);
 
@@ -49,4 +50,4 @@ export const FileContentView = ({
       />
     </div>
   );
-};
+});

@@ -1,4 +1,5 @@
 import { useViewModel } from "#core/viewmodel";
+import { observer } from "mobx-react-lite";
 import { Menu } from "#component/Menu";
 import type { ReactNode } from "react";
 
@@ -10,7 +11,7 @@ import type { ReactNode } from "react";
  *
  * `useViewModel` 하나만 부른다 — `onSelect`는 매 렌더 새로 계산되는 값이라 메모이즈할 이유가 없다.
  */
-export const CommandContextMenu = ({
+export const CommandContextMenu = observer(function CommandContextMenu({
   menuId,
   context,
   onOpenChange,
@@ -20,7 +21,7 @@ export const CommandContextMenu = ({
   readonly context?: unknown;
   readonly onOpenChange?: (open: boolean) => void;
   readonly children: ReactNode;
-}) => {
+}) {
   const commands = useViewModel("arka.commands");
 
   const items = commands
@@ -45,4 +46,4 @@ export const CommandContextMenu = ({
       )}
     </Menu>
   );
-};
+});

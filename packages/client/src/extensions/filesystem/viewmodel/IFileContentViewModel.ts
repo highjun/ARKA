@@ -41,14 +41,13 @@ declare module "#core/di" {
 /**
  * 화면(에디터)이 필요로 하는 파일 상태·조작을 노출하는 ViewModel 계약.
  *
- * atom은 React 경계를 넘지 않는다((C), 2026-09-05) — `rows`는 값 그대로다. 구현은
- * `ViewModelBase.observe()`로 atom을 감싸 값을 getter로 노출한다.
+ * 관찰 property는 전부 값 그대로다. 구현은 MobX observable 클래스고, 화면은 `observer`로 감싸 따라온다.
  */
 export interface IFileContentViewModel {
   readonly rows: FileRowMap;
   /**
    * `rows`가 바뀌었음을 알린다 — 화면 밖에서 이 값을 지켜봐야 하는 쪽(예: 탭의 dirty 표시)이
-   * 쓴다. `ViewModelBase.subscribe`는 React 배선이라 계약에 두지 않고, 이 메서드로 감싼다.
+   * 쓴다. MobX 구독은 구현 안의 일이라 계약에 두지 않고, 이 메서드로 감싼다.
    */
   onDidChange(listener: () => void): Disposable;
   openFile(path: string): void;
