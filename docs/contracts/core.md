@@ -31,15 +31,22 @@ export interface Descriptor {
  * **`add`는 `activate` 안에서만 부른다** — 부팅 뒤로 안 변하므로 등록 취소가 없다.
  */
 export declare class Registry<TDescriptor extends Descriptor> {
-  /**
-   * 지금 켜는 중인 확장의 id가 같이 기록된다 — 메뉴 묶음이 이것으로 갈린다.
-   * @throws DescriptorDuplicatedIdError 같은 id가 이미 있다. 조용한 덮어쓰기가 더 나쁘다.
-   */
+  /** @throws DescriptorDuplicatedIdError 같은 id가 이미 있다. 조용한 덮어쓰기가 더 나쁘다. */
   add(descriptor: TDescriptor): void;
   /** @throws DescriptorNotFoundError 그 id가 없다. */
   get(id: string): TDescriptor;
   tryGet(id: string): TDescriptor | undefined;
   list(): readonly TDescriptor[];
+}
+
+/**
+ * id 없이 담기만 하는 그릇. **걷기만 하고 찾지 않는 것**이 여기 온다 — 키바인딩·메뉴 항목.
+ * `Registry`와 같은 규칙이다: `activate` 안에서만 `add`하고 그 뒤로 안 변한다.
+ */
+export declare class Collection<T> {
+  /** 지금 켜는 중인 확장의 id가 같이 기록된다 — 메뉴 묶음이 이것으로 갈린다. */
+  add(item: T): void;
+  list(): readonly T[];
 }
 
 /** `Registry.get`이 없는 id를 받았다. */
@@ -171,7 +178,8 @@ export declare class Emitter<T = void> {
 명령은 **트리거를 모른다** — 팔레트에서 불리든 키로 불리든 같은 것이다.
 - 조건(`when`)은 트리거 쪽에 붙는다. 같은 명령이라도 키로 부를 때와 메뉴에서 부를 때 조건이 다르기 때문이다.
 
-바깥에서 보는 것은 `ICommandService` 하나다 — 네 등록부가 `InstanceMap`에 따로 오르지 않아 "넷이 한 벌"이 구조로 보장된다.
+바깥에서 보는 것은 `ICommandService` 하나다 — 그릇 넷이 `InstanceMap`에 따로 오르지 않아 "넷이 한 벌"이 구조로 보장된다.
+명령과 문맥은 id로 찾으므로 `Registry`, 키바인딩과 메뉴 항목은 걷기만 하므로 `Collection`이다 — id가 없다.
 조건을 푸는 일도 여기 있다. 등록부와 문맥을 짝지어 넘기는 자리를 남기면 엉뚱한 짝을 넘길 수 있다.
 
 ```ts
@@ -192,8 +200,8 @@ export interface ContextDescriptor extends Descriptor {
   readonly value: () => unknown;
 }
 
-/** 키 하나에 명령 하나. `id`는 등록 자체의 식별자다 — 키 문자열도 명령 id도 아니다. */
-export interface KeybindingDescriptor extends Descriptor {
+/** 키 하나에 명령 하나. id가 없다 — 눌린 키로 걷지 찾지 않는다. */
+export interface Keybinding {
   /** `ctrl+k` 형태. Ctrl과 Cmd를 둘 다 `ctrl`로 합친다. */
   readonly keybinding: string;
   readonly actionId: string;
@@ -201,12 +209,12 @@ export interface KeybindingDescriptor extends Descriptor {
 }
 
 /**
- * 메뉴 한 자리에 명령 하나.
+ * 메뉴 한 자리에 명령 하나. id가 없다 — `menuId`로 걷지 찾지 않는다.
  *
  * 정렬 그룹이 없다. **어느 확장이 냈는지가 곧 묶음**이라 커널이 이미 안다 — `add`될 때 켜는 중인
  * 확장의 id가 기록된다. 구분선은 확장이 바뀌는 자리에 긋고, 묶음 순서는 배럴 순서다.
  */
-export interface MenuItemDescriptor extends Descriptor {
+export interface MenuItem {
   /** 어느 메뉴에 기여하는지 — `explorer.context`·`shell.tab.context`. */
   readonly menuId: string;
   readonly actionId: string;
@@ -232,8 +240,8 @@ export interface ICommandService {
   readonly actions: Registry<ActionDescriptor>;
   readonly contexts: Registry<ContextDescriptor>;
   /** 확장이 기여한 **기본값**. 사용자 재정의는 `overrides`가 든다 — 여기는 안 변한다. */
-  readonly keybindings: Registry<KeybindingDescriptor>;
-  readonly menus: Registry<MenuItemDescriptor>;
+  readonly keybindings: Collection<Keybinding>;
+  readonly menus: Collection<MenuItem>;
 
   /** 사용자 재정의 전부 — `actionId → 키`. `null`이면 기본값을 꺼 둔 것이다. */
   readonly overrides: ReadonlyMap<string, string | null>;
@@ -241,9 +249,9 @@ export interface ICommandService {
   setKeybinding(actionId: string, keybinding: string | null): void;
 
   /** 눌린 키에 맞고 조건을 통과하는 키바인딩. **재정의를 먼저 본다.** 없으면 `undefined`. */
-  matchKeybinding(event: KeyboardEvent): KeybindingDescriptor | undefined;
+  matchKeybinding(event: KeyboardEvent): Keybinding | undefined;
   /** 그 메뉴에 붙고 조건을 통과하는 항목들. 확장 순서·`order` 순으로 정렬돼 온다. */
-  matchMenuItems(menuId: string): readonly MenuItemDescriptor[];
+  matchMenuItems(menuId: string): readonly MenuItem[];
 
   /** 실행했으면 `true` — 전역 keydown 리스너가 이 값으로 `preventDefault` 여부를 정한다. */
   dispatchKeydown(event: KeyboardEvent): boolean;
@@ -257,16 +265,17 @@ export interface ICommandService {
 스키마는 확장이 기여하고 값은 커널이 `settings.json`에 든다. 설정 화면은 스키마를 보고 그린다.
 
 ```ts
-/** 확장이 더하는 설정 한 칸. */
-export interface SettingsDescriptor extends Descriptor {
+/** 확장이 더하는 설정 한 칸. `type`이 `default`의 타입을 정한다 — 어긋나면 컴파일에서 잡힌다. */
+export type SettingsDescriptor = Descriptor & {
   readonly title: string;
-  readonly type: "boolean" | "number" | "string" | "enum";
-  readonly default: unknown;
-  /** `type`이 `enum`일 때만. */
-  readonly options?: readonly string[];
   /** 화면 폭에 따라 값이 갈리는가. 설정에 "기기" 개념을 두지 않기로 한 결정의 대응물이다. */
   readonly byViewportWidth?: boolean;
-}
+} & (
+  | { readonly type: "boolean"; readonly default: boolean }
+  | { readonly type: "number"; readonly default: number }
+  | { readonly type: "string"; readonly default: string }
+  | { readonly type: "enum"; readonly default: string; readonly options: readonly string[] }
+);
 
 /**
  * 스키마를 들고 값을 읽고 쓴다. 확장은 `activate`에서 `schema.add(…)`로 자기 칸을 더한다.

@@ -4,9 +4,7 @@
 커널의 계약은 [core.md](core.md)다 — 여기 나오는 `Descriptor`·`Registry`·`Container`·`InstanceId`는 거기 것이다.
 `IconId`는 `shared/component/Icon` 것이다 — `ICON_MAP`에 올린 이름만 통과하는 닫힌 집합.
 
-**아직 검토 전이다.** core를 닫으며 여기로 넘어온 숙제가 있다.
-- `SettingsDescriptor` — `type`과 `default`가 안 묶인다(core.md로 옮겨 감)
-- 메뉴 항목·키바인딩의 `id` 파생 — id로 찾지 않는 둘이 `Registry`에 있어야 하나
+**검토 중이다.** 확장 등록·기여 지점은 봤고, 워크스페이스부터는 아직이다.
 
 ---
 
