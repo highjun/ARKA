@@ -1,4 +1,5 @@
 import { useViewModel } from "#core/viewmodel";
+import { observer } from "mobx-react-lite";
 import { Heading } from "@primer/react";
 import { Text } from "#component/Text";
 import styles from "./SettingsTabView.module.css";
@@ -14,7 +15,7 @@ const DENSITIES = [
 ] as const;
 
 /** 설정 탭. 라디오 두 묶음 — 키가 늘면 섹션이 는다. */
-export const SettingsTabView = () => {
+export const SettingsTabView = observer(function SettingsTabView() {
   const viewModel = useViewModel("arka.workbench.settingsViewModel");
   return (
     <div data-component="SettingsTabView" className={styles["root"]}>
@@ -60,4 +61,4 @@ export const SettingsTabView = () => {
       </section>
     </div>
   );
-};
+});

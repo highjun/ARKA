@@ -1,4 +1,5 @@
 import { useViewModel } from "#core/viewmodel";
+import { observer } from "mobx-react-lite";
 import { CrashScreen } from "../component/CrashScreen";
 import { ErrorBoundary } from "#utils/errorBoundary";
 import { ShellView } from "./ShellView";
@@ -9,7 +10,7 @@ import { ShellView } from "./ShellView";
  * `ShellView`와 분리한 이유 — ErrorBoundary는 자기 자신의 오류를 못 잡는다. 셸 안에 두면 셸이
  * 죽을 때 같이 죽는다.
  */
-export const RootView = () => {
+export const RootView = observer(function RootView() {
   const errorLog = useViewModel("arka.workbench.errorLog");
   return (
     <ErrorBoundary
@@ -21,4 +22,4 @@ export const RootView = () => {
       <ShellView />
     </ErrorBoundary>
   );
-};
+});

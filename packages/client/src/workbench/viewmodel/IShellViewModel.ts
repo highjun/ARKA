@@ -88,8 +88,7 @@ declare module "#core/di" {
  * **파생이 컴포넌트 밖에 있어야** 하기 때문이다. `activities` 는 Model 에 아예 없는 목록이라
  * 여기서 만들어진다(활동이 무엇무엇인지는 화면의 사정이다).
  *
- * atom은 React 경계를 넘지 않는다((C), 2026-09-05) — 관찰 property는 전부 값 그대로다. 구현은
- * `ViewModelBase.observe()`로 atom을 감싸 값을 getter로 노출한다.
+ * 관찰 property는 전부 값 그대로다. 구현은 MobX observable 클래스고, 화면은 `observer`로 감싸 따라온다.
  */
 export interface IShellViewModel {
   /**

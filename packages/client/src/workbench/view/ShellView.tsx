@@ -1,5 +1,6 @@
 import type { SidebarSlotProps } from "../model/ISidebarContentRegistry";
 import { useViewModel } from "#core/viewmodel";
+import { observer } from "mobx-react-lite";
 import { Banner, ConfirmationDialog } from "@primer/react";
 import { Menu } from "#component/Menu";
 import { Icon } from "#component/Icon";
@@ -145,7 +146,7 @@ const buildTabContextMenu = (tree: TabTreeNode, commands: ICommandService) => (t
  * **파일을 모른다.** 탭의 dirty 여부는 ViewModel이 `ITabDirtyState`에 물어 트리에 담아 주고,
  * 무엇이 그 답을 채우는지는 조립부(`registerServices`)만 안다.
  */
-export const ShellView = () => {
+export const ShellView = observer(function ShellView() {
   const viewModel = useViewModel("arka.workbench.shellViewModel");
   const sidebarContentRegistry = useViewModel("arka.workbench.sidebarContentRegistry");
   const tabContentRegistry = useViewModel("arka.workbench.tabContentRegistry");
@@ -310,4 +311,4 @@ export const ShellView = () => {
       )}
     </>
   );
-};
+});

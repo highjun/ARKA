@@ -1,6 +1,5 @@
 import type { Disposable } from "#core/di";
-import { ViewModelBase } from "#core/viewmodel";
-import { atom } from "nanostores";
+import { makeAutoObservable, observable, observableRef } from "mobx";
 import type { ITabDirtyState } from "../model/ITabDirtyState";
 import type { IWorkbenchStartup } from "../model/IWorkbenchStartup";
 import { URI } from "#contracts";
@@ -13,7 +12,7 @@ import type { ICommandService } from "#core/commands";
 import { ROOT_PANE_ID } from "../model/tabsShare";
 import type { ITabLayout, OpenTab, PaneId, PaneLeaf, PaneNode, SplitOrientation } from "../model/ITabLayout";
 import { findLeaf, firstLeafId, neighbourOf, pruneTree, replaceLeaf } from "../model/paneTree";
-import type { IColorMode } from "../model/IColorMode";
+import type { IColorMode, Mode } from "../model/IColorMode";
 import type {
   ShellActivityRow,
   ShellTabPaneNode,
@@ -25,7 +24,7 @@ import type {
 } from "./IShellViewModel";
 
 /** 셸 전체가 보는 하나의 ViewModel. 탭·활동·테마·알림 Model을 구독해 화면이 쓸 값으로 편다. */
-export class ShellViewModel extends ViewModelBase implements IShellViewModel {
+export class ShellViewModel implements IShellViewModel {
   /** 트리 전체가 빈 leaf 하나로 무너졌을 때(전부 닫힘) 되돌아갈 자리 — Model 의 초기 상태와 같다. */
   static readonly #EMPTY_ROOT: PaneNode = { kind: "leaf", id: ROOT_PANE_ID, tabs: [], activeTabId: null };
 
@@ -46,16 +45,16 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
   readonly #startup: IWorkbenchStartup;
   readonly #appLifetime: IAppLifetime;
   readonly #workspace: IWorkspace;
-  readonly #buildId = this.observe(atom(""));
-  readonly #workspaceName = this.observe(atom(""));
-  readonly #isClientOutdated = this.observe(atom(false));
+  private buildIdState = "";
+  private workspaceNameState = "";
+  private isClientOutdatedState = false;
   readonly #notifications: INotifications;
-  readonly #notificationRows;
-  readonly #reveal = this.observe(atom<IShellViewModel["reveal"]>(null));
+  private notificationRows: readonly ShellNotificationRow[];
+  private revealState: IShellViewModel["reveal"] = null;
   #revealSeq = 0;
-  readonly #activities;
-  readonly #tree;
-  readonly #activeLeafId;
+  private activityRows: readonly ShellActivityRow[];
+  private treeState: ShellTabPaneNode;
+  private activeLeafIdState: PaneId;
   /**
    * 이 ViewModel 이 갖는 유일한 자기 상태다.
    *
@@ -63,12 +62,12 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
    * (직렬화·지속의 대상)에 둘 것이 아니다. 그러면서도 컴포넌트에 맡길 수는 없다 — 파일을 열면
    * 닫아야 한다는 규칙을 아는 곳이 여기뿐이라서다.
    */
-  readonly #isSidebarOpen = this.observe(atom(false));
+  private isSidebarOpenState = false;
   /** `requestCloseTab`이 확인을 구하는 동안 담아 두는 대상 — `confirmCloseTab`/`cancelCloseTab`이 지운다. */
-  readonly #pendingTabClose = this.observe(atom<{ leafId: PaneId; tabId: string } | null>(null));
-  /** 옛 `CommandCenterModel`에서 옮겨온 유일한 atom(2026-09-05) — `IShellViewModel.isPaletteOpen` 참고. */
-  readonly #isPaletteOpen = this.observe(atom(false));
-  readonly #theme;
+  private pendingTabCloseState: { leafId: PaneId; tabId: string } | null = null;
+  /** 옛 `CommandCenterModel`에서 옮겨온 유일한 상태(2026-09-05) — `IShellViewModel.isPaletteOpen` 참고. */
+  private isPaletteOpenState = false;
+  private themeState: Mode;
   readonly #copyToClipboard: (text: string) => void;
 
   /** Model들을 받아 각각 구독한다 — 여기서 만든 atom이 화면 갱신의 유일한 통로다. */
@@ -99,7 +98,6 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
      *  대상 아님)가 이 얇은 함수를 주입한다(`DirectoryTreeViewModel`과 같은 패턴). */
     copyToClipboard: (text: string) => void;
   }) {
-    super();
     this.#activityModel = activityModel;
     this.#tabLayout = tabLayout;
     this.#colorMode = colorMode;
@@ -110,24 +108,58 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     this.#workspace = workspace;
     this.#notifications = notifications;
     this.#copyToClipboard = copyToClipboard;
-    this.#notificationRows = this.observe(atom(this.#computeNotifications()));
+    this.notificationRows = this.#computeNotifications();
 
     // Model은 값과 이벤트만 준다 — 파생된 화면 상태(atom)는 전부 여기서 소유한다.
-    this.#activities = this.observe(atom(this.#computeActivities()));
-    this.#tree = this.observe(atom(this.#computeTree()));
-    this.#activeLeafId = this.observe(atom(tabLayout.activePaneId));
-    this.#theme = this.observe(atom(colorMode.mode));
+    this.activityRows = this.#computeActivities();
+    this.treeState = this.#computeTree();
+    this.activeLeafIdState = tabLayout.activePaneId;
+    this.themeState = colorMode.mode;
 
     this.#subscriptions = [
-      activityModel.onDidChange(() => this.#recompute()),
-      tabLayout.onDidChange(() => this.#recompute()),
-      colorMode.onDidChange(() => this.#recompute()),
+      activityModel.onDidChange(() => this.recompute()),
+      tabLayout.onDidChange(() => this.recompute()),
+      colorMode.onDidChange(() => this.recompute()),
       // dirty가 바뀌면 탭 표시가 달라진다 — 무엇이 더러워졌는지는 모르고 다시 계산만 한다.
-      tabDirtyState.onDidChange(() => this.#recompute()),
-      notifications.onDidChange(() => this.#notificationRows.set(this.#computeNotifications())),
-      appLifetime.onDidChange(() => this.#recomputeLifetime()),
-      workspace.onDidChange(() => this.#workspaceName.set(workspace.name)),
+      tabDirtyState.onDidChange(() => this.recompute()),
+      notifications.onDidChange(() => this.syncNotifications()),
+      appLifetime.onDidChange(() => this.recomputeLifetime()),
+      workspace.onDidChange(() => this.syncWorkspace()),
     ];
+
+    // 상태는 참조로만 관찰한다 — 매번 새 값을 통째로 넣으므로 깊이 감쌀 이유가 없고, 화면은 plain 값을 받는다.
+    makeAutoObservable<
+      this,
+      | "activityRows"
+      | "treeState"
+      | "notificationRows"
+      | "revealState"
+      | "pendingTabCloseState"
+      | "activeLeafIdState"
+      | "themeState"
+      | "buildIdState"
+      | "workspaceNameState"
+      | "isClientOutdatedState"
+      | "isSidebarOpenState"
+      | "isPaletteOpenState"
+    >(
+      this,
+      {
+        activityRows: observableRef,
+        treeState: observableRef,
+        notificationRows: observableRef,
+        revealState: observableRef,
+        pendingTabCloseState: observableRef,
+        activeLeafIdState: observable,
+        themeState: observable,
+        buildIdState: observable,
+        workspaceNameState: observable,
+        isClientOutdatedState: observable,
+        isSidebarOpenState: observable,
+        isPaletteOpenState: observable,
+      },
+      { autoBind: true },
+    );
 
     this.#registerCommands(commandCenterRegistry);
   }
@@ -147,17 +179,17 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
 
   /** `#activities`를 값으로 노출한다. */
   get activities(): readonly ShellActivityRow[] {
-    return this.#activities.get();
+    return this.activityRows;
   }
 
   /** `#tree`를 값으로 노출한다. */
   get tree(): ShellTabPaneNode {
-    return this.#tree.get();
+    return this.treeState;
   }
 
   /** `#activeLeafId`를 값으로 노출한다. */
   get activeLeafId(): PaneId {
-    return this.#activeLeafId.get();
+    return this.activeLeafIdState;
   }
 
   /** 같은 활동을 다시 고르면 닫는다 — 폰에서 사이드바를 접는 유일한 수단이다. */
@@ -208,7 +240,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
 
   /** `#pendingTabClose`를 값으로 노출한다. */
   get pendingTabClose(): { readonly leafId: PaneId; readonly tabId: string } | null {
-    return this.#pendingTabClose.get();
+    return this.pendingTabCloseState;
   }
 
   /** `isDirty`가 거짓이면 바로 `closeTab`, 참이면 `#pendingTabClose`에 담아 확인을 기다린다. */
@@ -218,20 +250,20 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
       this.closeTab(leafId, tabId);
       return;
     }
-    this.#pendingTabClose.set({ leafId, tabId });
+    this.pendingTabCloseState = { leafId, tabId };
   }
 
   /** `#pendingTabClose`에 담긴 대상으로 `closeTab`을 호출한다. */
   confirmCloseTab(): void {
-    const pending = this.#pendingTabClose.get();
-    this.#pendingTabClose.set(null);
+    const pending = this.pendingTabCloseState;
+    this.pendingTabCloseState = null;
     if (pending === null) return;
     this.closeTab(pending.leafId, pending.tabId);
   }
 
   /** `#pendingTabClose`를 비운다. */
   cancelCloseTab(): void {
-    this.#pendingTabClose.set(null);
+    this.pendingTabCloseState = null;
   }
 
   /** `leafId`에서 `tabId`와 `protectedTabIds`를 뺀 나머지를 닫는다. */
@@ -355,38 +387,38 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
 
   /** `#isSidebarOpen`을 값으로 노출한다. */
   get isSidebarOpen(): boolean {
-    return this.#isSidebarOpen.get();
+    return this.isSidebarOpenState;
   }
 
   /** `#isSidebarOpen`에 값을 반영한다. */
   setSidebarOpen(open: boolean): void {
-    this.#isSidebarOpen.set(open);
+    this.isSidebarOpenState = open;
   }
 
   /** `#isPaletteOpen`을 값으로 노출한다. */
   get isPaletteOpen(): boolean {
-    return this.#isPaletteOpen.get();
+    return this.isPaletteOpenState;
   }
 
   /** `#isPaletteOpen`에 값을 반영한다. */
   setPaletteOpen(open: boolean): void {
-    this.#isPaletteOpen.set(open);
+    this.isPaletteOpenState = open;
   }
 
   /** `#theme`를 값으로 노출한다. */
   /** 화면 구석에 띄울 빌드 표시. 아직 못 읽었거나 실패했으면 빈 문자열이다. */
   get buildId(): string {
-    return this.#buildId.get();
+    return this.buildIdState;
   }
 
   /** 아직 서버 정보를 못 읽었으면 빈 문자열이다. */
   get workspaceName(): string {
-    return this.#workspaceName.get();
+    return this.workspaceNameState;
   }
 
   /** 서버 정보를 못 읽었으면 `false`다 — 모르면 낡았다고 말하지 않는다. */
   get isClientOutdated(): boolean {
-    return this.#isClientOutdated.get();
+    return this.isClientOutdatedState;
   }
 
   /** 앱 수명에 맡긴다 — 실제 새로고침은 그쪽이 주입받았다. */
@@ -396,7 +428,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
 
   /** 화면이 그릴 최소 필드만 남긴 행이다 — `at`은 여기서 빠진다. */
   get notifications(): readonly ShellNotificationRow[] {
-    return this.#notificationRows.get();
+    return this.notificationRows;
   }
 
   /** 없는 id면 조용히 넘어간다. */
@@ -410,7 +442,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
 
   /** `'light'` 또는 `'dark'`. View가 이 값을 문서에 칠한다. */
   get theme(): string {
-    return this.#theme.get();
+    return this.themeState;
   }
 
   /** 현재 테마를 반전시켜 `#colorMode.setMode`을 호출한다. */
@@ -443,14 +475,14 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
 
   /** 위치 요청이 없으면 `null`. 같은 위치를 다시 요청해도 `seq`로 구분된다. */
   get reveal(): IShellViewModel["reveal"] {
-    return this.#reveal.get();
+    return this.revealState;
   }
 
   /** 활성 leaf 기준으로 미리보기 탭을 열거나, 이미 열려 있으면 고정한다. `position`은 그 탭의 내용에 전달된다. */
   previewFile(path: string, position?: { readonly line: number; readonly column: number }): void {
     if (position !== undefined) {
       this.#revealSeq += 1;
-      this.#reveal.set({ tabId: path, line: position.line, column: position.column, seq: this.#revealSeq });
+      this.revealState = { tabId: path, line: position.line, column: position.column, seq: this.#revealSeq };
     }
     const tab: OpenTab = { id: path, kind: "file", uri: URI.file(path), title: this.#nameOf(path) };
     const tree = this.#tabLayout.tree;
@@ -481,7 +513,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     }
 
     this.#tabLayout.setTree(nextTree);
-    this.#isSidebarOpen.set(false);
+    this.isSidebarOpenState = false;
   }
 
   /** 미리보기 탭이면 `previewTabId`를 비워 고정한다. */
@@ -758,16 +790,24 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     for (const subscription of this.#subscriptions) subscription.dispose();
   }
 
-  #recomputeLifetime(): void {
-    this.#buildId.set(this.#appLifetime.buildId);
-    this.#isClientOutdated.set(this.#appLifetime.isOutdated);
+  private recomputeLifetime(): void {
+    this.buildIdState = this.#appLifetime.buildId;
+    this.isClientOutdatedState = this.#appLifetime.isOutdated;
   }
 
-  #recompute(): void {
-    this.#activities.set(this.#computeActivities());
-    this.#tree.set(this.#computeTree());
-    this.#activeLeafId.set(this.#tabLayout.activePaneId);
-    this.#theme.set(this.#colorMode.mode);
+  private syncNotifications(): void {
+    this.notificationRows = this.#computeNotifications();
+  }
+
+  private syncWorkspace(): void {
+    this.workspaceNameState = this.#workspace.name;
+  }
+
+  private recompute(): void {
+    this.activityRows = this.#computeActivities();
+    this.treeState = this.#computeTree();
+    this.activeLeafIdState = this.#tabLayout.activePaneId;
+    this.themeState = this.#colorMode.mode;
   }
 
   #computeActivities() {
