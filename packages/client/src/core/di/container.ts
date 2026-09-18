@@ -19,7 +19,7 @@ export interface Disposable {
  * - `scoped` — **꺼낸** 자식 컨테이너마다 따로 만든다. 등록한 컨테이너가 아니다. 탭마다 하나여야 하는 것이 이것이다.
  * - `transient` — 조회할 때마다 새로. 컨테이너가 붙잡지 않으므로 `dispose`도 안 부른다.
  */
-type Lifetime = "singleton" | "scoped" | "transient";
+export type Lifetime = "singleton" | "scoped" | "transient";
 
 /** 무엇을 어떻게 만들지의 한 쌍. `create`는 컨테이너를 받아 자기 의존을 스스로 조회한다. */
 interface Provider<K extends InstanceId> {
