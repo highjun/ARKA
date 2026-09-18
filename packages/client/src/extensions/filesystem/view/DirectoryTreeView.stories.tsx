@@ -1,4 +1,4 @@
-import { CommandCenterRegistry } from "#core/commands";
+import { CommandService } from "#core/commands";
 import { Container } from "#core/di";
 import { ViewModelProvider } from "#core/viewmodel";
 import type { Meta, StoryObj } from "@storybook/react-vite";
@@ -8,7 +8,7 @@ import { DirectoryTreeView } from "./DirectoryTreeView";
 
 /**
  * 고정된 VM을 꽂는다 — 실물은 마운트에 워크스페이스를 읽고 `fs.watch`를 건다. 우클릭 메뉴는
- * 진짜 `CommandCenterRegistry`를 빈 채로 준다(커맨드가 없으면 메뉴에 뜰 것도 없다) — 이 컴포넌트는
+ * 진짜 `CommandService`를 빈 채로 준다(커맨드가 없으면 메뉴에 뜰 것도 없다) — 이 컴포넌트는
  * 레지스트리의 실제 모양을 훑으므로 흉내로는 부족하다.
  */
 const viewModel = (state: Partial<IDirectoryTreeViewModel>): IDirectoryTreeViewModel => ({
@@ -102,7 +102,15 @@ const story = (state: Partial<IDirectoryTreeViewModel>): Story => ({
       const container = new Container("story");
       container.register("arka.filesystem.directoryTreeViewModel", "singleton", () => viewModel(state));
       container.register("arka.filesystem.fileContentViewModel", "singleton", () => fileContentViewModel);
-      container.register("arka.commands", "singleton", () => new CommandCenterRegistry());
+      container.register(
+        "arka.commands",
+        "singleton",
+        () =>
+          new CommandService({
+            overridesStore: { load: () => ({}), save: () => undefined },
+            reportError: () => undefined,
+          }),
+      );
       return (
         <ViewModelProvider container={container.createChild("view")}>
           <div style={{ height: 520, width: 320 }}>

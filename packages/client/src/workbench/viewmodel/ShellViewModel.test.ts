@@ -1,10 +1,10 @@
 import { PROTOCOL_HEADER, PROTOCOL_VERSION } from "#contracts";
-import { Registry } from "#core/registry";
 import type { ITabDirtyState } from "../model/ITabDirtyState";
 import type { IWorkbenchStartup } from "../model/IWorkbenchStartup";
 import type { IServerInfo } from "../model/IServerInfo";
 import { NotificationService } from "../model/NotificationService";
-import type { ICommandCenterRegistry } from "#core/commands";
+import { CommandService, type ICommandService } from "#core/commands";
+import { Registry } from "#core/registry";
 import { ActivityModel } from "../model/ActivityModel";
 import { ROOT_PANE_ID } from "../model/tabsShare";
 import { TabsModel } from "../model/TabsModel";
@@ -17,17 +17,8 @@ import type { ShellTabPaneLeaf, ShellTabPaneNode, IShellViewModel } from "./IShe
 
 /** 커맨드 등록만 받아주는 흉내 — 이 파일의 관심사는 탭 트리·활동 로직이지 커맨드 배선 자체가
  *  아니다(그건 `#registerCommands`가 실제로 등록하는지를 보는 별도 테스트의 몫). */
-const fakeCommandCenterRegistry = (): ICommandCenterRegistry => ({
-  commandRegistry: new Registry(),
-  contextRegistry: new Registry(),
-  keybindingRegistry: new Registry(),
-  menuRegistry: new Registry(),
-  registerCommand: () => undefined,
-  registerContext: () => undefined,
-  registerKeybinding: () => undefined,
-  registerMenuItem: () => undefined,
-  dispatchKeydown: () => false,
-});
+const fakeCommandCenterRegistry = (): ICommandService =>
+  new CommandService({ overridesStore: { load: () => ({}), save: () => undefined }, reportError: () => undefined });
 
 const fakeStorage = (): IStorage => {
   const store = new Map<string, string>();

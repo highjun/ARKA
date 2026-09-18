@@ -1,4 +1,4 @@
-import { CommandCenterRegistry } from "#core/commands";
+import { CommandService } from "#core/commands";
 import { Container } from "#core/di";
 import {
   DirectoryTreeModel,
@@ -63,6 +63,8 @@ declare module "#core/di" {
 const EXPLORER_ID = "explorer";
 /** 검색 활동의 id. */
 const SEARCH_ID = "search";
+/** 사용자 단축키 재정의가 저장되는 키. */
+const KEYBINDING_OVERRIDES_KEY = "workbench.keybindings";
 /** 파일 탭의 kind. `IShellViewModel.previewFile`이 여는 탭의 kind와 같아야 TabContent가 찾는다. */
 const FILE_TAB_KIND = "file";
 
@@ -95,7 +97,17 @@ export function createApplication(): Container {
   container.register("arka.search.service", "singleton", createSearchServicePort);
   container.register("arka.workbench.storage", "singleton", createStoragePort);
   container.register("arka.workbench.serverInfo", "singleton", createServerInfoPort);
-  container.register("arka.commands", "singleton", () => new CommandCenterRegistry());
+  // 재정의는 localStorage에 산다 — 서버 settings.json은 나중 라운드. 실행 오류는 오류 기록으로 간다.
+  container.register("arka.commands", "singleton", (c) => {
+    const storage = c.resolve("arka.workbench.storage");
+    return new CommandService({
+      overridesStore: {
+        load: () => JSON.parse(storage.get(KEYBINDING_OVERRIDES_KEY) ?? "{}") as Record<string, string | null>,
+        save: (overrides) => storage.set(KEYBINDING_OVERRIDES_KEY, JSON.stringify(overrides)),
+      },
+      reportError: (error) => c.resolve("arka.workbench.errorLog").report(error, "command"),
+    });
+  });
   container.register("arka.workbench.activityBarRegistry", "singleton", () => new ActivityBarRegistry());
   container.register("arka.workbench.sidebarContentRegistry", "singleton", () => new SidebarContentRegistry());
   container.register("arka.workbench.tabContentRegistry", "singleton", () => new TabContentRegistry());
@@ -239,7 +251,7 @@ export function createApplication(): Container {
     stop: () => undefined,
   }));
   container.register("arka.workbench.startup.globalKeybindings", "scoped", (c) =>
-    createGlobalKeybindings({ commandCenterRegistry: c.resolve("arka.commands") }),
+    createGlobalKeybindings({ commands: c.resolve("arka.commands") }),
   );
   // 등록된 것을 스코프에서 resolve해 하나로 합친다 — descriptor가 토큰을 담는 이유가 여기다.
   container.register("arka.workbench.startup", "scoped", (c) => {

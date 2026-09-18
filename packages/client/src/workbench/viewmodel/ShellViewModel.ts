@@ -8,7 +8,7 @@ import type { IServerInfo } from "../model/IServerInfo";
 import type { INotificationService } from "../model/INotificationService";
 import type { IActivityBarRegistry } from "../model/IActivityBarRegistry";
 import type { IActivityModel } from "../model/IActivityModel";
-import type { ICommandCenterRegistry } from "#core/commands";
+import type { ICommandService } from "#core/commands";
 import { ROOT_PANE_ID } from "../model/tabsShare";
 import type { OpenTab, PaneId, TabPaneLeaf, TabPaneNode, TabSplitOrientation, ITabsModel } from "../model/ITabsModel";
 import type { IThemeModel } from "../model/IThemeModel";
@@ -110,7 +110,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     startup: IWorkbenchStartup;
     serverInfo: IServerInfo;
     notificationService: INotificationService;
-    commandCenterRegistry: ICommandCenterRegistry;
+    commandCenterRegistry: ICommandService;
     /** `no-restricted-globals`가 ViewModel의 `navigator` 직접 참조를 막는다 — 조립부(`registerServices.tsx`,
      *  대상 아님)가 이 얇은 함수를 주입한다(`DirectoryTreeViewModel`과 같은 패턴). */
     copyToClipboard: (text: string) => void;
@@ -527,19 +527,18 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
    * `dirtyTabIdsIn`이 `#tabDirtyState`(셸이 선언한 계약, 조립부가 채운다)를 본다 —
    * 저장 안 된 탭은 배치로 닫지 않는다.
    */
-  #registerCommands(commandCenterRegistry: ICommandCenterRegistry): void {
+  #registerCommands(commandCenterRegistry: ICommandService): void {
     /**
      * 증명용 커맨드 — Command·Keybinding 배선이 실제로 동작하는지 보는 첫 사례로 남겨둔 것.
      * 테마 전환은 이미 `toggleTheme()`으로도 되지만, 커맨드로도 하나 등록해둔다(둘이 공존해도
      * 문제없다 — 커맨드는 그냥 또 다른 트리거일 뿐이다).
      */
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "shell.toggleTheme",
       label: "테마 전환",
       execute: () => this.toggleTheme(),
     });
-    commandCenterRegistry.registerKeybinding({
-      id: "shell.toggleTheme.keybinding",
+    commandCenterRegistry.keybindings.add({
       keybinding: "ctrl+j",
       actionId: "shell.toggleTheme",
     });
@@ -547,16 +546,15 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     /**
      * 팔레트를 여는 것 자체가 커맨드다 — VSCode의 `workbench.action.showCommands`와 같은 방식.
      * `execute`가 `setPaletteOpen`을 부르는 것 말고는 하는 일이 없다 — 옛
-     * `commandCenterModel.setPaletteOpen`(2026-09-05, `ICommandCenterRegistry`로 분해되며
+     * `commandCenterModel.setPaletteOpen`(2026-09-05, `ICommandService`로 분해되며
      * `IShellViewModel`로 옮겨왔다).
      */
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "shell.openCommandPalette",
       label: "커맨드 팔레트 열기",
       execute: () => this.setPaletteOpen(true),
     });
-    commandCenterRegistry.registerKeybinding({
-      id: "shell.openCommandPalette.keybinding",
+    commandCenterRegistry.keybindings.add({
       keybinding: "ctrl+k",
       actionId: "shell.openCommandPalette",
     });
@@ -565,32 +563,30 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     // 활동을 등록한 쪽이 descriptor에 적는다.
     for (const activity of this.#activityBar.list()) {
       const commandId = `shell.showActivity.${activity.id}`;
-      commandCenterRegistry.registerCommand({
+      commandCenterRegistry.actions.add({
         id: commandId,
         label: `${activity.title} 보기`,
         execute: () => this.showActivity(activity.id),
       });
       if (activity.keybinding !== undefined) {
-        commandCenterRegistry.registerKeybinding({
-          id: `${commandId}.keybinding`,
+        commandCenterRegistry.keybindings.add({
           keybinding: activity.keybinding,
           actionId: commandId,
         });
       }
     }
 
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "shell.openSettings",
       label: "설정 열기",
       execute: () => this.openTab({ id: "settings", kind: "settings", title: "설정" }),
     });
-    commandCenterRegistry.registerKeybinding({
-      id: "shell.openSettings.keybinding",
+    commandCenterRegistry.keybindings.add({
       keybinding: "ctrl+,",
       actionId: "shell.openSettings",
     });
 
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "shell.openKeybindings",
       label: "키보드 단축키 보기",
       execute: () => this.openTab({ id: "keybindings", kind: "keybindings", title: "키보드 단축키" }),
@@ -632,7 +628,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     };
 
     const registerSplit = (id: string, label: string, position: SplitEdgeDropPosition): void => {
-      commandCenterRegistry.registerCommand({
+      commandCenterRegistry.actions.add({
         id,
         label,
         execute: (context) => {
@@ -647,7 +643,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     registerSplit("shell.tab.splitTop", "탭: 위로 분할", "top");
     registerSplit("shell.tab.splitBottom", "탭: 아래로 분할", "bottom");
 
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "shell.tab.close",
       label: "탭: 닫기",
       execute: (context) => {
@@ -657,7 +653,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
       },
     });
 
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "shell.tab.closeOthers",
       label: "탭: 다른 탭 모두 닫기",
       execute: (context) => {
@@ -667,7 +663,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
       },
     });
 
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "shell.tab.closeToRight",
       label: "탭: 오른쪽 탭 모두 닫기",
       execute: (context) => {
@@ -677,7 +673,7 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
       },
     });
 
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "shell.tab.copyPath",
       label: "탭: 경로 복사",
       // 탭 id가 곧 워크스페이스 루트 기준 경로다(`ShellTabRow` 계약 참고).
@@ -691,65 +687,17 @@ export class ShellViewModel extends ViewModelBase implements IShellViewModel {
     /**
      * 탭 우클릭 메뉴(`menuId: 'shell.tab.context'`) — `ShellView`가 `CommandContextMenu` 대신 이
      * registry를 직접 조회해 `Tab.renderTabContextMenu` 자리에 항목만 그린다(그 자리는 이미
-     * `Menu.Content` 안이라 `CommandContextMenu`가 감싸는 `Trigger`가 중복된다). `group`은
-     * VSCode 관례 — `1_split`이 분할, `2_close`가 닫기 계열, `3_copy`가 복사.
+     * `Menu.Content` 안이라 `CommandContextMenu`가 감싸는 `Trigger`가 중복된다). 순서는
+     * 분할 → 닫기 계열 → 복사.
      */
-    commandCenterRegistry.registerMenuItem({
-      id: "shell.tab.context.splitLeft",
-      menuId: "shell.tab.context",
-      commandId: "shell.tab.splitLeft",
-      group: "1_split",
-      order: 0,
-    });
-    commandCenterRegistry.registerMenuItem({
-      id: "shell.tab.context.splitRight",
-      menuId: "shell.tab.context",
-      commandId: "shell.tab.splitRight",
-      group: "1_split",
-      order: 1,
-    });
-    commandCenterRegistry.registerMenuItem({
-      id: "shell.tab.context.splitTop",
-      menuId: "shell.tab.context",
-      commandId: "shell.tab.splitTop",
-      group: "1_split",
-      order: 2,
-    });
-    commandCenterRegistry.registerMenuItem({
-      id: "shell.tab.context.splitBottom",
-      menuId: "shell.tab.context",
-      commandId: "shell.tab.splitBottom",
-      group: "1_split",
-      order: 3,
-    });
-    commandCenterRegistry.registerMenuItem({
-      id: "shell.tab.context.close",
-      menuId: "shell.tab.context",
-      commandId: "shell.tab.close",
-      group: "2_close",
-      order: 0,
-    });
-    commandCenterRegistry.registerMenuItem({
-      id: "shell.tab.context.closeOthers",
-      menuId: "shell.tab.context",
-      commandId: "shell.tab.closeOthers",
-      group: "2_close",
-      order: 1,
-    });
-    commandCenterRegistry.registerMenuItem({
-      id: "shell.tab.context.closeToRight",
-      menuId: "shell.tab.context",
-      commandId: "shell.tab.closeToRight",
-      group: "2_close",
-      order: 2,
-    });
-    commandCenterRegistry.registerMenuItem({
-      id: "shell.tab.context.copyPath",
-      menuId: "shell.tab.context",
-      commandId: "shell.tab.copyPath",
-      group: "3_copy",
-      order: 0,
-    });
+    commandCenterRegistry.menus.add({ menuId: "shell.tab.context", actionId: "shell.tab.splitLeft", order: 0 });
+    commandCenterRegistry.menus.add({ menuId: "shell.tab.context", actionId: "shell.tab.splitRight", order: 1 });
+    commandCenterRegistry.menus.add({ menuId: "shell.tab.context", actionId: "shell.tab.splitTop", order: 2 });
+    commandCenterRegistry.menus.add({ menuId: "shell.tab.context", actionId: "shell.tab.splitBottom", order: 3 });
+    commandCenterRegistry.menus.add({ menuId: "shell.tab.context", actionId: "shell.tab.close", order: 4 });
+    commandCenterRegistry.menus.add({ menuId: "shell.tab.context", actionId: "shell.tab.closeOthers", order: 5 });
+    commandCenterRegistry.menus.add({ menuId: "shell.tab.context", actionId: "shell.tab.closeToRight", order: 6 });
+    commandCenterRegistry.menus.add({ menuId: "shell.tab.context", actionId: "shell.tab.copyPath", order: 7 });
   }
 
   /** Model 의 트리를 화면용 트리로 바꾼다 — leaf 의 탭마다 `isPreview`·`isDirty` 를 파생시킨다. */

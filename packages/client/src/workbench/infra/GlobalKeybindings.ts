@@ -1,22 +1,16 @@
-import type { ICommandCenterRegistry } from "#core/commands";
-import { normalizeKeybinding } from "#core/menu";
+import type { ICommandService } from "#core/commands";
 import type { IWorkbenchStartup } from "../model/IWorkbenchStartup";
 
 /**
- * 전역 키 리스너 **하나**. 매칭되는 키바인딩을 찾아 커맨드를 실행하고, 실행했으면 브라우저
- * 기본 동작을 막는다(Ctrl+S가 "페이지 저장"을 여는 것 같은 충돌을 피하려는 것).
+ * 전역 키 리스너 **하나**. 맞는 키바인딩을 찾아 명령을 실행하고, 실행했으면 브라우저 기본 동작을
+ * 막는다(Ctrl+S가 "페이지 저장"을 여는 것 같은 충돌을 피하려는 것).
  *
  * 컴포넌트-로컬 단축키(CodeMirror의 Mod-S, FileTree의 방향키)는 안 건드린다 — 그건 DOM
  * 포커스가 있어야 의미 있는 것들이다.
  */
-export const createGlobalKeybindings = ({
-  commandCenterRegistry,
-}: {
-  commandCenterRegistry: ICommandCenterRegistry;
-}): IWorkbenchStartup => {
+export const createGlobalKeybindings = ({ commands }: { commands: ICommandService }): IWorkbenchStartup => {
   const onKeydown = (event: KeyboardEvent) => {
-    const executed = commandCenterRegistry.dispatchKeydown(normalizeKeybinding(event));
-    if (executed) event.preventDefault();
+    if (commands.dispatchKeydown(event)) event.preventDefault();
   };
   return {
     start: () => window.addEventListener("keydown", onKeydown),

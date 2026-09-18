@@ -106,7 +106,7 @@ export interface CommandPaletteProps extends Omit<ComponentPropsWithoutRef<"div"
   readonly defaultOpen?: boolean;
   /** 열림 여부가 바뀔 때마다(제어 여부 무관) 호출된다. */
   readonly onOpenChange?: (open: boolean) => void;
-  /** `commandRegistry.list()`를 그대로 옮긴 것 — 팔레트 전용 데이터는 없다. */
+  /** `ICommandService.actions.list()`를 그대로 옮긴 것 — 팔레트 전용 데이터는 없다. */
   readonly items: readonly CommandPaletteItem[];
   /** 항목을 고르면 그 id와 함께 호출된다. */
   readonly onSelect: (id: string) => void;

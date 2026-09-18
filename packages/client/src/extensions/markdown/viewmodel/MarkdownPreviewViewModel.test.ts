@@ -1,4 +1,4 @@
-import { CommandCenterRegistry } from "#core/commands";
+import { CommandService } from "#core/commands";
 import { describe, expect, it, vi } from "vitest";
 import { MarkdownPreviewModel } from "../model/MarkdownPreviewModel";
 import { MockMarkdownSource } from "../model/MockMarkdownSource";
@@ -7,7 +7,10 @@ import { MarkdownPreviewViewModel } from "./MarkdownPreviewViewModel";
 const settled = () => new Promise((resolve) => setTimeout(resolve, 0));
 const make = (activeFile: string | null) => {
   const openTab = vi.fn();
-  const registry = new CommandCenterRegistry();
+  const registry = new CommandService({
+    overridesStore: { load: () => ({}), save: () => undefined },
+    reportError: () => undefined,
+  });
   const viewModel = new MarkdownPreviewViewModel({
     previewModel: new MarkdownPreviewModel({ source: new MockMarkdownSource({ "a.md": "# 하나" }) }),
     commandCenterRegistry: registry,
@@ -20,9 +23,11 @@ const make = (activeFile: string | null) => {
 describe("MarkdownPreviewViewModel", () => {
   it("커맨드가 활성 .md 파일의 미리보기 탭을 연다", () => {
     const { openTab, registry } = make("docs/a.md");
-    registry.commandRegistry.get("markdown.openPreview").execute(undefined);
+    registry.execute("markdown.openPreview");
     expect(openTab).toHaveBeenCalledWith({ id: "preview:docs/a.md", kind: "markdownPreview", title: "미리보기 a.md" });
-    expect(registry.dispatchKeydown("ctrl+shift+v")).toBe(true);
+    expect(registry.dispatchKeydown(new KeyboardEvent("keydown", { key: "V", ctrlKey: true, shiftKey: true }))).toBe(
+      true,
+    );
   });
 
   it("활성 파일이 마크다운이 아니면 아무 일도 없다", () => {

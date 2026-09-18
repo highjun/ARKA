@@ -2,7 +2,7 @@ import type { Disposable } from "#core/di";
 import { ViewModelBase } from "#core/viewmodel";
 import { atom } from "nanostores";
 import type { DirectoryMap, IDirectoryTreeModel } from "../model/IDirectoryTreeModel";
-import type { ICommandCenterRegistry } from "#core/commands";
+import type { ICommandService } from "#core/commands";
 import type { ContextMenuTarget, IDirectoryTreeViewModel, EditingEntry, FileTreeRow } from "./IDirectoryTreeViewModel";
 import { GHOST_ID } from "./share";
 
@@ -33,7 +33,7 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
     isTypingSurface,
   }: {
     directoryTreeModel: IDirectoryTreeModel;
-    commandCenterRegistry: ICommandCenterRegistry;
+    commandCenterRegistry: ICommandService;
     /** `no-restricted-globals`가 Model/ViewModel의 `navigator` 직접 참조를 막는다 — 조립부
      *  (`registerServices.tsx`, 대상 아님)가 이 얇은 함수를 주입한다. */
     copyToClipboard: (text: string) => void;
@@ -281,14 +281,14 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
    * `menuId: 'filesystem.explorer.context'`) **둘 다 이 커맨드들 하나로 합류한다**(2026-09-04,
    * Menu 축 실배선). `execute`가 받는 `context`가 그 갈림길이다 — 우클릭이면 클릭한 행
    * (`ContextMenuTarget`)이 오고, 키보드/팔레트로 실행하면 `undefined`가 와서
-   * (`ICommandCenterRegistry.dispatchKeydown`이 `execute(undefined)`로 부른다) 그때는 현재
+   * (`ICommandService.dispatchKeydown`이 context 없이 부른다) 그때는 현재
    * 선택으로 대신한다.
    *
    * **알려진 단순화**: 우클릭 메뉴는 이름변경을 선택 개수와 무관하게 보여준다 — 이 앱의 Context
    * 축이 아직 호출별 데이터를 표현하지 못해서다. 안전장치는 `execute` 안에 있다: 정확히 하나가
    * 아니면 조용히 아무 일도 하지 않는다.
    */
-  #registerFilesystemCommands(commandCenterRegistry: ICommandCenterRegistry): void {
+  #registerFilesystemCommands(commandCenterRegistry: ICommandService): void {
     const toContextMenuTarget = (row: FileTreeRow): ContextMenuTarget => ({
       id: row.id,
       name: row.name,
@@ -307,7 +307,7 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
       return row === undefined ? null : toContextMenuTarget(row);
     };
 
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "filesystem.delete",
       label: "탐색기: 선택한 항목 삭제",
       execute: (context) => {
@@ -317,14 +317,13 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
         this.requestDelete();
       },
     });
-    commandCenterRegistry.registerKeybinding({
-      id: "filesystem.delete.keybinding",
+    commandCenterRegistry.keybindings.add({
       keybinding: "delete",
       actionId: "filesystem.delete",
       when: () => !this.#isTypingSurface(),
     });
 
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "filesystem.rename",
       label: "탐색기: 선택한 항목 이름 바꾸기",
       execute: (context) => {
@@ -337,14 +336,13 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
         this.requestRename();
       },
     });
-    commandCenterRegistry.registerKeybinding({
-      id: "filesystem.rename.keybinding",
+    commandCenterRegistry.keybindings.add({
       keybinding: "f2",
       actionId: "filesystem.rename",
       when: () => !this.#isTypingSurface(),
     });
 
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "filesystem.newFile",
       label: "탐색기: 새 파일 만들기",
       execute: (context) => {
@@ -354,7 +352,7 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
     });
     // 새 파일/폴더는 기본 키바인딩을 안 둔다 — VSCode도 안 둔다(우클릭·팔레트로 충분히 닿는다).
 
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "filesystem.newFolder",
       label: "탐색기: 새 폴더 만들기",
       execute: (context) => {
@@ -368,7 +366,7 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
      * `IWorkspaceFiles`에 `move`(이동/이름변경)는 있지만 `copy`(복제)가 아직 없어서, 붙여넣기
      * 대상·클립보드 상태까지 포함한 온전한 구현은 이번 범위 밖이다(Port 확장이 먼저 필요).
      */
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "filesystem.copyPath",
       label: "탐색기: 경로 복사",
       execute: (context) => {
@@ -380,44 +378,25 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
 
     /**
      * 우클릭 메뉴(`menuId: 'filesystem.explorer.context'`) — `DirectoryTreeView`가
-     * `CommandContextMenu`로 그린다. `group`은 VSCode 관례를 따른다 — `1_create`가 만들기,
-     * `2_modify`가 변경, `9_danger`가 파괴적 동작(사전순으로 갈린다, `matchMenuItems` 참고).
+     * `CommandContextMenu`로 그린다. 순서는 만들기 → 변경 → 복사 → 파괴적 동작(삭제가 맨 아래).
      */
-    commandCenterRegistry.registerMenuItem({
-      id: "filesystem.explorer.context.newFile",
+    commandCenterRegistry.menus.add({
       menuId: "filesystem.explorer.context",
-      commandId: "filesystem.newFile",
-      group: "1_create",
+      actionId: "filesystem.newFile",
       order: 0,
     });
-    commandCenterRegistry.registerMenuItem({
-      id: "filesystem.explorer.context.newFolder",
+    commandCenterRegistry.menus.add({
       menuId: "filesystem.explorer.context",
-      commandId: "filesystem.newFolder",
-      group: "1_create",
+      actionId: "filesystem.newFolder",
       order: 1,
     });
-    commandCenterRegistry.registerMenuItem({
-      id: "filesystem.explorer.context.rename",
+    commandCenterRegistry.menus.add({ menuId: "filesystem.explorer.context", actionId: "filesystem.rename", order: 2 });
+    commandCenterRegistry.menus.add({
       menuId: "filesystem.explorer.context",
-      commandId: "filesystem.rename",
-      group: "2_modify",
-      order: 0,
+      actionId: "filesystem.copyPath",
+      order: 3,
     });
-    commandCenterRegistry.registerMenuItem({
-      id: "filesystem.explorer.context.delete",
-      menuId: "filesystem.explorer.context",
-      commandId: "filesystem.delete",
-      group: "9_danger",
-      order: 0,
-    });
-    commandCenterRegistry.registerMenuItem({
-      id: "filesystem.explorer.context.copyPath",
-      menuId: "filesystem.explorer.context",
-      commandId: "filesystem.copyPath",
-      group: "3_copy",
-      order: 0,
-    });
+    commandCenterRegistry.menus.add({ menuId: "filesystem.explorer.context", actionId: "filesystem.delete", order: 4 });
   }
 
   /** `parentId 안에 새로 만든다`는 우클릭한 대상이 폴더면 그 안, 파일이면 그 부모, 빈 곳이면 루트다. */

@@ -1,4 +1,4 @@
-import { CommandCenterRegistry } from "#core/commands";
+import { CommandService } from "#core/commands";
 import { Container } from "#core/di";
 import { ViewModelProvider } from "#core/viewmodel";
 import type { Meta, StoryObj } from "@storybook/react-vite";
@@ -111,7 +111,15 @@ const story = (state: Partial<IShellViewModel>): Story => ({
       container.register("arka.workbench.shellViewModel", "singleton", () => viewModel(state));
       container.register("arka.workbench.sidebarContentRegistry", "singleton", () => sidebar);
       container.register("arka.workbench.tabContentRegistry", "singleton", () => tabs);
-      container.register("arka.commands", "singleton", () => new CommandCenterRegistry());
+      container.register(
+        "arka.commands",
+        "singleton",
+        () =>
+          new CommandService({
+            overridesStore: { load: () => ({}), save: () => undefined },
+            reportError: () => undefined,
+          }),
+      );
       return (
         <ViewModelProvider container={container.createChild("view")}>
           <div style={{ height: 640, width: 1100 }}>

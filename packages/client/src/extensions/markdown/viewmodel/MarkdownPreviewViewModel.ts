@@ -1,4 +1,4 @@
-import type { ICommandCenterRegistry } from "#core/commands";
+import type { ICommandService } from "#core/commands";
 import { ViewModelBase } from "#core/viewmodel";
 import { atom } from "nanostores";
 import type { IMarkdownPreviewModel } from "../model/IMarkdownPreviewModel";
@@ -27,7 +27,7 @@ export class MarkdownPreviewViewModel extends ViewModelBase implements IMarkdown
     openTab,
   }: {
     previewModel: IMarkdownPreviewModel;
-    commandCenterRegistry: ICommandCenterRegistry;
+    commandCenterRegistry: ICommandService;
     /** 지금 활성 탭이 파일이면 그 경로, 아니면 `null` — 조립부가 셸에서 읽어 준다. */
     activeFile: () => string | null;
     openTab: (tab: { id: string; kind: string; title: string }) => void;
@@ -39,16 +39,12 @@ export class MarkdownPreviewViewModel extends ViewModelBase implements IMarkdown
     this.#previews = this.observe(atom(previewModel.previews));
     previewModel.onDidChange(() => this.#previews.set(previewModel.previews));
 
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "markdown.openPreview",
       label: "마크다운 미리보기 열기",
       execute: () => this.openActivePreview(),
     });
-    commandCenterRegistry.registerKeybinding({
-      id: "markdown.openPreview.keybinding",
-      keybinding: "ctrl+shift+v",
-      actionId: "markdown.openPreview",
-    });
+    commandCenterRegistry.keybindings.add({ keybinding: "ctrl+shift+v", actionId: "markdown.openPreview" });
   }
 
   /** 미리보기 탭이 아니면 아무 일도 안 한다. 탭이 그려질 때 불린다. */

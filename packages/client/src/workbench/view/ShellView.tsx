@@ -1,5 +1,4 @@
 import type { SidebarSlotProps } from "../model/ISidebarContentRegistry";
-import { matchMenuItems } from "#core/menu";
 import { useViewModel } from "#core/viewmodel";
 import { Banner, ConfirmationDialog } from "@primer/react";
 import { Menu } from "#component/Menu";
@@ -13,7 +12,7 @@ import { Tab } from "../component/Tab";
 import type { IconId } from "#component/Icon";
 import type { TabItem, TabTreeNode } from "../component/Tab";
 import type { ComponentType, ReactNode } from "react";
-import type { ICommandCenterRegistry } from "#core/commands";
+import type { ICommandService } from "#core/commands";
 import type { ITabContentRegistry } from "../model/ITabContentRegistry";
 import type { ShellTabPaneNode, ShellTabRow, TabContextTarget } from "../viewmodel/IShellViewModel";
 import styles from "./ShellView.module.css";
@@ -110,29 +109,27 @@ const findLeafIdForTab = (node: TabTreeNode, tabId: string): string | null => {
  * 를 새로 감싸는데 `Tab.tsx`가 `renderTabContextMenu`를 이미 `Menu.Content` 안에서 부르기
  * 때문이다 — 여기선 항목(`Menu.Item`)만 돌려준다.
  */
-const buildTabContextMenu = (tree: TabTreeNode, commandCenterRegistry: ICommandCenterRegistry) => (tab: TabItem) => {
+/**
+ * 탭 우클릭 메뉴 — `shell.tab.context`에 담긴 명령들을 `Tab.renderTabContextMenu` 자리에 항목으로 그린다.
+ * 우클릭한 탭이 `context`로 명령에 전달된다.
+ */
+const buildTabContextMenu = (tree: TabTreeNode, commands: ICommandService) => (tab: TabItem) => {
   const leafId = findLeafIdForTab(tree, tab.id);
   if (!leafId) return null;
   const context: TabContextTarget = { leafId, tabId: tab.id };
 
-  const items = matchMenuItems(
-    commandCenterRegistry.menuRegistry,
-    commandCenterRegistry.contextRegistry,
-    "shell.tab.context",
-  )
+  const items = commands
+    .matchMenuItems("shell.tab.context")
     .map((menuItem) => {
-      const command = commandCenterRegistry.commandRegistry.tryGet(menuItem.commandId);
-      return command === undefined ? null : { id: menuItem.id, label: command.label, commandId: menuItem.commandId };
+      const action = commands.actions.tryGet(menuItem.actionId);
+      return action === undefined ? null : { actionId: menuItem.actionId, label: action.label };
     })
     .filter((item) => item !== null);
 
   return (
     <>
       {items.map((item) => (
-        <Menu.Item
-          key={item.id}
-          onSelect={() => commandCenterRegistry.commandRegistry.tryGet(item.commandId)?.execute(context)}
-        >
+        <Menu.Item key={item.actionId} onSelect={() => commands.execute(item.actionId, context)}>
           {item.label}
         </Menu.Item>
       ))}
@@ -186,15 +183,18 @@ export const ShellView = () => {
 
   // 팔레트 목록은 커맨드 registry를 그대로 옮긴 것이다 — 등록은 부팅 시 한 번 끝나므로 매 렌더
   // 다시 계산해도 가볍다.
-  const shortcutOf = (commandId: string): readonly string[] | undefined => {
-    const binding = commandCenterRegistry.keybindingRegistry.list().find((entry) => entry.actionId === commandId);
-    return binding?.keybinding.split("+").map((key) => key.charAt(0).toUpperCase() + key.slice(1));
+  const shortcutOf = (actionId: string): readonly string[] | undefined => {
+    // 사용자 재정의가 있으면 그것이 실효 키다. `null`은 꺼 둔 것이라 안 보인다.
+    const effective = commandCenterRegistry.overrides.has(actionId)
+      ? commandCenterRegistry.overrides.get(actionId)
+      : commandCenterRegistry.keybindings.list().find((entry) => entry.actionId === actionId)?.keybinding;
+    return effective?.split("+").map((key) => key.charAt(0).toUpperCase() + key.slice(1));
   };
-  const commandItems = commandCenterRegistry.commandRegistry
+  const commandItems = commandCenterRegistry.actions
     .list()
-    .map((command) => ({ id: command.id, label: command.label, shortcut: shortcutOf(command.id) }));
+    .map((action) => ({ id: action.id, label: action.label, shortcut: shortcutOf(action.id) }));
   const onCommandSelect = (id: string) => {
-    commandCenterRegistry.commandRegistry.tryGet(id)?.execute(undefined);
+    commandCenterRegistry.execute(id);
     viewModel.setPaletteOpen(false);
   };
 

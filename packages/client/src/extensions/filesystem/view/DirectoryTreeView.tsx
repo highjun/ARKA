@@ -5,7 +5,7 @@ import { Container } from "#component/Container";
 import { FileTree } from "../component/FileTree";
 import type { FileTreeItem } from "../component/FileTree";
 import type { MouseEvent } from "react";
-import { CommandContextMenu } from "#core/commands";
+import { CommandContextMenu } from "./CommandContextMenu";
 import type { ContextMenuTarget, DirectoryTreeStatus, FileTreeRow } from "../viewmodel/IDirectoryTreeViewModel";
 import styles from "./DirectoryTreeView.module.css";
 
@@ -114,7 +114,7 @@ export const DirectoryTreeView = ({
   return (
     <>
       {/* 우클릭 메뉴는 이제 커맨드 레지스트리가 그린다(2026-09-04, Menu 축 실배선) — 무엇이
-          뜨는지는 `app/filesystemCommands.ts`가 `registerMenuItem`으로 등록한 것이다. `context`는
+          뜨는지는 `DirectoryTreeViewModel`이 `menus.add`로 담은 것이다. `context`는
           지금 우클릭된 대상 — 커맨드의 `execute(context)`로 그대로 전달된다. */}
       <CommandContextMenu
         menuId="filesystem.explorer.context"

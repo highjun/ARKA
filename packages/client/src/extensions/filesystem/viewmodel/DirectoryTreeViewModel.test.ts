@@ -1,23 +1,13 @@
 import type { IWorkspaceFiles } from "../model/IWorkspaceFiles";
-import { Registry } from "#core/registry";
-import type { ICommandCenterRegistry } from "#core/commands";
+import { CommandService, type ICommandService } from "#core/commands";
 import { DirectoryTreeModel } from "../model/DirectoryTreeModel";
 import { DirectoryTreeViewModel } from "./DirectoryTreeViewModel";
 import type { IDirectoryTreeViewModel } from "./IDirectoryTreeViewModel";
 
 /** 커맨드 등록만 받아주는 흉내 — 이 파일의 관심사는 트리 접기 로직이지 커맨드 배선 자체가
  *  아니다. */
-const fakeCommandCenterRegistry = (): ICommandCenterRegistry => ({
-  commandRegistry: new Registry(),
-  contextRegistry: new Registry(),
-  keybindingRegistry: new Registry(),
-  menuRegistry: new Registry(),
-  registerCommand: () => undefined,
-  registerContext: () => undefined,
-  registerKeybinding: () => undefined,
-  registerMenuItem: () => undefined,
-  dispatchKeydown: () => false,
-});
+const fakeCommandCenterRegistry = (): ICommandService =>
+  new CommandService({ overridesStore: { load: () => ({}), save: () => undefined }, reportError: () => undefined });
 
 /**
  * 검사하는 것은 **평평한 표를 중첩 트리로 접는 규칙**이다.

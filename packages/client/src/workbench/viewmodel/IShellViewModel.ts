@@ -221,7 +221,7 @@ export interface IShellViewModel {
   setSidebarOpen(open: boolean): void;
 
   /**
-   * 커맨드 팔레트가 열려 있는가. 옛 `CommandCenterModel`(2026-09-05, `ICommandCenterRegistry`로
+   * 커맨드 팔레트가 열려 있는가. 옛 `CommandCenterModel`(2026-09-05, `ICommandService`로
    * 분해)이 갖고 있던 유일한 atom — 여는 트리거(`shell.openCommandPalette` 커맨드의 `execute`)가
    * React 컴포넌트가 아니라 커맨드 실행이라, 컴포넌트 로컬 state로는 닿지 않는다는 이유가 여전히
    * 같아 `isSidebarOpen`과 같은 성격의 shell UI 상태로 옮겨왔다.

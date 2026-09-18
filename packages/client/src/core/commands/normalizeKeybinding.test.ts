@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeKeybinding } from "./normalize";
+import { normalizeKeybinding } from "#core/commands";
 
 describe("normalizeKeybinding", () => {
   const eventOf = (overrides: Partial<KeyboardEvent>): KeyboardEvent =>
