@@ -1,4 +1,4 @@
-import { createToken, type Disposable } from "#core/di";
+import type { Disposable } from "#core/di";
 
 /**
  * `Tab`의 `TabSplitOrientation`과 값이 같다 — 그대로 import 하지 않는 것은 Model이 기반
@@ -55,7 +55,12 @@ interface TabPaneSplit {
 /** `kind`로 갈리는 판별 유니온이다. */
 export type TabPaneNode = TabPaneLeaf | TabPaneSplit;
 
-export const TabsModelToken = createToken<ITabsModel>("tabsModel");
+declare module "#core/di" {
+  /** `ITabsModel`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.workbench.tabsModel": ITabsModel;
+  }
+}
 /**
  * 탭 트리와 그중 활성 leaf·미리보기가 무엇인지, 그 값 셋만 갖는다.
  *

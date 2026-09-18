@@ -1,13 +1,9 @@
 import { ViewModelProvider } from "#core/viewmodel";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { FileContentViewModelToken, WorkspaceFilesToken } from "../extensions/filesystem";
 import type { IWorkspaceFiles } from "../extensions/filesystem";
 import { MockWorkspaceFiles } from "../extensions/filesystem/model/MockWorkspaceFiles";
-import { SearchServiceToken } from "../extensions/search";
 import { MockSearchService } from "../extensions/search/model/MockSearchService";
-import { ErrorLogToken } from "./model/IErrorLog";
-import { TabContentRegistryToken } from "./model/ITabContentRegistry";
 import { TabContentRegistry } from "./model/TabContentRegistry";
 import { RootView } from "./view/RootView";
 import { createApplication } from "./registerServices";
@@ -35,13 +31,10 @@ describe("registerServices", () => {
   });
 
   const mountWith = (workspaceFiles: IWorkspaceFiles) => {
-    const container = createApplication().createScope("test");
+    const container = createApplication().createChild("test");
     // 자식 스코프에 다시 등록해 그 스코프 안에서만 부모를 가린다.
-    container.register(WorkspaceFilesToken, { lifetime: "singleton", create: () => workspaceFiles });
-    container.register(SearchServiceToken, {
-      lifetime: "singleton",
-      create: () => new MockSearchService({ "a.md": "원본" }),
-    });
+    container.register("arka.filesystem.workspaceFiles", "singleton", () => workspaceFiles);
+    container.register("arka.search.service", "singleton", () => new MockSearchService({ "a.md": "원본" }));
     render(
       <ViewModelProvider container={container}>
         <RootView />
@@ -83,7 +76,7 @@ describe("registerServices", () => {
       // editFile을 부르면 Model이 조용히 무시한다.
       await screen.findByRole("button", { name: "저장" });
 
-      return container.resolve(FileContentViewModelToken);
+      return container.resolve("arka.filesystem.fileContentViewModel");
     };
 
     it("탭에 저장 안 됨 표시가 뜬다", async () => {
@@ -146,25 +139,19 @@ describe("registerServices", () => {
     it("탭이 렌더 중 던지면 CrashScreen이 뜨고 IErrorLog에 남는다", async () => {
       // React가 잡힌 오류를 console.error로도 내보낸다 — 테스트 출력이 그걸로 덮이지 않게 막는다.
       const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
-      const container = createApplication().createScope("test");
-      container.register(WorkspaceFilesToken, {
-        lifetime: "singleton",
-        create: () => new MockWorkspaceFiles({ "a.md": "" }),
-      });
+      const container = createApplication().createChild("test");
+      container.register("arka.filesystem.workspaceFiles", "singleton", () => new MockWorkspaceFiles({ "a.md": "" }));
       // 파일 탭을 그리는 컴포넌트를 터지는 것으로 바꾼다 — 자식 스코프에 다시 등록해 부모를 가린다.
-      container.register(TabContentRegistryToken, {
-        lifetime: "singleton",
-        create: () => {
-          const registry = new TabContentRegistry();
-          registry.add({
-            id: "file",
-            iconId: "file",
-            TabComponent: () => {
-              throw new Error("탭이 터졌다");
-            },
-          });
-          return registry;
-        },
+      container.register("arka.workbench.tabContentRegistry", "singleton", () => {
+        const registry = new TabContentRegistry();
+        registry.add({
+          id: "file",
+          iconId: "file",
+          TabComponent: () => {
+            throw new Error("탭이 터졌다");
+          },
+        });
+        return registry;
       });
       render(
         <ViewModelProvider container={container}>
@@ -175,9 +162,9 @@ describe("registerServices", () => {
       fireEvent.click(await screen.findByText("a.md"));
 
       expect(await screen.findByRole("alert")).toHaveTextContent("탭이 터졌다");
-      expect(container.resolve(ErrorLogToken).entries.map((entry) => [entry.source, entry.message])).toEqual([
-        ["render", "탭이 터졌다"],
-      ]);
+      expect(
+        container.resolve("arka.workbench.errorLog").entries.map((entry) => [entry.source, entry.message]),
+      ).toEqual([["render", "탭이 터졌다"]]);
       consoleError.mockRestore();
     });
   });

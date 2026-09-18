@@ -1,7 +1,6 @@
-import { createContainer, singleton } from "#core/di";
+import { Container } from "#core/di";
 import { ViewModelProvider } from "#core/viewmodel";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { SearchViewModelToken } from "../viewmodel/ISearchViewModel";
 import type { ISearchViewModel } from "../viewmodel/ISearchViewModel";
 import { SearchView } from "./SearchView";
 
@@ -26,12 +25,9 @@ const viewModel = (state: Partial<ISearchViewModel>): ISearchViewModel => ({
 });
 
 const withViewModel = (state: Partial<ISearchViewModel>) => {
-  const container = createContainer("story");
-  container.register(
-    SearchViewModelToken,
-    singleton(() => viewModel(state)),
-  );
-  return container.createScope("view");
+  const container = new Container("story");
+  container.register("arka.search.viewModel", "singleton", () => viewModel(state));
+  return container.createChild("view");
 };
 
 const meta = {
@@ -63,12 +59,12 @@ export const Default: Story = story({
       path: "src/workbench/view/ShellView.tsx",
       matches: [
         { line: 6, column: 10, preview: "import { useViewModel } from '#core/viewmodel';" },
-        { line: 74, column: 21, preview: "  const viewModel = useViewModel(ShellViewModelToken);" },
+        { line: 74, column: 21, preview: '  const viewModel = useViewModel("arka.workbench.shellViewModel");' },
       ],
     },
     {
       path: "src/extensions/search/view/SearchView.tsx",
-      matches: [{ line: 11, column: 21, preview: "  const viewModel = useViewModel(SearchViewModelToken);" }],
+      matches: [{ line: 11, column: 21, preview: '  const viewModel = useViewModel("arka.search.viewModel");' }],
     },
   ],
 });

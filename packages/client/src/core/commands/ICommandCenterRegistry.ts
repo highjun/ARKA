@@ -1,4 +1,3 @@
-import { createToken } from "#core/di";
 import type {
   ActionDescriptor,
   ActionRegistry,
@@ -44,7 +43,12 @@ export type MenuRegistry = CoreMenuRegistry;
  * 넷 다 `core`의 `Registry`로 이 Registry가 만들고, 앱 시작 시(`registerServices.tsx`)
  * 한 번 채워진다.
  */
-export const CommandCenterRegistryToken = createToken<ICommandCenterRegistry>("commandCenterRegistry");
+declare module "#core/di" {
+  /** `ICommandCenterRegistry`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.commands": ICommandCenterRegistry;
+  }
+}
 /** 넷을 한데 쥔 조립부의 창구. 등록은 부팅 때 한 번, 조회는 화면이 필요할 때마다. */
 export interface ICommandCenterRegistry {
   readonly commandRegistry: CommandRegistry;

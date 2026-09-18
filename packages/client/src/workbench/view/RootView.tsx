@@ -1,5 +1,4 @@
 import { useViewModel } from "#core/viewmodel";
-import { ErrorLogToken } from "../model/IErrorLog";
 import { CrashScreen } from "../component/CrashScreen";
 import { ErrorBoundary } from "#utils/errorBoundary";
 import { ShellView } from "./ShellView";
@@ -11,7 +10,7 @@ import { ShellView } from "./ShellView";
  * 죽을 때 같이 죽는다.
  */
 export const RootView = () => {
-  const errorLog = useViewModel(ErrorLogToken);
+  const errorLog = useViewModel("arka.workbench.errorLog");
   return (
     <ErrorBoundary
       onError={(error) => errorLog.report(error, "render")}

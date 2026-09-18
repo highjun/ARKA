@@ -1,26 +1,26 @@
-import { createContainer, scoped, singleton } from "#core/di";
+import { Container } from "#core/di";
 import { ViewModelProvider } from "#core/viewmodel";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { SearchModelToken } from "../model/ISearchModel";
 import { MockSearchService } from "../model/MockSearchService";
 import { SearchModel } from "../model/SearchModel";
-import { SearchViewModelToken } from "../viewmodel/ISearchViewModel";
 import { SearchViewModel } from "../viewmodel/SearchViewModel";
 import { SearchView } from "./SearchView";
 
 const mount = (onFileOpen = vi.fn()) => {
-  const container = createContainer("test");
+  const container = new Container("test");
   container.register(
-    SearchModelToken,
-    singleton(() => new SearchModel({ searchService: new MockSearchService({ "src/a.ts": "const hello = 1;" }) })),
+    "arka.search.model",
+    "singleton",
+    () => new SearchModel({ searchService: new MockSearchService({ "src/a.ts": "const hello = 1;" }) }),
   );
   container.register(
-    SearchViewModelToken,
-    scoped((c) => new SearchViewModel({ searchModel: c.resolve(SearchModelToken), debounceMs: 1 })),
+    "arka.search.viewModel",
+    "scoped",
+    (c) => new SearchViewModel({ searchModel: c.resolve("arka.search.model"), debounceMs: 1 }),
   );
   render(
-    <ViewModelProvider container={container.createScope("view")}>
+    <ViewModelProvider container={container.createChild("view")}>
       <SearchView onFileOpen={onFileOpen} />
     </ViewModelProvider>,
   );

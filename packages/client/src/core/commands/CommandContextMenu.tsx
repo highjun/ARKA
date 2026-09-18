@@ -2,7 +2,6 @@ import { matchMenuItems } from "#core/menu";
 import { useViewModel } from "#core/viewmodel";
 import { Menu } from "#component/Menu";
 import type { ReactNode } from "react";
-import { CommandCenterRegistryToken } from "./ICommandCenterRegistry";
 
 /**
  * 다른 모듈이 자기 컨텍스트 메뉴를 갖고 싶을 때 쓰는 자리 — `menuId`로 등록된 `MenuItemDescriptor`를
@@ -26,7 +25,7 @@ export const CommandContextMenu = ({
   readonly onOpenChange?: (open: boolean) => void;
   readonly children: ReactNode;
 }) => {
-  const commandCenterRegistry = useViewModel(CommandCenterRegistryToken);
+  const commandCenterRegistry = useViewModel("arka.commands");
 
   const items = matchMenuItems(commandCenterRegistry.menuRegistry, commandCenterRegistry.contextRegistry, menuId)
     .map((menuItem) => {

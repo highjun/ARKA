@@ -1,5 +1,3 @@
-import { createToken } from "#core/di";
-
 /** 화면이 그대로 쓰는 모양 — `status`가 `loading` 불리언으로 펴져 있다. */
 export type PreviewState = {
   readonly loading: boolean;
@@ -16,7 +14,12 @@ export const previewTabIdOf = (path: string): string => `preview:${path}`;
 export const pathOfPreviewTab = (tabId: string): string | null =>
   tabId.startsWith("preview:") ? tabId.slice("preview:".length) : null;
 
-export const MarkdownPreviewViewModelToken = createToken<IMarkdownPreviewViewModel>("markdownPreviewViewModel");
+declare module "#core/di" {
+  /** `IMarkdownPreviewViewModel`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.markdown.previewViewModel": IMarkdownPreviewViewModel;
+  }
+}
 /**
  * 미리보기 탭의 화면 상태. "마크다운 미리보기 열기" 커맨드(Ctrl+Shift+V)도 여기서 등록한다 — 지금 보고
  * 있는 파일이 무엇인지와 탭을 여는 방법은 조립부가 함수로 넣어 준다(익스텐션은 셸을 모른다).

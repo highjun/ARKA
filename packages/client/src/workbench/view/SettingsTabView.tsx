@@ -1,7 +1,6 @@
 import { useViewModel } from "#core/viewmodel";
 import { Heading } from "@primer/react";
 import { Text } from "#component/Text";
-import { SettingsViewModelToken } from "../viewmodel/ISettingsViewModel";
 import styles from "./SettingsTabView.module.css";
 
 const THEMES = [
@@ -16,7 +15,7 @@ const DENSITIES = [
 
 /** 설정 탭. 라디오 두 묶음 — 키가 늘면 섹션이 는다. */
 export const SettingsTabView = () => {
-  const viewModel = useViewModel(SettingsViewModelToken);
+  const viewModel = useViewModel("arka.workbench.settingsViewModel");
   return (
     <div data-component="SettingsTabView" className={styles["root"]}>
       <section className={styles["section"]}>

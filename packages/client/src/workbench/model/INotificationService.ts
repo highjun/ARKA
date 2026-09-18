@@ -1,4 +1,4 @@
-import { createToken, type Disposable } from "#core/di";
+import type { Disposable } from "#core/di";
 
 /** 아이콘과 색만 가른다 — 동작은 셋 다 같다. */
 export type NotificationSeverity = "info" | "warning" | "error";
@@ -12,7 +12,12 @@ export type Notification = {
   readonly at: number;
 };
 
-export const NotificationServiceToken = createToken<INotificationService>("notificationService");
+declare module "#core/di" {
+  /** `INotificationService`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.workbench.notifications": INotificationService;
+  }
+}
 /**
  * 사용자에게 알릴 것을 모으는 자리. VSCode의 `INotificationService`에 해당한다.
  *

@@ -1,5 +1,4 @@
-export { createToken } from "./token";
-export type { Token } from "./token";
-export { CircularDependencyError, TokenNotRegisteredError } from "./errors";
-export { createContainer, scoped, singleton, transient, value } from "./container";
-export type { Container, Disposable } from "./container";
+export type { InstanceMap, InstanceId } from "./instanceMap";
+export { Container } from "./container";
+export type { Disposable } from "./container";
+export { CircularDependencyError, ContainerDisposedError, InstanceNotRegisteredError } from "./errors";

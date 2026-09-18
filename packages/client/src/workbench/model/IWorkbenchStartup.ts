@@ -1,4 +1,4 @@
-import { createToken, type Token } from "#core/di";
+import type { InstanceId, InstanceMap } from "#core/di";
 
 /**
  * 셸이 뜨고 지는 것에 맞춰 켜고 꺼야 하는 것 하나.
@@ -14,18 +14,26 @@ export interface IWorkbenchStartup {
   stop(): void;
 }
 
+/** `InstanceMap`에서 `IWorkbenchStartup`인 것의 id만. */
+type StartupInstanceId = { [K in InstanceId]: InstanceMap[K] extends IWorkbenchStartup ? K : never }[InstanceId];
+
 /**
- * **descriptor가 함수가 아니라 토큰을 담는 이유.** Registry는 singleton이라 descriptor가
+ * **descriptor가 함수가 아니라 id를 담는 이유.** Registry는 singleton이라 descriptor가
  * 루트에서 등록되는데, 켤 대상은 `scoped`인 것을 쓴다. 루트에서 미리 resolve해 담아 두면
- * 화면이 보는 것과 **다른 인스턴스**를 켜게 된다. 토큰만 담아 두면 스코프를 가진 쪽이
+ * 화면이 보는 것과 **다른 인스턴스**를 켜게 된다. id만 담아 두면 스코프를 가진 쪽이
  * 그때 resolve한다.
  */
 export type WorkbenchStartupDescriptor = {
   readonly id: string;
-  readonly token: Token<IWorkbenchStartup>;
+  readonly instanceId: StartupInstanceId;
 };
 
-export const WorkbenchStartupRegistryToken = createToken<IWorkbenchStartupRegistry>("workbenchStartupRegistry");
+declare module "#core/di" {
+  /** `IWorkbenchStartupRegistry`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.workbench.startupRegistry": IWorkbenchStartupRegistry;
+  }
+}
 /** 셸 수명주기에 얹을 것들의 기여 지점. VSCode의 `IWorkbenchContributionsRegistry`에 해당한다. */
 export interface IWorkbenchStartupRegistry {
   /** descriptor 등록. 같은 ID로 재등록 불가. */

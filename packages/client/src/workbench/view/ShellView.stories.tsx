@@ -1,13 +1,10 @@
-import { CommandCenterRegistry, CommandCenterRegistryToken } from "#core/commands";
-import { createContainer, singleton } from "#core/di";
+import { CommandCenterRegistry } from "#core/commands";
+import { Container } from "#core/di";
 import { ViewModelProvider } from "#core/viewmodel";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Text } from "#component/Text";
 import { SidebarContentRegistry } from "../model/SidebarContentRegistry";
-import { SidebarContentRegistryToken } from "../model/ISidebarContentRegistry";
 import { TabContentRegistry } from "../model/TabContentRegistry";
-import { TabContentRegistryToken } from "../model/ITabContentRegistry";
-import { ShellViewModelToken } from "../viewmodel/IShellViewModel";
 import type { IShellViewModel, ShellTabPaneNode } from "../viewmodel/IShellViewModel";
 import { ShellView } from "./ShellView";
 
@@ -110,25 +107,13 @@ const story = (state: Partial<IShellViewModel>): Story => ({
   decorators: [
     (Story) => {
       const { sidebar, tabs } = registries();
-      const container = createContainer("story");
-      container.register(
-        ShellViewModelToken,
-        singleton(() => viewModel(state)),
-      );
-      container.register(
-        SidebarContentRegistryToken,
-        singleton(() => sidebar),
-      );
-      container.register(
-        TabContentRegistryToken,
-        singleton(() => tabs),
-      );
-      container.register(
-        CommandCenterRegistryToken,
-        singleton(() => new CommandCenterRegistry()),
-      );
+      const container = new Container("story");
+      container.register("arka.workbench.shellViewModel", "singleton", () => viewModel(state));
+      container.register("arka.workbench.sidebarContentRegistry", "singleton", () => sidebar);
+      container.register("arka.workbench.tabContentRegistry", "singleton", () => tabs);
+      container.register("arka.commands", "singleton", () => new CommandCenterRegistry());
       return (
-        <ViewModelProvider container={container.createScope("view")}>
+        <ViewModelProvider container={container.createChild("view")}>
           <div style={{ height: 640, width: 1100 }}>
             <Story />
           </div>

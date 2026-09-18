@@ -7,8 +7,6 @@ import type { FileTreeItem } from "../component/FileTree";
 import type { MouseEvent } from "react";
 import { CommandContextMenu } from "#core/commands";
 import type { ContextMenuTarget, DirectoryTreeStatus, FileTreeRow } from "../viewmodel/IDirectoryTreeViewModel";
-import { DirectoryTreeViewModelToken } from "../viewmodel/IDirectoryTreeViewModel";
-import { FileContentViewModelToken } from "../viewmodel/IFileContentViewModel";
 import styles from "./DirectoryTreeView.module.css";
 
 /**
@@ -65,8 +63,8 @@ export const DirectoryTreeView = ({
   /** 파일 행을 더블클릭했다 — 미리보기 탭을 고정한다(Tab 헤더 더블클릭과 같은 뜻). */
   readonly onFilePin: (path: string) => void;
 }) => {
-  const viewModel = useViewModel(DirectoryTreeViewModelToken);
-  const fileContentViewModel = useViewModel(FileContentViewModelToken);
+  const viewModel = useViewModel("arka.filesystem.directoryTreeViewModel");
+  const fileContentViewModel = useViewModel("arka.filesystem.fileContentViewModel");
 
   // 컴포넌트 어휘(FileTreeItem)를 ViewModel 어휘(경로 + 폴더 여부)로 바꾸기만 한다.
   const handleActivate = (item: FileTreeItem) => {

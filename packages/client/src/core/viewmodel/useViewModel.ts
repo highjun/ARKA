@@ -1,5 +1,5 @@
 import { useEffect, useSyncExternalStore } from "react";
-import type { Token } from "#core/di";
+import type { InstanceId, InstanceMap } from "#core/di";
 import { useAppContext } from "./ViewModelProvider";
 
 /** VM이 선택적으로 구현하는 생명주기 — 있으면 `useViewModel`이 마운트/언마운트에 걸어준다. */
@@ -8,7 +8,8 @@ interface ViewModelLifecycle {
   onDispose?(): void;
 }
 
-const hasLifecycle = (vm: object): vm is ViewModelLifecycle => "onMount" in vm || "onDispose" in vm;
+const hasLifecycle = (vm: unknown): vm is ViewModelLifecycle =>
+  typeof vm === "object" && vm !== null && ("onMount" in vm || "onDispose" in vm);
 
 /**
  * `<Name>View.tsx`는 훅을 `useViewModel` 하나만 부른다(`view-only-uses-view-model`) — `useEffect`로
@@ -18,7 +19,7 @@ const hasLifecycle = (vm: object): vm is ViewModelLifecycle => "onMount" in vm |
  * `vm`(항상 원본 인스턴스)을 의존성으로 준다 — `.scoped()`/`.singleton()`이라 컴포넌트가 살아있는
  * 한 같은 인스턴스이므로 사실상 마운트 1회·언마운트 1회다.
  */
-const useVmLifecycle = (vm: object): void => {
+const useVmLifecycle = (vm: unknown): void => {
   useEffect(() => {
     if (!hasLifecycle(vm)) return undefined;
     vm.onMount?.();
@@ -36,7 +37,9 @@ interface Observable {
   getVersion(): number;
 }
 
-const isObservable = (vm: object): vm is Observable =>
+const isObservable = (vm: unknown): vm is Observable =>
+  typeof vm === "object" &&
+  vm !== null &&
   typeof (vm as Partial<Observable>).subscribe === "function" &&
   typeof (vm as Partial<Observable>).getVersion === "function";
 
@@ -44,11 +47,11 @@ const noSubscription = () => () => {};
 const noVersion = () => 0;
 
 /**
- * `useViewModel` 은 토큰으로 ViewModel(또는 atom이 없는 `Registry`)을 꺼낸다 —
- * `const vm = useViewModel(TodoListViewModelToken)`.
+ * `useViewModel` 은 id로 ViewModel(또는 atom이 없는 `Registry`)을 꺼낸다 —
+ * `const vm = useViewModel("arka.todo.listViewModel")`.
  *
- * 토큰이 계약 타입을 들고 있으므로 반환 타입이 추론된다 — 호출부가 타입 인자를 따로
- * 말할 필요가 없고, 이름과 계약이 어긋날 자리도 없다.
+ * `InstanceMap`이 id와 계약 타입을 잇고 있으므로 반환 타입이 추론된다 — 호출부가 타입 인자를
+ * 따로 말할 필요가 없고, 이름과 계약이 어긋날 자리도 없다.
  *
  * ViewModel 은 컨테이너가 관리하는 클래스 인스턴스라 View 생명주기와 분리돼 산다.
  * **View(`<Name>View.tsx`)만** 이 hook을 호출한다.
@@ -57,8 +60,8 @@ const noVersion = () => 0;
  * `subscribe`/`getVersion`을 구독해 재렌더시키고 **원본 인스턴스**를 그대로 돌려준다. `useMemo`도
  * 쓰지 않는다: 컨테이너가 이미 캐싱한다.
  */
-export function useViewModel<T extends object>(token: Token<T>): T {
-  const vm = useAppContext().resolve(token);
+export function useViewModel<K extends InstanceId>(id: K): InstanceMap[K] {
+  const vm = useAppContext().resolve(id);
   useVmLifecycle(vm);
   const observable = isObservable(vm) ? vm : undefined;
   useSyncExternalStore(

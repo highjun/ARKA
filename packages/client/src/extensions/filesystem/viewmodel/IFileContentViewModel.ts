@@ -1,4 +1,4 @@
-import { createToken, type Disposable } from "#core/di";
+import type { Disposable } from "#core/di";
 /**
  * 화면이 그리는 파일 하나.
  *
@@ -32,7 +32,12 @@ export type FileRow = {
 /** 탭 id를 키로 한다 — 같은 파일을 두 탭으로 열면 두 항목이다. */
 export type FileRowMap = Readonly<Record<string, FileRow>>;
 
-export const FileContentViewModelToken = createToken<IFileContentViewModel>("fileContentViewModel");
+declare module "#core/di" {
+  /** `IFileContentViewModel`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.filesystem.fileContentViewModel": IFileContentViewModel;
+  }
+}
 /**
  * 화면(에디터)이 필요로 하는 파일 상태·조작을 노출하는 ViewModel 계약.
  *

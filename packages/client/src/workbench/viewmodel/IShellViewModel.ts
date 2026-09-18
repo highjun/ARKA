@@ -1,4 +1,3 @@
-import { createToken } from "#core/di";
 import type { PaneId } from "../model/ITabsModel";
 
 /**
@@ -76,7 +75,12 @@ export type ShellNotificationRow = {
   readonly message: string;
 };
 
-export const ShellViewModelToken = createToken<IShellViewModel>("shellViewModel");
+declare module "#core/di" {
+  /** `IShellViewModel`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.workbench.shellViewModel": IShellViewModel;
+  }
+}
 /**
  * Shell 의 화면 상태.
  *

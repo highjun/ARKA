@@ -1,7 +1,11 @@
-import { createToken } from "#core/di";
 import type { Density } from "../model/ISettingsModel";
 
-export const SettingsViewModelToken = createToken<ISettingsViewModel>("settingsViewModel");
+declare module "#core/di" {
+  /** `ISettingsViewModel`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.workbench.settingsViewModel": ISettingsViewModel;
+  }
+}
 /** 설정 탭의 화면 상태 — 테마와 밀도. VSCode 설정 편집기의 가장 작은 판. */
 export interface ISettingsViewModel {
   readonly theme: "light" | "dark";

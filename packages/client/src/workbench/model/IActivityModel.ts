@@ -1,4 +1,4 @@
-import { createToken, type Disposable } from "#core/di";
+import type { Disposable } from "#core/di";
 
 /**
  * 사이드바 활동 하나의 id. 어떤 활동이 있는지는 Model이 모른다 — `IActivityBarRegistry`
@@ -7,7 +7,12 @@ import { createToken, type Disposable } from "#core/di";
  */
 export type ActivityId = string;
 
-export const ActivityModelToken = createToken<IActivityModel>("activityModel");
+declare module "#core/di" {
+  /** `IActivityModel`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.workbench.activityModel": IActivityModel;
+  }
+}
 /**
  * 지금 어느 활동이 활성인지, 그 값 하나만 갖는다.
  *

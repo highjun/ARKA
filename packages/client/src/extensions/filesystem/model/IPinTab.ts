@@ -1,5 +1,9 @@
-import { createToken } from "#core/di";
-export const PinTabToken = createToken<IPinTab>("pinTab");
+declare module "#core/di" {
+  /** `IPinTab`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.filesystem.pinTab": IPinTab;
+  }
+}
 /**
  * `FilesystemModule`이 `ShellModule`의 탭 고정(pin)을 부르기 위한 통로.
  *

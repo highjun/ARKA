@@ -1,5 +1,3 @@
-import { createToken } from "#core/di";
-
 /** 활동 아이콘 바 항목 하나 — 어떤 아이콘이 있고, 눌렀을 때 부를 라벨이 뭔가. */
 export type ActivityBarDescriptor = {
   readonly id: string;
@@ -9,7 +7,12 @@ export type ActivityBarDescriptor = {
   readonly keybinding?: string;
 };
 
-export const ActivityBarRegistryToken = createToken<IActivityBarRegistry>("activityBarRegistry");
+declare module "#core/di" {
+  /** `IActivityBarRegistry`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.workbench.activityBarRegistry": IActivityBarRegistry;
+  }
+}
 /**
  * Shell이 갖는 확장 지점의 계약. `FilesystemModule` 등 각 모듈이 `registerServices.tsx`를 통해 여기
  * 등록하고, Shell은 등록된 것을 그릴 뿐 어떤 모듈이 무엇을 등록했는지 모른다.

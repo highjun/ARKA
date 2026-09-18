@@ -1,4 +1,3 @@
-import { createToken } from "#core/di";
 import type { ComponentType } from "react";
 
 /**
@@ -44,7 +43,12 @@ export type SidebarContentDescriptor = {
   readonly ContentComponent: ComponentType<SidebarSlotProps>;
 };
 
-export const SidebarContentRegistryToken = createToken<ISidebarContentRegistry>("sidebarContentRegistry");
+declare module "#core/di" {
+  /** `ISidebarContentRegistry`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.workbench.sidebarContentRegistry": ISidebarContentRegistry;
+  }
+}
 /**
  * 2026-09-06 — Registry가 Model과 같은 파일 구성 엄격함을 받으면서 타입 별칭에서 인터페이스로
  * 바뀌었다. `core`의 `Registry<T>`와 구조가 같지만, 빈 `extends`는

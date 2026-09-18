@@ -1,7 +1,6 @@
 import { useViewModel } from "#core/viewmodel";
 import { Banner } from "@primer/react";
 import { TextEditor } from "../component/TextEditor";
-import { FileContentViewModelToken } from "../viewmodel/IFileContentViewModel";
 import styles from "./FileContentView.module.css";
 
 /**
@@ -24,7 +23,7 @@ export const FileContentView = ({
   readonly path: string;
   readonly reveal?: { readonly line: number; readonly column: number; readonly seq: number } | null;
 }) => {
-  const viewModel = useViewModel(FileContentViewModelToken);
+  const viewModel = useViewModel("arka.filesystem.fileContentViewModel");
   viewModel.openFile(path);
 
   // 아직 담기지 않은 것(`undefined`, `openFile`이 막 부른 참이라 atom에 아직 안 실림)도 읽는

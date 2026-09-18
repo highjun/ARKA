@@ -1,9 +1,14 @@
-import { createToken, type Disposable } from "#core/di";
+import type { Disposable } from "#core/di";
 
 /** 화면 밝기. `Shell`이 Primer `ThemeProvider`의 `colorMode`로 넘겨 토큰을 갈아 끼운다. */
 export type Theme = "light" | "dark";
 
-export const ThemeModelToken = createToken<IThemeModel>("themeModel");
+declare module "#core/di" {
+  /** `IThemeModel`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.workbench.themeModel": IThemeModel;
+  }
+}
 /**
  * 지금 밝기, 그 값 하나만 갖는다. 다음 방문에도 유지되도록 `IStorage`로 스스로 지속한다.
  */

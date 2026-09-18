@@ -1,10 +1,8 @@
-import { CommandCenterRegistry, CommandCenterRegistryToken } from "#core/commands";
-import { createContainer, singleton } from "#core/di";
+import { CommandCenterRegistry } from "#core/commands";
+import { Container } from "#core/di";
 import { ViewModelProvider } from "#core/viewmodel";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { DirectoryTreeViewModelToken } from "../viewmodel/IDirectoryTreeViewModel";
 import type { FileTreeRow, IDirectoryTreeViewModel } from "../viewmodel/IDirectoryTreeViewModel";
-import { FileContentViewModelToken } from "../viewmodel/IFileContentViewModel";
 import type { IFileContentViewModel } from "../viewmodel/IFileContentViewModel";
 import { DirectoryTreeView } from "./DirectoryTreeView";
 
@@ -101,21 +99,12 @@ type Story = StoryObj<typeof meta>;
 const story = (state: Partial<IDirectoryTreeViewModel>): Story => ({
   decorators: [
     (Story) => {
-      const container = createContainer("story");
-      container.register(
-        DirectoryTreeViewModelToken,
-        singleton(() => viewModel(state)),
-      );
-      container.register(
-        FileContentViewModelToken,
-        singleton(() => fileContentViewModel),
-      );
-      container.register(
-        CommandCenterRegistryToken,
-        singleton(() => new CommandCenterRegistry()),
-      );
+      const container = new Container("story");
+      container.register("arka.filesystem.directoryTreeViewModel", "singleton", () => viewModel(state));
+      container.register("arka.filesystem.fileContentViewModel", "singleton", () => fileContentViewModel);
+      container.register("arka.commands", "singleton", () => new CommandCenterRegistry());
       return (
-        <ViewModelProvider container={container.createScope("view")}>
+        <ViewModelProvider container={container.createChild("view")}>
           <div style={{ height: 520, width: 320 }}>
             <Story />
           </div>

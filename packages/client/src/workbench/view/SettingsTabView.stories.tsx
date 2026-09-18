@@ -1,7 +1,6 @@
-import { createContainer, singleton } from "#core/di";
+import { Container } from "#core/di";
 import { ViewModelProvider } from "#core/viewmodel";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { SettingsViewModelToken } from "../viewmodel/ISettingsViewModel";
 import type { ISettingsViewModel } from "../viewmodel/ISettingsViewModel";
 import { SettingsTabView } from "./SettingsTabView";
 
@@ -28,13 +27,10 @@ type Story = StoryObj<typeof meta>;
 const story = (state: Partial<ISettingsViewModel>): Story => ({
   decorators: [
     (Story) => {
-      const container = createContainer("story");
-      container.register(
-        SettingsViewModelToken,
-        singleton(() => viewModel(state)),
-      );
+      const container = new Container("story");
+      container.register("arka.workbench.settingsViewModel", "singleton", () => viewModel(state));
       return (
-        <ViewModelProvider container={container.createScope("view")}>
+        <ViewModelProvider container={container.createChild("view")}>
           <div style={{ width: 560 }}>
             <Story />
           </div>

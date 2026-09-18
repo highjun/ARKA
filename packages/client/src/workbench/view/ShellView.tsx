@@ -1,8 +1,4 @@
-import { CommandCenterRegistryToken } from "#core/commands";
-import { SidebarContentRegistryToken } from "../model/ISidebarContentRegistry";
 import type { SidebarSlotProps } from "../model/ISidebarContentRegistry";
-import { TabContentRegistryToken } from "../model/ITabContentRegistry";
-import { ShellViewModelToken } from "../viewmodel/IShellViewModel";
 import { matchMenuItems } from "#core/menu";
 import { useViewModel } from "#core/viewmodel";
 import { Banner, ConfirmationDialog } from "@primer/react";
@@ -152,10 +148,10 @@ const buildTabContextMenu = (tree: TabTreeNode, commandCenterRegistry: ICommandC
  * 무엇이 그 답을 채우는지는 조립부(`registerServices`)만 안다.
  */
 export const ShellView = () => {
-  const viewModel = useViewModel(ShellViewModelToken);
-  const sidebarContentRegistry = useViewModel(SidebarContentRegistryToken);
-  const tabContentRegistry = useViewModel(TabContentRegistryToken);
-  const commandCenterRegistry = useViewModel(CommandCenterRegistryToken);
+  const viewModel = useViewModel("arka.workbench.shellViewModel");
+  const sidebarContentRegistry = useViewModel("arka.workbench.sidebarContentRegistry");
+  const tabContentRegistry = useViewModel("arka.workbench.tabContentRegistry");
+  const commandCenterRegistry = useViewModel("arka.commands");
 
   const onFileOpen = (path: string, position?: { readonly line: number; readonly column: number }) =>
     viewModel.previewFile(path, position);

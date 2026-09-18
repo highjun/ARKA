@@ -1,146 +1,115 @@
-import { CircularDependencyError, TokenNotRegisteredError } from "./errors";
-import type { Token } from "./token";
+import { CircularDependencyError, ContainerDisposedError, InstanceNotRegisteredError } from "./errors";
+import type { InstanceId, InstanceMap } from "./instanceMap";
 
 /**
- * dispose 대상. 스코프가 정리될 때 자기가 만든 인스턴스 중 이걸 구현한 것만 부른다.
+ * 지울 때 별도의 정리가 필요한 객체.
  *
- * **동기다.** `void | Promise<void>`였는데 비동기 정리를 하는 구현이 하나도 없었고(2026-09-14 실측),
- * 합집합 때문에 모든 `dispose()` 호출이 "버려진 Promise"로 보여 `no-floating-promises`가 여덟 번
- * 물었다. 비동기 정리가 필요해지면 그때 별도 타입을 만든다 — 컨테이너는 이미 `await`한다.
+ * **정리는 동기다.** 기다려야 하는 일은 `dispose` 전에 끝낸다 — 더티인 탭은 닫기 전에 확인을
+ * 구하므로 이 시점에 흘려보낼 것이 없다. 밖으로 나가는 정리(구독 해지·세션 닫기)는 보내고 잊는다.
+ * 비동기로 열면 `Container.dispose()`가 기다려야 해서 **탭 닫기가 네트워크에 묶인다.**
  */
 export interface Disposable {
   dispose(): void;
 }
 
-/** `singleton`은 앱에 하나, `scoped`는 스코프마다 하나, `transient`는 조회할 때마다 새로. */
+/**
+ * 어느 컨테이너에 만들어 붙잡나.
+ *
+ * - `singleton` — **등록한** 컨테이너에 한 번만 만들어 붙잡는다. 루트에 등록하면 앱에 하나다.
+ * - `scoped` — **꺼낸** 자식 컨테이너마다 따로 만든다. 등록한 컨테이너가 아니다. 탭마다 하나여야 하는 것이 이것이다.
+ * - `transient` — 조회할 때마다 새로. 컨테이너가 붙잡지 않으므로 `dispose`도 안 부른다.
+ */
 type Lifetime = "singleton" | "scoped" | "transient";
 
 /** 무엇을 어떻게 만들지의 한 쌍. `create`는 컨테이너를 받아 자기 의존을 스스로 조회한다. */
-interface Provider<T> {
+interface Provider<K extends InstanceId> {
   readonly lifetime: Lifetime;
-  create(container: Container): T;
+  readonly create: (container: Container) => InstanceMap[K];
 }
 
-/** 조회는 등록된 스코프에서 시작해 부모로 거슬러 올라간다. */
-export interface Container {
-  register<T>(token: Token<T>, provider: Provider<T>): void;
-  resolve<T>(token: Token<T>): T;
-  /** 자식은 부모를 볼 수 있고 부모는 자식을 볼 수 없다. 형제끼리도 못 본다. */
-  createScope(name: string): Container;
-  /** 자식 스코프를 먼저 정리한 뒤 자기가 만든 Disposable을 역순으로 부른다. */
-  dispose(): Promise<void>;
-}
+const isDisposable = (candidate: unknown): candidate is Disposable =>
+  typeof candidate === "object" && candidate !== null && typeof (candidate as Disposable).dispose === "function";
 
-/** 앱에 하나. 스코프를 만들 때마다 부모를 가리키는 새 인스턴스가 생긴다. */
-export function createContainer(name = "root"): Container {
-  return new ContainerImpl(name, undefined);
-}
-
-/** 등록한 스코프에 한 번만 만들어 붙잡는다. 루트에 등록하면 앱에 하나다. */
-export function singleton<T>(create: (c: Container) => T): Provider<T> {
-  return { lifetime: "singleton", create };
-}
-
-/** **조회한** 스코프마다 따로 만든다 — 등록한 스코프가 아니다. 스코프가 정리되면 함께 dispose된다. */
-export function scoped<T>(create: (c: Container) => T): Provider<T> {
-  return { lifetime: "scoped", create };
-}
-
-/** 조회할 때마다 새로 만든다. 컨테이너가 붙잡지 않으므로 **dispose도 안 부른다.** */
-export function transient<T>(create: (c: Container) => T): Provider<T> {
-  return { lifetime: "transient", create };
-}
-
-/** 이미 만들어 둔 것을 그대로 등록한다 — 설정 객체나 밖에서 만든 자원에 쓴다. */
-export function value<T>(instance: T): Provider<T> {
-  return { lifetime: "singleton", create: () => instance };
-}
-
-function isDisposable(candidate: unknown): candidate is Disposable {
-  return typeof candidate === "object" && candidate !== null && typeof (candidate as Disposable).dispose === "function";
-}
-
-class ContainerImpl implements Container {
+/** 확장끼리 만나는 유일한 통로. 자식은 부모를 보고 부모는 자식을 못 본다. */
+export class Container {
   readonly #name: string;
-  readonly #parent: ContainerImpl | undefined;
-  readonly #providers = new Map<Token<unknown>, Provider<unknown>>();
-  readonly #instances = new Map<Token<unknown>, unknown>();
-  readonly #children = new Set<ContainerImpl>();
+  readonly #parent: Container | undefined;
+  readonly #providers = new Map<InstanceId, Provider<InstanceId>>();
+  readonly #instances = new Map<InstanceId, unknown>();
+  readonly #children = new Set<Container>();
   /** 만든 순서대로 쌓고 dispose 때 역순으로 부른다 — 나중 것이 앞 것에 의존하므로. */
   readonly #disposables: Disposable[] = [];
-  /** 지금 만들고 있는 토큰들. 여기 다시 들어오면 순환이다. */
-  readonly #resolving: string[] = [];
+  /** 지금 만들고 있는 id들. 여기 다시 들어오면 순환이다. */
+  readonly #resolving: InstanceId[] = [];
   #disposed = false;
 
-  constructor(name: string, parent: ContainerImpl | undefined) {
+  /** 부모 없이 만들면 루트다. 자식은 `createChild`로만 난다. */
+  constructor(name = "root", parent?: Container) {
     this.#name = name;
     this.#parent = parent;
   }
 
-  register<T>(token: Token<T>, provider: Provider<T>): void {
-    // 자식에 같은 토큰을 다시 등록하면 그 스코프 안에서만 부모를 가린다(테스트 대역).
-    this.#providers.set(token as Token<unknown>, provider as Provider<unknown>);
+  /** 만드는 법을 물린다. 아직 만들지 않는다. 자식 컨테이너에서 다시 물리면 부모 것을 가린다 — 테스트 대역이 이 자리다. */
+  register<K extends InstanceId>(id: K, lifetime: Lifetime, create: (container: Container) => InstanceMap[K]): void {
+    this.#providers.set(id, { lifetime, create });
   }
 
-  resolve<T>(token: Token<T>): T {
-    const owner = this.#findOwner(token);
-    if (!owner) {
-      throw new TokenNotRegisteredError(token.description);
-    }
+  /**
+   * 꺼낸다. 없으면 만들고, 수명에 따라 붙잡는다.
+   * @throws InstanceNotRegisteredError 지도에는 있으나 아무도 물리지 않았다.
+   * @throws CircularDependencyError 만들어지는 중에 서로를 물고 돌았다.
+   * @throws ContainerDisposedError 이미 죽은 컨테이너에서 꺼내려 했다.
+   */
+  resolve<K extends InstanceId>(id: K): InstanceMap[K] {
+    if (this.#disposed) throw new ContainerDisposedError(this.#name);
+    const owner = this.#findOwner(id);
+    if (owner === undefined) throw new InstanceNotRegisteredError(id);
 
-    const provider = owner.#providers.get(token as Token<unknown>) as Provider<T>;
-
-    // singleton은 등록된 스코프가, scoped는 요청한 스코프가 인스턴스를 보관한다.
-    // transient는 아무도 보관하지 않는다.
+    const provider = owner.#providers.get(id) as Provider<K>;
+    // singleton은 등록한 컨테이너가, scoped는 꺼낸 컨테이너가 인스턴스를 보관한다. transient는 아무도.
     const cacheHolder = provider.lifetime === "singleton" ? owner : provider.lifetime === "scoped" ? this : undefined;
+    if (cacheHolder !== undefined && cacheHolder.#instances.has(id))
+      return cacheHolder.#instances.get(id) as InstanceMap[K];
 
-    if (cacheHolder && cacheHolder.#instances.has(token as Token<unknown>)) {
-      return cacheHolder.#instances.get(token as Token<unknown>) as T;
-    }
-
-    return this.#create(token, provider, cacheHolder);
+    return this.#create(id, provider, cacheHolder);
   }
 
-  createScope(name: string): Container {
-    const child = new ContainerImpl(name, this);
+  /** 자식 컨테이너를 딴다. 탭이 그 예다 — 탭 목록을 쥔 쪽이 따고, 목록에서 빠질 때 dispose한다. */
+  createChild(name: string): Container {
+    const child = new Container(name, this);
     this.#children.add(child);
     return child;
   }
 
-  async dispose(): Promise<void> {
+  /** 자식 컨테이너를 먼저 정리한 뒤 자기가 만든 Disposable을 역순으로 부른다. 부모의 목록에서도 빠진다. 두 번 불러도 안전하다. */
+  dispose(): void {
     if (this.#disposed) return;
     this.#disposed = true;
 
-    for (const child of this.#children) {
-      await child.dispose();
-    }
+    for (const child of [...this.#children]) child.dispose();
     this.#children.clear();
 
-    // `Disposable.dispose()`는 동기다 — `await`를 두면 `await-thenable`이 문다.
-    for (let i = this.#disposables.length - 1; i >= 0; i -= 1) {
-      this.#disposables[i]?.dispose();
-    }
+    for (let i = this.#disposables.length - 1; i >= 0; i -= 1) this.#disposables[i]?.dispose();
     this.#disposables.length = 0;
     this.#instances.clear();
 
-    if (this.#parent) {
-      this.#parent.#children.delete(this);
-    }
+    if (this.#parent !== undefined) this.#parent.#children.delete(this);
   }
 
-  #create<T>(token: Token<T>, provider: Provider<T>, cacheHolder: ContainerImpl | undefined): T {
-    if (this.#resolving.includes(token.description)) {
-      throw new CircularDependencyError([...this.#resolving, token.description]);
-    }
+  /** 이름을 그대로 — 오류 메시지와 디버거가 읽는다. */
+  toString(): string {
+    return `Container(${this.#name})`;
+  }
 
-    this.#resolving.push(token.description);
+  #create<K extends InstanceId>(id: K, provider: Provider<K>, cacheHolder: Container | undefined): InstanceMap[K] {
+    if (this.#resolving.includes(id)) throw new CircularDependencyError([...this.#resolving, id]);
+
+    this.#resolving.push(id);
     try {
       const instance = provider.create(this);
-      if (cacheHolder) {
-        cacheHolder.#instances.set(token as Token<unknown>, instance);
-        if (isDisposable(instance)) {
-          cacheHolder.#disposables.push(instance);
-        }
+      if (cacheHolder !== undefined) {
+        cacheHolder.#instances.set(id, instance);
+        if (isDisposable(instance)) cacheHolder.#disposables.push(instance);
       }
       return instance;
     } finally {
@@ -148,17 +117,13 @@ class ContainerImpl implements Container {
     }
   }
 
-  /** 자기부터 위로 올라가며 토큰을 등록한 스코프를 찾는다. */
-  #findOwner(token: Token<unknown>): ContainerImpl | undefined {
-    let current: ContainerImpl | undefined = this;
-    while (current) {
-      if (current.#providers.has(token)) return current;
+  /** 자기부터 위로 올라가며 id를 물린 컨테이너를 찾는다. */
+  #findOwner(id: InstanceId): Container | undefined {
+    let current: Container | undefined = this;
+    while (current !== undefined) {
+      if (current.#providers.has(id)) return current;
       current = current.#parent;
     }
     return undefined;
-  }
-
-  toString(): string {
-    return `Container(${this.#name})`;
   }
 }

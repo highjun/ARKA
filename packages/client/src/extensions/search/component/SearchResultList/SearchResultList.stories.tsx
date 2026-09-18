@@ -5,7 +5,7 @@ const FILES = [
   {
     path: "packages/client/src/workbench/view/ShellView.tsx",
     matches: [
-      { line: 12, column: 8, preview: "  const viewModel = useViewModel(ShellViewModelToken);" },
+      { line: 12, column: 8, preview: '  const viewModel = useViewModel("arka.workbench.shellViewModel");' },
       { line: 184, column: 20, preview: "      {viewModel.isClientOutdated ? (" },
     ],
   },

@@ -1,6 +1,11 @@
-import { createToken, type Disposable } from "#core/di";
+import type { Disposable } from "#core/di";
 
-export const TabDirtyStateToken = createToken<ITabDirtyState>("tabDirtyState");
+declare module "#core/di" {
+  /** `ITabDirtyState`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.workbench.tabDirtyState": ITabDirtyState;
+  }
+}
 /**
  * "이 탭에 저장 안 된 변경이 있는가"를 셸이 묻는 자리.
  *

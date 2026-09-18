@@ -2,7 +2,6 @@ import { useViewModel } from "#core/viewmodel";
 import { Button, Spinner, TextInput } from "@primer/react";
 import { Text } from "#component/Text";
 import { SearchResultList } from "../component/SearchResultList";
-import { SearchViewModelToken } from "../viewmodel/ISearchViewModel";
 import styles from "./SearchView.module.css";
 
 /**
@@ -13,7 +12,7 @@ export const SearchView = ({
 }: {
   readonly onFileOpen: (path: string, position?: { readonly line: number; readonly column: number }) => void;
 }) => {
-  const viewModel = useViewModel(SearchViewModelToken);
+  const viewModel = useViewModel("arka.search.viewModel");
   return (
     <div data-component="SearchView" className={styles["root"]}>
       <form
