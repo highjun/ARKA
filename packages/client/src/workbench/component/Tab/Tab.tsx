@@ -73,6 +73,6 @@ export const Tab = Object.assign(TabRoot, { Header: TabHeader, Strip: TabStrip, 
 /**
  * 공개 표면은 이 파일이 낸다 — 부품이 파일로 갈렸어도 밖에서 보는 자리는 `Tab` 하나다.
  */
-export type { PaneRowLeaf, PaneRowNode, PaneRowSplit, TabRow } from "./shared";
+export type { PaneRowLeaf, PaneRowSplit, TabRow } from "./shared";
 export type { TabGroupProps } from "./Group";
 export type { TabSplitProps } from "./Split";

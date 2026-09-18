@@ -2,63 +2,81 @@ import { useViewModel } from "#core/viewmodel";
 import { observer } from "mobx-react-lite";
 import { Heading } from "@primer/react";
 import { Text } from "#component/Text";
+import type { SettingsRow } from "../viewmodel/ISettingsViewModel";
 import styles from "./SettingsTabView.module.css";
 
-const THEMES = [
-  { value: "light", label: "밝게" },
-  { value: "dark", label: "어둡게" },
-] as const;
-const DENSITIES = [
-  { value: "auto", label: "자동 (터치 기기면 넓게)" },
-  { value: "compact", label: "촘촘하게 (IDE 밀도)" },
-  { value: "touch", label: "넓게 (터치 타겟 44px)" },
-] as const;
+/** 줄의 `type`마다 입력이 다르다 — 스위치·숫자·글·라디오. */
+const SettingsInput = observer(function SettingsInput({
+  row,
+  onChange,
+}: {
+  readonly row: SettingsRow;
+  readonly onChange: (value: unknown) => void;
+}) {
+  switch (row.type) {
+    case "boolean":
+      return (
+        <label className={styles["option"]}>
+          <input type="checkbox" checked={row.value === true} onChange={(event) => onChange(event.target.checked)} />
+          <Text>{row.title}</Text>
+        </label>
+      );
+    case "number":
+      return (
+        <label className={styles["option"]}>
+          <Text>{row.title}</Text>
+          <input
+            type="number"
+            value={typeof row.value === "number" ? row.value : ""}
+            onChange={(event) => onChange(Number(event.target.value))}
+          />
+        </label>
+      );
+    case "string":
+      return (
+        <label className={styles["option"]}>
+          <Text>{row.title}</Text>
+          <input
+            type="text"
+            value={typeof row.value === "string" ? row.value : ""}
+            onChange={(event) => onChange(event.target.value)}
+          />
+        </label>
+      );
+    case "enum":
+      return (
+        <fieldset className={styles["options"]}>
+          <legend className={styles["legend"]}>{row.title}</legend>
+          {(row.options ?? []).map((option) => (
+            <label key={option} className={styles["option"]}>
+              <input
+                type="radio"
+                name={row.id}
+                value={option}
+                checked={row.value === option}
+                onChange={() => onChange(option)}
+              />
+              <Text>{option}</Text>
+            </label>
+          ))}
+        </fieldset>
+      );
+  }
+});
 
-/** 설정 탭. 라디오 두 묶음 — 키가 늘면 섹션이 는다. */
+/** 설정 탭. 등록된 스키마를 줄로 편다 — 키가 늘면 줄이 는다. 밝기는 여기 없다 — 헤더의 토글이 바꾼다. */
 export const SettingsTabView = observer(function SettingsTabView() {
   const viewModel = useViewModel("arka.workbench.settingsViewModel");
   return (
     <div data-component="SettingsTabView" className={styles["root"]}>
-      <section className={styles["section"]}>
-        <Heading as="h2" variant="medium">
-          테마
-        </Heading>
-        <fieldset className={styles["options"]}>
-          <legend className={styles["legend"]}>화면 밝기</legend>
-          {THEMES.map((theme) => (
-            <label key={theme.value} className={styles["option"]}>
-              <input
-                type="radio"
-                name="theme"
-                value={theme.value}
-                checked={viewModel.theme === theme.value}
-                onChange={() => viewModel.setTheme(theme.value)}
-              />
-              <Text>{theme.label}</Text>
-            </label>
-          ))}
-        </fieldset>
-      </section>
-      <section className={styles["section"]}>
-        <Heading as="h2" variant="medium">
-          밀도
-        </Heading>
-        <fieldset className={styles["options"]}>
-          <legend className={styles["legend"]}>행 높이와 터치 타겟</legend>
-          {DENSITIES.map((density) => (
-            <label key={density.value} className={styles["option"]}>
-              <input
-                type="radio"
-                name="density"
-                value={density.value}
-                checked={viewModel.density === density.value}
-                onChange={() => viewModel.setDensity(density.value)}
-              />
-              <Text>{density.label}</Text>
-            </label>
-          ))}
-        </fieldset>
-      </section>
+      {viewModel.rows.map((row) => (
+        <section key={row.id} className={styles["section"]}>
+          <Heading as="h2" variant="medium">
+            {row.title}
+          </Heading>
+          <SettingsInput row={row} onChange={(value) => viewModel.set(row.id, value)} />
+        </section>
+      ))}
     </div>
   );
 });

@@ -1,6 +1,7 @@
 import { CommandService } from "#core/commands";
 import { Container } from "#core/di";
 import { Registry } from "#core/registry";
+import { Settings, type ISettings } from "#core/settings";
 import { URI } from "#contracts";
 import {
   DirectoryTreeModel,
@@ -18,7 +19,7 @@ import { createWorkspaceFilesPort } from "../extensions/filesystem/infra/HttpWor
 import { createWorkspaceWatchPort } from "../extensions/filesystem/infra/HttpWorkspaceWatch";
 import { DirectoryTreeView } from "../extensions/filesystem/view/DirectoryTreeView";
 import { createTextTabProvider } from "../extensions/filesystem/view/textTabProvider";
-import { createDocumentDensity } from "./infra/DocumentDensity";
+import { createDocumentDensity, DENSITY_SETTING_ID } from "./infra/DocumentDensity";
 import { createDocumentTheme } from "./infra/DocumentTheme";
 import { createErrorNotifier } from "./infra/ErrorNotifier";
 import { createGlobalErrorHandlers } from "./infra/GlobalErrorHandlers";
@@ -26,16 +27,13 @@ import { createGlobalKeybindings } from "./infra/GlobalKeybindings";
 import { createServerInfoPort } from "./infra/HttpServerInfo";
 import { createUnloadGuard } from "./infra/UnloadGuard";
 import { createStoragePort } from "./infra/LocalStorage";
+import { createViewportQuery } from "./infra/ViewportQuery";
 import { keybindingsTabProvider } from "./view/keybindingsTabProvider";
 import { settingsTabProvider } from "./view/settingsTabProvider";
-import { SettingsModel } from "./model/SettingsModel";
 import { SettingsViewModel } from "./viewmodel/SettingsViewModel";
 import { WorkbenchStartupRegistry } from "./model/WorkbenchStartupRegistry";
-import { ActivityBarRegistry } from "./model/ActivityBarRegistry";
-import { ActivityModel } from "./model/ActivityModel";
 import { ErrorLog } from "./model/ErrorLog";
 import { Notifications } from "./model/Notifications";
-import { SidebarContentRegistry } from "./model/SidebarContentRegistry";
 import { TabLayout } from "./model/TabLayout";
 import { TabSystem } from "./model/TabSystem";
 import { collectTabs, findLeaf } from "./model/paneTree";
@@ -44,6 +42,11 @@ import { AppLifetime } from "./model/AppLifetime";
 import { Workspace } from "./model/Workspace";
 import type { ServerInfo } from "./model/IServerInfo";
 import { ShellViewModel } from "./viewmodel/ShellViewModel";
+import { TabSystemViewModel } from "./viewmodel/TabSystemViewModel";
+import { NotificationViewModel } from "./viewmodel/NotificationViewModel";
+import { AppStatusViewModel } from "./viewmodel/AppStatusViewModel";
+import { CommandPaletteViewModel } from "./viewmodel/CommandPaletteViewModel";
+import { KeybindingViewModel } from "./viewmodel/KeybindingViewModel";
 import type { IWorkbenchStartup } from "./model/IWorkbenchStartup";
 
 declare module "#core/di" {
@@ -51,8 +54,10 @@ declare module "#core/di" {
    * 셸 수명주기에 얹는 기여들. 조립부만 아는 것이라 여기서 선언한다.
    * `arka.workbench.startup`은 아래 전부를 합친 것 — `ShellViewModel`이 이것 하나만 받는다.
    * `startup.markdown`은 익스텐션 커맨드를 탭이 뜨기 전에 팔레트에 올리려고 VM을 미리 만드는 것이다.
+   * `arka.settings`는 core 서비스지만 등록은 workbench가 한다(R15에서 모듈로).
    */
   interface InstanceMap {
+    "arka.settings": ISettings;
     "arka.workbench.startup.fileWatch": IWorkbenchStartup;
     "arka.workbench.startup.documentTheme": IWorkbenchStartup;
     "arka.workbench.startup.documentDensity": IWorkbenchStartup;
@@ -65,12 +70,14 @@ declare module "#core/di" {
   }
 }
 
-/** 탐색기 활동의 id. ActivityBar·SidebarContent 등록 둘 다 이 문자열로 서로를 잇는다. */
+/** 탐색기 사이드바의 id. */
 const EXPLORER_ID = "explorer";
-/** 검색 활동의 id. */
+/** 검색 사이드바의 id. */
 const SEARCH_ID = "search";
 /** 사용자 단축키 재정의가 저장되는 키. */
 const KEYBINDING_OVERRIDES_KEY = "workbench.keybindings";
+/** 설정 값이 저장되는 키. */
+const SETTINGS_KEY = "workbench.settings";
 
 /** `arka.workbench.open`이 받는 것. */
 const isOpenContext = (value: unknown): value is { readonly uri: URI; readonly preview?: boolean } =>
@@ -133,9 +140,20 @@ export function createApplication(): Container {
       reportError: (error) => c.resolve("arka.workbench.errorLog").report(error, "command"),
     });
   });
-  container.register("arka.workbench.activityBarRegistry", "singleton", () => new ActivityBarRegistry());
-  container.register("arka.workbench.sidebarContentRegistry", "singleton", () => new SidebarContentRegistry());
+  // 설정도 localStorage에 산다 — 서버 settings.json은 나중 라운드.
+  container.register("arka.settings", "singleton", (c) => {
+    const storage = c.resolve("arka.workbench.storage");
+    return new Settings({
+      store: {
+        load: () => JSON.parse(storage.get(SETTINGS_KEY) ?? "{}") as Record<string, unknown>,
+        save: (values) => storage.set(SETTINGS_KEY, JSON.stringify(values)),
+      },
+    });
+  });
+  container.register("arka.workbench.sidebar", "singleton", () => new Registry());
+  container.register("arka.workbench.bottom", "singleton", () => new Registry());
   container.register("arka.workbench.tabSystem", "singleton", () => new Registry());
+  container.register("arka.workbench.viewport", "singleton", createViewportQuery);
   container.register("arka.workbench.startupRegistry", "singleton", () => new WorkbenchStartupRegistry());
 
   container.register("arka.workbench.errorLog", "singleton", () => new ErrorLog());
@@ -150,7 +168,6 @@ export function createApplication(): Container {
     "singleton",
     (c) => new Workspace({ serverInfo: c.resolve("arka.workbench.serverInfo") }),
   );
-  container.register("arka.workbench.activityModel", "singleton", () => new ActivityModel());
   container.register(
     "arka.workbench.tabLayout",
     "singleton",
@@ -174,17 +191,43 @@ export function createApplication(): Container {
     (c) => new ColorMode({ storage: c.resolve("arka.workbench.storage") }),
   );
   container.register(
-    "arka.workbench.settingsModel",
-    "singleton",
-    (c) => new SettingsModel({ storage: c.resolve("arka.workbench.storage") }),
-  );
-  container.register(
     "arka.workbench.settingsViewModel",
     "singleton",
+    (c) => new SettingsViewModel({ settings: c.resolve("arka.settings") }),
+  );
+  container.register(
+    "arka.workbench.keybindingViewModel",
+    "singleton",
+    (c) => new KeybindingViewModel({ commands: c.resolve("arka.commands") }),
+  );
+  container.register(
+    "arka.workbench.commandPaletteViewModel",
+    "singleton",
+    (c) => new CommandPaletteViewModel({ commands: c.resolve("arka.commands") }),
+  );
+  container.register(
+    "arka.workbench.notificationViewModel",
+    "singleton",
+    (c) => new NotificationViewModel({ notifications: c.resolve("arka.workbench.notifications") }),
+  );
+  container.register(
+    "arka.workbench.appStatusViewModel",
+    "singleton",
     (c) =>
-      new SettingsViewModel({
-        colorMode: c.resolve("arka.workbench.colorMode"),
-        settingsModel: c.resolve("arka.workbench.settingsModel"),
+      new AppStatusViewModel({
+        appLifetime: c.resolve("arka.workbench.appLifetime"),
+        workspace: c.resolve("arka.workbench.workspace"),
+      }),
+  );
+  container.register(
+    "arka.workbench.tabSystemViewModel",
+    "singleton",
+    (c) =>
+      new TabSystemViewModel({
+        tabLayout: c.resolve("arka.workbench.tabLayout"),
+        tabs: c.resolve("arka.workbench.tabs"),
+        commands: c.resolve("arka.commands"),
+        copyToClipboard,
       }),
   );
   container.register(
@@ -263,7 +306,7 @@ export function createApplication(): Container {
     createDocumentTheme({ colorMode: c.resolve("arka.workbench.colorMode") }),
   );
   container.register("arka.workbench.startup.documentDensity", "singleton", (c) =>
-    createDocumentDensity({ settingsModel: c.resolve("arka.workbench.settingsModel") }),
+    createDocumentDensity({ settings: c.resolve("arka.settings") }),
   );
   container.register("arka.workbench.startup.unloadGuard", "singleton", (c) =>
     createUnloadGuard({ tabs: c.resolve("arka.workbench.tabs") }),
@@ -311,17 +354,13 @@ export function createApplication(): Container {
     "singleton",
     (c) =>
       new ShellViewModel({
-        activityModel: c.resolve("arka.workbench.activityModel"),
-        tabLayout: c.resolve("arka.workbench.tabLayout"),
+        sidebars: c.resolve("arka.workbench.sidebar"),
+        bottoms: c.resolve("arka.workbench.bottom"),
         colorMode: c.resolve("arka.workbench.colorMode"),
-        activityBarRegistry: c.resolve("arka.workbench.activityBarRegistry"),
-        tabs: c.resolve("arka.workbench.tabs"),
+        viewport: c.resolve("arka.workbench.viewport"),
+        tabLayout: c.resolve("arka.workbench.tabLayout"),
+        commands: c.resolve("arka.commands"),
         startup: c.resolve("arka.workbench.startup"),
-        appLifetime: c.resolve("arka.workbench.appLifetime"),
-        workspace: c.resolve("arka.workbench.workspace"),
-        notifications: c.resolve("arka.workbench.notifications"),
-        commandCenterRegistry: c.resolve("arka.commands"),
-        copyToClipboard,
       }),
   );
 
@@ -337,19 +376,24 @@ export function createApplication(): Container {
   startupRegistry.add({ id: "markdown", instanceId: "arka.workbench.startup.markdown" });
 
   // Registry 전부 singleton이라 루트에서 한 번만 채운다.
-  container
-    .resolve("arka.workbench.activityBarRegistry")
-    .add({ id: EXPLORER_ID, title: "탐색기", iconId: "files", keybinding: "ctrl+shift+e" });
-  container
-    .resolve("arka.workbench.sidebarContentRegistry")
-    .add({ id: EXPLORER_ID, ContentComponent: DirectoryTreeView });
-  container
-    .resolve("arka.workbench.activityBarRegistry")
-    .add({ id: SEARCH_ID, title: "검색", iconId: "search", keybinding: "ctrl+shift+f" });
-  container.resolve("arka.workbench.sidebarContentRegistry").add({ id: SEARCH_ID, ContentComponent: SearchView });
+  const sidebars = container.resolve("arka.workbench.sidebar");
+  sidebars.add({ id: EXPLORER_ID, title: "탐색기", iconId: "files", Content: DirectoryTreeView });
+  sidebars.add({ id: SEARCH_ID, title: "검색", iconId: "search", Content: SearchView });
+  // 설정 스키마 — 밀도. 확장이 `activate`에서 더하는 것과 같은 자리다.
+  container.resolve("arka.settings").schema.add({
+    id: DENSITY_SETTING_ID,
+    title: "밀도",
+    type: "enum",
+    default: "auto",
+    options: ["auto", "compact", "touch"],
+  });
   // 탭을 여는 길은 명령 하나다 — 사이드바·검색·미리보기가 전부 `arka.workbench.open`을 부른다. 문맥
   // `tab.active.*`는 확장이 "지금 보는 탭"을 셸을 모른 채 읽는 자리다.
   const commands = container.resolve("arka.commands");
+  // 사이드바 보기 단축키 — 명령(`shell.showActivity.<id>`)은 `ShellViewModel`이 등록한다. R15에서 각 확장의
+  // `arka.<ext>.focus`로 간다.
+  commands.keybindings.add({ keybinding: "ctrl+shift+e", actionId: `shell.showActivity.${EXPLORER_ID}` });
+  commands.keybindings.add({ keybinding: "ctrl+shift+f", actionId: `shell.showActivity.${SEARCH_ID}` });
   const activeTab = () => {
     const layout = container.resolve("arka.workbench.tabLayout");
     const leaf = findLeaf(layout.tree, layout.activePaneId);
@@ -370,7 +414,7 @@ export function createApplication(): Container {
     label: "탭: 옮겨진 경로 따라가기",
     execute: (context) => {
       if (!isRetargetContext(context)) return;
-      container.resolve("arka.workbench.shellViewModel").retargetTabs(context.oldPrefix, context.newPrefix);
+      container.resolve("arka.workbench.tabSystemViewModel").retargetTabs(context.oldPrefix, context.newPrefix);
     },
   });
 

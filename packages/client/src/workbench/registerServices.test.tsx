@@ -231,7 +231,7 @@ describe("registerServices", () => {
       fireEvent.keyDown(window, { key: ",", ctrlKey: true });
       expect(await screen.findByRole("tab", { name: /설정/u })).toBeDefined();
       expect(document.documentElement.dataset["density"]).toBe("compact");
-      fireEvent.click(screen.getByLabelText(/^넓게/u));
+      fireEvent.click(screen.getByLabelText("touch"));
       expect(document.documentElement.dataset["density"]).toBe("touch");
       expect(localStorage.getItem("workbench.settings")).toContain("touch");
     });
