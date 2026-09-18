@@ -209,4 +209,7 @@ export interface IShellViewModel extends Disposable {
    */
   readonly isPaletteOpen: boolean;
   setPaletteOpen(open: boolean): void;
+  /** 팔레트의 검색어. 닫으면 비운다 — 다음에 열 때 지난 검색어가 남지 않는다. */
+  readonly paletteQuery: string;
+  setPaletteQuery(value: string): void;
 }

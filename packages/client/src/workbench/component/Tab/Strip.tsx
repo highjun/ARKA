@@ -14,39 +14,33 @@ import type {
 import { clsx } from "clsx";
 import { getStripItemStates, useStripScrollHandle, useTabStrip } from "./useTabStrip";
 import { Container } from "#component/Container";
-import { Icon } from "#component/Icon";
-import { IconButton } from "#component/IconButton";
 import { Menu } from "#component/Menu";
-import type { StripDropPosition, TabClassNames, TabId, TabItem } from "./shared";
+import type { StripDropPosition, TabClassNames, TabId, TabRow } from "./shared";
 import { ClassNamesContext, useTabClassNames } from "./TabContext";
 import { TabHeader } from "./Header";
 
-/** 콜백이 없으면 그 기능 자체가 꺼진다 — `onTabClose`가 없으면 닫기 버튼도 안 뜬다. */
-export interface TabStripProps extends Omit<ComponentPropsWithoutRef<"div">, "children"> {
-  /** 지금 선택된 탭의 id. */
-  readonly activeTab: TabId;
+/** 콜백이 없으면 그 기능 자체가 꺼진다 — `onClose`가 없으면 닫기 버튼도, `onReorder`가 없으면 드래그 재정렬도 안 뜬다. */
+export interface TabStripProps extends Omit<ComponentPropsWithoutRef<"div">, "children" | "onSelect"> {
   /** 스트립에 표시할 탭 목록. */
-  readonly tabItems: readonly TabItem[];
+  readonly tabs: readonly TabRow[];
+  /** 지금 선택된 탭의 id. 없으면 `null`. */
+  readonly activeTabId: TabId | null;
   /** 탭 헤더를 클릭하면 그 id와 함께 호출된다. */
-  readonly onTabClick: (tabId: TabId) => void;
-  /** 스트립 끝의 "더 보기" 메뉴 버튼을 클릭하면 호출된다. */
-  readonly onMenuClick: () => void;
-  /** 탭을 닫으면 그 id와 함께 호출된다. 없으면 닫기 버튼 자체가 안 뜬다. */
-  readonly onTabClose?: (tabId: TabId) => void;
-  /** 드래그로 순서를 바꾸면 새 전체 목록과 함께 호출된다. 없으면 드래그 재정렬이 꺼진다. */
-  readonly onTabReorder?: (nextItems: TabItem[]) => void;
+  readonly onSelect?: (tabId: TabId) => void;
+  /** 탭을 닫으면 그 id와 함께 호출된다. */
+  readonly onClose?: (tabId: TabId) => void;
+  /** 드래그로 순서를 바꾸면 새 id 순서와 함께 호출된다. */
+  readonly onReorder?: (nextTabIds: readonly TabId[]) => void;
   /**
    * 미리보기 탭(`isPreview`)을 더블클릭하면 그 id와 함께 호출된다 — 없으면 더블클릭해도 아무
    * 일도 없다(옵트인). VSCode의 "미리보기 탭 더블클릭 시 고정" 관례. 이미 고정된 탭을 더블클릭
    * 하면 안 불린다.
    */
-  readonly onTabPin?: (tabId: TabId) => void;
-  /** `tabItems`가 빈 배열일 때 스트립 자리에 보여줄 내용. */
-  readonly stripEmptyLabel?: ReactNode;
+  readonly onPin?: (tabId: TabId) => void;
+  /** 주어지면 탭 헤더가 우클릭에 반응해 이 결과를 `Menu.Content`로 띄운다 — 없으면 아무 일도 없다(옵트인). */
+  readonly renderTabMenu?: (tabId: TabId) => ReactNode;
   /** 스트립 위에 겹쳐 그릴 내용(드롭존 표시 등) — 레이아웃에 영향을 주지 않는다. */
   readonly overlay?: ReactNode;
-  /** 주어지면 탭 헤더가 우클릭에 반응해 이 결과를 `Menu.Content`로 띄운다 — 없으면 지금처럼 아무 일도 없다(옵트인). */
-  readonly renderTabContextMenu?: (tab: TabItem) => ReactNode;
 }
 
 /** 목록 전체가 받는 드래그 핸들러 — 항목 단위는 `StripItemHandlers`다. */
@@ -64,16 +58,15 @@ export interface StripDropIndicator {
 
 /** 스트립이 항목들에게 내려보내는 것 전부 — prop 드릴링 대신 Context로 간다. */
 export interface StripContextValue {
-  readonly activeTab: TabId;
-  readonly tabItems: readonly TabItem[];
+  readonly tabs: readonly TabRow[];
+  readonly activeTabId: TabId | null;
   readonly reorderable: boolean;
-  readonly onTabClick: (tabId: TabId) => void;
-  readonly onMenuClick: () => void;
-  readonly onTabClose?: (tabId: TabId) => void;
-  readonly onTabReorder?: (nextItems: TabItem[]) => void;
-  readonly onTabPin?: (tabId: TabId) => void;
-  readonly renderTabContextMenu?: (tab: TabItem) => ReactNode;
-  readonly onKeyDown: (event: KeyboardEvent<HTMLDivElement>, item: TabItem) => void;
+  readonly onSelect?: (tabId: TabId) => void;
+  readonly onClose?: (tabId: TabId) => void;
+  readonly onReorder?: (nextTabIds: readonly TabId[]) => void;
+  readonly onPin?: (tabId: TabId) => void;
+  readonly renderTabMenu?: (tabId: TabId) => ReactNode;
+  readonly onKeyDown: (event: KeyboardEvent<HTMLDivElement>, tab: TabRow) => void;
   readonly dropIndicator: StripDropIndicator | null;
   readonly setDropIndicator: Dispatch<SetStateAction<StripDropIndicator | null>>;
   readonly draggingId: TabId | null;
@@ -81,10 +74,9 @@ export interface StripContextValue {
   readonly listRef: MutableRefObject<HTMLDivElement | null>;
 }
 
-/** 항목 하나에 그대로 펼쳐 붙이는 핸들러 묶음. */
+/** 항목 하나에 그대로 펼쳐 붙이는 핸들러 묶음. 클릭은 `onSelect`로 따로 간다. */
 interface StripItemHandlers {
   readonly draggable: boolean;
-  readonly onClick: MouseEventHandler<HTMLDivElement>;
   readonly onDoubleClick: MouseEventHandler<HTMLDivElement>;
   readonly onDragStart: DragEventHandler<HTMLDivElement>;
   readonly onDragEnd: DragEventHandler<HTMLDivElement>;
@@ -94,12 +86,13 @@ interface StripItemHandlers {
 
 /** 항목 하나가 그릴 때 보는 파생 상태. Context에서 자기 몫만 뽑은 것이다. */
 export interface StripItemState {
-  readonly tab: TabItem;
+  readonly tab: TabRow;
   readonly isActive: boolean;
   readonly isDraggable: boolean;
   readonly isDragging: boolean;
   readonly indicatorPosition: StripDropPosition | null;
-  readonly onClose: () => void;
+  readonly onSelect: () => void;
+  readonly onClose: (() => void) | undefined;
   readonly handlers: StripItemHandlers;
 }
 
@@ -115,20 +108,17 @@ export const StripItems = () => {
   const classNames = useTabClassNames();
   const context = useStripContext();
   const items = getStripItemStates(context);
-  const { renderTabContextMenu } = context;
+  const { renderTabMenu } = context;
 
   return (
     <>
-      {items.map(({ tab, isActive, isDraggable, isDragging, indicatorPosition, onClose, handlers }) => {
+      {items.map(({ tab, isActive, isDraggable, isDragging, indicatorPosition, onSelect, onClose, handlers }) => {
         const header = (
           <TabHeader
             {...handlers}
-            iconId={tab.iconId}
-            icon={tab.icon}
-            title={tab.title}
+            tab={tab}
             isActive={isActive}
-            isDirty={tab.isDirty}
-            isPreview={tab.isPreview}
+            onSelect={onSelect}
             onClose={onClose}
             aria-grabbed={isDraggable ? isDragging : undefined}
             aria-selected={isActive}
@@ -151,10 +141,10 @@ export const StripItems = () => {
             {indicatorPosition === "before" ? (
               <span aria-hidden="true" className={classNames.stripIndicatorBefore} />
             ) : null}
-            {renderTabContextMenu ? (
+            {renderTabMenu ? (
               <Menu kind="context">
                 <Menu.Trigger className={classNames.headerContextMenuTrigger}>{header}</Menu.Trigger>
-                <Menu.Content>{renderTabContextMenu(tab)}</Menu.Content>
+                <Menu.Content>{renderTabMenu(tab.id)}</Menu.Content>
               </Menu>
             ) : (
               header
@@ -169,32 +159,15 @@ export const StripItems = () => {
   );
 };
 
-/** 스트립 끝의 "더 보기" 버튼 — 넘쳐서 안 보이는 탭을 여는 자리다. */
-export const StripMenu = () => {
-  const { onMenuClick } = useStripContext();
-
-  return (
-    <IconButton
-      variant="invisible"
-      size="small"
-      aria-label="Open tab actions"
-      onClick={onMenuClick}
-      icon={() => <Icon iconId="ellipsis" size="sm" />}
-    />
-  );
-};
-
 /** 실제 구현 — `data-component`를 스스로 찍지 않는다(공개 `Tab.Strip`이 필요하면 감싸서 찍는다). `Tab.Group`이 자기 안의 strip으로 그대로 재사용한다. */
 export const StripRootImpl = ({
-  activeTab,
-  tabItems,
-  onTabClick,
-  onMenuClick,
-  onTabClose,
-  onTabReorder,
-  onTabPin,
-  renderTabContextMenu,
-  stripEmptyLabel = "No open tabs",
+  tabs,
+  activeTabId,
+  onSelect,
+  onClose,
+  onReorder,
+  onPin,
+  renderTabMenu,
   overlay,
   className,
   classNames: providedClassNames,
@@ -202,26 +175,23 @@ export const StripRootImpl = ({
 }: TabStripProps & { readonly classNames?: TabClassNames }) => {
   const inherited = useTabClassNames();
   const classNames = providedClassNames ?? inherited;
-  const { context, listRef, listHandlers } = useTabStrip(
-    activeTab,
-    tabItems,
-    onTabClick,
-    onMenuClick,
-    onTabClose,
-    onTabReorder,
-    onTabPin,
-    renderTabContextMenu,
-  );
+  const { context, listRef, listHandlers } = useTabStrip({
+    tabs,
+    activeTabId,
+    onSelect,
+    onClose,
+    onReorder,
+    onPin,
+    renderTabMenu,
+  });
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const { isOverflowing, onPointerDown: onScrollHandlePointerDown } = useStripScrollHandle(viewportRef);
 
   return (
     <ClassNamesContext value={classNames}>
       <StripContext value={context}>
-        {/* `role="tablist"`는 실제 탭이 있는 안쪽 div 에만 건다 — 이 바깥 div 까지 tablist 로 두면
-            `stripTail`의 "더보기" 버튼이 presentation 래퍼를 뚫고 tablist 의 허용되지 않는
-            자식(role=button)으로 잡힌다(axe `aria-required-children`). tablist 의 유일한 실제
-            자식은 role=tab 뿐이어야 한다. */}
+        {/* `role="tablist"`는 실제 탭이 있는 안쪽 div 에만 건다 — tablist 의 유일한 실제 자식은 role=tab 뿐이어야 한다
+            (axe `aria-required-children`). */}
         <div {...props} className={clsx(className, classNames.stripRoot)}>
           <Container ref={viewportRef} chrome="none" scroll="horizontal" className={classNames.stripListContainer}>
             <div
@@ -231,7 +201,7 @@ export const StripRootImpl = ({
               className={classNames.stripList}
               {...listHandlers}
             >
-              {tabItems.length > 0 ? <StripItems /> : <div className={classNames.stripEmpty}>{stripEmptyLabel}</div>}
+              <StripItems />
             </div>
           </Container>
           {isOverflowing ? (
@@ -243,9 +213,6 @@ export const StripRootImpl = ({
               className={classNames.stripScrollHandle}
             />
           ) : null}
-          <div className={classNames.stripTail}>
-            <StripMenu />
-          </div>
           {overlay}
         </div>
       </StripContext>

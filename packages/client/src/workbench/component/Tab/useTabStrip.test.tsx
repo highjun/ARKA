@@ -1,29 +1,30 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { useTabStrip } from "./useTabStrip";
-import type { TabItem } from "./Tab";
+import type { TabRow } from "./Tab";
 
-const ITEMS: TabItem[] = [
-  { id: "a", title: "A", iconId: "file" },
-  { id: "b", title: "B", iconId: "file" },
-];
+const row = (id: string): TabRow => ({
+  id,
+  kind: "file",
+  title: id.toUpperCase(),
+  icon: null,
+  Content: () => null,
+  isPreview: false,
+  isDirty: false,
+});
+const ROWS: TabRow[] = [row("a"), row("b")];
 
 describe("useTabStrip", () => {
-  it("onTabReorder 를 생략하면 순서를 바꿀 수 없다", () => {
-    const { result } = renderHook(() =>
-      useTabStrip("a", ITEMS, vi.fn(), vi.fn(), undefined, undefined, undefined, undefined),
-    );
+  it("onReorder 를 생략하면 순서를 바꿀 수 없다", () => {
+    const { result } = renderHook(() => useTabStrip({ tabs: ROWS, activeTabId: "a" }));
     expect(result.current.context.reorderable).toBe(false);
   });
 
-  it("유효한 drop indicator 가 정해진 상태에서 drop 하면 순서 변경을 확정한다", () => {
-    const onTabReorder = vi.fn();
-    const { result } = renderHook(() =>
-      useTabStrip("a", ITEMS, vi.fn(), vi.fn(), undefined, onTabReorder, undefined, undefined),
-    );
+  it("drop 표시선이 없으면 순서 변경을 확정하지 않는다", () => {
+    const onReorder = vi.fn();
+    const { result } = renderHook(() => useTabStrip({ tabs: ROWS, activeTabId: "a", onReorder }));
 
-    // listRef.current is null in jsdom without a real layout, so getStripChildRects/indicator
-    // resolution short-circuits to null — 여기서는 dataTransfer 가 비어있을 때 아무 일도 안 하는지만 확인한다.
+    // jsdom엔 실제 배치가 없어 listRef.current가 null이다 — 표시선이 안 잡히면 아무 일도 없어야 한다.
     const dataTransfer = { getData: () => "", dropEffect: "move" as const };
     act(() => {
       result.current.listHandlers.onDrop({
@@ -32,6 +33,20 @@ describe("useTabStrip", () => {
       } as unknown as Parameters<typeof result.current.listHandlers.onDrop>[0]);
     });
 
-    expect(onTabReorder).not.toHaveBeenCalled();
+    expect(onReorder).not.toHaveBeenCalled();
+  });
+
+  it("Shift+화살표로 순서를 바꾸면 새 id 순서가 온다", () => {
+    const onReorder = vi.fn();
+    const { result } = renderHook(() => useTabStrip({ tabs: ROWS, activeTabId: "a", onReorder }));
+
+    result.current.context.onKeyDown(
+      { key: "ArrowRight", shiftKey: true, preventDefault: () => {} } as unknown as Parameters<
+        typeof result.current.context.onKeyDown
+      >[0],
+      ROWS[0]!,
+    );
+
+    expect(onReorder).toHaveBeenCalledWith(["b", "a"]);
   });
 });

@@ -67,6 +67,7 @@ export class ShellViewModel implements IShellViewModel {
   private pendingTabCloseState: { leafId: PaneId; tabId: string } | null = null;
   /** 옛 `CommandCenterModel`에서 옮겨온 유일한 상태(2026-09-05) — `IShellViewModel.isPaletteOpen` 참고. */
   private isPaletteOpenState = false;
+  private paletteQueryState = "";
   private themeState: Mode;
   readonly #copyToClipboard: (text: string) => void;
 
@@ -141,6 +142,7 @@ export class ShellViewModel implements IShellViewModel {
       | "isClientOutdatedState"
       | "isSidebarOpenState"
       | "isPaletteOpenState"
+      | "paletteQueryState"
     >(
       this,
       {
@@ -155,6 +157,7 @@ export class ShellViewModel implements IShellViewModel {
         isClientOutdatedState: observable,
         isSidebarOpenState: observable,
         isPaletteOpenState: observable,
+        paletteQueryState: observable,
       },
       { autoBind: true },
     );
@@ -419,9 +422,20 @@ export class ShellViewModel implements IShellViewModel {
     return this.isPaletteOpenState;
   }
 
-  /** `#isPaletteOpen`에 값을 반영한다. */
+  /** `#isPaletteOpen`에 값을 반영한다. 닫으면 검색어도 비운다. */
   setPaletteOpen(open: boolean): void {
     this.isPaletteOpenState = open;
+    if (!open) this.paletteQueryState = "";
+  }
+
+  /** 팔레트의 검색어를 값으로 노출한다. */
+  get paletteQuery(): string {
+    return this.paletteQueryState;
+  }
+
+  /** 팔레트의 검색어에 값을 반영한다. */
+  setPaletteQuery(value: string): void {
+    this.paletteQueryState = value;
   }
 
   /** `#theme`를 값으로 노출한다. */

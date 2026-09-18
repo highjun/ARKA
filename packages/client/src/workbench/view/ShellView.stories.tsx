@@ -112,6 +112,8 @@ const viewModel = (state: Partial<IShellViewModel>, container: Container): IShel
   setSidebarOpen: () => undefined,
   isPaletteOpen: false,
   setPaletteOpen: () => undefined,
+  paletteQuery: "",
+  setPaletteQuery: () => undefined,
   ...state,
 });
 

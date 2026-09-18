@@ -1,32 +1,47 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Icon } from "#component/Icon";
 import { Tab } from "./index";
-import type { TabGroupItem, TabGroupProps, TabSplitProps, TabTreeSplit } from "./index";
+import type { PaneRowSplit, TabGroupProps, TabRow, TabSplitProps } from "./index";
 
-const ITEMS: readonly TabGroupItem[] = [
-  { id: "readme", title: "README.md", iconId: "file", content: <div style={{ padding: 16 }}>README.md 내용</div> },
+const content = (text: string) => () => <div style={{ padding: 16 }}>{text}</div>;
+
+const ROWS: readonly TabRow[] = [
+  {
+    id: "readme",
+    kind: "file",
+    title: "README.md",
+    icon: <Icon iconId="file" size="sm" />,
+    Content: content("README.md 내용"),
+    isPreview: false,
+    isDirty: false,
+  },
   {
     id: "main",
+    kind: "file",
     title: "main.ts",
-    iconId: "fileCode",
+    icon: <Icon iconId="fileCode" size="sm" />,
+    Content: content("main.ts 내용"),
+    isPreview: false,
     isDirty: true,
-    content: <div style={{ padding: 16 }}>main.ts 내용</div>,
   },
   {
     id: "preview",
+    kind: "file",
     title: "notes.md",
-    iconId: "file",
+    icon: <Icon iconId="file" size="sm" />,
+    Content: content("미리보기 탭"),
     isPreview: true,
-    content: <div style={{ padding: 16 }}>미리보기 탭</div>,
+    isDirty: false,
   },
 ];
 
-const SPLIT_TREE: TabTreeSplit = {
+const SPLIT_TREE: PaneRowSplit = {
   kind: "split",
   id: "root",
   orientation: "horizontal",
   children: [
-    { kind: "leaf", id: "left", activeTab: "readme", tabItems: ITEMS },
-    { kind: "leaf", id: "right", activeTab: "main", tabItems: ITEMS.slice(0, 2) },
+    { kind: "leaf", id: "left", activeTabId: "readme", tabs: ROWS },
+    { kind: "leaf", id: "right", activeTabId: "main", tabs: ROWS.slice(0, 2) },
   ],
 };
 
@@ -41,11 +56,10 @@ const meta = {
     ),
   ],
   args: {
-    activeTab: "readme",
-    tabItems: ITEMS,
-    onTabClick: () => undefined,
-    onMenuClick: () => undefined,
-    onTabClose: () => undefined,
+    tabs: ROWS,
+    activeTabId: "readme",
+    onSelect: () => undefined,
+    onClose: () => undefined,
   },
 } satisfies Meta<typeof Tab>;
 
@@ -57,17 +71,16 @@ type SplitStory = StoryObj<Meta<TabSplitProps>>;
 
 export const Default: GroupStory = {};
 /** 탭이 0개면 스트립 없이 `emptyMessage`만 그린다. */
-export const Empty: GroupStory = { args: { activeTab: "", tabItems: [], emptyMessage: "탐색기에서 파일을 고르세요." } };
+export const Empty: GroupStory = { args: { tabs: [], activeTabId: null, emptyMessage: "탐색기에서 파일을 고르세요." } };
 export const NoChrome: GroupStory = { args: { chrome: "none" } };
-// Split은 `render`로 직접 그린다 — 메타 args(`activeTab`/`tabItems`)가 합쳐져 Split 루트 DOM으로 새는 걸 막는다.
+// Split은 `render`로 직접 그린다 — 메타 args(`tabs`/`activeTabId`)가 합쳐져 Split 루트 DOM으로 새는 걸 막는다.
 export const Split: SplitStory = {
   render: () => (
     <Tab
       tree={SPLIT_TREE}
-      activeLeaf="left"
-      onTabClick={() => undefined}
-      onMenuClick={() => undefined}
-      onTabClose={() => undefined}
+      activePaneId="left"
+      onSelect={() => undefined}
+      onClose={() => undefined}
       style={{ height: "100%" }}
     />
   ),
@@ -76,9 +89,8 @@ export const SplitVertical: SplitStory = {
   render: () => (
     <Tab
       tree={{ ...SPLIT_TREE, orientation: "vertical" }}
-      activeLeaf="right"
-      onTabClick={() => undefined}
-      onMenuClick={() => undefined}
+      activePaneId="right"
+      onSelect={() => undefined}
       style={{ height: "100%" }}
     />
   ),

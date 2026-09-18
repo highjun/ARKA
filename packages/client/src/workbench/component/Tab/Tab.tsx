@@ -1,7 +1,7 @@
 import type { Ref } from "react";
 import { buildClassNames } from "./TabContext";
 import { TabHeader } from "./Header";
-import { StripItems, StripMenu, StripRootImpl } from "./Strip";
+import { StripItems, StripRootImpl } from "./Strip";
 import type { TabStripProps } from "./Strip";
 import { GroupImpl } from "./Group";
 import type { TabGroupProps } from "./Group";
@@ -12,12 +12,11 @@ const StripRoot = ({ className, ...props }: TabStripProps) => (
   <StripRootImpl {...props} classNames={buildClassNames()} className={className} />
 );
 
-/** 탭 헤더들을 가로로 늘어놓는 띠 — 넘치면 스크롤하고, 다 안 보이는 탭은 오버플로 메뉴로 묶는다. */
-const TabStrip = Object.assign(StripRoot, { Items: StripItems, Menu: StripMenu });
+/** 탭 헤더들을 가로로 늘어놓는 띠 — 넘치면 스크롤한다. */
+const TabStrip = Object.assign(StripRoot, { Items: StripItems });
 
 /**
- * Strip과 활성 탭의 내용(`children`)을 세로로 붙인 패널 하나 — 분할이 없을 때 `Tab`이 렌더하는
- * 기본 단위.
+ * Strip과 활성 탭의 내용을 세로로 붙인 패널 하나 — 분할이 없을 때 `Tab`이 렌더하는 기본 단위.
  *
  * `data-component` 는 여기서 리터럴로 정한다 — 실제 DOM에 닿는 자리(`GroupImpl`)가 하나뿐이라
  * 다른 컴포넌트와 같은 자리다.
@@ -51,10 +50,10 @@ const TabSplit = ({ className, chrome, ref, ...props }: TabSplitProps) => (
 TabSplit.displayName = "Tab.Split";
 
 /**
- * `tree`를 주면 분할, 주지 않고 `tabItems`/`activeTab`을 주면 단일 그룹으로 동작한다. 두 모양이
+ * `tree`를 주면 분할, 주지 않고 `tabs`/`activeTabId`를 주면 단일 그룹으로 동작한다. 두 모양이
  * 한 컴포넌트인 이유는 쓰는 쪽이 분할 여부를 런타임에 바꾸기 때문이다.
  */
-export type TabProps = (TabSplitProps | (TabGroupProps & { tree?: never })) & {
+export type TabProps = (TabSplitProps | (TabGroupProps & { readonly tree?: never })) & {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLElement>;
 };
@@ -74,6 +73,6 @@ export const Tab = Object.assign(TabRoot, { Header: TabHeader, Strip: TabStrip, 
 /**
  * 공개 표면은 이 파일이 낸다 — 부품이 파일로 갈렸어도 밖에서 보는 자리는 `Tab` 하나다.
  */
-export type { TabGroupItem, TabItem } from "./shared";
+export type { PaneRowLeaf, PaneRowNode, PaneRowSplit, TabRow } from "./shared";
 export type { TabGroupProps } from "./Group";
-export type { TabSplitProps, TabTreeLeaf, TabTreeNode, TabTreeSplit } from "./Split";
+export type { TabSplitProps } from "./Split";

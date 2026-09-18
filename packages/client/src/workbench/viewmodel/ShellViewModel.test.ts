@@ -688,6 +688,17 @@ describe("IShellViewModel — 커맨드 팔레트(2026-09-05, 옛 CommandCenterM
     expect(make().viewModel.isPaletteOpen).toBe(false);
   });
 
+  it("검색어를 들고, 닫으면 비운다", () => {
+    const { viewModel } = make();
+    viewModel.setPaletteOpen(true);
+    viewModel.setPaletteQuery("테마");
+    expect(viewModel.paletteQuery).toBe("테마");
+
+    viewModel.setPaletteOpen(false);
+
+    expect(viewModel.paletteQuery).toBe("");
+  });
+
   it("직접 열고 닫을 수 있다", () => {
     const { viewModel } = make();
 

@@ -8,9 +8,25 @@ import { Container } from "#component/Container";
 import { Panel } from "#component/Panel";
 import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
-import { ActivityBar } from "../ActivityBar";
-import type { ActivityBarItem } from "../ActivityBar";
-import { Menu } from "#component/Menu";
+import { ActivityRail } from "../ActivityRail";
+import type { SidebarRow } from "../ActivityRail";
+import type { IconId } from "#component/Icon";
+
+/** 사이드바 머리의 버튼 한 줄 — `workbench/viewmodel`의 `SidebarActionRow`와 구조가 같다(부품은 그 층을 못 본다). */
+interface SidebarActionRow {
+  readonly actionId: string;
+  readonly iconId: IconId;
+  /** 명령의 이름 — 툴팁으로 쓴다. */
+  readonly label: string;
+}
+
+/** 아래 창의 탭 한 줄 — `workbench/viewmodel`의 `BottomRow`와 구조가 같다. */
+interface BottomRow {
+  readonly id: string;
+  readonly title: string;
+  readonly iconId: IconId;
+  readonly isActive: boolean;
+}
 
 /** 패널이 없으면(아이콘 바만) 좁게, 있으면(아이콘 바+패널) 넓게 — 폭 값 자체는 워크벤치가 쓰던
  * 값을 그대로 컴포넌트 기본으로 가져온다. */
@@ -22,56 +38,61 @@ const RESIZABLE_MAX_WIDTH = "480px";
 
 const hasContent = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
 
-/** `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다. */
+/**
+ * 앱의 뼈대. 확장이 꽂히는 자리를 전부 낸다. `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다.
+ *
+ * 슬롯이 셋을 넘지만 부품으로 가르지 않는다 — Primer `SplitPageLayout`이 자식을 참조 동일성으로
+ * 골라내므로 그 안에 우리 부품을 끼우면 부모가 못 알아본다.
+ */
 export interface ShellProps extends Omit<ComponentPropsWithoutRef<"div">, "children"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLDivElement>;
   /** Primer `ThemeProvider`에 그대로 전달되는 색 모드. */
   readonly colorMode: "light" | "dark";
+  /** 좁은 화면인가. 지금은 `data-narrow`로만 실린다 — 겹쳐 뜨는 표현은 아직 미디어쿼리가 한다. */
+  readonly isNarrow?: boolean;
 
-  /** 사이드바 토글 버튼(모바일 전용) 뒤에 이어지는 앱 정체성. */
+  /** 사이드바 토글 버튼(모바일 전용) 뒤에 이어지는 앱 정체성. 계약 밖이다. */
   readonly brand?: ReactNode;
-  /** 헤더 우측 — 실행 가능한 액션들. */
+  /** 헤더 우측 — 실행 가능한 액션들. 계약 밖이다. */
   readonly actions?: ReactNode;
 
-  /** 주면 사이드바(활동 표시줄+패널)가 생긴다 — 안 주면 사이드바 자체가 없다(헤더의 모바일 토글
-   * 버튼도 안 뜬다). 세로 아이콘 레일은 `ActivityBar`를 그대로 쓴다. */
-  readonly activityItems?: readonly ActivityBarItem[];
-  /** 활동 아이콘을 클릭하면 그 id와 함께 호출된다. */
-  readonly onActivitySelect?: (id: string) => void;
-  /** 활성 활동에 대응하는 패널 콘텐츠. `null`/`undefined`면 패널이 없어(아이콘 바만) 사이드바가
-   * 좁게 뜬다. */
-  readonly panelContent?: ReactNode;
-  /** 패널 위에 뜨는 제목(예: "탐색기"). 둘 다(`panelTitle`·`panelActions`) 없으면 헤더 행 자체가
-   * 없다 — 지금까지처럼 패널이 바로 시작한다. */
-  readonly panelTitle?: string;
-  /** 패널 헤더의 "..." 더보기 버튼 안에 뜨는 메뉴 항목들(`Menu.Item` 등). 없으면 버튼 자체가
-   * 없다. */
-  readonly panelActions?: ReactNode;
-  /** 패널 머리 오른쪽에 **그대로** 놓이는 아이콘 버튼들. `panelActions`가 `'...'` 뒤로 접히는
-   *  것과 달리 접히지 않는다 — 자주 쓰는 것 한둘을 위한 자리다(VSCode 뷰 제목 줄과 같다). */
-  readonly panelInlineActions?: ReactNode;
-  /** 사이드바를 드래그로 폭 조절 가능하게 한다. 기본 `false`(고정폭) — 켜면 240~480px 사이에서
-   * 늘리고 줄일 수 있다(최소는 `sidebarMinWidth`로 덮어쓸 수 있다). */
-  readonly sidebarResizable?: boolean;
-  /** `sidebarResizable`일 때의 최소 폭. 예: `'200px'`. */
-  readonly sidebarMinWidth?: `${number}px`;
-  /** `sidebarResizable`일 때 폭을 기억할 `localStorage` 키. 안 주면 새로고침마다 기본폭으로
-   * 돌아간다. */
-  readonly sidebarWidthStorageKey?: string;
-  /** 모바일 드로어(사이드바) 열림 여부(제어). */
+  /** 주면 사이드바(활동 레일+패널)가 생긴다 — 안 주면 사이드바 자체가 없다(헤더의 모바일 토글 버튼도 안 뜬다). */
+  readonly sidebars?: readonly SidebarRow[];
+  /** 레일의 아이콘을 클릭하면 그 id와 함께 호출된다. */
+  readonly onSidebarSelect?: (id: string) => void;
+  /** 레일 맨 아래 설정 톱니를 누르면 호출된다. 계약 밖이다. */
+  readonly onSettingsSelect?: () => void;
+
+  /** 열린 사이드바의 제목. 없으면 패널 머리 행 자체가 없다. */
+  readonly sidebarTitle?: string;
+  /** 열린 사이드바의 본문. `null`/`undefined`면 패널이 없어(레일만) 사이드바가 좁게 뜬다. */
+  readonly sidebarContent?: ReactNode;
+  /** 패널 머리 오른쪽에 놓이는 아이콘 버튼들 — 명령이다. */
+  readonly sidebarActions?: readonly SidebarActionRow[];
+  /** 머리의 버튼을 누르면 그 명령 id와 함께 호출된다. */
+  readonly onSidebarActionActivate?: (actionId: string) => void;
+  /** 모바일 드로어(사이드바) 열림 여부(제어). 안 주면 컴포넌트가 닫힌 채로 스스로 든다. */
   readonly sidebarOpen?: boolean;
-  /** 기본값은 `undefined`(비제어) — `sidebarOpen`을 주면 제어로 전환된다. 모바일 드로어 개폐는
-   * 이 컴포넌트가 직접 갖는 상태다(Primer `Sidebar`엔 이런 개념이 없다). */
-  readonly defaultSidebarOpen?: boolean;
   /** 사이드바 열림 여부가 바뀔 때마다(제어 여부 무관) 호출된다. */
   readonly onSidebarOpenChange?: (open: boolean) => void;
-  /** 사이드바 `<aside>`의 `aria-label`. */
-  readonly sidebarAriaLabel?: string;
+  /** 사이드바를 드래그로 폭 조절 가능하게 한다. 기본 `false`(고정폭). 계약 밖이다. */
+  readonly sidebarResizable?: boolean;
+  /** `sidebarResizable`일 때의 최소 폭. 예: `'200px'`. 계약 밖이다. */
+  readonly sidebarMinWidth?: `${number}px`;
+  /** `sidebarResizable`일 때 폭을 기억할 `localStorage` 키. 계약 밖이다. */
+  readonly sidebarWidthStorageKey?: string;
 
-  /** 본문 — `Tab` 등 무엇이든. Shell 은 안에 뭐가 들었는지 모른다. */
+  /** 주면 아래 창(탭 띠)이 생긴다 — 안 주거나 비면 아래 창 자체가 없다. */
+  readonly bottoms?: readonly BottomRow[];
+  /** 열린 아래 창의 본문. 없으면 띠만 남는다. */
+  readonly bottomContent?: ReactNode;
+  /** 아래 창의 탭을 누르면 그 id와 함께 호출된다. */
+  readonly onBottomSelect?: (id: string) => void;
+
+  /** 탭 시스템이 여기 온다. Shell 은 안에 뭐가 들었는지 모른다. */
   readonly children: ReactNode;
-  /** `SplitPageLayout` 밖, `PortalProvider` 안의 형제로 뜬다 — `CommandPalette` 등. */
+  /** `SplitPageLayout` 밖, `PortalProvider` 안의 형제로 뜬다 — 팔레트·대화상자·알림. */
   readonly overlays?: ReactNode;
 }
 
@@ -91,21 +112,24 @@ export interface ShellProps extends Omit<ComponentPropsWithoutRef<"div">, "child
  */
 export const Shell = ({
   colorMode,
+  isNarrow,
   brand,
   actions,
-  activityItems,
-  onActivitySelect,
-  panelContent,
-  panelTitle,
-  panelActions,
-  panelInlineActions,
+  sidebars,
+  onSidebarSelect,
+  onSettingsSelect,
+  sidebarTitle,
+  sidebarContent,
+  sidebarActions,
+  onSidebarActionActivate,
+  sidebarOpen,
+  onSidebarOpenChange,
   sidebarResizable,
   sidebarMinWidth,
   sidebarWidthStorageKey,
-  sidebarOpen,
-  defaultSidebarOpen,
-  onSidebarOpenChange,
-  sidebarAriaLabel,
+  bottoms,
+  bottomContent,
+  onBottomSelect,
   children,
   overlays,
   className,
@@ -113,18 +137,25 @@ export const Shell = ({
   ...props
 }: ShellProps) => {
   const [portalRoot, setPortalRoot] = useState<HTMLDivElement | null>(null);
-  const [uncontrolledSidebarOpen, setUncontrolledSidebarOpen] = useState(defaultSidebarOpen ?? false);
+  const [uncontrolledSidebarOpen, setUncontrolledSidebarOpen] = useState(false);
   const resolvedSidebarOpen = sidebarOpen ?? uncontrolledSidebarOpen;
   const setSidebarOpen = (next: boolean) => {
     setUncontrolledSidebarOpen(next);
     onSidebarOpenChange?.(next);
   };
-  const hasSidebar = activityItems !== undefined;
-  const expanded = hasContent(panelContent);
+  const hasSidebar = sidebars !== undefined;
+  const expanded = hasContent(sidebarContent);
+  const hasBottom = bottoms !== undefined && bottoms.length > 0;
 
   return (
     <ThemeProvider colorMode={colorMode}>
-      <div {...props} ref={ref} data-component="Shell" className={clsx(className, styles["root"])}>
+      <div
+        {...props}
+        ref={ref}
+        data-component="Shell"
+        data-narrow={isNarrow ? "" : undefined}
+        className={clsx(className, styles["root"])}
+      >
         <PortalProvider container={portalRoot ?? undefined}>
           <SplitPageLayout className={styles["layout"]}>
             <SplitPageLayout.Header padding="none" divider="line">
@@ -163,7 +194,7 @@ export const Shell = ({
                 }
                 resizable={expanded && sidebarResizable}
                 widthStorageKey={sidebarResizable ? sidebarWidthStorageKey : undefined}
-                aria-label={sidebarAriaLabel}
+                aria-label="사이드바"
                 data-component="ShellSidebar"
                 className={clsx(styles["sidebar"], resolvedSidebarOpen && styles["sidebarOpen"])}
               >
@@ -178,35 +209,31 @@ export const Shell = ({
                     />
                   </div>
                   <div className={styles["sidebarBody"]}>
-                    <ActivityBar items={activityItems} onSelect={onActivitySelect} />
+                    <ActivityRail items={sidebars} onSelect={onSidebarSelect} onSettingsSelect={onSettingsSelect} />
                     {expanded && (
                       <Panel
                         density="compact"
                         className={styles["sidebarPanel"]}
-                        title={panelTitle}
+                        title={sidebarTitle}
                         actions={
-                          hasContent(panelInlineActions) || hasContent(panelActions) ? (
+                          sidebarActions !== undefined && sidebarActions.length > 0 ? (
                             <>
-                              {panelInlineActions}
-                              {hasContent(panelActions) ? (
-                                <Menu>
-                                  <Menu.Trigger asChild>
-                                    <IconButton
-                                      variant="invisible"
-                                      size="small"
-                                      aria-label="더 보기"
-                                      icon={() => <Icon iconId="ellipsis" size="sm" />}
-                                    />
-                                  </Menu.Trigger>
-                                  <Menu.Content>{panelActions}</Menu.Content>
-                                </Menu>
-                              ) : null}
+                              {sidebarActions.map((action) => (
+                                <IconButton
+                                  key={action.actionId}
+                                  variant="invisible"
+                                  size="small"
+                                  aria-label={action.label}
+                                  onClick={() => onSidebarActionActivate?.(action.actionId)}
+                                  icon={() => <Icon iconId={action.iconId} size="sm" />}
+                                />
+                              ))}
                             </>
                           ) : undefined
                         }
                       >
                         <Container chrome="none" className={styles["sidebarPanelBody"]}>
-                          {panelContent}
+                          {sidebarContent}
                         </Container>
                       </Panel>
                     )}
@@ -215,7 +242,34 @@ export const Shell = ({
               </SplitPageLayout.Sidebar>
             )}
             <SplitPageLayout.Content padding="none" className={styles["content"]}>
-              <div className={styles["contentFill"]}>{children}</div>
+              <div className={styles["contentFill"]}>
+                <div className={styles["main"]}>{children}</div>
+                {hasBottom && (
+                  <section aria-label="아래 창" data-component="ShellBottom" className={styles["bottom"]}>
+                    <div role="tablist" aria-orientation="horizontal" className={styles["bottomStrip"]}>
+                      {bottoms.map((bottom) => (
+                        <button
+                          key={bottom.id}
+                          type="button"
+                          role="tab"
+                          aria-selected={bottom.isActive}
+                          data-active={bottom.isActive ? "" : undefined}
+                          className={styles["bottomTab"]}
+                          onClick={() => onBottomSelect?.(bottom.id)}
+                        >
+                          <Icon iconId={bottom.iconId} size="sm" />
+                          {bottom.title}
+                        </button>
+                      ))}
+                    </div>
+                    {hasContent(bottomContent) && (
+                      <div role="tabpanel" className={styles["bottomBody"]}>
+                        {bottomContent}
+                      </div>
+                    )}
+                  </section>
+                )}
+              </div>
             </SplitPageLayout.Content>
           </SplitPageLayout>
           {overlays}

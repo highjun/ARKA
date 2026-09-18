@@ -12,7 +12,7 @@ export interface CrashScreenProps extends Omit<ComponentPropsWithoutRef<"div">, 
   /** 잡힌 오류의 메시지. 스택은 보여주지 않는다 — 사용자가 할 수 있는 일은 새로고침뿐이다. */
   readonly message: string;
   /** 다시 불러오기 버튼을 누르면 호출된다. */
-  readonly onReload: () => void;
+  readonly onReload?: () => void;
 }
 
 /**

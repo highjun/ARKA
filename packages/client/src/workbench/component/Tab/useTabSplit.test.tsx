@@ -1,22 +1,27 @@
 import { renderHook } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { useTabSplit } from "./useTabSplit";
-import type { TabTreeLeaf } from "./Tab";
+import type { PaneRowLeaf, TabRow } from "./Tab";
 
-const ITEMS = [
-  { id: "a", title: "A", iconId: "file" },
-  { id: "b", title: "B", iconId: "file" },
-];
+const row = (id: string): TabRow => ({
+  id,
+  kind: "file",
+  title: id.toUpperCase(),
+  icon: null,
+  Content: () => null,
+  isPreview: false,
+  isDirty: false,
+});
+const ROWS = [row("a"), row("b")];
 
 describe("useTabSplit", () => {
   it("빈 leaf 는 visibleTree 에서 잘라낸다", () => {
-    const emptyLeaf: TabTreeLeaf = { kind: "leaf", id: "empty", activeTab: "", tabItems: [] };
-    const fullLeaf: TabTreeLeaf = { kind: "leaf", id: "full", activeTab: "a", tabItems: ITEMS as never };
+    const emptyLeaf: PaneRowLeaf = { kind: "leaf", id: "empty", activeTabId: null, tabs: [] };
+    const fullLeaf: PaneRowLeaf = { kind: "leaf", id: "full", activeTabId: "a", tabs: ROWS };
     const { result } = renderHook(() =>
       useTabSplit({
         tree: { kind: "split", id: "root", orientation: "horizontal", children: [emptyLeaf, fullLeaf] },
-        onTabClick: vi.fn(),
-        onMenuClick: vi.fn(),
+        activePaneId: "full",
       }),
     );
 
@@ -24,8 +29,8 @@ describe("useTabSplit", () => {
   });
 
   it("기본 상태의 공유 context 에는 진행 중인 resize/drop 이 없다", () => {
-    const leaf: TabTreeLeaf = { kind: "leaf", id: "only", activeTab: "a", tabItems: ITEMS as never };
-    const { result } = renderHook(() => useTabSplit({ tree: leaf, onTabClick: vi.fn(), onMenuClick: vi.fn() }));
+    const leaf: PaneRowLeaf = { kind: "leaf", id: "only", activeTabId: "a", tabs: ROWS };
+    const { result } = renderHook(() => useTabSplit({ tree: leaf, activePaneId: "only" }));
 
     expect(result.current.context.dropIndicator).toBeNull();
     expect(result.current.context.resizingChildId).toBeNull();
