@@ -4,12 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { FileContentViewModelToken, WorkspaceFilesToken } from "../extensions/filesystem";
 import type { IWorkspaceFiles } from "../extensions/filesystem";
 import { MockWorkspaceFiles } from "../extensions/filesystem/model/MockWorkspaceFiles";
-import { AgentApiToken, AgentEventsToken } from "../extensions/agent";
 import { SearchServiceToken } from "../extensions/search";
-import { GitServiceToken } from "../extensions/git";
-import { MockGitService } from "../extensions/git/model/MockGitService";
 import { MockSearchService } from "../extensions/search/model/MockSearchService";
-import { MockAgentBackend } from "../extensions/agent/model/MockAgentBackend";
 import { ErrorLogToken } from "./model/IErrorLog";
 import { TabContentRegistryToken } from "./model/ITabContentRegistry";
 import { TabContentRegistry } from "./model/TabContentRegistry";
@@ -40,16 +36,12 @@ describe("registerServices", () => {
 
   const mountWith = (workspaceFiles: IWorkspaceFiles) => {
     const container = createApplication().createScope("test");
-    // 자식 스코프에 다시 등록해 그 스코프 안에서만 부모를 가린다. 에이전트 백엔드도 메모리 것으로.
+    // 자식 스코프에 다시 등록해 그 스코프 안에서만 부모를 가린다.
     container.register(WorkspaceFilesToken, { lifetime: "singleton", create: () => workspaceFiles });
-    const agent = new MockAgentBackend();
-    container.register(AgentApiToken, { lifetime: "singleton", create: () => agent });
-    container.register(AgentEventsToken, { lifetime: "singleton", create: () => agent });
     container.register(SearchServiceToken, {
       lifetime: "singleton",
       create: () => new MockSearchService({ "a.md": "원본" }),
     });
-    container.register(GitServiceToken, { lifetime: "singleton", create: () => new MockGitService() });
     render(
       <ViewModelProvider container={container}>
         <RootView />
@@ -190,23 +182,6 @@ describe("registerServices", () => {
     });
   });
 
-  /** 에이전트 활동 → 새 대화 → 탭이 열리고 보낸 말에 답이 오는지 — 배선 전체가 맞물리는지만 본다. */
-  describe("에이전트 배선", () => {
-    it("새 대화를 만들면 탭이 열리고 보내면 답이 온다", async () => {
-      mountWith(new MockWorkspaceFiles({}));
-      fireEvent.click(screen.getByLabelText("에이전트"));
-      fireEvent.click(await screen.findByRole("button", { name: /새 대화/u }));
-      expect(await screen.findByRole("tab", { name: /새 대화/u })).toBeDefined();
-
-      const textarea = await screen.findByRole("textbox");
-      await act(async () => {
-        fireEvent.change(textarea, { target: { value: "안녕" } });
-        fireEvent.submit(textarea.closest("form") as HTMLFormElement);
-      });
-      expect(await screen.findByText("받은 입력: 안녕")).toBeDefined();
-    });
-  });
-
   describe("검색 배선", () => {
     it("검색 활동에서 찾은 결과를 누르면 파일 탭이 열린다", async () => {
       mountWith(new MockWorkspaceFiles({ "a.md": "원본" }));
@@ -216,17 +191,6 @@ describe("registerServices", () => {
       });
       fireEvent.click(await screen.findByText("원본", { selector: "span" }));
       expect(await screen.findByRole("tab", { name: /a\.md/u })).toBeDefined();
-    });
-  });
-
-  describe("소스 제어 배선", () => {
-    it("소스 제어 활동에서 변경을 누르면 diff 탭이 열린다", async () => {
-      mountWith(new MockWorkspaceFiles({ "a.md": "원본" }));
-      const git = new MockGitService();
-      git.write("a.md", "원본");
-      // 조립부가 만든 컨테이너의 GitService는 위 mountWith가 덮었지만, 이 테스트는 변경이 있는 저장소가 필요하다.
-      fireEvent.click(screen.getByLabelText("소스 제어"));
-      expect(await screen.findByText("main")).toBeDefined();
     });
   });
 

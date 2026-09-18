@@ -9,8 +9,6 @@ export type Density = "auto" | "compact" | "touch";
 /** 저장소(localStorage)에 그대로 직렬화된다 — 함수나 클래스를 담지 않는다. */
 export type Settings = {
   readonly density: Density;
-  /** 에이전트가 파일을 바꾸는 툴을 부르기 전에 묻는다. 기본은 묻는다. */
-  readonly agentConfirmWrites: boolean;
 };
 
 export const SettingsModelToken = createToken<ISettingsModel>("settingsModel");

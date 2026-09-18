@@ -41,19 +41,6 @@ export const SettingsTabView = () => {
       </section>
       <section className={styles["section"]}>
         <Heading as="h2" variant="medium">
-          에이전트
-        </Heading>
-        <label className={styles["option"]}>
-          <input
-            type="checkbox"
-            checked={viewModel.agentConfirmWrites}
-            onChange={(event) => viewModel.setAgentConfirmWrites(event.target.checked)}
-          />
-          <Text>파일을 바꾸기 전에 묻기 — 끄면 에이전트가 write_file·create_entry를 바로 실행한다</Text>
-        </label>
-      </section>
-      <section className={styles["section"]}>
-        <Heading as="h2" variant="medium">
           밀도
         </Heading>
         <fieldset className={styles["options"]}>

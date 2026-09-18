@@ -14,34 +14,6 @@ import {
   WorkspaceWatchToken,
 } from "../extensions/filesystem";
 import {
-  AgentApiToken,
-  AgentEventsToken,
-  CHAT_TAB_KIND,
-  ChatModel,
-  ChatModelToken,
-  ChatViewModel,
-  ChatViewModelToken,
-} from "../extensions/agent";
-import { createAgentApiPort } from "../extensions/agent/infra/HttpAgentApi";
-import { createAgentEventsPort } from "../extensions/agent/infra/SseAgentEvents";
-import {
-  ChatSessionsInlineActions,
-  ChatSessionsMenuActions,
-  ChatSessionsView,
-} from "../extensions/agent/view/ChatSessionsView";
-import { ChatTabView } from "../extensions/agent/view/ChatTabView";
-import {
-  DIFF_TAB_KIND,
-  GitModel,
-  GitModelToken,
-  GitServiceToken,
-  SourceControlViewModel,
-  SourceControlViewModelToken,
-} from "../extensions/git";
-import { createGitServicePort } from "../extensions/git/infra/HttpGitService";
-import { DiffTabView } from "../extensions/git/view/DiffTabView";
-import { SourceControlView } from "../extensions/git/view/SourceControlView";
-import {
   MarkdownPreviewModel,
   MarkdownPreviewModelToken,
   MarkdownPreviewViewModel,
@@ -117,12 +89,8 @@ const WorkbenchStartupToken = createToken<IWorkbenchStartup>("workbenchStartup")
 
 /** 탐색기 활동의 id. ActivityBar·SidebarContent 등록 둘 다 이 문자열로 서로를 잇는다. */
 const EXPLORER_ID = "explorer";
-/** 에이전트 활동의 id. */
-const AGENT_ID = "agent";
 /** 검색 활동의 id. */
 const SEARCH_ID = "search";
-/** 소스 제어 활동의 id. */
-const SCM_ID = "scm";
 /** 파일 탭의 kind. `IShellViewModel.previewFile`이 여는 탭의 kind와 같아야 TabContent가 찾는다. */
 const FILE_TAB_KIND = "file";
 
@@ -153,9 +121,6 @@ export function createApplication(): Container {
   container.register(WorkspaceFilesToken, singleton(createWorkspaceFilesPort));
   container.register(WorkspaceWatchToken, singleton(createWorkspaceWatchPort));
   container.register(SearchServiceToken, singleton(createSearchServicePort));
-  container.register(GitServiceToken, singleton(createGitServicePort));
-  container.register(AgentApiToken, singleton(createAgentApiPort));
-  container.register(AgentEventsToken, singleton(createAgentEventsPort));
   container.register(StorageToken, singleton(createStoragePort));
   container.register(ServerInfoToken, singleton(createServerInfoPort));
   container.register(
@@ -231,25 +196,8 @@ export function createApplication(): Container {
     ),
   );
 
-  container.register(
-    ChatModelToken,
-    singleton(
-      (c) =>
-        new ChatModel({
-          api: c.resolve(AgentApiToken),
-          events: c.resolve(AgentEventsToken),
-          // 설정은 workbench의 것이다 — agent는 모르고, 조립부가 함수로 넘긴다.
-          confirmWrites: () => c.resolve(SettingsModelToken).settings.agentConfirmWrites,
-        }),
-    ),
-  );
-
   // ViewModel은 scoped다 — 화면 하나가 사는 동안만 유지되고, 그 스코프를 dispose하면
   // 구독까지 함께 정리된다.
-  container.register(
-    ChatViewModelToken,
-    scoped((c) => new ChatViewModel({ chatModel: c.resolve(ChatModelToken) })),
-  );
   container.register(
     SearchModelToken,
     singleton((c) => new SearchModel({ searchService: c.resolve(SearchServiceToken) })),
@@ -257,10 +205,6 @@ export function createApplication(): Container {
   container.register(
     SearchViewModelToken,
     scoped((c) => new SearchViewModel({ searchModel: c.resolve(SearchModelToken) })),
-  );
-  container.register(
-    GitModelToken,
-    singleton((c) => new GitModel({ gitService: c.resolve(GitServiceToken) })),
   );
   // markdown은 filesystem을 모른다 — 두 포트를 markdown이 바라는 모양으로 감싸는 어댑터에 넘기는
   // 것까지가 조립부의 일이다. 감싸는 방법 자체는 markdown의 infra가 안다.
@@ -273,10 +217,6 @@ export function createApplication(): Container {
   container.register(
     MarkdownPreviewModelToken,
     singleton((c) => new MarkdownPreviewModel({ source: c.resolve(MarkdownSourceToken) })),
-  );
-  container.register(
-    SourceControlViewModelToken,
-    scoped((c) => new SourceControlViewModel({ gitModel: c.resolve(GitModelToken) })),
   );
   container.register(
     MarkdownPreviewViewModelToken,
@@ -436,24 +376,6 @@ export function createApplication(): Container {
     .resolve(SidebarContentRegistryToken)
     .add({ id: SEARCH_ID, ContentComponent: ({ onFileOpen }) => <SearchView onFileOpen={onFileOpen} /> });
   container
-    .resolve(ActivityBarRegistryToken)
-    .add({ id: SCM_ID, title: "소스 제어", iconId: "sourceControl", keybinding: "ctrl+shift+g" });
-  container
-    .resolve(SidebarContentRegistryToken)
-    .add({ id: SCM_ID, ContentComponent: ({ onOpenTab }) => <SourceControlView onOpenTab={onOpenTab} /> });
-  container
-    .resolve(TabContentRegistryToken)
-    .add({ id: DIFF_TAB_KIND, iconId: "sourceControl", TabComponent: ({ tabId }) => <DiffTabView tabId={tabId} /> });
-  container
-    .resolve(ActivityBarRegistryToken)
-    .add({ id: AGENT_ID, title: "에이전트", iconId: "brain", keybinding: "ctrl+shift+a" });
-  container.resolve(SidebarContentRegistryToken).add({
-    id: AGENT_ID,
-    ContentComponent: ({ onOpenTab }) => <ChatSessionsView onOpenTab={onOpenTab} />,
-    InlineActions: ({ onOpenTab }) => <ChatSessionsInlineActions onOpenTab={onOpenTab} />,
-    MenuActions: () => <ChatSessionsMenuActions />,
-  });
-  container
     .resolve(TabContentRegistryToken)
     .add({ id: "keybindings", iconId: "keyboard", TabComponent: () => <KeybindingsTabView /> });
   container
@@ -463,11 +385,6 @@ export function createApplication(): Container {
     id: PREVIEW_TAB_KIND,
     iconId: "bookOpen",
     TabComponent: ({ tabId }) => <MarkdownPreviewTabView tabId={tabId} />,
-  });
-  container.resolve(TabContentRegistryToken).add({
-    id: CHAT_TAB_KIND,
-    iconId: "brain",
-    TabComponent: ({ tabId }) => <ChatTabView sessionId={tabId} />,
   });
 
   return container;
