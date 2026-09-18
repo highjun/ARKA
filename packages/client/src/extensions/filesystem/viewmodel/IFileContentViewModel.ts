@@ -68,9 +68,4 @@ export interface IFileContentViewModel extends Disposable {
   saveFile(path: string): void;
   /** 열려 있던 파일이 옮겨지거나 이름이 바뀌었다 — 편집 중이던 내용까지 새 경로로 따라간다. */
   retargetOpenFile(oldPrefix: string, newPrefix: string): void;
-
-  /** 열린 파일들을 외부 변경에 대해 감시하기 시작한다. */
-  startWatching(): void;
-  /** 감시를 멈춘다. */
-  stopWatching(): void;
 }

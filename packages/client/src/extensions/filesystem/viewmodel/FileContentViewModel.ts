@@ -47,6 +47,9 @@ export class FileContentViewModel implements IFileContentViewModel {
       { autoBind: true },
     );
 
+    // 만들어지는 순간 감시를 켠다 — VM은 화면보다 오래 살고(앱에 하나), 끄는 것은 컨테이너가 dispose할 때다.
+    fileContentModel.startWatching();
+
     // 검색 결과처럼 "이 파일의 이 줄로"를 바라는 쪽이 부른다 — 파일을 여는 것은 `arka.workbench.open`의 몫이다.
     commandCenterRegistry.actions.add({
       id: "arka.filesystem.reveal",
@@ -58,9 +61,10 @@ export class FileContentViewModel implements IFileContentViewModel {
     });
   }
 
-  /** 구독을 끊는다. 컨테이너가 이 VM을 정리할 때 불린다. */
+  /** 구독을 끊고 감시를 끈다. 컨테이너가 이 VM을 정리할 때 불린다. */
   dispose(): void {
     this.#subscription.dispose();
+    this.#model.stopWatching();
   }
 
   #computeRows(): FileRowMap {
@@ -121,16 +125,6 @@ export class FileContentViewModel implements IFileContentViewModel {
   /** `#model.retargetOpenFile`에 위임한다. */
   retargetOpenFile(oldPrefix: string, newPrefix: string): void {
     this.#model.retargetOpenFile(oldPrefix, newPrefix);
-  }
-
-  /** `#model.startWatching`에 위임한다. */
-  startWatching(): void {
-    this.#model.startWatching();
-  }
-
-  /** `#model.stopWatching`에 위임한다. */
-  stopWatching(): void {
-    this.#model.stopWatching();
   }
 
   #toRow(file: OpenFile): FileRow {

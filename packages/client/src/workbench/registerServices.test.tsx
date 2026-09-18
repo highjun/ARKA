@@ -1,4 +1,5 @@
 import type { Container } from "#core/di";
+import type { ExtensionModule } from "#core/extensions";
 import { ContainerProvider } from "#core/viewmodel";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -24,8 +25,8 @@ import { createApplication } from "./registerServices";
  * 만들어도 jsdom의 `localStorage`는 파일 전체가 공유한다. 안 지우면 앞 테스트가 연 탭이
  * 다음 테스트에서 부팅 시 복원돼 같은 텍스트가 사이드바와 탭 양쪽에 뜬다.
  *
- * 대역은 **루트에 다시 물린다** — 전부 singleton이라 자식에 물리면 탭 컨테이너(루트의 자식)가 못 본다.
- * `createApplication()`은 돌아오기 전에 아무것도 만들지 않으므로(빈 저장소면 복원할 탭도 없다) 늦지 않다.
+ * 대역은 **모듈로 끼운다** — 활성화가 곧 만드는 것이라 컨테이너를 돌려준 뒤에는 늦다. 같은 id를 다시 물리면
+ * 나중 것이 이긴다.
  */
 
 describe("registerServices", () => {
@@ -42,10 +43,17 @@ describe("registerServices", () => {
     localStorage.clear();
   });
 
+  /** 파일시스템과 검색 서비스를 대역으로 가린다 — 진짜 구현을 그대로 두면 이 테스트가 서버를 요구한다. */
+  const mocks = (workspaceFiles: IWorkspaceFiles): ExtensionModule => ({
+    id: "test.mocks",
+    provides: [
+      { id: "arka.filesystem.workspaceFiles", lifetime: "singleton", create: () => workspaceFiles },
+      { id: "arka.search.service", lifetime: "singleton", create: () => new MockSearchService({ "a.md": "원본" }) },
+    ],
+  });
+
   const mountWith = (workspaceFiles: IWorkspaceFiles) => {
-    const container = track(createApplication());
-    container.register("arka.filesystem.workspaceFiles", "singleton", () => workspaceFiles);
-    container.register("arka.search.service", "singleton", () => new MockSearchService({ "a.md": "원본" }));
+    const container = track(createApplication([mocks(workspaceFiles)]));
     render(
       <ContainerProvider container={container}>
         <RootView />
@@ -150,8 +158,7 @@ describe("registerServices", () => {
     it("탭이 렌더 중 던지면 CrashScreen이 뜨고 IErrorLog에 남는다", async () => {
       // React가 잡힌 오류를 console.error로도 내보낸다 — 테스트 출력이 그걸로 덮이지 않게 막는다.
       const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
-      const container = track(createApplication());
-      container.register("arka.filesystem.workspaceFiles", "singleton", () => new MockWorkspaceFiles({ "a.md": "" }));
+      const container = track(createApplication([mocks(new MockWorkspaceFiles({ "a.md": "" }))]));
       // 무엇이든 먼저 받아 터지는 본문을 돌려주는 provider를 얹는다 — 텍스트 provider보다 먼저 묻는다.
       container.resolve("arka.workbench.tabSystem").add({
         id: "test.crashing",
@@ -234,6 +241,55 @@ describe("registerServices", () => {
       fireEvent.click(screen.getByLabelText("touch"));
       expect(document.documentElement.dataset["density"]).toBe("touch");
       expect(localStorage.getItem("workbench.settings")).toContain("touch");
+    });
+  });
+
+  describe("부팅", () => {
+    it("셸 모듈과 확장이 기여 지점을 채운다 — 사이드바 둘, 탭 provider 넷, 밀도 설정, 명령", () => {
+      const container = track(createApplication([mocks(new MockWorkspaceFiles({}))]));
+
+      expect(
+        container
+          .resolve("arka.workbench.sidebar")
+          .list()
+          .map((sidebar) => sidebar.id),
+      ).toEqual(["explorer", "search"]);
+      expect(
+        container
+          .resolve("arka.workbench.tabSystem")
+          .list()
+          .map((provider) => provider.id)
+          .sort(),
+      ).toEqual([
+        "arka.filesystem.text",
+        "arka.markdown.preview",
+        "arka.workbench.keybindings",
+        "arka.workbench.settings",
+      ]);
+      expect(
+        container
+          .resolve("arka.settings")
+          .schema.list()
+          .map((setting) => setting.id),
+      ).toEqual(["workbench.density"]);
+      const commands = container.resolve("arka.commands");
+      for (const id of ["arka.workbench.open", "arka.filesystem.focus", "arka.search.focus", "markdown.openPreview"])
+        expect(commands.actions.tryGet(id), id).toBeDefined();
+    });
+
+    it("켜지 못한 확장은 알림으로 남고 나머지는 켜진다", () => {
+      const broken: ExtensionModule = {
+        id: "test.broken",
+        activate: () => {
+          throw new Error("고장");
+        },
+      };
+      const container = track(createApplication([mocks(new MockWorkspaceFiles({})), broken]));
+
+      expect(container.resolve("arka.workbench.notifications").items.map((item) => item.message)).toEqual([
+        "확장 test.broken을(를) 켜지 못했다(activate) — 고장",
+      ]);
+      expect(container.resolve("arka.workbench.sidebar").list()).toHaveLength(2);
     });
   });
 });

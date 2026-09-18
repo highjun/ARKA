@@ -2,12 +2,11 @@ import { URI } from "#contracts";
 import { CommandService } from "#core/commands";
 import { Emitter } from "#core/events";
 import { Registry } from "#core/registry";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import type { BottomDescriptor } from "../model/IBottomDescriptor";
 import type { SidebarDescriptor } from "../model/ISidebarDescriptor";
 import type { IStorage } from "../model/IStorage";
 import type { IViewport } from "../model/IViewport";
-import type { IWorkbenchStartup } from "../model/IWorkbenchStartup";
 import { ColorMode } from "../model/ColorMode";
 import { TabLayout } from "../model/TabLayout";
 import { ROOT_PANE_ID } from "../model/tabsShare";
@@ -16,22 +15,6 @@ import { ShellViewModel } from "./ShellViewModel";
 const fakeStorage = (): IStorage => {
   const store = new Map<string, string>();
   return { get: (key) => store.get(key) ?? null, set: (key, value) => void store.set(key, value) };
-};
-
-/** 켜졌는지만 본다 — 무엇이 켜지는지는 셸의 관심이 아니다. */
-const fakeStartup = (): IWorkbenchStartup & { started: boolean } => {
-  const state = { started: false };
-  return {
-    get started() {
-      return state.started;
-    },
-    start: () => {
-      state.started = true;
-    },
-    stop: () => {
-      state.started = false;
-    },
-  };
 };
 
 /** 플랫폼이 주는 값 — 테스트가 직접 넓혔다 좁혔다 한다. */
@@ -76,9 +59,8 @@ const make = () => {
   const colorMode = new ColorMode({ storage });
   const viewport = fakeViewport();
   const tabLayout = new TabLayout({ storage });
-  const startup = fakeStartup();
-  const viewModel = new ShellViewModel({ sidebars, bottoms, colorMode, viewport, tabLayout, commands, startup });
-  return { viewModel, commands, colorMode, viewport, tabLayout, startup, opened };
+  const viewModel = new ShellViewModel({ sidebars, bottoms, colorMode, viewport, tabLayout, commands });
+  return { viewModel, commands, colorMode, viewport, tabLayout, opened };
 };
 
 const activeIds = (viewModel: ShellViewModel): string[] =>
@@ -131,13 +113,14 @@ describe("IShellViewModel — 사이드바", () => {
     expect(viewModel.isSidebarOpen).toBe(true);
   });
 
-  it("사이드바마다 `<title> 보기` 명령이 등록된다", () => {
+  it("arka.workbench.revealSidebar 명령이 id로 연다 — 확장의 `<title> 보기`가 이것을 부른다", () => {
     const { viewModel, commands } = make();
 
-    expect(commands.actions.get("shell.showActivity.search").label).toBe("검색 보기");
-    commands.execute("shell.showActivity.search");
+    commands.execute("arka.workbench.revealSidebar", { id: "search" });
+    commands.execute("arka.workbench.revealSidebar", "엉뚱한 것");
 
     expect(activeIds(viewModel)).toEqual(["search"]);
+    expect(viewModel.isSidebarOpen).toBe(true);
   });
 });
 
@@ -224,23 +207,12 @@ describe("IShellViewModel — 설정·단축키 탭 명령", () => {
   });
 });
 
-describe("수명 — 시작 작업 위임", () => {
-  it("만들어지면 등록된 시작 작업을 켜고, dispose하면 끈다", () => {
-    const { viewModel, startup } = make();
-    expect(startup.started).toBe(true);
-
-    viewModel.dispose();
-
-    expect(startup.started).toBe(false);
-  });
-
+describe("수명", () => {
   it("dispose 뒤에는 Model 변화를 더 듣지 않는다", () => {
     const { viewModel, viewport } = make();
-    const spy = vi.fn();
     viewModel.dispose();
 
     viewport.setNarrow(true);
-    spy();
 
     expect(viewModel.isNarrow).toBe(false);
   });

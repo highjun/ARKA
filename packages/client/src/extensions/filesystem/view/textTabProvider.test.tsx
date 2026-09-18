@@ -13,8 +13,6 @@ const fakeFileContent = (opens: boolean, isDirty = false): IFileContentViewModel
   editFile: () => undefined,
   saveFile: () => undefined,
   retargetOpenFile: () => undefined,
-  startWatching: () => undefined,
-  stopWatching: () => undefined,
 });
 
 describe("텍스트 탭 provider", () => {

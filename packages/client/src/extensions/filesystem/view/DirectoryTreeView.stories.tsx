@@ -27,8 +27,6 @@ const viewModel = (state: Partial<IDirectoryTreeViewModel>): IDirectoryTreeViewM
   removeEntry: () => Promise.resolve(),
   removeEntries: () => Promise.resolve(),
   moveEntry: () => Promise.resolve(""),
-  startWatching: () => undefined,
-  stopWatching: () => undefined,
   contextTarget: null,
   contextTargets: [],
   setContextTarget: () => undefined,
@@ -44,6 +42,8 @@ const viewModel = (state: Partial<IDirectoryTreeViewModel>): IDirectoryTreeViewM
   cancelDelete: () => undefined,
   failureNotice: null,
   dismissFailureNotice: () => undefined,
+  startWatching: () => undefined,
+  stopWatching: () => undefined,
   openFile: () => undefined,
   pinFile: () => undefined,
   retargetTabs: () => undefined,
@@ -60,8 +60,6 @@ const fileContentViewModel: IFileContentViewModel = {
   editFile: () => undefined,
   saveFile: () => undefined,
   retargetOpenFile: () => undefined,
-  startWatching: () => undefined,
-  stopWatching: () => undefined,
 };
 
 const ROWS: readonly FileTreeRow[] = [

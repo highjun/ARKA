@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { createDocumentDensity, DENSITY_SETTING_ID } from "./DocumentDensity";
 
 describe("createDocumentDensity", () => {
-  it("설정을 html의 data-density에 반영하고 stop하면 지운다", () => {
+  it("설정을 html의 data-density에 반영하고 dispose하면 지운다", () => {
     const settings = new Settings({ store: { load: () => ({}), save: () => undefined } });
     settings.schema.add({
       id: DENSITY_SETTING_ID,
@@ -13,12 +13,11 @@ describe("createDocumentDensity", () => {
       options: ["auto", "compact", "touch"],
     });
     const density = createDocumentDensity({ settings });
-    density.start();
     // jsdom의 matchMedia 스텁은 항상 불일치 — auto는 compact가 된다.
     expect(document.documentElement.dataset["density"]).toBe("compact");
     settings.set(DENSITY_SETTING_ID, "touch");
     expect(document.documentElement.dataset["density"]).toBe("touch");
-    density.stop();
+    density.dispose();
     expect(document.documentElement.dataset["density"]).toBeUndefined();
   });
 });
