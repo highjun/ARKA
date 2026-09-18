@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
 import styles from "./Message.module.css";
-import { Timestamp } from "#component/Timestamp";
+import { formatDateTime } from "#utils/time";
 
 /** 정렬과 색만 가른다 — `system`은 양쪽 어디에도 붙지 않는다. */
 export type MessageAuthor = "user" | "agent" | "system";
@@ -40,6 +40,7 @@ export interface MessageProps extends Omit<ComponentPropsWithoutRef<"article">, 
 export const Message = ({ author, timestamp, avatar, children, className, ref, ...props }: MessageProps) => {
   const authorLabel = getAuthorLabel(author);
   const avatarLabel = getAvatarInitial(author);
+  const sentAt = typeof timestamp === "number" ? new Date(timestamp) : undefined;
 
   return (
     <article
@@ -60,8 +61,10 @@ export const Message = ({ author, timestamp, avatar, children, className, ref, .
         <div className={styles["meta"]}>
           <div className={styles["authorLabel"]}>{authorLabel}</div>
           <div className={styles["timestampRow"]}>
-            {typeof timestamp === "number" ? (
-              <Timestamp epoch={timestamp} mode="datetime" format="HH:mm" />
+            {sentAt ? (
+              <time className={styles["timestamp"]} dateTime={sentAt.toISOString()}>
+                {formatDateTime(sentAt, "HH:mm")}
+              </time>
             ) : (
               <span className={styles["timestampPlaceholder"]}>&nbsp;</span>
             )}

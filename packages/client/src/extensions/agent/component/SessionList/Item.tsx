@@ -4,7 +4,7 @@ import styles from "./Item.module.css";
 import { CounterLabel } from "@primer/react";
 import { StatusIndicator } from "../StatusIndicator";
 import type { StatusIndicatorStatus } from "../StatusIndicator";
-import { Timestamp } from "#component/Timestamp";
+import { formatRelative } from "#utils/time";
 
 /** 고를 수 있는지와 고르면 무엇을 하는지 — 행의 상호작용만 묶은 것이다. */
 export interface SessionListItemSelection {
@@ -104,9 +104,9 @@ export const SessionListItem = ({
       <div className={styles["metaRow"]}>
         <div className={styles["excerpt"]}>{excerpt}</div>
         {timestamp ? (
-          <div className={styles["timestamp"]}>
-            <Timestamp epoch={timestamp} mode="relative" />
-          </div>
+          <time className={styles["timestamp"]} dateTime={new Date(timestamp).toISOString()}>
+            {formatRelative(new Date(timestamp), Date.now())}
+          </time>
         ) : null}
       </div>
     </div>

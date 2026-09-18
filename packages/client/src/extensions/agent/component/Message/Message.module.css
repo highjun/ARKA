@@ -74,6 +74,8 @@
   margin-top: var(--space-xs);
 }
 
+/* 시각 글자와 그 자리지킴은 같은 크기라야 timestamp 가 없는 줄에서 높이가 안 튄다. */
+.timestamp,
 .timestampPlaceholder {
   font-size: var(--base-text-size-xs);
   line-height: var(--base-text-lineHeight-tight);

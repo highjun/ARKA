@@ -16,7 +16,11 @@ const OverlayStage = ({ children }: { readonly children: ReactNode }) => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   return (
     <div style={{ position: "relative", height: 480, width: 720, overflow: "hidden", transform: "translateZ(0)" }}>
-      <PortalProvider container={container ?? undefined}>{children}</PortalProvider>
+      {/* 메뉴는 트리거의 오른쪽 끝에 맞춰 열린다(`align="end"`) — 트리거가 왼쪽 끝에 있으면
+          목록이 상자 밖으로 나가 안 보인다. 실제 쓰임(오른쪽 위 더보기 단추)과 같이 놓는다. */}
+      <div style={{ display: "flex", justifyContent: "flex-end", padding: 16 }}>
+        <PortalProvider container={container ?? undefined}>{children}</PortalProvider>
+      </div>
       <div ref={setContainer} />
     </div>
   );

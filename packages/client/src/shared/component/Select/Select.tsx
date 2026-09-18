@@ -31,12 +31,17 @@ export interface SelectProps {
   readonly children?: ReactNode;
 }
 
-/** 목록을 여는 단추. 보이는 것은 소비자가 넣는다 — 지금 값을 적은 `Button` 처럼. */
-interface SelectTriggerProps extends ComponentPropsWithoutRef<"button"> {
+/**
+ * 목록을 여는 단추. **자기 모양을 자기가 그린다** — 아이콘·지금 값·아래 꺾쇠 셋이고, 어느
+ * `Select`든 같은 모양이어야 해서 소비자에게 맡기지 않는다(Figma `Select/Trigger` 와 같다).
+ */
+interface SelectTriggerProps extends Omit<ComponentPropsWithoutRef<"button">, "children" | "value"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLButtonElement>;
-  /** true면 Radix가 속성을 자식에 병합만 하고 자기 태그는 안 그린다 — 자식이 이미 버튼일 때. */
-  readonly asChild?: boolean;
+  /** 값 앞 아이콘. */
+  readonly visual?: ReactNode;
+  /** 단추에 적히는 지금 값. 생략하면 루트가 든 값을 적는다. */
+  readonly value?: string;
   /** true면 눌러도 열리지 않는다. */
   readonly disabled?: boolean;
 }
@@ -49,13 +54,15 @@ interface SelectContentProps extends ComponentPropsWithoutRef<"div"> {
 
 /** 값 한 줄. 고른 줄에 체크가 선다. */
 interface SelectItemProps extends Omit<ComponentPropsWithoutRef<"div">, "onSelect"> {
-  /** 이 줄이 나타내는 값. */
+  /** 이 줄이 나타내는 값. 고르면 이것이 올라간다. */
   readonly value: string;
+  /** 고른 줄. 생략하면 루트가 든 값과 같은지로 정한다. */
+  readonly selected?: boolean;
   /** true면 고를 수 없고 흐리게 표시된다. */
   readonly disabled?: boolean;
 }
 
-/** `Content`가 루트의 값 상태를 읽는 통로 — Radix `RadioGroup`은 `Content` 안에 있어야 한다. */
+/** `Trigger`·`Item`이 루트의 값 상태를 읽는 통로. */
 const ValueContext = createContext<{
   value?: string;
   setValue: (value: string) => void;
@@ -94,12 +101,21 @@ const SelectRoot = ({
   );
 };
 
-const SelectTrigger = ({ ref, ...props }: SelectTriggerProps) => <Dropdown.Trigger {...props} ref={ref} />;
+const SelectTrigger = ({ className, visual, value, ref, ...props }: SelectTriggerProps) => {
+  const { value: current } = useContext(ValueContext);
 
-/** 줄들을 담는 면. 루트의 값을 Radix `RadioGroup`으로 내려 고른 줄에 표시가 붙게 한다. */
+  return (
+    <Dropdown.Trigger {...props} ref={ref} className={clsx(className, styles["trigger"])}>
+      {visual}
+      <span className={styles["value"]}>{value ?? current}</span>
+      <Icon iconId="chevronDown" size="sm" />
+    </Dropdown.Trigger>
+  );
+};
+
+/** 줄들을 담는 면. */
 const SelectContent = ({ className, children, ref, ...props }: SelectContentProps) => {
   const container = usePortalContainer();
-  const { value, setValue } = useContext(ValueContext);
 
   return (
     <Dropdown.Portal container={container}>
@@ -111,28 +127,37 @@ const SelectContent = ({ className, children, ref, ...props }: SelectContentProp
         align="end"
         sideOffset={4}
       >
-        <Dropdown.RadioGroup value={value} onValueChange={setValue}>
-          {children}
-        </Dropdown.RadioGroup>
+        {children}
       </Dropdown.Content>
     </Dropdown.Portal>
   );
 };
 
 /**
- * 값 한 줄. 표시를 `ItemIndicator`로 그리고 자리를 항상 차지하게 둔다(`.indicator`) — 고른 줄만
- * 들여쓰기가 생기면 목록이 들쭉날쭉해진다.
+ * 값 한 줄. 체크 자리를 고르지 않은 줄에도 비워 둔다(`.indicator`) — 고른 줄만 들여쓰기가
+ * 생기면 목록이 들쭉날쭉해진다.
  */
-const SelectItem = ({ className, children, ...props }: SelectItemProps) => (
-  <Dropdown.RadioItem {...props} className={clsx(className, styles["item"])}>
-    <span className={styles["indicator"]}>
-      <Dropdown.ItemIndicator>
-        <Icon iconId="check" size="sm" />
-      </Dropdown.ItemIndicator>
-    </span>
-    {children}
-  </Dropdown.RadioItem>
-);
+const SelectItem = ({ className, children, value, selected, ...props }: SelectItemProps) => {
+  const { value: current, setValue } = useContext(ValueContext);
+  const isSelected = selected ?? current === value;
+
+  return (
+    <Dropdown.Item
+      {...props}
+      className={clsx(className, styles["item"])}
+      // Radix `RadioItem` 대신 역할을 손으로 단다 — `selected` 를 바깥에서 줄 수 있어야 하는데
+      // `RadioItem` 의 체크 여부는 `RadioGroup` 의 값에서만 나온다. 읽히는 것은 같다.
+      role="menuitemradio"
+      aria-checked={isSelected}
+      onSelect={() => {
+        setValue(value);
+      }}
+    >
+      <span className={styles["indicator"]}>{isSelected ? <Icon iconId="check" size="sm" /> : null}</span>
+      {children}
+    </Dropdown.Item>
+  );
+};
 
 /** 부품 함수 이름이 `Select<부품>`인 것은 react-docgen-typescript 가 최상위 export 만 컴포넌트로 보기 때문이다(`Menu`와 같다). */
 export const Select = Object.assign(SelectRoot, {

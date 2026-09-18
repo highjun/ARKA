@@ -1,5 +1,9 @@
-import type { TimestampMode } from "./Timestamp";
-
+/**
+ * 시각을 사람이 읽는 글자로 바꾸는 순수 함수들.
+ *
+ * `shared/component/Timestamp`를 지우면서(2026-09-18) 이리로 왔다 — Figma `01 Shared`가 컴포넌트
+ * 목록이고 거기에 시각 컴포넌트가 없다. 표시할 자리를 아는 것은 부르는 쪽이라 글자만 돌려준다.
+ */
 const MINUTE = 60 * 1000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
@@ -8,8 +12,8 @@ const pad = (value: number) => String(value).padStart(2, "0");
 
 type DatetimeToken = "YYYY" | "MM" | "DD" | "HH" | "mm" | "ss";
 
-const applyFormat = (tokens: Partial<Record<DatetimeToken, string>>, format: string): string =>
-  format.replace(/YYYY|MM|DD|HH|mm|ss/g, (token) => tokens[token as DatetimeToken] ?? token);
+const applyFormat = (tokens: Record<DatetimeToken, string>, format: string): string =>
+  format.replace(/YYYY|MM|DD|HH|mm|ss/g, (token) => tokens[token as DatetimeToken]);
 
 const datetimeTokens = (date: Date): Record<DatetimeToken, string> => ({
   YYYY: String(date.getFullYear()),
@@ -20,26 +24,9 @@ const datetimeTokens = (date: Date): Record<DatetimeToken, string> => ({
   ss: pad(date.getSeconds()),
 });
 
-/** `duration` 전용 — 같은 토큰 이름을 경과 일/시/분/초로 재해석한다. `YYYY`/`MM`은 달력 계산이 필요해 뺀다(치환 안 됨 → 리터럴로 남음). */
-const durationTokens = (diffMs: number): Partial<Record<DatetimeToken, string>> => {
-  const totalSeconds = Math.floor(Math.max(0, diffMs) / 1000);
-  const totalMinutes = Math.floor(totalSeconds / 60);
-  const totalHours = Math.floor(totalMinutes / 60);
-  return {
-    DD: pad(Math.floor(totalHours / 24)),
-    HH: pad(totalHours % 24),
-    mm: pad(totalMinutes % 60),
-    ss: pad(totalSeconds % 60),
-  };
-};
-
 /** 로컬 시간대로 찍는다. 알 수 없는 토큰은 리터럴로 남는다. */
 export const formatDateTime = (date: Date, format?: string): string =>
   applyFormat(datetimeTokens(date), format ?? "YYYY-MM-DD HH:mm");
-
-/** `HH`는 24로 나눈 나머지가 아니라 **총 시간**이다 — 30시간이면 `30`이 나온다. `YYYY`·`MM`은 없다. */
-export const formatDuration = (diffMs: number, format?: string): string =>
-  applyFormat(durationTokens(diffMs), format ?? "HH시간 mm분");
 
 /** `date`부터 `to`까지 지난 "만" 개월 수 — ms 차이를 30일로 나누는 근사 대신 달력
  * 필드(연·월·일)로 계산한다("1/31 → 3/1"처럼 달마다 일수가 달라도 직관과 맞도록). `to`의
@@ -61,11 +48,4 @@ export const formatRelative = (date: Date, now: number): string => {
   if (months < 1) return `${String(Math.floor(diff / DAY))}일 전`;
   if (months < 12) return `${String(months)}개월 전`;
   return `${String(Math.floor(months / 12))}년 전`;
-};
-
-/** `mode`가 셋 중 어느 것이냐로만 갈린다 — 셋의 선택은 부르는 쪽이 한다. */
-export const formatTimestamp = (mode: TimestampMode, date: Date, now: number, format?: string): string => {
-  if (mode === "relative") return formatRelative(date, now);
-  if (mode === "duration") return formatDuration(Math.max(0, now - date.getTime()), format);
-  return formatDateTime(date, format);
 };

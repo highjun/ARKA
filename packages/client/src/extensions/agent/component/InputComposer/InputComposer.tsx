@@ -277,14 +277,12 @@ export const InputComposer = ({
         <div className={styles["actions"]}>
           <span className={styles["modelLabel"]}>{MODEL_LABEL}</span>
           <Select value={state.selectedModel?.id} onValueChange={(id) => state.selectModel(id)}>
-            <Select.Trigger asChild>
-              <Button aria-label={MODEL_LABEL} disabled={state.disabled || state.models.length === 0}>
-                <span className={styles["modelOption"]}>
-                  {state.selectedModel?.iconId ? <Icon iconId={state.selectedModel.iconId} size="sm" /> : null}
-                  <span className={styles["modelName"]}>{state.selectedModel?.label ?? MODEL_LABEL}</span>
-                </span>
-              </Button>
-            </Select.Trigger>
+            <Select.Trigger
+              aria-label={MODEL_LABEL}
+              disabled={state.disabled || state.models.length === 0}
+              visual={state.selectedModel?.iconId ? <Icon iconId={state.selectedModel.iconId} size="sm" /> : null}
+              value={state.selectedModel?.label ?? MODEL_LABEL}
+            />
             <Select.Content>
               {state.models.map((model) => (
                 <Select.Item key={model.id} value={model.id} disabled={model.disabled}>

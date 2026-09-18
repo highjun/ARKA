@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Button } from "@primer/react";
 import { PortalProvider } from "#utils/portal";
 import { Icon } from "#component/Icon";
 import { Select } from "./index";
@@ -35,9 +34,7 @@ const meta = {
   ],
   render: (args) => (
     <Select {...args}>
-      <Select.Trigger asChild>
-        <Button leadingVisual={() => <Icon iconId="brain" size="sm" />}>Claude Opus 5</Button>
-      </Select.Trigger>
+      <Select.Trigger visual={<Icon iconId="brain" size="sm" />} value="Claude Opus 5" />
       <Select.Content>
         {MODELS.map((model) => (
           <Select.Item key={model.id} value={model.id} disabled={model.disabled}>

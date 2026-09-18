@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDateTime, formatDuration, formatRelative, formatTimestamp } from "./shared";
+import { formatDateTime, formatRelative } from "./time";
 
 const FIXED_NOW = 1_700_000_000_000;
 
@@ -52,36 +52,5 @@ describe("formatRelative", () => {
     date.setFullYear(date.getFullYear() - 2);
 
     expect(formatRelative(date, FIXED_NOW)).toBe("2년 전");
-  });
-});
-
-describe("formatDuration", () => {
-  it("기본 포맷은 HH시간 mm분", () => {
-    expect(formatDuration((4 * 60 + 2) * 60 * 1000)).toBe("04시간 02분");
-  });
-
-  it("같은 토큰을 경과 일/시/분으로 재해석한다", () => {
-    // 1일 2시간 5분
-    const diffMinutes = 26 * 60 + 5;
-
-    expect(formatDuration(diffMinutes * 60 * 1000, "DD일 HH시간 mm분")).toBe("01일 02시간 05분");
-  });
-
-  it("YYYY/MM 토큰은 지원하지 않아 리터럴로 남는다", () => {
-    expect(formatDuration(60 * 1000, "YYYY-MM mm분")).toBe("YYYY-MM 01분");
-  });
-});
-
-describe("formatTimestamp", () => {
-  it("relative 모드는 format을 무시한다", () => {
-    const date = new Date(FIXED_NOW - 10 * 1000);
-
-    expect(formatTimestamp("relative", date, FIXED_NOW, "YYYY년")).toBe("방금");
-  });
-
-  it("mode에 따라 알맞은 포매터로 위임한다", () => {
-    const date = new Date(FIXED_NOW);
-
-    expect(formatTimestamp("datetime", date, FIXED_NOW, "YYYY")).toBe(String(date.getFullYear()));
   });
 });

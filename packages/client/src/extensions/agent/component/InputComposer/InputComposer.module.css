@@ -82,16 +82,3 @@
   line-height: var(--text-caption-lineHeight);
   color: var(--fgColor-muted);
 }
-
-.modelOption {
-  display: inline-flex;
-  min-width: 0;
-  align-items: center;
-  gap: var(--space-xs);
-}
-
-.modelName {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}

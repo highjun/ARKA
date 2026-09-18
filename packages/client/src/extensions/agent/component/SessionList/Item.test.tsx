@@ -86,12 +86,12 @@ describe("SessionListItem", () => {
   it("timestamp 가 없으면 타임스탬프 자리를 렌더하지 않는다", () => {
     const { container } = render(<SessionListItem title="세션" />);
 
-    expect(container.querySelector('[data-component="Timestamp"]')).not.toBeInTheDocument();
+    expect(container.querySelector("time")).not.toBeInTheDocument();
   });
 
-  it("timestamp 가 있으면 렌더한다 — 실제 포맷은 Timestamp 자체 테스트 책임", () => {
+  it("timestamp 가 있으면 상대 시각으로 렌더한다 — 포맷 규칙은 utils/time 테스트 책임", () => {
     const { container } = render(<SessionListItem title="세션" timestamp={Date.now() - 60_000} />);
 
-    expect(container.querySelector('[data-component="Timestamp"]')).toBeInTheDocument();
+    expect(container.querySelector("time")).toHaveTextContent("1분 전");
   });
 });

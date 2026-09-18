@@ -83,6 +83,7 @@
     "#core": "./src/core/index.ts",
     "#core/*": "./src/core/*/index.ts",
     "#core/errors": "./src/core/errors.ts",
-    "#utils/*": "./src/shared/utils/*.tsx"
+    "#utils/*": "./src/shared/utils/*.tsx",
+    "#utils/time": "./src/shared/utils/time.ts"
   }
 }

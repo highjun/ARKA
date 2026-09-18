@@ -1,3 +1,56 @@
+/* 목록을 여는 단추. Figma `Select/Trigger` 를 그대로 옮긴다 — 32px 높이, 좌우 12px, 사이 4px.
+   Primer `Button` 을 쓰지 않는 것은 값 칸이 늘어나며 말줄임돼야 해서다(단추는 hug 다). */
+.trigger {
+  display: inline-flex;
+  height: var(--control-medium-size);
+  max-width: 100%;
+  align-items: center;
+  gap: var(--space-xs);
+  border-radius: var(--borderRadius-medium);
+  border-style: solid;
+  border-width: var(--borderWidth-thin);
+  border-color: var(--button-default-borderColor-rest);
+  background-color: var(--button-default-bgColor-rest);
+  padding-inline: var(--control-medium-paddingInline-normal);
+  padding-block: 0;
+  font-size: var(--text-body-size-small);
+  line-height: var(--text-body-lineHeight-small);
+  color: var(--button-default-fgColor-rest);
+  transition: background-color var(--motion-duration-short) var(--motion-easing-move);
+}
+
+/* 값만 늘어나고 줄어든다 — 아이콘과 꺾쇠는 제 크기를 지킨다. */
+.value {
+  overflow: hidden;
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trigger:hover:not(:disabled) {
+  background-color: var(--button-default-bgColor-hover);
+}
+
+/* 열려 있는 동안은 면이 hover 와 같고 테두리가 초점 색이 된다 — 어느 단추가 이 목록을 열었는지 보인다. */
+.trigger[data-state="open"] {
+  /* `--focus-outlineColor` 와 같은 색인데, 테두리엔 borderColor 계열을 쓰라고 primer/colors 가 잡는다. */
+  border-color: var(--borderColor-accent-emphasis);
+  background-color: var(--button-default-bgColor-hover);
+}
+
+.trigger:disabled {
+  border-color: var(--button-default-borderColor-disabled);
+  color: var(--button-default-fgColor-disabled);
+  cursor: not-allowed;
+}
+
+.trigger:focus-visible {
+  outline: var(--borderWidth-thick) solid var(--focus-outlineColor);
+  outline-offset: -1px;
+}
+
 /* `Menu.Content`와 같은 면 — 값 목록도 메뉴와 같은 자리에 같은 모양으로 뜬다. */
 .content {
   z-index: var(--zIndex-popover);
