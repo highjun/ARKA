@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { createRegistry } from "#core/registry";
+import { Registry } from "#core/registry";
 import type { ContextRegistry } from "#core/action";
 import { matchMenuItems, type MenuItemDescriptor } from "./menu";
 
 const registryWith = (...entries: MenuItemDescriptor[]) => {
-  const registry = createRegistry<MenuItemDescriptor>();
+  const registry = new Registry<MenuItemDescriptor>();
   for (const entry of entries) registry.add(entry);
   return registry;
 };
 
-const ctx = createRegistry() as ContextRegistry;
+const ctx = new Registry() as ContextRegistry;
 
 describe("matchMenuItems", () => {
   it("주어진 메뉴에 기여된 항목만 돌려준다", () => {

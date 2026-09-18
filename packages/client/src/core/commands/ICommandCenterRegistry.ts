@@ -41,7 +41,7 @@ export type MenuRegistry = CoreMenuRegistry;
  * `ITabsModel`·`IActivityModel`·`IThemeModel`과 성격이 달라(VSCode도 CommandService/
  * ContextKeyService/KeybindingService/MenuService를 따로 둔다) 별도 슬라이스로 뒀다.
  *
- * 넷 다 `core`의 `createRegistry()`로 이 Registry가 만들고, 앱 시작 시(`registerServices.tsx`)
+ * 넷 다 `core`의 `Registry`로 이 Registry가 만들고, 앱 시작 시(`registerServices.tsx`)
  * 한 번 채워진다.
  */
 export const CommandCenterRegistryToken = createToken<ICommandCenterRegistry>("commandCenterRegistry");

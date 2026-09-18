@@ -1,7 +1,7 @@
 import type { Disposable } from "#core/di";
 
 /** 돌려주는 값은 무시된다 — 비동기로 하고 싶으면 리스너 안에서 스스로 띄운다. */
-export type Listener<T> = (value: T) => void;
+type Listener<T> = (value: T) => void;
 
 /**
  * Model이 "무슨 일이 있었다"를 알리는 통로.

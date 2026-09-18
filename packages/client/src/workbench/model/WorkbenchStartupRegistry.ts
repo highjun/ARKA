@@ -1,9 +1,9 @@
-import { createRegistry, type DescriptorMatch, type Registry } from "#core";
+import { Registry } from "#core/registry";
 import type { WorkbenchStartupDescriptor, IWorkbenchStartupRegistry } from "./IWorkbenchStartup";
 
-/** `IWorkbenchStartupRegistry`의 유일한 구현체 — core의 `createRegistry()`를 그대로 감싼다. */
+/** `IWorkbenchStartupRegistry`의 유일한 구현체 — core의 `Registry`를 그대로 감싼다. */
 export class WorkbenchStartupRegistry implements IWorkbenchStartupRegistry {
-  readonly #registry: Registry<WorkbenchStartupDescriptor> = createRegistry();
+  readonly #registry = new Registry<WorkbenchStartupDescriptor>();
 
   /** `#registry.add`에 위임한다. */
   add(descriptor: WorkbenchStartupDescriptor): void {
@@ -21,12 +21,7 @@ export class WorkbenchStartupRegistry implements IWorkbenchStartupRegistry {
   }
 
   /** `#registry.list`에 위임한다. */
-  list(): WorkbenchStartupDescriptor[] {
+  list(): readonly WorkbenchStartupDescriptor[] {
     return this.#registry.list();
-  }
-
-  /** `#registry.match`에 위임한다. */
-  match(id: string): DescriptorMatch<WorkbenchStartupDescriptor>[] {
-    return this.#registry.match(id);
   }
 }

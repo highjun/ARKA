@@ -1,5 +1,5 @@
 import { PROTOCOL_HEADER, PROTOCOL_VERSION } from "#contracts";
-import { createRegistry } from "#core";
+import { Registry } from "#core/registry";
 import type { ITabDirtyState } from "../model/ITabDirtyState";
 import type { IWorkbenchStartup } from "../model/IWorkbenchStartup";
 import type { IServerInfo } from "../model/IServerInfo";
@@ -18,10 +18,10 @@ import type { ShellTabPaneLeaf, ShellTabPaneNode, IShellViewModel } from "./IShe
 /** 커맨드 등록만 받아주는 흉내 — 이 파일의 관심사는 탭 트리·활동 로직이지 커맨드 배선 자체가
  *  아니다(그건 `#registerCommands`가 실제로 등록하는지를 보는 별도 테스트의 몫). */
 const fakeCommandCenterRegistry = (): ICommandCenterRegistry => ({
-  commandRegistry: createRegistry(),
-  contextRegistry: createRegistry(),
-  keybindingRegistry: createRegistry(),
-  menuRegistry: createRegistry(),
+  commandRegistry: new Registry(),
+  contextRegistry: new Registry(),
+  keybindingRegistry: new Registry(),
+  menuRegistry: new Registry(),
   registerCommand: () => undefined,
   registerContext: () => undefined,
   registerKeybinding: () => undefined,
@@ -76,7 +76,7 @@ const make = (
   startup: IWorkbenchStartup & { started: boolean };
   notificationService: NotificationService;
 } => {
-  const activityBarRegistry: IActivityBarRegistry = createRegistry();
+  const activityBarRegistry: IActivityBarRegistry = new Registry();
   activityBarRegistry.add({ id: "explorer", title: "탐색기", iconId: "files" });
   const tabDirtyState = fakeTabDirtyState();
   const startup = fakeStartup();

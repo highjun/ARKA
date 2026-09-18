@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { createRegistry } from "#core/registry";
+import { Registry } from "#core/registry";
 import type { ContextRegistry } from "#core/action";
 import { matchKeybinding, type KeybindingDescriptor } from "./keybinding";
 
 const registryWith = (...entries: KeybindingDescriptor[]) => {
-  const registry = createRegistry<KeybindingDescriptor>();
+  const registry = new Registry<KeybindingDescriptor>();
   for (const entry of entries) registry.add(entry);
   return registry;
 };
 
-const ctx = createRegistry() as ContextRegistry;
+const ctx = new Registry() as ContextRegistry;
 
 describe("matchKeybinding", () => {
   it("when 절이 없는 항목은 매칭된다", () => {

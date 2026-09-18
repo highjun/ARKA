@@ -1,21 +1,6 @@
 import type { ICommandCenterRegistry } from "#core/commands";
+import { normalizeKeybinding } from "#core/menu";
 import type { IWorkbenchStartup } from "../model/IWorkbenchStartup";
-
-/**
- * 브라우저 키보드 이벤트를 `ctrl+j` 형태 문자열로 정규화한다.
- *
- * Ctrl과 Cmd(메타)를 둘 다 `ctrl`로 합친다 — 플랫폼마다 다른 키를 따로 등록하게 하지 않기
- * 위한 단순화다. 조합키 자신이 눌린 순간은 조합에서 뺀다.
- */
-const normalizeKeydown = (event: KeyboardEvent): string => {
-  const parts: string[] = [];
-  if (event.ctrlKey || event.metaKey) parts.push("ctrl");
-  if (event.altKey) parts.push("alt");
-  if (event.shiftKey) parts.push("shift");
-  const key = event.key.toLowerCase();
-  if (!["control", "meta", "alt", "shift"].includes(key)) parts.push(key);
-  return parts.join("+");
-};
 
 /**
  * 전역 키 리스너 **하나**. 매칭되는 키바인딩을 찾아 커맨드를 실행하고, 실행했으면 브라우저
@@ -30,7 +15,7 @@ export const createGlobalKeybindings = ({
   commandCenterRegistry: ICommandCenterRegistry;
 }): IWorkbenchStartup => {
   const onKeydown = (event: KeyboardEvent) => {
-    const executed = commandCenterRegistry.dispatchKeydown(normalizeKeydown(event));
+    const executed = commandCenterRegistry.dispatchKeydown(normalizeKeybinding(event));
     if (executed) event.preventDefault();
   };
   return {

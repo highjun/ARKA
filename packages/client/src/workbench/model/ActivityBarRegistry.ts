@@ -1,9 +1,9 @@
-import { createRegistry, type DescriptorMatch, type Registry } from "#core";
+import { Registry } from "#core/registry";
 import type { ActivityBarDescriptor, IActivityBarRegistry } from "./IActivityBarRegistry";
 
-/** `IActivityBarRegistry`의 유일한 구현체 — `core`의 `createRegistry()`를 그대로 감싼다. */
+/** `IActivityBarRegistry`의 유일한 구현체 — `core`의 `Registry`를 그대로 감싼다. */
 export class ActivityBarRegistry implements IActivityBarRegistry {
-  readonly #registry: Registry<ActivityBarDescriptor> = createRegistry();
+  readonly #registry = new Registry<ActivityBarDescriptor>();
 
   /** `#registry.add`에 위임한다. */
   add(descriptor: ActivityBarDescriptor): void {
@@ -21,12 +21,7 @@ export class ActivityBarRegistry implements IActivityBarRegistry {
   }
 
   /** `#registry.list`에 위임한다. */
-  list(): ActivityBarDescriptor[] {
+  list(): readonly ActivityBarDescriptor[] {
     return this.#registry.list();
-  }
-
-  /** `#registry.match`에 위임한다. */
-  match(id: string): DescriptorMatch<ActivityBarDescriptor>[] {
-    return this.#registry.match(id);
   }
 }

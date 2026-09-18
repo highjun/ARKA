@@ -13,10 +13,10 @@ export interface Disposable {
 }
 
 /** `singleton`은 앱에 하나, `scoped`는 스코프마다 하나, `transient`는 조회할 때마다 새로. */
-export type Lifetime = "singleton" | "scoped" | "transient";
+type Lifetime = "singleton" | "scoped" | "transient";
 
 /** 무엇을 어떻게 만들지의 한 쌍. `create`는 컨테이너를 받아 자기 의존을 스스로 조회한다. */
-export interface Provider<T> {
+interface Provider<T> {
   readonly lifetime: Lifetime;
   create(container: Container): T;
 }

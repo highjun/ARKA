@@ -1,6 +1,5 @@
 import { createToken } from "#core/di";
 import type { ComponentType } from "react";
-import type { DescriptorMatch } from "#core";
 
 /**
  * 탭 하나의 내용 — `OpenTab.kind`로 찾는다.
@@ -33,7 +32,5 @@ export interface ITabContentRegistry {
   /** 조회 시도. 없으면 `undefined`. */
   tryGet(id: string): TabContentDescriptor | undefined;
   /** 등록된 전체 목록 반환. */
-  list(): TabContentDescriptor[];
-  /** ID 패턴 조회. 파라미터와 함께 리스트로 반환. */
-  match(id: string): DescriptorMatch<TabContentDescriptor>[];
+  list(): readonly TabContentDescriptor[];
 }

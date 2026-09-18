@@ -1,5 +1,5 @@
 import type { IWorkspaceFiles } from "../model/IWorkspaceFiles";
-import { createRegistry } from "#core";
+import { Registry } from "#core/registry";
 import type { ICommandCenterRegistry } from "#core/commands";
 import { DirectoryTreeModel } from "../model/DirectoryTreeModel";
 import { DirectoryTreeViewModel } from "./DirectoryTreeViewModel";
@@ -8,10 +8,10 @@ import type { IDirectoryTreeViewModel } from "./IDirectoryTreeViewModel";
 /** 커맨드 등록만 받아주는 흉내 — 이 파일의 관심사는 트리 접기 로직이지 커맨드 배선 자체가
  *  아니다. */
 const fakeCommandCenterRegistry = (): ICommandCenterRegistry => ({
-  commandRegistry: createRegistry(),
-  contextRegistry: createRegistry(),
-  keybindingRegistry: createRegistry(),
-  menuRegistry: createRegistry(),
+  commandRegistry: new Registry(),
+  contextRegistry: new Registry(),
+  keybindingRegistry: new Registry(),
+  menuRegistry: new Registry(),
   registerCommand: () => undefined,
   registerContext: () => undefined,
   registerKeybinding: () => undefined,

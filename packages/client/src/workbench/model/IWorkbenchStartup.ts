@@ -1,5 +1,4 @@
 import { createToken, type Token } from "#core/di";
-import type { DescriptorMatch } from "#core";
 
 /**
  * 셸이 뜨고 지는 것에 맞춰 켜고 꺼야 하는 것 하나.
@@ -36,7 +35,5 @@ export interface IWorkbenchStartupRegistry {
   /** 조회 시도. 없으면 `undefined`. */
   tryGet(id: string): WorkbenchStartupDescriptor | undefined;
   /** 등록된 전체 목록 반환. */
-  list(): WorkbenchStartupDescriptor[];
-  /** ID 패턴 조회. 파라미터와 함께 리스트로 반환. */
-  match(id: string): DescriptorMatch<WorkbenchStartupDescriptor>[];
+  list(): readonly WorkbenchStartupDescriptor[];
 }

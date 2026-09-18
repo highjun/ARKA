@@ -1,6 +1,5 @@
 import { createToken } from "#core/di";
 import type { ComponentType } from "react";
-import type { DescriptorMatch } from "#core";
 
 /**
  * 활동 아이콘 바에서 고른 것에 대응하는 사이드바 내용. 없으면(`tryGet`이 `undefined`) 패널이 빈다.
@@ -59,7 +58,5 @@ export interface ISidebarContentRegistry {
   /** 조회 시도. 없으면 `undefined`. */
   tryGet(id: string): SidebarContentDescriptor | undefined;
   /** 등록된 전체 목록 반환. */
-  list(): SidebarContentDescriptor[];
-  /** ID 패턴 조회. 파라미터와 함께 리스트로 반환. */
-  match(id: string): DescriptorMatch<SidebarContentDescriptor>[];
+  list(): readonly SidebarContentDescriptor[];
 }

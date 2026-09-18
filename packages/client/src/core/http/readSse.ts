@@ -7,10 +7,10 @@
  * 모바일 NAT/프록시가 FIN 없이 끊는 경우 `reader.read()`만으로는 영원히 알 수 없다. 서버 하트비트
  * 15초의 3배다.
  */
-export const DEFAULT_IDLE_TIMEOUT_MS = 45_000;
+const DEFAULT_IDLE_TIMEOUT_MS = 45_000;
 
 /** `signal`은 필수다 — 끊을 수 없는 스트림을 열지 않는다. */
-export type SseOptions = {
+type SseOptions = {
   readonly headers?: Record<string, string>;
   readonly signal: AbortSignal;
   readonly idleTimeoutMs?: number;

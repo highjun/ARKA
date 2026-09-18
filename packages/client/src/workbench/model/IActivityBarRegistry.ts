@@ -1,5 +1,4 @@
 import { createToken } from "#core/di";
-import type { DescriptorMatch } from "#core";
 
 /** 활동 아이콘 바 항목 하나 — 어떤 아이콘이 있고, 눌렀을 때 부를 라벨이 뭔가. */
 export type ActivityBarDescriptor = {
@@ -31,7 +30,5 @@ export interface IActivityBarRegistry {
   /** 조회 시도. 없으면 `undefined`. */
   tryGet(id: string): ActivityBarDescriptor | undefined;
   /** 등록된 전체 목록 반환. */
-  list(): ActivityBarDescriptor[];
-  /** ID 패턴 조회. 파라미터와 함께 리스트로 반환. */
-  match(id: string): DescriptorMatch<ActivityBarDescriptor>[];
+  list(): readonly ActivityBarDescriptor[];
 }

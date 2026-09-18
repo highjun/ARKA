@@ -1,9 +1,9 @@
-import { createRegistry, type DescriptorMatch, type Registry } from "#core";
+import { Registry } from "#core/registry";
 import type { SidebarContentDescriptor, ISidebarContentRegistry } from "./ISidebarContentRegistry";
 
-/** `ISidebarContentRegistry`의 유일한 구현체 — `core`의 `createRegistry()`를 그대로 감싼다. */
+/** `ISidebarContentRegistry`의 유일한 구현체 — `core`의 `Registry`를 그대로 감싼다. */
 export class SidebarContentRegistry implements ISidebarContentRegistry {
-  readonly #registry: Registry<SidebarContentDescriptor> = createRegistry();
+  readonly #registry = new Registry<SidebarContentDescriptor>();
 
   /** `#registry.add`에 위임한다. */
   add(descriptor: SidebarContentDescriptor): void {
@@ -21,12 +21,7 @@ export class SidebarContentRegistry implements ISidebarContentRegistry {
   }
 
   /** `#registry.list`에 위임한다. */
-  list(): SidebarContentDescriptor[] {
+  list(): readonly SidebarContentDescriptor[] {
     return this.#registry.list();
-  }
-
-  /** `#registry.match`에 위임한다. */
-  match(id: string): DescriptorMatch<SidebarContentDescriptor>[] {
-    return this.#registry.match(id);
   }
 }
