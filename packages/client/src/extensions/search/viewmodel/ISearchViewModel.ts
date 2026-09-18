@@ -34,4 +34,6 @@ export interface ISearchViewModel extends Disposable {
   toggleCaseSensitive(): void;
   /** 디바운스를 기다리지 않고 지금 찾는다(Enter). */
   submit(): void;
+  /** 결과 하나를 열고 그 줄·열로 간다 — `arka.workbench.open`과 `arka.filesystem.reveal` 명령을 부른다. */
+  openResult(path: string, position: { readonly line: number; readonly column: number }): void;
 }

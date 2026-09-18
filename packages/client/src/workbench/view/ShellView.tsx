@@ -1,5 +1,3 @@
-import { URI } from "#contracts";
-import type { SidebarSlotProps } from "../model/ISidebarContentRegistry";
 import { ContainerProvider, useViewModel } from "#core/viewmodel";
 import { observer } from "mobx-react-lite";
 import { Banner, ConfirmationDialog } from "@primer/react";
@@ -15,7 +13,7 @@ import type { IconId } from "#component/Icon";
 import type { TabItem, TabTreeNode } from "../component/Tab";
 import type { ComponentType, ReactNode } from "react";
 import type { ICommandService } from "#core/commands";
-import type { TabDescriptor } from "../model/ITabProviderDescriptor";
+import type { TabContentProps, TabDescriptor } from "../model/ITabProviderDescriptor";
 import type { ShellTabPaneNode, ShellTabRow, TabContextTarget } from "../viewmodel/IShellViewModel";
 import styles from "./ShellView.module.css";
 
@@ -150,13 +148,6 @@ export const ShellView = observer(function ShellView() {
   const sidebarContentRegistry = useViewModel("arka.workbench.sidebarContentRegistry");
   const commandCenterRegistry = useViewModel("arka.commands");
 
-  const onFileOpen = (path: string, position?: { readonly line: number; readonly column: number }) =>
-    void viewModel.previewFile(path, position);
-  /** 사이드바는 경로로 말한다 — 탭 id는 그 경로의 `file:` uri다. */
-  const onFilePin = (path: string) => viewModel.pinTab(URI.file(path).toString());
-  /** 탭이 가리키는 경로만 옮긴다 — 편집 버퍼는 그것을 소유한 쪽이 스스로 옮긴다. */
-  const onFileMove = (oldPath: string, newPath: string) => viewModel.retargetTabs(oldPath, newPath);
-
   /** 저장 안 된 탭을 닫으려 하면 확인을 구한다 — dirty 여부는 ViewModel이 descriptor에 묻는다. */
   const onTabClose = (leafId: string, tabId: string) => {
     viewModel.requestCloseTab(leafId, tabId);
@@ -166,18 +157,16 @@ export const ShellView = observer(function ShellView() {
   const renderTab = (tab: ShellTabDisplayRow): ReactNode => {
     const descriptor = tab.descriptor;
     if (descriptor === undefined) return null;
-    const reveal = viewModel.reveal !== null && viewModel.reveal.tabId === tab.id ? viewModel.reveal : null;
+    const contentProps: TabContentProps = { tabId: tab.id };
     return (
       <ContainerProvider container={viewModel.containerOf(tab.id)}>
-        <descriptor.Content tabId={tab.id} reveal={reveal} />
+        <descriptor.Content {...contentProps} />
       </ContainerProvider>
     );
   };
 
-  // 확장이 내는 본문·액션은 모두 같은 통로를 받는다 — 커널이 크롬을 그리므로 제목은 값으로 온다.
-  const slotProps = { onFileOpen, onFileMove, onFilePin };
-  const renderSlot = (Slot: ComponentType<SidebarSlotProps> | undefined): ReactNode =>
-    Slot === undefined ? null : <Slot {...slotProps} />;
+  // 확장이 내는 본문·액션은 커널에게서 아무것도 받지 않는다 — 파일을 여는 것도 명령이다.
+  const renderSlot = (Slot: ComponentType | undefined): ReactNode => (Slot === undefined ? null : <Slot />);
 
   const treeWithDirty = mergeTabDisplay(viewModel.tree, (tabId) => viewModel.descriptorOf(tabId));
   const activeActivity = viewModel.activities.find((activity) => activity.isActive);

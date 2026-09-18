@@ -1,3 +1,4 @@
+import { URI } from "#contracts";
 import type { Disposable } from "#core/di";
 import { makeAutoObservable, observable, observableRef, runInAction } from "mobx";
 import type { DirectoryMap, IDirectoryTreeModel } from "../model/IDirectoryTreeModel";
@@ -23,6 +24,7 @@ export class DirectoryTreeViewModel implements IDirectoryTreeViewModel {
 
   readonly #copyToClipboard: (text: string) => void;
   readonly #isTypingSurface: () => boolean;
+  readonly #commands: ICommandService;
 
   /** 만들 때 파일 커맨드(삭제·이름변경·새로 만들기)를 스스로 등록한다. */
   constructor({
@@ -41,6 +43,7 @@ export class DirectoryTreeViewModel implements IDirectoryTreeViewModel {
   }) {
     this.#copyToClipboard = copyToClipboard;
     this.#isTypingSurface = isTypingSurface;
+    this.#commands = commandCenterRegistry;
     this.#model = directoryTreeModel;
     // Model은 값과 이벤트만 준다 — 파생된 화면 상태는 전부 여기서 소유한다.
     this.rowsState = this.#computeRows();
@@ -149,6 +152,21 @@ export class DirectoryTreeViewModel implements IDirectoryTreeViewModel {
   /** `#model.renameEntry`에 위임한다. */
   renameEntry(id: string, newName: string): Promise<void> {
     return this.#model.renameEntry(id, newName);
+  }
+
+  /** `arka.workbench.open`을 미리보기로 부른다 — 탭을 어떻게 여는지는 셸의 일이다. */
+  openFile(path: string): void {
+    this.#commands.execute("arka.workbench.open", { uri: URI.file(path), preview: true });
+  }
+
+  /** `arka.workbench.open`을 고정으로 부른다 — 같은 uri가 미리보기 자리에 있으면 그 자리에서 고정된다. */
+  pinFile(path: string): void {
+    this.#commands.execute("arka.workbench.open", { uri: URI.file(path), preview: false });
+  }
+
+  /** `arka.workbench.retargetTabs`를 부른다 — 편집 버퍼는 `IFileContentViewModel.retargetOpenFile`이 따로 옮긴다. */
+  retargetTabs(oldPath: string, newPath: string): void {
+    this.#commands.execute("arka.workbench.retargetTabs", { oldPrefix: oldPath, newPrefix: newPath });
   }
 
   /** `#model.removeEntry`에 위임한다. */

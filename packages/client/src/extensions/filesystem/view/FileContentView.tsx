@@ -15,13 +15,7 @@ import styles from "./FileContentView.module.css";
  * 안내 한 줄뿐이다. **편집·저장은 `TextEditor`에 그대로 위임한다** — 버퍼 관리·저장 버튼·Ctrl+S는
  * 전부 그 컴포넌트가 갖고, 여기서는 ViewModel이 이미 접어 준 값을 그대로 넘길 뿐이다.
  */
-export const FileContentView = observer(function FileContentView({
-  path,
-  reveal = null,
-}: {
-  readonly path: string;
-  readonly reveal?: { readonly line: number; readonly column: number; readonly seq: number } | null;
-}) {
+export const FileContentView = observer(function FileContentView({ path }: { readonly path: string }) {
   const viewModel = useViewModel("arka.filesystem.fileContentViewModel");
 
   // 아직 담기지 않은 것(`undefined`, 열기가 막 시작된 참)도 읽는 중과 같은 뜻이다 — 둘 다 에디터
@@ -43,7 +37,7 @@ export const FileContentView = observer(function FileContentView({
         isDirty={row?.isDirty ?? false}
         isSaving={row?.isSaving ?? false}
         loading={loading}
-        revealAt={reveal}
+        revealAt={viewModel.reveals[path] ?? null}
       />
     </div>
   );

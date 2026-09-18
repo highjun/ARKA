@@ -32,6 +32,9 @@ export type FileRow = {
 /** 탭 id를 키로 한다 — 같은 파일을 두 탭으로 열면 두 항목이다. */
 export type FileRowMap = Readonly<Record<string, FileRow>>;
 
+/** 파일 안의 특정 위치를 보여 달라는 요청. 줄·열은 1부터, `seq`는 같은 위치를 다시 요청해도 구분되게. */
+export type RevealRequest = { readonly line: number; readonly column: number; readonly seq: number };
+
 declare module "#core/di" {
   /** `IFileContentViewModel`를 컨테이너에서 꺼내는 자리. */
   interface InstanceMap {
@@ -55,6 +58,10 @@ export interface IFileContentViewModel extends Disposable {
    * 다른 provider에게 넘길지 판정하는 자리다. 이미 열려 있으면 다시 읽지 않는다.
    */
   openFile(path: string): Promise<boolean>;
+  /** 경로별 마지막 위치 요청. `arka.filesystem.reveal` 명령이 채우고 에디터가 소비한다. */
+  readonly reveals: Readonly<Record<string, RevealRequest>>;
+  /** 그 파일의 이 줄·열을 보여 달라고 한다. 탭이 아직 안 열렸어도 담아 두면 열릴 때 간다. */
+  revealAt(path: string, position: { readonly line: number; readonly column: number }): void;
   /** 타이핑할 때마다 부른다 — 로컬 버퍼만 바뀐다. */
   editFile(path: string, content: string): void;
   /** 지금 버퍼를 서버에 쓴다. */

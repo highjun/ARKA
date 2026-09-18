@@ -137,23 +137,6 @@ export interface IShellViewModel extends Disposable {
    */
   retargetTabs(oldPrefix: string, newPrefix: string): void;
 
-  /**
-   * 파일을 **미리보기로** 연다(`open`의 `preview: true`). 한 번 더 열면 고정된다. 열리면 모바일 드로어를 닫는다.
-   * `arka.workbench.open` 명령이 생기면(R12) 사이드바가 그것을 직접 부르고 이 메서드는 빠진다.
-   */
-  previewFile(path: string, position?: { readonly line: number; readonly column: number }): Promise<void>;
-
-  /**
-   * 마지막 위치 요청 — 어느 탭의 몇 줄·몇 열. View가 그 탭의 내용에 넘긴다. `seq`는 요청마다 오른다.
-   * 없으면 `null`. 셸은 파일을 모르므로 "탭 id와 위치"만 든다.
-   */
-  readonly reveal: {
-    readonly tabId: string;
-    readonly line: number;
-    readonly column: number;
-    readonly seq: number;
-  } | null;
-
   /** 무엇이든 탭으로 연다 — `ITabSystem.open`에 위임한다. 지금 포커스된 leaf 기준이다. */
   open(uri: URI, options?: OpenOptions): Promise<void>;
 

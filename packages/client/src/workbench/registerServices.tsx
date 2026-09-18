@@ -1,6 +1,7 @@
 import { CommandService } from "#core/commands";
 import { Container } from "#core/di";
 import { Registry } from "#core/registry";
+import { URI } from "#contracts";
 import {
   DirectoryTreeModel,
   DirectoryTreeViewModel,
@@ -37,7 +38,7 @@ import { Notifications } from "./model/Notifications";
 import { SidebarContentRegistry } from "./model/SidebarContentRegistry";
 import { TabLayout } from "./model/TabLayout";
 import { TabSystem } from "./model/TabSystem";
-import { collectTabs } from "./model/paneTree";
+import { collectTabs, findLeaf } from "./model/paneTree";
 import { ColorMode } from "./model/ColorMode";
 import { AppLifetime } from "./model/AppLifetime";
 import { Workspace } from "./model/Workspace";
@@ -70,6 +71,18 @@ const EXPLORER_ID = "explorer";
 const SEARCH_ID = "search";
 /** 사용자 단축키 재정의가 저장되는 키. */
 const KEYBINDING_OVERRIDES_KEY = "workbench.keybindings";
+
+/** `arka.workbench.open`이 받는 것. */
+const isOpenContext = (value: unknown): value is { readonly uri: URI; readonly preview?: boolean } =>
+  typeof value === "object" && value !== null && "uri" in value && value.uri instanceof URI;
+/** `arka.workbench.retargetTabs`가 받는 것 — 워크스페이스 루트 기준 경로 접두어 둘. */
+const isRetargetContext = (value: unknown): value is { readonly oldPrefix: string; readonly newPrefix: string } =>
+  typeof value === "object" &&
+  value !== null &&
+  "oldPrefix" in value &&
+  typeof value.oldPrefix === "string" &&
+  "newPrefix" in value &&
+  typeof value.newPrefix === "string";
 
 /**
  * 조립은 여기 한 곳이다. 이 파일만 읽으면 무엇이 도는지 다 보인다.
@@ -202,7 +215,11 @@ export function createApplication(): Container {
   container.register(
     "arka.search.viewModel",
     "singleton",
-    (c) => new SearchViewModel({ searchModel: c.resolve("arka.search.model") }),
+    (c) =>
+      new SearchViewModel({
+        searchModel: c.resolve("arka.search.model"),
+        commandCenterRegistry: c.resolve("arka.commands"),
+      }),
   );
   // markdown은 filesystem을 모른다 — 두 포트를 markdown이 바라는 모양으로 감싸는 어댑터에 넘기는
   // 것까지가 조립부의 일이다. 감싸는 방법 자체는 markdown의 infra가 안다.
@@ -224,11 +241,6 @@ export function createApplication(): Container {
       new MarkdownPreviewViewModel({
         previewModel: c.resolve("arka.markdown.previewModel"),
         commandCenterRegistry: c.resolve("arka.commands"),
-        activeFile: () => {
-          const active = c.resolve("arka.workbench.shellViewModel").activeTab;
-          return active !== null && active.uri.scheme === "file" ? active.uri.path : null;
-        },
-        openUri: (uri) => void c.resolve("arka.workbench.tabs").open(uri),
       }),
   );
   container.register(
@@ -291,6 +303,7 @@ export function createApplication(): Container {
     (c) =>
       new FileContentViewModel({
         fileContentModel: c.resolve("arka.filesystem.fileContentModel"),
+        commandCenterRegistry: c.resolve("arka.commands"),
       }),
   );
   container.register(
@@ -333,9 +346,34 @@ export function createApplication(): Container {
   container
     .resolve("arka.workbench.activityBarRegistry")
     .add({ id: SEARCH_ID, title: "검색", iconId: "search", keybinding: "ctrl+shift+f" });
-  container
-    .resolve("arka.workbench.sidebarContentRegistry")
-    .add({ id: SEARCH_ID, ContentComponent: ({ onFileOpen }) => <SearchView onFileOpen={onFileOpen} /> });
+  container.resolve("arka.workbench.sidebarContentRegistry").add({ id: SEARCH_ID, ContentComponent: SearchView });
+  // 탭을 여는 길은 명령 하나다 — 사이드바·검색·미리보기가 전부 `arka.workbench.open`을 부른다. 문맥
+  // `tab.active.*`는 확장이 "지금 보는 탭"을 셸을 모른 채 읽는 자리다.
+  const commands = container.resolve("arka.commands");
+  const activeTab = () => {
+    const layout = container.resolve("arka.workbench.tabLayout");
+    const leaf = findLeaf(layout.tree, layout.activePaneId);
+    return leaf?.tabs.find((tab) => tab.id === leaf.activeTabId) ?? null;
+  };
+  commands.contexts.add({ id: "tab.active.uri", value: () => activeTab()?.uri ?? null });
+  commands.contexts.add({ id: "tab.active.kind", value: () => activeTab()?.kind ?? null });
+  commands.actions.add({
+    id: "arka.workbench.open",
+    label: "탭으로 열기",
+    execute: (context) => {
+      if (!isOpenContext(context)) return;
+      void container.resolve("arka.workbench.tabs").open(context.uri, { preview: context.preview === true });
+    },
+  });
+  commands.actions.add({
+    id: "arka.workbench.retargetTabs",
+    label: "탭: 옮겨진 경로 따라가기",
+    execute: (context) => {
+      if (!isRetargetContext(context)) return;
+      container.resolve("arka.workbench.shellViewModel").retargetTabs(context.oldPrefix, context.newPrefix);
+    },
+  });
+
   // 탭 provider — 여는 쪽이 자기 ViewModel을 그때 꺼낸다. 부팅 때 미리 만들면 테스트 대역이 끼어들 틈이 없다.
   const tabProviders = container.resolve("arka.workbench.tabSystem");
   tabProviders.add(settingsTabProvider);

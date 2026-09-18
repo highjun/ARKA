@@ -20,6 +20,7 @@ const viewModel = (state: Partial<ISearchViewModel>): ISearchViewModel => ({
   toggleRegex: () => undefined,
   toggleCaseSensitive: () => undefined,
   submit: () => undefined,
+  openResult: () => undefined,
   dispose: () => undefined,
   ...state,
 });
@@ -33,7 +34,6 @@ const withViewModel = (state: Partial<ISearchViewModel>) => {
 const meta = {
   title: "search/SearchView",
   component: SearchView,
-  args: { onFileOpen: () => undefined },
 } satisfies Meta<typeof SearchView>;
 
 export default meta;

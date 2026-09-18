@@ -1,27 +1,61 @@
+import { URI } from "#contracts";
+import type { ICommandService } from "#core/commands";
 import type { Disposable } from "#core/di";
 import { makeAutoObservable, observableRef, reaction } from "mobx";
 import type { IFileContentModel, OpenFile } from "../model/IFileContentModel";
-import type { IFileContentViewModel, FileRow, FileRowMap } from "./IFileContentViewModel";
+import type { IFileContentViewModel, FileRow, FileRowMap, RevealRequest } from "./IFileContentViewModel";
+
+/** `arka.filesystem.reveal`이 받는 것 — 어느 파일의 몇 줄·몇 열. */
+type RevealContext = { readonly uri: URI; readonly line: number; readonly column: number };
+
+const isRevealContext = (value: unknown): value is RevealContext =>
+  typeof value === "object" &&
+  value !== null &&
+  "uri" in value &&
+  value.uri instanceof URI &&
+  "line" in value &&
+  typeof value.line === "number" &&
+  "column" in value &&
+  typeof value.column === "number";
 
 /** `IFileContentViewModel`을 구현한다 — Model의 `OpenFile`을 화면용 `FileRow`로 변환한다. */
 export class FileContentViewModel implements IFileContentViewModel {
   readonly #model: IFileContentModel;
   private rowsState: FileRowMap;
+  private revealsState: Readonly<Record<string, RevealRequest>> = {};
+  #revealSeq = 0;
   readonly #subscription: Disposable;
 
-  /** Model을 구독해 화면용 행으로 편다. */
-  constructor({ fileContentModel }: { fileContentModel: IFileContentModel }) {
+  /** Model을 구독해 화면용 행으로 편다. "줄·열로 이동" 명령(`arka.filesystem.reveal`)도 여기서 등록한다. */
+  constructor({
+    fileContentModel,
+    commandCenterRegistry,
+  }: {
+    fileContentModel: IFileContentModel;
+    commandCenterRegistry: ICommandService;
+  }) {
     this.#model = fileContentModel;
     // Model은 값과 이벤트만 준다 — 화면 상태는 여기서 소유한다.
     this.rowsState = this.#computeRows();
     this.#subscription = fileContentModel.onDidChange(() => this.syncRows());
-    makeAutoObservable<this, "rowsState">(
+    makeAutoObservable<this, "rowsState" | "revealsState">(
       this,
       {
         rowsState: observableRef,
+        revealsState: observableRef,
       },
       { autoBind: true },
     );
+
+    // 검색 결과처럼 "이 파일의 이 줄로"를 바라는 쪽이 부른다 — 파일을 여는 것은 `arka.workbench.open`의 몫이다.
+    commandCenterRegistry.actions.add({
+      id: "arka.filesystem.reveal",
+      label: "파일: 줄·열로 이동",
+      execute: (context) => {
+        if (!isRevealContext(context) || context.uri.scheme !== "file") return;
+        this.revealAt(context.uri.path, context);
+      },
+    });
   }
 
   /** 구독을 끊는다. 컨테이너가 이 VM을 정리할 때 불린다. */
@@ -49,6 +83,20 @@ export class FileContentViewModel implements IFileContentViewModel {
 
   private syncRows(): void {
     this.rowsState = this.#computeRows();
+  }
+
+  /** 경로별 마지막 위치 요청을 값으로 노출한다. */
+  get reveals(): Readonly<Record<string, RevealRequest>> {
+    return this.revealsState;
+  }
+
+  /** `seq`를 올려 같은 위치를 다시 요청해도 에디터가 구분하게 한다. */
+  revealAt(path: string, position: { readonly line: number; readonly column: number }): void {
+    this.#revealSeq += 1;
+    this.revealsState = {
+      ...this.revealsState,
+      [path]: { line: position.line, column: position.column, seq: this.#revealSeq },
+    };
   }
 
   /** `#model.open`으로 읽은 뒤 판정한다. 읽기 실패·바이너리는 텍스트 탭이 열 수 없는 것이라 닫고 `false`다. */

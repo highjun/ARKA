@@ -6,18 +6,6 @@ import type { ComponentType } from "react";
  * 옛 `shell/registries/index.ts`(타입 3개짜리 grouping 파일)에서 정식 Registry 역할로
  * 풀어냈다(2026-09-05, 5-C) — `IActivityBarRegistry`와 같은 이유로 갈렸다.
  */
-/** 사이드바 본문·액션이 커널에게서 받는 것. 셋 다 `IShellViewModel`의 얇은 통로다. */
-export type SidebarSlotProps = {
-  /** 파일을 미리보기로 연다. `position`을 주면 그 줄·열(1부터)로 커서를 옮긴다(검색 결과). */
-  readonly onFileOpen: (path: string, position?: { readonly line: number; readonly column: number }) => void;
-  /** 파일이 옮겨졌다(드래그앤드롭 등) — 그 경로를 보던 탭이 새 경로를 따라가야 한다
-   *  (`IShellViewModel.retargetTabs`). */
-  readonly onFileMove: (oldPath: string, newPath: string) => void;
-  /** 파일 행을 더블클릭했다 — 미리보기 탭을 고정한다(`IShellViewModel.pinTab`, Tab 헤더
-   *  더블클릭과 같은 뜻). */
-  readonly onFilePin: (path: string) => void;
-};
-
 /**
  * 활동 아이콘 바에서 고른 것에 대응하는 사이드바 내용. 없으면(`tryGet`이 `undefined`) 패널이 빈다.
  *
@@ -34,11 +22,11 @@ export type SidebarSlotProps = {
 export type SidebarContentDescriptor = {
   readonly id: string;
   /** 머리 오른쪽에 그대로 놓이는 아이콘 버튼들 — 자주 쓰는 것 한둘이다. */
-  readonly InlineActions?: ComponentType<SidebarSlotProps>;
+  readonly InlineActions?: ComponentType;
   /** `'...'` 뒤에 접히는 메뉴 항목들. `Menu.Item` 모양을 낸다 — `Shell.panelActions`와 같은 관용구다. */
-  readonly MenuActions?: ComponentType<SidebarSlotProps>;
-  /** 패널 **본문**만 그린다. */
-  readonly ContentComponent: ComponentType<SidebarSlotProps>;
+  readonly MenuActions?: ComponentType;
+  /** 패널 **본문**만 그린다. **커널에게서 받는 props는 없다** — 파일을 여는 것도 명령(`arka.workbench.open`)이다. */
+  readonly ContentComponent: ComponentType;
 };
 
 declare module "#core/di" {

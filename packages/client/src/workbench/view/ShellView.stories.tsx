@@ -95,8 +95,6 @@ const viewModel = (state: Partial<IShellViewModel>, container: Container): IShel
   splitTab: () => undefined,
   resizeNode: () => undefined,
   retargetTabs: () => undefined,
-  previewFile: () => Promise.resolve(),
-  reveal: null,
   open: () => Promise.resolve(),
   descriptorOf: (tabId) => DESCRIPTORS[tabId],
   containerOf: () => container,

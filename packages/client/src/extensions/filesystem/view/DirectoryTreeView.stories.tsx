@@ -44,6 +44,9 @@ const viewModel = (state: Partial<IDirectoryTreeViewModel>): IDirectoryTreeViewM
   cancelDelete: () => undefined,
   failureNotice: null,
   dismissFailureNotice: () => undefined,
+  openFile: () => undefined,
+  pinFile: () => undefined,
+  retargetTabs: () => undefined,
   ...state,
 });
 
@@ -51,6 +54,8 @@ const fileContentViewModel: IFileContentViewModel = {
   dispose: () => undefined,
   rows: {},
   onDidChange: () => ({ dispose: () => undefined }),
+  reveals: {},
+  revealAt: () => undefined,
   openFile: () => Promise.resolve(true),
   editFile: () => undefined,
   saveFile: () => undefined,
@@ -90,7 +95,6 @@ const ROWS: readonly FileTreeRow[] = [
 const meta = {
   title: "filesystem/DirectoryTreeView",
   component: DirectoryTreeView,
-  args: { onFileOpen: () => undefined, onFileMove: () => undefined, onFilePin: () => undefined },
 } satisfies Meta<typeof DirectoryTreeView>;
 
 export default meta;

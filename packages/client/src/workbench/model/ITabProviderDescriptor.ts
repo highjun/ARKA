@@ -2,15 +2,9 @@ import type { URI } from "#contracts";
 import type { Descriptor, Registry } from "#core/registry";
 import type { ComponentType, ReactNode } from "react";
 
-/**
- * 탭 내용이 받는 것. **커널은 탭 안을 모른다** — id만 넘긴다. 자리 지정(anchor)은 나중에 다시 본다.
- *
- * `reveal`은 계약 밖이다 — 검색 결과의 줄·열이 아직 셸을 거쳐 오기 때문에 잠시 실어 나른다.
- * `arka.filesystem.reveal` 명령이 생기면(R12) 빠진다.
- */
+/** 탭 내용이 받는 것. **커널은 탭 안을 모른다** — id만 넘긴다. 자리 지정(anchor)은 나중에 다시 본다. */
 export interface TabContentProps {
   readonly tabId: string;
-  readonly reveal?: { readonly line: number; readonly column: number; readonly seq: number } | null;
 }
 
 /**

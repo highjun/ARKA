@@ -1,5 +1,5 @@
 import { observable, observableRef } from "mobx";
-import type { TabContentProps, TabProviderDescriptor } from "../../../workbench/model/ITabProviderDescriptor";
+import type { TabProviderDescriptor } from "../../../workbench/model/ITabProviderDescriptor";
 import { FileIcon } from "../component/FileIcon";
 import type { IFileContentViewModel } from "../viewmodel/IFileContentViewModel";
 import { FileContentView } from "./FileContentView";
@@ -31,7 +31,7 @@ export const createTextTabProvider = (deps: {
         get isDirty() {
           return fileContent.rows[path]?.isDirty ?? false;
         },
-        Content: ({ reveal }: TabContentProps) => <FileContentView path={path} reveal={reveal} />,
+        Content: () => <FileContentView path={path} />,
       },
       { icon: observableRef, Content: observableRef },
     );

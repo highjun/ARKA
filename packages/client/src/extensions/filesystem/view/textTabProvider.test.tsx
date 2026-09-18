@@ -7,6 +7,8 @@ const fakeFileContent = (opens: boolean, isDirty = false): IFileContentViewModel
   dispose: () => undefined,
   rows: { "docs/a.md": { content: "", notice: null, readOnly: false, isDirty, isSaving: false, loading: false } },
   onDidChange: () => ({ dispose: () => undefined }),
+  reveals: {},
+  revealAt: () => undefined,
   openFile: vi.fn(() => Promise.resolve(opens)),
   editFile: () => undefined,
   saveFile: () => undefined,

@@ -1,3 +1,5 @@
+import { URI } from "#contracts";
+import type { ICommandService } from "#core/commands";
 import type { Disposable } from "#core/di";
 import { makeAutoObservable, observable, observableRef } from "mobx";
 import type { ISearchModel } from "../model/ISearchModel";
@@ -9,6 +11,7 @@ const DEBOUNCE_MS = 250;
 /** `ISearchViewModel`의 유일한 구현체. */
 export class SearchViewModel implements ISearchViewModel {
   readonly #model: ISearchModel;
+  readonly #commands: ICommandService;
   readonly #debounceMs: number;
   private queryState: string;
   private regexState: boolean;
@@ -21,8 +24,17 @@ export class SearchViewModel implements ISearchViewModel {
   #timer: ReturnType<typeof setTimeout> | null = null;
 
   /** `debounceMs`를 0으로 주면 즉시 나간다 — 테스트가 타이머를 기다리지 않게. */
-  constructor({ searchModel, debounceMs = DEBOUNCE_MS }: { searchModel: ISearchModel; debounceMs?: number }) {
+  constructor({
+    searchModel,
+    commandCenterRegistry,
+    debounceMs = DEBOUNCE_MS,
+  }: {
+    searchModel: ISearchModel;
+    commandCenterRegistry: ICommandService;
+    debounceMs?: number;
+  }) {
     this.#model = searchModel;
+    this.#commands = commandCenterRegistry;
     this.#debounceMs = debounceMs;
     this.queryState = searchModel.query.query;
     this.regexState = searchModel.query.regex;
@@ -54,6 +66,13 @@ export class SearchViewModel implements ISearchViewModel {
       },
       { autoBind: true },
     );
+  }
+
+  /** 위치를 먼저 담고 연다 — 탭이 아직 없어도 열릴 때 그 줄로 간다. 검색은 파일을 모른다 — 명령 둘을 부를 뿐이다. */
+  openResult(path: string, position: { readonly line: number; readonly column: number }): void {
+    const uri = URI.file(path);
+    this.#commands.execute("arka.filesystem.reveal", { uri, line: position.line, column: position.column });
+    this.#commands.execute("arka.workbench.open", { uri, preview: true });
   }
 
   /** 구독과 예약된 타이머를 함께 끊는다 — 컨테이너가 정리할 때 부른다. */

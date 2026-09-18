@@ -53,26 +53,18 @@ const deleteSubtitleOf = (targets: readonly ContextMenuTarget[]) =>
     ? "안의 내용까지 전부 사라진다. 되돌릴 수 없다."
     : "되돌릴 수 없다.";
 
-/** 사이드바의 파일 탐색기. 트리 컴포넌트에 ViewModel의 행을 그대로 넘기고 배치만 한다. */
-export const DirectoryTreeView = observer(function DirectoryTreeView({
-  onFileOpen,
-  onFileMove,
-  onFilePin,
-}: {
-  readonly onFileOpen: (path: string) => void;
-  readonly onFileMove: (oldPath: string, newPath: string) => void;
-  /** 파일 행을 더블클릭했다 — 미리보기 탭을 고정한다(Tab 헤더 더블클릭과 같은 뜻). */
-  readonly onFilePin: (path: string) => void;
-}) {
+/** 사이드바의 파일 탐색기. 트리 컴포넌트에 ViewModel의 행을 그대로 넘기고 배치만 한다. 셸에서 받는 props는 없다. */
+export const DirectoryTreeView = observer(function DirectoryTreeView() {
   const viewModel = useViewModel("arka.filesystem.directoryTreeViewModel");
   const fileContentViewModel = useViewModel("arka.filesystem.fileContentViewModel");
 
   // 컴포넌트 어휘(FileTreeItem)를 ViewModel 어휘(경로 + 폴더 여부)로 바꾸기만 한다.
   const handleActivate = (item: FileTreeItem) => {
-    if (item.type !== "folder") onFileOpen(item.id);
+    if (item.type !== "folder") viewModel.openFile(item.id);
   };
+  // 더블클릭은 고정 — 미리보기 탭을 고정한다(Tab 헤더 더블클릭과 같은 뜻).
   const handleRowDoubleClick = (item: FileTreeItem) => {
-    if (item.type !== "folder") onFilePin(item.id);
+    if (item.type !== "folder") viewModel.pinFile(item.id);
   };
   const handleExpand = (item: FileTreeItem, expanded: boolean) => viewModel.setFolderExpanded(item.id, expanded);
   /**
@@ -88,7 +80,7 @@ export const DirectoryTreeView = observer(function DirectoryTreeView({
       .moveEntry(source.id, target.id)
       .then((newPath) => {
         fileContentViewModel.retargetOpenFile(source.id, newPath);
-        onFileMove(source.id, newPath);
+        viewModel.retargetTabs(source.id, newPath);
       })
       .catch(() => undefined);
   };

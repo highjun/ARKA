@@ -1,3 +1,5 @@
+import { URI } from "#contracts";
+import { CommandService } from "#core/commands";
 import type { IWorkspaceFiles } from "../model/IWorkspaceFiles";
 import { FileContentModel } from "../model/FileContentModel";
 import { FileContentViewModel } from "./FileContentViewModel";
@@ -37,13 +39,21 @@ const text = (content: string, extra: Partial<Reply> = {}): Reply => ({
 const make = (
   byPath: Record<string, Reply>,
   options: { writeFails?: string } = {},
-): { files: IFileContentViewModel; model: FileContentModel } => {
+): { files: IFileContentViewModel; model: FileContentModel; commands: CommandService } => {
   const model = new FileContentModel({
     workspaceFiles: serving(byPath, options) as unknown as IWorkspaceFiles,
     // 감시는 이 파일의 관심사가 아니다 — 구독하지 않는 대본으로 대신한다.
     workspaceWatch: { watch: () => () => undefined },
   });
-  return { files: new FileContentViewModel({ fileContentModel: model }), model };
+  const commands = new CommandService({
+    overridesStore: { load: () => ({}), save: () => undefined },
+    reportError: () => undefined,
+  });
+  return {
+    files: new FileContentViewModel({ fileContentModel: model, commandCenterRegistry: commands }),
+    model,
+    commands,
+  };
 };
 
 const viewModel = (byPath: Record<string, Reply>, options: { writeFails?: string } = {}): IFileContentViewModel =>
@@ -143,6 +153,28 @@ describe("안내 문장과 편집 가능 여부", () => {
 
     expect(files.rows["gone.md"]).toMatchObject({ content: "", readOnly: true });
     expect(files.rows["gone.md"]?.notice).toMatch(/없는 파일/u);
+  });
+});
+
+describe("줄·열로 이동", () => {
+  it("revealAt은 경로별로 담고, 같은 위치를 다시 요청해도 seq가 올라 구분된다", () => {
+    const { files } = make({});
+
+    files.revealAt("a.md", { line: 3, column: 2 });
+    files.revealAt("a.md", { line: 3, column: 2 });
+
+    expect(files.reveals["a.md"]).toEqual({ line: 3, column: 2, seq: 2 });
+  });
+
+  it("arka.filesystem.reveal 명령이 file: uri의 경로로 revealAt을 부른다", () => {
+    const { files, commands } = make({});
+
+    commands.execute("arka.filesystem.reveal", { uri: URI.file("docs/a.md"), line: 5, column: 1 });
+    commands.execute("arka.filesystem.reveal", { uri: URI.parse("chat:///1"), line: 5, column: 1 });
+    commands.execute("arka.filesystem.reveal", "엉뚱한 것");
+
+    expect(Object.keys(files.reveals)).toEqual(["docs/a.md"]);
+    expect(files.reveals["docs/a.md"]).toMatchObject({ line: 5, column: 1 });
   });
 });
 

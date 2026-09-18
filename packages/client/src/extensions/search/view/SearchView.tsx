@@ -6,13 +6,9 @@ import { SearchResultList } from "../component/SearchResultList";
 import styles from "./SearchView.module.css";
 
 /**
- * 사이드바의 검색 패널. 결과를 누르면 그 파일을 그 줄·열로 연다.
+ * 사이드바의 검색 패널. 결과를 누르면 그 파일을 그 줄·열로 연다. 셸에서 받는 props는 없다.
  */
-export const SearchView = observer(function SearchView({
-  onFileOpen,
-}: {
-  readonly onFileOpen: (path: string, position?: { readonly line: number; readonly column: number }) => void;
-}) {
+export const SearchView = observer(function SearchView() {
   const viewModel = useViewModel("arka.search.viewModel");
   return (
     <div data-component="SearchView" className={styles["root"]}>
@@ -62,7 +58,7 @@ export const SearchView = observer(function SearchView({
       <div className={styles["results"]}>
         <SearchResultList
           files={viewModel.rows}
-          onSelect={(path, match) => onFileOpen(path, { line: match.line, column: match.column })}
+          onSelect={(path, match) => viewModel.openResult(path, { line: match.line, column: match.column })}
         />
       </div>
     </div>

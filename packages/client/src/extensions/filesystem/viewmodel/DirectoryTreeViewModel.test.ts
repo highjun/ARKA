@@ -1,3 +1,4 @@
+import { URI } from "#contracts";
 import type { IWorkspaceFiles } from "../model/IWorkspaceFiles";
 import { CommandService, type ICommandService } from "#core/commands";
 import { DirectoryTreeModel } from "../model/DirectoryTreeModel";
@@ -595,5 +596,50 @@ describe("findRow", () => {
     const tree = viewModel({ "": [] });
 
     expect(tree.findRow("nope")).toBeUndefined();
+  });
+});
+
+describe("탭 열기 명령", () => {
+  const withCommands = () => {
+    const commands = fakeCommandCenterRegistry();
+    const opened: unknown[] = [];
+    const retargeted: unknown[] = [];
+    commands.actions.add({ id: "arka.workbench.open", label: "열기", execute: (context) => void opened.push(context) });
+    commands.actions.add({
+      id: "arka.workbench.retargetTabs",
+      label: "옮기기",
+      execute: (context) => void retargeted.push(context),
+    });
+    const directoryTreeModel = new DirectoryTreeModel({
+      workspaceFiles: serving({ "": [entry("a.md")] }) as unknown as IWorkspaceFiles,
+      workspaceWatch: { watch: () => () => undefined },
+    });
+    const viewModel = new DirectoryTreeViewModel({
+      directoryTreeModel,
+      commandCenterRegistry: commands,
+      copyToClipboard: () => undefined,
+      isTypingSurface: () => false,
+    });
+    return { viewModel, opened, retargeted };
+  };
+
+  it("openFile은 미리보기로, pinFile은 고정으로 arka.workbench.open을 부른다", () => {
+    const { viewModel, opened } = withCommands();
+
+    viewModel.openFile("docs/a.md");
+    viewModel.pinFile("docs/a.md");
+
+    expect(opened).toEqual([
+      { uri: URI.file("docs/a.md"), preview: true },
+      { uri: URI.file("docs/a.md"), preview: false },
+    ]);
+  });
+
+  it("retargetTabs는 arka.workbench.retargetTabs에 옛·새 접두어를 넘긴다", () => {
+    const { viewModel, retargeted } = withCommands();
+
+    viewModel.retargetTabs("old", "new");
+
+    expect(retargeted).toEqual([{ oldPrefix: "old", newPrefix: "new" }]);
   });
 });

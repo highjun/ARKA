@@ -51,8 +51,6 @@ export class ShellViewModel implements IShellViewModel {
   private isClientOutdatedState = false;
   readonly #notifications: INotifications;
   private notificationRows: readonly ShellNotificationRow[];
-  private revealState: IShellViewModel["reveal"] = null;
-  #revealSeq = 0;
   private activityRows: readonly ShellActivityRow[];
   /** 탭 Model의 스냅샷 — `tree`는 여기에 descriptor(제목·더티)를 겹쳐 파생한다. */
   private layoutState: { readonly tree: PaneNode; readonly previewTabId: string | null };
@@ -135,7 +133,6 @@ export class ShellViewModel implements IShellViewModel {
       | "activityRows"
       | "layoutState"
       | "notificationRows"
-      | "revealState"
       | "pendingTabCloseState"
       | "activeLeafIdState"
       | "themeState"
@@ -150,7 +147,6 @@ export class ShellViewModel implements IShellViewModel {
         activityRows: observableRef,
         layoutState: observableRef,
         notificationRows: observableRef,
-        revealState: observableRef,
         pendingTabCloseState: observableRef,
         activeLeafIdState: observable,
         themeState: observable,
@@ -173,6 +169,14 @@ export class ShellViewModel implements IShellViewModel {
         (dirtyPreview) => {
           if (dirtyPreview !== null) this.pinTab(dirtyPreview);
         },
+      ),
+    });
+
+    // 보던 탭이 바뀌면 모바일 드로어를 닫는다 — 폰에서 드로어가 방금 연 파일을 가린다.
+    this.#subscriptions.push({
+      dispose: reaction(
+        () => this.activeTab?.id ?? null,
+        () => this.setSidebarOpen(false),
       ),
     });
 
@@ -482,25 +486,9 @@ export class ShellViewModel implements IShellViewModel {
 
   /** 활성 leaf 기준이다. 열린 탭이 없으면 `null`. */
   get activeTab(): { readonly id: string; readonly kind: string; readonly uri: URI } | null {
-    const leaf = findLeaf(this.layoutState.tree, this.#tabLayout.activePaneId);
+    const leaf = findLeaf(this.layoutState.tree, this.activeLeafIdState);
     const active = leaf?.tabs.find((tab) => tab.id === leaf.activeTabId);
     return active === undefined ? null : { id: active.id, kind: active.kind, uri: active.uri };
-  }
-
-  /** 위치 요청이 없으면 `null`. 같은 위치를 다시 요청해도 `seq`로 구분된다. */
-  get reveal(): IShellViewModel["reveal"] {
-    return this.revealState;
-  }
-
-  /** 미리보기로 연다. `position`은 그 탭의 내용에 전달된다. 열리면 모바일 드로어를 닫는다. */
-  async previewFile(path: string, position?: { readonly line: number; readonly column: number }): Promise<void> {
-    const uri = URI.file(path);
-    if (position !== undefined) {
-      this.#revealSeq += 1;
-      this.revealState = { tabId: uri.toString(), line: position.line, column: position.column, seq: this.#revealSeq };
-    }
-    await this.#tabs.open(uri, { preview: true });
-    this.setSidebarOpen(false);
   }
 
   /** 미리보기 탭이면 `previewTabId`를 비워 고정한다. */

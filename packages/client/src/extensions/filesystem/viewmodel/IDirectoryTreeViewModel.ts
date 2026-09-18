@@ -98,6 +98,13 @@ export interface IDirectoryTreeViewModel extends Disposable {
   /** 드래그앤드롭으로 다른 폴더에 옮긴다. 옮긴 뒤의 전체 경로를 돌려준다(열린 탭 재배정용). */
   moveEntry(id: string, toParentId: string): Promise<string>;
 
+  /** 파일을 미리보기 탭으로 연다 — `arka.workbench.open` 명령을 부른다. 행 클릭이 부른다. */
+  openFile(path: string): void;
+  /** 파일을 고정 탭으로 연다 — 이미 미리보기로 열려 있으면 고정된다. 행 더블클릭이 부른다. */
+  pinFile(path: string): void;
+  /** 파일이 옮겨졌다 — 그 경로를 보던 탭이 새 경로를 따라가게 `arka.workbench.retargetTabs`를 부른다. */
+  retargetTabs(oldPath: string, newPath: string): void;
+
   /** 펼친 디렉터리를 외부 변경에 대해 감시하기 시작한다. */
   startWatching(): void;
   /** 감시를 멈춘다. */

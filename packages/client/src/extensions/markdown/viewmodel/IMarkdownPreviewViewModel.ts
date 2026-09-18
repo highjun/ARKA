@@ -14,7 +14,7 @@ declare module "#core/di" {
 }
 /**
  * 미리보기 탭의 화면 상태. "마크다운 미리보기 열기" 커맨드(Ctrl+Shift+V)도 여기서 등록한다 — 지금 보고
- * 있는 파일이 무엇인지와 uri를 여는 방법은 조립부가 함수로 넣어 준다(익스텐션은 셸을 모른다).
+ * 있는 파일은 `tab.active.uri` 문맥으로 읽고, 탭은 `arka.workbench.open` 명령으로 연다(익스텐션은 셸을 모른다).
  *
  * 경로로 말한다 — 탭 id가 아니다. 미리보기 탭 provider가 `markdown-preview:///<path>`에서 경로를 꺼내 준다.
  */
