@@ -27,7 +27,7 @@ const OverlayStage = ({ children }: { readonly children: ReactNode }) => {
 };
 
 const meta = {
-  title: "workbench/CommandPalette",
+  title: "01-workbench/CommandPalette",
   component: CommandPalette,
   decorators: [
     (Story) => (

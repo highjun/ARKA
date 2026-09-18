@@ -27,7 +27,7 @@ const OverlayStage = ({ children }: { readonly children: ReactNode }) => {
 };
 
 const meta = {
-  title: "shared/Menu",
+  title: "00-shared/Menu",
   component: Menu,
   decorators: [
     (Story) => (

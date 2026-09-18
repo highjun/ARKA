@@ -11,7 +11,7 @@ const ITEMS: readonly ActivityBarItem[] = [
 ];
 
 const meta = {
-  title: "workbench/ActivityBar",
+  title: "01-workbench/ActivityBar",
   component: ActivityBar,
   args: { items: ITEMS, defaultActiveId: "files", onSelect: () => undefined },
   decorators: [

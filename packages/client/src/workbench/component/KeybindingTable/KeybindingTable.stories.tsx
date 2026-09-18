@@ -9,7 +9,7 @@ const ROWS = [
 ];
 
 const meta = {
-  title: "workbench/KeybindingTable",
+  title: "01-workbench/KeybindingTable",
   component: KeybindingTable,
   args: { rows: ROWS },
 } satisfies Meta<typeof KeybindingTable>;

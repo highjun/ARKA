@@ -31,7 +31,7 @@ const SPLIT_TREE: TabTreeSplit = {
 };
 
 const meta = {
-  title: "workbench/Tab",
+  title: "01-workbench/Tab",
   component: Tab,
   decorators: [
     (Story) => (

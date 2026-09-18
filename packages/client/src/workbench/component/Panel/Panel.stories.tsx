@@ -4,7 +4,7 @@ import { IconButton } from "#component/IconButton";
 import { Panel } from "./index";
 
 const meta = {
-  title: "workbench/Panel",
+  title: "01-workbench/Panel",
   component: Panel,
   decorators: [
     (Story) => (

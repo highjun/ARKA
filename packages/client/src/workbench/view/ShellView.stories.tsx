@@ -99,7 +99,7 @@ const viewModel = (state: Partial<IShellViewModel>): IShellViewModel => ({
 });
 
 const meta = {
-  title: "workbench/ShellView",
+  title: "01-workbench/ShellView",
   component: ShellView,
 } satisfies Meta<typeof ShellView>;
 

@@ -23,7 +23,7 @@ const OverlayStage = ({ children }: { readonly children: ReactNode }) => {
 };
 
 const meta = {
-  title: "shared/Select",
+  title: "00-shared/Select",
   component: Select,
   decorators: [
     (Story) => (

@@ -9,7 +9,7 @@ export const greet = (name: string) => {
 `;
 
 const meta = {
-  title: "shared/CodeBlock",
+  title: "00-shared/CodeBlock",
   component: CodeBlock,
   args: { content: CONTENT, language: "typescript", fileName: "greet.ts" },
   decorators: [

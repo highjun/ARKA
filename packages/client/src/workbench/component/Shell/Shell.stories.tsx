@@ -12,7 +12,7 @@ const ACTIVITY_ITEMS: readonly ActivityBarItem[] = [
 ];
 
 const meta = {
-  title: "workbench/Shell",
+  title: "01-workbench/Shell",
   component: Shell,
   decorators: [
     (Story) => (

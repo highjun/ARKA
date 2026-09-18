@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { NotificationList } from "./NotificationList";
 
 const meta = {
-  title: "workbench/NotificationList",
+  title: "01-workbench/NotificationList",
   component: NotificationList,
   args: {
     items: [

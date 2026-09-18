@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Kbd } from "./index";
 
 const meta = {
-  title: "shared/Kbd",
+  title: "00-shared/Kbd",
   component: Kbd,
   args: { children: "Ctrl" },
 } satisfies Meta<typeof Kbd>;

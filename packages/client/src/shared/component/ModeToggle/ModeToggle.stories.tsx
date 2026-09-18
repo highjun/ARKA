@@ -3,7 +3,7 @@ import { Icon } from "#component/Icon";
 import { ModeToggle } from "./index";
 
 const meta = {
-  title: "shared/ModeToggle",
+  title: "00-shared/ModeToggle",
   component: ModeToggle,
   args: {
     values: ["light", "dark"],
