@@ -254,12 +254,14 @@ export default [
       "@typescript-eslint/no-restricted-imports": [
         "error",
         {
-          paths: ["react", "react-dom", "nanostores", "zustand", "jotai", "valtio", "@primer/react"].map((name) => ({
-            name,
-            allowTypeImports: true,
-            message:
-              "`model/`은 상태 라이브러리와 React를 런타임으로 모릅니다 — 화면 상태는 ViewModel이 소유합니다(→ ADR 0007).",
-          })),
+          paths: ["react", "react-dom", "mobx", "nanostores", "zustand", "jotai", "valtio", "@primer/react"].map(
+            (name) => ({
+              name,
+              allowTypeImports: true,
+              message:
+                "`model/`은 상태 라이브러리와 React를 런타임으로 모릅니다 — 화면 상태는 ViewModel이 소유합니다(→ ADR 0007).",
+            }),
+          ),
           patterns: [
             {
               group: ["@nanostores/*", "@radix-ui/*"],

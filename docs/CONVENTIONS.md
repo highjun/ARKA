@@ -197,16 +197,16 @@
 - 코드는 도메인별 슬라이스 아래에 모은다. 레이어를 최상위로 두지 않는다.
 - 도메인을 모르는 것(DI·설정·부팅)만 `core/`에 둔다.
 - 슬라이스 내부 — client는 `model/` `infra/` `viewmodel/` `view/` `component/`, server는 `domain/` `infra/` `services/` `runtime/` `transport/`. `runtime/`은 **요청보다 오래 사는 것**을 든다(`RunManager`) — 요청 하나로 끝나는 `services/`와 수명이 다르다. 두 목록은 `eslint.config.ts`의 zone과 구조 테스트가 닫힌 집합으로 든다.
-- 의존은 안쪽(`model`/`domain`)을 향한다. 어느 구현이 꽂힐지는 조립부(client는 `workbench/registerServices.tsx`)가 정한다.
+- 의존은 안쪽(`model`/`domain`)을 향한다. 어느 구현이 꽂힐지는 모듈이 정한다 — client는 슬라이스마다 `ExtensionModule` 하나(`index.ts`)이고, 조립부(`workbench/registerServices.tsx`)는 모듈 목록을 켤 뿐이다. → [ADR 0014](adr/0014-extension-model.md)
 - `index.ts`에는 바깥이 실제로 부르는 것만 넣는다. 내부 구현·에러 타입·유틸은 내보내지 않는다. **`knip`이 본다** — 아무도 안 부르는 export는 관문에서 막힌다. → [ADR 0011](adr/0011-lint-off-the-shelf.md)
-- 슬라이스끼리 직접 import하지 않는다. DI 토큰이나 이벤트로만 소통한다.
+- 슬라이스끼리 직접 import하지 않는다. `InstanceMap`의 id나 명령·문맥으로만 소통한다.
 - `shared/`는 아무것도 import할 수 없다. 공통 추출은 아래로만 한다.
 - client는 `core/ workbench/ extensions/ shared/` 넷이다. **의존 방향·슬라이스 경계·`shared/`의 고립을 세 패키지 모두 `eslint.config.ts`의 zone이 강제한다** — server는 2026-09-14까지 비어 있었다.
 - **빈 레이어를 미리 만들지 않는다.** 실제 I/O나 유스케이스가 생길 때 폴더를 만든다.
 - 파일 이름: 클래스·React 컴포넌트·계약(`I<Name>.ts`)은 PascalCase, 함수 모듈은 camelCase. 폴더는 camelCase(컴포넌트 폴더는 그 컴포넌트 이름). 하이픈·밑줄은 쓰지 않는다 — `public/`의 자산만 예외다. **`check-file`이 하이픈·밑줄과 계층 폴더·접두를 보고, 컴포넌트 폴더의 PascalCase는 구조 테스트가 본다.** PascalCase냐 camelCase냐는 파일이 내보내는 이름을 따르므로 기계가 판정하지 못한다 — 그 한 칸만 리뷰다. → [ADR 0011](adr/0011-lint-off-the-shelf.md)
-- **`model/`은 사실과 사건을, `viewmodel/`은 화면 상태를 다룬다.** `model`→`viewmodel`은 이벤트로, `viewmodel`→`view`는 바인딩으로 잇는다. atom은 ViewModel이 소유한다. → [ADR 0007](adr/0007-client-layers.md)
+- **`model/`은 사실과 사건을, `viewmodel/`은 화면 상태를 다룬다.** `model`→`viewmodel`은 이벤트로, `viewmodel`→`view`는 `observer`로 잇는다. observable은 ViewModel이 소유한다(MobX `makeAutoObservable` 클래스). → [ADR 0007](adr/0007-client-layers.md)
 - **`model/`은 도메인 타입·규칙(순수 로직)과 `infra/`가 구현할 인터페이스 선언까지다.** React·fetch·window·전역 상태를 런타임으로 알지 않는다.
-- **`view/`가 부르는 훅은 `useViewModel` 하나뿐이다.** 로컬 상태가 필요하면 ViewModel로 옮긴다. DI 접근(`useAppContext`·`resolve`)도 하지 않는다.
+- **`view/`가 부르는 훅은 `useViewModel` 하나뿐이다.** 로컬 상태가 필요하면 ViewModel로 옮긴다. DI 접근(`resolve`)도 하지 않는다 — `Promise.resolve`도 같은 선택자에 걸리므로 `async`로 쓴다.
 - **위 두 줄은 린트가 본다** — `no-restricted-syntax`가 `view/`의 훅과 DI 접근을, `@typescript-eslint/no-restricted-imports`가 `model/`의 상태 라이브러리를 막는다(`import type`은 허용한다). → [ADR 0011](adr/0011-lint-off-the-shelf.md)
 - **코드의 모양은 `prettier`가 정한다.** 손으로 맞추지 않는다 — 고치려면 `pnpm --filter ops run format`이고, 관문은 `--check`만 한다. 마크다운은 `markdownlint`가 든다.
 - CSS는 `stylelint`가 본다 — client의 `lint`가 ESLint에 이어 돌린다. 값은 Primer 토큰만 참조한다 — 색·간격·테두리·그림자·글꼴에 리터럴을 쓰지 않는다. → [ADR 0009](adr/0009-primer-first.md)
