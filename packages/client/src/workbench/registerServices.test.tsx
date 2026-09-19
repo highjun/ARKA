@@ -207,11 +207,12 @@ describe("registerServices", () => {
   });
 
   describe("커맨드와 단축키", () => {
-    it("키보드 단축키 커맨드가 목록 탭을 연다", async () => {
+    it("키보드 단축키 커맨드가 설정 탭을 열고 거기 단축키 표가 있다", async () => {
       mountWith(new MockWorkspaceFiles({}));
       fireEvent.keyDown(window, { key: "k", ctrlKey: true });
       fireEvent.click(await screen.findByText("키보드 단축키 보기"));
-      expect(await screen.findByRole("tab", { name: /키보드 단축키/u })).toBeDefined();
+      expect(await screen.findByRole("tab", { name: /설정/u })).toBeDefined();
+      expect(await screen.findByRole("heading", { name: "단축키" })).toBeDefined();
       expect(screen.getByText("shell.openCommandPalette")).toBeDefined();
     });
   });
@@ -229,7 +230,7 @@ describe("registerServices", () => {
   });
 
   describe("부팅", () => {
-    it("셸 모듈과 확장이 기여 지점을 채운다 — 사이드바 하나, 탭 provider 셋, 밀도 설정, 명령", () => {
+    it("셸 모듈과 확장이 기여 지점을 채운다 — 사이드바 하나, 탭 provider 둘, 밀도 설정, 명령", () => {
       const container = track(createApplication([mocks(new MockWorkspaceFiles({}))]));
 
       expect(
@@ -244,7 +245,7 @@ describe("registerServices", () => {
           .list()
           .map((provider) => provider.id)
           .sort(),
-      ).toEqual(["arka.filesystem.text", "arka.workbench.keybindings", "arka.workbench.settings"]);
+      ).toEqual(["arka.filesystem.text", "arka.workbench.settings"]);
       expect(
         container
           .resolve("arka.settings")

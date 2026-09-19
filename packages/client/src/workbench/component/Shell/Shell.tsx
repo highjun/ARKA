@@ -38,6 +38,12 @@ const RESIZABLE_MAX_WIDTH = "480px";
 
 const hasContent = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
 
+/** 레일 아래 묶음의 설정 줄. 사이드바 id 와 겹치지 않게 접두사를 붙인다. */
+const SETTINGS_ID = "shell.settings";
+const SETTINGS_ROW: readonly SidebarRow[] = [
+  { id: SETTINGS_ID, title: "설정", iconId: "settingsGear", isActive: false },
+];
+
 /**
  * 앱의 뼈대. 확장이 꽂히는 자리를 전부 낸다. `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다.
  *
@@ -110,12 +116,6 @@ export interface ShellProps extends Omit<ComponentPropsWithoutRef<"div">, "child
  * `SplitPageLayout`도 `ThemeProvider`도 forwardRef가 아니라서(둘 다 컴파일된 소스로 확인 —
  * plain 함수), ref는 우리가 직접 렌더하는 wrapper div로 보낸다.
  */
-/** 레일 아래 묶음의 설정 줄. 사이드바 id 와 겹치지 않게 접두사를 붙인다. */
-const SETTINGS_ID = "shell.settings";
-const SETTINGS_ROW: readonly SidebarRow[] = [
-  { id: SETTINGS_ID, title: "설정", iconId: "settingsGear", isActive: false },
-];
-
 export const Shell = ({
   colorMode,
   isNarrow,
