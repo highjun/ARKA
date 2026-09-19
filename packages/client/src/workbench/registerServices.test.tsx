@@ -169,10 +169,10 @@ describe("registerServices", () => {
 
   /**
    * 화면이 죽어도 아무도 모르는 상태를 막는 배선이 실제로 닿는지 본다 — 탭 하나가 렌더 중 던지면
-   * 빈 화면 대신 `CrashScreen`이 뜨고, `IErrorLog`에 기록이 남아야 한다.
+   * 빈 화면 대신 오류 띠가 뜨고, `IErrorLog`에 기록이 남아야 한다.
    */
   describe("렌더 오류 보호", () => {
-    it("탭이 렌더 중 던지면 CrashScreen이 뜨고 IErrorLog에 남는다", async () => {
+    it("탭이 렌더 중 던지면 오류 띠가 뜨고 IErrorLog에 남는다", async () => {
       // React가 잡힌 오류를 console.error로도 내보낸다 — 테스트 출력이 그걸로 덮이지 않게 막는다.
       const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
       const container = track(createApplication([mocks(new MockWorkspaceFiles({ "a.md": "" }))]));
