@@ -1,0 +1,24 @@
+# VS Code를 컨테이너 한 칸으로 띄운다. `serve.mjs`가 띄우고 내린다.
+#
+# **왜 컨테이너인가** — `vscode.dev`는 공개 리포를 열 때 로그인을 요구해서 폴더를 못 연다.
+# 폴더가 없으면 트리·검색 결과·터미널·diff가 전부 빈 패널이라 참고할 그림이 안 나온다.
+#
+# **왜 `openvscode-server`가 아니라 `code-server`인가** — gitpod 쪽 빌드에서는 Git 확장이 안 붙어
+# 사이드바가 "No source control providers registered."로 비고, 설정 에디터가 열다가 오류를 낸다
+# (2026-09-16 실측). code-server에서는 둘 다 정상이다.
+services:
+  vscode:
+    image: codercom/code-server:latest
+    container_name: arka-references-vscode
+    init: true
+    command:
+      - "--auth=none"
+      - "--bind-addr=0.0.0.0:8080"
+      - "--disable-workspace-trust"
+      - "--disable-telemetry"
+      - "/home/coder/project"
+    ports:
+      - "127.0.0.1:13000:8080"
+    volumes:
+      # 저장소 사본이다. 진짜 워킹트리를 물리지 않는다.
+      - ../../.output/references/workspace:/home/coder/project
