@@ -92,6 +92,9 @@ printf '%s' "feat(client): 검색 패널을 연다" | pnpm --filter ops exec com
 **앱 전체를 만져 봐야 하면 Codespaces로 그 브랜치를 띄운다**(→ [`.devcontainer/README.md`](../.devcontainer/README.md)).
 포트가 기본 비공개라 GitHub에 로그인한 본인만 닿는다 — 인증이 없는 앱을 공개 URL에 두지 않는다.
 
+**그림의 정본은 Figma다.** 스토리북은 코드가 그린 것을 보여 주고, Figma 시트는 그려야 할 것을 든다.
+시트를 검토하는 잣대는 [figma/review-checklist.md](figma/review-checklist.md)에 있다.
+
 ## 배포
 
 **`main`에 머지하면 실배포에 올라간다.** 머지가 곧 배포다.
