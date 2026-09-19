@@ -8,6 +8,10 @@ storybook-static/
 .claude
 docs/USER_NOTE.md
 
+# 바깥 제품의 화면. 색인(`docs/references/description.json`)만 커밋하고 이미지는 각자
+# `tools/references/capture.mjs`로 다시 만든다 — 공개 저장소에 남의 UI를 싣지 않는다.
+docs/references/assets/
+
 # 키·인증서 파일. 이름만 봐도 비밀인 것은 손이 닿기 전에 막는다.
 *.pem
 *.key

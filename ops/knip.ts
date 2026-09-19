@@ -39,6 +39,15 @@ const config: KnipConfig = {
       project: ["src/**/*.ts", "test/**/*.ts"],
     },
     "packages/contracts": { entry: ["src/index.ts", "src/**/*.test.ts"], project: ["src/**/*.ts"] },
+    /*
+     * 손으로 부르는 스크립트 **둘**이다 — 컨테이너를 띄우는 것과 찍는 것. 나머지(`targets.mjs`·
+     * `primer.mjs`·`primer-notes.mjs`·`paths.mjs`)는 그 둘이 import하므로 진입점이 아니다.
+     * `@playwright/test`는 `capture.mjs`가 쓴다.
+     */
+    "tools/references": {
+      entry: ["capture.mjs", "serve.mjs"],
+      project: ["**/*.mjs"],
+    },
     ops: {
       // `ops`는 명령 모음이라 진입점이 여럿이다 — 파이프라인·린트·태스크·배포·훅·백업.
       entry: [
