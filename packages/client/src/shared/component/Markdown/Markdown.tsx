@@ -6,7 +6,7 @@ import remarkGfm from "remark-gfm";
 import styles from "./Markdown.module.css";
 import { CodeBlock } from "#component/CodeBlock";
 
-/** 요소별 덮어쓰기 맵 — react-markdown의 `components`를 그대로 받는다. */
+/** 요소별 렌더 맵 — react-markdown의 `components` 타입. 안에서만 쓴다. */
 type MarkdownComponents = NonNullable<ComponentPropsWithoutRef<typeof ReactMarkdown>["components"]>;
 
 /** 원문을 받는다 — 파싱과 렌더는 이 컴포넌트가 한다. */
@@ -15,11 +15,6 @@ export interface MarkdownProps extends ComponentPropsWithoutRef<"div"> {
   readonly ref?: Ref<HTMLElement>;
   /** 마크다운 원문. */
   readonly source: string;
-  /**
-   * 요소를 바꿔 끼우는 자리. 링크를 눌렀을 때 워크스페이스에서 열기처럼 **앱이 아는 동작**을
-   * 여기로 꽂는다. 기본 맵(코드 블록)과 얕게 합쳐지므로 넘긴 것만 덮인다.
-   */
-  readonly components?: MarkdownComponents;
 }
 
 /**
@@ -56,15 +51,18 @@ const CODE_COMPONENTS: MarkdownComponents = {
  * 메시지마다 다시 파싱하는 비용은 `memo`로 막는다 — 스트리밍 중에는 마지막 메시지만 바뀐다.
  *
  * 루트는 `div`다. 메시지 말풍선(`article`) 안에 들어가는 쓰임이 있어서 `article`을 내면 중첩된다.
+ *
+ * 요소를 바꿔 끼우는 `components` prop 은 뺐다(2026-09-18) — 넘기는 곳이 없었고, 요소를 무엇으로
+ * 그릴지는 이 컴포넌트가 정할 일이다.
  */
-export const Markdown = memo(({ source, components, className, ref, ...props }: MarkdownProps) => (
+export const Markdown = memo(({ source, className, ref, ...props }: MarkdownProps) => (
   <div
     ref={ref as Ref<HTMLDivElement>}
     {...props}
     data-component="Markdown"
     className={clsx(className, styles["root"])}
   >
-    <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ ...CODE_COMPONENTS, ...components }}>
+    <ReactMarkdown remarkPlugins={[remarkGfm]} components={CODE_COMPONENTS}>
       {source}
     </ReactMarkdown>
   </div>

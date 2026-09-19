@@ -9,9 +9,9 @@ export const greet = (name: string) => {
 `;
 
 const meta = {
-  title: "shared/CodeBlock",
+  title: "00-shared/CodeBlock",
   component: CodeBlock,
-  args: { content: CONTENT, language: "typescript", title: "greet.ts" },
+  args: { content: CONTENT, language: "typescript", fileName: "greet.ts" },
   decorators: [
     (Story) => (
       <div style={{ width: 560 }}>
@@ -25,8 +25,8 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-export const NoTitle: Story = { args: { title: undefined } };
+export const NoFileName: Story = { args: { fileName: undefined } };
 export const PlainText: Story = {
-  args: { language: undefined, title: undefined, content: "언어 이름표 없이 그대로 보여주는 글" },
+  args: { language: undefined, fileName: undefined, content: "언어 이름표 없이 그대로 보여주는 글" },
 };
-export const Empty: Story = { args: { content: "", title: undefined } };
+export const Empty: Story = { args: { content: "", fileName: undefined } };

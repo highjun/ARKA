@@ -21,7 +21,7 @@ export interface NotificationListProps extends Omit<ComponentPropsWithoutRef<"di
   /** 쌓아 보일 알림들. 비면 아무것도 그리지 않는다. */
   readonly items: readonly NotificationListItem[];
   /** 닫기를 누르면 그 id와 함께 호출된다. */
-  readonly onDismiss: (id: string) => void;
+  readonly onDismiss?: (id: string) => void;
 }
 
 const ICON: Record<NotificationListItem["severity"], IconId> = { info: "bell", warning: "warning", error: "error" };
@@ -52,7 +52,7 @@ export const NotificationList = ({ items, onDismiss, className, ref, ...props }:
             size="small"
             aria-label="알림 닫기"
             icon={() => <Icon iconId="close" size="sm" />}
-            onClick={() => onDismiss(item.id)}
+            onClick={() => onDismiss?.(item.id)}
           />
         </div>
       ))}

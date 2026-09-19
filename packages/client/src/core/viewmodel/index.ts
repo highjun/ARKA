@@ -1,3 +1,2 @@
-export { ViewModelProvider, useAppContext, MissingViewModelProviderError } from "./ViewModelProvider";
+export { ContainerProvider, MissingContainerProviderError } from "./ContainerProvider";
 export { useViewModel } from "./useViewModel";
-export { ViewModelBase } from "./ViewModelBase";

@@ -1,4 +1,4 @@
-import { createToken, type Disposable } from "#core/di";
+import type { Disposable } from "#core/di";
 import type { FileEntry, FileEntryType } from "../model/IWorkspaceFiles";
 
 /**
@@ -25,7 +25,12 @@ type DirectoryNode = {
 /** 경로(루트는 `''`) → 그 디렉터리의 상태. */
 export type DirectoryMap = Readonly<Record<string, DirectoryNode>>;
 
-export const DirectoryTreeModelToken = createToken<IDirectoryTreeModel>("directoryTreeModel");
+declare module "#core/di" {
+  /** `IDirectoryTreeModel`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.filesystem.directoryTreeModel": IDirectoryTreeModel;
+  }
+}
 /** 디렉터리 트리 상태를 소유하고 파일시스템 조작을 제공하는 Model 계약. */
 export interface IDirectoryTreeModel {
   readonly directories: DirectoryMap;

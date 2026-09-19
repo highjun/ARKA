@@ -1,2 +1,2 @@
 export { ActivityBar } from "./ActivityBar";
-export type { ActivityBarItem } from "./ActivityBar";
+export type { SidebarRow } from "./ActivityBar";

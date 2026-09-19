@@ -1,5 +1,4 @@
-import { createToken } from "#core/di";
-
+import type { Disposable } from "#core/di";
 /** 줄·열은 1부터. `preview`는 그 줄의 원문이라 화면이 잘라 쓴다. */
 type SearchMatchRow = {
   readonly line: number;
@@ -13,9 +12,14 @@ export type SearchFileRow = {
   readonly matches: readonly SearchMatchRow[];
 };
 
-export const SearchViewModelToken = createToken<ISearchViewModel>("searchViewModel");
+declare module "#core/di" {
+  /** `ISearchViewModel`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.search.viewModel": ISearchViewModel;
+  }
+}
 /** 검색 패널의 화면 상태. 입력은 곧바로 Model 조건에 반영하고, 검색은 짧은 디바운스 뒤에 나간다. */
-export interface ISearchViewModel {
+export interface ISearchViewModel extends Disposable {
   readonly query: string;
   readonly regex: boolean;
   readonly caseSensitive: boolean;
@@ -30,5 +34,6 @@ export interface ISearchViewModel {
   toggleCaseSensitive(): void;
   /** 디바운스를 기다리지 않고 지금 찾는다(Enter). */
   submit(): void;
-  onDispose(): void;
+  /** 결과 하나를 열고 그 줄·열로 간다 — `arka.workbench.open`과 `arka.filesystem.reveal` 명령을 부른다. */
+  openResult(path: string, position: { readonly line: number; readonly column: number }): void;
 }

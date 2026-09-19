@@ -1,4 +1,4 @@
-import { createToken } from "#core/di";
+import type { Disposable } from "#core/di";
 /**
  * 화면이 그리는 트리.
  *
@@ -52,21 +52,18 @@ export type EditingEntry =
   | { readonly kind: "rename"; readonly id: string; readonly initialValue: string }
   | { readonly kind: "newFile" | "newFolder"; readonly parentId: string };
 
-export const DirectoryTreeViewModelToken = createToken<IDirectoryTreeViewModel>("directoryTreeViewModel");
+declare module "#core/di" {
+  /** `IDirectoryTreeViewModel`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.filesystem.directoryTreeViewModel": IDirectoryTreeViewModel;
+  }
+}
 /**
  * `FileTree` 컴포넌트가 필요로 하는 상태·조작을 모두 노출하는 ViewModel 계약.
  *
- * atom은 React 경계를 넘지 않는다((C), 2026-09-05) — 관찰 property는 전부 값 그대로다. 구현은
- * `ViewModelBase.observe()`로 atom을 감싸 값을 getter로 노출한다.
+ * 관찰 property는 전부 값 그대로다. 구현은 MobX observable 클래스고, 화면은 `observer`로 감싸 따라온다.
  */
-export interface IDirectoryTreeViewModel {
-  /**
-   * `useViewModel`이 View 마운트/언마운트에 자동으로 건다(`view-only-uses-view-model` — View는
-   * 이 훅을 직접 걸 수 없다). 루트를 읽고 감시를 시작·정지하는 자리다.
-   */
-  onMount(): void;
-  onDispose(): void;
-
+export interface IDirectoryTreeViewModel extends Disposable {
   readonly rows: readonly FileTreeRow[];
   readonly expandedIds: readonly string[];
   /** 선택된 경로들(다중선택). 빈 배열이 "선택 없음"이다. */
@@ -100,6 +97,13 @@ export interface IDirectoryTreeViewModel {
   removeEntries(ids: readonly string[]): Promise<void>;
   /** 드래그앤드롭으로 다른 폴더에 옮긴다. 옮긴 뒤의 전체 경로를 돌려준다(열린 탭 재배정용). */
   moveEntry(id: string, toParentId: string): Promise<string>;
+
+  /** 파일을 미리보기 탭으로 연다 — `arka.workbench.open` 명령을 부른다. 행 클릭이 부른다. */
+  openFile(path: string): void;
+  /** 파일을 고정 탭으로 연다 — 이미 미리보기로 열려 있으면 고정된다. 행 더블클릭이 부른다. */
+  pinFile(path: string): void;
+  /** 파일이 옮겨졌다 — 그 경로를 보던 탭이 새 경로를 따라가게 `arka.workbench.retargetTabs`를 부른다. */
+  retargetTabs(oldPath: string, newPath: string): void;
 
   /** 펼친 디렉터리를 외부 변경에 대해 감시하기 시작한다. */
   startWatching(): void;

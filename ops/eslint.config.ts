@@ -2,6 +2,11 @@ import ops from "./lint/index.ts";
 
 /** 작업장 자신도 검사한다 — 저장소를 검사하는 코드가 검사를 안 받으면 앞뒤가 안 맞는다. */
 export default [
+  /*
+   * **`figma/`는 검사하지 않는다.** Figma 플러그인 샌드박스 안에서 도는 코드라 `figma` 전역이
+   * 있고 모듈 시스템이 없다 — 여기 규칙은 그런 코드를 모른다. 그 자리는 `figma/README.md`가 든다.
+   */
+  { ignores: ["figma/**"] },
   ...ops.configs.base,
   {
     /*

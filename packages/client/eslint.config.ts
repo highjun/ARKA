@@ -31,7 +31,7 @@ const RESTRICTED_SYNTAX = [
 ];
 
 /** client의 슬라이스. 새 슬라이스를 더할 때 여기 한 줄을 빼먹으면 그 슬라이스만 검사에서 빠진다. */
-const SLICES = ["agent", "filesystem", "git", "markdown", "search"];
+const SLICES = ["filesystem", "markdown", "search"];
 
 /**
  * **의존은 안쪽을 향한다**(→ ADR 0007). 계층마다 *자기 슬라이스 안에서* 볼 수 있는 것.
@@ -254,12 +254,14 @@ export default [
       "@typescript-eslint/no-restricted-imports": [
         "error",
         {
-          paths: ["react", "react-dom", "nanostores", "zustand", "jotai", "valtio", "@primer/react"].map((name) => ({
-            name,
-            allowTypeImports: true,
-            message:
-              "`model/`은 상태 라이브러리와 React를 런타임으로 모릅니다 — 화면 상태는 ViewModel이 소유합니다(→ ADR 0007).",
-          })),
+          paths: ["react", "react-dom", "mobx", "nanostores", "zustand", "jotai", "valtio", "@primer/react"].map(
+            (name) => ({
+              name,
+              allowTypeImports: true,
+              message:
+                "`model/`은 상태 라이브러리와 React를 런타임으로 모릅니다 — 화면 상태는 ViewModel이 소유합니다(→ ADR 0007).",
+            }),
+          ),
           patterns: [
             {
               group: ["@nanostores/*", "@radix-ui/*"],

@@ -1,15 +1,21 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { KeybindingTable } from "./index";
+import type { KeybindingRow } from "./index";
 
-const ROWS = [
-  { id: "1", keys: ["Ctrl", "Shift", "P"], label: "커맨드 팔레트 열기", commandId: "workbench.action.showCommands" },
-  { id: "2", keys: ["Ctrl", "B"], label: "사이드바 토글", commandId: "workbench.action.toggleSidebar" },
-  { id: "3", keys: ["Ctrl", "W"], label: "탭 닫기", commandId: "workbench.action.closeActiveTab" },
-  { id: "4", keys: ["F2"], label: "filesystem.rename", commandId: "filesystem.rename" },
+const ROWS: readonly KeybindingRow[] = [
+  {
+    actionId: "workbench.action.showCommands",
+    label: "커맨드 팔레트 열기",
+    keybinding: "ctrl+shift+p",
+    isConflicting: false,
+  },
+  { actionId: "workbench.action.toggleSidebar", label: "사이드바 토글", keybinding: "ctrl+b", isConflicting: true },
+  { actionId: "workbench.action.closeActiveTab", label: "탭 닫기", keybinding: "ctrl+b", isConflicting: true },
+  { actionId: "filesystem.rename", label: "filesystem.rename", keybinding: "f2", isConflicting: false },
 ];
 
 const meta = {
-  title: "workbench/KeybindingTable",
+  title: "01-workbench/KeybindingTable",
   component: KeybindingTable,
   args: { rows: ROWS },
 } satisfies Meta<typeof KeybindingTable>;
@@ -17,7 +23,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** 키 칩이 여러 개인 줄과 하나인 줄이 섞여 있다. 이름이 없는 커맨드는 id 가 이름 자리에 온다. */
+/** 키 칩이 여러 개인 줄과 하나인 줄이 섞여 있고, 같은 키에 둘이 걸린 줄은 충돌 표시가 붙는다. */
 export const Default: Story = {};
 
 /** 등록된 것이 없으면 머리만 남는다. */

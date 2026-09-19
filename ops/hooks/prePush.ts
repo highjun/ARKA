@@ -33,7 +33,7 @@ if (process.argv[1] === import.meta.filename) {
     console.error(`
 [브랜치] ${blocked.join(", ")}로 직접 밀 수 없습니다.
 
-합치는 길은 PR 하나입니다(→ docs/workflow.md).
+합치는 길은 PR 하나입니다(→ docs/CONVENTIONS.md).
 
   git switch -c feat/…      작업마다 브랜치
   git push -u origin HEAD

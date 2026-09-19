@@ -1,4 +1,5 @@
-export { createRegistry } from "./registry";
-export type { Registry } from "./registry";
-export type { Descriptor, DescriptorMatch } from "./descriptor";
-export { DescriptorNotFoundError, DuplicateDescriptorError } from "./errors";
+export { Registry } from "./registry";
+export { Collection } from "./collection";
+export type { CollectionEntry } from "./collection";
+export type { Descriptor } from "./descriptor";
+export { DescriptorNotFoundError, DescriptorDuplicatedIdError } from "./errors";

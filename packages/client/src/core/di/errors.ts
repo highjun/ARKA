@@ -1,22 +1,37 @@
-/** 어느 스코프에도 등록되지 않은 토큰을 조회했다. */
-export class TokenNotRegisteredError extends Error {
-  /** `description`은 토큰이 든 이름이다 — 메시지에 그대로 실려 어느 토큰인지 바로 보인다. */
-  constructor(description: string) {
-    super(`"${description}"이(가) 어느 스코프에도 등록되지 않았습니다.`);
-    this.name = "TokenNotRegisteredError";
+import { CoreError } from "#core/errors";
+import type { InstanceId } from "./instanceMap";
+
+/** `Container.resolve`가 지도에는 있으나 아무도 물리지 않은 id를 받았다. */
+export class InstanceNotRegisteredError extends CoreError {
+  readonly id: InstanceId;
+  /** `id`를 필드로도 남긴다 — 잡는 쪽이 메시지를 다시 파싱하지 않게. */
+  constructor(id: InstanceId) {
+    super(`"${id}"이(가) 어느 컨테이너에도 등록되지 않았습니다.`);
+    this.id = id;
+  }
+}
+
+/** 둘 이상이 만들어지는 중에 서로를 물고 돌았다. `path`가 돈 순서다 — id가 곧 이름이라 그대로 읽힌다. */
+export class CircularDependencyError extends CoreError {
+  readonly path: readonly InstanceId[];
+  /** 경로를 그대로 메시지에 싣는다 — 스택 오버플로로 터지면 어느 id가 원인인지 알 수 없다. */
+  constructor(path: readonly InstanceId[]) {
+    super(`의존이 순환합니다: ${path.join(" → ")}`);
+    this.path = path;
   }
 }
 
 /**
- * 의존이 자기 자신으로 돌아왔다.
+ * 이미 dispose된 컨테이너에서 꺼내려 했다. 늦게 온 콜백이 죽은 탭을 건드린 것이다.
  *
- * 감지하지 않으면 스택 오버플로로 터지는데, 그 스택에는 컨테이너 내부 프레임만
- * 남아 어느 토큰이 원인인지 알 수 없다. 경로를 그대로 메시지에 싣는다.
+ * 부모 것을 대신 주지 않는다 — 죽은 탭의 일을 살아 있는 앱에 대고 하게 된다.
  */
-export class CircularDependencyError extends Error {
-  /** `path`는 조회가 지나온 토큰 이름 순서다. 그대로 이어 붙여 순환을 보여준다. */
-  constructor(path: readonly string[]) {
-    super(`의존이 순환합니다: ${path.join(" → ")}`);
-    this.name = "CircularDependencyError";
+export class ContainerDisposedError extends CoreError {
+  /** `createChild`에 준 이름. 어느 탭이 죽었는지 그대로 읽힌다. */
+  readonly containerName: string;
+  /** 이름을 필드로도 남긴다 — 잡는 쪽이 메시지를 다시 파싱하지 않게. */
+  constructor(containerName: string) {
+    super(`"${containerName}" 컨테이너는 이미 정리됐습니다.`);
+    this.containerName = containerName;
   }
 }

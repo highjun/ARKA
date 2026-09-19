@@ -1,15 +1,14 @@
 import { useViewModel } from "#core/viewmodel";
+import { observer } from "mobx-react-lite";
 import { Banner, Spinner } from "@primer/react";
 import { Blankslate } from "@primer/react/experimental";
 import { Markdown } from "#component/Markdown";
-import { MarkdownPreviewViewModelToken } from "../viewmodel/IMarkdownPreviewViewModel";
 import styles from "./MarkdownPreviewTabView.module.css";
 
-/** 미리보기 탭. 어느 파일인지는 탭 id(`preview:<path>`)가 말한다. `openPreview`는 멱등이라 렌더마다 부른다. */
-export const MarkdownPreviewTabView = ({ tabId }: { readonly tabId: string }) => {
-  const viewModel = useViewModel(MarkdownPreviewViewModelToken);
-  viewModel.openPreview(tabId);
-  const preview = viewModel.previewOf(tabId);
+/** 미리보기 탭. 어느 파일인지는 props로 받는다 — 읽기를 시작하는 것은 탭 provider의 몫이고, 여기는 그릴 뿐이다. */
+export const MarkdownPreviewTabView = observer(function MarkdownPreviewTabView({ path }: { readonly path: string }) {
+  const viewModel = useViewModel("arka.markdown.previewViewModel");
+  const preview = viewModel.previewOf(path);
 
   if (preview.failure !== null) {
     return (
@@ -34,4 +33,4 @@ export const MarkdownPreviewTabView = ({ tabId }: { readonly tabId: string }) =>
       <Markdown source={preview.markdown} />
     </div>
   );
-};
+});

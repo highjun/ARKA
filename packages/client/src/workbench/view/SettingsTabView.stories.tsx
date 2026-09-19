@@ -1,26 +1,30 @@
-import { createContainer, singleton } from "#core/di";
-import { ViewModelProvider } from "#core/viewmodel";
+import { Container } from "#core/di";
+import { ContainerProvider } from "#core/viewmodel";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { SettingsViewModelToken } from "../viewmodel/ISettingsViewModel";
 import type { ISettingsViewModel } from "../viewmodel/ISettingsViewModel";
 import { SettingsTabView } from "./SettingsTabView";
 
-/**
- * 고정된 VM을 꽂는다 — 실물은 `IStorage`를 읽고 `<html data-theme>`을 건드리므로, 스토리가
- * 스토리북 전체의 테마·밀도를 바꿔 다른 스토리의 그림까지 흔든다.
- */
+/** 실제 `SettingsViewModel` 대신 고정된 줄을 꽂는다 — 이 층에서 볼 것은 "주어진 줄을 어떻게 그리는가"다. */
 const viewModel = (state: Partial<ISettingsViewModel>): ISettingsViewModel => ({
-  theme: "light",
-  density: "auto",
-  agentConfirmWrites: true,
-  setTheme: () => undefined,
-  setDensity: () => undefined,
-  setAgentConfirmWrites: () => undefined,
+  dispose: () => undefined,
+  rows: [
+    { id: "workbench.density", title: "밀도", type: "enum", value: "auto", options: ["auto", "compact", "touch"] },
+    { id: "editor.wordWrap", title: "줄 바꿈", type: "boolean", value: true },
+    { id: "editor.tabSize", title: "탭 너비", type: "number", value: 2 },
+    { id: "editor.fontFamily", title: "글꼴", type: "string", value: "monospace" },
+  ],
+  set: () => undefined,
   ...state,
 });
 
+const withViewModel = (state: Partial<ISettingsViewModel>) => {
+  const container = new Container("story");
+  container.register("arka.workbench.settingsViewModel", "singleton", () => viewModel(state));
+  return container.createChild("view");
+};
+
 const meta = {
-  title: "workbench/SettingsTabView",
+  title: "01-workbench/SettingsTabView",
   component: SettingsTabView,
 } satisfies Meta<typeof SettingsTabView>;
 
@@ -29,27 +33,17 @@ type Story = StoryObj<typeof meta>;
 
 const story = (state: Partial<ISettingsViewModel>): Story => ({
   decorators: [
-    (Story) => {
-      const container = createContainer("story");
-      container.register(
-        SettingsViewModelToken,
-        singleton(() => viewModel(state)),
-      );
-      return (
-        <ViewModelProvider container={container.createScope("view")}>
-          <div style={{ width: 560 }}>
-            <Story />
-          </div>
-        </ViewModelProvider>
-      );
-    },
+    (Story) => (
+      <ContainerProvider container={withViewModel(state)}>
+        <div style={{ height: 480, width: 720 }}>
+          <Story />
+        </div>
+      </ContainerProvider>
+    ),
   ],
 });
 
+/** 네 가지 `type`이 각각 어떻게 그려지는지. */
 export const Default: Story = story({});
-
-/** 세 섹션이 모두 기본값이 아닌 쪽으로 넘어간 모습 — 선택 표시가 실제로 따라가는지 본다. */
-export const AllChanged: Story = story({ theme: "dark", density: "touch", agentConfirmWrites: false });
-
-/** 밀도를 촘촘하게 — 이 값이 `--arka-row-height`를 통해 FileTree 같은 목록의 행 높이를 정한다. */
-export const Compact: Story = story({ density: "compact" });
+/** 등록된 스키마가 없으면 빈 화면이다. */
+export const Empty: Story = story({ rows: [] });

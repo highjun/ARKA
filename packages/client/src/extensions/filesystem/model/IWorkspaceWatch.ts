@@ -1,4 +1,3 @@
-import { createToken } from "#core/di";
 /**
  * 워크스페이스의 파일·디렉터리 변경을 구독하는 통로.
  *
@@ -13,7 +12,12 @@ import { createToken } from "#core/di";
 /** 두 번 불러도 안전하다. 안 부르면 연결이 남는다. */
 export type WorkspaceWatchUnsubscribe = () => void;
 
-export const WorkspaceWatchToken = createToken<IWorkspaceWatch>("workspaceWatch");
+declare module "#core/di" {
+  /** `IWorkspaceWatch`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.filesystem.workspaceWatch": IWorkspaceWatch;
+  }
+}
 /** 워크스페이스 변경 구독을 감싸는 Port 계약. */
 export interface IWorkspaceWatch {
   /**

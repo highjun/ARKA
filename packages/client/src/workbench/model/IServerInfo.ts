@@ -1,5 +1,3 @@
-import { createToken } from "#core/di";
-
 /** 부팅 때 한 번 읽는다 — 서버가 바뀌면 새로고침해야 갱신된다. */
 export type ServerInfo = {
   /** 서버가 뜬 시각(ISO). 화면 구석의 빌드 표시에 쓴다. */
@@ -14,7 +12,12 @@ export type ServerInfo = {
   readonly gitSha?: string;
 };
 
-export const ServerInfoToken = createToken<IServerInfo>("serverInfo");
+declare module "#core/di" {
+  /** `IServerInfo`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.workbench.serverInfo": IServerInfo;
+  }
+}
 /**
  * 서버에게 "너는 누구냐"를 묻는다 — 언제 떴고 어떤 프로토콜을 말하는지.
  *

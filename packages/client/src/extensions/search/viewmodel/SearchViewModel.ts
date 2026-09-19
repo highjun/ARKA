@@ -1,6 +1,7 @@
+import { URI } from "#contracts";
+import type { ICommandService } from "#core/commands";
 import type { Disposable } from "#core/di";
-import { ViewModelBase } from "#core/viewmodel";
-import { atom } from "nanostores";
+import { makeAutoObservable, observable, observableRef } from "mobx";
 import type { ISearchModel } from "../model/ISearchModel";
 import type { ISearchViewModel, SearchFileRow } from "./ISearchViewModel";
 
@@ -8,73 +9,111 @@ import type { ISearchViewModel, SearchFileRow } from "./ISearchViewModel";
 const DEBOUNCE_MS = 250;
 
 /** `ISearchViewModel`의 유일한 구현체. */
-export class SearchViewModel extends ViewModelBase implements ISearchViewModel {
+export class SearchViewModel implements ISearchViewModel {
   readonly #model: ISearchModel;
+  readonly #commands: ICommandService;
   readonly #debounceMs: number;
-  readonly #query;
-  readonly #regex;
-  readonly #caseSensitive;
-  readonly #searching;
-  readonly #rows;
-  readonly #summary;
-  readonly #failure;
+  private queryState: string;
+  private regexState: boolean;
+  private caseSensitiveState: boolean;
+  private searchingState: boolean;
+  private rowsState: readonly SearchFileRow[];
+  private summaryState: string;
+  private failureState: string | null;
   readonly #subscription: Disposable;
   #timer: ReturnType<typeof setTimeout> | null = null;
 
   /** `debounceMs`를 0으로 주면 즉시 나간다 — 테스트가 타이머를 기다리지 않게. */
-  constructor({ searchModel, debounceMs = DEBOUNCE_MS }: { searchModel: ISearchModel; debounceMs?: number }) {
-    super();
+  constructor({
+    searchModel,
+    commandCenterRegistry,
+    debounceMs = DEBOUNCE_MS,
+  }: {
+    searchModel: ISearchModel;
+    commandCenterRegistry: ICommandService;
+    debounceMs?: number;
+  }) {
     this.#model = searchModel;
+    this.#commands = commandCenterRegistry;
     this.#debounceMs = debounceMs;
-    this.#query = this.observe(atom(searchModel.query.query));
-    this.#regex = this.observe(atom(searchModel.query.regex));
-    this.#caseSensitive = this.observe(atom(searchModel.query.caseSensitive));
-    this.#searching = this.observe(atom(searchModel.status === "searching"));
-    this.#rows = this.observe(atom(this.#computeRows()));
-    this.#summary = this.observe(atom(this.#computeSummary()));
-    this.#failure = this.observe(atom(searchModel.failure));
-    this.#subscription = searchModel.onDidChange(() => this.#recompute());
+    this.queryState = searchModel.query.query;
+    this.regexState = searchModel.query.regex;
+    this.caseSensitiveState = searchModel.query.caseSensitive;
+    this.searchingState = searchModel.status === "searching";
+    this.rowsState = this.#computeRows();
+    this.summaryState = this.#computeSummary();
+    this.failureState = searchModel.failure;
+    this.#subscription = searchModel.onDidChange(() => this.recompute());
+    makeAutoObservable<
+      this,
+      | "queryState"
+      | "regexState"
+      | "caseSensitiveState"
+      | "searchingState"
+      | "rowsState"
+      | "summaryState"
+      | "failureState"
+    >(
+      this,
+      {
+        queryState: observable,
+        regexState: observable,
+        caseSensitiveState: observable,
+        searchingState: observable,
+        rowsState: observableRef,
+        summaryState: observable,
+        failureState: observable,
+      },
+      { autoBind: true },
+    );
   }
 
-  /** 구독과 예약된 타이머를 함께 끊는다 — 스코프가 정리될 때 컨테이너가 부른다. */
-  onDispose(): void {
+  /** 위치를 먼저 담고 연다 — 탭이 아직 없어도 열릴 때 그 줄로 간다. 검색은 파일을 모른다 — 명령 둘을 부를 뿐이다. */
+  openResult(path: string, position: { readonly line: number; readonly column: number }): void {
+    const uri = URI.file(path);
+    this.#commands.execute("arka.filesystem.reveal", { uri, line: position.line, column: position.column });
+    this.#commands.execute("arka.workbench.open", { uri, preview: true });
+  }
+
+  /** 구독과 예약된 타이머를 함께 끊는다 — 컨테이너가 정리할 때 부른다. */
+  dispose(): void {
     this.#subscription.dispose();
     if (this.#timer !== null) clearTimeout(this.#timer);
   }
 
   /** 입력창의 현재 값이다 — 마지막으로 실행된 질의가 아니다. */
   get query(): string {
-    return this.#query.get();
+    return this.queryState;
   }
 
   /** 켜면 질의를 정규식으로 읽는다. */
   get regex(): boolean {
-    return this.#regex.get();
+    return this.regexState;
   }
 
   /** 끄면 대소문자를 가리지 않는다. */
   get caseSensitive(): boolean {
-    return this.#caseSensitive.get();
+    return this.caseSensitiveState;
   }
 
   /** 디바운스 대기 중에는 `false`다 — 실제로 나간 뒤에만 켜진다. */
   get searching(): boolean {
-    return this.#searching.get();
+    return this.searchingState;
   }
 
   /** 파일 단위로 묶인다. 결과가 없으면 빈 배열이다. */
   get rows(): readonly SearchFileRow[] {
-    return this.#rows.get();
+    return this.rowsState;
   }
 
   /** 화면에 그대로 쓰는 한 줄이다 — 개수 계산을 화면이 다시 하지 않게. */
   get summary(): string {
-    return this.#summary.get();
+    return this.summaryState;
   }
 
   /** 실패했을 때만 값이 있다. */
   get failure(): string | null {
-    return this.#failure.get();
+    return this.failureState;
   }
 
   /** 타이핑마다 불려도 된다 — 실제 검색은 디바운스 뒤에 나간다. */
@@ -130,13 +169,13 @@ export class SearchViewModel extends ViewModelBase implements ISearchViewModel {
     return `${String(files)}개 파일에서 ${String(result.matches.length)}개${result.truncated ? " (더 있음)" : ""}`;
   }
 
-  #recompute(): void {
-    this.#query.set(this.#model.query.query);
-    this.#regex.set(this.#model.query.regex);
-    this.#caseSensitive.set(this.#model.query.caseSensitive);
-    this.#searching.set(this.#model.status === "searching");
-    this.#rows.set(this.#computeRows());
-    this.#summary.set(this.#computeSummary());
-    this.#failure.set(this.#model.failure);
+  private recompute(): void {
+    this.queryState = this.#model.query.query;
+    this.regexState = this.#model.query.regex;
+    this.caseSensitiveState = this.#model.query.caseSensitive;
+    this.searchingState = this.#model.status === "searching";
+    this.rowsState = this.#computeRows();
+    this.summaryState = this.#computeSummary();
+    this.failureState = this.#model.failure;
   }
 }

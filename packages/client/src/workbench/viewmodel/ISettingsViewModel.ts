@@ -1,13 +1,22 @@
-import { createToken } from "#core/di";
-import type { Density } from "../model/ISettingsModel";
+import type { Disposable } from "#core/di";
 
-export const SettingsViewModelToken = createToken<ISettingsViewModel>("settingsViewModel");
-/** 설정 탭의 화면 상태 — 테마와 밀도. VSCode 설정 편집기의 가장 작은 판. */
-export interface ISettingsViewModel {
-  readonly theme: "light" | "dark";
-  readonly density: Density;
-  setTheme(theme: "light" | "dark"): void;
-  setDensity(density: Density): void;
-  readonly agentConfirmWrites: boolean;
-  setAgentConfirmWrites(value: boolean): void;
+/** 설정 화면의 한 줄. 스키마와 지금 값을 함께 든다. */
+export interface SettingsRow {
+  readonly id: string;
+  readonly title: string;
+  readonly type: "boolean" | "number" | "string" | "enum";
+  readonly value: unknown;
+  readonly options?: readonly string[];
+}
+
+declare module "#core/di" {
+  /** `ISettingsViewModel`를 컨테이너에서 꺼내는 자리. */
+  interface InstanceMap {
+    "arka.workbench.settingsViewModel": ISettingsViewModel;
+  }
+}
+/** 설정 화면. 등록된 스키마를 줄로 펴고 값을 물린다. */
+export interface ISettingsViewModel extends Disposable {
+  readonly rows: readonly SettingsRow[];
+  set(id: string, value: unknown): void;
 }

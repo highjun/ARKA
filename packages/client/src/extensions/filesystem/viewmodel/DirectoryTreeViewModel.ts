@@ -1,29 +1,30 @@
+import { URI } from "#contracts";
 import type { Disposable } from "#core/di";
-import { ViewModelBase } from "#core/viewmodel";
-import { atom } from "nanostores";
+import { makeAutoObservable, observable, observableRef, runInAction } from "mobx";
 import type { DirectoryMap, IDirectoryTreeModel } from "../model/IDirectoryTreeModel";
-import type { ICommandCenterRegistry } from "#core/commands";
+import type { ICommandService } from "#core/commands";
 import type { ContextMenuTarget, IDirectoryTreeViewModel, EditingEntry, FileTreeRow } from "./IDirectoryTreeViewModel";
 import { GHOST_ID } from "./share";
 
 /** `IDirectoryTreeViewModel`을 구현한다 — Model의 평평한 상태를 `computed`로 중첩 트리·컨텍스트 메뉴 대상으로 접는다. */
-export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryTreeViewModel {
+export class DirectoryTreeViewModel implements IDirectoryTreeViewModel {
   readonly #model: IDirectoryTreeModel;
   readonly #subscription: Disposable;
-  readonly #rows;
-  readonly #expandedIds;
-  readonly #selectedIds;
-  readonly #status;
-  readonly #failure;
+  private rowsState: readonly FileTreeRow[];
+  private expandedIdsState: readonly string[];
+  private selectedIdsState: readonly string[];
+  private statusState: IDirectoryTreeViewModel["status"];
+  private failureState: string | null;
 
-  readonly #contextTarget = this.observe(atom<ContextMenuTarget | null>(null));
-  readonly #contextTargets;
-  readonly #editingEntry = this.observe(atom<EditingEntry | null>(null));
-  readonly #deleteTargets = this.observe(atom<readonly ContextMenuTarget[]>([]));
-  readonly #failureNotice = this.observe(atom<string | null>(null));
+  private contextTargetState: ContextMenuTarget | null = null;
+  private contextTargetsState: readonly ContextMenuTarget[];
+  private editingEntryState: EditingEntry | null = null;
+  private deleteTargetsState: readonly ContextMenuTarget[] = [];
+  private failureNoticeState: string | null = null;
 
   readonly #copyToClipboard: (text: string) => void;
   readonly #isTypingSurface: () => boolean;
+  readonly #commands: ICommandService;
 
   /** 만들 때 파일 커맨드(삭제·이름변경·새로 만들기)를 스스로 등록한다. */
   constructor({
@@ -33,73 +34,91 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
     isTypingSurface,
   }: {
     directoryTreeModel: IDirectoryTreeModel;
-    commandCenterRegistry: ICommandCenterRegistry;
+    commandCenterRegistry: ICommandService;
     /** `no-restricted-globals`가 Model/ViewModel의 `navigator` 직접 참조를 막는다 — 조립부
      *  (`registerServices.tsx`, 대상 아님)가 이 얇은 함수를 주입한다. */
     copyToClipboard: (text: string) => void;
     /** 위와 같은 이유로 `document.activeElement` 접근도 조립부가 대신 판정해 함수로 준다. */
     isTypingSurface: () => boolean;
   }) {
-    super();
     this.#copyToClipboard = copyToClipboard;
     this.#isTypingSurface = isTypingSurface;
+    this.#commands = commandCenterRegistry;
     this.#model = directoryTreeModel;
-    // Model은 값과 이벤트만 준다 — 파생된 화면 상태(atom)는 전부 여기서 소유한다.
-    this.#rows = this.observe(atom(this.#computeRows()));
-    this.#expandedIds = this.observe(atom(directoryTreeModel.expanded));
-    this.#selectedIds = this.observe(atom(directoryTreeModel.selected));
-    this.#status = this.observe(atom(this.#computeStatus()));
-    this.#failure = this.observe(atom(this.#computeFailure()));
-    this.#contextTargets = this.observe(atom(this.#computeContextTargets()));
+    // Model은 값과 이벤트만 준다 — 파생된 화면 상태는 전부 여기서 소유한다.
+    this.rowsState = this.#computeRows();
+    this.expandedIdsState = directoryTreeModel.expanded;
+    this.selectedIdsState = directoryTreeModel.selected;
+    this.statusState = this.#computeStatus();
+    this.failureState = this.#computeFailure();
+    this.contextTargetsState = this.#computeContextTargets();
 
-    // Model이 바뀔 때, 그리고 이 VM 자신의 상태가 바뀔 때 파생값을 다시 만든다.
-    this.#subscription = directoryTreeModel.onDidChange(() => this.#recompute());
-    this.#contextTarget.listen(() => this.#recompute());
-    this.#editingEntry.listen(() => this.#recompute());
+    // Model이 바뀔 때 파생값을 다시 만든다. 이 VM 자신의 상태(우클릭 대상·편집 중)가 바뀔 때는 그 setter가 부른다.
+    this.#subscription = directoryTreeModel.onDidChange(() => this.recompute());
+    makeAutoObservable<
+      this,
+      | "rowsState"
+      | "expandedIdsState"
+      | "selectedIdsState"
+      | "statusState"
+      | "failureState"
+      | "contextTargetState"
+      | "contextTargetsState"
+      | "editingEntryState"
+      | "deleteTargetsState"
+      | "failureNoticeState"
+    >(
+      this,
+      {
+        rowsState: observableRef,
+        expandedIdsState: observableRef,
+        selectedIdsState: observableRef,
+        statusState: observable,
+        failureState: observable,
+        contextTargetState: observableRef,
+        contextTargetsState: observableRef,
+        editingEntryState: observableRef,
+        deleteTargetsState: observableRef,
+        failureNoticeState: observable,
+      },
+      { autoBind: true },
+    );
 
     this.#registerFilesystemCommands(commandCenterRegistry);
+
+    // 만들어지는 순간 루트를 읽고 감시를 켠다 — VM은 화면보다 오래 살고, 끄는 것은 컨테이너가 dispose할 때다.
+    this.start();
+    this.startWatching();
   }
 
   /** `#rows`를 값으로 노출한다. */
   get rows(): readonly FileTreeRow[] {
-    return this.#rows.get();
+    return this.rowsState;
   }
 
   /** `#expandedIds`를 값으로 노출한다. */
   get expandedIds(): readonly string[] {
-    return this.#expandedIds.get();
+    return this.expandedIdsState;
   }
 
   /** `#selectedIds`를 값으로 노출한다. */
   get selectedIds(): readonly string[] {
-    return this.#selectedIds.get();
+    return this.selectedIdsState;
   }
 
   /** `#status`를 값으로 노출한다. */
   get status() {
-    return this.#status.get();
+    return this.statusState;
   }
 
   /** `#failure`를 값으로 노출한다. */
   get failure(): string | null {
-    return this.#failure.get();
+    return this.failureState;
   }
 
   /** `#model.load`에 위임한다. */
   start(): void {
     void this.#model.load();
-  }
-
-  /** `useViewModel`이 View 마운트에 자동으로 건다(`view-only-uses-view-model`) — View는 이 훅을
-   *  직접 걸 수 없다. */
-  onMount(): void {
-    this.start();
-    this.startWatching();
-  }
-
-  /** `stopWatching`에 위임한다. */
-  onDispose(): void {
-    this.stopWatching();
   }
 
   /** `#model.setExpanded`에 위임한다. */
@@ -122,7 +141,7 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
       }
       return undefined;
     };
-    return search(this.#rows.get());
+    return search(this.rowsState);
   }
 
   /** 화면 어휘(`'folder'`/`'file'`)를 Model 어휘(`'dir'`/`'file'`)로 바꿔 `#model.createEntry`에 위임한다. */
@@ -133,6 +152,21 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
   /** `#model.renameEntry`에 위임한다. */
   renameEntry(id: string, newName: string): Promise<void> {
     return this.#model.renameEntry(id, newName);
+  }
+
+  /** `arka.workbench.open`을 미리보기로 부른다 — 탭을 어떻게 여는지는 셸의 일이다. */
+  openFile(path: string): void {
+    this.#commands.execute("arka.workbench.open", { uri: URI.file(path), preview: true });
+  }
+
+  /** `arka.workbench.open`을 고정으로 부른다 — 같은 uri가 미리보기 자리에 있으면 그 자리에서 고정된다. */
+  pinFile(path: string): void {
+    this.#commands.execute("arka.workbench.open", { uri: URI.file(path), preview: false });
+  }
+
+  /** `arka.workbench.retargetTabs`를 부른다 — 편집 버퍼는 `IFileContentViewModel.retargetOpenFile`이 따로 옮긴다. */
+  retargetTabs(oldPath: string, newPath: string): void {
+    this.#commands.execute("arka.workbench.retargetTabs", { oldPrefix: oldPath, newPrefix: newPath });
   }
 
   /** `#model.removeEntry`에 위임한다. */
@@ -174,22 +208,23 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
 
   /** `#contextTarget`을 값으로 노출한다. */
   get contextTarget(): ContextMenuTarget | null {
-    return this.#contextTarget.get();
+    return this.contextTargetState;
   }
 
   /** `#contextTargets`를 값으로 노출한다. */
   get contextTargets(): readonly ContextMenuTarget[] {
-    return this.#contextTargets.get();
+    return this.contextTargetsState;
   }
 
-  /** `#contextTarget`에 그대로 반영한다. */
+  /** 우클릭 대상을 반영하고 파생값(대상 묶음)을 다시 만든다. */
   setContextTarget(target: ContextMenuTarget | null): void {
-    this.#contextTarget.set(target);
+    this.contextTargetState = target;
+    this.recompute();
   }
 
   /** `#editingEntry`에서 `FileTree`가 바로 쓸 수 있는 id 하나로 접는다. */
   get editingId(): string | undefined {
-    const editing = this.#editingEntry.get();
+    const editing = this.editingEntryState;
     if (editing === null) return undefined;
     return editing.kind === "rename" ? editing.id : GHOST_ID;
   }
@@ -197,31 +232,34 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
   /** `#editingEntry`를 `newFile`로 채운다 — 부모가 아직 안 펼쳐졌으면 먼저 펼친다(유령 행이
    *  보이려면 그 부모가 펼쳐져 있어야 한다). */
   requestNewFile(): void {
-    this.#startCreating("newFile");
+    this.startCreating("newFile");
   }
 
   /** `#editingEntry`를 `newFolder`로 채운다. */
   requestNewFolder(): void {
-    this.#startCreating("newFolder");
+    this.startCreating("newFolder");
   }
 
-  #startCreating(kind: "newFile" | "newFolder"): void {
-    const parentId = this.#parentIdFor(this.#contextTarget.get());
+  private startCreating(kind: "newFile" | "newFolder"): void {
+    const parentId = this.#parentIdFor(this.contextTargetState);
     if (parentId !== "") void this.#model.setExpanded(parentId, true);
-    this.#editingEntry.set({ kind, parentId });
+    this.editingEntryState = { kind, parentId };
+    this.recompute();
   }
 
   /** `contextTarget`의 현재 이름을 초기값으로 `#editingEntry`를 채운다. */
   requestRename(): void {
-    const target = this.#contextTarget.get();
+    const target = this.contextTargetState;
     if (target === null) return;
-    this.#editingEntry.set({ kind: "rename", id: target.id, initialValue: target.name });
+    this.editingEntryState = { kind: "rename", id: target.id, initialValue: target.name };
+    this.recompute();
   }
 
   /** `#editingEntry.kind`에 따라 `createEntry`/`renameEntry`를 부르고 `#editingEntry`를 비운다. */
   onEditCommit(value: string): void {
-    const editing = this.#editingEntry.get();
-    this.#editingEntry.set(null);
+    const editing = this.editingEntryState;
+    this.editingEntryState = null;
+    this.recompute();
     if (editing === null) return;
 
     const name = value.trim();
@@ -237,42 +275,43 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
     );
   }
 
-  /** `#editingEntry`를 비운다. */
+  /** 편집 중 상태를 비운다. */
   onEditCancel(): void {
-    this.#editingEntry.set(null);
+    this.editingEntryState = null;
+    this.recompute();
   }
 
   /** `#deleteTargets`를 값으로 노출한다. */
   get deleteTargets(): readonly ContextMenuTarget[] {
-    return this.#deleteTargets.get();
+    return this.deleteTargetsState;
   }
 
   /** `#contextTargets`를 `#deleteTargets`에 복사한다. */
   requestDelete(): void {
-    this.#deleteTargets.set(this.#contextTargets.get());
+    this.deleteTargetsState = this.contextTargetsState;
   }
 
   /** `#deleteTargets`를 비우고 `removeEntries`를 부른다. */
   confirmDelete(): void {
-    const targets = this.#deleteTargets.get();
-    this.#deleteTargets.set([]);
+    const targets = this.deleteTargetsState;
+    this.deleteTargetsState = [];
     if (targets.length === 0) return;
     this.removeEntries(targets.map((target) => target.id)).catch(this.#reportFailure("지우지 못했다"));
   }
 
   /** `#deleteTargets`를 비운다. */
   cancelDelete(): void {
-    this.#deleteTargets.set([]);
+    this.deleteTargetsState = [];
   }
 
   /** `#failureNotice`를 값으로 노출한다. */
   get failureNotice(): string | null {
-    return this.#failureNotice.get();
+    return this.failureNoticeState;
   }
 
   /** `#failureNotice`를 비운다. */
   dismissFailureNotice(): void {
-    this.#failureNotice.set(null);
+    this.failureNoticeState = null;
   }
 
   /**
@@ -281,14 +320,14 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
    * `menuId: 'filesystem.explorer.context'`) **둘 다 이 커맨드들 하나로 합류한다**(2026-09-04,
    * Menu 축 실배선). `execute`가 받는 `context`가 그 갈림길이다 — 우클릭이면 클릭한 행
    * (`ContextMenuTarget`)이 오고, 키보드/팔레트로 실행하면 `undefined`가 와서
-   * (`ICommandCenterRegistry.dispatchKeydown`이 `execute(undefined)`로 부른다) 그때는 현재
+   * (`ICommandService.dispatchKeydown`이 context 없이 부른다) 그때는 현재
    * 선택으로 대신한다.
    *
    * **알려진 단순화**: 우클릭 메뉴는 이름변경을 선택 개수와 무관하게 보여준다 — 이 앱의 Context
    * 축이 아직 호출별 데이터를 표현하지 못해서다. 안전장치는 `execute` 안에 있다: 정확히 하나가
    * 아니면 조용히 아무 일도 하지 않는다.
    */
-  #registerFilesystemCommands(commandCenterRegistry: ICommandCenterRegistry): void {
+  #registerFilesystemCommands(commandCenterRegistry: ICommandService): void {
     const toContextMenuTarget = (row: FileTreeRow): ContextMenuTarget => ({
       id: row.id,
       name: row.name,
@@ -307,7 +346,7 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
       return row === undefined ? null : toContextMenuTarget(row);
     };
 
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "filesystem.delete",
       label: "탐색기: 선택한 항목 삭제",
       execute: (context) => {
@@ -317,14 +356,13 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
         this.requestDelete();
       },
     });
-    commandCenterRegistry.registerKeybinding({
-      id: "filesystem.delete.keybinding",
+    commandCenterRegistry.keybindings.add({
       keybinding: "delete",
       actionId: "filesystem.delete",
       when: () => !this.#isTypingSurface(),
     });
 
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "filesystem.rename",
       label: "탐색기: 선택한 항목 이름 바꾸기",
       execute: (context) => {
@@ -337,14 +375,13 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
         this.requestRename();
       },
     });
-    commandCenterRegistry.registerKeybinding({
-      id: "filesystem.rename.keybinding",
+    commandCenterRegistry.keybindings.add({
       keybinding: "f2",
       actionId: "filesystem.rename",
       when: () => !this.#isTypingSurface(),
     });
 
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "filesystem.newFile",
       label: "탐색기: 새 파일 만들기",
       execute: (context) => {
@@ -354,7 +391,7 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
     });
     // 새 파일/폴더는 기본 키바인딩을 안 둔다 — VSCode도 안 둔다(우클릭·팔레트로 충분히 닿는다).
 
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "filesystem.newFolder",
       label: "탐색기: 새 폴더 만들기",
       execute: (context) => {
@@ -368,7 +405,7 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
      * `IWorkspaceFiles`에 `move`(이동/이름변경)는 있지만 `copy`(복제)가 아직 없어서, 붙여넣기
      * 대상·클립보드 상태까지 포함한 온전한 구현은 이번 범위 밖이다(Port 확장이 먼저 필요).
      */
-    commandCenterRegistry.registerCommand({
+    commandCenterRegistry.actions.add({
       id: "filesystem.copyPath",
       label: "탐색기: 경로 복사",
       execute: (context) => {
@@ -380,44 +417,25 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
 
     /**
      * 우클릭 메뉴(`menuId: 'filesystem.explorer.context'`) — `DirectoryTreeView`가
-     * `CommandContextMenu`로 그린다. `group`은 VSCode 관례를 따른다 — `1_create`가 만들기,
-     * `2_modify`가 변경, `9_danger`가 파괴적 동작(사전순으로 갈린다, `matchMenuItems` 참고).
+     * `CommandContextMenu`로 그린다. 순서는 만들기 → 변경 → 복사 → 파괴적 동작(삭제가 맨 아래).
      */
-    commandCenterRegistry.registerMenuItem({
-      id: "filesystem.explorer.context.newFile",
+    commandCenterRegistry.menus.add({
       menuId: "filesystem.explorer.context",
-      commandId: "filesystem.newFile",
-      group: "1_create",
+      actionId: "filesystem.newFile",
       order: 0,
     });
-    commandCenterRegistry.registerMenuItem({
-      id: "filesystem.explorer.context.newFolder",
+    commandCenterRegistry.menus.add({
       menuId: "filesystem.explorer.context",
-      commandId: "filesystem.newFolder",
-      group: "1_create",
+      actionId: "filesystem.newFolder",
       order: 1,
     });
-    commandCenterRegistry.registerMenuItem({
-      id: "filesystem.explorer.context.rename",
+    commandCenterRegistry.menus.add({ menuId: "filesystem.explorer.context", actionId: "filesystem.rename", order: 2 });
+    commandCenterRegistry.menus.add({
       menuId: "filesystem.explorer.context",
-      commandId: "filesystem.rename",
-      group: "2_modify",
-      order: 0,
+      actionId: "filesystem.copyPath",
+      order: 3,
     });
-    commandCenterRegistry.registerMenuItem({
-      id: "filesystem.explorer.context.delete",
-      menuId: "filesystem.explorer.context",
-      commandId: "filesystem.delete",
-      group: "9_danger",
-      order: 0,
-    });
-    commandCenterRegistry.registerMenuItem({
-      id: "filesystem.explorer.context.copyPath",
-      menuId: "filesystem.explorer.context",
-      commandId: "filesystem.copyPath",
-      group: "3_copy",
-      order: 0,
-    });
+    commandCenterRegistry.menus.add({ menuId: "filesystem.explorer.context", actionId: "filesystem.delete", order: 4 });
   }
 
   /** `parentId 안에 새로 만든다`는 우클릭한 대상이 폴더면 그 안, 파일이면 그 부모, 빈 곳이면 루트다. */
@@ -430,7 +448,9 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
 
   #reportFailure(verb: string): (error: unknown) => void {
     return (error) => {
-      this.#failureNotice.set(`${verb} — ${error instanceof Error ? error.message : String(error)}`);
+      runInAction(() => {
+        this.failureNoticeState = `${verb} — ${error instanceof Error ? error.message : String(error)}`;
+      });
     };
   }
 
@@ -494,24 +514,25 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
     });
   }
 
-  /** 구독을 끊는다. 컨테이너가 이 VM을 정리할 때 불린다. */
+  /** 구독과 감시를 끊는다. 컨테이너가 이 VM을 정리할 때 불린다. */
   dispose(): void {
     this.#subscription.dispose();
+    this.stopWatching();
   }
 
-  #recompute(): void {
-    this.#rows.set(this.#computeRows());
-    this.#expandedIds.set(this.#model.expanded);
-    this.#selectedIds.set(this.#model.selected);
-    this.#status.set(this.#computeStatus());
-    this.#failure.set(this.#computeFailure());
-    this.#contextTargets.set(this.#computeContextTargets());
+  private recompute(): void {
+    this.rowsState = this.#computeRows();
+    this.expandedIdsState = this.#model.expanded;
+    this.selectedIdsState = this.#model.selected;
+    this.statusState = this.#computeStatus();
+    this.failureState = this.#computeFailure();
+    this.contextTargetsState = this.#computeContextTargets();
   }
 
   #computeRows(): readonly FileTreeRow[] {
     return this.#withEditingGhost(
       this.#childrenOf(this.#model.directories, new Set(this.#model.expanded), ""),
-      this.#editingEntry.get(),
+      this.editingEntryState,
     );
   }
 
@@ -527,7 +548,7 @@ export class DirectoryTreeViewModel extends ViewModelBase implements IDirectoryT
 
   /** `contextTarget`이 지금 선택 안에 있으면 선택 전체, 아니면 그 행 하나다. */
   #computeContextTargets(): readonly ContextMenuTarget[] {
-    const target = this.#contextTarget.get();
+    const target = this.contextTargetState;
     if (target === null) return [];
     const selectedIds = this.#model.selected;
     if (!selectedIds.includes(target.id)) return [target];

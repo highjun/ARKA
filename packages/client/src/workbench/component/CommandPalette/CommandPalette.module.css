@@ -93,33 +93,14 @@
   gap: var(--space-xs);
 }
 
-.shortcutKey {
-  min-width: 1.5em;
-  border-style: solid;
-  border-width: var(--borderWidth-thin);
-  border-radius: var(--borderRadius-small);
-  padding-inline: var(--space-xs);
-  /* 2px 미만 base-size 토큰이 없다, 키캡
-     칩의 미세 조정값이라 리터럴이 불가피하다 */
-  padding-block: 1px;
-  font-family: inherit;
-  font-size: var(--base-text-size-xs);
-  line-height: var(--base-text-lineHeight-tight);
-  text-align: center;
-  background-color: var(--buttonKeybindingHint-default-bgColor-rest);
-  border-color: var(--buttonKeybindingHint-default-borderColor-rest);
-  color: var(--buttonKeybindingHint-default-fgColor-rest);
-}
-
 .content [cmdk-item][data-selected="true"] {
   background-color: var(--bgColor-accent-emphasis);
   color: var(--fgColor-onEmphasis);
 }
 
-/* 선택된 행 위에서는 kbd 도 강조 배경에 맞춰 반전한다 — Primer가 강조 배경 위 키바인딩 힌트용으로
-   갖고 있는 토큰과 정확히 같은 짝(`Button`의 `keybindingHint`가 `primary` variant 위에서 쓰는 것과
-   동일)이다. */
-.content [cmdk-item][data-selected="true"] .shortcutKey {
+/* 선택된 행 위에서는 `Kbd` 도 강조 배경에 맞춰 반전한다 — `Kbd`의 `tone="onEmphasis"`와 같은 토큰 짝이다.
+   고른 줄은 cmdk 가 CSS 로 정하므로 prop 으로 tone 을 바꿀 수 없어 여기서만 덮어쓴다. */
+.content [cmdk-item][data-selected="true"] [data-component="Kbd"] {
   background-color: var(--buttonKeybindingHint-primary-bgColor-rest);
   border-color: var(--buttonKeybindingHint-primary-borderColor-rest);
   color: var(--buttonKeybindingHint-primary-fgColor-rest);

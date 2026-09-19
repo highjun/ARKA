@@ -3,13 +3,13 @@ import type { ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { PortalProvider } from "#utils/portal";
 import { CommandPalette } from "./index";
-import type { CommandPaletteItem } from "./index";
+import type { CommandRow } from "./index";
 
-const ITEMS: readonly CommandPaletteItem[] = [
-  { id: "newFile", label: "새 파일", shortcut: ["Ctrl", "N"] },
-  { id: "newFolder", label: "새 폴더" },
-  { id: "toggleTheme", label: "테마 전환", shortcut: ["Ctrl", "Shift", "T"] },
-  { id: "openPalette", label: "커맨드 팔레트", shortcut: ["Ctrl", "Shift", "P"] },
+const ROWS: readonly CommandRow[] = [
+  { id: "newFile", label: "새 파일", keybinding: "ctrl+n" },
+  { id: "newFolder", label: "새 폴더", keybinding: "" },
+  { id: "toggleTheme", label: "테마 전환", keybinding: "ctrl+shift+t" },
+  { id: "openPalette", label: "커맨드 팔레트", keybinding: "ctrl+shift+p" },
 ];
 
 /**
@@ -27,7 +27,7 @@ const OverlayStage = ({ children }: { readonly children: ReactNode }) => {
 };
 
 const meta = {
-  title: "workbench/CommandPalette",
+  title: "01-workbench/CommandPalette",
   component: CommandPalette,
   decorators: [
     (Story) => (
@@ -36,12 +36,13 @@ const meta = {
       </OverlayStage>
     ),
   ],
-  args: { defaultOpen: true, items: ITEMS, onSelect: () => undefined, onOpenChange: () => undefined },
+  args: { open: true, query: "", rows: ROWS, onSelect: () => undefined, onOpenChange: () => undefined },
 } satisfies Meta<typeof CommandPalette>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-export const Empty: Story = { args: { items: [] } };
-export const CustomEmptyMessage: Story = { args: { items: [], emptyMessage: "등록된 커맨드가 없습니다." } };
+export const Empty: Story = { args: { rows: [] } };
+/** 검색어와 맞는 게 없다. */
+export const NoMatch: Story = { args: { query: "없는 명령" } };

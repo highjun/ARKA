@@ -41,8 +41,6 @@ export const buildClassNames = (): TabClassNames => {
     stripRoot: styles["stripRoot"],
     stripListContainer: styles["stripListContainer"],
     stripList: styles["stripList"],
-    stripEmpty: styles["stripEmpty"],
-    stripTail: styles["stripTail"],
     stripItemWrapper: styles["stripItemWrapper"],
     stripIndicatorBefore: styles["stripIndicatorBefore"],
     stripIndicatorAfter: styles["stripIndicatorAfter"],

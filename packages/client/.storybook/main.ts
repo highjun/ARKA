@@ -6,7 +6,7 @@ import type { StorybookConfig } from "@storybook/react-vite";
  * `shared/component/`와 각 슬라이스의 `component/`는 전부 대상이다.
  *
  * `view/`는 **조합이 드러나는 것만** 대상이다 — 화면 한 구역을 실제로 채우는 view(`ShellView`,
- * `DirectoryTreeView`, `ChatTabView`, `SourceControlView`, `SearchView`, `SettingsTabView`).
+ * `DirectoryTreeView`, `SearchView`, `SettingsTabView`).
  * 나머지 view는 컴포넌트 하나에 값을 꽂는 얇은 바인딩이라 그 컴포넌트의 스토리가 이미 같은
  * 그림을 덮는다 — 스토리를 더 만들어도 새로 보이는 것이 없고 VRT 기준 이미지만 늘어난다.
  *

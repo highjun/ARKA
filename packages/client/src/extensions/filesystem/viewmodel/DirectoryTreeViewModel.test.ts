@@ -1,23 +1,14 @@
+import { URI } from "#contracts";
 import type { IWorkspaceFiles } from "../model/IWorkspaceFiles";
-import { createRegistry } from "#core";
-import type { ICommandCenterRegistry } from "#core/commands";
+import { CommandService, type ICommandService } from "#core/commands";
 import { DirectoryTreeModel } from "../model/DirectoryTreeModel";
 import { DirectoryTreeViewModel } from "./DirectoryTreeViewModel";
 import type { IDirectoryTreeViewModel } from "./IDirectoryTreeViewModel";
 
 /** 커맨드 등록만 받아주는 흉내 — 이 파일의 관심사는 트리 접기 로직이지 커맨드 배선 자체가
  *  아니다. */
-const fakeCommandCenterRegistry = (): ICommandCenterRegistry => ({
-  commandRegistry: createRegistry(),
-  contextRegistry: createRegistry(),
-  keybindingRegistry: createRegistry(),
-  menuRegistry: createRegistry(),
-  registerCommand: () => undefined,
-  registerContext: () => undefined,
-  registerKeybinding: () => undefined,
-  registerMenuItem: () => undefined,
-  dispatchKeydown: () => false,
-});
+const fakeCommandCenterRegistry = (): ICommandService =>
+  new CommandService({ overridesStore: { load: () => ({}), save: () => undefined }, reportError: () => undefined });
 
 /**
  * 검사하는 것은 **평평한 표를 중첩 트리로 접는 규칙**이다.
@@ -179,8 +170,8 @@ describe("자리 표시 — 화살표는 type만으로 산다", () => {
  * 있으면 "읽는 중…" 이 영원히 남았다. 상태는 Model 에 이미 있었고 ViewModel 이 안 내보냈을 뿐이다.
  */
 describe("status — 화면이 로딩과 빈 상태를 가르는 근거", () => {
-  it("시작 전에는 idle 이다", () => {
-    expect(viewModel({ "": [] }).status).toBe("idle");
+  it("만들어지면 곧 읽기 시작한다 — loading", () => {
+    expect(viewModel({ "": [] }).status).toBe("loading");
   });
 
   it("읽는 동안은 loading 이다", () => {
@@ -605,5 +596,50 @@ describe("findRow", () => {
     const tree = viewModel({ "": [] });
 
     expect(tree.findRow("nope")).toBeUndefined();
+  });
+});
+
+describe("탭 열기 명령", () => {
+  const withCommands = () => {
+    const commands = fakeCommandCenterRegistry();
+    const opened: unknown[] = [];
+    const retargeted: unknown[] = [];
+    commands.actions.add({ id: "arka.workbench.open", label: "열기", execute: (context) => void opened.push(context) });
+    commands.actions.add({
+      id: "arka.workbench.retargetTabs",
+      label: "옮기기",
+      execute: (context) => void retargeted.push(context),
+    });
+    const directoryTreeModel = new DirectoryTreeModel({
+      workspaceFiles: serving({ "": [entry("a.md")] }) as unknown as IWorkspaceFiles,
+      workspaceWatch: { watch: () => () => undefined },
+    });
+    const viewModel = new DirectoryTreeViewModel({
+      directoryTreeModel,
+      commandCenterRegistry: commands,
+      copyToClipboard: () => undefined,
+      isTypingSurface: () => false,
+    });
+    return { viewModel, opened, retargeted };
+  };
+
+  it("openFile은 미리보기로, pinFile은 고정으로 arka.workbench.open을 부른다", () => {
+    const { viewModel, opened } = withCommands();
+
+    viewModel.openFile("docs/a.md");
+    viewModel.pinFile("docs/a.md");
+
+    expect(opened).toEqual([
+      { uri: URI.file("docs/a.md"), preview: true },
+      { uri: URI.file("docs/a.md"), preview: false },
+    ]);
+  });
+
+  it("retargetTabs는 arka.workbench.retargetTabs에 옛·새 접두어를 넘긴다", () => {
+    const { viewModel, retargeted } = withCommands();
+
+    viewModel.retargetTabs("old", "new");
+
+    expect(retargeted).toEqual([{ oldPrefix: "old", newPrefix: "new" }]);
   });
 });

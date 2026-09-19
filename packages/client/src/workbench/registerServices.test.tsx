@@ -1,18 +1,11 @@
-import { ViewModelProvider } from "#core/viewmodel";
+import type { Container } from "#core/di";
+import type { ExtensionModule } from "#core/extensions";
+import { ContainerProvider } from "#core/viewmodel";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { FileContentViewModelToken, WorkspaceFilesToken } from "../extensions/filesystem";
 import type { IWorkspaceFiles } from "../extensions/filesystem";
 import { MockWorkspaceFiles } from "../extensions/filesystem/model/MockWorkspaceFiles";
-import { AgentApiToken, AgentEventsToken } from "../extensions/agent";
-import { SearchServiceToken } from "../extensions/search";
-import { GitServiceToken } from "../extensions/git";
-import { MockGitService } from "../extensions/git/model/MockGitService";
 import { MockSearchService } from "../extensions/search/model/MockSearchService";
-import { MockAgentBackend } from "../extensions/agent/model/MockAgentBackend";
-import { ErrorLogToken } from "./model/IErrorLog";
-import { TabContentRegistryToken } from "./model/ITabContentRegistry";
-import { TabContentRegistry } from "./model/TabContentRegistry";
 import { RootView } from "./view/RootView";
 import { createApplication } from "./registerServices";
 
@@ -31,29 +24,40 @@ import { createApplication } from "./registerServices";
  * `createApplication()`이 실제 저장소(→ `localStorage`)를 쓴다 — 매 테스트가 새 컨테이너를
  * 만들어도 jsdom의 `localStorage`는 파일 전체가 공유한다. 안 지우면 앞 테스트가 연 탭이
  * 다음 테스트에서 부팅 시 복원돼 같은 텍스트가 사이드바와 탭 양쪽에 뜬다.
+ *
+ * 대역은 **모듈로 끼운다** — 활성화가 곧 만드는 것이라 컨테이너를 돌려준 뒤에는 늦다. 같은 id를 다시 물리면
+ * 나중 것이 이긴다.
  */
 
 describe("registerServices", () => {
+  /** 테스트마다 만든 컨테이너. 앱은 하나뿐이라 실제로는 페이지가 닫힐 때까지 살지만, 여기서는 다음 테스트에
+   *  전역 리스너(beforeunload·keydown)가 새지 않게 끝에 dispose한다. */
+  const containers: Container[] = [];
+  const track = (container: Container): Container => {
+    containers.push(container);
+    return container;
+  };
+
   afterEach(() => {
+    for (const container of containers.splice(0)) container.dispose();
     localStorage.clear();
   });
 
+  /** 파일시스템과 검색 서비스를 대역으로 가린다 — 진짜 구현을 그대로 두면 이 테스트가 서버를 요구한다. */
+  const mocks = (workspaceFiles: IWorkspaceFiles): ExtensionModule => ({
+    id: "test.mocks",
+    provides: [
+      { id: "arka.filesystem.workspaceFiles", lifetime: "singleton", create: () => workspaceFiles },
+      { id: "arka.search.service", lifetime: "singleton", create: () => new MockSearchService({ "a.md": "원본" }) },
+    ],
+  });
+
   const mountWith = (workspaceFiles: IWorkspaceFiles) => {
-    const container = createApplication().createScope("test");
-    // 자식 스코프에 다시 등록해 그 스코프 안에서만 부모를 가린다. 에이전트 백엔드도 메모리 것으로.
-    container.register(WorkspaceFilesToken, { lifetime: "singleton", create: () => workspaceFiles });
-    const agent = new MockAgentBackend();
-    container.register(AgentApiToken, { lifetime: "singleton", create: () => agent });
-    container.register(AgentEventsToken, { lifetime: "singleton", create: () => agent });
-    container.register(SearchServiceToken, {
-      lifetime: "singleton",
-      create: () => new MockSearchService({ "a.md": "원본" }),
-    });
-    container.register(GitServiceToken, { lifetime: "singleton", create: () => new MockGitService() });
+    const container = track(createApplication([mocks(workspaceFiles)]));
     render(
-      <ViewModelProvider container={container}>
+      <ContainerProvider container={container}>
         <RootView />
-      </ViewModelProvider>,
+      </ContainerProvider>,
     );
     return container;
   };
@@ -75,9 +79,9 @@ describe("registerServices", () => {
   });
 
   /**
-   * **저장 안 된 변경이 Shell까지 실제로 닿는지**를 본다 — `ShellView`가 `fileContentViewModel`을
-   * `FileContentView`와 같은 컨테이너에서 꺼내는지가 이 배선의 전부다. 하나라도 다른 컨테이너를
-   * 가리키면 dirty가 조용히 `false`로 굳는다.
+   * **저장 안 된 변경이 Shell까지 실제로 닿는지**를 본다 — 텍스트 탭 provider가 돌려준 descriptor의 `isDirty`가
+   * 탭 컨테이너 안의 `FileContentView`가 편집하는 것과 같은 `fileContentViewModel`을 읽는지가 이 배선의 전부다.
+   * 하나라도 다른 인스턴스를 가리키면 dirty가 조용히 `false`로 굳는다.
    *
    * `editFile`을 직접 부르는 것은 CodeMirror 타이핑을 jsdom이 흉내내지 못해서다.
    */
@@ -91,7 +95,7 @@ describe("registerServices", () => {
       // editFile을 부르면 Model이 조용히 무시한다.
       await screen.findByRole("button", { name: "저장" });
 
-      return container.resolve(FileContentViewModelToken);
+      return container.resolve("arka.filesystem.fileContentViewModel");
     };
 
     it("탭에 저장 안 됨 표시가 뜬다", async () => {
@@ -154,56 +158,34 @@ describe("registerServices", () => {
     it("탭이 렌더 중 던지면 CrashScreen이 뜨고 IErrorLog에 남는다", async () => {
       // React가 잡힌 오류를 console.error로도 내보낸다 — 테스트 출력이 그걸로 덮이지 않게 막는다.
       const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
-      const container = createApplication().createScope("test");
-      container.register(WorkspaceFilesToken, {
-        lifetime: "singleton",
-        create: () => new MockWorkspaceFiles({ "a.md": "" }),
-      });
-      // 파일 탭을 그리는 컴포넌트를 터지는 것으로 바꾼다 — 자식 스코프에 다시 등록해 부모를 가린다.
-      container.register(TabContentRegistryToken, {
-        lifetime: "singleton",
-        create: () => {
-          const registry = new TabContentRegistry();
-          registry.add({
-            id: "file",
-            iconId: "file",
-            TabComponent: () => {
+      const container = track(createApplication([mocks(new MockWorkspaceFiles({ "a.md": "" }))]));
+      // 무엇이든 먼저 받아 터지는 본문을 돌려주는 provider를 얹는다 — 텍스트 provider보다 먼저 묻는다.
+      container.resolve("arka.workbench.tabSystem").add({
+        id: "test.crashing",
+        priority: 1000,
+        openTab: () =>
+          Promise.resolve({
+            icon: null,
+            title: "터지는 탭",
+            isDirty: false,
+            Content: () => {
               throw new Error("탭이 터졌다");
             },
-          });
-          return registry;
-        },
+          }),
       });
       render(
-        <ViewModelProvider container={container}>
+        <ContainerProvider container={container}>
           <RootView />
-        </ViewModelProvider>,
+        </ContainerProvider>,
       );
 
       fireEvent.click(await screen.findByText("a.md"));
 
       expect(await screen.findByRole("alert")).toHaveTextContent("탭이 터졌다");
-      expect(container.resolve(ErrorLogToken).entries.map((entry) => [entry.source, entry.message])).toEqual([
-        ["render", "탭이 터졌다"],
-      ]);
+      expect(
+        container.resolve("arka.workbench.errorLog").entries.map((entry) => [entry.source, entry.message]),
+      ).toEqual([["render", "탭이 터졌다"]]);
       consoleError.mockRestore();
-    });
-  });
-
-  /** 에이전트 활동 → 새 대화 → 탭이 열리고 보낸 말에 답이 오는지 — 배선 전체가 맞물리는지만 본다. */
-  describe("에이전트 배선", () => {
-    it("새 대화를 만들면 탭이 열리고 보내면 답이 온다", async () => {
-      mountWith(new MockWorkspaceFiles({}));
-      fireEvent.click(screen.getByLabelText("에이전트"));
-      fireEvent.click(await screen.findByRole("button", { name: /새 대화/u }));
-      expect(await screen.findByRole("tab", { name: /새 대화/u })).toBeDefined();
-
-      const textarea = await screen.findByRole("textbox");
-      await act(async () => {
-        fireEvent.change(textarea, { target: { value: "안녕" } });
-        fireEvent.submit(textarea.closest("form") as HTMLFormElement);
-      });
-      expect(await screen.findByText("받은 입력: 안녕")).toBeDefined();
     });
   });
 
@@ -216,17 +198,6 @@ describe("registerServices", () => {
       });
       fireEvent.click(await screen.findByText("원본", { selector: "span" }));
       expect(await screen.findByRole("tab", { name: /a\.md/u })).toBeDefined();
-    });
-  });
-
-  describe("소스 제어 배선", () => {
-    it("소스 제어 활동에서 변경을 누르면 diff 탭이 열린다", async () => {
-      mountWith(new MockWorkspaceFiles({ "a.md": "원본" }));
-      const git = new MockGitService();
-      git.write("a.md", "원본");
-      // 조립부가 만든 컨테이너의 GitService는 위 mountWith가 덮었지만, 이 테스트는 변경이 있는 저장소가 필요하다.
-      fireEvent.click(screen.getByLabelText("소스 제어"));
-      expect(await screen.findByText("main")).toBeDefined();
     });
   });
 
@@ -267,9 +238,58 @@ describe("registerServices", () => {
       fireEvent.keyDown(window, { key: ",", ctrlKey: true });
       expect(await screen.findByRole("tab", { name: /설정/u })).toBeDefined();
       expect(document.documentElement.dataset["density"]).toBe("compact");
-      fireEvent.click(screen.getByLabelText(/^넓게/u));
+      fireEvent.click(screen.getByLabelText("touch"));
       expect(document.documentElement.dataset["density"]).toBe("touch");
       expect(localStorage.getItem("workbench.settings")).toContain("touch");
+    });
+  });
+
+  describe("부팅", () => {
+    it("셸 모듈과 확장이 기여 지점을 채운다 — 사이드바 둘, 탭 provider 넷, 밀도 설정, 명령", () => {
+      const container = track(createApplication([mocks(new MockWorkspaceFiles({}))]));
+
+      expect(
+        container
+          .resolve("arka.workbench.sidebar")
+          .list()
+          .map((sidebar) => sidebar.id),
+      ).toEqual(["explorer", "search"]);
+      expect(
+        container
+          .resolve("arka.workbench.tabSystem")
+          .list()
+          .map((provider) => provider.id)
+          .sort(),
+      ).toEqual([
+        "arka.filesystem.text",
+        "arka.markdown.preview",
+        "arka.workbench.keybindings",
+        "arka.workbench.settings",
+      ]);
+      expect(
+        container
+          .resolve("arka.settings")
+          .schema.list()
+          .map((setting) => setting.id),
+      ).toEqual(["workbench.density"]);
+      const commands = container.resolve("arka.commands");
+      for (const id of ["arka.workbench.open", "arka.filesystem.focus", "arka.search.focus", "markdown.openPreview"])
+        expect(commands.actions.tryGet(id), id).toBeDefined();
+    });
+
+    it("켜지 못한 확장은 알림으로 남고 나머지는 켜진다", () => {
+      const broken: ExtensionModule = {
+        id: "test.broken",
+        activate: () => {
+          throw new Error("고장");
+        },
+      };
+      const container = track(createApplication([mocks(new MockWorkspaceFiles({})), broken]));
+
+      expect(container.resolve("arka.workbench.notifications").items.map((item) => item.message)).toEqual([
+        "확장 test.broken을(를) 켜지 못했다(activate) — 고장",
+      ]);
+      expect(container.resolve("arka.workbench.sidebar").list()).toHaveLength(2);
     });
   });
 });

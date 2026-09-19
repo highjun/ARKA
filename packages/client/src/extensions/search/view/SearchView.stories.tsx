@@ -1,7 +1,6 @@
-import { createContainer, singleton } from "#core/di";
-import { ViewModelProvider } from "#core/viewmodel";
+import { Container } from "#core/di";
+import { ContainerProvider } from "#core/viewmodel";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { SearchViewModelToken } from "../viewmodel/ISearchViewModel";
 import type { ISearchViewModel } from "../viewmodel/ISearchViewModel";
 import { SearchView } from "./SearchView";
 
@@ -21,23 +20,20 @@ const viewModel = (state: Partial<ISearchViewModel>): ISearchViewModel => ({
   toggleRegex: () => undefined,
   toggleCaseSensitive: () => undefined,
   submit: () => undefined,
-  onDispose: () => undefined,
+  openResult: () => undefined,
+  dispose: () => undefined,
   ...state,
 });
 
 const withViewModel = (state: Partial<ISearchViewModel>) => {
-  const container = createContainer("story");
-  container.register(
-    SearchViewModelToken,
-    singleton(() => viewModel(state)),
-  );
-  return container.createScope("view");
+  const container = new Container("story");
+  container.register("arka.search.viewModel", "singleton", () => viewModel(state));
+  return container.createChild("view");
 };
 
 const meta = {
   title: "search/SearchView",
   component: SearchView,
-  args: { onFileOpen: () => undefined },
 } satisfies Meta<typeof SearchView>;
 
 export default meta;
@@ -46,11 +42,11 @@ type Story = StoryObj<typeof meta>;
 const story = (state: Partial<ISearchViewModel>): Story => ({
   decorators: [
     (Story) => (
-      <ViewModelProvider container={withViewModel(state)}>
+      <ContainerProvider container={withViewModel(state)}>
         <div style={{ height: 480, width: 320 }}>
           <Story />
         </div>
-      </ViewModelProvider>
+      </ContainerProvider>
     ),
   ],
 });
@@ -63,12 +59,12 @@ export const Default: Story = story({
       path: "src/workbench/view/ShellView.tsx",
       matches: [
         { line: 6, column: 10, preview: "import { useViewModel } from '#core/viewmodel';" },
-        { line: 74, column: 21, preview: "  const viewModel = useViewModel(ShellViewModelToken);" },
+        { line: 74, column: 21, preview: '  const viewModel = useViewModel("arka.workbench.shellViewModel");' },
       ],
     },
     {
       path: "src/extensions/search/view/SearchView.tsx",
-      matches: [{ line: 11, column: 21, preview: "  const viewModel = useViewModel(SearchViewModelToken);" }],
+      matches: [{ line: 11, column: 21, preview: '  const viewModel = useViewModel("arka.search.viewModel");' }],
     },
   ],
 });

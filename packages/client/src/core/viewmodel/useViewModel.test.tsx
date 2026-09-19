@@ -1,99 +1,84 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { createContainer, createToken, scoped } from "#core/di";
-import { atom } from "nanostores";
+import { makeAutoObservable } from "mobx";
+import { observer } from "mobx-react-lite";
 import { describe, expect, it } from "vitest";
-import { ViewModelBase } from "./ViewModelBase";
-import { ViewModelProvider } from "./ViewModelProvider";
-import { useViewModel } from "./useViewModel";
+import { Container } from "#core/di";
+import { ContainerProvider, MissingContainerProviderError, useViewModel } from "#core/viewmodel";
 
-const WorkspaceViewModelToken = createToken<WorkspaceViewModel>("workspaceViewModel");
+declare module "#core/di" {
+  /** 이 파일의 테스트가 쓰는 인스턴스들. */
+  interface InstanceMap {
+    "test.workspaceViewModel": WorkspaceViewModel;
+    "test.plainRegistry": PlainRegistry;
+  }
+}
 
-/**
- * ViewModel 계약 — atom은 등장하지 않는다(React 경계를 넘지 않는다). 관찰 property는 plain 값,
- * command는 메서드로 노출한다.
- */
+/** ViewModel 계약 — 관찰 property는 plain 값, 조작은 메서드다. MobX가 계약에 안 나온다. */
 interface WorkspaceViewModel {
   readonly openFileId: string | null;
   readonly isDirty: boolean;
-  /** atom을 감싸지 않은 그냥 getter — `#private` 필드를 그대로 돌려준다. */
   readonly label: string;
   openFile(fileId: string): void;
   markDirty(): void;
 }
 
-/**
- * 실제 앱의 모든 ViewModel처럼 `ViewModelBase`를 상속해 atom을 `observe()`로 감싸고, getter는
- * plain 값을 돌려준다 — 계약에 `ReadableAtom`이 등장하지 않는다.
- */
-class WorkspaceViewModelImpl extends ViewModelBase implements WorkspaceViewModel {
-  readonly #openFileId = this.observe(atom<string | null>(null));
-  readonly #isDirty = this.observe(atom(false));
-  readonly #label = "workspace";
+/** 실제 앱의 모든 ViewModel처럼 `makeAutoObservable` 클래스다. 필드가 곧 상태고 getter는 없다. */
+class WorkspaceViewModelImpl implements WorkspaceViewModel {
+  openFileId: string | null = null;
+  isDirty = false;
+  readonly label = "workspace";
 
-  get openFileId(): string | null {
-    return this.#openFileId.get();
+  constructor() {
+    makeAutoObservable(this);
   }
 
-  get isDirty(): boolean {
-    return this.#isDirty.get();
+  openFile(fileId: string): void {
+    this.openFileId = fileId;
   }
 
-  get label(): string {
-    return this.#label;
-  }
-
-  openFile(fileId: string) {
-    this.#openFileId.set(fileId);
-  }
-  markDirty() {
-    this.#isDirty.set(true);
+  markDirty(): void {
+    this.isDirty = true;
   }
 }
 
-// View — useViewModel 이 반환한 원본 인스턴스를 그대로 쓴다. `openFileId`/`isDirty`는 이미 plain
-// 값이다 — View는 useStore를 직접 부르지 않는다.
-const WorkspaceView = () => {
-  const vm = useViewModel(WorkspaceViewModelToken);
+/** ViewModel이 아닌 것도 꺼낼 수는 있다 — 막는 것은 타입이 아니라 린트다. */
+class PlainRegistry {
+  readonly items: readonly string[] = ["a", "b"];
+}
+
+// View — `observer`가 다시 그리고, 훅은 인스턴스를 그대로 준다.
+const WorkspaceView = observer(function WorkspaceView() {
+  const vm = useViewModel("test.workspaceViewModel");
   return (
     <button type="button" onClick={() => vm.openFile("readme.md")}>
       {vm.label}: {vm.openFileId ?? "none"}
       {vm.isDirty ? " *" : ""}
     </button>
   );
-};
+});
 
-/**
- * ViewModel 은 SCOPED 다 — 같은 화면을 두 번 열면 VM 도 둘이어야 한다. 그래서 루트가 아니라
- * `createScope('test')` 로 만든 자식을 넘긴다.
- *
- * 앞으로는 마운트 경계에서 이 `createScope('test')`/`dispose()` 를 자동으로 부르는 provider 가 생긴다.
- * 여기서는 아직 손으로 만든다.
- */
 const setup = () => {
-  const root = createContainer();
-  root.register(
-    WorkspaceViewModelToken,
-    scoped(() => new WorkspaceViewModelImpl()),
-  );
-  return root.createScope("test");
+  const root = new Container();
+  root.register("test.workspaceViewModel", "scoped", () => new WorkspaceViewModelImpl());
+  return root.createChild("test");
 };
 
 describe("useViewModel", () => {
-  it("VM 인스턴스를 resolve 해서 observable 속성을 렌더링한다", () => {
+  it("VM 인스턴스를 꺼내 값을 그린다", () => {
     render(
-      <ViewModelProvider container={setup()}>
+      <ContainerProvider container={setup()}>
         <WorkspaceView />
-      </ViewModelProvider>,
+      </ContainerProvider>,
     );
 
     expect(screen.getByRole("button").textContent).toBe("workspace: none");
   });
 
-  it("re-renders the View when a VM property changes (자동 구독)", () => {
+  it("VM 값이 바뀌면 observer가 다시 그린다", () => {
     render(
-      <ViewModelProvider container={setup()}>
+      <ContainerProvider container={setup()}>
         <WorkspaceView />
-      </ViewModelProvider>,
+      </ContainerProvider>,
     );
 
     fireEvent.click(screen.getByRole("button"));
@@ -101,21 +86,15 @@ describe("useViewModel", () => {
     expect(screen.getByRole("button").textContent).toBe("workspace: readme.md");
   });
 
-  it("구독 필드가 여러 개여도(atom 두 개) 각각 정확한 값으로 반영한다", () => {
-    const container = createContainer();
-    container.register(
-      WorkspaceViewModelToken,
-      scoped(() => new WorkspaceViewModelImpl()),
-    );
-    const vm = container.resolve(WorkspaceViewModelToken);
+  it("필드가 여러 개여도 각각 정확한 값으로 반영한다", () => {
+    const container = setup();
+    const vm = container.resolve("test.workspaceViewModel");
 
     render(
-      <ViewModelProvider container={container}>
+      <ContainerProvider container={container}>
         <WorkspaceView />
-      </ViewModelProvider>,
+      </ContainerProvider>,
     );
-    expect(screen.getByRole("button").textContent).toBe("workspace: none");
-
     act(() => vm.markDirty());
     expect(screen.getByRole("button").textContent).toBe("workspace: none *");
 
@@ -123,165 +102,62 @@ describe("useViewModel", () => {
     expect(screen.getByRole("button").textContent).toBe("workspace: readme.md *");
   });
 
-  it("한 scope 안에서는 리렌더링해도 같은 VM 인스턴스를 resolve 한다", () => {
+  it("다시 그려도 같은 인스턴스다 — 프록시도 캐시도 없다", () => {
     const container = setup();
-
-    const { rerender } = render(
-      <ViewModelProvider container={container}>
-        <WorkspaceView />
-      </ViewModelProvider>,
-    );
-    fireEvent.click(screen.getByRole("button"));
-    rerender(
-      <ViewModelProvider container={container}>
-        <WorkspaceView />
-      </ViewModelProvider>,
-    );
-
-    // 인스턴스가 새로 만들어졌다면 atom 이 초기값(`none`)으로 돌아갔을 것이다.
-    expect(screen.getByRole("button").textContent).toBe("workspace: readme.md");
-  });
-
-  it("scope 마다 별도의 VM 인스턴스를 준다", () => {
-    const root = createContainer();
-    root.register(
-      WorkspaceViewModelToken,
-      scoped(() => new WorkspaceViewModelImpl()),
-    );
-
-    const first = root.createScope("test").resolve(WorkspaceViewModelToken);
-    const second = root.createScope("test").resolve(WorkspaceViewModelToken);
-
-    expect(first).not.toBe(second);
-  });
-
-  it("returns the exact same reference across re-renders (프록시 없음 — 값이 바뀌어도 정체성 불변)", () => {
-    const container = setup();
-    const vm = container.resolve(WorkspaceViewModelToken);
     const seen: WorkspaceViewModel[] = [];
-
-    const ProbeView = () => {
-      const probed = useViewModel(WorkspaceViewModelToken);
+    const ProbeView = observer(function ProbeView() {
+      const probed = useViewModel("test.workspaceViewModel");
       seen.push(probed);
       return <span>{probed.openFileId ?? "none"}</span>;
-    };
+    });
 
     render(
-      <ViewModelProvider container={container}>
+      <ContainerProvider container={container}>
         <ProbeView />
-      </ViewModelProvider>,
+      </ContainerProvider>,
     );
-    act(() => vm.openFile("readme.md"));
+    act(() => container.resolve("test.workspaceViewModel").openFile("readme.md"));
 
     expect(seen.length).toBeGreaterThanOrEqual(2);
     expect(seen.every((instance) => instance === seen[0])).toBe(true);
+    expect(seen[0]).toBe(container.resolve("test.workspaceViewModel"));
   });
 
-  it("ViewModelProvider 밖에서 쓰면 던진다", () => {
-    expect(() => render(<WorkspaceView />)).toThrow("useAppContext must be used within a ViewModelProvider.");
-  });
-});
+  it("겹친 ContainerProvider 안에서는 안쪽 컨테이너에서 꺼낸다", () => {
+    const root = new Container();
+    root.register("test.workspaceViewModel", "scoped", () => new WorkspaceViewModelImpl());
+    const outer = root.createChild("outer");
+    const inner = root.createChild("inner");
+    inner.resolve("test.workspaceViewModel").openFile("inner.md");
 
-describe("useViewModel — 생명주기(onMount/onDispose)", () => {
-  interface WatcherViewModel {
-    readonly watching: boolean;
-    onMount(): void;
-    onDispose(): void;
-  }
-
-  class WatcherViewModelImpl extends ViewModelBase implements WatcherViewModel {
-    readonly #watching = this.observe(atom(false));
-
-    get watching(): boolean {
-      return this.#watching.get();
-    }
-
-    onMount() {
-      this.#watching.set(true);
-    }
-    onDispose() {
-      this.#watching.set(false);
-    }
-  }
-
-  const WatcherViewModelToken = createToken<WatcherViewModel>("watcherViewModel");
-
-  const WatcherView = () => {
-    const vm = useViewModel(WatcherViewModelToken);
-    return <span>{vm.watching ? "watching" : "idle"}</span>;
-  };
-
-  const setupWatcher = () => {
-    const root = createContainer();
-    root.register(
-      WatcherViewModelToken,
-      scoped(() => new WatcherViewModelImpl()),
-    );
-    return root.createScope("test");
-  };
-
-  it("View 가 마운트되면 onMount 를 부른다", () => {
     render(
-      <ViewModelProvider container={setupWatcher()}>
-        <WatcherView />
-      </ViewModelProvider>,
-    );
-
-    expect(screen.getByText("watching")).toBeTruthy();
-  });
-
-  it("View 가 언마운트되면 onDispose 를 부른다", () => {
-    const container = setupWatcher();
-    const vm = container.resolve(WatcherViewModelToken);
-
-    const { unmount } = render(
-      <ViewModelProvider container={container}>
-        <WatcherView />
-      </ViewModelProvider>,
-    );
-    unmount();
-
-    expect(vm.watching).toBe(false);
-  });
-
-  it("VM이 생명주기를 구현하지 않아도 그냥 동작한다", () => {
-    // 위 `WorkspaceView` 테스트들이 이미 이걸 증명한다 — `WorkspaceViewModel`엔 onMount가 없다.
-    expect(() =>
-      render(
-        <ViewModelProvider container={setup()}>
+      <ContainerProvider container={outer}>
+        <ContainerProvider container={inner}>
           <WorkspaceView />
-        </ViewModelProvider>,
-      ),
-    ).not.toThrow();
-  });
-});
-
-describe("useViewModel — atom이 없는 대상(Registry 등)", () => {
-  // Registry는 ViewModelBase를 상속하지 않는다 — atom이 없으니 구독할 것도 없다.
-  class PlainRegistry {
-    readonly items: readonly string[] = ["a", "b"];
-  }
-
-  const PlainRegistryToken = createToken<PlainRegistry>("plainRegistry");
-
-  const RegistryView = () => {
-    const registry = useViewModel(PlainRegistryToken);
-    return <span>{registry.items.join(",")}</span>;
-  };
-
-  it("subscribe/getVersion이 없어도 원본 인스턴스를 그대로 돌려준다", () => {
-    const root = createContainer();
-    root.register(
-      PlainRegistryToken,
-      scoped(() => new PlainRegistry()),
+        </ContainerProvider>
+      </ContainerProvider>,
     );
 
+    expect(screen.getByRole("button").textContent).toBe("workspace: inner.md");
+  });
+
+  it("ViewModel이 아닌 것도 그대로 돌려준다", () => {
+    const root = new Container();
+    root.register("test.plainRegistry", "singleton", () => new PlainRegistry());
+    const RegistryView = function RegistryView() {
+      return <span>{useViewModel("test.plainRegistry").items.join(",")}</span>;
+    };
+
     render(
-      <ViewModelProvider container={root.createScope("test")}>
+      <ContainerProvider container={root}>
         <RegistryView />
-      </ViewModelProvider>,
+      </ContainerProvider>,
     );
 
     expect(screen.getByText("a,b")).toBeTruthy();
+  });
+
+  it("ContainerProvider 밖에서 부르면 MissingContainerProviderError를 던진다", () => {
+    expect(() => render(<WorkspaceView />)).toThrow(MissingContainerProviderError);
   });
 });

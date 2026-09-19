@@ -29,7 +29,7 @@ const SOURCE = [
 ].join("\n");
 
 const meta = {
-  title: "shared/Markdown",
+  title: "00-shared/Markdown",
   component: Markdown,
   args: { source: SOURCE },
 } satisfies Meta<typeof Markdown>;

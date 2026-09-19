@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent, PointerEventHandler, ReactNode, RefObject } from "react";
 import type { StripContextValue, StripDropIndicator, StripItemState, StripListHandlers } from "./Strip";
-import type { StripDropPosition, TabId, TabItem } from "./shared";
+import type { StripDropPosition, TabId, TabRow } from "./shared";
 
 /** 끝을 넘어가면 원본을 그대로 돌려준다 — 순환하지 않는다. 키보드 재정렬이 쓴다. */
-const reorder = (tabItems: readonly TabItem[], itemId: string, direction: -1 | 1): readonly TabItem[] => {
+const reorder = (tabItems: readonly TabRow[], itemId: string, direction: -1 | 1): readonly TabRow[] => {
   const index = tabItems.findIndex((tab) => tab.id === itemId);
   const nextIndex = index + direction;
   if (index < 0 || nextIndex < 0 || nextIndex >= tabItems.length) return tabItems;
@@ -17,11 +17,11 @@ const reorder = (tabItems: readonly TabItem[], itemId: string, direction: -1 | 1
 
 /** 순서가 실제로 안 바뀌면 **원본 참조를 그대로** 돌려준다 — 부르는 쪽이 참조로 변경을 판단한다. */
 const reorderByDrop = (
-  tabItems: readonly TabItem[],
+  tabItems: readonly TabRow[],
   fromId: string,
   targetId: string,
   position: StripDropPosition,
-): readonly TabItem[] => {
+): readonly TabRow[] => {
   const fromIndex = tabItems.findIndex((tab) => tab.id === fromId);
   const targetIndex = tabItems.findIndex((tab) => tab.id === targetId);
   if (fromIndex < 0 || targetIndex < 0) return tabItems;
@@ -60,20 +60,20 @@ const POINTER_DRAG_THRESHOLD_PX = 6;
 
 /** 표시선이 없거나 순서가 그대로면 콜백을 부르지 않는다. */
 const commitReorder = (
-  tabItems: readonly TabItem[],
+  tabs: readonly TabRow[],
   fromId: string,
   indicator: StripDropIndicator | null,
-  onTabReorder?: (nextItems: TabItem[]) => void,
+  onReorder?: (nextTabIds: readonly TabId[]) => void,
 ): void => {
   if (!fromId || !indicator) return;
-  const nextItems = reorderByDrop(tabItems, fromId, indicator.targetId, indicator.position);
-  if (nextItems !== tabItems) onTabReorder?.([...nextItems]);
+  const next = reorderByDrop(tabs, fromId, indicator.targetId, indicator.position);
+  if (next !== tabs) onReorder?.(next.map((tab) => tab.id));
 };
 
 const createStripKeyDown =
   /** Context에서 `onKeyDown`을 빼고 받는다 — 지금 만들고 있는 것이 그것이라 순환을 끊는다. */
-  (context: Omit<StripContextValue, "onKeyDown">) => (event: KeyboardEvent<HTMLDivElement>, item: TabItem) => {
-    const currentIndex = context.tabItems.findIndex((tab) => tab.id === item.id);
+  (context: Omit<StripContextValue, "onKeyDown">) => (event: KeyboardEvent<HTMLDivElement>, item: TabRow) => {
+    const currentIndex = context.tabs.findIndex((tab) => tab.id === item.id);
     if (currentIndex < 0) return;
 
     if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
@@ -81,13 +81,13 @@ const createStripKeyDown =
       const direction = event.key === "ArrowRight" ? 1 : -1;
 
       if (event.shiftKey && context.reorderable) {
-        const nextItems = reorder(context.tabItems, item.id, direction);
-        if (nextItems !== context.tabItems) context.onTabReorder?.([...nextItems]);
+        const next = reorder(context.tabs, item.id, direction);
+        if (next !== context.tabs) context.onReorder?.(next.map((tab) => tab.id));
         return;
       }
 
-      const nextIndex = (currentIndex + direction + context.tabItems.length) % context.tabItems.length;
-      context.onTabClick(context.tabItems[nextIndex]!.id);
+      const nextIndex = (currentIndex + direction + context.tabs.length) % context.tabs.length;
+      context.onSelect?.(context.tabs[nextIndex]!.id);
     }
   };
 
@@ -95,31 +95,37 @@ const createStripKeyDown =
  * `draggingId`/`dropIndicator`가 진짜 상태(`useState`)라 렌더링 쪽(`Tab.tsx`)에 둘 수 없다. Context
  * 값과 tab-list 컨테이너 핸들러를 반환한다.
  */
-export const useTabStrip = (
-  activeTab: TabId,
-  tabItems: readonly TabItem[],
-  onTabClick: (tabId: TabId) => void,
-  onMenuClick: () => void,
-  onTabClose: ((tabId: TabId) => void) | undefined,
-  onTabReorder: ((nextItems: TabItem[]) => void) | undefined,
-  onTabPin: ((tabId: TabId) => void) | undefined,
-  renderTabContextMenu: ((tab: TabItem) => ReactNode) | undefined,
-) => {
-  const reorderable = Boolean(onTabReorder);
+export const useTabStrip = ({
+  tabs,
+  activeTabId,
+  onSelect,
+  onClose,
+  onReorder,
+  onPin,
+  renderTabMenu,
+}: {
+  readonly tabs: readonly TabRow[];
+  readonly activeTabId: TabId | null;
+  readonly onSelect?: (tabId: TabId) => void;
+  readonly onClose?: (tabId: TabId) => void;
+  readonly onReorder?: (nextTabIds: readonly TabId[]) => void;
+  readonly onPin?: (tabId: TabId) => void;
+  readonly renderTabMenu?: (tabId: TabId) => ReactNode;
+}) => {
+  const reorderable = Boolean(onReorder);
   const listRef = useRef<HTMLDivElement | null>(null);
   const [dropIndicator, setDropIndicator] = useState<StripDropIndicator | null>(null);
   const [draggingId, setDraggingId] = useState<TabId | null>(null);
 
   const contextBase = {
-    activeTab,
-    tabItems,
+    tabs,
+    activeTabId,
     reorderable,
-    onTabClick,
-    onMenuClick,
-    onTabClose,
-    onTabReorder,
-    onTabPin,
-    renderTabContextMenu,
+    onSelect,
+    onClose,
+    onReorder,
+    onPin,
+    renderTabMenu,
     dropIndicator,
     setDropIndicator,
     draggingId,
@@ -149,7 +155,7 @@ export const useTabStrip = (
       const indicator = container ? getNearestGapPosition(event.clientX, getStripChildRects(container)) : null;
       setDropIndicator(null);
       setDraggingId(null);
-      commitReorder(tabItems, fromId, indicator, onTabReorder);
+      commitReorder(tabs, fromId, indicator, onReorder);
     },
   };
 
@@ -209,22 +215,23 @@ export const useStripScrollHandle = (viewportRef: RefObject<HTMLDivElement | nul
 
 /** 탭 하나의 클릭/드래그/키보드 인터랙션 props — 순수 함수가 아니라 컨텍스트의 setState를 클로저로 문다. */
 export const getStripItemStates = (context: StripContextValue): StripItemState[] =>
-  context.tabItems.map((tab) => {
+  context.tabs.map((tab) => {
     const isDraggable = context.reorderable;
     const indicatorPosition = context.dropIndicator?.targetId === tab.id ? context.dropIndicator.position : null;
+    const { onClose } = context;
 
     return {
       tab,
-      isActive: tab.id === context.activeTab,
+      isActive: tab.id === context.activeTabId,
       isDraggable,
       isDragging: context.draggingId === tab.id,
       indicatorPosition,
-      onClose: () => context.onTabClose?.(tab.id),
+      onSelect: () => context.onSelect?.(tab.id),
+      onClose: onClose === undefined ? undefined : () => onClose(tab.id),
       handlers: {
         draggable: isDraggable,
-        onClick: () => context.onTabClick(tab.id),
         onDoubleClick: () => {
-          if (tab.isPreview) context.onTabPin?.(tab.id);
+          if (tab.isPreview) context.onPin?.(tab.id);
         },
         onDragStart: (event) => {
           if (!isDraggable) return;
@@ -278,7 +285,7 @@ export const getStripItemStates = (context: StripContextValue): StripItemState[]
             const indicator = readIndicator(upEvent.clientX);
             context.setDropIndicator(null);
             context.setDraggingId(null);
-            commitReorder(context.tabItems, tab.id, indicator, context.onTabReorder);
+            commitReorder(context.tabs, tab.id, indicator, context.onReorder);
           };
 
           const onCancel = () => {
@@ -296,7 +303,7 @@ export const getStripItemStates = (context: StripContextValue): StripItemState[]
           context.onKeyDown(event, tab);
           if (!event.defaultPrevented && (event.key === "Enter" || event.key === " ")) {
             event.preventDefault();
-            context.onTabClick(tab.id);
+            context.onSelect?.(tab.id);
           }
         },
       },

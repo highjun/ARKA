@@ -7,10 +7,11 @@ import {
   implementsRef,
 } from "#utils/testing";
 import { KeybindingTable } from "./KeybindingTable";
+import type { KeybindingRow } from "./KeybindingTable";
 
-const ROWS = [
-  { id: "1", keys: ["Ctrl", "B"], label: "사이드바 토글", commandId: "workbench.action.toggleSidebar" },
-  { id: "2", keys: ["F2"], label: "이름 바꾸기", commandId: "filesystem.rename" },
+const ROWS: KeybindingRow[] = [
+  { actionId: "workbench.action.toggleSidebar", label: "사이드바 토글", keybinding: "ctrl+b", isConflicting: false },
+  { actionId: "filesystem.rename", label: "이름 바꾸기", keybinding: "f2", isConflicting: false },
 ];
 
 /** 표의 구조와 키 표시가 계약대로인지 본다. */
@@ -23,11 +24,18 @@ describe("KeybindingTable", () => {
     expect(screen.getByText("filesystem.rename")).toBeInTheDocument();
   });
 
-  it("키를 kbd 로 하나씩 그린다 — 키보드 입력의 정본 태그다", () => {
+  it("키를 `+`로 갈라 kbd 로 하나씩 그린다 — 첫 글자를 올려 적는다", () => {
     const { container } = render(<KeybindingTable rows={ROWS} />);
 
     const keys = [...container.querySelectorAll("kbd")].map((node) => node.textContent);
     expect(keys).toEqual(["Ctrl", "B", "F2"]);
+  });
+
+  it("충돌하는 줄은 표시가 붙는다", () => {
+    render(<KeybindingTable rows={[{ ...ROWS[0]!, isConflicting: true }]} />);
+
+    expect(screen.getByText("충돌")).toBeInTheDocument();
+    expect(screen.getAllByRole("row")[1]).toHaveAttribute("data-conflicting", "");
   });
 
   it("줄이 없으면 머리만 남는다", () => {
