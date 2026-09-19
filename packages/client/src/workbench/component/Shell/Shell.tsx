@@ -110,6 +110,12 @@ export interface ShellProps extends Omit<ComponentPropsWithoutRef<"div">, "child
  * `SplitPageLayout`도 `ThemeProvider`도 forwardRef가 아니라서(둘 다 컴파일된 소스로 확인 —
  * plain 함수), ref는 우리가 직접 렌더하는 wrapper div로 보낸다.
  */
+/** 레일 아래 묶음의 설정 줄. 사이드바 id 와 겹치지 않게 접두사를 붙인다. */
+const SETTINGS_ID = "shell.settings";
+const SETTINGS_ROW: readonly SidebarRow[] = [
+  { id: SETTINGS_ID, title: "설정", iconId: "settingsGear", isActive: false },
+];
+
 export const Shell = ({
   colorMode,
   isNarrow,
@@ -209,7 +215,13 @@ export const Shell = ({
                     />
                   </div>
                   <div className={styles["sidebarBody"]}>
-                    <ActivityBar items={sidebars} onSelect={onSidebarSelect} onSettingsSelect={onSettingsSelect} />
+                    {/* **설정은 아래 묶음의 한 줄이다** — 레일이 따로 그리는 톱니가 아니다.
+                        셸은 그 줄을 여기서 만들어 넣고, 고르면 `onSettingsSelect` 로 보낸다. */}
+                    <ActivityBar
+                      topItems={sidebars}
+                      bottomItems={SETTINGS_ROW}
+                      onSelect={(id) => (id === SETTINGS_ID ? onSettingsSelect?.() : onSidebarSelect?.(id))}
+                    />
                     {expanded && (
                       <Panel
                         density="compact"
