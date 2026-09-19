@@ -290,6 +290,55 @@ globalThis.__arka.spec = (() => {
     return rows.length;
   };
 
+  /**
+   * **부품 차례** — 컴파운드가 무엇 무엇으로 되어 있는지 한자리에서 보여 준다.
+   *
+   * 이게 없으면 시트가 루트 표에서 곧장 첫 부품으로 뛰어들어, 읽는 사람이 끝까지 스크롤해야
+   * 부품이 몇인지 안다. `이름 · 무엇` 두 칸이고 설명은 `meta` 의 `설명` 을 그대로 쓴다.
+   */
+  const partIndex = async (into, parts) => {
+    const M = meta();
+    if (!M || parts.length < 2) return 0;
+
+    const blk = box("부품", "VERTICAL", GAP_LABEL);
+    into.appendChild(blk);
+    blk.appendChild(await text("부품", "Title/Small", "fgColor/default", "Head"));
+
+    const tbl = box("부품 표", "VERTICAL", 0);
+    blk.appendChild(tbl);
+
+    const line = async (cells, style, color, head) => {
+      const r = box(head ? "Head" : `Row/${cells[0]}`, "HORIZONTAL", T_GAP, { align: "MIN" });
+      r.paddingTop = r.paddingBottom = 8;
+      if (head) {
+        r.strokes = solid("borderColor/muted");
+        r.strokeLeftWeight = r.strokeRightWeight = r.strokeTopWeight = 0;
+        r.strokeBottomWeight = 1;
+        r.paddingTop = 0;
+      }
+      tbl.appendChild(r);
+      const made = [];
+      for (const [i, c] of cells.entries()) made.push(await text(c, style, color, ["Name", "Desc"][i]));
+      for (const t of made) r.appendChild(t);
+      return made;
+    };
+
+    const 칸들 = [await line(["name", "무엇"], "Caption", "fgColor/muted", true)];
+    for (const full of parts) {
+      const short = full.includes("/") ? full.split("/").slice(1).join("/") : full;
+      칸들.push(await line([short, M.of(full)?.설명 ?? ""], "Body/Small", "fgColor/default", false));
+    }
+
+    fixW(tbl, DOC_W);
+    for (const [n, d] of 칸들) {
+      n.parent.layoutSizingHorizontal = "FILL";
+      fixW(n, T_NAME);
+      d.layoutSizingHorizontal = "FILL";
+      d.textAutoResize = "HEIGHT";
+    }
+    return parts.length;
+  };
+
   /** 세트를 오른쪽 덤프로 접는다. */
   const dumpInto = async (dump, set) => {
     set.layoutMode = "HORIZONTAL";
@@ -409,8 +458,11 @@ globalThis.__arka.spec = (() => {
       // **`가상: true` 인 부품은 Figma 노드가 없다** — 표만 세우고 견본은 건너뛴다.
       // (`Menu/Trigger`·`NavList/Group` 처럼 코드에만 있는 부품이 시트에서 사라지지 않게.)
       const nodes = parts.map((p) => findNode(p));
+      // **루트가 부품 목록에 없어도 제 노드는 이 시트 것이다**(`FormControl`·`Banner`·`Dialog`).
+      // 부품이 전부 가상이면 닻이 이것 하나뿐이라, 없으면 되그릴 자리를 못 찾는다.
+      const rootNode = parts.includes(name) ? null : findNode(name);
       const sheetName = `${name} Spec`;
-      const home = unwrap(nodes.filter(Boolean), sheetName);
+      const home = unwrap([...(rootNode ? [rootNode] : []), ...nodes.filter(Boolean)], sheetName);
       // 부품이 저마다 제 시트를 갖고 있었다면 그것도 걷는다.
       for (const p of parts) for (const c of [...home.children]) if (c.name === `${p} Spec`) c.remove();
 
@@ -426,6 +478,8 @@ globalThis.__arka.spec = (() => {
       if (src) head.appendChild(await text(src, "Caption", "fgColor/muted", "Source"));
 
       const axisW = await measureAxes(nodes.filter(Boolean));
+      // **부품 차례가 먼저다** — 무엇으로 되어 있는지 보고 나서 하나씩 읽는다.
+      const 차례 = await partIndex(doc, parts);
       // 묶음 이름이 부품 이름과 같으면(`TitleBar` 묶음의 첫 부품이 `TitleBar`) 머리 표를
       // 생략한다 — 안 그러면 같은 표가 두 번 뜬다.
       let 인스턴스 = 0,
@@ -434,7 +488,12 @@ globalThis.__arka.spec = (() => {
         const short = parts[i].includes("/") ? parts[i].split("/").slice(1).join("/") : parts[i];
         const block = box(`Part/${short}`, "VERTICAL", GAP_AXIS);
         doc.appendChild(block);
-        block.appendChild(await text(short, "Title/Small", "fgColor/default", "Part"));
+        // 제목과 설명은 한 머리다 — 떼어 놓으면 설명이 아래 표에 붙어 보인다.
+        const 머리 = box("Head", "VERTICAL", 6);
+        block.appendChild(머리);
+        머리.appendChild(await text(short, "Title/Small", "fgColor/default", "Part"));
+        const 설명 = meta()?.of(parts[i])?.설명;
+        if (설명) 머리.appendChild(await text(설명, "Caption", "fgColor/muted", "PartDesc"));
         표 += await propTable(block, parts[i]);
         if (!node) continue; // 가상 부품 — 표까지만
         const n = await blocks(block, node, { defaults: defaults?.[parts[i]] ?? null, axisW, metaName: parts[i] });
@@ -457,6 +516,10 @@ globalThis.__arka.spec = (() => {
       const dump = box(`${name} Variants`, "VERTICAL", 20);
       sheet.appendChild(dump);
       dump.appendChild(await text("Variants", "Caption", "fgColor/muted", "Caption"));
+      if (rootNode) {
+        if (rootNode.type === "COMPONENT_SET") await dumpInto(dump, rootNode);
+        else dump.appendChild(rootNode);
+      }
       for (const node of nodes) {
         if (!node) continue;
         if (node.type === "COMPONENT_SET") await dumpInto(dump, node);
@@ -466,9 +529,13 @@ globalThis.__arka.spec = (() => {
       return {
         시트: name,
         부품: parts,
+        차례,
         인스턴스,
         표,
-        변형: nodes.reduce((a, n) => a + (n ? (n.type === "COMPONENT_SET" ? n.children.length : 1) : 0), 0),
+        변형: [rootNode, ...nodes].reduce(
+          (a, n) => a + (n ? (n.type === "COMPONENT_SET" ? n.children.length : 1) : 0),
+          0,
+        ),
         크기: `${Math.round(sheet.width)}x${Math.round(sheet.height)}`,
       };
     },
