@@ -11,7 +11,7 @@ const log = createStdoutLogger();
 const main = async (): Promise<void> => {
   const config = await loadConfig();
   const startedAt = new Date().toISOString();
-  const { app, close } = createApp({ config, log, startedAt });
+  const { app } = createApp({ config, log, startedAt });
 
   const server = serve({ fetch: app.fetch, port: config.port, hostname: config.host }, (info) => {
     // 어느 디렉터리를 열었는지 모르면 경로 문제를 추적할 수 없다.
@@ -23,7 +23,6 @@ const main = async (): Promise<void> => {
     if (shuttingDown) return;
     shuttingDown = true;
     log.info("server.stopping", { signal });
-    close();
     server.close(() => {
       log.info("server.stopped");
       process.exit(0);

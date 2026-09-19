@@ -179,7 +179,7 @@ globalThis.__arka.meta = (() => {
       props: { children: { t: "slot", d: "아이콘" } },
     },
     SegmentedControl: {
-      설명: "@primer/react SegmentedControl · 칸을 나눠 하나만 고르는 띠. InputComposer 의 Action/Plan",
+      설명: "@primer/react SegmentedControl · 칸을 나눠 하나만 고르는 띠",
       props: {
         count: { t: "slot", n: "children", d: "`SegmentedControl.Button`·`.IconButton` 들. 지금 두셋" },
         selected: { t: "boolean", d: "Figma 축 — 어느 칸이 골라졌나. 코드에선 `SegmentedControl.Button` 의 prop 이다" },
@@ -502,7 +502,7 @@ globalThis.__arka.meta = (() => {
         tree: { t: "object", d: "주면 `Tab.Split`, 없으면 `Tab.Group` 이 선다. 갈래를 정하는 것이 이 하나다" },
         chrome: { t: "enum", d: "bordered | none. none 이면 테두리를 안 그린다. 기본 bordered" },
       },
-      부품: ["Tab/Strip", "Tab/Header", "Tab/Group", "Tab/Split", "Tab/Actions"],
+      부품: ["Tab/Actions", "Tab/Header", "Tab/Strip", "Tab/Group", "Tab/Split"],
     },
 
     "Menu/Content": {
@@ -610,12 +610,13 @@ globalThis.__arka.meta = (() => {
       },
     },
     TitleBar: {
-      설명: "workbench/component/TitleBar (예상 자리) · 창 맨 위 35px. 왼쪽 이름 · 가운데 명령 칸 · 오른쪽 알림과 테마",
+      설명: "workbench/component/TitleBar (예상 자리) · 창 맨 위 35px. 왼쪽 이름 · 가운데 명령 칸 · 오른쪽 빌드·알림·테마",
       props: {
         brand: { t: "slot", d: "왼쪽 — 마크 20×20 과 작업 공간 이름" },
         center: { t: "slot", d: "가운데 — `CommandCenter`. 누르면 팔레트가 열린다" },
-        actions: { t: "slot", d: "오른쪽 — 알림 종과 `ModeToggle` 둘뿐이다" },
+        actions: { t: "slot", d: "오른쪽 — 빌드 표시 · 알림 종 · `ModeToggle` 셋뿐이다" },
       },
+      부품: ["CommandCenter"],
     },
     CommandCenter: {
       설명: "workbench/component/CommandCenter (예상 자리) · 제목 줄 가운데 칸. 누르면 팔레트가 열린다",
@@ -643,6 +644,7 @@ globalThis.__arka.meta = (() => {
         onSelect: { t: "action", d: "고를 때. 표준 `onSelect` 를 가로챈다" },
         onActiveIdChange: { t: "action", d: "지금 자리가 바뀔 때" },
       },
+      부품: ["ActivityBar/Item"],
     },
     "ActivityBar/Item": {
       설명: "workbench/component/ActivityBar · 레일의 아이콘 한 칸 48×48",
@@ -663,6 +665,7 @@ globalThis.__arka.meta = (() => {
         header: { t: "slot", d: "Figma 속성 — 머리 통째로 갈아 끼운다. 코드에선 위의 `title`+`actions` 둘이다" },
         children: { t: "slot", d: "내용" },
       },
+      부품: ["Panel/Header"],
     },
     "Panel/Header": {
       설명: "workbench/component/Panel · Panel 의 머리. 제목이거나 탭 줄이다 (Figma 전용 부품)",
@@ -747,6 +750,7 @@ globalThis.__arka.meta = (() => {
         onSelect: { t: "action", d: "필수. 고를 때" },
         onOpenChange: { t: "action", d: "여닫을 때" },
       },
+      부품: ["CommandPalette/Item"],
     },
     "CommandPalette/Item": {
       설명: "workbench/component/CommandPalette · 결과 한 줄",
@@ -808,93 +812,6 @@ globalThis.__arka.meta = (() => {
         onChange: { t: "action", d: "고칠 때" },
       },
     },
-    SearchResultItem: {
-      설명: "extensions/search/component/SearchResultList · 찾은 줄 하나. 맞은 곳이 강조된다",
-      props: {
-        fileName: { t: "string", d: "어느 파일인지" },
-        line: { t: "number", d: "줄 번호 — 21" },
-        excerpt: { t: "string", d: "맞은 줄의 앞뒤" },
-        onSelect: { t: "action", d: "고를 때" },
-      },
-      css: { state: "`:hover` `:focus-visible`" },
-    },
-    ChangeListItem: {
-      설명: "extensions/git/component/ChangeList · 바뀐 파일 한 줄. 앞 글자가 무슨 변화인지 말한다",
-      props: {
-        badge: { t: "enum", d: "M 고침 | A 더함 | D 지움 | R 옮김 | U 충돌. 글자 색만 다르다" },
-        path: { t: "string", d: "파일 경로" },
-        onSelect: { t: "action", d: "고르면 diff 를 연다" },
-      },
-      css: { state: "`:hover`" },
-    },
-    DiffLine: {
-      설명: "extensions/git/component/DiffView · diff 의 한 줄",
-      props: {
-        kind: { t: "enum", d: "add | del | hunk | meta | ctx. 면 색과 앞 부호가 갈린다" },
-        text: { t: "string", d: "줄 내용" },
-        lineNumber: { t: "number", d: "줄 번호" },
-      },
-    },
-    StatusIndicator: {
-      설명: "extensions/agent/component/StatusIndicator · 에이전트가 지금 무엇을 하는지",
-      props: {
-        status: { t: "enum", d: "running | done | waitingInput | error" },
-        label: { t: "string", d: "옆에 적히는 말" },
-      },
-    },
-    Message: {
-      설명: "extensions/agent/component/Message · 대화 한 마디",
-      props: {
-        author: { t: "enum", d: "user | agent | system. 코드는 `data-author` 로 찍는다" },
-        content: { t: "slot", d: "마디 내용 — 보통 `Markdown`" },
-        timestamp: { t: "number", d: "언제 — epoch 밀리초" },
-      },
-    },
-    StepBlock: {
-      설명: "extensions/agent/component/StepBlock · 에이전트가 한 걸음. 접었다 편다",
-      props: {
-        kind: { t: "enum", d: "thinking | tool" },
-        expanded: { t: "boolean", n: "open", d: "펼쳐져 있다" },
-        summary: { t: "string", d: "접었을 때 보이는 한 줄" },
-        onToggle: { t: "action", d: "접고 펼 때" },
-      },
-      css: { state: "`:hover`" },
-    },
-    InputComposer: {
-      설명: "extensions/agent/component/InputComposer · 에이전트에게 말을 거는 칸과 도구 줄",
-      props: {
-        mode: { t: "enum", d: "action | plan. `SegmentedControl` 로 고른다" },
-        disabled: { t: "boolean", d: "보낼 수 없게 한다" },
-        loading: { t: "boolean", d: "보내는 중. 전송 단추가 스피너로 바뀐다" },
-        value: { t: "string", d: "적은 말" },
-        onSend: { t: "action", d: "보낼 때" },
-      },
-      css: { state: "`:focus-within` 이 테두리를 accent 로 바꾼다" },
-    },
-    SessionListItem: {
-      설명: "extensions/agent/component/SessionList · 대화 한 줄. 안 읽은 수가 오른쪽에 뜬다",
-      props: {
-        unread: { t: "number", d: "안 읽은 수. 0 이면 배지가 안 뜬다" },
-        title: { t: "string", d: "대화 이름" },
-        onSelect: { t: "action", d: "고를 때" },
-      },
-      css: { state: "`:hover` `[aria-current]` 활성" },
-    },
-    SessionList: {
-      설명: "extensions/agent/component/SessionList · 대화 목록",
-      props: {
-        chrome: { t: "enum", d: "panel | none. panel 이면 `Panel` 이 감싼다" },
-        empty: { t: "boolean", d: "비었나. 비면 `Blankslate` 가 대신 든다" },
-        items: { t: "object", d: "대화들" },
-      },
-    },
-    ChatRoom: {
-      설명: "extensions/agent/component/ChatRoom · 대화 한 판 — 마디들과 입력칸",
-      props: {
-        status: { t: "enum", d: "running | done | waitingInput | error" },
-        messages: { t: "object", d: "마디들" },
-      },
-    },
   };
 
   const 이름 = (k, p) => p.n ?? k;
@@ -923,9 +840,31 @@ globalThis.__arka.meta = (() => {
     ],
   };
 
+  /** `묶음` 을 편 차례표 — `이름 → { 페이지, 묶음, 번호 }`. 한 번만 만든다. */
+  const 자리표 = (() => {
+    const 표 = {};
+    for (const [페이지, 묶음들] of Object.entries(묶음)) {
+      let n = 0;
+      const 총 = 묶음들.reduce((a, [, 이름들]) => a + 이름들.length, 0);
+      for (const [묶음이름, 이름들] of 묶음들) {
+        for (const 이름 of 이름들) 표[이름] = { 페이지, 묶음: 묶음이름, 번호: (n += 1), 총 };
+      }
+    }
+    return 표;
+  })();
+
   return {
     M,
     묶음,
+    /**
+     * 시트가 페이지 몇 번째인가 — `{ 페이지, 묶음, 번호, 총 }`. `묶음` 에 없으면 `null`.
+     *
+     * **이 번호가 곧 시트 제목의 `N` 이다**(`28. Menu`). 절은 `N.1`·`N.2`, 항은 `N.2.1` 로
+     * 이어진다 — 차례와 본문이 글자로 맞물리게 하는 것이 번호를 두는 까닭이다.
+     */
+    자리(setName) {
+      return 자리표[setName] ?? null;
+    },
     /** 세트 하나의 `{ 설명, props, css }`. 없으면 `null`. */
     of(setName) {
       return M[setName] ?? null;

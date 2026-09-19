@@ -97,12 +97,6 @@ test.describe("데스크톱", () => {
     await expect(page.getByRole("dialog")).toBeVisible();
   });
 
-  test("ctrl+shift+f로 검색 패널이 열린다", async ({ page }) => {
-    await page.goto("/");
-    await page.keyboard.press("Control+Shift+F");
-    await expect(page.getByLabel("검색어")).toBeVisible();
-  });
-
   test("폴더를 펼치면 자식이 보인다", async ({ page }) => {
     await page.goto("/");
     await treeRow(page, "src").click();

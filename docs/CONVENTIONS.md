@@ -48,8 +48,7 @@
 
 ### 검토 필수 지점
 
-- **이벤트 로그 스키마(`contracts/agent/events.ts`) — 가장 중요.** 진화 규칙이 걸려 있다
-- `contracts/` 전체
+- **`contracts/` 전체 — 가장 중요.** 클라이언트와 서버가 이것만 보고 만난다
 - 공개 API 표면(`index.ts`)
 - 린트·tsconfig 설정
 

@@ -34,7 +34,7 @@ export const serializeError = (error: unknown): LogFields => {
  *
  * **이름 규칙이 곧 이 동작이다.** 비밀에 그 접미사를 붙이기로 한 이유가 여기 있다 —
  * 붙어 있으면 기계가 알아보고, 안 붙어 있으면 아무 장치도 걸리지 않는다.
- * 대소문자를 가리지 않는다: 환경변수는 `ARKA_ANTHROPIC_API_KEY`고 로그 필드는 `apiKey`다.
+ * 대소문자를 가리지 않는다: 환경변수는 `..._API_KEY` 꼴이고 로그 필드는 `apiKey`다.
  */
 const SECRET_FIELD = /(password|secret|token|key)$/iu;
 

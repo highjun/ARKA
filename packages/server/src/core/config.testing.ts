@@ -11,8 +11,6 @@ export const makeConfig = (overrides: Partial<ServerConfig> & Pick<ServerConfig,
   port: 0,
   host: "127.0.0.1",
   clientRoot: undefined,
-  dataDir: ":memory:",
-  agent: { runner: "scripted" },
   gitSha: undefined,
   ...overrides,
 });
