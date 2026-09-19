@@ -7,7 +7,6 @@ import { IconButton } from "#component/IconButton";
 import { ModeToggle } from "#component/ModeToggle";
 import { Text } from "#component/Text";
 import { CommandPalette } from "../component/CommandPalette";
-import { NotificationList } from "../component/NotificationList";
 import { Shell } from "../component/Shell";
 import { Tab } from "../component/Tab";
 import type { ReactNode } from "react";
@@ -209,8 +208,6 @@ export const ShellView = observer(function ShellView() {
           }
         />
       </Shell>
-
-      <NotificationList items={notifications.items} onDismiss={(id) => notifications.dismiss(id)} />
 
       {pendingClose === null ? null : (
         <ConfirmationDialog
