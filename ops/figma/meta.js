@@ -616,6 +616,7 @@ globalThis.__arka.meta = (() => {
         center: { t: "slot", d: "가운데 — `CommandCenter`. 누르면 팔레트가 열린다" },
         actions: { t: "slot", d: "오른쪽 — 빌드 표시 · 알림 종 · `ModeToggle` 셋뿐이다" },
       },
+      부품: ["CommandCenter"],
     },
     CommandCenter: {
       설명: "workbench/component/CommandCenter (예상 자리) · 제목 줄 가운데 칸. 누르면 팔레트가 열린다",
@@ -643,6 +644,7 @@ globalThis.__arka.meta = (() => {
         onSelect: { t: "action", d: "고를 때. 표준 `onSelect` 를 가로챈다" },
         onActiveIdChange: { t: "action", d: "지금 자리가 바뀔 때" },
       },
+      부품: ["ActivityBar/Item"],
     },
     "ActivityBar/Item": {
       설명: "workbench/component/ActivityBar · 레일의 아이콘 한 칸 48×48",
@@ -663,6 +665,7 @@ globalThis.__arka.meta = (() => {
         header: { t: "slot", d: "Figma 속성 — 머리 통째로 갈아 끼운다. 코드에선 위의 `title`+`actions` 둘이다" },
         children: { t: "slot", d: "내용" },
       },
+      부품: ["Panel/Header"],
     },
     "Panel/Header": {
       설명: "workbench/component/Panel · Panel 의 머리. 제목이거나 탭 줄이다 (Figma 전용 부품)",
@@ -747,6 +750,7 @@ globalThis.__arka.meta = (() => {
         onSelect: { t: "action", d: "필수. 고를 때" },
         onOpenChange: { t: "action", d: "여닫을 때" },
       },
+      부품: ["CommandPalette/Item"],
     },
     "CommandPalette/Item": {
       설명: "workbench/component/CommandPalette · 결과 한 줄",
@@ -923,9 +927,31 @@ globalThis.__arka.meta = (() => {
     ],
   };
 
+  /** `묶음` 을 편 차례표 — `이름 → { 페이지, 묶음, 번호 }`. 한 번만 만든다. */
+  const 자리표 = (() => {
+    const 표 = {};
+    for (const [페이지, 묶음들] of Object.entries(묶음)) {
+      let n = 0;
+      const 총 = 묶음들.reduce((a, [, 이름들]) => a + 이름들.length, 0);
+      for (const [묶음이름, 이름들] of 묶음들) {
+        for (const 이름 of 이름들) 표[이름] = { 페이지, 묶음: 묶음이름, 번호: (n += 1), 총 };
+      }
+    }
+    return 표;
+  })();
+
   return {
     M,
     묶음,
+    /**
+     * 시트가 페이지 몇 번째인가 — `{ 페이지, 묶음, 번호, 총 }`. `묶음` 에 없으면 `null`.
+     *
+     * **이 번호가 곧 시트 제목의 `N` 이다**(`28. Menu`). 절은 `N.1`·`N.2`, 항은 `N.2.1` 로
+     * 이어진다 — 차례와 본문이 글자로 맞물리게 하는 것이 번호를 두는 까닭이다.
+     */
+    자리(setName) {
+      return 자리표[setName] ?? null;
+    },
     /** 세트 하나의 `{ 설명, props, css }`. 없으면 `null`. */
     of(setName) {
       return M[setName] ?? null;

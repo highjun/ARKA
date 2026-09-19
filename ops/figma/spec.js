@@ -172,7 +172,11 @@ globalThis.__arka.spec = (() => {
    * 컴포넌트의 사정이 아니다. 갈래는 `meta` 에서 읽고, **표에 없는 키는 안 그린다**
    * (지어내지 않고 `meta.audit()` 이 잡게 둔다).
    */
-  const blocks = async (into, node, { defaults = null, axisW = 0, metaName = null } = {}) => {
+  const blocks = async (
+    into,
+    node,
+    { defaults = null, axisW = 0, metaName = null, prefix = "", 층 = "Title/Small" } = {},
+  ) => {
     const M = meta();
     const name = metaName ?? node.name;
     const defs = node.componentPropertyDefinitions ?? {};
@@ -227,23 +231,76 @@ globalThis.__arka.spec = (() => {
       props.push({ key: short, 갈래: M?.kind(name, short) ?? TYPE_WORD[defs[k].type], 칸: await 속성칸(k) });
     }
 
-    let made = 0;
+    let made = 0,
+      차 = 0;
     for (const [제목, 줄들, 갈래보임] of [
       ["Props", props, true],
       ["CSS-State", css, false],
     ]) {
       if (!줄들.length) continue;
+      차 += 1;
       const blk = box(제목, "VERTICAL", GAP_AXIS);
       into.appendChild(blk);
-      blk.appendChild(await text(제목, "Title/Small", "fgColor/default", "Head"));
+      // 컴파운드 안이면 `28.4.1. Props`, 홀로 선 시트면 `6.1. Props`. `prefix` 가 그 앞자리다.
+      blk.appendChild(await text(`${prefix}${차}. ${제목}`, 층, "fgColor/default", "Head"));
       for (const r of 줄들) made += await row(blk, r.key, 갈래보임 ? r.갈래 : null, r.칸, axisW);
     }
     return made;
   };
 
-  const T_NAME = 180,
+  const T_NUM = 56,
+    T_GROUP = 120,
+    T_NAME = 180,
     T_TYPE = 96,
     T_GAP = 16;
+
+  /**
+   * **표 하나.** `머리` 한 줄과 `줄들` 을 쌓고 칸마다 폭을 못 박는다.
+   *
+   * prop 표·부품 목록·페이지 목차가 전부 이 꼴이라 여기 한 곳에서 짠다.
+   * `폭들` 의 마지막 칸은 `null` 로 두면 남는 자리를 다 먹는다(설명 칸).
+   *
+   * **폭을 먼저 못 박아야 FILL 이 먹는다.** 그리고 `layoutGrow` 대신 `FILL` 을 쓴다 —
+   * `layoutGrow = 1` 은 글자의 `textAutoResize` 를 `NONE` 으로 바꿔 긴 설명을 잘라 먹는다.
+   */
+  const table = async (into, 이름, 머리, 줄들, 폭들, { 폭 = DOC_W } = {}) => {
+    const tbl = box(이름, "VERTICAL", 0);
+    into.appendChild(tbl);
+    const 칸이름 = 머리.map((_, i) => `C${String(i)}`);
+
+    const line = async (cells, style, color, head) => {
+      const r = box(head ? "Head" : `Row/${cells[0]}`, "HORIZONTAL", T_GAP, { align: "MIN" });
+      r.paddingTop = r.paddingBottom = 8;
+      if (head) {
+        r.strokes = solid("borderColor/muted");
+        r.strokeLeftWeight = r.strokeRightWeight = r.strokeTopWeight = 0;
+        r.strokeBottomWeight = 1;
+        r.paddingTop = 0;
+      }
+      tbl.appendChild(r);
+      const made = [];
+      for (const [i, c] of cells.entries()) made.push(await text(c, style, color, 칸이름[i]));
+      for (const t of made) r.appendChild(t);
+      return made;
+    };
+
+    const 칸들 = [await line(머리, "Caption", "fgColor/muted", true)];
+    for (const 줄 of 줄들) 칸들.push(await line(줄, "Body/Small", "fgColor/default", false));
+
+    fixW(tbl, 폭);
+    for (const 칸 of 칸들) {
+      칸[0].parent.layoutSizingHorizontal = "FILL";
+      for (const [i, t] of 칸.entries()) {
+        if (폭들[i] === null || 폭들[i] === undefined) {
+          t.layoutSizingHorizontal = "FILL";
+          t.textAutoResize = "HEIGHT";
+        } else {
+          fixW(t, 폭들[i]);
+        }
+      }
+    }
+    return 줄들.length;
+  };
 
   /**
    * 설명 아래의 **prop 표** — `name · type · description` 세 칸.
@@ -254,89 +311,34 @@ globalThis.__arka.spec = (() => {
   const propTable = async (into, setName) => {
     const rows = meta()?.rows(setName) ?? [];
     if (!rows.length) return 0;
-
-    const tbl = box("Props 표", "VERTICAL", 0);
-    into.appendChild(tbl);
-
-    const line = async (cells, style, color, head) => {
-      const r = box(head ? "Head" : `Row/${cells[0]}`, "HORIZONTAL", T_GAP, { align: "MIN" });
-      r.paddingTop = r.paddingBottom = 8;
-      if (head) {
-        r.strokes = solid("borderColor/muted");
-        r.strokeLeftWeight = r.strokeRightWeight = r.strokeTopWeight = 0;
-        r.strokeBottomWeight = 1;
-        r.paddingTop = 0;
-      }
-      tbl.appendChild(r);
-      const made = [];
-      for (const [i, c] of cells.entries()) made.push(await text(c, style, color, ["Name", "Type", "Desc"][i]));
-      for (const t of made) r.appendChild(t);
-      return made;
-    };
-
-    const 칸들 = [await line(["name", "type", "description"], "Caption", "fgColor/muted", true)];
-    for (const r of rows) 칸들.push(await line([r.name, r.type, r.desc], "Body/Small", "fgColor/default", false));
-
-    // **폭을 먼저 못 박아야 FILL 이 먹는다.** 그리고 `layoutGrow` 대신 `FILL` 을 쓴다 —
-    // `layoutGrow = 1` 은 글자의 `textAutoResize` 를 `NONE` 으로 바꿔 긴 설명을 잘라 먹는다.
-    fixW(tbl, DOC_W);
-    for (const [n, t, d] of 칸들) {
-      n.parent.layoutSizingHorizontal = "FILL";
-      fixW(n, T_NAME);
-      fixW(t, T_TYPE);
-      d.layoutSizingHorizontal = "FILL";
-      d.textAutoResize = "HEIGHT";
-    }
-    return rows.length;
+    return await table(
+      into,
+      "Props 표",
+      ["name", "type", "description"],
+      rows.map((r) => [r.name, r.type, r.desc]),
+      [T_NAME, T_TYPE, null],
+    );
   };
 
   /**
-   * **부품 차례** — 컴파운드가 무엇 무엇으로 되어 있는지 한자리에서 보여 준다.
+   * **부품 목록** — 이 시트가 무엇 무엇을 다루는지 한자리에서 보여 준다. `N.1` 자리다.
    *
-   * 이게 없으면 시트가 루트 표에서 곧장 첫 부품으로 뛰어들어, 읽는 사람이 끝까지 스크롤해야
-   * 부품이 몇인지 안다. `이름 · 무엇` 두 칸이고 설명은 `meta` 의 `설명` 을 그대로 쓴다.
+   * 이게 없으면 시트가 곧장 첫 부품으로 뛰어들어, 읽는 사람이 끝까지 스크롤해야 절이 몇인지
+   * 안다. **`#` 칸에 절 번호를 그대로 적는다** — `28.4` 를 보고 내려가면 `28.4. Item` 이 있다.
+   *
+   * @param 절들 - `[{ 번호, 이름, 무엇 }]`.
    */
-  const partIndex = async (into, parts) => {
-    const M = meta();
-    if (!M || parts.length < 2) return 0;
-
-    const blk = box("부품", "VERTICAL", GAP_LABEL);
+  const partIndex = async (into, 절들, 번호) => {
+    const blk = box("부품 목록", "VERTICAL", GAP_LABEL);
     into.appendChild(blk);
-    blk.appendChild(await text("부품", "Title/Small", "fgColor/default", "Head"));
-
-    const tbl = box("부품 표", "VERTICAL", 0);
-    blk.appendChild(tbl);
-
-    const line = async (cells, style, color, head) => {
-      const r = box(head ? "Head" : `Row/${cells[0]}`, "HORIZONTAL", T_GAP, { align: "MIN" });
-      r.paddingTop = r.paddingBottom = 8;
-      if (head) {
-        r.strokes = solid("borderColor/muted");
-        r.strokeLeftWeight = r.strokeRightWeight = r.strokeTopWeight = 0;
-        r.strokeBottomWeight = 1;
-        r.paddingTop = 0;
-      }
-      tbl.appendChild(r);
-      const made = [];
-      for (const [i, c] of cells.entries()) made.push(await text(c, style, color, ["Name", "Desc"][i]));
-      for (const t of made) r.appendChild(t);
-      return made;
-    };
-
-    const 칸들 = [await line(["name", "무엇"], "Caption", "fgColor/muted", true)];
-    for (const full of parts) {
-      const short = full.includes("/") ? full.split("/").slice(1).join("/") : full;
-      칸들.push(await line([short, M.of(full)?.설명 ?? ""], "Body/Small", "fgColor/default", false));
-    }
-
-    fixW(tbl, DOC_W);
-    for (const [n, d] of 칸들) {
-      n.parent.layoutSizingHorizontal = "FILL";
-      fixW(n, T_NAME);
-      d.layoutSizingHorizontal = "FILL";
-      d.textAutoResize = "HEIGHT";
-    }
-    return parts.length;
+    blk.appendChild(await text(`${번호} 부품 목록`, "Title/Medium", "fgColor/default", "Head"));
+    return await table(
+      blk,
+      "부품 목록 표",
+      ["#", "name", "무엇"],
+      절들.map((절) => [절.번호, 절.이름, 절.무엇]),
+      [T_NUM, T_NAME, null],
+    );
   };
 
   /** 세트를 오른쪽 덤프로 접는다. */
@@ -425,12 +427,14 @@ globalThis.__arka.spec = (() => {
       sheet.appendChild(doc);
       const head = box("Head", "VERTICAL", 6);
       doc.appendChild(head);
-      head.appendChild(await text(setName, "Title/Large", "fgColor/default", "Title"));
+      const N = meta()?.자리(setName) ? String(meta().자리(setName).번호) : null;
+      head.appendChild(await text(N ? `${N}. ${setName}` : setName, "Title/Large", "fgColor/default", "Title"));
       if (set.description) head.appendChild(await text(set.description, "Caption", "fgColor/muted", "Source"));
 
       const 표 = await propTable(doc, setName);
       const axisW = await measureAxes([set]);
-      const 인스턴스 = await blocks(doc, set, { defaults, axisW });
+      // 부품이 없으니 절이 곧 견본 묶음이다 — `6.1. Props` · `6.2. CSS-State`.
+      const 인스턴스 = await blocks(doc, set, { defaults, axisW, prefix: N ? `${N}.` : "", 층: "Title/Medium" });
       // 덤프가 시트마다 같은 x 에서 시작하도록 문서 너비를 못 박는다. 다만 축 값이 많아
       // 줄이 더 길면 그쪽에 맞춘다 — 고정폭보다 넓은 줄은 삐져나가기 때문이다.
       fixW(doc, Math.max(DOC_W, Math.ceil(doc.width)));
@@ -450,19 +454,20 @@ globalThis.__arka.spec = (() => {
     },
 
     /**
-     * **컴파운드 한 장.** 부품 여럿을 한 시트에 블록으로 쌓고, 덤프도 한 칸에 모은다.
-     * `parts` 는 `["Menu/Content", "Menu/Item", …]` 처럼 세트·컴포넌트 이름이다.
+     * **컴파운드 한 장.** 부품 여럿을 한 시트에 절로 쌓고, 덤프도 한 칸에 모은다.
+     *
+     * `parts` 를 안 주면 `meta` 의 `부품` 을 읽는다 — 거기가 정본이다.
+     * **루트는 어느 목록에도 안 적는다. 여기서 맨 뒤에 붙인다** — 작은 조각부터 읽고
+     * 마지막에 전체를 보는 차례다(두 페이지 공통).
      */
-    async group(name, parts, { defaults = null, source = null } = {}) {
+    async group(name, parts = meta()?.of(name)?.부품 ?? [], { defaults = null, source = null } = {}) {
       if (!Object.keys(S).length) await this.boot();
       // **`가상: true` 인 부품은 Figma 노드가 없다** — 표만 세우고 견본은 건너뛴다.
       // (`Menu/Trigger`·`NavList/Group` 처럼 코드에만 있는 부품이 시트에서 사라지지 않게.)
-      const nodes = parts.map((p) => findNode(p));
-      // **루트가 부품 목록에 없어도 제 노드는 이 시트 것이다**(`FormControl`·`Banner`·`Dialog`).
-      // 부품이 전부 가상이면 닻이 이것 하나뿐이라, 없으면 되그릴 자리를 못 찾는다.
-      const rootNode = parts.includes(name) ? null : findNode(name);
+      const 이름들 = [...parts, name];
+      const nodes = 이름들.map((p) => findNode(p));
       const sheetName = `${name} Spec`;
-      const home = unwrap([...(rootNode ? [rootNode] : []), ...nodes.filter(Boolean)], sheetName);
+      const home = unwrap(nodes.filter(Boolean), sheetName);
       // 부품이 저마다 제 시트를 갖고 있었다면 그것도 걷는다.
       for (const p of parts) for (const c of [...home.children]) if (c.name === `${p} Spec`) c.remove();
 
@@ -473,40 +478,60 @@ globalThis.__arka.spec = (() => {
       sheet.appendChild(doc);
       const head = box("Head", "VERTICAL", 6);
       doc.appendChild(head);
-      head.appendChild(await text(name, "Title/Large", "fgColor/default", "Title"));
-      const src = source ?? nodes.find((n) => n?.description)?.description;
+      const 자리 = meta()?.자리(name) ?? null;
+      const N = 자리 ? String(자리.번호) : null;
+      head.appendChild(await text(N ? `${N}. ${name}` : name, "Title/Large", "fgColor/default", "Title"));
+      // **루트의 설명을 먼저 쓴다.** 노드 쪽을 먼저 보면 루트가 가상일 때(`Menu`) 노드가 있는
+      // 첫 부품의 것을 집어 와 `Menu` 자리에 `Menu.Content` 의 설명이 선다.
+      const src = source ?? meta()?.of(name)?.설명 ?? nodes.find((n) => n?.description)?.description;
       if (src) head.appendChild(await text(src, "Caption", "fgColor/muted", "Source"));
 
       const axisW = await measureAxes(nodes.filter(Boolean));
-      // **부품 차례가 먼저다** — 무엇으로 되어 있는지 보고 나서 하나씩 읽는다.
-      const 차례 = await partIndex(doc, parts);
-      // 묶음 이름이 부품 이름과 같으면(`TitleBar` 묶음의 첫 부품이 `TitleBar`) 머리 표를
-      // 생략한다 — 안 그러면 같은 표가 두 번 뜬다.
+      // **`N.1` 은 부품 목록, 절은 `N.2` 부터.** 차례의 `#` 와 절 제목이 글자로 같아야 눈이 따라간다.
+      const 짧게 = (full) => (full.includes("/") ? full.split("/").slice(1).join("/") : full);
+      const 절들 = 이름들.map((full, i) => ({
+        번호: N ? `${N}.${String(i + 2)}` : String(i + 1),
+        이름: 짧게(full),
+        무엇: meta()?.of(full)?.설명 ?? "",
+        full,
+      }));
+      // **목록이 먼저다** — 무엇으로 되어 있는지 보고 나서 하나씩 읽는다.
+      const 차례 = await partIndex(doc, 절들, N ? `${N}.1.` : "1.");
+
       let 인스턴스 = 0,
-        표 = parts.includes(name) ? 0 : await propTable(doc, name);
+        표 = 0;
       for (const [i, node] of nodes.entries()) {
-        const short = parts[i].includes("/") ? parts[i].split("/").slice(1).join("/") : parts[i];
-        const block = box(`Part/${short}`, "VERTICAL", GAP_AXIS);
+        const 절 = 절들[i];
+        const 루트인가 = i === nodes.length - 1;
+        const block = box(`Part/${절.이름}`, "VERTICAL", GAP_AXIS);
         doc.appendChild(block);
         // 제목과 설명은 한 머리다 — 떼어 놓으면 설명이 아래 표에 붙어 보인다.
+        // 루트는 설명을 안 단다 — 시트 머리에 이미 같은 줄이 섰다.
         const 머리 = box("Head", "VERTICAL", 6);
         block.appendChild(머리);
-        머리.appendChild(await text(short, "Title/Small", "fgColor/default", "Part"));
-        const 설명 = meta()?.of(parts[i])?.설명;
-        if (설명) 머리.appendChild(await text(설명, "Caption", "fgColor/muted", "PartDesc"));
-        표 += await propTable(block, parts[i]);
+        머리.appendChild(await text(`${절.번호}. ${절.이름}`, "Title/Medium", "fgColor/default", "Part"));
+        if (절.무엇 && !루트인가) 머리.appendChild(await text(절.무엇, "Caption", "fgColor/muted", "PartDesc"));
+        표 += await propTable(block, 절.full);
         if (!node) continue; // 가상 부품 — 표까지만
-        const n = await blocks(block, node, { defaults: defaults?.[parts[i]] ?? null, axisW, metaName: parts[i] });
+        const n = await blocks(block, node, {
+          defaults: defaults?.[절.full] ?? null,
+          axisW,
+          metaName: 절.full,
+          prefix: `${절.번호}.`,
+        });
         인스턴스 += n;
-        // 축도 속성도 없는 부품 — 견본 하나로 족하다.
+        // 축도 속성도 없는 부품 — 견본 하나로 족하다. 제목을 달아야 번호가 안 비어 보인다.
         if (!n) {
+          const blk = box("견본", "VERTICAL", GAP_AXIS);
+          block.appendChild(blk);
+          blk.appendChild(await text(`${절.번호}.1. 견본`, "Title/Small", "fgColor/default", "Head"));
           const r = box("Sample", "HORIZONTAL", GAP_CELL, { align: "MIN" });
-          block.appendChild(r);
+          blk.appendChild(r);
           const inst =
             node.type === "COMPONENT_SET"
               ? (node.defaultVariant ?? node.children[0]).createInstance()
               : node.createInstance();
-          inst.name = short;
+          inst.name = 절.이름;
           r.appendChild(inst);
           인스턴스 += 1;
         }
@@ -516,10 +541,6 @@ globalThis.__arka.spec = (() => {
       const dump = box(`${name} Variants`, "VERTICAL", 20);
       sheet.appendChild(dump);
       dump.appendChild(await text("Variants", "Caption", "fgColor/muted", "Caption"));
-      if (rootNode) {
-        if (rootNode.type === "COMPONENT_SET") await dumpInto(dump, rootNode);
-        else dump.appendChild(rootNode);
-      }
       for (const node of nodes) {
         if (!node) continue;
         if (node.type === "COMPONENT_SET") await dumpInto(dump, node);
@@ -532,10 +553,7 @@ globalThis.__arka.spec = (() => {
         차례,
         인스턴스,
         표,
-        변형: [rootNode, ...nodes].reduce(
-          (a, n) => a + (n ? (n.type === "COMPONENT_SET" ? n.children.length : 1) : 0),
-          0,
-        ),
+        변형: nodes.reduce((a, n) => a + (n ? (n.type === "COMPONENT_SET" ? n.children.length : 1) : 0), 0),
         크기: `${Math.round(sheet.width)}x${Math.round(sheet.height)}`,
       };
     },
@@ -550,13 +568,73 @@ globalThis.__arka.spec = (() => {
       sheet.appendChild(doc);
       const head = box("Head", "VERTICAL", 6);
       doc.appendChild(head);
-      head.appendChild(await text(comp.name, "Title/Large", "fgColor/default", "Title"));
+      const N = meta()?.자리(comp.name) ? String(meta().자리(comp.name).번호) : null;
+      head.appendChild(await text(N ? `${N}. ${comp.name}` : comp.name, "Title/Large", "fgColor/default", "Title"));
       if (comp.description) head.appendChild(await text(comp.description, "Caption", "fgColor/muted", "Source"));
       const 표 = await propTable(doc, comp.name);
       doc.appendChild(comp);
-      const 인스턴스 = await blocks(doc, comp, { axisW: await measureAxes([comp]) });
+      const 인스턴스 = await blocks(doc, comp, {
+        axisW: await measureAxes([comp]),
+        prefix: N ? `${N}.` : "",
+        층: "Title/Medium",
+      });
       fixW(doc, Math.max(DOC_W, Math.ceil(doc.width)));
       return { 세트: comp.name, 인스턴스, 표, 변형: 0, 크기: `${Math.round(sheet.width)}x${Math.round(sheet.height)}` };
+    },
+
+    /**
+     * **페이지 목차 한 장.** `# · name · 묶음 · 무엇` 네 칸으로 시트 전부를 적는다.
+     *
+     * 번호는 `meta.자리()` 가 내고 시트 제목의 `N` 과 같은 값이다 — 목차에서 28을 보고
+     * `28. Menu` 를 찾아간다. 시트보다 **앞에** 놓는다.
+     */
+    async toc(pageName) {
+      if (!Object.keys(S).length) await this.boot();
+      await figma.loadAllPagesAsync();
+      const page = figma.root.children.find((p) => p.name === pageName);
+      if (!page) throw new Error(`페이지 없음: ${pageName}`);
+      const 묶음들 = meta()?.묶음?.[pageName];
+      if (!묶음들) throw new Error(`묶음 없음: ${pageName}`);
+
+      const 이름 = `${pageName} 목차`;
+      for (const c of [...page.children]) if (c.name === 이름) c.remove();
+      const sec = page.children.find((c) => c.type === "SECTION" && c.name === "Components");
+      const home = sec ?? page;
+      for (const c of [...home.children]) if (c.name === 이름) c.remove();
+
+      const frame = box(이름, "VERTICAL", GAP_LABEL, { fill: "bgColor/default", pad: PAD });
+      home.appendChild(frame);
+      frame.appendChild(await text(이름, "Title/Large", "fgColor/default", "Title"));
+
+      const 줄들 = [];
+      for (const [묶음이름, 이름들] of 묶음들)
+        for (const n of 이름들) 줄들.push([String(meta().자리(n).번호), n, 묶음이름, meta().of(n)?.설명 ?? ""]);
+      await table(frame, "목차 표", ["#", "name", "묶음", "무엇"], 줄들, [T_NUM, T_NAME, T_GROUP, null], {
+        폭: DOC_W + T_GROUP + T_GAP,
+      });
+
+      // **맨 앞으로 보낸다.** `insertChild(0, …)` 은 오토레이아웃 안에서도 차례를 바꾼다.
+      home.insertChild(0, frame);
+      return { 목차: pageName, 줄: 줄들.length };
+    },
+
+    /**
+     * **페이지를 통째로 되그린다.** `묶음` 차례대로 `부품` 이 있으면 `group()`, 없으면 `sheet()`.
+     *
+     * **플러그인은 한 번에 29초**라 한 호출에 한두 장이 한계다. `from`·`to` 로 잘라 부른다
+     * (1부터 세는 닫힌 구간). 손으로 부품 목록을 넘기던 것이 없어져 되풀이가 된다.
+     */
+    async page(pageName, { from = 1, to = Infinity } = {}) {
+      if (!Object.keys(S).length) await this.boot();
+      const 묶음들 = meta()?.묶음?.[pageName];
+      if (!묶음들) throw new Error(`묶음 없음: ${pageName}`);
+      const 이름들 = 묶음들.flatMap(([, ns]) => ns).slice(from - 1, to);
+      const 한것 = [];
+      for (const n of 이름들) {
+        const 부품 = meta().of(n)?.부품;
+        한것.push(부품?.length ? await this.group(n) : await this.sheet(n));
+      }
+      return 한것;
     },
 
     /**
