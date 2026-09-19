@@ -63,12 +63,52 @@
 
 ### PR과 머지
 
-절차와 예시는 [workflow.md](workflow.md)에 있다. 여기는 결정만 둔다(→ [ADR 0005](adr/0005-ci-gate.md)).
+GitHub Flow다. `main` 하나가 언제나 배포 가능하고 나머지는 짧게 사는 브랜치다(→ [ADR 0005](adr/0005-ci-gate.md)).
+
+```sh
+git switch -c feat/검색-패널        # main에서 딴다
+# … 작업 …
+pnpm --filter ops check             # 라운드마다
+git push -u origin HEAD
+gh pr create                        # 제목은 아래 형식으로
+```
 
 - **`main`에 직접 푸시하지 않는다. 합치는 길은 PR 하나다.**
 - **머지는 squash다.** 그래서 **PR 제목이 곧 `main`의 커밋 메시지**이고, 형식은 `<타입>(<scope>): <한글 설명>`이다. 브랜치 안의 커밋 메시지는 그대로 한글 자연문이다 — squash되어 사라진다.
 - **판정은 사용자가 한다.** 에이전트는 PR을 열 뿐 머지하지 않는다.
 - **CI가 빨가면 코드를 고친다. 설정을 고쳐 통과시키지 않는다.**
+- PR 본문에는 무엇을 왜 바꿨는지, 어떻게 확인했는지를 쓴다. **본문에 "결정한 것 / 확인 필요"를 둔다** — 정해진 결정을 벗어난 판단은 거기에 스스로 신고한다. 리뷰가 그 두 줄부터 읽는다.
+
+| 자리 | 값 |
+| --- | --- |
+| 타입 | `feat` `fix` `refactor` `perf` `docs` `test` `build` `ci` `chore` `revert` |
+| scope | **선택.** 쓴다면 `contracts` `client` `server` `ops` `repo` 중 하나 |
+| 설명 | 한글. 마침표를 찍지 않는다. 제목 전체가 **72자**를 넘지 않는다 |
+
+```sh
+printf '%s' "feat(client): 검색 패널을 연다" | pnpm --filter ops exec commitlint
+```
+
+### 관문
+
+**워크플로는 둘이다.** `ci.yml`의 잡이 `check`와 `deploy`고 `storybook.yml`이 화면을 올린다.
+`check`는 룰셋의 **필수 검사 이름**이라 바꾸지 않는다.
+
+**CI에만 있는 검사를 만들지 않는다.** 빨간불은 로컬에서 같은 한 줄로 재현된다.
+
+| 단계 | 로컬에서 같은 것 |
+| --- | --- |
+| typecheck → lint → test:unit → test:integration → build | `pnpm --filter ops check` — **CI가 부르는 것이 이 명령 그대로다** |
+| PR 제목 형식(PR일 때만) | `printf '%s' "제목" \| pnpm --filter ops exec commitlint` |
+| 워크플로가 말이 되나 | `docker run --rm -v "$PWD:/repo:ro" -w /repo rhysd/actionlint:1.7.7 -no-color` |
+| `src/` 밖 변경이 PR 본문에 적혀 있나(PR일 때만) | `PR_BODY="$(gh pr view --json body -q .body)" node ops/pipeline/outsideSrc.ts origin/main HEAD` |
+| 새 커밋에 시크릿이 있는지 | `docker run --rm -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.30.1 git /repo --gitleaks-ignore-path /repo/ops/.gitleaksignore --redact --no-banner` |
+| 이미지를 굽는다 | `node ops/deploy/build.ts arka:local` |
+| Playwright | `pnpm --filter client run test:e2e` |
+
+**PR 본문이나 제목만 고치면 검사가 다시 돌지 않는다.** `edited` 이벤트를 받지 않기 때문이다 —
+받으면 그 이벤트가 돌던 진짜 검사를 취소하고 그 자리를 대신해 관문이 조용히 빈다(2026-09-13 실측).
+제목이나 본문을 고쳤으면 push하거나 PR을 닫았다 연다.
 
 ### 원칙
 
@@ -258,4 +298,4 @@ E2E는 `pnpm --filter client test:e2e`로 돌린다. 조립이 맞물리는지�
 - [ ] 이번 라운드가 한 가지 관심사인가
 - [ ] 스스로 판단한 지점을 신고했는가
 - [ ] 패키지의 `src/` 밖을 건드렸다면 PR 본문에 **무엇을 왜 바꿨는지** 적었는가 — 승인은 사용자가 PR에서 한다 → [ADR 0003](adr/0003-approval-outside-src.md)
-- [ ] PR을 연다면 **제목이 `<타입>(<scope>): <한글 설명>` 형식인가** → [workflow.md](workflow.md)
+- [ ] PR을 연다면 **제목이 `<타입>(<scope>): <한글 설명>` 형식인가** → 위 「PR과 머지」

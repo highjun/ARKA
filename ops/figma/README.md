@@ -15,7 +15,7 @@
 ## 돌리는 법
 
 ```sh
-node tools/figma/serve.mjs 9230
+node ops/figma/serve.mjs 9230
 ```
 
 그리고 Figma Console MCP의 `figma_execute`에서:

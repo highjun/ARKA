@@ -62,6 +62,34 @@ docker compose -f ops/deploy/compose.yml -f ops/deploy/compose.local.yml up -d -
 curl -s "$ARKA_ORIGIN/api/version"   # Access 뒤라 로그인한 브라우저로 본다
 ```
 
+### 아직 관문에 없는 것
+
+- **VRT** — 기준 이미지는 **검토에서 그 스토리를 Accept할 때 하나씩** 만든다(`CONVENTIONS.md`의
+  테스트 절). 아직 승인된 것이 없어 전부 건너뛴다. 승인이 쌓이면 관문으로 올린다
+  ([TASK-53](tasks/0053.md)).
+- **Docker 경계 스모크**(`pnpm --filter ops test:smoke`) — `check`의 컨테이너 단계와 겹치면서 느리다.
+
+둘 다 `pnpm --filter ops verify`에는 그대로 들어 있다.
+
+## 화면을 어떻게 보나
+
+**PR마다 스토리북이 올라간다.** 봇이 링크를 코멘트로 달고 갱신한다. PR을 닫으면 그 폴더를 지운다.
+
+| | |
+| --- | --- |
+| `main` | `highjun.github.io/ARKASHIC/` |
+| PR | `highjun.github.io/ARKASHIC/pr-<번호>/` |
+
+**PR별 앱 미리보기는 없다.** 예전에는 사용자 기계에 띄웠는데 터널·DNS·Access를 PR마다 만들고
+지우는 자체 도구가 배포 코드의 대부분이었다(2026-09-13 걷어냈다). 지금은 이렇게 나눠 본다 —
+화면은 스토리북이, 부팅은 `check`의 컨테이너 단계가, 동작은 e2e가 본다.
+
+**앱 전체를 만져 봐야 하면 Codespaces로 그 브랜치를 띄운다**(→ [`.devcontainer/README.md`](../.devcontainer/README.md)).
+포트가 기본 비공개라 GitHub에 로그인한 본인만 닿는다 — 인증이 없는 앱을 공개 URL에 두지 않는다.
+
+**그림의 정본은 Figma다.** 스토리북은 코드가 그린 것을 보여 주고, Figma 시트는 그려야 할 것을
+든다. 시트를 검토하는 잣대는 [figma/review-checklist.md](figma/review-checklist.md)에 있다.
+
 ### 되돌리기
 
 **되돌릴 커밋의 SHA 태그를 당긴다.** 어느 SHA였는지는 Environments 탭이나 `git log`가 안다.

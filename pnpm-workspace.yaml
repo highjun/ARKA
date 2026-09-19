@@ -1,7 +1,6 @@
 packages:
   - "packages/*"
   - "ops"
-  - "tools/references"
 allowBuilds:
   esbuild: true
   simple-git-hooks: true

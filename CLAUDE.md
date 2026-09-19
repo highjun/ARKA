@@ -1,7 +1,6 @@
 # ARKASHIC — 에이전트 작업 규칙
 
 - 규칙 — [CONVENTIONS.md](docs/CONVENTIONS.md)
-- 절차 — [workflow.md](docs/workflow.md)
 - 운영 — [operations.md](docs/operations.md)
 - 결정과 이유 — `docs/adr/`
 - 할 일 — `docs/tasks/`
