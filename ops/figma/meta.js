@@ -502,7 +502,7 @@ globalThis.__arka.meta = (() => {
         tree: { t: "object", d: "주면 `Tab.Split`, 없으면 `Tab.Group` 이 선다. 갈래를 정하는 것이 이 하나다" },
         chrome: { t: "enum", d: "bordered | none. none 이면 테두리를 안 그린다. 기본 bordered" },
       },
-      부품: ["Tab/Strip", "Tab/Header", "Tab/Group", "Tab/Split", "Tab/Actions"],
+      부품: ["Tab/Actions", "Tab/Header", "Tab/Strip", "Tab/Group", "Tab/Split"],
     },
 
     "Menu/Content": {
