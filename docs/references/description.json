@@ -1,0 +1,1367 @@
+{
+  "codemirror-editor-default": {
+    "description": "CodeMirror 6 기본 차림 — 왼쪽 줄 번호 거터에 접기 삼각형이 붙고, 본문은 문법 색칠된 함수 하나다. 높이가 내용에 맞춰 줄어든다",
+    "category": "editor",
+    "product": "CodeMirror 6"
+  },
+  "datasette-preview-filters": {
+    "description": "표 위의 거르개 — 검색칸 한 줄, 그 아래 열 고르개(열 이름이 전부 든 드롭다운)와 값 칸이 한 줄, 맨 아래 실행 줄. 줄을 더해 조건을 쌓는 모양이다",
+    "category": "preview",
+    "product": "Datasette"
+  },
+  "datasette-preview-table": {
+    "description": "SQLite 테이블을 행·열 표로 보여준다. 열이 열아홉이라 표가 화면보다 훨씬 넓고 가로로 흐른다. 머리 줄의 정렬 화살표와 그 위 'Show charting options·Link' 줄이 같이 보인다",
+    "category": "preview",
+    "product": "Datasette"
+  },
+  "obsidian-editor-reading-view-dark": {
+    "description": "마크다운 읽기 모드 본문 — 제목·문단·내부 링크가 글 폭 제한 안에 놓인다. 제목 위계가 크기와 굵기로만 갈린다",
+    "category": "editor",
+    "product": "Obsidian"
+  },
+  "obsidian-editor-reading-view-light": {
+    "description": "마크다운 읽기 모드 본문 — 제목·문단·내부 링크가 글 폭 제한 안에 놓인다. 제목 위계가 크기와 굵기로만 갈린다",
+    "category": "editor",
+    "product": "Obsidian"
+  },
+  "obsidian-knowledge-backlinks-dark": {
+    "description": "본문 아래 붙는 백링크 구역 — 대문자 머리글(LINKS TO THIS PAGE)과 이 문서를 가리키는 문서 목록",
+    "category": "knowledge",
+    "product": "Obsidian"
+  },
+  "obsidian-knowledge-backlinks-light": {
+    "description": "본문 아래 붙는 백링크 구역 — 대문자 머리글(LINKS TO THIS PAGE)과 이 문서를 가리키는 문서 목록",
+    "category": "knowledge",
+    "product": "Obsidian"
+  },
+  "obsidian-knowledge-graph-dark": {
+    "description": "문서 사이 연결을 점과 선으로 그린 272×260 그래프 칸. 오른쪽 위에 펼치기·전체 보기 아이콘 둘이 떠 있고 점마다 문서 이름이 붙는다",
+    "category": "knowledge",
+    "product": "Obsidian"
+  },
+  "obsidian-knowledge-graph-light": {
+    "description": "문서 사이 연결을 점과 선으로 그린 272×260 그래프 칸. 오른쪽 위에 펼치기·전체 보기 아이콘 둘이 떠 있고 점마다 문서 이름이 붙는다",
+    "category": "knowledge",
+    "product": "Obsidian"
+  },
+  "obsidian-shell-left-sidebar-dark": {
+    "description": "왼쪽 사이드바 320px — 맨 위 언어 고르개, 그 아래 문서 트리가 한 단계 들여쓰기로 이어진다. 구분선 없이 여백으로만 묶는다",
+    "category": "shell",
+    "product": "Obsidian"
+  },
+  "obsidian-shell-left-sidebar-light": {
+    "description": "왼쪽 사이드바 320px — 맨 위 언어 고르개, 그 아래 문서 트리가 한 단계 들여쓰기로 이어진다. 구분선 없이 여백으로만 묶는다",
+    "category": "shell",
+    "product": "Obsidian"
+  },
+  "obsidian-shell-right-sidebar-dark": {
+    "description": "오른쪽 보조 사이드바 320px — 위에 작은 그래프 칸, 아래에 현재 문서의 제목 목차(ON THIS PAGE)가 구역 둘로 쌓인다",
+    "category": "shell",
+    "product": "Obsidian"
+  },
+  "obsidian-shell-right-sidebar-light": {
+    "description": "오른쪽 보조 사이드바 320px — 위에 작은 그래프 칸, 아래에 현재 문서의 제목 목차(ON THIS PAGE)가 구역 둘로 쌓인다",
+    "category": "shell",
+    "product": "Obsidian"
+  },
+  "primer-primitive-action-bar-dark": {
+    "description": "오른쪽에 붙는 아이콘만의 도구 줄. 굵게·기울임·코드·링크 뒤에 세로 구분선을 두고 추가·찾기·목록 넷이 이어진다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-action-bar-light": {
+    "description": "오른쪽에 붙는 아이콘만의 도구 줄. 굵게·기울임·코드·링크 뒤에 세로 구분선을 두고 추가·찾기·목록 넷이 이어진다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-action-list-dark": {
+    "description": "글자만 있는 항목 세 줄(Copy link · Quote reply · Edit comment)이 세로로 쌓인 목록. 항목 사이 구분선이 없고 좌우 여백이 같다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-action-list-light": {
+    "description": "글자만 있는 항목 세 줄(Copy link · Quote reply · Edit comment)이 세로로 쌓인 목록. 항목 사이 구분선이 없고 좌우 여백이 같다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-action-menu-dark": {
+    "description": "누르면 목록이 열리는 버튼 하나(Open menu). 닫힌 상태라 방아쇠만 보인다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-action-menu-light": {
+    "description": "누르면 목록이 열리는 버튼 하나(Open menu). 닫힌 상태라 방아쇠만 보인다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-anchored-overlay-dark": {
+    "description": "떠 있는 판을 붙일 기준 버튼(Button) 하나. 닫힌 상태다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-anchored-overlay-light": {
+    "description": "떠 있는 판을 붙일 기준 버튼(Button) 하나. 닫힌 상태다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-announce-dark": {
+    "description": "화면 낭독기에 알릴 글 한 줄(Default message). 보이는 모양은 평범한 글줄이다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-announce-light": {
+    "description": "화면 낭독기에 알릴 글 한 줄(Default message). 보이는 모양은 평범한 글줄이다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-aria-alert-dark": {
+    "description": "긴급 알림으로 읽히는 글 한 줄(Default message). 시각적으로는 글줄과 같다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-aria-alert-light": {
+    "description": "긴급 알림으로 읽히는 글 한 줄(Default message). 시각적으로는 글줄과 같다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-aria-status-dark": {
+    "description": "상태 변화를 알리는 글 한 줄(Default message). 시각적으로는 글줄과 같다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-aria-status-light": {
+    "description": "상태 변화를 알리는 글 한 줄(Default message). 시각적으로는 글줄과 같다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-autocomplete-dark": {
+    "description": "라벨이 붙은 입력칸과 그 위에 누른 키를 보여주는 줄(Last key pressed: none). 후보 목록은 닫혀 있다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-autocomplete-light": {
+    "description": "라벨이 붙은 입력칸과 그 위에 누른 키를 보여주는 줄(Last key pressed: none). 후보 목록은 닫혀 있다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-avatar-dark": {
+    "description": "동그랗게 잘린 아바타 한 장. 24px 남짓이다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-avatar-light": {
+    "description": "동그랗게 잘린 아바타 한 장. 24px 남짓이다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-avatar-stack-dark": {
+    "description": "동그란 아바타 셋이 서로 겹쳐 왼쪽부터 포개진 줄. 앞의 것이 뒤의 것을 테두리로 덮는다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-avatar-stack-light": {
+    "description": "동그란 아바타 셋이 서로 겹쳐 왼쪽부터 포개진 줄. 앞의 것이 뒤의 것을 테두리로 덮는다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-banner-dark": {
+    "description": "아이콘·제목·본문·버튼 둘이 한 칸에 담긴 알림 띠. 'Info'로 톤을 밝히고 본문은 여러 줄로 감긴다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-banner-light": {
+    "description": "아이콘·제목·본문·버튼 둘이 한 칸에 담긴 알림 띠. 'Info'로 톤을 밝히고 본문은 여러 줄로 감긴다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-blankslate-dark": {
+    "description": "비어 있음을 알리는 큰 판 — 제목(Welcome to the mona wiki!), 여러 줄 설명, 아래에 행동 버튼. 세로 여백이 크다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-blankslate-light": {
+    "description": "비어 있음을 알리는 큰 판 — 제목(Welcome to the mona wiki!), 여러 줄 설명, 아래에 행동 버튼. 세로 여백이 크다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-branch-name-dark": {
+    "description": "브랜치 이름을 고정폭 글꼴과 알약 배경으로 감싼 짧은 표식(branch_name)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-branch-name-light": {
+    "description": "브랜치 이름을 고정폭 글꼴과 알약 배경으로 감싼 짧은 표식(branch_name)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-breadcrumbs-dark": {
+    "description": "구분자로 이어지는 경로 링크 줄(Home › About › Team). 마지막 칸이 현재 자리다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-breadcrumbs-light": {
+    "description": "구분자로 이어지는 경로 링크 줄(Home › About › Team). 마지막 칸이 현재 자리다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-button-dark": {
+    "description": "기본 버튼 하나(Default). 높이 32px, 테두리와 옅은 배경을 가진다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-button-group-dark": {
+    "description": "버튼 셋이 틈 없이 붙어 한 덩어리가 된 줄. 바깥 모서리만 둥글다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-button-group-light": {
+    "description": "버튼 셋이 틈 없이 붙어 한 덩어리가 된 줄. 바깥 모서리만 둥글다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-button-light": {
+    "description": "기본 버튼 하나(Default). 높이 32px, 테두리와 옅은 배경을 가진다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-card-dark": {
+    "description": "제목·설명·보조 정보(3 contributors)를 담은 상자. 테두리로 구역을 만들고 안쪽 여백이 넓다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-card-light": {
+    "description": "제목·설명·보조 정보(3 contributors)를 담은 상자. 테두리로 구역을 만들고 안쪽 여백이 넓다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-checkbox-dark": {
+    "description": "네모 체크 상자와 라벨 한 쌍(Default label)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-checkbox-group-dark": {
+    "description": "제목(Choices) 아래 체크 상자 셋이 세로로 선다. 하나에는 필수 표시(*)가 붙는다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-checkbox-group-light": {
+    "description": "제목(Choices) 아래 체크 상자 셋이 세로로 선다. 하나에는 필수 표시(*)가 붙는다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-checkbox-light": {
+    "description": "네모 체크 상자와 라벨 한 쌍(Default label)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-confirmation-dialog-dark": {
+    "description": "확인을 묻는 대화상자를 여는 버튼(Show dialog). 닫힌 상태다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-confirmation-dialog-light": {
+    "description": "확인을 묻는 대화상자를 여는 버튼(Show dialog). 닫힌 상태다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-counter-label-dark": {
+    "description": "숫자를 감싼 작은 알약(12). 옆 글에 붙어 개수를 나타낸다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-counter-label-light": {
+    "description": "숫자를 감싼 작은 알약(12). 옆 글에 붙어 개수를 나타낸다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-css-component-dark": {
+    "description": "CSS만으로 만든 버튼 하나(Default). React 컴포넌트와 같은 모양을 클래스로 낸다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-css-component-light": {
+    "description": "CSS만으로 만든 버튼 하나(Default). React 컴포넌트와 같은 모양을 클래스로 낸다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-data-table-dark": {
+    "description": "제목·부제 아래 열 다섯짜리 표 — 저장소 이름·종류·갱신 시각·상태 둘. 머리 줄과 본문 줄의 높이가 다르다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-data-table-light": {
+    "description": "제목·부제 아래 열 다섯짜리 표 — 저장소 이름·종류·갱신 시각·상태 둘. 머리 줄과 본문 줄의 높이가 다르다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-details-dark": {
+    "description": "펼침 삼각형과 요약 줄(See Details). 접힌 상태다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-details-light": {
+    "description": "펼침 삼각형과 요약 줄(See Details). 접힌 상태다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-dialog-dark": {
+    "description": "대화상자를 여는 버튼(Show dialog). 닫힌 상태다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-dialog-light": {
+    "description": "대화상자를 여는 버튼(Show dialog). 닫힌 상태다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-filtered-action-list-dark": {
+    "description": "제목·설명·검색칸 아래 라벨 목록이 이어진다. 치는 대로 걸러진다는 안내가 검색칸 자리에 적혀 있다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-filtered-action-list-light": {
+    "description": "제목·설명·검색칸 아래 라벨 목록이 이어진다. 치는 대로 걸러진다는 안내가 검색칸 자리에 적혀 있다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-form-control-dark": {
+    "description": "라벨(필수 표시 포함)·입력칸·아래 설명 한 줄이 한 덩어리로 묶인 폼 한 칸",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-form-control-light": {
+    "description": "라벨(필수 표시 포함)·입력칸·아래 설명 한 줄이 한 덩어리로 묶인 폼 한 칸",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-header-dark": {
+    "description": "제품 머리 줄 — 왼쪽 로고(GitHub)와 메뉴. 어두운 배경에 높이 64px다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-header-light": {
+    "description": "제품 머리 줄 — 왼쪽 로고(GitHub)와 메뉴. 어두운 배경에 높이 64px다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-heading-dark": {
+    "description": "제목 글 한 줄(Default H2 Heading). 본문보다 크고 굵다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-heading-light": {
+    "description": "제목 글 한 줄(Default H2 Heading). 본문보다 크고 굵다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-hidden-dark": {
+    "description": "화면 폭에 따라 감추고 드러내는 것을 설명하는 글줄. 보이는 모양은 평범한 문단이다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-hidden-light": {
+    "description": "화면 폭에 따라 감추고 드러내는 것을 설명하는 글줄. 보이는 모양은 평범한 문단이다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-icon-button-dark": {
+    "description": "아이콘 하나만 든 정사각 버튼(하트). 32×32에 글자가 없다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-icon-button-light": {
+    "description": "아이콘 하나만 든 정사각 버튼(하트). 32×32에 글자가 없다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-inline-message-dark": {
+    "description": "글줄 사이에 끼는 짧은 안내 한 줄(An example inline message)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-inline-message-light": {
+    "description": "글줄 사이에 끼는 짧은 안내 한 줄(An example inline message)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-issue-label-dark": {
+    "description": "이슈 라벨 알약 하나(Issue label). 배경색으로 분류를 나타낸다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-issue-label-light": {
+    "description": "이슈 라벨 알약 하나(Issue label). 배경색으로 분류를 나타낸다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-keybinding-hint-dark": {
+    "description": "단축키를 기호와 글자로 나란히 보이는 칩 줄(shift ⇧ · control ⌃ · k K)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-keybinding-hint-light": {
+    "description": "단축키를 기호와 글자로 나란히 보이는 칩 줄(shift ⇧ · control ⌃ · k K)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-label-dark": {
+    "description": "테두리만 있는 작은 알약 하나(Default)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-label-group-dark": {
+    "description": "알약 열여섯 개가 두 줄로 감기며 늘어선 묶음",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-label-group-light": {
+    "description": "알약 열여섯 개가 두 줄로 감기며 늘어선 묶음",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-label-light": {
+    "description": "테두리만 있는 작은 알약 하나(Default)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-link-button-dark": {
+    "description": "버튼처럼 보이지만 링크로 도는 것(Default). 모양은 기본 버튼과 같다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-link-button-light": {
+    "description": "버튼처럼 보이지만 링크로 도는 것(Default). 모양은 기본 버튼과 같다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-link-dark": {
+    "description": "본문 안의 링크 한 줄(Links are great). 색으로만 구분하고 밑줄이 없다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-link-light": {
+    "description": "본문 안의 링크 한 줄(Links are great). 색으로만 구분하고 밑줄이 없다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-nav-list-dark": {
+    "description": "세로 이동 목록 세 줄(Item 1~3). 현재 항목이 배경으로 강조된다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-nav-list-light": {
+    "description": "세로 이동 목록 세 줄(Item 1~3). 현재 항목이 배경으로 강조된다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-page-header-dark": {
+    "description": "화면 제목 한 줄(Title)과 그 아래 경계선. 높이 65px다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-page-header-light": {
+    "description": "화면 제목 한 줄(Title)과 그 아래 경계선. 높이 65px다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-page-layout-dark": {
+    "description": "머리·본문·옆 칸·바닥 넷으로 나뉜 문서 흐름 레이아웃. 칸마다 이름이 적혀 있다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-page-layout-light": {
+    "description": "머리·본문·옆 칸·바닥 넷으로 나뉜 문서 흐름 레이아웃. 칸마다 이름이 적혀 있다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-pagination-dark": {
+    "description": "이전·다음과 쪽 번호가 한 줄에 놓인 쪽 넘김 줄",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-pagination-light": {
+    "description": "이전·다음과 쪽 번호가 한 줄에 놓인 쪽 넘김 줄",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-popover-dark": {
+    "description": "제목·본문·버튼을 담아 떠 있는 작은 판. 기준 원소를 가리키는 꼭지가 달린다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-popover-light": {
+    "description": "제목·본문·버튼을 담아 떠 있는 작은 판. 기준 원소를 가리키는 꼭지가 달린다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-progress-bar-dark": {
+    "description": "가로로 길고 8px 높이인 진행 막대의 빈 트랙. 채워진 부분이 없는 상태다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-progress-bar-light": {
+    "description": "가로로 길고 8px 높이인 진행 막대의 빈 트랙. 채워진 부분이 없는 상태다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-radio-dark": {
+    "description": "동그란 라디오 단추와 라벨 한 쌍(Label)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-radio-group-dark": {
+    "description": "제목(Choices) 아래 라디오 셋이 세로로 선다. 하나만 고를 수 있다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-radio-group-light": {
+    "description": "제목(Choices) 아래 라디오 셋이 세로로 선다. 하나만 고를 수 있다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-radio-light": {
+    "description": "동그란 라디오 단추와 라벨 한 쌍(Label)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-relative-time-dark": {
+    "description": "시각을 사람이 읽는 꼴로 적은 글 한 줄(on Jan 1, 2020)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-relative-time-light": {
+    "description": "시각을 사람이 읽는 꼴로 적은 글 한 줄(on Jan 1, 2020)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-scrollable-region-dark": {
+    "description": "넘치면 스스로 스크롤 영역이 되는 칸. 안에 줄바꿈 없는 긴 글이 들어 있다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-scrollable-region-light": {
+    "description": "넘치면 스스로 스크롤 영역이 되는 칸. 안에 줄바꿈 없는 긴 글이 들어 있다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-segmented-control-dark": {
+    "description": "붙어 있는 칸 셋 중 하나만 눌린 토글 줄(Preview · Raw · Blame)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-segmented-control-light": {
+    "description": "붙어 있는 칸 셋 중 하나만 눌린 토글 줄(Preview · Raw · Blame)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-select-dark": {
+    "description": "라벨과 드롭다운 한 쌍. 접힌 상태에서 고른 값이 보인다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-select-light": {
+    "description": "라벨과 드롭다운 한 쌍. 접힌 상태에서 고른 값이 보인다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-select-panel-dark": {
+    "description": "라벨(Labels)과 고른 값들(bug, good first issue)을 보이는 고르기 칸. 목록은 닫혀 있다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-select-panel-light": {
+    "description": "라벨(Labels)과 고른 값들(bug, good first issue)을 보이는 고르기 칸. 목록은 닫혀 있다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-spinner-dark": {
+    "description": "도는 원형 대기 표시와 그 아래 글(Loading)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-spinner-light": {
+    "description": "도는 원형 대기 표시와 그 아래 글(Loading)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-split-page-layout-dark": {
+    "description": "머리·옆 칸·본문·바닥으로 나뉘고 옆 칸과 본문 사이를 끌어 넓히는 레이아웃. 뷰포트에 꽉 찬다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-split-page-layout-light": {
+    "description": "머리·옆 칸·본문·바닥으로 나뉘고 옆 칸과 본문 사이를 끌어 넓히는 레이아웃. 뷰포트에 꽉 찬다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-stack-dark": {
+    "description": "자식 셋(First·Second·Third)을 일정한 틈으로 세로로 쌓는 배치 상자",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-stack-light": {
+    "description": "자식 셋(First·Second·Third)을 일정한 틈으로 세로로 쌓는 배치 상자",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-state-label-dark": {
+    "description": "상태를 아이콘과 글로 알리는 알약 하나(Open)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-state-label-light": {
+    "description": "상태를 아이콘과 글로 알리는 알약 하나(Open)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-sub-nav-dark": {
+    "description": "이동 링크 셋이 붙어 한 덩어리가 된 줄(Home · Documentation · Support)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-sub-nav-light": {
+    "description": "이동 링크 셋이 붙어 한 덩어리가 된 줄(Home · Documentation · Support)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-tabs-dark": {
+    "description": "탭 셋과 그 아래 내용 칸. 고른 탭에 밑줄 대신 배경이 붙는다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-tabs-light": {
+    "description": "탭 셋과 그 아래 내용 칸. 고른 탭에 밑줄 대신 배경이 붙는다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-text-dark": {
+    "description": "글 한 줄(Default Text). 크기·굵기·색을 props로 정한다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-text-input-dark": {
+    "description": "라벨과 한 줄 입력칸 한 쌍(Default label)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-text-input-light": {
+    "description": "라벨과 한 줄 입력칸 한 쌍(Default label)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-text-light": {
+    "description": "글 한 줄(Default Text). 크기·굵기·색을 props로 정한다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-textarea-dark": {
+    "description": "라벨과 여러 줄 입력칸 한 쌍. 높이가 넉넉하고 오른쪽 아래에 크기 손잡이가 있다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-textarea-light": {
+    "description": "라벨과 여러 줄 입력칸 한 쌍. 높이가 넉넉하고 오른쪽 아래에 크기 손잡이가 있다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-timeline-dark": {
+    "description": "세로선을 따라 아이콘과 글이 이어지는 이력 목록. 같은 글 셋이 세 마디로 놓인다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-timeline-light": {
+    "description": "세로선을 따라 아이콘과 글이 이어지는 이력 목록. 같은 글 셋이 세 마디로 놓인다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-toggle-switch-dark": {
+    "description": "라벨과 켜짐/꺼짐 스위치 한 쌍. 현재 상태를 글(Off)로도 적는다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-toggle-switch-light": {
+    "description": "라벨과 켜짐/꺼짐 스위치 한 쌍. 현재 상태를 글(Off)로도 적는다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-token-dark": {
+    "description": "지울 수 있는 작은 알약 하나(token)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-token-light": {
+    "description": "지울 수 있는 작은 알약 하나(token)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-tooltip-v2-dark": {
+    "description": "기준 원소 위에 떠서 설명을 주는 작은 검은 판(Delete)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-tooltip-v2-light": {
+    "description": "기준 원소 위에 떠서 설명을 주는 작은 검은 판(Delete)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-topic-tag-dark": {
+    "description": "주제를 나타내는 둥근 알약 하나(react). 링크로 돈다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-topic-tag-light": {
+    "description": "주제를 나타내는 둥근 알약 하나(react). 링크로 돈다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-tree-view-dark": {
+    "description": "접히는 트리 — 폴더(src) 아래 파일 셋이 들여쓰기로 붙고, 각 줄 오른쪽에 상태 글(Added·Modified)이 적힌다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-tree-view-light": {
+    "description": "접히는 트리 — 폴더(src) 아래 파일 셋이 들여쓰기로 붙고, 각 줄 오른쪽에 상태 글(Added·Modified)이 적힌다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-truncate-dark": {
+    "description": "폭을 넘으면 말줄임으로 자르는 글 한 줄(Some example text)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-truncate-light": {
+    "description": "폭을 넘으면 말줄임으로 자르는 글 한 줄(Some example text)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-underline-nav-dark": {
+    "description": "밑줄로 현재 자리를 보이는 이동 줄(Code · Pull requests · Actions · Projects · Wiki)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-underline-nav-light": {
+    "description": "밑줄로 현재 자리를 보이는 이동 줄(Code · Pull requests · Actions · Projects · Wiki)",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-underline-panels-dark": {
+    "description": "밑줄 탭 셋과 그 아래 내용 칸(Panel 1)이 한 덩어리로 묶인다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "primer-primitive-underline-panels-light": {
+    "description": "밑줄 탭 셋과 그 아래 내용 칸(Panel 1)이 한 덩어리로 묶인다",
+    "category": "primitive",
+    "product": "Primer"
+  },
+  "vscode-agent-chat-panel-dark": {
+    "description": "오른쪽 보조 사이드바 300px에 붙은 대화 칸 — 크롬은 사이드바와 같은 35px 제목 줄이고, 본문은 빈 상태 안내와 아래 입력칸이다",
+    "category": "agent",
+    "product": "VSCode"
+  },
+  "vscode-agent-chat-panel-light": {
+    "description": "오른쪽 보조 사이드바 300px에 붙은 대화 칸 — 크롬은 사이드바와 같은 35px 제목 줄이고, 본문은 빈 상태 안내와 아래 입력칸이다",
+    "category": "agent",
+    "product": "VSCode"
+  },
+  "vscode-agent-composer-dark": {
+    "description": "요청 입력칸 276×78 — 여러 줄 입력 영역 아래에 도구 줄이 한 겹 붙는다",
+    "category": "agent",
+    "product": "VSCode"
+  },
+  "vscode-agent-composer-light": {
+    "description": "요청 입력칸 276×78 — 여러 줄 입력 영역 아래에 도구 줄이 한 겹 붙는다",
+    "category": "agent",
+    "product": "VSCode"
+  },
+  "vscode-agent-composer-toolbar-dark": {
+    "description": "입력칸 아래 도구 줄 262×22 — 왼쪽에 첨부·모드(Agent)·모델 고르개, 오른쪽에 보내기. 아래 줄에 실행 위치(Local)와 권한(Default permissions)이 칩으로 적힌다",
+    "category": "agent",
+    "product": "VSCode"
+  },
+  "vscode-agent-composer-toolbar-light": {
+    "description": "입력칸 아래 도구 줄 262×22 — 왼쪽에 첨부·모드(Agent)·모델 고르개, 오른쪽에 보내기. 아래 줄에 실행 위치(Local)와 권한(Default permissions)이 칩으로 적힌다",
+    "category": "agent",
+    "product": "VSCode"
+  },
+  "vscode-agent-extension-panel-dark": {
+    "description": "Open VSX에서 설치한 에이전트 확장이 사이드바에 꽂힌 모양 — 여기서는 시작 화면이다(제공자 고르기 라디오 넷과 Continue·Login 버튼). **키가 없으면 여기까지다** — 대화·도구 승인 화면은 못 얻었다",
+    "category": "agent",
+    "product": "VSCode"
+  },
+  "vscode-agent-extension-panel-light": {
+    "description": "Open VSX에서 설치한 에이전트 확장이 사이드바에 꽂힌 모양 — 여기서는 시작 화면이다(제공자 고르기 라디오 넷과 Continue·Login 버튼). **키가 없으면 여기까지다** — 대화·도구 승인 화면은 못 얻었다",
+    "category": "agent",
+    "product": "VSCode"
+  },
+  "vscode-command-keybindings-dark": {
+    "description": "단축키 표 792×807 — 위에 검색칸, 아래에 명령·키·조건(When)·출처 네 열의 표. 머리글에 '3196 Keybindings'를 적는다",
+    "category": "command",
+    "product": "VSCode"
+  },
+  "vscode-command-keybindings-light": {
+    "description": "단축키 표 792×807 — 위에 검색칸, 아래에 명령·키·조건(When)·출처 네 열의 표. 머리글에 '3196 Keybindings'를 적는다",
+    "category": "command",
+    "product": "VSCode"
+  },
+  "vscode-command-keybindings-row-dark": {
+    "description": "단축키 표의 행 하나 24px — 명령·키 칩·조건식·출처가 네 칸에 나뉜다",
+    "category": "command",
+    "product": "VSCode"
+  },
+  "vscode-command-keybindings-row-hover-dark": {
+    "description": "단축키 표의 행 하나 24px — 명령·키 칩·조건식·출처가 네 칸에 나뉜다. 마우스를 얹은 상태다",
+    "category": "command",
+    "product": "VSCode"
+  },
+  "vscode-command-keybindings-row-hover-light": {
+    "description": "단축키 표의 행 하나 24px — 명령·키 칩·조건식·출처가 네 칸에 나뉜다. 마우스를 얹은 상태다",
+    "category": "command",
+    "product": "VSCode"
+  },
+  "vscode-command-keybindings-row-light": {
+    "description": "단축키 표의 행 하나 24px — 명령·키 칩·조건식·출처가 네 칸에 나뉜다",
+    "category": "command",
+    "product": "VSCode"
+  },
+  "vscode-command-palette-dark": {
+    "description": "명령 팔레트 602×408 — `>`가 든 입력칸 아래 '785 Results'와 명령 목록. 줄마다 오른쪽에 단축키 칩이 붙는다",
+    "category": "command",
+    "product": "VSCode"
+  },
+  "vscode-command-palette-light": {
+    "description": "명령 팔레트 602×408 — `>`가 든 입력칸 아래 '785 Results'와 명령 목록. 줄마다 오른쪽에 단축키 칩이 붙는다",
+    "category": "command",
+    "product": "VSCode"
+  },
+  "vscode-command-palette-row-dark": {
+    "description": "팔레트 목록 행 22px — 명령 이름 한 줄이다",
+    "category": "command",
+    "product": "VSCode"
+  },
+  "vscode-command-palette-row-hover-dark": {
+    "description": "팔레트 목록 행 22px — 명령 이름 한 줄이다. 마우스를 얹은 상태다",
+    "category": "command",
+    "product": "VSCode"
+  },
+  "vscode-command-palette-row-hover-light": {
+    "description": "팔레트 목록 행 22px — 명령 이름 한 줄이다. 마우스를 얹은 상태다",
+    "category": "command",
+    "product": "VSCode"
+  },
+  "vscode-command-palette-row-light": {
+    "description": "팔레트 목록 행 22px — 명령 이름 한 줄이다",
+    "category": "command",
+    "product": "VSCode"
+  },
+  "vscode-command-quick-open-dark": {
+    "description": "같은 위젯의 파일 열기 모드 602×50 — 접두를 떼면 명령이 아니라 파일을 고른다. 결과가 없으면 높이가 입력칸 한 줄로 줄어든다",
+    "category": "command",
+    "product": "VSCode"
+  },
+  "vscode-command-quick-open-light": {
+    "description": "같은 위젯의 파일 열기 모드 602×50 — 접두를 떼면 명령이 아니라 파일을 고른다. 결과가 없으면 높이가 입력칸 한 줄로 줄어든다",
+    "category": "command",
+    "product": "VSCode"
+  },
+  "vscode-editor-find-widget-dark": {
+    "description": "에디터 안 찾기 위젯 419×33 — 오른쪽 위에 떠서 본문을 밀지 않는다. 왼쪽 삼각형으로 바꾸기 줄을 펼치고, 결과가 없으면 'No results'를 안에 적는다",
+    "category": "editor",
+    "product": "VSCode"
+  },
+  "vscode-editor-find-widget-light": {
+    "description": "에디터 안 찾기 위젯 419×33 — 오른쪽 위에 떠서 본문을 밀지 않는다. 왼쪽 삼각형으로 바꾸기 줄을 펼치고, 결과가 없으면 'No results'를 안에 적는다",
+    "category": "editor",
+    "product": "VSCode"
+  },
+  "vscode-editor-gutter-dark": {
+    "description": "왼쪽 거터 66px — 글리프 자리와 줄 번호가 나란히 서고, 접기 삼각형이 그 사이에 든다",
+    "category": "editor",
+    "product": "VSCode"
+  },
+  "vscode-editor-gutter-light": {
+    "description": "왼쪽 거터 66px — 글리프 자리와 줄 번호가 나란히 서고, 접기 삼각형이 그 사이에 든다",
+    "category": "editor",
+    "product": "VSCode"
+  },
+  "vscode-editor-markdown-preview-dark": {
+    "description": "마크다운 프리뷰가 앉은 에디터 칸 — 제목·문단·불릿·굵은 글씨가 본문 폭 안에 렌더된다. 웹뷰가 탭 하나로 꽂힌 모양이다",
+    "category": "editor",
+    "product": "VSCode"
+  },
+  "vscode-editor-markdown-preview-light": {
+    "description": "마크다운 프리뷰가 앉은 에디터 칸 — 제목·문단·불릿·굵은 글씨가 본문 폭 안에 렌더된다. 웹뷰가 탭 하나로 꽂힌 모양이다",
+    "category": "editor",
+    "product": "VSCode"
+  },
+  "vscode-editor-minimap-dark": {
+    "description": "미니맵 96px — 코드를 축소해 그린 캔버스 위에 현재 보이는 범위가 밝은 띠로 얹힌다",
+    "category": "editor",
+    "product": "VSCode"
+  },
+  "vscode-editor-minimap-light": {
+    "description": "미니맵 96px — 코드를 축소해 그린 캔버스 위에 현재 보이는 범위가 밝은 띠로 얹힌다",
+    "category": "editor",
+    "product": "VSCode"
+  },
+  "vscode-editor-suggest-dark": {
+    "description": "자동완성 목록 432×230 — 줄마다 종류 아이콘과 이름이 서고, **고른 줄에만** 오른쪽에 서명이 흐린 글씨로 같은 줄에 덧붙는다. 별도 설명 칸은 접혀 있고 네 변이 모두 끌 수 있는 경계다",
+    "category": "editor",
+    "product": "VSCode"
+  },
+  "vscode-editor-suggest-light": {
+    "description": "자동완성 목록 432×230 — 줄마다 종류 아이콘과 이름이 서고, **고른 줄에만** 오른쪽에 서명이 흐린 글씨로 같은 줄에 덧붙는다. 별도 설명 칸은 접혀 있고 네 변이 모두 끌 수 있는 경계다",
+    "category": "editor",
+    "product": "VSCode"
+  },
+  "vscode-editor-text-dark": {
+    "description": "에디터 본문 — 줄 번호 거터, 들여쓰기 안내선, 문법 색칠, 오른쪽에 미니맵과 개요 눈금",
+    "category": "editor",
+    "product": "VSCode"
+  },
+  "vscode-editor-text-light": {
+    "description": "에디터 본문 — 줄 번호 거터, 들여쓰기 안내선, 문법 색칠, 오른쪽에 미니맵과 개요 눈금",
+    "category": "editor",
+    "product": "VSCode"
+  },
+  "vscode-explorer-open-editors-dark": {
+    "description": "열린 편집기 목록 — 파일 이름 옆에 흐린 글씨로 그 경로가 붙는다",
+    "category": "explorer",
+    "product": "VSCode"
+  },
+  "vscode-explorer-open-editors-light": {
+    "description": "열린 편집기 목록 — 파일 이름 옆에 흐린 글씨로 그 경로가 붙는다",
+    "category": "explorer",
+    "product": "VSCode"
+  },
+  "vscode-explorer-row-dark": {
+    "description": "트리 행 하나 22px — 접기 삼각형 자리, 폴더 아이콘, 이름",
+    "category": "explorer",
+    "product": "VSCode"
+  },
+  "vscode-explorer-row-hover-dark": {
+    "description": "트리 행 하나 22px — 접기 삼각형 자리, 폴더 아이콘, 이름. 마우스를 얹은 상태다",
+    "category": "explorer",
+    "product": "VSCode"
+  },
+  "vscode-explorer-row-hover-light": {
+    "description": "트리 행 하나 22px — 접기 삼각형 자리, 폴더 아이콘, 이름. 마우스를 얹은 상태다",
+    "category": "explorer",
+    "product": "VSCode"
+  },
+  "vscode-explorer-row-light": {
+    "description": "트리 행 하나 22px — 접기 삼각형 자리, 폴더 아이콘, 이름",
+    "category": "explorer",
+    "product": "VSCode"
+  },
+  "vscode-explorer-row-selected-dark": {
+    "description": "선택된 트리 행 — 배경이 칠해지고 왼쪽에 표시선이 선다",
+    "category": "explorer",
+    "product": "VSCode"
+  },
+  "vscode-explorer-row-selected-light": {
+    "description": "선택된 트리 행 — 배경이 칠해지고 왼쪽에 표시선이 선다",
+    "category": "explorer",
+    "product": "VSCode"
+  },
+  "vscode-explorer-view-dark": {
+    "description": "파일 트리 — 루트 아래 폴더가 펼쳐지고 한 단계마다 들여쓰기 안내선이 그어진다. 행마다 파일 종류 아이콘이 앞에 붙는다",
+    "category": "explorer",
+    "product": "VSCode"
+  },
+  "vscode-explorer-view-light": {
+    "description": "파일 트리 — 루트 아래 폴더가 펼쳐지고 한 단계마다 들여쓰기 안내선이 그어진다. 행마다 파일 종류 아이콘이 앞에 붙는다",
+    "category": "explorer",
+    "product": "VSCode"
+  },
+  "vscode-notification-center-dark": {
+    "description": "알림 센터 452×37 — 머리 줄과 목록 칸으로 나뉘고, 비어 있으면 'NO NEW NOTIFICATIONS'만 든다",
+    "category": "notification",
+    "product": "VSCode"
+  },
+  "vscode-notification-center-light": {
+    "description": "알림 센터 452×37 — 머리 줄과 목록 칸으로 나뉘고, 비어 있으면 'NO NEW NOTIFICATIONS'만 든다",
+    "category": "notification",
+    "product": "VSCode"
+  },
+  "vscode-primitive-context-menu-dark": {
+    "description": "에디터 우클릭 메뉴 310×617 — 항목을 구분선으로 묶고 오른쪽에 단축키를 적는다. 하위 메뉴가 있는 줄은 화살표를 단다",
+    "category": "primitive",
+    "product": "VSCode"
+  },
+  "vscode-primitive-context-menu-light": {
+    "description": "에디터 우클릭 메뉴 310×617 — 항목을 구분선으로 묶고 오른쪽에 단축키를 적는다. 하위 메뉴가 있는 줄은 화살표를 단다",
+    "category": "primitive",
+    "product": "VSCode"
+  },
+  "vscode-responsive-activity-bar-dark": {
+    "description": "390px에서도 48px 세로 레일 그대로다. 390 중 48은 12%다",
+    "category": "responsive",
+    "product": "VSCode"
+  },
+  "vscode-responsive-activity-bar-light": {
+    "description": "390px에서도 48px 세로 레일 그대로다. 390 중 48은 12%다",
+    "category": "responsive",
+    "product": "VSCode"
+  },
+  "vscode-responsive-workbench-dark": {
+    "description": "390×844에서 같은 셸 — **VSCode는 접지 않는다.** 48px 활동 바와 340px 사이드바가 그대로 남아 편집기 자리가 사라지고, 남은 폭을 보조 사이드바(채팅)가 차지한다. 탭 띠는 2px로 눌린다",
+    "category": "responsive",
+    "product": "VSCode"
+  },
+  "vscode-responsive-workbench-light": {
+    "description": "390×844에서 같은 셸 — **VSCode는 접지 않는다.** 48px 활동 바와 340px 사이드바가 그대로 남아 편집기 자리가 사라지고, 남은 폭을 보조 사이드바(채팅)가 차지한다. 탭 띠는 2px로 눌린다",
+    "category": "responsive",
+    "product": "VSCode"
+  },
+  "vscode-search-result-row-dark": {
+    "description": "검색 결과 행 22px — 파일 머리 줄은 아이콘·이름·매치 수를, 매치 줄은 해당 줄 내용과 강조를 담는다",
+    "category": "search",
+    "product": "VSCode"
+  },
+  "vscode-search-result-row-hover-dark": {
+    "description": "검색 결과 행 22px — 파일 머리 줄은 아이콘·이름·매치 수를, 매치 줄은 해당 줄 내용과 강조를 담는다. 마우스를 얹은 상태다",
+    "category": "search",
+    "product": "VSCode"
+  },
+  "vscode-search-result-row-hover-light": {
+    "description": "검색 결과 행 22px — 파일 머리 줄은 아이콘·이름·매치 수를, 매치 줄은 해당 줄 내용과 강조를 담는다. 마우스를 얹은 상태다",
+    "category": "search",
+    "product": "VSCode"
+  },
+  "vscode-search-result-row-light": {
+    "description": "검색 결과 행 22px — 파일 머리 줄은 아이콘·이름·매치 수를, 매치 줄은 해당 줄 내용과 강조를 담는다",
+    "category": "search",
+    "product": "VSCode"
+  },
+  "vscode-search-view-dark": {
+    "description": "검색 사이드바 — 위에 찾기·바꾸기 줄, 가운데 '526 results in 90 files'와 'Open in editor', 아래에 파일별로 접히는 결과 트리",
+    "category": "search",
+    "product": "VSCode"
+  },
+  "vscode-search-view-light": {
+    "description": "검색 사이드바 — 위에 찾기·바꾸기 줄, 가운데 '526 results in 90 files'와 'Open in editor', 아래에 파일별로 접히는 결과 트리",
+    "category": "search",
+    "product": "VSCode"
+  },
+  "vscode-search-widget-dark": {
+    "description": "찾기 줄 285×26 — 왼쪽 삼각형이 바꾸기 줄을 펼치고, 입력칸 안쪽 오른쪽에 대소문자·낱말·정규식 토글이 든다",
+    "category": "search",
+    "product": "VSCode"
+  },
+  "vscode-search-widget-light": {
+    "description": "찾기 줄 285×26 — 왼쪽 삼각형이 바꾸기 줄을 펼치고, 입력칸 안쪽 오른쪽에 대소문자·낱말·정규식 토글이 든다",
+    "category": "search",
+    "product": "VSCode"
+  },
+  "vscode-settings-editor-dark": {
+    "description": "설정 화면 1150×657 — 위에 검색칸과 User/Remote/Workspace 범위 탭, 왼쪽에 범주 트리, 가운데에 항목마다 제목·설명·컨트롤",
+    "category": "settings",
+    "product": "VSCode"
+  },
+  "vscode-settings-editor-light": {
+    "description": "설정 화면 1150×657 — 위에 검색칸과 User/Remote/Workspace 범위 탭, 왼쪽에 범주 트리, 가운데에 항목마다 제목·설명·컨트롤",
+    "category": "settings",
+    "product": "VSCode"
+  },
+  "vscode-settings-row-dark": {
+    "description": "범주 트리 행 22px — 글자만 든 한 줄이다",
+    "category": "settings",
+    "product": "VSCode"
+  },
+  "vscode-settings-row-hover-dark": {
+    "description": "범주 트리 행 22px — 글자만 든 한 줄이다. 마우스를 얹은 상태다",
+    "category": "settings",
+    "product": "VSCode"
+  },
+  "vscode-settings-row-hover-light": {
+    "description": "범주 트리 행 22px — 글자만 든 한 줄이다. 마우스를 얹은 상태다",
+    "category": "settings",
+    "product": "VSCode"
+  },
+  "vscode-settings-row-light": {
+    "description": "범주 트리 행 22px — 글자만 든 한 줄이다",
+    "category": "settings",
+    "product": "VSCode"
+  },
+  "vscode-settings-toc-dark": {
+    "description": "설정 범주 트리 200×560 — Commonly Used부터 Extensions까지 한 단계 목록",
+    "category": "settings",
+    "product": "VSCode"
+  },
+  "vscode-settings-toc-light": {
+    "description": "설정 범주 트리 200×560 — Commonly Used부터 Extensions까지 한 단계 목록",
+    "category": "settings",
+    "product": "VSCode"
+  },
+  "vscode-shell-activity-bar-dark": {
+    "description": "48px 세로 레일. 아이콘 여섯이 위에 붙고 계정·설정이 아래에 붙으며, 소스 제어 아이콘에 변경 수 배지(3)가 얹힌다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-activity-bar-item-dark": {
+    "description": "레일 항목 하나 48×48 — 아이콘, 오른쪽 아래 배지, 왼쪽에 활성 표시 막대가 겹쳐 있다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-activity-bar-item-hover-dark": {
+    "description": "레일 항목 하나 48×48 — 아이콘, 오른쪽 아래 배지, 왼쪽에 활성 표시 막대가 겹쳐 있다. 마우스를 얹은 상태다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-activity-bar-item-hover-light": {
+    "description": "레일 항목 하나 48×48 — 아이콘, 오른쪽 아래 배지, 왼쪽에 활성 표시 막대가 겹쳐 있다. 마우스를 얹은 상태다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-activity-bar-item-light": {
+    "description": "레일 항목 하나 48×48 — 아이콘, 오른쪽 아래 배지, 왼쪽에 활성 표시 막대가 겹쳐 있다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-activity-bar-light": {
+    "description": "48px 세로 레일. 아이콘 여섯이 위에 붙고 계정·설정이 아래에 붙으며, 소스 제어 아이콘에 변경 수 배지(3)가 얹힌다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-breadcrumbs-dark": {
+    "description": "빵부스러기 22px — 폴더 다섯, 파일 하나, 그리고 파일 안 기호 둘(ThemeModel › theme)까지 한 줄로 잇는다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-breadcrumbs-light": {
+    "description": "빵부스러기 22px — 폴더 다섯, 파일 하나, 그리고 파일 안 기호 둘(ThemeModel › theme)까지 한 줄로 잇는다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-editor-actions-dark": {
+    "description": "에디터 그룹 오른쪽 위 도구 묶음 64×35 — 아이콘만 둘이다(분할·넘침)",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-editor-actions-light": {
+    "description": "에디터 그룹 오른쪽 위 도구 묶음 64×35 — 아이콘만 둘이다(분할·넘침)",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-editor-split-dark": {
+    "description": "좌우로 가른 에디터 그룹 — 그룹마다 탭 띠·빵부스러기·미니맵을 따로 들고, 활성 그룹의 탭만 밝다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-editor-split-light": {
+    "description": "좌우로 가른 에디터 그룹 — 그룹마다 탭 띠·빵부스러기·미니맵을 따로 들고, 활성 그룹의 탭만 밝다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-pane-header-dark": {
+    "description": "사이드바 안 구역 머리 22px — 접기 삼각형, 구역 아이콘, 대문자 제목(PROJECT), 오른쪽 액션 자리",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-pane-header-hover-dark": {
+    "description": "사이드바 안 구역 머리 22px — 접기 삼각형, 구역 아이콘, 대문자 제목(PROJECT), 오른쪽 액션 자리. 마우스를 얹은 상태다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-pane-header-hover-light": {
+    "description": "사이드바 안 구역 머리 22px — 접기 삼각형, 구역 아이콘, 대문자 제목(PROJECT), 오른쪽 액션 자리. 마우스를 얹은 상태다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-pane-header-light": {
+    "description": "사이드바 안 구역 머리 22px — 접기 삼각형, 구역 아이콘, 대문자 제목(PROJECT), 오른쪽 액션 자리",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-panel-dark": {
+    "description": "아래 패널 300px — 탭 다섯(PROBLEMS·OUTPUT·DEBUG CONSOLE·TERMINAL·PORTS)과 오른쪽 액션, 본문은 터미널이다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-panel-light": {
+    "description": "아래 패널 300px — 탭 다섯(PROBLEMS·OUTPUT·DEBUG CONSOLE·TERMINAL·PORTS)과 오른쪽 액션, 본문은 터미널이다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-side-bar-dark": {
+    "description": "사이드바 300px — 위에 크롬(EXPLORER 제목 줄), 아래에 확장이 그리는 본문. 본문은 파일 트리다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-side-bar-light": {
+    "description": "사이드바 300px — 위에 크롬(EXPLORER 제목 줄), 아래에 확장이 그리는 본문. 본문은 파일 트리다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-side-bar-title-dark": {
+    "description": "사이드바 크롬만 35px — 왼쪽에 대문자 제목(EXPLORER), 오른쪽에 제목 액션과 전역 액션 자리",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-side-bar-title-light": {
+    "description": "사이드바 크롬만 35px — 왼쪽에 대문자 제목(EXPLORER), 오른쪽에 제목 액션과 전역 액션 자리",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-status-bar-dark": {
+    "description": "상태 표시줄 22px 한 벌 — 왼쪽은 브랜치와 문제 개수, 오른쪽은 커서 위치·들여쓰기·인코딩·줄끝·언어와 알림 종",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-status-bar-item-dark": {
+    "description": "상태 표시줄 칸 하나 34×22 — 아이콘만 든 알림 종이다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-status-bar-item-hover-dark": {
+    "description": "상태 표시줄 칸 하나 34×22 — 아이콘만 든 알림 종이다. 마우스를 얹은 상태다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-status-bar-item-hover-light": {
+    "description": "상태 표시줄 칸 하나 34×22 — 아이콘만 든 알림 종이다. 마우스를 얹은 상태다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-status-bar-item-light": {
+    "description": "상태 표시줄 칸 하나 34×22 — 아이콘만 든 알림 종이다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-status-bar-left-dark": {
+    "description": "상태 표시줄 왼쪽 묶음 773×22 — 원격 표시, 브랜치(`chore/untrack-draft*`, 더티라 별표), 동기화 화살표, 오류 1·경고 0, 열린 포트 0이 칸 다섯으로 붙는다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-status-bar-left-light": {
+    "description": "상태 표시줄 왼쪽 묶음 773×22 — 원격 표시, 브랜치(`chore/untrack-draft*`, 더티라 별표), 동기화 화살표, 오류 1·경고 0, 열린 포트 0이 칸 다섯으로 붙는다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-status-bar-light": {
+    "description": "상태 표시줄 22px 한 벌 — 왼쪽은 브랜치와 문제 개수, 오른쪽은 커서 위치·들여쓰기·인코딩·줄끝·언어와 알림 종",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-status-bar-right-dark": {
+    "description": "상태 표시줄 오른쪽 묶음 — 레이아웃·언어·줄끝·인코딩·들여쓰기·커서 위치·블레임이 칸 열로 붙는다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-status-bar-right-light": {
+    "description": "상태 표시줄 오른쪽 묶음 — 레이아웃·언어·줄끝·인코딩·들여쓰기·커서 위치·블레임이 칸 열로 붙는다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-tab-dark": {
+    "description": "탭 하나 155×35 — 파일 아이콘·이름·닫기 자리. 배경 칠과 위아래 테두리가 각각 따로 겹쳐 있다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-tab-hover-dark": {
+    "description": "탭 하나 155×35 — 파일 아이콘·이름·닫기 자리. 배경 칠과 위아래 테두리가 각각 따로 겹쳐 있다. 마우스를 얹은 상태다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-tab-hover-light": {
+    "description": "탭 하나 155×35 — 파일 아이콘·이름·닫기 자리. 배경 칠과 위아래 테두리가 각각 따로 겹쳐 있다. 마우스를 얹은 상태다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-tab-light": {
+    "description": "탭 하나 155×35 — 파일 아이콘·이름·닫기 자리. 배경 칠과 위아래 테두리가 각각 따로 겹쳐 있다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-tab-strip-dark": {
+    "description": "탭 띠 57px — 탭 둘(ThemeModel.ts · concept.md)이 왼쪽에 붙고 그 아래 빵부스러기 줄이 한 겹 더 깔린다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-tab-strip-light": {
+    "description": "탭 띠 57px — 탭 둘(ThemeModel.ts · concept.md)이 왼쪽에 붙고 그 아래 빵부스러기 줄이 한 겹 더 깔린다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-title-bar-dark": {
+    "description": "제목 줄 35px — 가운데에 워크스페이스 이름이 든 명령 칸이 놓이고, 오른쪽 끝에 레이아웃 토글 넷이 선다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-title-bar-light": {
+    "description": "제목 줄 35px — 가운데에 워크스페이스 이름이 든 명령 칸이 놓이고, 오른쪽 끝에 레이아웃 토글 넷이 선다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-workbench-dark": {
+    "description": "1440×900 셸 전체 — 왼쪽부터 48px 활동 바, 300px 사이드바, 에디터, 맨 아래 22px 상태 표시줄. 구역 사이에 끌 수 있는 경계가 있다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-shell-workbench-light": {
+    "description": "1440×900 셸 전체 — 왼쪽부터 48px 활동 바, 300px 사이드바, 에디터, 맨 아래 22px 상태 표시줄. 구역 사이에 끌 수 있는 경계가 있다",
+    "category": "shell",
+    "product": "VSCode"
+  },
+  "vscode-terminal-screen-dark": {
+    "description": "xterm 화면 754×264 — 캔버스로 그린다. 링크 층·장식 층이 본문 위에 따로 겹친다",
+    "category": "terminal",
+    "product": "VSCode"
+  },
+  "vscode-terminal-screen-light": {
+    "description": "xterm 화면 754×264 — 캔버스로 그린다. 링크 층·장식 층이 본문 위에 따로 겹친다",
+    "category": "terminal",
+    "product": "VSCode"
+  },
+  "vscode-terminal-view-dark": {
+    "description": "터미널 칸 — 프롬프트(`coder@…:~/project$`)와 블록 커서가 보이고, 왼쪽 여백에 셸 통합이 찍은 명령 표식(점)이 줄마다 선다",
+    "category": "terminal",
+    "product": "VSCode"
+  },
+  "vscode-terminal-view-light": {
+    "description": "터미널 칸 — 프롬프트(`coder@…:~/project$`)와 블록 커서가 보이고, 왼쪽 여백에 셸 통합이 찍은 명령 표식(점)이 줄마다 선다",
+    "category": "terminal",
+    "product": "VSCode"
+  },
+  "vscode-vcs-diff-dark": {
+    "description": "나란히 비교 에디터 — 왼쪽이 원본, 오른쪽이 고친 것. 가운데 물받이가 바뀐 덩어리를 잇고 오른쪽 끝에 변경 위치를 요약한 띠가 선다",
+    "category": "vcs",
+    "product": "VSCode"
+  },
+  "vscode-vcs-diff-light": {
+    "description": "나란히 비교 에디터 — 왼쪽이 원본, 오른쪽이 고친 것. 가운데 물받이가 바뀐 덩어리를 잇고 오른쪽 끝에 변경 위치를 요약한 띠가 선다",
+    "category": "vcs",
+    "product": "VSCode"
+  },
+  "vscode-vcs-row-dark": {
+    "description": "소스 제어 행 34px — 커밋 메시지 입력칸이 목록의 첫 줄로 들어가 있다",
+    "category": "vcs",
+    "product": "VSCode"
+  },
+  "vscode-vcs-row-hover-dark": {
+    "description": "소스 제어 행 34px — 커밋 메시지 입력칸이 목록의 첫 줄로 들어가 있다. 마우스를 얹은 상태다",
+    "category": "vcs",
+    "product": "VSCode"
+  },
+  "vscode-vcs-row-hover-light": {
+    "description": "소스 제어 행 34px — 커밋 메시지 입력칸이 목록의 첫 줄로 들어가 있다. 마우스를 얹은 상태다",
+    "category": "vcs",
+    "product": "VSCode"
+  },
+  "vscode-vcs-row-light": {
+    "description": "소스 제어 행 34px — 커밋 메시지 입력칸이 목록의 첫 줄로 들어가 있다",
+    "category": "vcs",
+    "product": "VSCode"
+  },
+  "vscode-vcs-view-dark": {
+    "description": "소스 제어 사이드바 — 커밋 메시지 입력칸, 꽉 찬 폭의 Commit 버튼, 접히는 'Changes' 머리와 개수 배지(3). 파일 줄마다 이름·폴더·오른쪽 상태 글자(D·M·U)가 붙고 지운 파일은 이름에 취소선이 그어진다. 마우스를 얹은 줄에만 인라인 액션 셋이 나타난다",
+    "category": "vcs",
+    "product": "VSCode"
+  },
+  "vscode-vcs-view-light": {
+    "description": "소스 제어 사이드바 — 커밋 메시지 입력칸, 꽉 찬 폭의 Commit 버튼, 접히는 'Changes' 머리와 개수 배지(3). 파일 줄마다 이름·폴더·오른쪽 상태 글자(D·M·U)가 붙고 지운 파일은 이름에 취소선이 그어진다. 마우스를 얹은 줄에만 인라인 액션 셋이 나타난다",
+    "category": "vcs",
+    "product": "VSCode"
+  }
+}
