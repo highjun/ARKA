@@ -1,8 +1,6 @@
-import { mkdir, realpath, stat } from "node:fs/promises";
-import os from "node:os";
+import { realpath, stat } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
-import { type AgentConfig, AgentEnv } from "../features/agent/config";
 
 /**
  * 서버 설정. 도메인을 모르므로 `core/`에 둔다 — 워크스페이스 루트는
@@ -34,8 +32,6 @@ const CoreEnv = z.object({
   ARKA_HOST: z.string().min(1).default("127.0.0.1"),
   /** 빌드된 클라이언트가 있는 디렉터리. 없으면 정적 서빙을 켜지 않는다. */
   ARKA_CLIENT_ROOT: z.string().min(1).optional(),
-  /** 데이터 디렉터리(SQLite 등). 없으면 `~/.arka`. 없는 디렉터리는 만든다. */
-  ARKA_DATA_DIR: z.string().min(1).optional(),
   /** 이 이미지를 만든 커밋. 이미지가 구워 넣는다 — 소스에서 바로 띄우면 없다. */
   ARKA_GIT_SHA: z.string().min(1).optional(),
 });
@@ -48,10 +44,6 @@ export type ServerConfig = {
   readonly host: string;
   /** 절대경로. 정적 서빙을 켜지 않으면 `undefined`. */
   readonly clientRoot: string | undefined;
-  /** 절대경로. `data.db`가 여기 산다. */
-  readonly dataDir: string;
-  /** 어느 실행기를 조립할지. 기능이 자기 변수를 소유한다(→ features/agent/config.ts). */
-  readonly agent: AgentConfig;
   /** 이 이미지를 만든 커밋. 소스에서 바로 띄우면 `undefined`. */
   readonly gitSha: string | undefined;
 };
@@ -81,7 +73,7 @@ const resolveDirectory = async (name: string, value: string): Promise<string> =>
  *
  * docker의 `ENV X=$ARG`는 인자를 안 주면 빈 문자열을 넣고, compose의 `X: "${X:-}"`도 그렇다.
  * 그것을 값으로 보면 `.min(1)`이 "너무 짧음"으로 잡아 **부팅이 죽고 재시작 루프에 빠진다** —
- * `ARKA_ANTHROPIC_API_KEY`와 `ARKA_GIT_SHA`에서 두 번 당했다. 여기서 한 번에 걷는다.
+ * `ARKA_GIT_SHA`에서 당했다. 여기서 한 번에 걷는다.
  */
 const withoutEmpty = (env: Readonly<Record<string, string | undefined>>): Record<string, string | undefined> =>
   Object.fromEntries(Object.entries(env).filter(([, value]) => value !== ""));
@@ -106,21 +98,7 @@ export const loadConfig = async (
   env: Readonly<Record<string, string | undefined>> = process.env,
 ): Promise<ServerConfig> => {
   const present = withoutEmpty(env);
-  const { ARKA_WORKSPACE, ARKA_PORT, ARKA_HOST, ARKA_CLIENT_ROOT, ARKA_DATA_DIR, ARKA_GIT_SHA } = parseEnv(
-    CoreEnv,
-    present,
-  );
-  const agent = parseEnv(AgentEnv, present);
-
-  // 데이터 디렉터리는 워크스페이스와 달리 우리가 소유한다 — 없으면 만든다.
-  const dataDir = path.resolve(ARKA_DATA_DIR ?? path.join(os.homedir(), ".arka"));
-  try {
-    await mkdir(dataDir, { recursive: true });
-  } catch (error) {
-    throw new ConfigError(
-      `ARKA_DATA_DIR: cannot create ${dataDir}: ${error instanceof Error ? error.message : String(error)}`,
-    );
-  }
+  const { ARKA_WORKSPACE, ARKA_PORT, ARKA_HOST, ARKA_CLIENT_ROOT, ARKA_GIT_SHA } = parseEnv(CoreEnv, present);
 
   return {
     workspaceRoot: await resolveDirectory("ARKA_WORKSPACE", ARKA_WORKSPACE ?? process.cwd()),
@@ -128,8 +106,6 @@ export const loadConfig = async (
     host: ARKA_HOST,
     clientRoot:
       ARKA_CLIENT_ROOT === undefined ? undefined : await resolveDirectory("ARKA_CLIENT_ROOT", ARKA_CLIENT_ROOT),
-    dataDir: await resolveDirectory("ARKA_DATA_DIR", dataDir),
-    agent,
     gitSha: ARKA_GIT_SHA,
   };
 };

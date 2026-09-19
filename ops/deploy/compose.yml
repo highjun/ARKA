@@ -22,20 +22,9 @@ services:
     # **`UID`가 아니라 `ARKA_UID`인 이유**: bash에서 `UID`는 읽기 전용이라
     # `UID=$(id -u) docker compose up`이 대입에서 죽는다(2026-09-10 실측). 이름을 피한다.
     user: "${ARKA_UID:-1000}:${ARKA_GID:-1000}"
-    # **목록 문법인 이유**: 이름만 적으면 변수가 없을 때 컨테이너에 아예 만들어지지 않는다.
-    # `KEY: "${KEY:-}"`로 쓰면 **빈 문자열**이 들어가는데, 서버 스키마가 `min(1)`이라
-    # "없음"이 아니라 "너무 짧음"으로 읽혀 부팅에서 죽고 재시작 루프에 빠진다(2026-09-10 실측).
-    # 기본값을 여기 적지 않는다 — 서버 스키마가 이미 갖고 있다. 여기서는 통과만 시킨다.
-    environment:
-      - ARKA_AGENT_RUNNER
-      - ARKA_ANTHROPIC_API_KEY
-      - ARKA_ANTHROPIC_MODEL
     volumes:
       # **실재하는 디렉터리여야 한다** — 없으면 부팅에서 죽고, docker가 대신 만들면 root 소유가 된다.
       - "${ARKA_WORKSPACE:-./workspace}:/workspace"
-      # 세션·이벤트 로그(SQLite). 실배포는 워크스페이스 안의 경로를 주어 파일 트리에도 보이게 한다.
-      # 값이 없으면 이름 있는 볼륨이 쓰인다 — 백업은 그 안의 data.db 복사다.
-      - "${ARKA_DATA:-arka-data}:/data"
     # **로그가 무제한으로 자라지 않게 한다.** docker 기본값은 회전이 없어 json 파일이 디스크를
     # 다 먹을 때까지 늘어난다. 10MB × 3개면 사고를 짚기에 충분하고 상한이 30MB다.
     logging:
@@ -74,6 +63,3 @@ services:
     depends_on:
       app:
         condition: service_healthy
-
-volumes:
-  arka-data:

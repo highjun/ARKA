@@ -20,7 +20,7 @@ describe("server 슬라이스 구조", () => {
   const slices = foldersIn(FEATURES);
 
   it("슬라이스를 하나라도 찾는다 — 배치가 바뀌면 이 스위트가 조용히 비어 버린다", () => {
-    expect(slices.length).toBeGreaterThan(3);
+    expect(slices.length).toBeGreaterThan(0);
   });
 
   it("슬라이스마다 배럴이 있다 — 조립부(`src/app.ts`)가 부르는 자리는 `index.ts` 하나다", () => {

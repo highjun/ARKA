@@ -50,7 +50,6 @@ const waitHealthy = async (): Promise<void> => {
 };
 
 const workspace = mkdtempSync(path.join(tmpdir(), "arka-ws-"));
-const data = mkdtempSync(path.join(tmpdir(), "arka-data-"));
 
 try {
   console.log("# build");
@@ -68,8 +67,6 @@ try {
     `127.0.0.1:${String(PORT)}:3000`,
     "-v",
     `${workspace}:/workspace`,
-    "-v",
-    `${data}:/data`,
     IMAGE,
   );
   await waitHealthy();
@@ -108,21 +105,11 @@ try {
   await reader.cancel();
   if (!fired) fail("watch가 뜨지 않았다");
 
-  console.log("# ③ 재시작 후 데이터 유지 — 워크스페이스 파일과 SQLite의 세션");
-  // 응답은 `{ session: AgentSession }`이다 — **id가 최상위가 아니다.** 정규식으로 첫 `"id"`를
-  // 집던 옛 방식은 그 중첩을 모른 채 우연히 맞았다. 파싱하니 실제 모양이 드러났다.
-  const created = (await (
-    await api("/api/agent/sessions", { method: "POST", body: JSON.stringify({ title: "smoke" }) })
-  ).json()) as { session?: { id?: string } };
-  const sessionId = created.session?.id;
-  if (sessionId === undefined) fail("세션이 만들어지지 않았다");
-  statSync(path.join(data, "data.db"));
+  console.log("# ③ 재시작 후 데이터 유지 — 워크스페이스 파일");
   docker("restart", NAME);
   await waitHealthy();
   const content = (await (await api("/api/files/content?path=from-container.txt")).json()) as { content?: string };
   if (content.content !== "hello") fail("재시작 뒤 파일이 사라졌다");
-  const fetched = (await (await api(`/api/agent/sessions/${sessionId}`)).json()) as { session?: { title?: string } };
-  if (fetched.session?.title !== "smoke") fail("재시작 뒤 세션이 사라졌다");
 
   console.log("# ④ 정적 클라이언트가 같은 오리진에서 나온다");
   const html = await (await fetch(`${BASE}/`)).text();
@@ -132,5 +119,4 @@ try {
 } finally {
   spawnSync("docker", ["rm", "-f", NAME], { stdio: "ignore" });
   rmSync(workspace, { recursive: true, force: true });
-  rmSync(data, { recursive: true, force: true });
 }

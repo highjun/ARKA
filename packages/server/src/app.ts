@@ -7,17 +7,12 @@ import { createProtocolGuard } from "./core/protocol";
 import { type AppVariables, createRequestContext } from "./core/requestContext";
 import { createRequestLog } from "./core/requestLog";
 import { createWorkspace } from "./core/workspace";
-import { createAgentFeature } from "./features/agent";
-import { createFsRoutes, createWatchRoutes, createWorkspaceOperations } from "./features/filesystem";
-import { createGitRoutes } from "./features/git";
-import { createSearchRoutes } from "./features/search";
+import { createFsRoutes, createWatchRoutes } from "./features/filesystem";
 import { createStaticRoutes } from "./features/static";
 
-/** 조립된 앱과 그 자원. `index.ts`가 이걸 받아 포트를 연다. */
+/** 조립된 앱. `index.ts`가 이걸 받아 포트를 연다. */
 export type Application = {
   readonly app: Hono<{ Variables: AppVariables }>;
-  /** 장기 실행 자원(Run·DB)을 정리한다. 종료 경로에서 부른다. */
-  close(): void;
 };
 
 /**
@@ -37,13 +32,6 @@ export const createApp = ({
 }): Application => {
   const app = new Hono<{ Variables: AppVariables }>();
   const workspace = createWorkspace(config.workspaceRoot);
-  // 에이전트 툴은 filesystem의 유스케이스로 파일을 다룬다 — 두 feature를 잇는 것은 조립부의 일이다.
-  const agent = createAgentFeature({
-    dataDir: config.dataDir,
-    log,
-    workspace: createWorkspaceOperations(workspace.root),
-    agent: config.agent,
-  });
 
   // 맨 앞이다 — 인증 컨텍스트가 먼저 실리고, 뒤의 어떤 핸들러가 답하든 로그 한 줄이 남는다.
   app.use("*", createRequestContext());
@@ -66,9 +54,6 @@ export const createApp = ({
 
   app.route("/", createWatchRoutes(workspace.root));
   app.route("/", createFsRoutes(workspace.root));
-  app.route("/", agent.routes);
-  app.route("/", createSearchRoutes(workspace.root));
-  app.route("/", createGitRoutes(workspace.root));
 
   // 정적 서빙은 마지막이다 — SPA fallback이 확장자 없는 경로를 전부 index.html로 되돌리므로
   // API 라우트보다 먼저 붙으면 `/api/*`까지 삼킨다.
@@ -83,5 +68,5 @@ export const createApp = ({
     return c.json({ code: "Internal", message: "internal error" }, 500);
   });
 
-  return { app, close: () => agent.close() };
+  return { app };
 };

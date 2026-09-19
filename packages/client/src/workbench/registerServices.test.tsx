@@ -5,7 +5,6 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { IWorkspaceFiles } from "../extensions/filesystem";
 import { MockWorkspaceFiles } from "../extensions/filesystem/model/MockWorkspaceFiles";
-import { MockSearchService } from "../extensions/search/model/MockSearchService";
 import { RootView } from "./view/RootView";
 import { createApplication } from "./registerServices";
 
@@ -43,13 +42,10 @@ describe("registerServices", () => {
     localStorage.clear();
   });
 
-  /** 파일시스템과 검색 서비스를 대역으로 가린다 — 진짜 구현을 그대로 두면 이 테스트가 서버를 요구한다. */
+  /** 파일시스템을 대역으로 가린다 — 진짜 구현을 그대로 두면 이 테스트가 서버를 요구한다. */
   const mocks = (workspaceFiles: IWorkspaceFiles): ExtensionModule => ({
     id: "test.mocks",
-    provides: [
-      { id: "arka.filesystem.workspaceFiles", lifetime: "singleton", create: () => workspaceFiles },
-      { id: "arka.search.service", lifetime: "singleton", create: () => new MockSearchService({ "a.md": "원본" }) },
-    ],
+    provides: [{ id: "arka.filesystem.workspaceFiles", lifetime: "singleton", create: () => workspaceFiles }],
   });
 
   const mountWith = (workspaceFiles: IWorkspaceFiles) => {
@@ -189,46 +185,13 @@ describe("registerServices", () => {
     });
   });
 
-  describe("검색 배선", () => {
-    it("검색 활동에서 찾은 결과를 누르면 파일 탭이 열린다", async () => {
-      mountWith(new MockWorkspaceFiles({ "a.md": "원본" }));
-      fireEvent.click(screen.getByLabelText("검색"));
-      await act(async () => {
-        fireEvent.change(await screen.findByLabelText("검색어"), { target: { value: "원본" } });
-      });
-      fireEvent.click(await screen.findByText("원본", { selector: "span" }));
-      expect(await screen.findByRole("tab", { name: /a\.md/u })).toBeDefined();
-    });
-  });
-
   describe("커맨드와 단축키", () => {
-    it("Ctrl+Shift+F가 검색 활동을 열고, 팔레트에 단축키가 보인다", async () => {
-      mountWith(new MockWorkspaceFiles({}));
-      fireEvent.keyDown(window, { key: "F", ctrlKey: true, shiftKey: true });
-      expect(await screen.findByLabelText("검색어")).toBeDefined();
-
-      fireEvent.keyDown(window, { key: "k", ctrlKey: true });
-      const item = await screen.findByText("검색 보기");
-      expect(item.closest("[cmdk-item]")?.textContent).toContain("Shift");
-    });
-
     it("키보드 단축키 커맨드가 목록 탭을 연다", async () => {
       mountWith(new MockWorkspaceFiles({}));
       fireEvent.keyDown(window, { key: "k", ctrlKey: true });
       fireEvent.click(await screen.findByText("키보드 단축키 보기"));
       expect(await screen.findByRole("tab", { name: /키보드 단축키/u })).toBeDefined();
       expect(screen.getByText("shell.openCommandPalette")).toBeDefined();
-    });
-  });
-
-  describe("마크다운 미리보기 배선", () => {
-    it("파일을 열고 Ctrl+Shift+V를 누르면 미리보기 탭이 렌더된 제목을 보여 준다", async () => {
-      mountWith(new MockWorkspaceFiles({ "a.md": "# 안녕 세상" }));
-      fireEvent.click(await screen.findByText("a.md"));
-      await screen.findByRole("button", { name: "저장" });
-      fireEvent.keyDown(window, { key: "V", ctrlKey: true, shiftKey: true });
-      expect(await screen.findByRole("tab", { name: /미리보기 a\.md/u })).toBeDefined();
-      expect(await screen.findByRole("heading", { level: 1, name: "안녕 세상" })).toBeDefined();
     });
   });
 
@@ -245,7 +208,7 @@ describe("registerServices", () => {
   });
 
   describe("부팅", () => {
-    it("셸 모듈과 확장이 기여 지점을 채운다 — 사이드바 둘, 탭 provider 넷, 밀도 설정, 명령", () => {
+    it("셸 모듈과 확장이 기여 지점을 채운다 — 사이드바 하나, 탭 provider 셋, 밀도 설정, 명령", () => {
       const container = track(createApplication([mocks(new MockWorkspaceFiles({}))]));
 
       expect(
@@ -253,19 +216,14 @@ describe("registerServices", () => {
           .resolve("arka.workbench.sidebar")
           .list()
           .map((sidebar) => sidebar.id),
-      ).toEqual(["explorer", "search"]);
+      ).toEqual(["explorer"]);
       expect(
         container
           .resolve("arka.workbench.tabSystem")
           .list()
           .map((provider) => provider.id)
           .sort(),
-      ).toEqual([
-        "arka.filesystem.text",
-        "arka.markdown.preview",
-        "arka.workbench.keybindings",
-        "arka.workbench.settings",
-      ]);
+      ).toEqual(["arka.filesystem.text", "arka.workbench.keybindings", "arka.workbench.settings"]);
       expect(
         container
           .resolve("arka.settings")
@@ -273,7 +231,7 @@ describe("registerServices", () => {
           .map((setting) => setting.id),
       ).toEqual(["workbench.density"]);
       const commands = container.resolve("arka.commands");
-      for (const id of ["arka.workbench.open", "arka.filesystem.focus", "arka.search.focus", "markdown.openPreview"])
+      for (const id of ["arka.workbench.open", "arka.filesystem.focus"])
         expect(commands.actions.tryGet(id), id).toBeDefined();
     });
 
@@ -289,7 +247,7 @@ describe("registerServices", () => {
       expect(container.resolve("arka.workbench.notifications").items.map((item) => item.message)).toEqual([
         "확장 test.broken을(를) 켜지 못했다(activate) — 고장",
       ]);
-      expect(container.resolve("arka.workbench.sidebar").list()).toHaveLength(2);
+      expect(container.resolve("arka.workbench.sidebar").list()).toHaveLength(1);
     });
   });
 });

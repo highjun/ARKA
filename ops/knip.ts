@@ -48,7 +48,6 @@ const config: KnipConfig = {
         "tasks/main.ts",
         "deploy/{build,smoke,anonSmoke}.ts",
         "hooks/prePush.ts",
-        "backup/run.ts",
         "structure/*.test.ts",
         "*.config.ts",
         "knip.ts",

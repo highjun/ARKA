@@ -610,11 +610,11 @@ globalThis.__arka.meta = (() => {
       },
     },
     TitleBar: {
-      설명: "workbench/component/TitleBar (예상 자리) · 창 맨 위 35px. 왼쪽 이름 · 가운데 명령 칸 · 오른쪽 알림과 테마",
+      설명: "workbench/component/TitleBar (예상 자리) · 창 맨 위 35px. 왼쪽 이름 · 가운데 명령 칸 · 오른쪽 빌드·알림·테마",
       props: {
         brand: { t: "slot", d: "왼쪽 — 마크 20×20 과 작업 공간 이름" },
         center: { t: "slot", d: "가운데 — `CommandCenter`. 누르면 팔레트가 열린다" },
-        actions: { t: "slot", d: "오른쪽 — 알림 종과 `ModeToggle` 둘뿐이다" },
+        actions: { t: "slot", d: "오른쪽 — 빌드 표시 · 알림 종 · `ModeToggle` 셋뿐이다" },
       },
     },
     CommandCenter: {
