@@ -64,6 +64,27 @@ describe("registerServices", () => {
     expect(screen.getByLabelText("탐색기")).toBeDefined();
   });
 
+  describe("알림 종", () => {
+    it("온 것이 없으면 종에 수가 안 붙는다", () => {
+      mountWith(new MockWorkspaceFiles({}));
+
+      expect(screen.getByLabelText("알림 없음")).toBeDefined();
+    });
+
+    it("알림이 오면 종에 수가 붙고, 골라서 닫으면 사라진다", async () => {
+      const container = mountWith(new MockWorkspaceFiles({}));
+      act(() => {
+        container.resolve("arka.workbench.notifications").notify("error", "터졌다");
+      });
+
+      // Radix 의 드롭다운은 click 이 아니라 pointerdown 에 열린다(왼쪽 버튼만).
+      fireEvent.pointerDown(await screen.findByLabelText("알림 1건"), { button: 0, ctrlKey: false });
+      fireEvent.click(await screen.findByRole("menuitem", { name: /터졌다/u }));
+
+      expect(await screen.findByLabelText("알림 없음")).toBeDefined();
+    });
+  });
+
   /**
    * jsdom은 CSS를 적용하지 않으므로 트리가 화면 밖으로 밀려 있어도 여기서는 통과한다 —
    * 보이는지가 아니라 **배선이 닿는지**만 보는 테스트다.
