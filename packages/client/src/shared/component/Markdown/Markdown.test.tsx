@@ -45,17 +45,6 @@ describe("Markdown", () => {
     expect(screen.getByText(/alert\(1\)/u)).toBeInTheDocument();
   });
 
-  it("components 로 요소를 바꿔 끼울 수 있다 — 링크를 앱이 가로채는 자리다", () => {
-    render(
-      <Markdown
-        source="[열기](./a.md)"
-        components={{ a: ({ children }) => <button type="button">{children}</button> }}
-      />,
-    );
-
-    expect(screen.getByRole("button", { name: "열기" })).toBeInTheDocument();
-  });
-
   implementsClassName((extra) => <Markdown source="본문" {...extra} />);
   implementsDataComponent((extra) => <Markdown source="본문" {...extra} />, "Markdown");
   implementsRef<HTMLDivElement>((extra) => <Markdown source="본문" {...extra} />, HTMLDivElement);

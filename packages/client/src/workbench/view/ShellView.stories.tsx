@@ -129,7 +129,7 @@ const paletteViewModel = (state: Partial<ICommandPaletteViewModel>): ICommandPal
 });
 
 const meta = {
-  title: "workbench/ShellView",
+  title: "01-workbench/ShellView",
   component: ShellView,
 } satisfies Meta<typeof ShellView>;
 

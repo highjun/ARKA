@@ -5,11 +5,11 @@ import { PortalProvider } from "#utils/portal";
 import styles from "./Shell.module.css";
 import { SplitPageLayout, ThemeProvider } from "@primer/react";
 import { Container } from "#component/Container";
-import { Panel } from "#component/Panel";
+import { Panel } from "../Panel";
 import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
-import { ActivityRail } from "../ActivityRail";
-import type { SidebarRow } from "../ActivityRail";
+import { ActivityBar } from "../ActivityBar";
+import type { SidebarRow } from "../ActivityBar";
 import type { IconId } from "#component/Icon";
 
 /** 사이드바 머리의 버튼 한 줄 — `workbench/viewmodel`의 `SidebarActionRow`와 구조가 같다(부품은 그 층을 못 본다). */
@@ -209,7 +209,7 @@ export const Shell = ({
                     />
                   </div>
                   <div className={styles["sidebarBody"]}>
-                    <ActivityRail items={sidebars} onSelect={onSidebarSelect} onSettingsSelect={onSettingsSelect} />
+                    <ActivityBar items={sidebars} onSelect={onSidebarSelect} onSettingsSelect={onSettingsSelect} />
                     {expanded && (
                       <Panel
                         density="compact"

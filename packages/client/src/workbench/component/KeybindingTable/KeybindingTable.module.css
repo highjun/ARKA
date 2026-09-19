@@ -11,12 +11,7 @@
   border-bottom: var(--borderWidth-thin) solid var(--borderColor-muted);
 }
 
+/* 키캡 모양은 `Kbd` 가 그린다 — 여기선 키 사이 간격만. */
 .key {
-  display: inline-block;
-  padding: 0 var(--space-xs);
   margin-right: var(--space-xs);
-  font-family: var(--fontStack-monospace);
-  background-color: var(--bgColor-muted);
-  border: var(--borderWidth-thin) solid var(--borderColor-default);
-  border-radius: var(--borderRadius-small);
 }

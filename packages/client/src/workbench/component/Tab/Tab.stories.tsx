@@ -46,7 +46,7 @@ const SPLIT_TREE: PaneRowSplit = {
 };
 
 const meta = {
-  title: "workbench/Tab",
+  title: "01-workbench/Tab",
   component: Tab,
   decorators: [
     (Story) => (

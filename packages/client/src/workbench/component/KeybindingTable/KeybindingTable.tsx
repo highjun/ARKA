@@ -1,4 +1,5 @@
 import type { ComponentPropsWithoutRef, Ref } from "react";
+import { Kbd } from "#component/Kbd";
 import { clsx } from "clsx";
 import { Text } from "#component/Text";
 import styles from "./KeybindingTable.module.css";
@@ -29,8 +30,7 @@ const keysOf = (keybinding: string): readonly string[] =>
 /**
  * 등록된 키바인딩을 표로 보여 준다 — 읽기 전용이다. 충돌(같은 키에 둘 이상)은 줄에 표시한다.
  *
- * 키를 `<kbd>`로 그리는 것은 그것이 키보드 입력의 정본 시맨틱 태그라서다. 모양은
- * `Menu`의 단축키 칩과 같은 Primer 토큰을 쓴다 — 앱 전체에서 키는 같게 보여야 한다.
+ * 키는 `Kbd`로 그린다 — 앱 전체에서 키는 같게 보여야 해서 한 부품으로 모았다.
  */
 export const KeybindingTable = ({ rows, className, ref, ...props }: KeybindingTableProps) => (
   <table ref={ref} {...props} data-component="KeybindingTable" className={clsx(className, styles["table"])}>
@@ -46,9 +46,9 @@ export const KeybindingTable = ({ rows, className, ref, ...props }: KeybindingTa
         <tr key={`${row.actionId}:${row.keybinding}`} data-conflicting={row.isConflicting ? "" : undefined}>
           <td className={styles["cell"]}>
             {keysOf(row.keybinding).map((key) => (
-              <kbd key={key} className={styles["key"]}>
+              <Kbd key={key} className={styles["key"]}>
                 {key}
-              </kbd>
+              </Kbd>
             ))}
             {row.isConflicting ? (
               <Text size="small" tone="danger">

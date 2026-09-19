@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
 import { Shell } from "./index";
-import type { SidebarRow } from "../ActivityRail";
+import type { SidebarRow } from "../ActivityBar";
 
 const SIDEBARS: readonly SidebarRow[] = [
   { id: "files", iconId: "files", title: "탐색기", isActive: true },
@@ -11,7 +11,7 @@ const SIDEBARS: readonly SidebarRow[] = [
 ];
 
 const meta = {
-  title: "workbench/Shell",
+  title: "01-workbench/Shell",
   component: Shell,
   decorators: [
     (Story) => (

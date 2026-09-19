@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Menu } from "#component/Menu";
-import { ActivityRail } from "./index";
+import { ActivityBar } from "./index";
 import type { SidebarRow } from "./index";
 
 const ITEMS: readonly SidebarRow[] = [
@@ -11,8 +11,8 @@ const ITEMS: readonly SidebarRow[] = [
 ];
 
 const meta = {
-  title: "workbench/ActivityRail",
-  component: ActivityRail,
+  title: "01-workbench/ActivityBar",
+  component: ActivityBar,
   args: { items: ITEMS, onSelect: () => undefined, onSettingsSelect: () => undefined },
   decorators: [
     (Story) => (
@@ -21,7 +21,7 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof ActivityRail>;
+} satisfies Meta<typeof ActivityBar>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

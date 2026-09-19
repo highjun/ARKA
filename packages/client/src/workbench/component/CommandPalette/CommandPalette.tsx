@@ -1,4 +1,5 @@
 import type { ComponentPropsWithoutRef, Ref } from "react";
+import { Kbd } from "#component/Kbd";
 import { clsx } from "clsx";
 import { usePortalContainer } from "#utils/portal";
 import styles from "./CommandPalette.module.css";
@@ -12,7 +13,7 @@ export interface CommandRow {
   readonly keybinding: string;
 }
 
-/** `ctrl+shift+p` → `['Ctrl', 'Shift', 'P']` — 키 하나당 `<kbd>` 하나. */
+/** `ctrl+shift+p` → `['Ctrl', 'Shift', 'P']` — 키 하나당 `Kbd` 하나. */
 const keysOf = (keybinding: string): readonly string[] =>
   keybinding === "" ? [] : keybinding.split("+").map((key) => key.charAt(0).toUpperCase() + key.slice(1));
 
@@ -74,9 +75,9 @@ const PaletteDialog = ({
               {keys.length > 0 && (
                 <span className={styles["shortcuts"]}>
                   {keys.map((key) => (
-                    <kbd key={key} className={styles["shortcutKey"]}>
+                    <Kbd key={key} className={styles["shortcutKey"]}>
                       {key}
-                    </kbd>
+                    </Kbd>
                   ))}
                 </span>
               )}

@@ -1,8 +1,0 @@
-.Timestamp {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  font-size: var(--base-text-size-xs);
-  line-height: var(--base-text-lineHeight-tight);
-  color: var(--fgColor-muted);
-}

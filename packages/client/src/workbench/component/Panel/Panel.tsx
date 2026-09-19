@@ -26,6 +26,9 @@ export interface PanelProps extends Omit<ComponentPropsWithoutRef<"div">, "title
 }
 
 /**
+ * 워크벤치의 그릇 — 사이드바와 아래 독이 이것이다. `shared/` 에 있던 것을 2026-09-18 에 여기로 옮겼다
+ * (Figma 의 자리와 맞춘다). 확장은 이것을 쓰지 않는다 — 머리는 커널이 그린다.
+ *
  * "제목 + 액션" 헤더와 본문, 고정된 2영역 레이아웃 — 컴파운드가 아니라 `Container`와 같은 단일
  * props 컴포넌트로 간다(header/body가 재배치·반복될 이유가 없어 컴파운드로 얻는 이득이 없다).
  * `title`·`actions` 둘 다 없으면 헤더 행 자체를 렌더하지 않는다(`Shell`의 `panelTitle`/

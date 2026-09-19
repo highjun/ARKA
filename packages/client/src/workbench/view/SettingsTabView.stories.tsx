@@ -24,7 +24,7 @@ const withViewModel = (state: Partial<ISettingsViewModel>) => {
 };
 
 const meta = {
-  title: "workbench/SettingsTabView",
+  title: "01-workbench/SettingsTabView",
   component: SettingsTabView,
 } satisfies Meta<typeof SettingsTabView>;
 

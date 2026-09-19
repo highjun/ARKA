@@ -522,7 +522,7 @@ export interface ShellProps extends Omit<ComponentPropsWithoutRef<"div">, "child
 }
 
 /** 사이드바를 고르는 세로 아이콘 줄. 맨 아래에 설정 톱니가 따로 붙는다 — 사이드바가 아니다. */
-export interface ActivityRailProps extends Omit<ComponentPropsWithoutRef<"nav">, "onSelect"> {
+export interface ActivityBarProps extends Omit<ComponentPropsWithoutRef<"nav">, "onSelect"> {
   readonly ref?: Ref<HTMLElement>;
   readonly items: readonly SidebarRow[];
   readonly onSelect?: (id: string) => void;

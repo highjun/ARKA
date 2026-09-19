@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { PortalProvider } from "#utils/portal";
 import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
+import { Kbd } from "#component/Kbd";
 import { Menu } from "./index";
 import styles from "./Menu.module.css";
 
@@ -15,14 +16,18 @@ const OverlayStage = ({ children }: { readonly children: ReactNode }) => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   return (
     <div style={{ position: "relative", height: 480, width: 720, overflow: "hidden", transform: "translateZ(0)" }}>
-      <PortalProvider container={container ?? undefined}>{children}</PortalProvider>
+      {/* 메뉴는 트리거의 오른쪽 끝에 맞춰 열린다(`align="end"`) — 트리거가 왼쪽 끝에 있으면
+          목록이 상자 밖으로 나가 안 보인다. 실제 쓰임(오른쪽 위 더보기 단추)과 같이 놓는다. */}
+      <div style={{ display: "flex", justifyContent: "flex-end", padding: 16 }}>
+        <PortalProvider container={container ?? undefined}>{children}</PortalProvider>
+      </div>
       <div ref={setContainer} />
     </div>
   );
 };
 
 const meta = {
-  title: "shared/Menu",
+  title: "00-shared/Menu",
   component: Menu,
   decorators: [
     (Story) => (
@@ -43,7 +48,9 @@ const meta = {
       </Menu.Trigger>
       <Menu.Content>
         <Menu.Label>세션</Menu.Label>
-        <Menu.Item onSelect={() => undefined}>이름 바꾸기</Menu.Item>
+        <Menu.Item onSelect={() => undefined} shortcut={<Kbd>F2</Kbd>}>
+          이름 바꾸기
+        </Menu.Item>
         <Menu.Item onSelect={() => undefined}>보관</Menu.Item>
         <Menu.Separator />
         <Menu.Item disabled>삭제</Menu.Item>

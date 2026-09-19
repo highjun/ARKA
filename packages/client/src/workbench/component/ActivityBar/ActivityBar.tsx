@@ -1,6 +1,6 @@
 import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
 import { clsx } from "clsx";
-import styles from "./ActivityRail.module.css";
+import styles from "./ActivityBar.module.css";
 import { Container } from "#component/Container";
 import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
@@ -16,7 +16,7 @@ export interface SidebarRow {
 }
 
 /** `onSelect`를 가로챈다 — 표준 `onSelect`가 아니라 항목 선택이다. */
-export interface ActivityRailProps extends Omit<ComponentPropsWithoutRef<"nav">, "onSelect"> {
+export interface ActivityBarProps extends Omit<ComponentPropsWithoutRef<"nav">, "onSelect"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLElement>;
   /** 세로로 나열할 사이드바들. 활성 여부는 줄이 든다 — 컴포넌트가 스스로 들지 않는다. */
@@ -38,7 +38,7 @@ export interface ActivityRailProps extends Omit<ComponentPropsWithoutRef<"nav">,
  * children 안쪽에 있어야 한다 — `Container`의 `className`은 바깥 chrome 박스에 붙지, 실제로
  * 스크롤되는 Viewport 안 배치까지 건드리지 않는다.
  */
-export const ActivityRail = ({
+export const ActivityBar = ({
   items,
   onSelect,
   renderItemMenu,
@@ -46,8 +46,8 @@ export const ActivityRail = ({
   className,
   ref,
   ...props
-}: ActivityRailProps) => (
-  <nav ref={ref} {...props} data-component="ActivityRail" className={clsx(className, styles["nav"])}>
+}: ActivityBarProps) => (
+  <nav ref={ref} {...props} data-component="ActivityBar" className={clsx(className, styles["nav"])}>
     <Container chrome="none" className={styles["container"]}>
       <div className={styles["rail"]}>
         {items.map((item) => {

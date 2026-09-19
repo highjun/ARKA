@@ -32,7 +32,14 @@ const normalizeContent = (value: string) => String(value).replace(/\n$/u, "");
 /** 비었거나 공백뿐이면 `'text'`다 — 캡션이 빈 이름표를 그리지 않게. */
 const normalizeLanguage = (value?: string) => value?.trim().toLowerCase() || "text";
 /** 없으면 빈 문자열이다. 캡션을 그릴지 말지는 부르는 쪽이 이 값으로 정한다. */
-const normalizeTitle = (value?: string) => value?.trim() ?? "";
+const normalizeFileName = (value?: string) => value?.trim() ?? "";
+
+/**
+ * 복사 버튼의 접근성 이름. prop 으로 열어 두던 것(`copyLabel`·`copiedLabel`)을 상수로 내렸다
+ * (2026-09-18) — 바깥에서 바꿀 일이 없었고 인터페이스만 넓혔다.
+ */
+const COPY_LABEL = "Copy code";
+const COPIED_LABEL = "Copied";
 
 const getSyntaxTokenKind = (text: string): CodeBlockSyntaxTokenKind => {
   if (text.startsWith("//") || text.startsWith("/*")) return "comment";
@@ -57,14 +64,31 @@ const tokenizeLine = (line: string, lineNumber: number): CodeBlockSyntaxToken[] 
     const index = match.index ?? 0;
 
     if (index > cursor)
-      tokens.push({ key: `${lineNumber}:${cursor}:plain`, kind: "plain", text: line.slice(cursor, index) });
-    tokens.push({ key: `${lineNumber}:${index}:${text}`, kind: getSyntaxTokenKind(text), text });
+      tokens.push({
+        key: `${lineNumber}:${cursor}:plain`,
+        kind: "plain",
+        text: line.slice(cursor, index),
+      });
+    tokens.push({
+      key: `${lineNumber}:${index}:${text}`,
+      kind: getSyntaxTokenKind(text),
+      text,
+    });
     cursor = index + text.length;
   }
 
   if (cursor < line.length)
-    tokens.push({ key: `${lineNumber}:${cursor}:plain`, kind: "plain", text: line.slice(cursor) });
-  if (tokens.length === 0) tokens.push({ key: `${lineNumber}:0:plain`, kind: "plain", text: line || " " });
+    tokens.push({
+      key: `${lineNumber}:${cursor}:plain`,
+      kind: "plain",
+      text: line.slice(cursor),
+    });
+  if (tokens.length === 0)
+    tokens.push({
+      key: `${lineNumber}:0:plain`,
+      kind: "plain",
+      text: line || " ",
+    });
 
   return tokens;
 };
@@ -73,7 +97,12 @@ const tokenizeLine = (line: string, lineNumber: number): CodeBlockSyntaxToken[] 
 const getLines = (content: string): CodeBlockLine[] =>
   content.split("\n").map((text, index) => {
     const number = index + 1;
-    return { key: `${number}:${text}`, number, text: text || " ", tokens: tokenizeLine(text, number) };
+    return {
+      key: `${number}:${text}`,
+      number,
+      text: text || " ",
+      tokens: tokenizeLine(text, number),
+    };
   });
 
 const COPY_RESET_DELAY_MS = 1400;
@@ -82,40 +111,28 @@ const COPY_RESET_DELAY_MS = 1400;
 const clipboard = createTextClipboardPort();
 
 /** `children`을 막는다 — 코드는 `content`로만 들어온다. */
-export interface CodeBlockProps extends Omit<ComponentPropsWithoutRef<"figure">, "title" | "children"> {
+export interface CodeBlockProps extends Omit<ComponentPropsWithoutRef<"figure">, "children"> {
   /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLElement>;
   /** 표시할 코드 원문. */
   readonly content: string;
   /** 캡션에 표시할 언어 이름표(예: `'typescript'`) — 문법 강조 자체와는 무관하다. */
   readonly language?: string;
-  /** 코드 캡션에 쓰는 파일명/제목 — 네이티브 `title`(툴팁)과 이름이 겹치지만, 캡션이 이 컴포넌트에서 더 흔한 쓰임이라 그대로 가져간다. */
-  readonly title?: string;
-  /** 복사 버튼의 접근성 이름(복사 전). 기본값 `'Copy code'`. */
-  readonly copyLabel?: string;
-  /** 복사 직후 잠깐 바뀌는 접근성 이름. 기본값 `'Copied'`. */
-  readonly copiedLabel?: string;
+  /** 캡션에 언어 옆에 적히는 파일 이름(예: `'index.ts'`). */
+  readonly fileName?: string;
 }
 
 /**
  * 토큰 종류를 클래스로 갈라 받지 않고 `data-token` 으로 드러낸다 — 종류마다 어느 색을 쓸지는
  * 스타일 결정이라 CSS 가 `[data-token=…]` 로 받는다.
  */
-export const CodeBlock = ({
-  content,
-  language,
-  title,
-  className,
-  copyLabel = "Copy code",
-  copiedLabel = "Copied",
-  ref,
-  ...props
-}: CodeBlockProps) => {
+export const CodeBlock = ({ content, language, fileName, className, ref, ...props }: CodeBlockProps) => {
+  // 복사됨은 이 컴포넌트가 스스로 쥔다 — 바깥이 "복사됨"을 띄울 일이 없어 prop 으로 열지 않는다(2026-09-18 결정).
   const [copied, setCopied] = useState(false);
 
   const normalizedContent = normalizeContent(content);
   const normalizedLanguage = normalizeLanguage(language);
-  const normalizedTitle = normalizeTitle(title);
+  const normalizedFileName = normalizeFileName(fileName);
   const lines = getLines(normalizedContent);
 
   const copyCode = async () => {
@@ -130,18 +147,19 @@ export const CodeBlock = ({
       <figcaption className={styles["caption"]}>
         <span className={styles["meta"]}>
           <span className={styles["language"]}>{normalizedLanguage}</span>
-          {normalizedTitle ? <span className={styles["title"]}>{normalizedTitle}</span> : null}
+          {normalizedFileName ? <span className={styles["fileName"]}>{normalizedFileName}</span> : null}
         </span>
         <IconButton
           variant="invisible"
           size="small"
           onClick={() => void copyCode()}
-          aria-label={copied ? copiedLabel : copyLabel}
+          aria-label={copied ? COPIED_LABEL : COPY_LABEL}
           icon={() => <Icon iconId={copied ? "check" : "copy"} size="sm" />}
         />
       </figcaption>
       <pre className={styles["body"]} data-language={normalizedLanguage}>
-        <code>
+        {/* 브라우저 기본 스타일이 `code` 에 `font-family: monospace` 를 직접 걸어 `pre` 의 서체가 상속되지 않는다 — 되받는다. */}
+        <code className={styles["code"]}>
           {lines.map((line) => (
             <span key={line.key} className={styles["line"]}>
               <span className={styles["lineNumber"]} aria-hidden="true">

@@ -18,10 +18,24 @@
 @import "./reset.css";
 
 /*
- * 밀도 토큰 — 셸이 `<html data-density>`로 정하고(설정 → DocumentDensity 기여) 컴포넌트는 변수만 본다.
- * IDE 밀도와 터치 타겟(44px)의 충돌을 여기서 한 번에 푼다.
+ * 브랜드 서체 — 위에서 불러온 Pretendard·Cascadia Code 를 **Primer 의 서체 토큰에 실어** 앱 전체가 쓴다.
+ * 2026-09-18 까지는 불러오기만 하고 아무 데도 안 써서 앱이 브라우저 기본 서체로 떴다(스토리북에서
+ * 발견). 토큰을 덮어쓰면 `var(--fontStack-monospace)` 를 쓰는 아홉 곳이 한 번에 바로잡히고,
+ * Figma(`text_styles.js`)가 가정하는 서체와도 같아진다. 뒤는 Primer 의 원래 스택이다.
  */
 :root {
+  --fontStack-sansSerif:
+    "Pretendard Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  --fontStack-system: var(--fontStack-sansSerif);
+  --fontStack-monospace:
+    "Cascadia Code Variable", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* 앱 전체의 기본 서체. `body` 타입 선택자는 이 파일에서 못 쓰므로 루트에서 상속시킨다. */
+  font-family: var(--fontStack-sansSerif);
+
+  /* 밀도 토큰 — 셸이 `<html data-density>`로 정하고(설정 → DocumentDensity 기여) 컴포넌트는 변수만 본다.
+   * IDE 밀도와 터치 타겟(44px)의 충돌을 여기서 한 번에 푼다. */
   --arka-row-height: 28px;
 }
 
