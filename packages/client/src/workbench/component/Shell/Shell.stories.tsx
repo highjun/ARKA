@@ -22,7 +22,7 @@ const meta = {
   ],
   args: {
     colorMode: "light",
-    brand: <span style={{ fontWeight: 600, paddingInline: 8 }}>ARKASHIC</span>,
+    brand: <span style={{ fontWeight: 600, paddingInline: 8 }}>ARKA</span>,
     actions: (
       <IconButton variant="invisible" size="small" aria-label="알림" icon={() => <Icon iconId="bell" size="sm" />} />
     ),

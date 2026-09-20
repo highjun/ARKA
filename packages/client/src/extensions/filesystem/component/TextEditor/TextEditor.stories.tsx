@@ -5,7 +5,7 @@ const CONTENT = `import { greet } from './greet';
 
 // 진입점
 export const main = (): void => {
-  const message = greet('ARKASHIC');
+  const message = greet('ARKA');
   console.log(message);
 };
 

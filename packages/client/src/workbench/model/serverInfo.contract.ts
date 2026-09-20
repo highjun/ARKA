@@ -11,7 +11,7 @@ const SAMPLE: ServerInfo = {
   builtAt: "2026-09-09T00:00:00.000Z",
   protocolVersion: 1,
   protocolHeader: PROTOCOL_HEADER,
-  workspaceName: "ARKASHIC",
+  workspaceName: "ARKA",
 };
 
 export const testServerInfoContract = (name: string, setup: ServerInfoSetup): void => {

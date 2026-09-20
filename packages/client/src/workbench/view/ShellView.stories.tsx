@@ -108,7 +108,7 @@ const notificationViewModel = (state: Partial<INotificationViewModel>): INotific
 
 const appStatusViewModel = (state: Partial<IAppStatusViewModel>): IAppStatusViewModel => ({
   dispose: () => undefined,
-  workspaceName: "ARKASHIC",
+  workspaceName: "ARKA",
   buildId: "ab90700",
   isOutdated: false,
   reload: () => undefined,

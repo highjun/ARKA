@@ -1,5 +1,5 @@
 [Unit]
-Description=GitHub Actions runner (ARKASHIC)
+Description=GitHub Actions runner (ARKA)
 After=network-online.target docker.service
 Wants=network-online.target
 
