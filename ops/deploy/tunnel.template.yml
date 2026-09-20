@@ -3,5 +3,5 @@ credentials-file: /etc/cloudflared/creds.json
 
 ingress:
   - hostname: ${ARKA_HOSTNAME}
-    service: http://app:3000
+    service: http://app:${ARKA_CONTAINER_PORT}
   - service: http_status:404

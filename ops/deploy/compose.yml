@@ -9,13 +9,19 @@ services:
     container_name: ${ARKA_NAME:-arka}-app
     restart: unless-stopped
     user: "${ARKA_UID:-1000}:${ARKA_GID:-1000}"
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      ARKA_HOST: ${ARKA_CONTAINER_HOST:-0.0.0.0}
+      ARKA_PORT: ${ARKA_CONTAINER_PORT:-3000}
+      ARKA_WORKSPACE: ${ARKA_CONTAINER_WORKSPACE:-/workspace}
+      ARKA_CLIENT_ROOT: ${ARKA_CLIENT_ROOT:-/app/dist/client}
     volumes:
-      - "${ARKA_WORKSPACE:-./workspace}:/workspace"
+      - "${ARKA_WORKSPACE:-./workspace}:${ARKA_CONTAINER_WORKSPACE:-/workspace}"
     logging:
       driver: json-file
       options: { max-size: "10m", max-file: "3" }
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:${ARKA_CONTAINER_PORT:-3000}/api/health"]
       interval: 30s
       timeout: 3s
       start_period: 10s
