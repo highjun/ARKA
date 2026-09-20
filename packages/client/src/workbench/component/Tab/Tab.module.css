@@ -5,7 +5,7 @@
   border-style: solid;
   border-width: var(--borderWidth-thin);
   border-color: var(--borderColor-muted);
-  background-color: var(--bgColor-default);
+  background-color: var(--bgColor-inset);
 }
 
 /* `--control-small-size`(28px) — 닫기 버튼도 같은 `IconButton`(28px)이라 딱 맞물린다.
@@ -45,10 +45,11 @@
     border-top-color var(--motion-duration-short) var(--motion-easing-move);
 }
 
-/* strip 은 muted로 가라앉히고, active 탭만 default로 띄워 패널과 이어져 보이게 한다(VSCode 관례) —
- * 지금까진 active/inactive 배경이 완전히 같아서 어떤 탭이 열려있는지 시각적으로 구분이 안 됐다. */
+/* **활성 탭은 본문과 같은 색**이라 둘이 이어져 보인다 — 비활성 탭은 띠와 같다.
+ * 2026-09-20 에 방향이 뒤집혔다: 전엔 띠가 muted 고 활성 탭이 default 였는데, 그림이 본문을
+ * 가장 어둡게(`inset`) 두기로 해서 띠 쪽이 밝아졌다. 경계가 색으로 보이는 것은 그대로다. */
 .header[data-active] {
-  background-color: var(--bgColor-default);
+  background-color: var(--bgColor-inset);
   border-top-color: var(--borderColor-accent-emphasis);
 }
 
@@ -155,8 +156,8 @@
   border-width: 0 0 var(--borderWidth-thin) 0;
   border-color: var(--borderColor-default);
 
-  /* muted — active 탭만 default로 띄워서 대비를 준다(바로 아래 `.header[data-active]`). */
-  background-color: var(--bgColor-muted);
+  /* 띠는 본문보다 밝다 — active 탭만 본문 색으로 가라앉혀 이어 보이게 한다(`.header[data-active]`). */
+  background-color: var(--bgColor-default);
 }
 
 /* 실제 스크롤은 Container(부모)가 한다 — 이 div는 그 안에서 role="tablist"·드래그 정렬 좌표
@@ -279,6 +280,7 @@
 
 .groupPanel {
   height: 100%;
+  background-color: var(--bgColor-inset);
   font-size: var(--text-body-size-medium);
   line-height: var(--text-body-lineHeight-medium);
 }
@@ -399,7 +401,7 @@
   min-width: 0;
   overflow: hidden;
   border-color: var(--borderColor-muted);
-  background-color: var(--bgColor-default);
+  background-color: var(--bgColor-inset);
 }
 
 .leafSectionActive {
