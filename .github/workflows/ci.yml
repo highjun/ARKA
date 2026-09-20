@@ -23,6 +23,8 @@ jobs:
     env:
       IMAGE: ghcr.io/${{ github.repository_owner }}/arka:${{ github.sha }}
       LATEST: ghcr.io/${{ github.repository_owner }}/arka:latest
+      ARKA_NAME: ci
+      ARKA_WORKSPACE: /tmp/arka-ci-workspace
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -51,16 +53,15 @@ jobs:
 
       - name: 그 이미지가 뜨는가
         run: |
-          mkdir -p /tmp/arka-ci-workspace
-          ARKA_UID=$(id -u) ARKA_GID=$(id -g) ARKA_IMAGE="$IMAGE" docker compose \
-            -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci \
-            up -d --no-build --wait
+          mkdir -p "$ARKA_WORKSPACE"
+          ARKA_UID=$(id -u) ARKA_GID=$(id -g) ARKA_IMAGE="$IMAGE" \
+            docker compose -f ops/deploy/compose.yml up -d --no-build --wait
       - name: 안 뜨면 로그를 남긴다
         if: failure()
-        run: docker compose -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci logs
+        run: docker compose -f ops/deploy/compose.yml logs
       - name: 컨테이너를 치운다
         if: always()
-        run: docker compose -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci down -v
+        run: docker compose -f ops/deploy/compose.yml down -v
 
       - name: 검사한 그 이미지를 올린다
         if: github.event_name == 'push'
