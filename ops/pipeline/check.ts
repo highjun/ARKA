@@ -6,7 +6,7 @@ const STAGES: Readonly<Record<string, () => void>> = {
   "test:unit": () => step("pnpm", "-r", "--if-present", "run", "test:unit"),
   "test:integration": () => step("pnpm", "-r", "--if-present", "run", "test:integration"),
   build: () => step("pnpm", "-r", "--if-present", "run", "build"),
-  knip: () => step("npx", "--prefix", "ops", "knip", "--config", "ops/knip.ts", "--no-config-hints"),
+  knip: () => step("npx", "--prefix", "ops", "knip", "--config", "ops/knip.config.ts", "--no-config-hints"),
 };
 
 export const chosen = (args: readonly string[], names: readonly string[]): readonly string[] => {
