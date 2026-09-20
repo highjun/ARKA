@@ -168,7 +168,7 @@ const base: Linter.Config[] = [
     // 스크롤에 묻힌다 — 쓸모없는 지시문은 "여기 위반이 있다"는 거짓 표시로 남는다.
     linterOptions: { reportUnusedDisableDirectives: "error" },
     rules: {
-      // 미룬 일은 주석이 아니라 `docs/tasks/`에 쌓는다. `decoration`은 `/** * TODO */`처럼
+      // 미룬 일은 주석에 쌓지 않는다. `decoration`은 `/** * TODO */`처럼
       // 별표로 꾸며진 줄도 같은 것으로 보게 한다.
       "no-warning-comments": [
         "error",
@@ -275,7 +275,7 @@ const base: Linter.Config[] = [
       "vitest/no-disabled-tests": "error",
       // 같은 이름이 둘이면 어느 쪽이 깨졌는지 출력으로 가려지지 않는다.
       "vitest/no-identical-title": "error",
-      // 주석 처리된 테스트는 지운다 — 미룬 일은 `docs/tasks/`에 적는다.
+      // 주석 처리된 테스트는 지운다.
       "vitest/no-commented-out-tests": "error",
     },
   },

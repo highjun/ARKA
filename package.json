@@ -10,8 +10,7 @@
   },
   "scripts": {
     "build": "pnpm -r --if-present run build",
-    "prepare": "simple-git-hooks",
-    "task": "pnpm --filter ops run task"
+    "prepare": "simple-git-hooks"
   },
   "devDependencies": {
     "simple-git-hooks": "^2.14.0"

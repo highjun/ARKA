@@ -65,8 +65,7 @@ curl -s "$ARKA_ORIGIN/api/version"   # Access 뒤라 로그인한 브라우저�
 ### 아직 관문에 없는 것
 
 - **VRT** — 기준 이미지는 **검토에서 그 스토리를 Accept할 때 하나씩** 만든다(`CONVENTIONS.md`의
-  테스트 절). 아직 승인된 것이 없어 전부 건너뛴다. 승인이 쌓이면 관문으로 올린다
-  ([TASK-53](tasks/0053.md)).
+  테스트 절). 아직 승인된 것이 없어 전부 건너뛴다. 승인이 쌓이면 관문으로 올린다.
 - **Docker 경계 스모크**(`pnpm --filter ops test:smoke`) — `check`의 컨테이너 단계와 겹치면서 느리다.
 
 둘 다 `pnpm --filter ops verify`에는 그대로 들어 있다.

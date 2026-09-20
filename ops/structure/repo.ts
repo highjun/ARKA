@@ -20,6 +20,3 @@ export const read = (file: string): string => readFileSync(path.join(REPO_ROOT, 
 
 /** 추적되는 마크다운 전부. */
 export const MARKDOWN = TRACKED.filter((file) => file.endsWith(".md"));
-
-/** 추적되는 TypeScript·CSS 전부 — 주석 안의 인용을 여기서 찾는다. */
-export const SOURCE = TRACKED.filter((file) => /\.(?:ts|tsx|css)$/u.test(file));

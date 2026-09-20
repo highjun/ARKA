@@ -60,7 +60,7 @@ const LAYER_ZONES = ["./src/workbench", ...SLICES.map((slice) => `./src/extensio
 /** `view/`에만 더 걸리는 것 — 훅 하나와 DI 접근 금지. */
 /*
  * **브라우저 패키지에 Node 전역이 보인다** — `tsconfig`의 `types: ["vitest/globals"]`가
- * `@types/node`를 전이로 끌고 온다(→ TASK-44). `types` 배열은 전역 자동 포함만 통제하고 전이
+ * `@types/node`를 전이로 끌고 온다. `types` 배열은 전역 자동 포함만 통제하고 전이
  * 의존은 못 막으니 여기서 막는다. `test/`·`vite.config.ts`·`.storybook/`은 Node에서 돌아 대상이 아니다.
  */
 const NODE_GLOBALS = [
@@ -224,7 +224,7 @@ export default [
     // `importNames`가 별칭(`IconButton as PrimerIconButton`)까지 잡기 때문이다. 그 겹 자신은
     // 가져와야 하므로 `ignores`로 대상에서 뺀다 — 규칙을 끄는 것이 아니다.
     files: ["src/**/*.{ts,tsx}"],
-    // `ModeToggle`은 겹을 쓰면 자기 `data-component`를 잃는다(→ TASK-64). 그때까지만 예외다.
+    // `ModeToggle`은 겹을 쓰면 자기 `data-component`를 잃는다. 그 문제가 풀릴 때까지만 예외다.
     ignores: ["src/shared/component/IconButton/**", "src/shared/component/ModeToggle/**"],
     rules: {
       "no-restricted-imports": [
@@ -274,7 +274,7 @@ export default [
   },
 
   {
-    // Node 전역(→ TASK-44). `src/`만이다 — `test/`·`vite.config.ts`·`.storybook/`은 Node에서 돈다.
+    // Node 전역. `src/`만이다 — `test/`·`vite.config.ts`·`.storybook/`은 Node에서 돈다.
     files: ["src/**/*.{ts,tsx}"],
     rules: { "no-restricted-globals": ["error", ...NODE_GLOBALS] },
   },

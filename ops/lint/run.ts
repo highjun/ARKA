@@ -41,7 +41,7 @@ const run = (file: string, args: readonly string[]): void => {
 run("markdownlint-cli2", ["--config", "ops/.markdownlint-cli2.jsonc"]);
 
 /*
- * **코드의 모양**(→ TASK-65). `--check`만 한다 — 고치는 것은 `pnpm --filter ops run format`이고,
+ * **코드의 모양**. `--check`만 한다 — 고치는 것은 `pnpm --filter ops run format`이고,
  * 관문이 남의 파일을 조용히 고쳐서는 안 된다. 마크다운은 대상이 아니다(`.prettierignore`).
  */
 run("prettier", ["--config", "ops/prettier.config.ts", "--check", "--log-level", "warn", "."]);

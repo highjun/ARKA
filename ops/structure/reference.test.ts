@@ -1,9 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync } from "node:fs";
 import path from "node:path";
-import { MARKDOWN, REPO_ROOT, SOURCE, TRACKED, read } from "./repo.ts";
-
-const TRACKED_SET = new Set(TRACKED);
+import { MARKDOWN, REPO_ROOT, read } from "./repo.ts";
 
 /** `[글]( 대상 )`의 대상. 바깥 URL과 앵커만 있는 것은 뺀다 — 네트워크를 때리지 않는다. */
 const linksOf = (markdown: string): string[] =>
@@ -25,15 +23,5 @@ describe("문서의 상대 링크가 실재한다", () => {
     });
 
     expect(dead).toEqual([]);
-  });
-});
-
-describe("인용한 태스크가 실재한다", () => {
-  it.each([...MARKDOWN, ...SOURCE])("%s — 인용한 TASK 번호의 파일이 있다", (file) => {
-    const missing = [...read(file).matchAll(/TASK-(?<number>\d+)/gu)]
-      .map((match) => match.groups?.["number"] ?? "")
-      .filter((number) => !TRACKED_SET.has(`docs/tasks/${number.padStart(4, "0")}.md`));
-
-    expect(missing).toEqual([]);
   });
 });

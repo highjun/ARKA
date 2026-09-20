@@ -7,7 +7,7 @@ import { useTabClassNames } from "./TabContext";
 
 /**
  * `title`·`onSelect`를 가로챈다 — 네이티브 툴팁과 텍스트 선택 이벤트가 아니라 탭 제목과 탭 고르기다.
- * 닫기 버튼이 탭 **밖**에 있다 — 안에 두면 중첩 상호작용이 된다(알려진 한계, TASK-66).
+ * 닫기 버튼이 탭 **밖**에 있다 — 안에 두면 중첩 상호작용이 된다(알려진 한계).
  */
 export interface TabHeaderProps extends Omit<ComponentPropsWithoutRef<"div">, "children" | "title" | "onSelect"> {
   /** 그릴 탭 — 아이콘·제목·미리보기·더티가 여기서 온다. */

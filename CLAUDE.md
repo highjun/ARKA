@@ -2,11 +2,10 @@
 
 - 규칙 — [CONVENTIONS.md](docs/CONVENTIONS.md)
 - 운영 — [operations.md](docs/operations.md)
-- 할 일 — `docs/tasks/`
 
 ## 글 쓰는 법
 
-답변·PR·커밋·태스크·문서 전부에 적용한다.
+답변·PR·커밋·문서 전부에 적용한다.
 
 - **결론부터.** 첫 줄이 답이다.
 - **필요한 문장만.** 빼도 뜻이 같은 문장을 뺀다.

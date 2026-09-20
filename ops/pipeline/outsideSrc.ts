@@ -36,17 +36,13 @@ if (outside.length === 0) {
 const body = process.env["PR_BODY"] ?? "";
 
 /**
- * 파일 이름이든 그 폴더든, 본문이 가리키면 언급된 것으로 본다. **태스크는 번호로도 받는다** —
- * 이 저장소가 그것을 인용하는 정본 형태가 `TASK-47`이고, 그 번호가 실재하는지는
- * `ops/structure/`가 이미 본다.
+ * 파일 이름이든 그 폴더든, 본문이 가리키면 언급된 것으로 본다.
  */
 const mentioned = (file: string): boolean => {
   const parts = file.split("/");
   const candidates = [file, parts.at(-1) ?? file];
   for (let depth = parts.length - 1; depth > 0; depth -= 1) candidates.push(`${parts.slice(0, depth).join("/")}/`);
 
-  const task = /^docs\/tasks\/(?<number>\d{4})\.md$/u.exec(file)?.groups?.["number"];
-  if (task !== undefined) candidates.push(`TASK-${String(Number(task))}`);
   // `docs/` 최상위 문서는 확장자 없이 부른다 — `CONVENTIONS`·`workflow`·`operations`.
   const doc = /^docs\/(?<name>[^/]+)\.md$/u.exec(file)?.groups?.["name"];
   if (doc !== undefined) candidates.push(doc);

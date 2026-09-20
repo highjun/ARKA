@@ -38,7 +38,7 @@ export default [
   // 워크플로와 액션 YAML. **형태만 본다** — 없는 `uses`·잘못된 `needs` 같은 의미는
   // `actionlint`가 CI에서 본다.
   ...(yml.configs["flat/standard"] as unknown as Linter.Config[]),
-  // 여백·괄호 안 공백 같은 모양은 포매터의 일이다(TASK-65) — 여기서 다투지 않는다. 남는 것은
+  // 여백·괄호 안 공백 같은 모양은 포매터의 일이다 — 여기서 다투지 않는다. 남는 것은
   // 빈 키·빈 값·탭 들여쓰기처럼 **뜻이 달라지는** 것들이다.
   ...(yml.configs["flat/prettier"] as unknown as Linter.Config[]),
   {

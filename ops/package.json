@@ -10,8 +10,7 @@
     "test:smoke": "node deploy/smoke.ts",
     "check": "node pipeline/check.ts",
     "format": "prettier --config prettier.config.ts --write ..",
-    "verify": "node pipeline/verify.ts",
-    "task": "node tasks/main.ts"
+    "verify": "node pipeline/verify.ts"
   },
   "exports": {
     "./lint": "./lint/index.ts"

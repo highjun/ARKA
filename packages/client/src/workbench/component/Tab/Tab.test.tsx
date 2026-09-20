@@ -184,7 +184,7 @@ describe("Tab", () => {
 
     // nested-interactive: 탭 헤더(`role="tab"`)가 닫기 버튼을 자식으로 품는다 — 실제 IDE도 쓰는
     // 패턴이다. 버튼을 형제로 빼면 고칠 수 있지만 드래그 히트박스와 포인터 예외 처리를 함께
-    // 바꿔야 한다. 알려진 한계로 이 규칙만 뺀다(TASK-66).
+    // 바꿔야 한다. 알려진 한계로 이 규칙만 뺀다.
     await expectNoA11yViolations(container, { rules: { "nested-interactive": { enabled: false } } });
   });
 });

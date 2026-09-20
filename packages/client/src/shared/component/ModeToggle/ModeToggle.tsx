@@ -46,7 +46,7 @@ const getLabel = (labels: ModeToggleLabels | undefined, currentIndex: number, fa
  *
  * **우리 `IconButton` 겹을 쓰지 않는 유일한 자리다**(린트 예외). 이유는 하나뿐이다 —
  * 그 겹이 `data-component`를 스프레드 뒤에 박아서, 겹쳐 쓰면 이 컴포넌트의 이름이
- * 사라진다(→ TASK-64). 그것이 풀리면 예외와 중복 CSS가 함께 없어진다.
+ * 사라진다. 그것이 풀리면 예외와 중복 CSS가 함께 없어진다.
  *
  * `ref`는 그대로 통과시킨다 — 감싸면서 ref 접근을 잃으면 raw `IconButton`을 쓸 때보다 기능이
  * 줄어든다.
