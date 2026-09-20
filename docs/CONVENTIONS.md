@@ -275,6 +275,7 @@ printf '%s' "feat(client): 검색 패널을 연다" | pnpm --filter ops exec com
 - **E2E** — `test/e2e/*.spec.ts`.
 - **VRT** — 스토리를 순회해 찍는다. `pnpm --filter client test:visual-regression`(비교). 기준을 만들 때는 **스토리를 골라** 인자를 넘긴다 — `test:visual-regression -g "<스토리 id>" --update-snapshots`. **Docker에서만** 생성·비교한다.
   - **기준 이미지는 검토에서 그 스토리를 Accept할 때 만든다.** 아직 아무도 안 본 그림을 기준으로 삼으면 "검토 안 함"이 "승인됨"으로 기록된다. VRT가 잡으려는 것은 승인된 뒤의 변형이다.
+  - **검토는 Figma와 겹쳐 본다.** `storybook-addon-figma-sync`가 그림을 스토리 위에 얹고 어긋난 픽셀을 빨갛게 칠한다. 한꺼번에 재는 것은 `node ops/figma/compare.mjs`. 겹쳐 보지 않고 만든 부품은 검사만 통과할 뿐 그림과 어긋난 채 쌓인다(2026-09-20에 그렇게 됐다). → [ops/figma/README.md](../ops/figma/README.md)
   - 그래서 기준이 없는 스토리는 **실패가 아니라 건너뜀**이다. 없는 것이 정상인 기간이 있다.
 - **모든 테스트가 자기 패키지 안에 있다.** 자리는 *무엇이 돌리는가*로 갈린다 — 단위·계약·스모크·스토리는 **대상 옆**에 두고(vitest가 소스와 함께 본다), **대상을 특정할 수 없는 것**만 패키지의 `test/` 아래로 묶는다 — 앱 전체를 보는 E2E(`test/e2e/`), 스토리 전부를 도는 VRT(`test/vrt/`), 테스트 환경 자체를 세우는 설정(`test/vitestSetup.ts`). 단위 테스트를 소스에서 떼어내는 `tests/` 폴더나 던더 폴더는 쓰지 않는다.
 - Mock은 `Mock<Name>.ts`.
