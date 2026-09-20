@@ -30,13 +30,28 @@
   inset: 0;
 }
 
+/* **창 전체의 바탕.** 이것이 없으면 아래 구역이 배경을 안 준 자리마다 브라우저의 흰색이
+   비쳐, 어둡게로 바꿔도 화면이 하얗게 보인다(2026-09-20 스크린샷으로 확인). */
 .root {
   position: absolute;
   inset: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bgColor-default);
+  color: var(--fgColor-default);
 }
 
+/* 높이는 `TitleBar` 가 제가 든다 — 여기서는 아래 줄만 긋는다. */
+.titleBar {
+  border-style: solid;
+  border-width: 0 0 var(--borderWidth-thin) 0;
+  border-color: var(--borderColor-default);
+}
+
+/* 제목 줄 아래 남는 자리를 다 먹는다. */
 .layout {
-  height: 100%;
+  min-height: 0;
+  flex-grow: 1;
 }
 
 /*

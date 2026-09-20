@@ -162,28 +162,30 @@ export const Shell = ({
         className={clsx(className, styles["root"])}
       >
         <PortalProvider container={portalRoot ?? undefined}>
+          {/* **제목 줄은 창 맨 위를 가로지른다.** `SplitPageLayout.Header` 안에 두면 레이아웃이
+              정한 자리 때문에 레일·사이드바가 그 왼쪽에 붙어 화면 맨 위부터 시작한다 —
+              그림과 어긋나고 브랜드 글자가 탭 줄과 같은 높이에 놓인다(2026-09-20 스크린샷). */}
+          <TitleBar
+            className={styles["titleBar"]}
+            brand={
+              <>
+                {hasSidebar && (
+                  <IconButton
+                    variant="invisible"
+                    size="small"
+                    className={styles["sidebarToggle"]}
+                    aria-label="사이드바 열기"
+                    onClick={() => setSidebarOpen(true)}
+                    icon={() => <Icon iconId="layoutSidebarLeft" size="sm" />}
+                  />
+                )}
+                {brand}
+              </>
+            }
+            center={center}
+            actions={actions}
+          />
           <SplitPageLayout className={styles["layout"]}>
-            <SplitPageLayout.Header padding="none" divider="line">
-              <TitleBar
-                brand={
-                  <>
-                    {hasSidebar && (
-                      <IconButton
-                        variant="invisible"
-                        size="small"
-                        className={styles["sidebarToggle"]}
-                        aria-label="사이드바 열기"
-                        onClick={() => setSidebarOpen(true)}
-                        icon={() => <Icon iconId="layoutSidebarLeft" size="sm" />}
-                      />
-                    )}
-                    {brand}
-                  </>
-                }
-                center={center}
-                actions={actions}
-              />
-            </SplitPageLayout.Header>
             {hasSidebar && (
               <SplitPageLayout.Sidebar
                 padding="none"
