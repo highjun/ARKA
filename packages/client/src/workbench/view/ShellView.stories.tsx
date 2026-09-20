@@ -101,7 +101,10 @@ const tabSystemViewModel = (state: Partial<ITabSystemViewModel>, container: Cont
 const notificationViewModel = (state: Partial<INotificationViewModel>): INotificationViewModel => ({
   dispose: () => undefined,
   items: [],
+  unreadCount: 0,
   dismiss: () => undefined,
+  markAllRead: () => undefined,
+  clear: () => undefined,
   ...state,
 });
 
@@ -197,9 +200,16 @@ export const Split: Story = story({ tabs: { tree: SPLIT, activePaneId: "leaf-2" 
 export const Notifications: Story = story({
   notifications: {
     items: [
-      { id: "1", severity: "error", message: "파일을 저장하지 못했다 — EACCES" },
-      { id: "2", severity: "warning", message: "연결이 불안정하다" },
+      {
+        id: "1",
+        severity: "error",
+        message: "파일을 저장하지 못했다 — EACCES",
+        at: Date.now() - 180_000,
+        isRead: false,
+      },
+      { id: "2", severity: "warning", message: "연결이 불안정하다", at: Date.now() - 60_000, isRead: false },
     ],
+    unreadCount: 2,
   },
 });
 

@@ -68,20 +68,19 @@ describe("registerServices", () => {
     it("온 것이 없으면 종에 수가 안 붙는다", () => {
       mountWith(new MockWorkspaceFiles({}));
 
-      expect(screen.getByLabelText("알림 없음")).toBeDefined();
+      expect(screen.getByLabelText("알림")).toBeDefined();
     });
 
-    it("알림이 오면 종에 수가 붙고, 골라서 닫으면 사라진다", async () => {
+    it("알림이 오면 안 읽은 수가 붙고, 종을 누르면 탭이 열리며 읽음이 된다", async () => {
       const container = mountWith(new MockWorkspaceFiles({}));
       act(() => {
         container.resolve("arka.workbench.notifications").notify("error", "터졌다");
       });
 
-      // Radix 의 드롭다운은 click 이 아니라 pointerdown 에 열린다(왼쪽 버튼만).
-      fireEvent.pointerDown(await screen.findByLabelText("알림 1건"), { button: 0, ctrlKey: false });
-      fireEvent.click(await screen.findByRole("menuitem", { name: /터졌다/u }));
+      fireEvent.click(await screen.findByLabelText("안 읽은 알림 1건"));
 
-      expect(await screen.findByLabelText("알림 없음")).toBeDefined();
+      expect(await screen.findByText("터졌다")).toBeDefined();
+      expect(await screen.findByLabelText("알림")).toBeDefined();
     });
   });
 
@@ -245,7 +244,7 @@ describe("registerServices", () => {
           .list()
           .map((provider) => provider.id)
           .sort(),
-      ).toEqual(["arka.filesystem.text", "arka.workbench.settings"]);
+      ).toEqual(["arka.filesystem.text", "arka.workbench.notifications", "arka.workbench.settings"]);
       expect(
         container
           .resolve("arka.settings")

@@ -2,13 +2,18 @@ import type { Disposable } from "#core/di";
 import type { Notification } from "../model/INotifications";
 
 declare module "#core/di" {
-  /** `INotificationViewModel`를 컨테이너에서 꺼내는 자리. */
   interface InstanceMap {
     "arka.workbench.notificationViewModel": INotificationViewModel;
   }
 }
-/** 구석에 쌓인 알림. `INotifications`의 것을 그대로 내고, 닫는 것을 그쪽에 넘긴다. */
+
+/** 알림 탭과 제목 줄의 종이 함께 쓴다. */
 export interface INotificationViewModel extends Disposable {
+  /** 오래된 것이 앞이다. */
   readonly items: readonly Notification[];
+  /** 안 읽은 수. 종의 배지가 이 값이다. */
+  readonly unreadCount: number;
   dismiss(id: string): void;
+  markAllRead(): void;
+  clear(): void;
 }

@@ -137,38 +137,24 @@ export const ShellView = observer(function ShellView() {
             <Text size="small" tone="muted" className={styles["buildId"]}>
               {appStatus.buildId}
             </Text>
-            <Menu kind="dropdown">
-              {/* **`asChild` 다** — Trigger 자신이 `button` 이라 `IconButton` 을 그 안에 넣으면 버튼이 중첩된다. */}
-              <Menu.Trigger asChild>
-                <span className={styles["bell"]}>
-                  <IconButton
-                    variant="invisible"
-                    size="small"
-                    aria-label={
-                      notifications.items.length === 0 ? "알림 없음" : `알림 ${String(notifications.items.length)}건`
-                    }
-                    icon={() => <Icon iconId="bell" size="sm" />}
-                  />
-                  {notifications.items.length === 0 ? null : (
-                    <CounterLabel scheme="primary" className={styles["bellBadge"]}>
-                      {notifications.items.length}
-                    </CounterLabel>
-                  )}
-                </span>
-              </Menu.Trigger>
-              <Menu.Content>
-                {notifications.items.length === 0 ? (
-                  <Menu.Label>온 것이 없다</Menu.Label>
-                ) : (
-                  notifications.items.map((item) => (
-                    <Menu.Item key={item.id} onSelect={() => notifications.dismiss(item.id)}>
-                      <Icon iconId={item.severity === "info" ? "bell" : item.severity} size="sm" />
-                      {item.message}
-                    </Menu.Item>
-                  ))
-                )}
-              </Menu.Content>
-            </Menu>
+            {/* **누르면 탭이 열린다** — 메뉴는 동작 목록이라 읽을 것을 담는 그릇이 아니었다.
+                고르면 읽히는 게 아니라 지워지던 것이 그 탓이다. */}
+            <span className={styles["bell"]}>
+              <IconButton
+                variant="invisible"
+                size="small"
+                aria-label={
+                  notifications.unreadCount === 0 ? "알림" : `안 읽은 알림 ${String(notifications.unreadCount)}건`
+                }
+                onClick={() => commands.execute("shell.openNotifications")}
+                icon={() => <Icon iconId="bell" size="sm" />}
+              />
+              {notifications.unreadCount === 0 ? null : (
+                <CounterLabel scheme="primary" className={styles["bellBadge"]}>
+                  {notifications.unreadCount}
+                </CounterLabel>
+              )}
+            </span>
             <ModeToggle
               values={["light", "dark"]}
               value={shell.colorMode}
