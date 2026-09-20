@@ -711,7 +711,10 @@ globalThis.__arka.meta = (() => {
       props: {
         brand: { t: "slot", d: "왼쪽 — 마크 20×20 과 작업 공간 이름" },
         center: { t: "slot", d: "가운데 — `CommandCenter`. 누르면 팔레트가 열린다" },
-        actions: { t: "slot", d: "오른쪽 — 빌드 표시 · 알림 종 · `ModeToggle` 셋뿐이다" },
+        actions: {
+          t: "slot",
+          d: "오른쪽 — 빌드 표시 · 알림 종 · `ModeToggle` 셋뿐이다. 빌드는 `2026-09-20 11:18(a1b2c3d)` 꼴",
+        },
       },
     },
     CommandCenter: {
@@ -909,6 +912,7 @@ globalThis.__arka.meta = (() => {
         "Settings/TabPanel",
         "Settings/Row",
         "Settings/Keybindings",
+        "Settings/Keybinding",
       ],
     },
     "Settings/Root": {
@@ -936,10 +940,30 @@ globalThis.__arka.meta = (() => {
       },
     },
     "Settings/Keybindings": {
-      설명: "workbench/view/SettingsTabView · Settings.Keybindings · 단축키 범주. 명령·키 표",
+      설명: "workbench/view/SettingsTabView · Settings.Keybindings · 단축키 범주. 찾기 칸과 줄들",
       props: {
-        rows: { t: "object", d: "행들 — `[{ id, keys, label, commandId }]`" },
+        rows: { t: "object", d: "줄들 — `[{ id, keys, label, commandId }]`" },
+        query: { t: "string", d: "찾을 말 — 명령 이름과 id 를 함께 건다" },
+        recordingId: {
+          t: "string",
+          d: "지금 재지정 중인 줄의 id. **한 번에 하나다** — 줄이 아니라 여기가 드는 까닭이다",
+        },
+        onQueryChange: { t: "action", d: "찾을 말이 바뀔 때" },
+        onRecordingChange: { t: "action", d: "재지정을 열고 닫을 때. `null` 이면 닫는다" },
+        onRebind: { t: "action", d: "새 조합을 받았을 때 — `(id, keys)`" },
       },
+    },
+    "Settings/Keybinding": {
+      설명: "workbench/view/SettingsTabView · Settings.Keybinding · 단축키 한 줄. 설정 줄과 같은 기하다 — 왼쪽 이름, 오른쪽 컨트롤",
+      props: {
+        label: { t: "string", d: '명령 이름 — "파일 찾기"' },
+        commandId: { t: "string", d: '아래 흐린 줄 — "workbench.action.quickOpen"' },
+        keys: { t: "object", d: '키캡들 — `["Ctrl", "Shift", "P"]`. 비면 「없음」이 선다' },
+        recording: { t: "boolean", d: "재지정 중. 오른쪽이 키를 기다리는 칸이 된다. 값은 `Keybindings` 가 쥔다" },
+        onRecordingChange: { t: "action", d: "연필을 누르거나 취소할 때" },
+        onRebind: { t: "action", d: "새 조합을 받았을 때" },
+      },
+      css: { state: "`:hover` 가 면을 밝히고 **연필을 띄운다** — 평소엔 없다. `:focus-visible` 도 같다" },
     },
     "Settings/Row": {
       설명: "workbench/view/SettingsTabView · Settings.Row · 설정 한 줄. 이름·설명 왼쪽, 컨트롤 오른쪽",
