@@ -381,6 +381,28 @@ globalThis.__arka.meta = (() => {
         noDelay: { t: "boolean", d: "기다리지 않고 바로 띄운다" },
       },
     },
+    Toast: {
+      설명: "shared/component/Toast (예상 자리) · 스스로 알리고 사라진다. 앱을 막지 않는다",
+      부품: ["Toast/Root", "Toast/Item"],
+    },
+    "Toast/Root": {
+      설명: "shared/component/Toast (예상 자리) · Toast.Root · 화면 구석에 쌓는 자리. 새것이 아래에 붙는다",
+      props: {
+        children: { t: "slot", d: "`.Item` 들. 커널이 `INotifications` 를 걸러 넣는다" },
+        placement: { t: "enum", d: "bottom-right | bottom-left. 기본 bottom-right" },
+      },
+    },
+    "Toast/Item": {
+      설명: "shared/component/Toast (예상 자리) · Toast.Item · 알림 하나. 색은 아이콘에만 싣는다",
+      props: {
+        severity: { t: "enum", d: "info | warning | error. `INotifications` 의 것과 같다" },
+        message: { t: "string", d: "알릴 말. 한 줄을 넘으면 접지 않고 늘어난다" },
+        action: { t: "slot", d: "아래 오른쪽 단추. 명령 id 로 가리킨다 — `MenuItem` 과 같은 꼴" },
+        timeout: { t: "number", d: "밀리초. 주면 스스로 사라진다. 없으면 × 로만 닫힌다" },
+        onDismiss: { t: "action", d: "× 를 누르거나 시간이 다 됐을 때" },
+      },
+      css: { state: "`:hover` 동안 사라지는 시계를 멈춘다" },
+    },
     Dialog: {
       설명: "@primer/react Dialog · ConfirmationDialog · 앱을 막고 답을 받아 내는 창",
       부품: [
@@ -901,6 +923,48 @@ globalThis.__arka.meta = (() => {
       // 짚인 줄은 cmdk 가 정한다 — 소비자가 넘기는 값이 아니라 CSS-State 다.
       css: { selected: "`[cmdk-item][data-selected=true]` 를 cmdk 가 붙인다. 마우스와 키보드 둘 다 이것을 움직인다" },
     },
+    // 알림도 확장처럼 꽂힌다 — **탭 하나**다(2026-09-20 사용자 결정). 제목 줄의 종이 트리거라
+    // 레일에는 칸을 두지 않는다. 설정은 톱니가 레일 아래에, 알림은 종이 제목 줄에 있다.
+    Notifications: {
+      설명: "workbench/view/NotificationsTabView (예상 자리) · 쌓인 알림을 열어 보는 탭. 제목 줄의 종이 연다",
+      부품: ["Notifications/Root", "Notifications/TabHeader", "Notifications/TabPanel", "Notifications/Row"],
+    },
+    "Notifications/Root": {
+      가상: true,
+      설명: "workbench/view/NotificationsTabView (예상 자리) · 커널이 신고하는 것. 그릴 것은 없다",
+      props: {
+        uri: { t: "string", d: "`arka:notifications`. 탭이 이 좌표로 열린다" },
+        title: { t: "string", d: '"알림". 탭 이름과 종의 툴팁' },
+        iconId: { t: "enum", d: "bell. 종과 탭 머리가 같은 글리프를 쓴다" },
+      },
+    },
+    "Notifications/TabHeader": {
+      설명: "workbench/view/NotificationsTabView (예상 자리) · Notifications.TabHeader · 탭 머리. 종과 「알림」",
+      props: {},
+    },
+    "Notifications/TabPanel": {
+      설명: "workbench/view/NotificationsTabView (예상 자리) · Notifications.TabPanel · 줄들과 도구 줄. 비면 `Blankslate` 가 선다",
+      props: {
+        state: { t: "enum", d: "Figma 축 — list | empty. 코드는 `items` 로만 갈린다" },
+        items: { t: "object", d: "알림들 — `[{ id, severity, message, at, isRead }]`" },
+        unreadCount: { t: "number", d: "안 읽은 수. 종의 배지와 같은 값이다" },
+        onMarkAllRead: { t: "action", d: "「모두 읽음」. 탭을 열 때도 이것이 돈다" },
+        onClearAll: { t: "action", d: "「모두 지우기」" },
+        onDismiss: { t: "action", d: "줄 하나를 지울 때" },
+      },
+    },
+    "Notifications/Row": {
+      설명: "workbench/view/NotificationsTabView (예상 자리) · Notifications.Row · 알림 한 줄. 심각도 · 말 · 시각 · 동작",
+      props: {
+        severity: { t: "enum", d: "info | warning | error. 색은 아이콘에만 싣는다" },
+        read: { t: "boolean", n: "isRead", d: "읽었나. 안 읽은 것은 면이 밝고 앞에 점이 선다" },
+        message: { t: "string", d: "알릴 말" },
+        at: { t: "number", d: "온 때. 줄에는 「3분 전」으로 적는다" },
+        action: { t: "slot", d: "오른쪽 단추. 명령 id 로 가리킨다" },
+        onDismiss: { t: "action", d: "× 를 누를 때" },
+      },
+      css: { state: "`:hover` 가 면을 밝힌다" },
+    },
     // 설정은 확장이다 — 세 자리(레일 아래 묶음의 칸 · 탭 머리 · 탭 본문)가 각각 별개의 UI 라 부품도 각각이다
     // (2026-09-20 사용자 결정).
     Settings: {
@@ -1020,7 +1084,7 @@ globalThis.__arka.meta = (() => {
       ["Navigation", ["NavList", "UnderlineNav"]],
       ["Display", ["Icon", "Label", "CounterLabel", "Avatar", "DataTable"]],
       ["Feedback", ["Banner", "Blankslate", "Spinner", "ProgressBar"]],
-      ["Overlays", ["Menu", "Select", "Dialog", "Tooltip"]],
+      ["Overlays", ["Menu", "Select", "Dialog", "Tooltip", "Toast"]],
       ["Layout", ["Container"]],
     ],
     // VS Code 의 창 구역 이름을 따른다 — 어디에 무엇이 있는지가 곧 이름이 되게.
@@ -1031,7 +1095,7 @@ globalThis.__arka.meta = (() => {
       ["Editor", ["Tab"]],
       ["Bottom", ["Bottom"]],
       ["Overlays", ["CommandPalette"]],
-      ["Extension", ["Settings"]],
+      ["Extension", ["Notifications", "Settings"]],
       ["Window", ["Sash", "TitleBar", "Shell"]],
     ],
   };
