@@ -19,13 +19,11 @@ const Demo = (props: Omit<ComponentProps<typeof Select>, "children">) => (
   </Select>
 );
 
-/** 프리미티브를 감싼 구조가 계약대로 동작하는지 본다 — 열리고, 고르면 값이 올라오고, 고른 줄에 표시가 붙는다. */
 describe("Select", () => {
   it("트리거를 누르면 열린다(비제어)", () => {
     render(<Demo />);
 
     expect(screen.queryByRole("menuitemradio")).not.toBeInTheDocument();
-    // Radix 트리거는 `pointerdown`(button 0)에서 연다 — `Menu`와 같다.
     fireEvent.pointerDown(screen.getByRole("button", { name: "모델" }), {
       button: 0,
     });
@@ -77,7 +75,6 @@ describe("Select", () => {
     expect(screen.getByRole("button")).toHaveTextContent("sonnet");
   });
 
-  // `Menu.test`와 같은 꼴 — `extra`를 `Content`에 바로 펼친다.
   const Shell = (extra: Record<string, unknown>) => (
     <Select open>
       <Select.Trigger value="모델" />

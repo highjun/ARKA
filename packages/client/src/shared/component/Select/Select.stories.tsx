@@ -11,7 +11,6 @@ const MODELS = [
   { id: "haiku", label: "Claude Haiku 4.5", disabled: true },
 ];
 
-/** 목록은 포탈로 `document.body`에 뜨는데 VRT는 `#storybook-root`만 찍는다 — 포탈 대상을 이 상자 안으로 돌린다. */
 const OverlayStage = ({ children }: { readonly children: ReactNode }) => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   return (

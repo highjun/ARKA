@@ -5,7 +5,6 @@ import type { ITabLayout, OpenTab, PaneNode } from "./ITabLayout";
 import { TabLayout } from "./TabLayout";
 import { ROOT_PANE_ID } from "./tabsShare";
 
-/** 실제 `localStorage` 대신 메모리 하나로 — 계약(get/set)만 있으면 Model이 알 필요 없다. */
 const fakeStorage = (seed: Record<string, string> = {}): IStorage => {
   const store = new Map(Object.entries(seed));
   return {
@@ -16,7 +15,6 @@ const fakeStorage = (seed: Record<string, string> = {}): IStorage => {
 
 const make = (storage: IStorage = fakeStorage()): ITabLayout => new TabLayout({ storage });
 
-/** 잎이 아니면 빈 목록 — 테스트는 루트 잎만 다룬다. */
 const tabsOf = (node: PaneNode): readonly OpenTab[] => (node.kind === "leaf" ? node.tabs : []);
 const activeOf = (node: PaneNode): string | null => (node.kind === "leaf" ? node.activeTabId : null);
 

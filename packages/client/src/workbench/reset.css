@@ -1,11 +1,3 @@
-/*
- * 리셋이 없어서 브라우저 기본값(`body` 8px 마진, `box-sizing: content-box` 등)이 소비 앱
- * 화면에 그대로 샜다(2026-08-31, arka-workbench가 `html,body,#root{margin:0}`·
- * `[data-color-mode]{box-sizing:border-box}`로 자기 쪽에서 우회해뒀던 걸 여기로 흡수한다).
- * Josh Comeau의 "Custom CSS Reset"(https://www.joshwcomeau.com/css/custom-css-reset/,
- * 퍼블릭 도메인)을 원문 그대로 쓴다 — `#root, #__next` 중 `#__next`(Next.js 전용)만 뺐다,
- * 이 스택 어디에도 Next.js가 없고 `#root`는 소비 앱들이 실제로 쓰는 루트 엘리먼트 id다.
- */
 *,
 *::before,
 *::after {
@@ -69,16 +61,6 @@ h6 {
   isolation: isolate;
 }
 
-/*
- * 모바일 브라우저가 탭 가능한 요소에 자동으로 붙이는 회색 "탭 하이라이트" 오버레이를 끈다.
- * 이게 켜져 있으면 우리가 CSS로 정교하게 만든 hover/active 배경(작은 행 하나에만 정확히 걸림)과
- * 별개로, 브라우저 자체 오버레이가 **가장 가까운 탭 가능 조상**(중첩 트리에서는 자식까지 포함한
- * `<li>` 전체, 우리 행 하나보다 훨씬 큰 박스)에 걸린다 — 폴더를 눌러 펼치는 순간 그 폴더 한 줄이
- * 아니라 방금 나타난 자식들까지 통째로 회색 박스가 덮였다 사라지는 것처럼 보인다(2026-08-24,
- * "explorer 배경이 겹쳐 보인다" 지적으로 발견 — 실제 터치 컴포지터 오버레이라 Playwright
- * 스크린샷엔 안 찍혀서 처음엔 원인을 못 찾았다). 대신 Primer 자체 hover/active 스타일이 시각
- * 피드백을 그대로 맡는다.
- */
 html {
   -webkit-tap-highlight-color: transparent;
 }

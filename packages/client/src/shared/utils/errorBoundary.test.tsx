@@ -7,7 +7,6 @@ const Bomb = (): never => {
 };
 
 describe("ErrorBoundary", () => {
-  // React가 잡힌 오류를 console.error로도 내보낸다 — 테스트 출력이 그걸로 덮이지 않게 막는다.
   beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => undefined));
   afterEach(() => vi.restoreAllMocks());
 

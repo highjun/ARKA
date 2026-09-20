@@ -1,10 +1,5 @@
 import { createWorkspaceFilesPort } from "./HttpWorkspaceFiles";
 
-/**
- * 계약을 네트워크 경계에서 검사한다 — 손으로 갈아끼우는 것은 `fetch` 하나뿐이고, Adapter 의
- * 이름은 이 파일 어디에도 나오지 않는다. 구현을 바꿔도 이 테스트는 그대로 남아야 한다.
- */
-
 const originalFetch = globalThis.fetch;
 
 type Call = {

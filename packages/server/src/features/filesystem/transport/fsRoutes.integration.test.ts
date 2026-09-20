@@ -3,13 +3,6 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { expectResponse, probeApp, withProtocol } from "../../../responseContract";
 import type { RouteProbe } from "../../../responseContract";
 
-/**
- * 파일 라우트의 **응답이 계약을 지키는지** 본다. 클라이언트를 모른다 — 어댑터를 붙이지 않고
- * 스키마에만 대고 잰다(→ `responseContract.ts`).
- *
- * 동작이 맞는지(옮기면 옛 경로가 사라지는가 등)는 `infra/fileOperations.test.ts`가 본다.
- * 여기는 **모양**만 본다.
- */
 let probe: RouteProbe;
 let dispose: () => Promise<void>;
 
@@ -128,12 +121,10 @@ describe("파일 라우트의 응답 계약", () => {
     await expectResponse(probe, { url: "/api/files?path=a.txt", init: { method: "DELETE" } }, PathResult);
   });
 
-  // 오류도 계약이다 — 클라이언트가 `code`로 분기한다.
   it("없는 파일을 읽으면 404와 FileErrorBody다", async () => {
     await expectResponse(probe, { url: "/api/files/content?path=nope.txt", status: 404 }, FileErrorBody);
   });
 
-  // 루트 밖은 `NotFound`로 답한다 — 밖에 무엇이 있는지 알려주지 않는다.
   it("루트 밖 경로는 거부하고 FileErrorBody다", async () => {
     const body = await expectResponse(probe, { url: "/api/files?path=..", status: 404 }, FileErrorBody);
     expect(body.code).toBe("NotFound");

@@ -6,11 +6,6 @@ import type { FileTreeRow, IDirectoryTreeViewModel } from "../viewmodel/IDirecto
 import type { IFileContentViewModel } from "../viewmodel/IFileContentViewModel";
 import { DirectoryTreeView } from "./DirectoryTreeView";
 
-/**
- * 고정된 VM을 꽂는다 — 실물은 마운트에 워크스페이스를 읽고 `fs.watch`를 건다. 우클릭 메뉴는
- * 진짜 `CommandService`를 빈 채로 준다(커맨드가 없으면 메뉴에 뜰 것도 없다) — 이 컴포넌트는
- * 레지스트리의 실제 모양을 훑으므로 흉내로는 부족하다.
- */
 const viewModel = (state: Partial<IDirectoryTreeViewModel>): IDirectoryTreeViewModel => ({
   dispose: () => undefined,
   rows: [],
@@ -130,19 +125,14 @@ export const Default: Story = story({
   selectedIds: ["CONVENTIONS.md"],
 });
 
-/** 워크스페이스가 정말 비었을 때 — 읽는 중과 달라야 한다. */
 export const Empty: Story = story({ status: "loaded" });
 
-/** 아직 루트를 읽는 중 — 행이 없는 이유가 다르므로 스피너가 뜬다. */
 export const Loading: Story = story({ status: "loading" });
 
-/** 루트를 읽지 못했다 — 트리 자체가 뜨지 않는 유일한 경우다. */
 export const Error: Story = story({ status: "error", failure: "워크스페이스를 읽지 못했다 — ENOENT" });
 
-/** 이름을 인라인으로 고치는 중 — 행 자체가 입력칸이 된다(모달이 아니다). */
 export const Editing: Story = story({ rows: ROWS, expandedIds: ["packages"], editingId: "CONVENTIONS.md" });
 
-/** 여러 항목을 지우기 직전의 확인 — 폴더가 섞이면 문구가 달라진다. */
 export const DeleteConfirm: Story = story({
   rows: ROWS,
   expandedIds: ["packages"],
@@ -152,5 +142,4 @@ export const DeleteConfirm: Story = story({
   ],
 });
 
-/** 조작이 실패해 안내를 띄운 상태. */
 export const FailureNotice: Story = story({ rows: ROWS, failureNotice: "같은 이름이 이미 있다 — EEXIST" });

@@ -45,12 +45,6 @@ describe("flattenVisible", () => {
   });
 });
 
-/**
- * `useTreeNavigation`을 훅 단독으로 검증한다 — Primer의 `useRovingTabIndex.test.tsx`처럼
- * `renderHook`을 쓰지 않고, 훅을 쓰는 최소 픽스처 컴포넌트를 만들어 렌더한다. 이 훅은 이제 "포커스와
- * 키 라우팅"만 갖는다(선택·활성화 조합은 `FileTree.tsx`로 옮겨서 `FileTree.test.tsx`가 덮는다) —
- * 여기서는 훅 자신의 로직(등록·포커스 위임·자가치유·콜백 라우팅)만 좁게 본다.
- */
 const noop = () => {};
 
 const TreeNavigationFixture = ({
@@ -91,7 +85,6 @@ const TreeNavigationFixture = ({
           ref={registerNode(node.item.id)}
           role="treeitem"
           aria-label={node.item.name}
-          // `treeitem`은 선택 여부를 항상 알려야 한다(WAI-ARIA). 이 흉내는 선택을 안 보므로 false 고정.
           aria-selected={false}
           tabIndex={node.item.id === effectiveFocusedId ? 0 : -1}
           onFocus={() => setFocusedId(node.item.id)}
@@ -125,14 +118,10 @@ describe("useTreeNavigation hook", () => {
   it("focusedId가 flat에서 사라지면 effectiveFocusedId가 첫 항목으로 자가치유한다", () => {
     const { rerender } = render(<TreeNavigationFixture items={ITEMS} expandedIds={new Set(["src"])} />);
 
-    // onFocus 동기화를 재현한다 — jsdom의 raw `.focus()`는 React가 위임하는 `focusin`을
-    // 쏘지 않으므로 `fireEvent.focus`를 쓴다.
     const a = screen.getByRole("treeitem", { name: "a.ts" });
     fireEvent.focus(a);
     expect(a).toHaveAttribute("tabindex", "0");
 
-    // 'src'를 접으면 'a'가 flat에서 사라진다 — 포커스 state는 여전히 'a'를 가리키지만
-    // effectiveFocusedId는 flat[0](='src')으로 파생된다.
     rerender(<TreeNavigationFixture items={ITEMS} expandedIds={new Set()} />);
 
     expect(screen.getByRole("treeitem", { name: "src" })).toHaveAttribute("tabindex", "0");

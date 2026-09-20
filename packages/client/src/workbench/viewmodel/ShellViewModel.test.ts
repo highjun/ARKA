@@ -17,7 +17,6 @@ const fakeStorage = (): IStorage => {
   return { get: (key) => store.get(key) ?? null, set: (key, value) => void store.set(key, value) };
 };
 
-/** 플랫폼이 주는 값 — 테스트가 직접 넓혔다 좁혔다 한다. */
 const fakeViewport = (): IViewport & { setNarrow(value: boolean): void } => {
   const changed = new Emitter();
   let narrow = false;
@@ -35,7 +34,6 @@ const fakeViewport = (): IViewport & { setNarrow(value: boolean): void } => {
 
 const NOOP_CONTENT = () => null;
 
-/** 사이드바 둘(탐색기·검색)과 아래 창 하나(터미널)를 등록한 진짜 레지스트리로 조립한다. */
 const make = () => {
   const sidebars = new Registry<SidebarDescriptor>();
   sidebars.add({

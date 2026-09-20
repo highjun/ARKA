@@ -16,7 +16,6 @@ const make = (serverInfo: IServerInfo = { load: () => Promise.resolve(null) }) =
   return { viewModel, reload };
 };
 
-/** 서버 정보 대본 — 기본은 지금 프로토콜과 같다. */
 const info = (extra: Partial<ServerInfo>): IServerInfo => ({
   load: () =>
     Promise.resolve({

@@ -10,10 +10,8 @@ import { FileContentViewModel } from "./viewmodel/FileContentViewModel";
 
 export { type IWorkspaceFiles } from "./model/IWorkspaceFiles";
 
-/** 탐색기 사이드바의 id. 다른 확장이 알 필요는 없다 — 여는 것은 `arka.filesystem.focus` 명령이다. */
 const EXPLORER_ID = "explorer";
 
-// 브라우저 API를 얇은 함수로 감싸 넣는다 — Model·ViewModel이 navigator·document를 직접 알면 테스트가 DOM에 묶인다.
 const copyToClipboard = (text: string): void => {
   void navigator.clipboard.writeText(text);
 };
@@ -24,11 +22,6 @@ const isTypingSurface = (): boolean => {
   return (active as HTMLElement).isContentEditable;
 };
 
-/**
- * 파일시스템 확장 — 탐색기 사이드바와 텍스트 탭. 커널과 만나는 면이 이 값 하나다.
- *
- * 파일 감시는 `fileContentViewModel`이 만들어지는 순간 켜진다 — `activate`에서 꺼내는 것이 곧 켜는 것이다.
- */
 export const filesystem: ExtensionModule = {
   id: "arka.filesystem",
   provides: [
@@ -84,7 +77,6 @@ export const filesystem: ExtensionModule = {
         { actionId: "filesystem.newFolder", iconId: "newFolder" },
       ],
     });
-    // 텍스트 탭 provider — 여는 쪽이 자기 ViewModel을 그때 꺼낸다.
     c.resolve("arka.workbench.tabSystem").add(
       createTextTabProvider({
         get fileContent() {
@@ -99,7 +91,6 @@ export const filesystem: ExtensionModule = {
       execute: () => commands.execute("arka.workbench.revealSidebar", { id: EXPLORER_ID }),
     });
     commands.keybindings.add({ keybinding: "ctrl+shift+e", actionId: "arka.filesystem.focus" });
-    // 파일 감시와 탐색기 명령(삭제·이름 바꾸기…)은 ViewModel이 만들어지는 순간 켜진다.
     c.resolve("arka.filesystem.fileContentViewModel");
     c.resolve("arka.filesystem.directoryTreeViewModel");
   },

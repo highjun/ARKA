@@ -1,25 +1,15 @@
-# 병합 전 관문. **로컬에서 부를 수 있는 명령만 부른다** —
-# CI에만 있는 검사를 만들면 로컬이 초록인데 CI가 빨간 상태를 아무도 재현하지 못한다.
-#
-# 잡은 둘이다. `check`는 룰셋의 **필수 검사 이름**이라 바꾸지 않는다.
 name: CI
 
 on:
   push:
     branches: [main]
-  # **`edited`를 받지 않는다.** PR 본문·제목을 고치면 이벤트가 하나 더 나고, 아래 concurrency가
-  # 돌던 진짜 검사를 취소한 뒤 그 자리를 대신한다 — 관문이 조용히 비었다(2026-09-13 실측).
-  # 제목을 고쳤으면 push하거나 PR을 닫았다 열어 다시 돌린다.
   pull_request:
     types: [opened, synchronize, reopened]
 
 concurrency:
   group: ci-${{ github.ref }}
-  # **`main` push는 취소하지 않는다.** 런이 통째로 취소되면 `deploy`까지 죽어 그 커밋이 배포되지 않는다
-  # (2026-09-11 #20·#21 실측). PR은 새 push가 오면 앞 런이 무의미하므로 취소한다.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-# 기본은 읽기만. 더 필요한 잡이 자기 자리에서 더한다.
 permissions:
   contents: read
 
@@ -29,7 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      # 검사한 이미지를 GHCR에 올린다. 공개 저장소라 패키지도 무료다.
       packages: write
     env:
       IMAGE: ghcr.io/${{ github.repository_owner }}/arka:${{ github.sha }}
@@ -37,28 +26,17 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # gitleaks가 커밋 범위를 훑으려면 이력이 있어야 한다.
           fetch-depth: 0
       - uses: ./.github/actions/setup
 
-      # **목록은 `ops/pipeline/check.ts`에 하나뿐이다.** 여기 단계를 늘어놓으면 손으로 도는
-      # `pnpm --filter ops check`와 갈린다 — 2026-09-14까지 실제로 순서가 달랐고 `build`는
-      # CI에만 있었다. 무엇을 어떤 순서로 도는지와 그 이유는 그 파일이 적는다.
       - run: pnpm --filter ops check
 
-      # squash merge라 **PR 제목이 그대로 main의 커밋 메시지가 된다.** 개별 커밋이 아니라 이것을 본다.
-      # 제목을 인자가 아니라 env로 넘긴다 — 제목에 든 따옴표·백틱이 셸에 해석되지 않게.
-      # **dependabot은 건너뛴다.** 봇이 짓는 제목(`build(repo): bump …from x to y`)이 72자를 넘는데
-      # 사람이 PR에서 고칠 수 없어, 아무도 고칠 수 없는 빨간불이 된다.
       - name: PR 제목 형식
         if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]'
         run: printf '%s' "$PR_TITLE" | pnpm --filter ops exec commitlint
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
 
-      # **`src/` 밖을 건드렸으면 PR 본문이 그것을 말해야 한다**. 밖은 배치·설정·결정이라
-      # 파급이 전역이고 승인은 PR 리뷰다 — 리뷰어가 diff를 열기 전에 무엇이 밖이었나를 알아야 한다.
-      # 언급 여부만 본다. 설명이 타당한가는 사람이 판정한다.
       - name: src 밖 변경이 PR 본문에 적혀 있나
         if: github.event_name == 'pull_request'
         run: node ops/pipeline/outsideSrc.ts "$BASE" "$HEAD"
@@ -67,14 +45,9 @@ jobs:
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}
 
-      # **워크플로의 뜻을 본다** — 없는 `uses`, 잘못된 `needs`, 오타 난 러너 라벨, 셸 문법.
-      # ESLint의 `yml/*`는 형태만 보므로 이 자리가 따로 있다. 공식 이미지를 `docker run`으로
-      # 쓰는 것은 아래 gitleaks와 같은 방식이다 — 비공식 npm 재포장을 쓰지 않는다.
       - name: 워크플로가 말이 되나
         run: docker run --rm -v "$PWD:/repo:ro" -w /repo rhysd/actionlint:1.7.7 -no-color
 
-      # 액션이 아니라 이미지를 직접 쓴다 — 로컬에서 같은 명령으로 재현되고, 조직 라이선스
-      # 안내를 지나지 않아도 된다. `--redact`로 값이 로그에 남지 않게 한다.
       - name: 이번에 더해진 커밋에 시크릿이 있나
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
@@ -87,18 +60,9 @@ jobs:
             git /repo --gitleaks-ignore-path /repo/ops/.gitleaksignore \
             --log-opts="--no-merges $RANGE" --redact --no-banner
 
-      # **여기서 굽는 이미지가 그대로 배포된다**. 예전에는 CI가 굽고 버린 뒤
-      # 러너가 다시 구웠다 — 검사한 것과 뜨는 것이 다른 빌드였다.
-      # 굽는 길은 저장소에 하나뿐이다(`build.ts`가 커밋 SHA를 박고 뒤를 치운다).
       - name: 이미지를 굽는다
         run: node ops/deploy/build.ts "$IMAGE"
 
-      # **워크스페이스가 실재해야 부팅한다** — 없으면 config가 던지고 프로세스가 죽는다.
-      # docker가 대신 만들게 두면 root 소유가 되어 컨테이너가 쓰지 못한다.
-      #
-      # `--wait`는 compose의 HEALTHCHECK(`/api/health`)가 통과할 때까지 기다린다.
-      # "빌드는 되는데 뜨지 않는다"를 병합 전에 잡는 것이 이 단계의 전부다.
-      # 프로젝트 이름은 `.env.ci`의 `ARKA_NAME`이 정한다(`ci`). 터널은 프로필 뒤라 뜨지 않는다.
       - name: 그 이미지가 뜨는가
         run: |
           mkdir -p /tmp/arka-ci-workspace
@@ -112,8 +76,6 @@ jobs:
         if: always()
         run: docker compose -f ops/deploy/compose.yml --env-file ops/deploy/.env.ci down -v
 
-      # **`main`일 때만 올린다.** PR의 이미지는 뜨는지만 보고 버린다 — 배포되지 않을 것을
-      # 레지스트리에 쌓지 않는다. 액션을 하나 더 핀 고정하는 대신 `docker login`을 직접 쓴다.
       - name: 검사한 그 이미지를 올린다
         if: github.event_name == 'push'
         run: |
@@ -121,8 +83,6 @@ jobs:
           docker push "$IMAGE"
           docker tag "$IMAGE" "$LATEST" && docker push "$LATEST"
 
-      # 스펙이 `projects`를 선언하지 않아 기본 chromium으로 돈다. 그것만 받는다.
-      # webServer가 스스로 client를 빌드하고 server를 tsx로 띄운다(playwright.config.ts).
       - run: pnpm --filter client exec playwright install --with-deps chromium
       - run: pnpm --filter client run test:e2e
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -134,51 +94,36 @@ jobs:
 
   deploy:
     name: deploy
-    # **검사가 통과한 뒤에만 배포한다.** `needs`만이 워크플로 안에서 그것을 보장한다.
     needs: [check]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: [self-hosted, linux, arka]
-    # 배포가 **기록으로 남는다.** 저장소의 Environments 탭에 무엇이 언제 어느 커밋으로 떴는지
-    # 쌓인다. 배포 직전 승인은 설정 스위치라 코드 변경 없이 켜고 끈다.
-    # `url`은 넣지 않는다 — 공개 저장소라 그 화면도 공개고, 호스트 이름을 리포 밖에 두기로 했다.
     environment: production
     permissions:
       contents: read
       packages: read
     concurrency:
       group: deploy-production
-      # **배포는 중간에 자르지 않는다.** 컨테이너를 바꾸는 중에 끊기면 무엇이 떠 있는지 모른다.
       cancel-in-progress: false
     env:
       IMAGE: ghcr.io/${{ github.repository_owner }}/arka:${{ github.sha }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # **굽지 않는다.** `check`가 구워 올린 바로 그 이미지를 당긴다 — 검사한 것과 뜨는 것이
-      # 같은 산출물이어야 한다. 되돌리기도 옛 SHA 태그를 당기는 것으로 정확해진다.
       - name: 검사한 이미지를 당긴다
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker pull "$IMAGE"
 
-      # 값은 **이 기계의 파일**에 있다(0600) — GitHub Secrets에 두지 않는다. `set -a`로 셸에 풀어
-      # compose의 치환(`${ARKA_*}`)과 `environment:` 통과에 둘 다 닿게 한다.
-      # `ARKA_IMAGE`는 여기서 덮는다 — 파일의 값이 아니라 방금 검사한 SHA를 띄운다.
       - name: 올린다
         run: |
           set -a; . "$HOME/ARKA/secure/env/arka.env"; set +a
           ARKA_IMAGE="$IMAGE" docker compose -f ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
 
-      # **이 검사가 실질적인 자물쇠다.** ARKA에는 인증이 없고 워크스페이스가 사용자의 개인
-      # 디렉터리라, Access가 살아 있지 않으면 그 전체가 인터넷에 열린다.
-      # 오리진도 이 기계의 파일에서 읽는다 — 공개 저장소라 워크플로 로그도 공개다.
       - name: 익명 접근이 막히는지 본다
         run: |
           set -a; . "$HOME/ARKA/secure/env/arka.env"; set +a
           node ops/deploy/anonSmoke.ts "$ARKA_ORIGIN"
 
-      # 러너에서 빌드가 사라져 `build.ts`의 회수 단계도 함께 사라졌다. 당겨 온 옛 이미지가
-      # 쌓이므로 여기서 걷는다 — 떠 있는 것이 물고 있는 이미지는 지워지지 않는다.
       - name: 안 쓰는 이미지를 걷는다
         if: always()
         run: docker image prune -f

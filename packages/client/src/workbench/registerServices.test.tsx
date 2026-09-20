@@ -8,29 +8,7 @@ import { MockWorkspaceFiles } from "../extensions/filesystem/model/MockWorkspace
 import { RootView } from "./view/RootView";
 import { createApplication } from "./registerServices";
 
-/**
- * 조립이 실제로 맞물리는지만 본다 — 화면의 내용은 각 컴포넌트가, 계층의 규칙은 각 계층의
- * unit test가 이미 본다. 여기서 걸리는 것은 **배선이 틀린 경우**뿐이다.
- *
- * `<RootView />`를 마운트한다 — main.tsx가 그리는 것과 같은 트리다. beforeunload 가드·전역
- * 키다운·오류 핸들러 등 앱 전체 배선이 `infra/`의 기여들에 있다.
- *
- * 파일시스템 구현만 `MockWorkspaceFiles`로 대신한다. 진짜 구현을 그대로 두면 이 테스트가 서버를
- * 요구하게 된다. Mock이 실물처럼 구는 것은 `workspaceFiles.contract.ts`가 보증한다.
- */
-
-/**
- * `createApplication()`이 실제 저장소(→ `localStorage`)를 쓴다 — 매 테스트가 새 컨테이너를
- * 만들어도 jsdom의 `localStorage`는 파일 전체가 공유한다. 안 지우면 앞 테스트가 연 탭이
- * 다음 테스트에서 부팅 시 복원돼 같은 텍스트가 사이드바와 탭 양쪽에 뜬다.
- *
- * 대역은 **모듈로 끼운다** — 활성화가 곧 만드는 것이라 컨테이너를 돌려준 뒤에는 늦다. 같은 id를 다시 물리면
- * 나중 것이 이긴다.
- */
-
 describe("registerServices", () => {
-  /** 테스트마다 만든 컨테이너. 앱은 하나뿐이라 실제로는 페이지가 닫힐 때까지 살지만, 여기서는 다음 테스트에
-   *  전역 리스너(beforeunload·keydown)가 새지 않게 끝에 dispose한다. */
   const containers: Container[] = [];
   const track = (container: Container): Container => {
     containers.push(container);
@@ -42,7 +20,6 @@ describe("registerServices", () => {
     localStorage.clear();
   });
 
-  /** 파일시스템을 대역으로 가린다 — 진짜 구현을 그대로 두면 이 테스트가 서버를 요구한다. */
   const mocks = (workspaceFiles: IWorkspaceFiles): ExtensionModule => ({
     id: "test.mocks",
     provides: [{ id: "arka.filesystem.workspaceFiles", lifetime: "singleton", create: () => workspaceFiles }],
@@ -64,31 +41,17 @@ describe("registerServices", () => {
     expect(screen.getByLabelText("탐색기")).toBeDefined();
   });
 
-  /**
-   * jsdom은 CSS를 적용하지 않으므로 트리가 화면 밖으로 밀려 있어도 여기서는 통과한다 —
-   * 보이는지가 아니라 **배선이 닿는지**만 보는 테스트다.
-   */
   it("워크스페이스 트리가 사이드바까지 연결된다", async () => {
     mountWith(new MockWorkspaceFiles({ projects: null }));
 
     expect(await screen.findByText("projects")).toBeDefined();
   });
 
-  /**
-   * **저장 안 된 변경이 Shell까지 실제로 닿는지**를 본다 — 텍스트 탭 provider가 돌려준 descriptor의 `isDirty`가
-   * 탭 컨테이너 안의 `FileContentView`가 편집하는 것과 같은 `fileContentViewModel`을 읽는지가 이 배선의 전부다.
-   * 하나라도 다른 인스턴스를 가리키면 dirty가 조용히 `false`로 굳는다.
-   *
-   * `editFile`을 직접 부르는 것은 CodeMirror 타이핑을 jsdom이 흉내내지 못해서다.
-   */
   describe("저장 안 된 변경 보호", () => {
     const mountWithOpenFile = async () => {
       const container = mountWith(new MockWorkspaceFiles({ "a.md": "원본" }));
 
-      // 탐색기는 이미 기본 활동이다 — 다시 누르면 "같은 것을 또 골랐다"로 읽어 오히려 닫는다.
       fireEvent.click(await screen.findByText("a.md"));
-      // 저장 버튼은 readOnly가 풀렸을 때만 뜬다 — 즉 파일이 다 읽혔다는 신호다. 그전에
-      // editFile을 부르면 Model이 조용히 무시한다.
       await screen.findByRole("button", { name: "저장" });
 
       return container.resolve("arka.filesystem.fileContentViewModel");
@@ -146,16 +109,10 @@ describe("registerServices", () => {
     });
   });
 
-  /**
-   * 화면이 죽어도 아무도 모르는 상태를 막는 배선이 실제로 닿는지 본다 — 탭 하나가 렌더 중 던지면
-   * 빈 화면 대신 `CrashScreen`이 뜨고, `IErrorLog`에 기록이 남아야 한다.
-   */
   describe("렌더 오류 보호", () => {
     it("탭이 렌더 중 던지면 CrashScreen이 뜨고 IErrorLog에 남는다", async () => {
-      // React가 잡힌 오류를 console.error로도 내보낸다 — 테스트 출력이 그걸로 덮이지 않게 막는다.
       const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
       const container = track(createApplication([mocks(new MockWorkspaceFiles({ "a.md": "" }))]));
-      // 무엇이든 먼저 받아 터지는 본문을 돌려주는 provider를 얹는다 — 텍스트 provider보다 먼저 묻는다.
       container.resolve("arka.workbench.tabSystem").add({
         id: "test.crashing",
         priority: 1000,

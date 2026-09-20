@@ -40,12 +40,9 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 export const Dark: Story = { args: { colorMode: "dark" } };
-/** 패널 콘텐츠가 없으면 활동 레일만 남아 사이드바가 좁게 뜬다. */
 export const Collapsed: Story = { args: { sidebarContent: undefined } };
-/** `sidebars`가 없으면 사이드바 자체가 없다. */
 export const NoSidebar: Story = { args: { sidebars: undefined } };
 export const Resizable: Story = { args: { sidebarResizable: true } };
-/** 아래 창 — 터미널 같은 것이 온다. */
 export const WithBottom: Story = {
   args: {
     bottoms: [

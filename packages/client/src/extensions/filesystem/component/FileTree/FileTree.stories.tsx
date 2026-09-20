@@ -51,7 +51,6 @@ export const Default: Story = {};
 export const Empty: Story = { args: { items: [], emptyLabel: "파일이 없습니다" } };
 export const Collapsed: Story = { args: { defaultExpandedIds: [], defaultSelectedIds: [] } };
 export const Bordered: Story = { args: { chrome: "bordered" } };
-/** 자식 목록을 읽는 중인 폴더 — 행 오른쪽 끝에 스피너가 붙는다. */
 export const Loading: Story = {
   args: {
     items: [
@@ -62,7 +61,6 @@ export const Loading: Story = {
     defaultSelectedIds: [],
   },
 };
-/** 이름 편집 중인 행 — 라벨이 입력창으로 바뀐다. */
 export const Editing: Story = {
   args: { editingId: "src/main.ts", onEditCommit: () => undefined, onEditCancel: () => undefined },
 };

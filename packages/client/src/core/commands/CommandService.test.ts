@@ -143,7 +143,6 @@ describe("CommandService — 메뉴", () => {
       commands.menus.add(item("m", "f1", 1));
     });
 
-    // 켜는 순서는 second → first 였으므로 second 묶음이 먼저다
     expect(commands.matchMenuItems("m").map((entry) => entry.actionId)).toEqual(["s2", "f1", "f2"]);
   });
 });

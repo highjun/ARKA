@@ -59,7 +59,7 @@
 }
 
 .root table {
-  /* stylelint-disable-next-line primer/borders -- 이 규칙은 `border-collapse`를 테두리 *값*으로 본다. `collapse`는 표 모델의 키워드라 토큰이 없다. */
+  /* stylelint-disable-next-line primer/borders */
   border-collapse: collapse;
 }
 

@@ -10,7 +10,6 @@ import {
 } from "#core/extensions";
 
 declare module "#core/di" {
-  /** 이 파일의 테스트가 쓰는 인스턴스들. */
   interface InstanceMap {
     "test.ext.log": string[];
     "test.ext.menus": Collection<string>;

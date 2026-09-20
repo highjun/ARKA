@@ -14,19 +14,11 @@ import {
   writeFileContent,
 } from "./fileOperations";
 
-/**
- * 진짜 디스크를 쓴다.
- *
- * 이 파일이 지키는 것은 **심링크 탈출 차단**인데, 그건 `realpath` 가 실제로 동작해야만 검증된다.
- * fs 를 가짜로 두면 정작 위험한 경로가 테스트 밖으로 빠진다.
- */
-
 let root: string;
 let outside: string;
 
 describe("fileOperations", () => {
   beforeAll(async () => {
-    // tmpdir 자체가 심링크일 수 있다(macOS 의 /var → /private/var) — 루트는 항상 편 값으로 둔다.
     outside = realpathSync(await mkdtemp(path.join(os.tmpdir(), "wb-files-")));
     root = path.join(outside, "root");
 
@@ -65,7 +57,6 @@ describe("fileOperations", () => {
     });
 
     it("퍼센트 인코딩을 한 번 더 풀지 않는다 — 이름에 %20 이 든 파일을 다른 파일로 열면 안 된다", async () => {
-      // 디코딩은 호출부(URLSearchParams)의 일이다. 여기서 또 풀면 `a%20b.txt` 가 `a b.txt` 로 열린다.
       expect(await resolveWithin(root, "a%20b.txt")).toBe(path.join(root, "a%20b.txt"));
       expect(await resolveWithin(root, "a b.txt")).toBeNull();
     });
@@ -124,10 +115,6 @@ describe("fileOperations", () => {
       expect(Object.keys(listing.entries[0] ?? {}).sort()).toEqual(["name", "type"]);
     });
 
-    /**
-     * 예전에는 엔트리마다 `stat` 을 했는데, `stat` 은 심링크를 따라간다 — 가리키는 대상이 없으면
-     * 예외가 나고 그 항목이 **목록에서 조용히 사라졌다.** 있는 파일이 안 보이는 종류의 버그다.
-     */
     it("깨진 심링크도 목록에 남는다", async () => {
       await symlink(path.join(outside, "없는-파일"), path.join(root, "dangling-link"));
 
@@ -205,12 +192,6 @@ describe("fileOperations", () => {
       await rm(dir, { recursive: true, force: true });
     });
 
-    /**
-     * 배포 마운트가 `:ro` 면 여기서 `EROFS` 가 난다. 파일 하나를 읽기 전용으로 만들어 같은 종류의
-     * 실패(`EACCES`)를 재현한다 — 마운트 자체를 읽기 전용으로 만드는 것은 이 테스트 환경에서 못 한다.
-     * `FilesService` 가 이 오류를 사람이 읽을 메시지로 바꾸는 것은 여기서는 보지 않는다 — 여기서는
-     * **오류가 삼켜지지 않고 그대로 올라오는지**만 본다.
-     */
     it("쓰기 권한이 없으면 오류가 그대로 올라온다", async () => {
       const dir = await mkdirTemp();
       const file = path.join(dir, "locked.md");

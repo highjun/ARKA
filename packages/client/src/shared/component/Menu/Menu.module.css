@@ -1,5 +1,3 @@
-/* 스토리 전용 — `kind="context"`의 Trigger 는 우클릭 대상일 뿐 자기 모양이 없어서, 데모에서
-   우클릭할 자리를 눈에 보이게 여기서 하나 빌려 준다. */
 .demoTrigger {
   display: flex;
   height: var(--control-large-size);
@@ -26,21 +24,13 @@
   padding: var(--space-xs);
   color: var(--fgColor-default);
   box-shadow: var(--shadow-floating-medium);
-
-  /* Shell의 portal root(`pointer-events: none`)로 포탈될 수 있어 여기서 되살린다. Shell 없이
-     `document.body`로 포탈될 때(Storybook 등)는 조상에 `pointer-events: none`가 없어 무해하다. */
   pointer-events: auto;
 }
 
-/* 우클릭 메뉴는 항목 문구가 길다(파일 경로·"이름 바꾸기" 같은 동사구) — 좌클릭 드롭다운보다
-   넓게 잡는다. 둘을 한 컴포넌트로 합치면서 값 차이를 `data-kind`로 남겼다. */
 .content[data-kind="context"] {
   min-width: 220px;
 }
 
-/* height 를 Primer 컨트롤 스케일의 가장 작은 값(`--control-xsmall-size`, 24px)으로 고정한다 —
-   Tab의 `.header`와 같은 패턴(고정 height + `align-items: center`로 중앙 정렬, padding-block은
-   0). "길게"(지난 라운드 요청)는 메뉴 폭 얘기였지 행 높이가 아니었다(2026-08-25 정정). */
 .item {
   position: relative;
   display: flex;
@@ -67,8 +57,6 @@
   color: var(--fgColor-muted);
 }
 
-/* 우측 정렬 단축키 — `Item`의 `shortcut` slot 이 여기 든다. Item 이 이미 flex(`gap`)라 형제로 두고
-   margin-left:auto 만 주면 된다. 키캡 모양은 `Kbd` 가 스스로 그린다. */
 .itemShortcut {
   display: flex;
   flex-shrink: 0;

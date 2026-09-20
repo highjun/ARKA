@@ -15,25 +15,9 @@ import type { TabContentProps } from "../model/ITabProviderDescriptor";
 import type { PaneRowNode, TabContextTarget, TabRow } from "../viewmodel/ITabSystemViewModel";
 import styles from "./ShellView.module.css";
 
-/**
- * DI·구독·마크업이 한 파일에 있다(2026-09-04, D9) — `useViewModel` 하나만 부른다는 규율
- * (`view-only-uses-view-model`)로 "DI를 아는 파일을 하나로 가둔다"를 지킨다. ViewModel 다섯을 꺼낸다 —
- * 뼈대·탭·알림·앱 상태·팔레트. 훅은 하나고 부르는 횟수가 여럿일 뿐이다.
- *
- * 전역 배선(키다운 디스패치·beforeunload 가드·테마 DOM 반영)은 여기 없다 — 앱 전체 단위 배선이라 `infra/`에 있다.
- *
- * 탭 닫기 확인은 `window.confirm` 대신 `ITabSystemViewModel.pendingClose` + `ConfirmationDialog`다
- * (2026-09-04 — 네이티브 대화상자는 앱 UI와 다르게 생겨 일관성이 없다는 판단).
- */
-
-/** 트리의 탭 전부 — `renderContent`가 id로 본문을 찾는다. */
 const collectRows = (node: PaneRowNode): readonly TabRow[] =>
   node.kind === "leaf" ? node.tabs : node.children.flatMap(collectRows);
 
-/**
- * 탭 우클릭 메뉴 — `shell.tab.context`에 담긴 명령들을 `Tab.renderTabMenu` 자리에 항목으로 그린다.
- * 우클릭한 탭이 `context`로 명령에 전달된다.
- */
 const buildTabMenu = (commands: ICommandService) => (paneId: string, tabId: string) => {
   const context: TabContextTarget = { paneId, tabId };
 
@@ -56,11 +40,6 @@ const buildTabMenu = (commands: ICommandService) => (paneId: string, tabId: stri
   );
 };
 
-/**
- * 셸 화면. 다른 모듈을 셸에 잇는 **유일한 자리** — 사이드바·아래 창은 `IShellViewModel`이 레지스트리에서 풀어
- * 준 것을, 탭은 `ITabSystemViewModel`이 descriptor에서 풀어 준 것을 그린다. 어떤 모듈이 무엇을 등록했는지는
- * 조립부만 안다. **파일을 모른다** — 파일을 여는 것도 명령이다.
- */
 export const ShellView = observer(function ShellView() {
   const shell = useViewModel("arka.workbench.shellViewModel");
   const tabs = useViewModel("arka.workbench.tabSystemViewModel");
@@ -72,7 +51,6 @@ export const ShellView = observer(function ShellView() {
   const tree = tabs.tree;
   const rowsById = new Map(collectRows(tree).map((row) => [row.id, row] as const));
 
-  /** 탭 본문을 그 탭의 자식 컨테이너로 감싼다 — 탭 안에서 `useViewModel`이 꺼내는 것은 거기서 온다. */
   const renderContent = (_paneId: string, tabId: string): ReactNode => {
     const row = rowsById.get(tabId);
     if (row === undefined) return null;
@@ -90,9 +68,6 @@ export const ShellView = observer(function ShellView() {
 
   return (
     <>
-      {/* 닫을 수 없다 — 낡은 채로 쓰면 요청이 426으로 죽는다. `role="status"`로 랜드마크 대신
-          라이브 영역을 만든다: 이 띠는 처음부터 있는 것이 아니라 프로토콜이 어긋난 순간 나타나므로
-          나타났다는 사실이 읽혀야 한다. `flush`는 화면 맨 위에 모서리 없이 붙이려는 것이다. */}
       {appStatus.isOutdated ? (
         <Banner
           role="status"

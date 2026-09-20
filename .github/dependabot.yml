@@ -1,31 +1,18 @@
-# 의존성 갱신은 **GitHub 기능이라 Actions 분을 쓰지 않는다.** `pnpm audit`을 CI 단계로 두면
-# 런마다 분을 쓰면서 같은 답을 낸다.
-#
-# 묶어서 연다 — PR 하나에 여러 갱신이 들어가야 `check`가 한 번 돈다.
 version: 2
 updates:
   - package-ecosystem: npm
-    # pnpm 워크스페이스라 루트의 lockfile 하나가 모든 패키지를 든다.
     directory: /
     schedule: { interval: weekly }
     open-pull-requests-limit: 3
     groups:
       minor-and-patch:
         update-types: [minor, patch]
-    # `check`의 PR 제목 검사를 지나야 한다 — 타입·scope가 목록 안이어야 하고 72자 이하다.
     commit-message:
       prefix: "build(repo)"
     ignore:
-      # **TypeScript 메이저는 받지 않는다.** typescript-eslint가 TS 7을 하드 거부해서
-      # 올리는 순간 `lint`가 통째로 죽는다(2026-09-13 PR #33에서 실측 —
-      # "typescript-eslint does not support TS 7.0"). 이 저장소에서 구조 규칙을 강제하는
-      # 유일한 장치가 린트라, 린트를 잃고 TS만 올리는 것은 손해다.
-      # typescript-eslint가 지원하면 이 항목을 지운다 — 추적: typescript-eslint#10940.
       - dependency-name: typescript
         update-types: [version-update:semver-major]
 
-  # 워크플로가 액션을 커밋 SHA로 고정하므로 사람이 올릴 방법이 이것뿐이다.
-  # **복합 액션은 자기 폴더를 따로 적어야 본다** — `/`만 두면 `.github/actions/setup`을 놓친다.
   - package-ecosystem: github-actions
     directories:
       - /
@@ -34,7 +21,6 @@ updates:
     commit-message:
       prefix: "ci(repo)"
 
-  # 이미지의 base(`node:24-alpine`)와 사이드카(`cloudflared`)를 올린다.
   - package-ecosystem: docker
     directory: /ops/deploy
     schedule: { interval: monthly }

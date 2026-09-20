@@ -1,44 +1,10 @@
-/**
- * 세트마다 **설명 한 줄과 prop 표**. 시트가 여기서 읽는다. 플러그인 안에서 돈다.
- *
- *     (0, eval)(await (await fetch("http://localhost:9230/tool/meta.js")).text());
- *     await globalThis.__arka.meta.apply();   // 설명을 Figma 에 써 넣는다
- *     globalThis.__arka.meta.audit();         // 표에 빠진 축·속성을 센다
- *
- * **설명은 `<위치> · <역할 한 줄>`.** 위치가 곧 출처다 — 라이브러리를 그대로 쓰면 라이브러리
- * 이름을, 우리가 변형하면 **코드에서 살 자리**(이미 있으면 현재 자리, 없으면 예상 자리)를 적는다.
- *
- * **분류는 두 층이다.**
- *
- *     1. React Props   바깥에서 넣는 것
- *        enum · string · number · boolean · object · action · slot
- *     2. CSS-State     prop 이 아니다. CSS 선택자로만 갈린다 (`:hover` `[data-disabled]` …)
- *
- * **Figma 의 속성 타입을 그대로 쓰면 거짓말이 된다.** `leadingVisual`·`description`·`action` 은
- * Figma 에선 BOOLEAN 이지만 코드에선 `ReactNode` — `slot` 이다. 그래서 갈래를 손으로 적는다.
- *
- * **무엇을 적는가 — 보이는 것이나 뜻을 바꾸는 prop 만.** 상속한 DOM 속성과 순수 a11y 통과
- * (`aria-*`·`role`·`alt`)는 안 적는다 — 단 보이는 글자가 되면(`IconButton` 의 `aria-label` 은
- * 툴팁이 된다) 적는다. `ButtonGroup.role` 처럼 키보드 이동 방식만 바꾸는 것도 안 적는다.
- * **가로채 뜻을 바꾼 것**(`Menu.Item.onSelect`, `ModeToggle.value`)은 적는다.
- *
- * 키는 **Figma 의 축·속성 이름**이다. 코드의 prop 이름이 다르면 `n` 에 적는다 —
- * 표엔 `n` 이, 견본 블록엔 키가 선다.
- *
- * **Compound 는 루트와 서브컴포넌트가 각각 한 항목이다.** 루트에 `부품: ["Menu/Trigger", …]` 를
- * 두면 시트가 루트 표 다음에 부품마다 제목 + 표(+ Figma 노드가 있으면 견본)를 쌓는다.
- * Figma 노드가 없는 항목은 `가상: true` — 표만 서고 `apply()`·`audit()` 은 건너뛴다.
- */
 globalThis.__arka = globalThis.__arka ?? {};
 
 globalThis.__arka.meta = (() => {
-  /** `t` 갈래. `n` 코드 이름(다를 때만). `d` 한 줄 설명. */
   const M = {
-    // ── 01 Shared · 글자와 아이콘 ────────────────────────────────────────────
     Text: {
       설명: "shared/component/Text · 본문 글자",
       props: {
-        // `variant`(body | caption) 는 뺐다 — 제품 17곳 중 명시한 곳 0, caption 은 렌더된 적이 없다(2026-09-18).
         size: { t: "enum", d: "small | medium | large. 기본 medium" },
         tone: { t: "enum", d: "default | muted | danger. 기본 default" },
         children: { t: "slot", d: "적을 말" },
@@ -83,7 +49,6 @@ globalThis.__arka.meta = (() => {
       },
     },
 
-    // ── 01 Shared · 입력 ────────────────────────────────────────────────────
     TextInput: {
       설명: "@primer/react TextInput · 한 줄 입력칸",
       props: {
@@ -208,7 +173,6 @@ globalThis.__arka.meta = (() => {
       },
     },
 
-    // ── 01 Shared · 표식 ────────────────────────────────────────────────────
     CounterLabel: {
       설명: "@primer/react CounterLabel · 숫자 하나를 담는 알약. 안 읽은 수",
       props: {
@@ -259,7 +223,6 @@ globalThis.__arka.meta = (() => {
       },
     },
 
-    // ── 01 Shared · 담는 것 ─────────────────────────────────────────────────
     Container: {
       설명: "shared/component/Container · 넘치는 것을 스크롤로 받아 내는 그릇",
       props: {
@@ -271,12 +234,9 @@ globalThis.__arka.meta = (() => {
     ButtonGroup: {
       설명: "@primer/react ButtonGroup · 단추가 틈 없이 붙어 바깥 모서리만 둥근 줄",
       props: {
-        // `role` 은 뺐다 — "toolbar" 일 때만 화살표 순회를 켜는 스위치라 디자인 인터페이스가 아니다.
         count: { t: "slot", n: "children", d: "붙일 Button·IconButton 들. 지금 둘셋" },
       },
     },
-    // `ActionBar` 는 2026-09-18 에 버렸다 — IconButton 여럿 + 구분선일 뿐이고 Primer 가 더하는 건
-    // 좁아질 때 넘침 메뉴로 접는 것 하나. 제품 import 0건.
     UnderlineNav: {
       설명: "@primer/react UnderlineNav · 밑줄로 지금 자리를 알리는 탭 줄. 아래 독과 설정 범위가 이것이다",
       props: {
@@ -335,7 +295,6 @@ globalThis.__arka.meta = (() => {
       css: { state: "`:hover` 가 본문 줄만 밝힌다" },
     },
 
-    // ── 01 Shared · 떠 있는 것과 알리는 것 ──────────────────────────────────
     Tooltip: {
       설명: "@primer/react Tooltip · 올리면 anchor 옆에 뜨는 짧은 말. 꼬리가 없다",
       props: {
@@ -458,8 +417,6 @@ globalThis.__arka.meta = (() => {
       props: { href: { t: "string", d: "" }, children: { t: "slot", d: "" } },
     },
 
-    // ── 01 Shared · 메뉴와 고르기 ───────────────────────────────────────────
-    // 컴파운드 시트의 머리말. 세트가 아니라 묶음이라 `apply()` 는 건너뛴다.
     Menu: {
       가상: true,
       설명: "shared/component/Menu · 눌러서 여는 할 일 목록 (루트)",
@@ -557,7 +514,6 @@ globalThis.__arka.meta = (() => {
       css: { state: "`:hover`" },
     },
 
-    // ── 01 Shared · 글 ─────────────────────────────────────────────────────
     ModeToggle: {
       설명: "shared/component/ModeToggle · 두 값 사이를 오가는 아이콘 단추. 밝게/어둡게가 이것이다",
       props: {
@@ -580,7 +536,6 @@ globalThis.__arka.meta = (() => {
     CodeBlock: {
       설명: "shared/component/CodeBlock · 줄 번호와 복사 단추가 있는 코드 덩어리",
       props: {
-        // 셋만(사용자 결정 2026-09-18). `title`·`showFileName`·`hasContent`·`copyLabel`·`copiedLabel`·`copied` 는 뺐다.
         content: { t: "string", d: "코드 원문" },
         language: { t: "string", d: '말머리에 적히는 언어 — "typescript"' },
         fileName: { t: "string", d: '언어 옆 파일 이름 — "index.ts"' },
@@ -588,7 +543,6 @@ globalThis.__arka.meta = (() => {
       css: { token: "`[data-token=keyword|string|comment|number|function]` 이 색을 가른다" },
     },
 
-    // ── 02 Workbench · 줄들 ────────────────────────────────────────────────
     Shell: {
       설명: "workbench/component/Shell · 위 부품을 다 품는 창 한 장",
       props: {
@@ -758,7 +712,6 @@ globalThis.__arka.meta = (() => {
         shortcut: { t: "object", d: '오른쪽 키캡들 — `["⌘", "K"]`. 비면 묶음이 안 그려진다' },
         label: { t: "string", d: "명령 이름" },
       },
-      // 짚인 줄은 cmdk 가 정한다 — 소비자가 넘기는 값이 아니라 CSS-State 다.
       css: { selected: "`[cmdk-item][data-selected=true]` 를 cmdk 가 붙인다. 마우스와 키보드 둘 다 이것을 움직인다" },
     },
     "SettingsEditor/Keybindings": {
@@ -785,7 +738,6 @@ globalThis.__arka.meta = (() => {
       },
     },
 
-    // ── 03~09 · 기능 페이지 (아직 훑기 전이라 얇다) ─────────────────────────
     FileIcon: {
       설명: "extensions/filesystem/component/FileIcon · 확장자로 고르는 파일 아이콘",
       props: {
@@ -816,7 +768,6 @@ globalThis.__arka.meta = (() => {
 
   const 이름 = (k, p) => p.n ?? k;
 
-  /** 페이지의 시트 묶음. `stack()` 이 읽어 SECTION 여덟으로 가른다. 없는 페이지는 한 줄로 쌓인다. */
   const 묶음 = {
     "01 Shared": [
       ["글자", ["Text", "Kbd", "Link", "Markdown", "CodeBlock"]],
@@ -828,8 +779,6 @@ globalThis.__arka.meta = (() => {
       ["떠 있는 것", ["Menu", "Select", "Dialog", "Tooltip"]],
       ["배치", ["Container"]],
     ],
-    // VS Code 의 창 구역 이름을 따른다 — 어디에 무엇이 있는지가 곧 이름이 되게.
-    // **차례는 작은 것부터다** — 원자에서 시작해 구역을 거쳐 창 한 장으로 끝난다.
     "02 Workbench": [
       ["액티비티 바", ["ActivityBar"]],
       ["사이드바", ["Panel", "SideBar"]],
@@ -840,7 +789,6 @@ globalThis.__arka.meta = (() => {
     ],
   };
 
-  /** `묶음` 을 편 차례표 — `이름 → { 페이지, 묶음, 번호 }`. 한 번만 만든다. */
   const 자리표 = (() => {
     const 표 = {};
     for (const [페이지, 묶음들] of Object.entries(묶음)) {
@@ -856,39 +804,26 @@ globalThis.__arka.meta = (() => {
   return {
     M,
     묶음,
-    /**
-     * 시트가 페이지 몇 번째인가 — `{ 페이지, 묶음, 번호, 총 }`. `묶음` 에 없으면 `null`.
-     *
-     * **이 번호가 곧 시트 제목의 `N` 이다**(`28. Menu`). 절은 `N.1`·`N.2`, 항은 `N.2.1` 로
-     * 이어진다 — 차례와 본문이 글자로 맞물리게 하는 것이 번호를 두는 까닭이다.
-     */
     자리(setName) {
       return 자리표[setName] ?? null;
     },
-    /** 세트 하나의 `{ 설명, props, css }`. 없으면 `null`. */
     of(setName) {
       return M[setName] ?? null;
     },
-    /** 축·속성 하나의 갈래 낱말. `props` 에 없으면 `null` — 시트는 아무것도 안 적는다. */
     kind(setName, key) {
       return M[setName]?.props?.[key]?.t ?? null;
     },
-    /** 그 키가 CSS-State 인가. */
     isCss(setName, key) {
       return Boolean(M[setName]?.css?.[key]);
     },
-    /** 표에 실을 줄들 — `[{ name, type, desc }]`. 정의 순서를 지킨다. */
     rows(setName) {
       const e = M[setName];
       if (!e) return [];
       return Object.entries(e.props ?? {}).map(([k, p]) => ({ name: 이름(k, p), type: p.t, desc: p.d }));
     },
 
-    /** 표의 `설명` 을 각 세트의 Figma description 에 써 넣는다. */
     async apply() {
       await figma.loadAllPagesAsync();
-      // **이름 색인을 한 번만 만든다.** 이름마다 `findOne` 을 돌리면 열 페이지를 82번 훑어
-      // 30초를 넘긴다(2026-09-17 에 그렇게 두 번 끊겼다).
       const byName = new Map();
       for (const p of figma.root.children) {
         for (const n of p.findAll(
@@ -900,7 +835,7 @@ globalThis.__arka.meta = (() => {
       const 씀 = [],
         못찾음 = [];
       for (const [name, e] of Object.entries(M)) {
-        if (e.가상) continue; // Figma 노드가 없는 항목
+        if (e.가상) continue;
         const node = byName.get(name);
         if (!node) {
           못찾음.push(name);
@@ -912,10 +847,6 @@ globalThis.__arka.meta = (() => {
       return { 씀: 씀.length, 못찾음 };
     },
 
-    /**
-     * 표에 **빠진 축·속성**을 센다. 파일에 있는데 여기 없으면 시트가 그 줄을 안 그린다 —
-     * 조용히 사라지지 않게 여기서 잡는다.
-     */
     async audit() {
       await figma.loadAllPagesAsync();
       const 빠짐 = [],
@@ -924,7 +855,7 @@ globalThis.__arka.meta = (() => {
         for (const n of p.findAll(
           (x) => x.type === "COMPONENT_SET" || (x.type === "COMPONENT" && x.parent?.type !== "COMPONENT_SET"),
         )) {
-          if (/^Icon\//.test(n.name)) continue; // Foundation 의 글리프는 표 밖이다
+          if (/^Icon\//.test(n.name)) continue;
           const defs = n.componentPropertyDefinitions ?? {};
           const keys = Object.keys(defs).map((k) => k.split("#")[0]);
           const e = M[n.name];

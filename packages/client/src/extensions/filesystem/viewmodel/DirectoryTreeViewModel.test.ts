@@ -5,16 +5,8 @@ import { DirectoryTreeModel } from "../model/DirectoryTreeModel";
 import { DirectoryTreeViewModel } from "./DirectoryTreeViewModel";
 import type { IDirectoryTreeViewModel } from "./IDirectoryTreeViewModel";
 
-/** 커맨드 등록만 받아주는 흉내 — 이 파일의 관심사는 트리 접기 로직이지 커맨드 배선 자체가
- *  아니다. */
 const fakeCommandCenterRegistry = (): ICommandService =>
   new CommandService({ overridesStore: { load: () => ({}), save: () => undefined }, reportError: () => undefined });
-
-/**
- * 검사하는 것은 **평평한 표를 중첩 트리로 접는 규칙**이다.
- *
- * Model 은 진짜를 그대로 쓴다 — I/O 가 Port 뒤에 있어서 대신할 이유가 없다. Port 만 대본으로 둔다.
- */
 
 type ScriptedEntry = { name: string; type: "dir" | "file" };
 
@@ -61,7 +53,6 @@ const viewModel = (
 ): IDirectoryTreeViewModel => {
   const directoryTreeModel = new DirectoryTreeModel({
     workspaceFiles: serving(byPath, options) as unknown as IWorkspaceFiles,
-    // 감시는 이 파일의 관심사가 아니다 — 구독하지 않는 대본으로 대신한다.
     workspaceWatch: { watch: () => () => undefined },
   });
   return new DirectoryTreeViewModel({
@@ -128,10 +119,6 @@ describe("rows", () => {
 });
 
 describe("자리 표시 — 화살표는 type만으로 산다", () => {
-  /**
-   * `FileTree`는 `type==='folder'`면 자식 유무와 무관하게 항상 화살표를 그린다(2026-09, C1)
-   * — 예전처럼 자리 표시 자식을 끼워 넣지 않아도 화살표가 살아 있다.
-   */
   it("아직 안 읽은 폴더는 자식 없이 둔다 — 화살표는 그래도 산다", async () => {
     const many = Array.from({ length: 30 }, (_, index) => entry(`d${String(index).padStart(2, "0")}`, "dir"));
     const tree = viewModel({ "": many, ...Object.fromEntries(many.map((each) => [each.name, []])) });
@@ -163,12 +150,6 @@ describe("자리 표시 — 화살표는 type만으로 산다", () => {
   });
 });
 
-/**
- * **비어 있는 것과 읽는 중인 것은 다르다.**
- *
- * 예전에는 "행이 없으면 읽는 중" 이라고 화면이 제 마음대로 적어서, 워크스페이스가 정말 비어
- * 있으면 "읽는 중…" 이 영원히 남았다. 상태는 Model 에 이미 있었고 ViewModel 이 안 내보냈을 뿐이다.
- */
 describe("status — 화면이 로딩과 빈 상태를 가르는 근거", () => {
   it("만들어지면 곧 읽기 시작한다 — loading", () => {
     expect(viewModel({ "": [] }).status).toBe("loading");
@@ -200,12 +181,6 @@ describe("status — 화면이 로딩과 빈 상태를 가르는 근거", () => 
   });
 });
 
-/**
- * 읽는 중인 폴더는 **자기 행이** 돈다 — 자식 자리에 "읽는 중…" 이라는 가짜 파일을 만들지 않는다.
- *
- * 프리페치가 닿지 않는 폴더(앞 24개 밖)로 본다. 미리 읽어 둔 폴더는 펼쳐도 기다림이 없어서
- * 이 상태를 아예 지나가지 않는다 — 그게 프리페치의 목적이다.
- */
 describe("폴더 행의 loading", () => {
   const many = Array.from({ length: 30 }, (_, index) => entry(`d${String(index).padStart(2, "0")}`, "dir"));
   const deep = { "": many, ...Object.fromEntries(many.map((each) => [each.name, [entry("a.md")]])) };
@@ -221,7 +196,6 @@ describe("폴더 행의 loading", () => {
     tree.setFolderExpanded("d29", true);
 
     expect(tree.rows[29]).toMatchObject({ id: "d29", loading: true });
-    // 자식 자리에는 "읽는 중…" 이라는 파일 행이 없다.
     expect(tree.rows[29]?.children?.map((child) => child.name)).not.toContain("읽는 중…");
   });
 
@@ -236,17 +210,12 @@ describe("폴더 행의 loading", () => {
     expect(tree.rows[29]?.children?.map((child) => child.name)).toEqual(["a.md"]);
   });
 
-  /**
-   * **프리페치는 화면에 티가 나지 않아야 한다.** 배경에서 읽는 폴더까지 돌면, 루트를 연 직후
-   * 폴더 24개가 한꺼번에 돌아 앱이 버벅이는 것처럼 보인다.
-   */
   it("미리 읽는 중인 폴더는 돌지 않는다 — 펼친 것만 돈다", async () => {
     const tree = viewModel(deep);
 
     tree.start();
     await settled();
 
-    // 이 순간 프리페치가 한창인데(앞 24개), 사용자가 펼친 것은 하나도 없다.
     expect(tree.rows.filter((row) => row.loading === true)).toEqual([]);
   });
 
@@ -291,11 +260,6 @@ describe("선택과 실패", () => {
   });
 });
 
-/**
- * 화면 어휘(`'folder'`)를 Model 어휘(`'dir'`)로 바꾸는지, 그리고 성공하면 트리에 실제로 반영
- * 되는지를 본다. 실패를 삼키지 않는지도 — `binding.tsx` 가 `.catch` 로 사람에게 보여주려면
- * ViewModel 이 거절을 던져야 한다.
- */
 describe("createEntry / renameEntry / removeEntry", () => {
   it("folder 를 만들면 Model 에는 dir 로 전해지고 트리에도 반영된다", async () => {
     const tree = viewModel({ "": [] });
@@ -304,8 +268,6 @@ describe("createEntry / renameEntry / removeEntry", () => {
 
     await tree.createEntry("", "sub", "folder");
 
-    // 새로 만든 폴더의 **안**은 아직 읽지 않았다 — createEntry 는 만든 대상의 부모만 다시 읽는다.
-    // 화살표는 `type==='folder'`면 자식 유무와 무관하게 뜬다(2026-09, C1) — 자리 표시가 필요 없다.
     expect(tree.rows).toEqual([{ id: "sub", name: "sub", type: "folder", loading: false, children: [] }]);
   });
 
@@ -367,7 +329,6 @@ describe("createEntry / renameEntry / removeEntry", () => {
     tree.setFolderExpanded("folder", true);
     await settled();
 
-    // 폴더 자신과 그 자식을 같이 선택해서 지운다 — 자식은 후손이라 걸러지고, 폴더만 실제로 지워진다.
     await tree.removeEntries(["folder", "folder/inner.txt", "kept.txt"]);
 
     expect(tree.rows.map((row) => row.id)).toEqual([]);

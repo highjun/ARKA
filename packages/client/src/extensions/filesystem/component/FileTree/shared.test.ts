@@ -76,7 +76,6 @@ describe("nextSelection", () => {
 
   it("range는 앵커~대상 구간을 order 순서로 자른다(정방향)", () => {
     const result = nextSelection({ intent: "range", current: ["a"], order: ROWS, anchorId: "a", targetId: "d" });
-    // c는 disabled라 제외
     expect(result.ids).toEqual(["a", "b", "d"]);
     expect(result.anchorId).toBe("a");
   });
@@ -159,7 +158,6 @@ describe("compactFolderChains", () => {
 
     const result = compactFolderChains(tree);
 
-    // a는 자식이 폴더 b 하나뿐이라 압축되지만, b는 파일을 갖고 있어 거기서 끊긴다.
     expect(result[0]).toMatchObject({ id: "b", name: "a/b" });
     expect(result[0]!.children).toEqual([{ id: "b/f", name: "f.ts", type: "file" }]);
   });

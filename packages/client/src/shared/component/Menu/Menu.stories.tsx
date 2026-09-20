@@ -8,16 +8,10 @@ import { Kbd } from "#component/Kbd";
 import { Menu } from "./index";
 import styles from "./Menu.module.css";
 
-/**
- * 메뉴는 포탈로 `document.body`에 뜨는데 VRT는 `#storybook-root`만 찍는다 — 포탈 대상을 이 상자
- * 안으로 돌리고, `transform`으로 fixed 포지션의 기준 상자까지 이 상자로 바꾼다.
- */
 const OverlayStage = ({ children }: { readonly children: ReactNode }) => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   return (
     <div style={{ position: "relative", height: 480, width: 720, overflow: "hidden", transform: "translateZ(0)" }}>
-      {/* 메뉴는 트리거의 오른쪽 끝에 맞춰 열린다(`align="end"`) — 트리거가 왼쪽 끝에 있으면
-          목록이 상자 밖으로 나가 안 보인다. 실제 쓰임(오른쪽 위 더보기 단추)과 같이 놓는다. */}
       <div style={{ display: "flex", justifyContent: "flex-end", padding: 16 }}>
         <PortalProvider container={container ?? undefined}>{children}</PortalProvider>
       </div>
@@ -65,11 +59,6 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = { args: { defaultOpen: true } };
 export const Closed: Story = { args: { defaultOpen: false } };
 
-/**
- * `kind="context"`는 우클릭으로 뜬다 — 여기서는 좌표 없이 열어 둔 그림이라 좌상단에 앵커링된다
- * (Radix가 경고를 내는 것도 그 때문이고, 의도된 동작이다). 트리거는 자기 모양이 없어서 우클릭할
- * 자리를 눈에 보이게 하나 빌려 준다.
- */
 export const Context: Story = {
   args: { kind: "context", defaultOpen: true },
   render: (args) => (

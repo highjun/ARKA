@@ -4,7 +4,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { ISettingsViewModel } from "../viewmodel/ISettingsViewModel";
 import { SettingsTabView } from "./SettingsTabView";
 
-/** 실제 `SettingsViewModel` 대신 고정된 줄을 꽂는다 — 이 층에서 볼 것은 "주어진 줄을 어떻게 그리는가"다. */
 const viewModel = (state: Partial<ISettingsViewModel>): ISettingsViewModel => ({
   dispose: () => undefined,
   rows: [
@@ -43,7 +42,5 @@ const story = (state: Partial<ISettingsViewModel>): Story => ({
   ],
 });
 
-/** 네 가지 `type`이 각각 어떻게 그려지는지. */
 export const Default: Story = story({});
-/** 등록된 스키마가 없으면 빈 화면이다. */
 export const Empty: Story = story({ rows: [] });

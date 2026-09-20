@@ -12,13 +12,9 @@ import type {
 } from "./Split";
 import type { PaneRowLeaf, PaneRowNode, PaneRowSplit, SplitDropPosition, TabDropZone, TabId } from "./shared";
 
-// ─────────────────────────── 계산 ───────────────────────────
-
 const clampNormalized = (size: number): number => Math.min(80, Math.max(10, size));
-/** 10~90%로 가둔다 — 한쪽이 사라져 되돌릴 수 없게 되는 것을 막는다. 소수점 둘째 자리까지. */
 const clampSize = (size: number): number => Math.min(90, Math.max(10, Number(size.toFixed(2))));
 
-/** 합이 100이 되도록 다시 나눈다 — `size`가 없는 자식은 균등분으로 시작한다. */
 const normalizeSizes = (nodes: readonly PaneRowNode[]): number[] => {
   if (nodes.length === 0) return [];
 
@@ -29,14 +25,12 @@ const normalizeSizes = (nodes: readonly PaneRowNode[]): number[] => {
   return sizes.map((size) => Number(((size / total) * 100).toFixed(4)));
 };
 
-/** `onResize`가 없거나 자식이 하나면 크기 조절이 꺼진다. */
 const getSplitState = (node: PaneRowSplit, onResize?: TabSplitProps["onResize"]): SplitState => ({
   orientation: node.orientation,
   sizes: normalizeSizes(node.children),
   disabledResize: !onResize || node.children.length < 2,
 });
 
-/** 빈 leaf를 걷어내고, 자식이 하나만 남은 split은 그 자식으로 대체한다. 전부 사라지면 `null`. */
 const pruneVisibleTree = (node: PaneRowNode): PaneRowNode | null => {
   if (node.kind === "leaf") return node.tabs.length > 0 ? node : null;
 
@@ -52,8 +46,6 @@ const pruneVisibleTree = (node: PaneRowNode): PaneRowNode | null => {
   return { ...node, children: survivors };
 };
 
-// 좌/우가 우선 — 전체 높이의 양옆 22%(모서리 포함)는 항상 left/right, 가운데 폭 안에서만 상하 22%를 본다.
-/** 가장자리 22%를 방향으로, 가운데는 `center`(합치기)로 읽는다. 좌·우가 상·하보다 우선이다. */
 const getSplitDropPosition = (event: DragEvent<HTMLElement>, rect: DOMRect): SplitDropPosition => {
   const x = (event.clientX - rect.left) / rect.width;
   const y = (event.clientY - rect.top) / rect.height;
@@ -70,7 +62,6 @@ const getLeafPanelRect = (sectionEl: HTMLElement): DOMRect =>
   sectionEl.querySelector<HTMLElement>('[role="tabpanel"]')?.getBoundingClientRect() ??
   sectionEl.getBoundingClientRect();
 
-/** 드롭 대상이 탭 목록 안이면 `strip`, 아니면 `panel`이다 — DOM 조상을 거슬러 판단한다. */
 const getLeafDropZone = (event: DragEvent<HTMLElement>): TabDropZone =>
   event.target instanceof HTMLElement && event.target.closest('[role="tablist"]') ? "strip" : "panel";
 
@@ -82,7 +73,6 @@ const getTransferValue = (event: DragEvent<HTMLElement>, key: string): string =>
   }
 };
 
-/** leaf 하나의 drag/drop 핸들러 — branch 자식과 트리가 leaf 하나뿐인 루트 양쪽에서 재사용한다. */
 const createLeafDragHandlers = (
   leafId: PaneId,
   activeTabId: TabId | null,
@@ -163,12 +153,6 @@ const createLeafDragHandlers = (
   },
 });
 
-// ─────────────────────────── 상태 ───────────────────────────
-
-/**
- * Split 트리 전체가 공유하는 상태(`dragSourceRef`/`dropIndicator`/`resizingChildId`/
- * `visibleHandleChildId`) — 전부 진짜 상태라 렌더링 쪽(`Tab.tsx`)에 둘 수 없다.
- */
 export const useTabSplit = (
   props: Pick<TabSplitProps, "tree" | "activePaneId" | "onMove" | "onSplit" | "onResize">,
 ) => {
@@ -196,7 +180,6 @@ export const useTabSplit = (
   return { visibleTree, context };
 };
 
-/** 트리 전체가 leaf 하나뿐일 때(아직 split된 적 없음)의 루트 상태 — 가장자리 드롭으로 최초 split을 시작한다. */
 export const getRootLeafState = (leaf: PaneRowLeaf, shared: SplitContextValue): SplitRootLeafState => {
   const indicator = shared.dropIndicator?.leafId === leaf.id ? shared.dropIndicator : null;
 
@@ -209,7 +192,6 @@ export const getRootLeafState = (leaf: PaneRowLeaf, shared: SplitContextValue): 
   };
 };
 
-/** branch 하나의 resize 상태 — `onPointerDown`이 `window` 리스너를 붙였다 떼는 진짜 로직이다. */
 export const useSplitBranch = (node: PaneRowSplit, shared: SplitContextValue) => {
   const branchRef = useRef<HTMLElement | null>(null);
   const state = getSplitState(node, shared.onResize);

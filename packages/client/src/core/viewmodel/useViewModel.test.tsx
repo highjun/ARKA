@@ -6,14 +6,12 @@ import { Container } from "#core/di";
 import { ContainerProvider, MissingContainerProviderError, useViewModel } from "#core/viewmodel";
 
 declare module "#core/di" {
-  /** 이 파일의 테스트가 쓰는 인스턴스들. */
   interface InstanceMap {
     "test.workspaceViewModel": WorkspaceViewModel;
     "test.plainRegistry": PlainRegistry;
   }
 }
 
-/** ViewModel 계약 — 관찰 property는 plain 값, 조작은 메서드다. MobX가 계약에 안 나온다. */
 interface WorkspaceViewModel {
   readonly openFileId: string | null;
   readonly isDirty: boolean;
@@ -22,7 +20,6 @@ interface WorkspaceViewModel {
   markDirty(): void;
 }
 
-/** 실제 앱의 모든 ViewModel처럼 `makeAutoObservable` 클래스다. 필드가 곧 상태고 getter는 없다. */
 class WorkspaceViewModelImpl implements WorkspaceViewModel {
   openFileId: string | null = null;
   isDirty = false;
@@ -41,12 +38,10 @@ class WorkspaceViewModelImpl implements WorkspaceViewModel {
   }
 }
 
-/** ViewModel이 아닌 것도 꺼낼 수는 있다 — 막는 것은 타입이 아니라 린트다. */
 class PlainRegistry {
   readonly items: readonly string[] = ["a", "b"];
 }
 
-// View — `observer`가 다시 그리고, 훅은 인스턴스를 그대로 준다.
 const WorkspaceView = observer(function WorkspaceView() {
   const vm = useViewModel("test.workspaceViewModel");
   return (

@@ -1,12 +1,5 @@
 import { createWorkspaceWatchPort } from "./HttpWorkspaceWatch";
 
-/**
- * Port 에 바라는 것: **SSE 바이트를 "무엇이 바뀌었는지" 목록으로 바꾸고, 해지하면 더는 안 부른다.**
- * Adapter 이름은 여기 나오지 않는다 — 전송을 바꿔도 이 파일은 그대로 살아야 한다.
- *
- * `vi.mock` 을 쓰지 않는다(`port-integration-test-no-mock`) — 모듈을 갈아끼우는 대신
- * **네트워크 경계만** 대신한다.
- */
 const encoder = new TextEncoder();
 
 const streamOf = (chunks: readonly string[]): ReadableStream<Uint8Array> =>
@@ -21,7 +14,6 @@ const frame = (paths: readonly string[]): string => `data: ${JSON.stringify({ pa
 
 const originalFetch = globalThis.fetch;
 
-/** 서버가 이 바이트들을 보냈다고 치고, 마지막 요청 URL을 남겨 둔다. */
 const serverSends = (chunks: readonly string[], status = 200): { url: () => string | null; calls: () => number } => {
   let captured: string | null = null;
   let calls = 0;
@@ -39,12 +31,6 @@ describe("HttpWorkspaceWatch", () => {
     vi.useRealTimers();
   });
 
-  /**
-   * 스트림 소비가 끝날 때까지 기다린다 — 매크로태스크 한 바퀴(`setTimeout(0)`)를 쓴다.
-   * 마이크로태스크만 세면(예전엔 `Promise.resolve()` 두 번) `#readWithIdleTimeout`(idle-timeout
-   * 경쟁을 위한 `Promise.race`)이 추가한 체인 깊이에 맞춰 셀 때마다 다시 맞춰야 해서 깨지기
-   * 쉽다 — 매크로태스크 한 바퀴는 그 안의 마이크로태스크를 전부 비우므로 체인 깊이와 무관하다.
-   */
   const flush = async (): Promise<void> => {
     await new Promise((resolve) => setTimeout(resolve, 0));
   };
@@ -112,7 +98,6 @@ describe("HttpWorkspaceWatch", () => {
     }) as unknown as typeof fetch;
 
     const unsubscribe = createWorkspaceWatchPort().watch(["a.md"], () => undefined);
-    // 첫 연결이 실패로 이어지기 전에 해지한다.
     unsubscribe();
     await vi.advanceTimersByTimeAsync(5_000);
 
@@ -145,8 +130,6 @@ describe("HttpWorkspaceWatch", () => {
     expect(changes).toEqual([["a.md"]]);
   });
 
-  /** `pull`에서 아무것도 enqueue하지 않는 스트림 — `reader.read()`가 절대 안 끝난다(idle-timeout·
-   *  visibility 테스트에서 "연결이 조용히 죽었다"를 흉내내는 자리). */
   const neverRespondingStream = (): ReadableStream<Uint8Array> => new ReadableStream<Uint8Array>({ pull() {} });
 
   it("idle-timeout 안에 아무 프레임도 안 오면 재연결한다", async () => {
@@ -161,7 +144,6 @@ describe("HttpWorkspaceWatch", () => {
     await vi.advanceTimersByTimeAsync(1);
     expect(calls).toBe(1);
 
-    // idle-timeout(45s)을 넘기면 죽은 연결로 보고 재시도 대기(2s) 뒤 다시 연결해야 한다.
     await vi.advanceTimersByTimeAsync(45_000 + 2_000);
     unsubscribe();
 
@@ -173,7 +155,6 @@ describe("HttpWorkspaceWatch", () => {
     let calls = 0;
     globalThis.fetch = (() => {
       calls += 1;
-      // 15초마다 빈 프레임(하트비트)을 흘려보내는 스트림 — idle-timeout(45초)보다 훨씬 자주 온다.
       return Promise.resolve({
         ok: true,
         status: 200,
@@ -205,7 +186,6 @@ describe("HttpWorkspaceWatch", () => {
     expect(calls).toBe(1);
 
     document.dispatchEvent(new Event("visibilitychange"));
-    // idle-timeout(45s)의 극히 일부인 재시도 대기(2s)만 지나도 재연결돼야 한다.
     await vi.advanceTimersByTimeAsync(2_000);
     unsubscribe();
 

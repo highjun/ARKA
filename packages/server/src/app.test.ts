@@ -9,7 +9,6 @@ import { makeConfig } from "./core/config.testing";
 import type { LogFields, Logger } from "./core/log";
 
 let workspaceRoot: string;
-/** 프로토콜 헤더를 실은 요청. 실제 클라이언트가 보내는 것과 같다. */
 const withProtocol = (init: RequestInit = {}): RequestInit => ({
   ...init,
   headers: { ...(init.headers as Record<string, string> | undefined), [PROTOCOL_HEADER]: String(PROTOCOL_VERSION) },

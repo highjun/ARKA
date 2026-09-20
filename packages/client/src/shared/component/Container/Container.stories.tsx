@@ -39,7 +39,6 @@ export const Horizontal: Story = {
     </Container>
   ),
 };
-/** `scroll="none"` — 스크롤 영역 없이 순수 테두리 상자라 내용이 넘쳐도 자르지 않는다. */
 export const NoScroll: Story = {
   args: { scroll: "none" },
   render: (args) => (

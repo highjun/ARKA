@@ -1,15 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { IWorkspaceFiles } from "./IWorkspaceFiles";
 
-/**
- * `IWorkspaceFiles`를 구현한 **모든 것**이 통과해야 하는 스위트. 실물(HTTP → 서버 → 디스크)과
- * Mock이 같은 스위트를 돌기 때문에, Mock 위에서 통과한 테스트와 스토리를 실물에서도 믿을 수 있다.
- *
- * `setup`은 부를 때마다 **빈 루트**를 가진 새 구현을 돌려줘야 한다. 씨앗은 스위트가 `create`·
- * `write`로 직접 심는다 — 그래야 그 둘도 검증 대상이 된다.
- *
- * 무엇을 던지는지는 묻지 않는다. 계약이 오류 타입을 정하지 않았고, 정하기 전까지는 "던진다"만 본다.
- */
 export const testWorkspaceFilesContract = (
   name: string,
   setup: () => Promise<IWorkspaceFiles> | IWorkspaceFiles,

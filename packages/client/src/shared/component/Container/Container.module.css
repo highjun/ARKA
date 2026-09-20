@@ -1,14 +1,7 @@
-/* `height: 100%`가 없으면 block 기본값(`auto`)이라, 쓰는 쪽이 바깥 div로 높이만 주고
-   `Container` 자신엔 치수 className을 안 준 흔한 패턴에서 상자가 그냥 늘어나 스크롤이 전혀
-   발동하지 않았다(2026-09-02 발견). 조상이 명시적 높이가 없으면 `height: 100%`는 스펙상
-   `auto`로 풀려 기존 동작과 같다. */
 .root {
   position: relative;
   height: 100%;
   color: var(--fgColor-default);
-
-  /* 스크롤바를 얇게, 손잡이만 보이게. Firefox·Chromium이 이 두 줄을 읽고, Safari는 원래
-     오버레이 스크롤바라 무시해도 같은 그림이 된다. */
   scrollbar-width: thin;
   scrollbar-color: var(--control-transparent-bgColor-active) transparent;
 }
@@ -17,7 +10,6 @@
   overflow: auto;
 }
 
-/* 한 축만 켠다 — 반대 축은 `hidden`이어야 미세한 오버플로로 스크롤바가 따라 뜨지 않는다. */
 .root[data-scroll="horizontal"] {
   overflow: auto hidden;
 }
@@ -26,7 +18,6 @@
   overflow: hidden auto;
 }
 
-/* 내용이 넘쳐도 자르지 않는다. */
 .root[data-scroll="none"] {
   overflow: visible;
 }
@@ -39,14 +30,11 @@
   background-color: var(--bgColor-default);
 }
 
-/* 스토리 전용 — `root`는 치수를 안 가져서(쓰는 쪽이 매번 className으로 준다), 데모에서 스크롤이
-   실제로 보이려면 여기서 하나 빌려 준다. */
 .demo {
   height: var(--overlay-height-small);
   max-width: var(--breakpoint-medium);
 }
 
-/* 세로+가로 동시 오버플로 데모 — 폭·높이 둘 다 제한한다. */
 .demoBoth {
   width: var(--breakpoint-medium);
   max-width: 100%;

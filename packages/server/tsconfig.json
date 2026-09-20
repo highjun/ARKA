@@ -3,10 +3,5 @@
   "compilerOptions": {
     "types": ["node"]
   },
-  // 이 패키지의 TypeScript를 전부 본다. 여기 없으면 타입 검사가 그 파일을 아예 안 본다 —
-  // `test/`와 `build.ts`가 2026-09-14까지 그랬다.
-  //
-  // `eslint.config.ts`는 뺀다 — `ops/lint`가 TS 원본이라 이 패키지의 옵션으로 ops 소스를
-  // 컴파일하게 된다.
   "include": ["src", "test", "build.ts"]
 }

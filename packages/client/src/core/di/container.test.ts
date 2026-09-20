@@ -1,9 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { CircularDependencyError, Container, ContainerDisposedError, InstanceNotRegisteredError } from "#core/di";
 
-/** 테스트 전용 자리. `test.` 접두로 앱의 키와 갈린다. */
 declare module "#core/di" {
-  /** 이 파일의 테스트가 쓰는 인스턴스들. */
   interface InstanceMap {
     "test.counter": { readonly id: number };
     "test.disposable": { dispose: () => void };

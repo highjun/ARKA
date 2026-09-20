@@ -2,16 +2,6 @@ import type { IWorkspaceFiles } from "../model/IWorkspaceFiles";
 import { FileContentModel } from "./FileContentModel";
 import type { IFileContentModel } from "./IFileContentModel";
 
-/**
- * 검사하는 것은 **캐시 규칙·서버 응답을 화면 상태로 접는 규칙·편집 버퍼와 저장의 관계**다.
- *
- * 탭을 오갈 때마다 다시 읽으면 폰에서 그대로 느려지므로, "이미 읽었으면 읽지 않는다"가 이 Model
- * 의 계약이다. 잘림·바이너리는 서버가 알려주는 것을 그대로 나르지 않고 화면 어휘로 바꾼다.
- *
- * **`content` 와 `savedContent` 의 차이가 곧 dirty 다.** 따로 불리언을 두지 않는 것은, 두 소스가
- * 어긋나는 사고(예: 저장했는데 dirty 가 안 꺼짐)를 아예 만들 수 없게 하기 위해서다.
- */
-
 type Reply = { path: string; content: string; truncated: boolean; encoding: "utf8" | "binary" };
 type ScriptedPort = {
   list(path: string): Promise<{ path: string; parent: string | null; entries: [] }>;
@@ -121,10 +111,8 @@ describe("open", () => {
     const replies: Record<string, Reply> = {};
     const port = serving(replies);
     const files = model(port);
-    // 실패
     await files.open("a.md");
     replies["a.md"] = text("a.md", "A");
-    // 재시도 → 성공
     await files.open("a.md");
 
     await files.open("a.md");
@@ -244,7 +232,6 @@ describe("save", () => {
     const files = model(port);
     await files.open("a.md");
 
-    // content === savedContent
     await files.save("a.md");
 
     expect(port.seenWrites).toEqual([]);
@@ -300,7 +287,6 @@ describe("save", () => {
     files.edit("a.md", "고친 내용");
 
     const first = files.save("a.md");
-    // 저장 중 — 아무 일도 하지 않는다
     const second = files.save("a.md");
     resolveWrite?.();
     await Promise.all([first, second]);
@@ -328,11 +314,6 @@ describe("save", () => {
   });
 });
 
-/**
- * 파일이 옮겨지거나 이름이 바뀌면 열려 있던 버퍼가 **경로째로** 새 키를 따라가야 한다 — 안 그러면
- * 편집 중이던 내용이 옛 경로 아래 고아로 남고, 새 경로를 다시 열면 디스크에서 새로 읽어 그
- * 편집을 조용히 잃는다.
- */
 describe("retargetOpenFile", () => {
   it("편집 중이던 내용까지 새 경로로 따라간다", async () => {
     const port = serving({ "old.md": text("old.md", "원본") });
@@ -378,10 +359,6 @@ describe("retargetOpenFile", () => {
   });
 });
 
-/**
- * 열린 파일 집합을 구독 경로로 삼되, **편집 중(dirty)인 파일은 외부 변경이 와도 자동으로
- * 덮어쓰지 않는다** — 사용자의 미저장 편집을 보호하는 것이 이 Model 이 감시를 갖는 핵심 이유다.
- */
 describe("watch", () => {
   const watchPort = () => {
     const calls: (readonly string[])[] = [];

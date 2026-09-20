@@ -241,9 +241,6 @@ describe("Shell", () => {
       </Shell>,
     );
 
-    // 핵심 계약 — `usePortalContainer()`가 Shell이 만든 portalRoot(색 토큰 스코프 안)를 가리키는가.
-    // 어긋나면 포탈이 토큰 스코프 밖으로 나가 메뉴가 투명하게 뜬다. `SplitPageLayout` 밖에서,
-    // `Shell` 서브트리 안에서 잡혀야 한다.
     const menu = screen.getByRole("menu");
     const layout = container.querySelector('[data-component="SplitPageLayout"]');
     const shellRoot = document.querySelector('[data-component="Shell"]');
@@ -295,8 +292,6 @@ describe("Shell", () => {
       </Shell>,
     );
 
-    // Shell 은 사이드바 Sheet(Radix Dialog)를 내부에서 이미 portal로 띄운다 — render()가
-    // 돌려주는 container 는 그 형제라 안 잡힌다. 실제로 뜬 걸 검사하려면 body 를 봐야 한다.
     await expectNoA11yViolations(document.body);
   });
 });

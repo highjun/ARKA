@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { protectedPushes } from "./prePush.ts";
 
-/**
- * git이 주는 입력 형식(`<local ref> <local sha> <remote ref> <remote sha>`)을 고정한다.
- * **셋째 칸이 원격 ref다** — 여기를 첫째로 착각하면 훅이 조용히 아무것도 안 막는다.
- */
 const line = (remoteRef: string): string => `refs/heads/x deadbeef ${remoteRef} cafebabe`;
 
 describe("main으로 직접 미는 것을 막는다", () => {

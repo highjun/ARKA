@@ -4,20 +4,12 @@ import { Button, Heading } from "@primer/react";
 import { Text } from "#component/Text";
 import styles from "./CrashScreen.module.css";
 
-/** `onReload`는 필수다 — 사용자가 빠져나갈 길이 없는 화면을 만들지 않는다. */
-/** `children`을 막는다 — 내용은 `message`가 정한다. */
 export interface CrashScreenProps extends Omit<ComponentPropsWithoutRef<"div">, "children"> {
-  /** 루트 원소로 그대로 통과한다. */
   readonly ref?: Ref<HTMLDivElement>;
-  /** 잡힌 오류의 메시지. 스택은 보여주지 않는다 — 사용자가 할 수 있는 일은 새로고침뿐이다. */
   readonly message: string;
-  /** 다시 불러오기 버튼을 누르면 호출된다. */
   readonly onReload?: () => void;
 }
 
-/**
- * 셸이 렌더 중 죽었을 때 빈 화면 대신 보이는 것. VSCode의 "창을 다시 로드" 대화상자와 같은 자리다.
- */
 export const CrashScreen = ({ message, onReload, className, ref, ...props }: CrashScreenProps) => (
   <div ref={ref} {...props} data-component="CrashScreen" role="alert" className={clsx(className, styles["root"])}>
     <Heading as="h1" variant="large">

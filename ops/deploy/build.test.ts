@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildCommand, describeCommit, pruneCommands } from "./build.ts";
 
-/**
- * **함정마다 케이스 하나.** 이 저장소에 `<none>` 이미지 656개가 쌓여 디스크를 86%까지
- * 밀어 올린 적이 있고, 아래 넷 중 하나만 어긋나도 같은 일이 다시 생긴다.
- */
 describe("빌드 명령", () => {
   it("BuildKit을 강제한다 — 레거시 빌더가 중간 단계를 이미지로 커밋한 것이 656개의 원인이다", () => {
     expect(buildCommand("arka:latest", "abc").env?.["DOCKER_BUILDKIT"]).toBe("1");

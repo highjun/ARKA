@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 
 const SRC = path.resolve(import.meta.dirname, "../src");
 
-/** `src` 아래 모든 파일 경로를 준다(폴더는 빼고). */
 const walk = (dir: string): string[] =>
   readdirSync(dir).flatMap((entry) => {
     const full = path.join(dir, entry);
@@ -13,16 +12,8 @@ const walk = (dir: string): string[] =>
 
 const FILES = walk(SRC).map((file) => path.relative(SRC, file));
 
-/**
- * 컴포넌트 폴더 하나 — `<Name>/<Name>.tsx`가 있는 자리다. 부품 파일(`Header.tsx` 등)은 폴더
- * 이름과 달라 여기 걸리지 않는다.
- */
 const COMPONENT = /(?:^|\/)(?:shared\/component|[^/]+\/component)\/(?<name>[A-Z][A-Za-z0-9]*)\/\k<name>\.tsx$/u;
 
-/**
- * 규약이 파일 시스템에 대해 말하는 것을 본다 — 린트는 구문을 보고, 이건 "옆에 파일이 있나"라서
- * 테스트가 맞는 자리다.
- */
 describe("컴포넌트 폴더 구조", () => {
   const components = FILES.filter((file) => COMPONENT.test(file));
 

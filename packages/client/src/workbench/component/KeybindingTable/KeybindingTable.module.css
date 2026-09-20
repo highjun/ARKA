@@ -1,6 +1,6 @@
 .table {
   width: 100%;
-  /* stylelint-disable-next-line primer/borders -- 이 규칙은 `border-collapse`를 테두리 *값*으로 본다. `collapse`는 표 모델의 키워드라 토큰이 없다. */
+  /* stylelint-disable-next-line primer/borders */
   border-collapse: collapse;
   font-size: var(--text-body-size-small);
 }
@@ -11,7 +11,6 @@
   border-bottom: var(--borderWidth-thin) solid var(--borderColor-muted);
 }
 
-/* 키캡 모양은 `Kbd` 가 그린다 — 여기선 키 사이 간격만. */
 .key {
   margin-right: var(--space-xs);
 }

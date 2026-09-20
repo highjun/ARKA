@@ -33,10 +33,6 @@ import { ShellViewModel } from "./viewmodel/ShellViewModel";
 import { TabSystemViewModel } from "./viewmodel/TabSystemViewModel";
 
 declare module "#core/di" {
-  /**
-   * workbench 모듈만 아는 것들 — core 서비스(`arka.settings`)의 등록과, 부팅 때 켜져 앱이 사는 동안 도는 배선
-   * 여섯. 배선은 만들어지는 순간 켜지고 컨테이너가 정리할 때 꺼진다.
-   */
   interface InstanceMap {
     "arka.settings": ISettings;
     "arka.workbench.globalErrorHandlers": Disposable;
@@ -48,15 +44,11 @@ declare module "#core/di" {
   }
 }
 
-/** 사용자 단축키 재정의가 저장되는 키. */
 const KEYBINDING_OVERRIDES_KEY = "workbench.keybindings";
-/** 설정 값이 저장되는 키. */
 const SETTINGS_KEY = "workbench.settings";
 
-/** `arka.workbench.open`이 받는 것. */
 const isOpenContext = (value: unknown): value is { readonly uri: URI; readonly preview?: boolean } =>
   typeof value === "object" && value !== null && "uri" in value && value.uri instanceof URI;
-/** `arka.workbench.retargetTabs`가 받는 것 — 워크스페이스 루트 기준 경로 접두어 둘. */
 const isRetargetContext = (value: unknown): value is { readonly oldPrefix: string; readonly newPrefix: string } =>
   typeof value === "object" &&
   value !== null &&
@@ -65,13 +57,6 @@ const isRetargetContext = (value: unknown): value is { readonly oldPrefix: strin
   "newPrefix" in value &&
   typeof value.newPrefix === "string";
 
-/**
- * 셸 자신을 켜는 모듈 — 확장과 같은 모양이다. 먼저 켜진다(배럴 순서).
- *
- * **전부 singleton이다.** 탭마다 자식 컨테이너가 생기므로 scoped면 탭 안에서 꺼낸 ViewModel이 셸이 보는 것과
- * 갈린다 — 탭마다 따로여야 하는 인스턴스는 아직 없다. 브라우저 API는 `infra/`의 얇은 함수로 감싼다 —
- * Model·ViewModel이 `navigator`·`document`를 직접 알면 테스트가 DOM에 묶인다.
- */
 export const workbench: ExtensionModule = {
   id: "arka.workbench",
   provides: [
@@ -80,7 +65,6 @@ export const workbench: ExtensionModule = {
       id: "arka.workbench.serverInfo",
       lifetime: "singleton",
       create: () => {
-        // 앱 수명과 워크스페이스가 같은 답을 읽는다 — 한 번만 묻고 나눈다.
         const port = createServerInfoPort();
         let loading: Promise<ServerInfo | null> | undefined;
         return { load: () => (loading ??= port.load()) };
@@ -90,7 +74,6 @@ export const workbench: ExtensionModule = {
       id: "arka.commands",
       lifetime: "singleton",
       create: (c) => {
-        // 재정의는 localStorage에 산다 — 서버 settings.json은 나중 라운드. 실행 오류는 오류 기록으로 간다.
         const storage = c.resolve("arka.workbench.storage");
         return new CommandService({
           overridesStore: {
@@ -105,7 +88,6 @@ export const workbench: ExtensionModule = {
       id: "arka.settings",
       lifetime: "singleton",
       create: (c) => {
-        // 설정도 localStorage에 산다 — 서버 settings.json은 나중 라운드.
         const storage = c.resolve("arka.workbench.storage");
         return new Settings({
           store: {
@@ -140,7 +122,6 @@ export const workbench: ExtensionModule = {
     {
       id: "arka.workbench.tabs",
       lifetime: "singleton",
-      // 탭 컨테이너의 부모는 이 모듈을 켠 컨테이너(앱 루트)다 — 탭 안에서 꺼내는 것이 셸이 보는 것과 같은 인스턴스가 된다.
       create: (c) =>
         new TabSystem({
           layout: c.resolve("arka.workbench.tabLayout"),
@@ -207,7 +188,6 @@ export const workbench: ExtensionModule = {
       lifetime: "singleton",
       create: (c) => new KeybindingViewModel({ commands: c.resolve("arka.commands") }),
     },
-    // 부팅 때 켜져 앱이 사는 동안 도는 배선 — 만드는 순간 켜진다.
     {
       id: "arka.workbench.globalErrorHandlers",
       lifetime: "singleton",
@@ -244,7 +224,6 @@ export const workbench: ExtensionModule = {
     },
   ],
   activate: (c) => {
-    // 설정 스키마 — 밀도. 확장이 `activate`에서 더하는 것과 같은 자리다.
     c.resolve("arka.settings").schema.add({
       id: DENSITY_SETTING_ID,
       title: "밀도",
@@ -256,8 +235,6 @@ export const workbench: ExtensionModule = {
     tabProviders.add(settingsTabProvider);
     tabProviders.add(keybindingsTabProvider);
 
-    // 탭을 여는 길은 명령 하나다 — 사이드바·검색·미리보기가 전부 `arka.workbench.open`을 부른다. 문맥
-    // `tab.active.*`는 확장이 "지금 보는 탭"을 셸을 모른 채 읽는 자리다.
     const commands = c.resolve("arka.commands");
     const activeTab = () => {
       const layout = c.resolve("arka.workbench.tabLayout");
@@ -283,14 +260,12 @@ export const workbench: ExtensionModule = {
       },
     });
 
-    // 부팅 배선을 켠다 — 오류 핸들러가 첫째다: 뒤의 것이 켜지다 던져도 잡힌다.
     c.resolve("arka.workbench.globalErrorHandlers");
     c.resolve("arka.workbench.errorNotifier");
     c.resolve("arka.workbench.documentTheme");
     c.resolve("arka.workbench.documentDensity");
     c.resolve("arka.workbench.globalKeybindings");
     c.resolve("arka.workbench.unloadGuard");
-    // ViewModel이 만들어지는 순간 자기 명령을 등록한다 — 화면이 뜨기 전에 단축키가 먹어야 한다.
     c.resolve("arka.workbench.shellViewModel");
     c.resolve("arka.workbench.tabSystemViewModel");
     c.resolve("arka.workbench.commandPaletteViewModel");

@@ -2,20 +2,12 @@ import type { DirectoryListing, FileContent, FileEntry, FileEntryType, IWorkspac
 
 type Node = { readonly type: "dir" } | { readonly type: "file"; readonly content: string };
 
-/** 파일 씨앗 — 값이 문자열이면 파일, `null`이면 빈 디렉터리. 중간 디렉터리는 자동으로 생긴다. */
 export type WorkspaceSeed = Readonly<Record<string, string | null>>;
 
-/**
- * 메모리 안의 `IWorkspaceFiles`. 테스트와 스토리가 공유한다.
- *
- * 실물처럼 굴어야 한다 — `workspaceFiles.contract.ts`가 그것을 강제한다. 여기서 "대충" 통과시키면
- * 그 위의 테스트가 전부 거짓 초록이 된다.
- */
 export class MockWorkspaceFiles implements IWorkspaceFiles {
   readonly #nodes = new Map<string, Node>();
   static readonly #byName = new Intl.Collator("ko").compare;
 
-  /** 값이 `null`이면 폴더, 문자열이면 파일이다. 중간 폴더는 자동으로 만들어진다. */
   constructor(seed: WorkspaceSeed = {}) {
     this.#nodes.set("", { type: "dir" });
     for (const [path, value] of Object.entries(seed)) {
@@ -24,7 +16,6 @@ export class MockWorkspaceFiles implements IWorkspaceFiles {
     }
   }
 
-  /** 이름을 한국어 콜레이션으로 정렬한다 — 실물 서버와 같은 순서다. */
   async list(path: string): Promise<DirectoryListing> {
     const normalized = MockWorkspaceFiles.#normalize(path);
     const node = this.#nodes.get(normalized);
@@ -46,7 +37,6 @@ export class MockWorkspaceFiles implements IWorkspaceFiles {
     return { path: normalized, parent: MockWorkspaceFiles.#parentOf(normalized), entries };
   }
 
-  /** 폴더를 읽으면 던진다. 잘림(`truncated`)은 흉내내지 않는다. */
   async read(path: string): Promise<FileContent> {
     const normalized = MockWorkspaceFiles.#normalize(path);
     const node = this.#nodes.get(normalized);
@@ -55,7 +45,6 @@ export class MockWorkspaceFiles implements IWorkspaceFiles {
     return { path: normalized, content: node.content, truncated: false, encoding: "utf8" };
   }
 
-  /** 없는 파일이면 던진다 — 만들기는 `create`의 몫이다. */
   async write(path: string, content: string): Promise<void> {
     const normalized = MockWorkspaceFiles.#normalize(path);
     const node = this.#nodes.get(normalized);
@@ -64,7 +53,6 @@ export class MockWorkspaceFiles implements IWorkspaceFiles {
     this.#nodes.set(normalized, { type: "file", content });
   }
 
-  /** 이미 있으면 던진다. 중간 폴더는 자동으로 만들어진다. */
   async create(path: string, type: FileEntryType): Promise<void> {
     const normalized = MockWorkspaceFiles.#normalize(path);
     if (normalized === "") throw new Error("cannot create the root");
@@ -74,7 +62,6 @@ export class MockWorkspaceFiles implements IWorkspaceFiles {
     this.#nodes.set(normalized, type === "dir" ? { type: "dir" } : { type: "file", content: "" });
   }
 
-  /** 폴더면 자손까지 함께 옮긴다. 대상이 이미 있으면 던진다. */
   async move(from: string, to: string): Promise<void> {
     const source = MockWorkspaceFiles.#normalize(from);
     const target = MockWorkspaceFiles.#normalize(to);
@@ -91,7 +78,6 @@ export class MockWorkspaceFiles implements IWorkspaceFiles {
     }
   }
 
-  /** 폴더면 자손까지 함께 지운다 — 비었는지 묻지 않는다. */
   async remove(path: string): Promise<void> {
     const normalized = MockWorkspaceFiles.#normalize(path);
     if (normalized === "") throw new Error("cannot remove the root");
@@ -109,7 +95,6 @@ export class MockWorkspaceFiles implements IWorkspaceFiles {
     }
   }
 
-  /** 선행 슬래시를 떼고 `..`·빈 세그먼트·널 바이트를 거부한다 — 실물의 경로 방어와 같은 결과다. */
   static #normalize(path: string): string {
     if (path.includes("\0")) throw new Error(`invalid path: ${path}`);
     const stripped = path.replace(/^\/+/u, "").replace(/\/+$/u, "");

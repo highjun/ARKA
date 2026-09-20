@@ -5,14 +5,6 @@ import path from "node:path";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { resolveWatchPaths, watchPaths, type WorkspaceWatchHandle } from "./watchOperations";
 
-/**
- * 진짜 파일시스템과 진짜 `fs.watch` 를 쓴다.
- *
- * 이 파일이 지키는 것은 **실제 변경이 실제로 전달되는가** 인데, 그건 커널 이벤트가 실제로 와야만
- * 검증된다. 도착 시점은 예측할 수 없으므로 고정 `sleep` 대신 `waitFor` 로 폴링한다(vitest의
- * `vi.waitFor`에 해당하는 게 jest 기본 API엔 없어 직접 짠다).
- */
-
 const waitFor = async (assertion: () => void, { timeoutMs = 2_000, intervalMs = 20 } = {}): Promise<void> => {
   const deadline = Date.now() + timeoutMs;
   for (;;) {
@@ -67,7 +59,6 @@ describe("watchOperations", () => {
     for (let index = 0; index < 5; index += 1) await writeFile(target, String(index));
 
     await waitFor(() => expect(calls().length).toBeGreaterThan(0));
-    // 5번 썼지만 코얼레싱 창(200ms) 안에서 벌어졌으므로 프레임 수는 그보다 훨씬 적어야 한다.
     expect(calls().length).toBeLessThan(5);
   });
 

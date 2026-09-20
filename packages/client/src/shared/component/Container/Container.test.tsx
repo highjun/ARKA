@@ -9,7 +9,6 @@ import {
 } from "#utils/testing";
 import { Container } from "./Container";
 
-/** 스크롤하는 원소가 루트 자신인지 본다 — 내용이 그 안에 들어가고 ref 도 거기 꽂힌다. */
 describe("Container", () => {
   it("children 을 스크롤하는 원소 안에 렌더링하고 ref 도 거기에 넘긴다", () => {
     const ref = createRef<HTMLDivElement>();

@@ -8,12 +8,6 @@ import {
 } from "#utils/testing";
 import { TextEditor } from "./TextEditor";
 
-/**
- * CodeMirror 는 진짜 DOM 을 만든다 — jsdom 에서 그리기까지는 되지만 레이아웃·측정은 못 한다.
- * 그래서 여기서는 컴포넌트가 조립하는 구조(헤더·버튼·본문 호스트)와 그 배선만 본다. CodeMirror
- * 자체의 동작(문법 강조 확장·내용 갈아끼우기 등)은 `useCodeMirrorEditor.test.tsx` 가 훅 단위로
- * 좁게 본다. 색과 크기는 시각 회귀가 맡는다.
- */
 describe("TextEditor", () => {
   implementsClassName((extra) => <TextEditor path="a.ts" content="const a = 1;" {...extra} />);
   implementsDataComponent((extra) => <TextEditor path="a.ts" content="const a = 1;" {...extra} />, "TextEditor");

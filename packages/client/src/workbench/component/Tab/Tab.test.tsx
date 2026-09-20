@@ -20,7 +20,6 @@ const row = (id: string, title: string, extra: Partial<TabRow> = {}): TabRow => 
 
 const ROWS: TabRow[] = [row("a", "A"), row("b", "B")];
 
-/** `tree`가 없으면 Group(단일 탭 묶음), 있으면 Split(분할 트리)로 렌더된다 — 두 경로 모두 같은 계약을 지킨다. */
 describe("Tab", () => {
   it("tree 를 생략하면 Group 으로 렌더링하고 활성 탭의 Content 를 그린다", () => {
     render(<Tab tabs={ROWS} activeTabId="a" />);
@@ -129,11 +128,6 @@ describe("Tab", () => {
     expect(onClose).toHaveBeenCalledWith("a");
   });
 
-  /**
-   * 비활성 탭은 `headerActionSlot`(활성 탭의 닫기 자리)을 아예 마운트하지 않는다(폭 축소가
-   * 목적, 2026-09-01 지적으로 확인) — 대신 `headerCloseButtonHover`가 `.header` 위에 겹쳐
-   * 뜬다. 호버 없이도 항상 보이고 항상 눌린다(2026-09, hover 크로스페이드 제거).
-   */
   it("비활성 탭도 겹쳐 뜨는 닫기 버튼으로 닫을 수 있다", () => {
     const onClose = vi.fn();
     render(<Tab tabs={ROWS} activeTabId="a" onClose={onClose} />);
@@ -182,9 +176,6 @@ describe("Tab", () => {
   it("axe 접근성 위반이 없다", async () => {
     const { container } = render(<Tab tabs={ROWS} activeTabId="a" onClose={() => undefined} />);
 
-    // nested-interactive: 탭 헤더(`role="tab"`)가 닫기 버튼을 자식으로 품는다 — 실제 IDE도 쓰는
-    // 패턴이다. 버튼을 형제로 빼면 고칠 수 있지만 드래그 히트박스와 포인터 예외 처리를 함께
-    // 바꿔야 한다. 알려진 한계로 이 규칙만 뺀다.
     await expectNoA11yViolations(container, { rules: { "nested-interactive": { enabled: false } } });
   });
 });

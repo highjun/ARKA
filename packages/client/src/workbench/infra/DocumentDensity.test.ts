@@ -13,7 +13,6 @@ describe("createDocumentDensity", () => {
       options: ["auto", "compact", "touch"],
     });
     const density = createDocumentDensity({ settings });
-    // jsdom의 matchMedia 스텁은 항상 불일치 — auto는 compact가 된다.
     expect(document.documentElement.dataset["density"]).toBe("compact");
     settings.set(DENSITY_SETTING_ID, "touch");
     expect(document.documentElement.dataset["density"]).toBe("touch");

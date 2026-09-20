@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { cacheControlFor, contentTypeFor, KILL_SWITCH_SW, pickFile, resolveWithin } from "./staticFiles";
 
 const ROOT = "/app/dist";
-/** 디스크 대신 이 목록에 있으면 존재하는 것으로 친다. */
 const having =
   (...files: string[]) =>
   (candidate: string): boolean =>
@@ -19,7 +18,6 @@ describe("resolveWithin — 경로 탈출 방어", () => {
   });
 
   it("평문 .. 로 root 를 벗어날 수 없다", () => {
-    // normalize 가 `/../..` 를 `/` 로 접으므로 root 안에 머문다 — 뚫리지 않는다.
     expect(resolveWithin(ROOT, "/../../etc/passwd")).toBe("/app/dist/etc/passwd");
   });
 
@@ -40,8 +38,6 @@ describe("resolveWithin — 경로 탈출 방어", () => {
   });
 
   it("어떤 .. 조합을 넣어도 root 밖 경로가 나오지 않는다", () => {
-    // normalize 가 resolve 보다 먼저 `..` 를 접기 때문에, URL 로는 root 를 벗어날 수 없다.
-    // resolveWithin 의 접두사 검사는 그 뒤에 놓인 두 번째 그물이라 여기서 걸릴 입력이 없다.
     for (const url of ["/..", "/../..", "/a/../../..", "/./../%2e%2e/", "//../etc"]) {
       const resolved = resolveWithin(ROOT, url);
       expect(resolved).toBeDefined();
@@ -70,8 +66,6 @@ describe("pickFile", () => {
   });
 
   it("/sw.js 를 index.html 로 삼키지 않는다 — 이걸 삼켜서 옛 Service Worker 가 영구히 남았다", () => {
-    // 브라우저는 SW 스크립트가 JS MIME 이 아니면 업데이트를 실패로 처리하고 기존 SW 를 유지한다.
-    // 즉 여기서 HTML 이 나가면 회수 수단 자체가 막힌다.
     expect(pickFile(ROOT, "/sw.js", having("index.html"))).toBeUndefined();
   });
 

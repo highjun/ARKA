@@ -12,10 +12,6 @@ const ROWS: readonly CommandRow[] = [
   { id: "openPalette", label: "커맨드 팔레트", keybinding: "ctrl+shift+p" },
 ];
 
-/**
- * 팔레트는 포탈로 `document.body`에 뜨는데 VRT는 `#storybook-root`만 찍는다 — 포탈 대상을 이
- * 상자 안으로 돌리고, `transform`으로 fixed 포지션의 기준 상자까지 이 상자로 바꾼다.
- */
 const OverlayStage = ({ children }: { readonly children: ReactNode }) => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   return (
@@ -44,5 +40,4 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 export const Empty: Story = { args: { rows: [] } };
-/** 검색어와 맞는 게 없다. */
 export const NoMatch: Story = { args: { query: "없는 명령" } };

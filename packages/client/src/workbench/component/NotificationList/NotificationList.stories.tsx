@@ -12,7 +12,6 @@ const meta = {
     ],
     onDismiss: () => undefined,
   },
-  // 고정 위치 요소라 캔버스에 높이를 준다 — 없으면 VRT 스크린샷이 비어 보인다.
   decorators: [
     (Story) => (
       <div style={{ position: "relative", width: 480, height: 240 }}>

@@ -8,9 +8,6 @@
   background-color: var(--bgColor-default);
 }
 
-/* 실제 내용은 caption 크기 텍스트 + size="small" 아이콘 버튼(--control-small-size=28px)뿐이라
- * --control-large-size(40px)는 과했다(2026-09-01 지적으로 확인) — --control-medium-size(32px)면
- * align-items:center만으로 28px 버튼이 충분히 들어간다. */
 .caption {
   display: flex;
   min-height: var(--control-medium-size);
@@ -35,8 +32,6 @@
   line-height: var(--base-text-lineHeight-tight);
 }
 
-/* 크기·굵기는 `.caption`(caption 12px·regular)을 그대로 물려받는다 — Figma 의 캡션 글자와 같다.
-   2026-09-18 까지 codeInline 크기(em 상대값)와 medium 굵기를 따로 걸어 Figma 보다 크고 굵게 떴다. */
 .language {
   flex-shrink: 0;
   text-transform: capitalize;
@@ -59,15 +54,11 @@
   background-color: var(--bgColor-default);
   padding: 0;
   padding-block: var(--space-sm);
-
-  /* 코드 블록의 정본 크기(13px). `codeInline` 은 부모 기준 em(0.9285em)이라 16px 본문 안에서 14.9px 로
-     떠 Figma(13px)보다 크고 굵어 보였다(2026-09-18). */
   font-size: var(--text-codeBlock-size);
   line-height: var(--text-codeBlock-lineHeight);
   color: var(--fgColor-default);
 }
 
-/* UA 의 `code { font-family: monospace }` 를 되받아 `.body` 의 토큰 서체를 쓴다(2026-09-18 스토리북에서 발견). */
 .code {
   font: inherit;
 }
@@ -90,7 +81,6 @@
   white-space: pre;
 }
 
-/* `plain`은 code-syntax 토큰 표에 없다 — punctuation이 CodeBlock 기본(비강조) 텍스트 색을 겸한다. */
 .token {
   color: var(--fgColor-muted);
 }

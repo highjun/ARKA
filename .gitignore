@@ -6,21 +6,16 @@ storybook-static/
 .env
 .env.*
 .claude
-# 사용자 개인 메모. 저장소의 모양이 아니다.
 USER_NOTE.md
 docs/draft/
 
-# 키·인증서 파일. 이름만 봐도 비밀인 것은 손이 닿기 전에 막는다.
 *.pem
 *.key
 *.p12
 *.pfx
 *credential*
 
-# CI 컨테이너용 가짜 값. `.env.*` 금지의 유일한 예외다 — 여기엔 시크릿이 없다.
 !ops/deploy/.env.ci
 
-# 복사해서 채우는 원본. 값이 없으므로 비밀이 아니다.
 !ops/deploy/.env.example
-
 

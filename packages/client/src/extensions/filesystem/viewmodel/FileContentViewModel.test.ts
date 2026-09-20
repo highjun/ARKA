@@ -5,13 +5,6 @@ import { FileContentModel } from "../model/FileContentModel";
 import { FileContentViewModel } from "./FileContentViewModel";
 import type { IFileContentViewModel } from "./IFileContentViewModel";
 
-/**
- * 검사하는 것은 **상태를 안내 한 줄 + 편집 가능 플래그로 접는 규칙**이다.
- *
- * 읽는 중·바이너리·잘림·실패가 각각 어떤 문장이 되는지, 평범한 경우에만 안내가 사라지는지, 그리고
- * **읽기 전용을 여는 조건이 딱 "다 읽혔고 잘리지 않았고 텍스트인 파일"뿐인지**.
- */
-
 type Reply = { path: string; content: string; truncated: boolean; encoding: "utf8" | "binary" };
 
 const serving = (byPath: Record<string, Reply>, options: { writeFails?: string } = {}) => ({
@@ -42,7 +35,6 @@ const make = (
 ): { files: IFileContentViewModel; model: FileContentModel; commands: CommandService } => {
   const model = new FileContentModel({
     workspaceFiles: serving(byPath, options) as unknown as IWorkspaceFiles,
-    // 감시는 이 파일의 관심사가 아니다 — 구독하지 않는 대본으로 대신한다.
     workspaceWatch: { watch: () => () => undefined },
   });
   const commands = new CommandService({
@@ -112,7 +104,6 @@ describe("openFile", () => {
 });
 
 describe("안내 문장과 편집 가능 여부", () => {
-  // `openFile`은 바이너리를 닫아 버리므로 Model로 직접 연다 — 여기서 보는 것은 행으로 접는 규칙이다.
   it("바이너리는 본문 없이 이유만 주고 편집을 막는다", async () => {
     const { files, model } = make({ "x.png": { ...text(""), path: "x.png", encoding: "binary" } });
 

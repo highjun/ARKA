@@ -8,7 +8,6 @@ import {
 } from "#utils/testing";
 import { Markdown } from "./Markdown";
 
-/** 원문을 받아 React 요소로 그리는 계약을 본다 — 파싱 결과가 DOM으로 나오는지, 위험한 것이 막히는지. */
 describe("Markdown", () => {
   it("문단·강조·목록을 요소로 그린다", () => {
     render(<Markdown source={"**굵게** 그리고 보통\n\n- 하나\n- 둘"} />);

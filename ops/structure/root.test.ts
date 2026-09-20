@@ -3,16 +3,6 @@ import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import { REPO_ROOT } from "./repo.ts";
 
-/**
- * **루트에 있는 것마다 왜 전역인지를 적는다**.
- *
- * 목록이 아니라 **사유표**를 잠근다. 항목을 늘리려면 사유를 써야 하고, 그 문장이 diff에 뜨는 것이
- * 이 장치의 값이다 — 승인을 막는 것이 아니라 눈에 띄게 만든다. 실재 집합과 양방향으로 대조하니
- * 지워진 것도 잡힌다.
- *
- * **내용은 잠그지 않는다.** `package.json` 해시를 잠그면 의존성 범프마다 빨간불이 뜨고, 사람이
- * 빨간불에 익숙해지는 것이 더 나쁘다.
- */
 const REASONS: Readonly<Record<string, string>> = {
   ".github": "GitHub가 읽는 자리가 루트 하나로 정해져 있다 — 워크플로·CODEOWNERS·dependabot.",
   ".gitignore": "git이 읽는 자리가 루트다. 패키지마다 두면 무엇이 무시되는지 흩어진다.",
@@ -29,10 +19,6 @@ const REASONS: Readonly<Record<string, string>> = {
   "tsconfig.json": "세 패키지가 `extends`하는 바탕. 한 곳에서 정하지 않으면 옵션이 갈린다.",
 };
 
-/**
- * 루트에 실재하는 것. `.git`과 git이 무시하는 것을 뺀다. **파일 시스템을 읽는다** —
- * `git ls-tree`로 하면 커밋 전에 더해진 것이 안 잡힌다.
- */
 const actual = (): readonly string[] =>
   readdirSync(REPO_ROOT)
     .filter((entry) => entry !== ".git")

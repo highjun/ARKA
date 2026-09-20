@@ -3,12 +3,9 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { MARKDOWN, REPO_ROOT, read } from "./repo.ts";
 
-/** `[글]( 대상 )`의 대상. 바깥 URL과 앵커만 있는 것은 뺀다 — 네트워크를 때리지 않는다. */
 const linksOf = (markdown: string): string[] =>
   [...markdown.matchAll(/\[[^\]]*\]\((?<target>[^)]+)\)/gu)]
     .map((match) => match.groups?.["target"] ?? "")
-    // 바깥 URL·앵커는 네트워크를 때리므로 뺀다. 규약이 형식을 보이는 자리(`(경로)`)도 링크가
-    // 아니라 본보기라 뺀다 — 실제 경로는 ASCII다.
     .filter((target) => !/^(?:https?:|mailto:|#)/u.test(target) && /^[\w./#-]+$/u.test(target));
 
 describe("문서의 상대 링크가 실재한다", () => {

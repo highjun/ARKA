@@ -27,7 +27,6 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-/** 사이드바가 하나도 없어도 설정 톱니는 남는다. */
 export const Empty: Story = { args: { items: [] } };
 export const NoneActive: Story = { args: { items: ITEMS.map((item) => ({ ...item, isActive: false })) } };
 export const WithItemMenu: Story = {

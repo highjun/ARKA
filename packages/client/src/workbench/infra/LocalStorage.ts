@@ -10,5 +10,4 @@ class LocalStorageAdapter implements IStorage {
   }
 }
 
-/** `IStorage`의 실제 구현(`LocalStorageAdapter`)을 만든다. */
 export const createStoragePort = (): IStorage => new LocalStorageAdapter();

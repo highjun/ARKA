@@ -6,7 +6,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
-  /* stylelint-disable-next-line primer/responsive-widths -- `min()`의 둘째 항이 이미 뷰포트에 맞춰 줄인다. 규칙은 첫 항만 읽는다. */
+  /* stylelint-disable-next-line primer/responsive-widths */
   width: min(360px, calc(100vw - var(--space-md) * 2));
 }
 

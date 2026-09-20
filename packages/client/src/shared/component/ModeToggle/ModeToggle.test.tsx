@@ -81,11 +81,6 @@ describe("ModeToggle", () => {
     expect(onValueChange).not.toHaveBeenCalled();
   });
 
-  /**
-   * `IconButton`은 툴팁이 있으면(비활성화가 아닌 한) `aria-label`을 버튼에 직접 싣지 않고
-   * `aria-labelledby`로 툴팁 텍스트를 가리킨다(`@primer/react` `Button/IconButton.js` 확인) —
-   * 그래서 속성을 직접 보는 대신 접근성 이름 계산 규칙을 그대로 따르는 `getByRole`로 검증한다.
-   */
   it("labels 를 넘기면 현재 인덱스에 맞는 라벨을 접근성 이름으로 쓴다", () => {
     render(
       <ModeToggle values={values} value="dark" onValueChange={vi.fn()} labels={["라이트로 전환", "다크로 전환"]}>

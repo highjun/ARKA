@@ -2,11 +2,6 @@
   position: relative;
 }
 
-/*
- * `IconButton.module.css`와 같은 방식이다 — 보이는 박스는 `IconButton`에 맡기고 터치 타겟만
- * 의사 요소로 세로로 넓힌다. 두 곳에 같은 CSS가 있는 것은 이 컴포넌트가 우리 `IconButton` 겹을
- * 쓰지 못해서다. 그 문제가 풀리면 이 블록과 린트 예외가 함께 사라진다.
- */
 @media (pointer: coarse) {
   .root::after {
     content: "";

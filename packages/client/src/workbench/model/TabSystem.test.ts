@@ -24,7 +24,6 @@ const descriptor = (title: string, isDirty = false): TabDescriptor => ({
   Content: NOOP_CONTENT,
 });
 
-/** `scheme`만 받는 provider. 몇 번 물었는지 센다. */
 const provider = (id: string, scheme: string, priority: number, isDirty = false) => {
   const openTab = vi.fn((uri: URI) =>
     Promise.resolve(uri.scheme === scheme ? descriptor(`${id}:${uri.path}`, isDirty) : undefined),
@@ -307,7 +306,6 @@ describe("ITabSystem — hasAnyDirty", () => {
 });
 
 declare module "#core/di" {
-  /** 컨테이너 상속을 보는 데만 쓰는 시험용 항목. */
   interface InstanceMap {
     "test.tabSystemSample": { dispose(): void };
   }

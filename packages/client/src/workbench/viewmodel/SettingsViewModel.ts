@@ -3,13 +3,11 @@ import type { ISettings } from "#core/settings";
 import { makeAutoObservable, observableRef } from "mobx";
 import type { ISettingsViewModel, SettingsRow } from "./ISettingsViewModel";
 
-/** `ISettingsViewModel`의 유일한 구현체. 스키마 순서대로 줄을 편다. */
 export class SettingsViewModel implements ISettingsViewModel {
   readonly #settings: ISettings;
   readonly #subscription: Disposable;
   private rowsState: readonly SettingsRow[];
 
-  /** 값이 바뀔 때마다 줄을 다시 편다 — 스키마는 부팅 때 굳는다. */
   constructor({ settings }: { settings: ISettings }) {
     this.#settings = settings;
     this.rowsState = this.#computeRows();
@@ -17,17 +15,14 @@ export class SettingsViewModel implements ISettingsViewModel {
     this.#subscription = settings.onDidChange(() => this.sync());
   }
 
-  /** 스키마 순서 그대로. */
   get rows(): readonly SettingsRow[] {
     return this.rowsState;
   }
 
-  /** `ISettings.set`에 넘긴다 — 저장과 알림은 그쪽이 한다. */
   set(id: string, value: unknown): void {
     this.#settings.set(id, value);
   }
 
-  /** 구독을 끊는다. */
   dispose(): void {
     this.#subscription.dispose();
   }

@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { IStorage } from "./IStorage";
 
-/** `IStorage`를 구현한 모든 것이 통과해야 하는 스위트. `setup`은 빈 저장소를 준다. */
 export const testStorageContract = (name: string, setup: () => IStorage | Promise<IStorage>): void => {
   describe(`IStorage: ${name}`, () => {
     let storage: IStorage;

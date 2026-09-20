@@ -24,7 +24,6 @@ describe("useTabStrip", () => {
     const onReorder = vi.fn();
     const { result } = renderHook(() => useTabStrip({ tabs: ROWS, activeTabId: "a", onReorder }));
 
-    // jsdom엔 실제 배치가 없어 listRef.current가 null이다 — 표시선이 안 잡히면 아무 일도 없어야 한다.
     const dataTransfer = { getData: () => "", dropEffect: "move" as const };
     act(() => {
       result.current.listHandlers.onDrop({

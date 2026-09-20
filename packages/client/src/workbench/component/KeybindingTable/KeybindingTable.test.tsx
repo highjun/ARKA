@@ -14,7 +14,6 @@ const ROWS: KeybindingRow[] = [
   { actionId: "filesystem.rename", label: "이름 바꾸기", keybinding: "f2", isConflicting: false },
 ];
 
-/** 표의 구조와 키 표시가 계약대로인지 본다. */
 describe("KeybindingTable", () => {
   it("줄마다 키·이름·id 를 그린다", () => {
     render(<KeybindingTable rows={ROWS} />);

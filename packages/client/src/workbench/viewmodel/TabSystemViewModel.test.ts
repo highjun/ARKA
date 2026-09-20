@@ -14,7 +14,6 @@ import type { ITabSystem } from "../model/ITabSystem";
 import { TabSystemViewModel } from "./TabSystemViewModel";
 import type { ITabSystemViewModel, PaneRowLeaf, PaneRowNode } from "./ITabSystemViewModel";
 
-/** 커맨드 등록만 받아주는 흉내 — 이 파일의 관심사는 탭 트리 로직이지 커맨드 배선 자체가 아니다. */
 const fakeCommands = (): ICommandService =>
   new CommandService({ overridesStore: { load: () => ({}), save: () => undefined }, reportError: () => undefined });
 
@@ -26,15 +25,9 @@ const fakeStorage = (): IStorage => {
   };
 };
 
-/** 탭 id는 uri 문자열이다 — 경로로 쓰는 테스트가 짧게 적는 길. */
 const fileId = (path: string): string => URI.file(path).toString();
-/** 파일을 미리보기로 연다 — 사이드바가 `arka.workbench.open` 명령으로 하는 것과 같다. */
 const preview = (tabs: ITabSystem, path: string): Promise<void> => tabs.open(URI.file(path), { preview: true });
 
-/**
- * 셸이 탭 안을 모른다는 계약의 가짜다 — filesystem을 알 필요가 없다. `file:`과 `chat:`을 받는 provider 둘을
- * 두고, `markDirty(id)`로 그 탭이 저장 안 된 것으로 보이게 한다(descriptor는 observable이라 화면이 따라온다).
- */
 const fakeProviders = (): { registry: Registry<TabProviderDescriptor>; markDirty: (id: string) => void } => {
   const dirty = observable(new Set<string>());
   const registry = new Registry<TabProviderDescriptor>();
@@ -66,7 +59,6 @@ const fakeProviders = (): { registry: Registry<TabProviderDescriptor>; markDirty
   return { registry, markDirty: (id) => runInAction(() => void dirty.add(id)) };
 };
 
-/** 진짜 Model 을 조립한다 — I/O 가 없어 바꿔 낄 이유가 없다. */
 const make = (): {
   tabLayout: ITabLayout;
   tabs: ITabSystem;
@@ -92,7 +84,6 @@ const findLeaf = (node: PaneRowNode, leafId: string): PaneRowLeaf | null => {
   return null;
 };
 
-/** 지금 활성 leaf. 없으면 테스트가 잘못된 것이다(불변 위반) — 조용히 넘기지 않고 던진다. */
 const activeLeafOf = (viewModel: ITabSystemViewModel): PaneRowLeaf => {
   const leaf = findLeaf(viewModel.tree, viewModel.activePaneId);
   if (!leaf) throw new Error("activeLeafId가 트리 안에 없다");
@@ -142,7 +133,6 @@ describe("ITabSystemViewModel — 파일 미리보기", () => {
     const { viewModel, tabs } = make();
 
     await preview(tabs, "a.md");
-    // 고정
     await preview(tabs, "a.md");
     await preview(tabs, "b.md");
     await preview(tabs, "c.md");
@@ -283,7 +273,6 @@ describe("ITabSystemViewModel — closeOthers", () => {
   });
 
   it("닫힌 탭이 활성이었으면 남긴 탭으로 활성을 옮긴다", async () => {
-    // activeTabId: 'b'
     const { viewModel } = await threeTabs();
 
     viewModel.closeOthers(ROOT_PANE_ID, fileId("a"));
@@ -333,7 +322,6 @@ describe("ITabSystemViewModel — closeToRight", () => {
   });
 
   it("닫힌 탭이 활성이었으면 기준 탭으로 활성을 옮긴다", async () => {
-    // activeTabId: 'c'
     const { viewModel } = await threeTabs();
 
     viewModel.closeToRight(ROOT_PANE_ID, fileId("a"));
@@ -347,7 +335,6 @@ describe("ITabSystemViewModel — 미리보기 표시", () => {
     const { viewModel, tabs } = make();
 
     await preview(tabs, "a.md");
-    // 고정
     await preview(tabs, "a.md");
     await preview(tabs, "b.md");
 
@@ -377,7 +364,6 @@ describe("ITabSystemViewModel — 미리보기 표시", () => {
     const { viewModel, tabs } = make();
 
     await preview(tabs, "a.md");
-    // a.md는 밀려나 고정된다
     await preview(tabs, "b.md");
 
     viewModel.pinTab(fileId("a.md"));
@@ -540,18 +526,13 @@ describe("ITabSystemViewModel — 분할된 상태에서 미리보기", () => {
     });
     viewModel.splitTab(ROOT_PANE_ID, "b", "right");
     const otherLeafId = `${ROOT_PANE_ID}-split-b`;
-    // 분할 직후엔 새 pane 이 활성이다
     expect(viewModel.activePaneId).toBe(otherLeafId);
 
-    // otherLeafId 에서 미리보기 하나 생김
     await preview(tabs, "preview.md");
-    // 다시 root 로 포커스 이동
     viewModel.selectTab(ROOT_PANE_ID, "a");
-    // root 에서 새로 미리보기
     await preview(tabs, "other.md");
 
     const otherLeaf = findLeaf(viewModel.tree, otherLeafId);
-    // 옛 미리보기 탭('preview.md')이 다른 pane 에 그대로 남아 있다 — 활성 pane 조작만으로 지워지지 않는다.
     expect(otherLeaf && tabIdsOf(otherLeaf)).toEqual(["b", fileId("preview.md")]);
     expect(otherLeaf?.tabs.every((tab) => !tab.isPreview)).toBe(true);
 
@@ -561,10 +542,6 @@ describe("ITabSystemViewModel — 분할된 상태에서 미리보기", () => {
   });
 });
 
-/**
- * 파일 탭의 id 는 경로 그 자체다. 드래그로 파일이 옮겨지거나 이름이 바뀌면 그 탭이 옛 경로를
- * 가리킨 채로 끊긴다 — `retargetTabs` 가 없으면 탭은 남아도 다시는 아무 파일과도 안 이어진다.
- */
 describe("ITabSystemViewModel — retargetTabs", () => {
   it("경로가 정확히 같은 파일 탭의 id·제목을 바꾼다", async () => {
     const { viewModel, tabs } = make();
@@ -623,10 +600,6 @@ describe("ITabSystemViewModel — retargetTabs", () => {
   });
 });
 
-/**
- * `window.confirm` 대신이다(2026-09-04) — 무엇이 더러운지는 `ITabDirtyState`가 알고, ViewModel은
- * 그 답을 물어 확인 흐름만 관리한다. 셸은 파일이라는 개념을 모른다.
- */
 describe("requestCloseTab / confirmClose / cancelClose", () => {
   it("dirty가 아니면 바로 닫는다 — 확인을 구하지 않는다", async () => {
     const { viewModel, tabs } = make();

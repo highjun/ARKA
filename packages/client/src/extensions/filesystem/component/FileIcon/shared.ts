@@ -1,13 +1,11 @@
 import { extensionMapData, fileIconMapData, filenameMapData } from "./data";
 
-/** 세트에 실재하는 아이콘 이름만 통과한다 — 오타가 타입에서 걸린다. */
 export type FileIconId = keyof typeof fileIconMapData;
 
 export const FILE_ICON_MAP: Record<FileIconId, string> = fileIconMapData;
 export const EXTENSION_MAP = extensionMapData as Record<string, FileIconId>;
 export const FILENAME_MAP = filenameMapData as Record<string, FileIconId>;
 
-/** 파일명 전체 → `.lock` → 확장자 순으로 본다. 아무것도 안 맞으면 기본 파일 아이콘이다. */
 export const fileIconIdOf = (name: string): FileIconId => {
   const lower = name.toLowerCase();
 

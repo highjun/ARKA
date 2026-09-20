@@ -21,16 +21,6 @@ import { useCallback, useEffect, useRef } from "react";
 import type { RefObject } from "react";
 import { fileExtensionOf, getKeymapForExtension } from "./shared";
 
-/**
- * 파일 이름에서 문법을 고른다.
- *
- * **문법 강조는 LSP 가 아니다.** 여기서 하는 일은 토큰 단위 색칠뿐이고 전부 브라우저 안에서
- * 끝난다 — 언어 서버도, 문서 동기화도 없다. 진단·자동완성·정의로 이동이 LSP 의 몫이고
- * 그건 여전히 범위 밖이다(`apps/workbench/README.md` 의 Not now).
- *
- * 언어를 다 넣지 않는다. 번들이 언어마다 붙으므로 **이 워크스페이스에서 실제로 자주 여는 것**만
- * 둔다. 모르는 확장자는 강조 없이 그냥 보여준다 — 그래도 줄번호와 읽기는 된다.
- */
 export type CodeLanguage =
   "javascript" | "typescript" | "jsx" | "tsx" | "json" | "markdown" | "css" | "html" | "python";
 
@@ -53,21 +43,11 @@ const BY_EXTENSION: Readonly<Record<string, CodeLanguage>> = {
   py: "python",
 };
 
-/** 모르는 확장자면 `undefined` — 강조 없이 그냥 보여준다. */
 export const languageOf = (path: string): CodeLanguage | undefined => {
   const extension = fileExtensionOf(path);
   return extension === undefined ? undefined : BY_EXTENSION[extension];
 };
 
-/**
- * CodeMirror 6 를 붙잡아 두는 유일한 자리.
- *
- * 외부 라이브러리를 이 훅 안에 가두는 것이 이 레포의 방식이다(`@radix-ui`·`cmdk` 와 같다). 그래서
- * `TextEditor.tsx` 는 `EditorView`·`Extension` 같은 CodeMirror 타입을 전혀 모른 채 이 훅이 돌려주는
- * `hostRef`·`openSearch` 만 쓴다.
- *
- * **기본은 읽기 전용이고, `readOnly={false}` 로 편집이 켜진다.**
- */
 const LANGUAGE_EXTENSION: Readonly<Record<CodeLanguage, () => Extension>> = {
   javascript: () => javascript(),
   typescript: () => javascript({ typescript: true }),
@@ -80,13 +60,6 @@ const LANGUAGE_EXTENSION: Readonly<Record<CodeLanguage, () => Extension>> = {
   python: () => python(),
 };
 
-/**
- * 문법 색을 **디자인 토큰에 붙인다.**
- *
- * CodeMirror 의 `defaultHighlightStyle` 은 라이트 기준 색이 박혀 있어 다크에서 겉돈다. 여기서는
- * `--code-syntax-*` 를 그대로 참조하므로 테마가 바뀌면 따라온다 — 그 토큰은 `CodeBlock` 이 쓰던
- * 것과 같은 것이라 두 컴포넌트의 코드 색이 갈리지도 않는다.
- */
 const highlight = HighlightStyle.define([
   { tag: [tags.keyword, tags.modifier, tags.operatorKeyword], color: "var(--codeMirror-syntax-fgColor-keyword)" },
   { tag: [tags.string, tags.special(tags.string)], color: "var(--codeMirror-syntax-fgColor-string)" },
@@ -105,17 +78,6 @@ const highlight = HighlightStyle.define([
   { tag: tags.link, color: "var(--codeMirror-syntax-fgColor-constant)", textDecoration: "underline" },
 ]);
 
-/**
- * 배경·선택·활성 줄도 토큰으로 — 하드코딩하면 다크에서 뜬다.
- *
- * **`.cm-cursor`를 명시한다.** CodeMirror의 다크 분기는 `EditorView.theme(spec, { dark: true })`
- * 로 알려줘야 걸리는데, 우리는 CSS 변수 하나로 넘나들어 그 옵션을 안 쓴다 — 안 적으면 캐럿이
- * 다크에서도 검정으로 남는다.
- *
- * **`.cm-selectionBackground` 하나만 적으면 안 먹는다** — 기본 스타일에 포커스 상태 전용의 훨씬
- * 구체적인 선택자가 있어 같은 사슬을 맞춰야 이긴다. 색은 `@primer/primitives`의 CodeMirror
- * 전용 토큰(`--codeMirror-*`)을 쓴다 — 일반 토큰으로 "얼마나 진하게"를 추측하지 않아도 된다.
- */
 const theme = EditorView.theme({
   "&": { backgroundColor: "transparent", color: "var(--codeMirror-fgColor)" },
   ".cm-content": { caretColor: "var(--codeMirror-cursor-fgColor)" },
@@ -138,10 +100,8 @@ const theme = EditorView.theme({
   ".cm-panels input, .cm-panels button": { color: "var(--codeMirror-fgColor)" },
 });
 
-/** "이 위치를 보여 달라"는 요청. `seq`가 바뀔 때마다 같은 줄이어도 다시 간다. 줄·열은 1부터. */
 export type RevealPosition = { readonly line: number; readonly column: number; readonly seq: number };
 
-/** `onChange`가 없으면 편집이 꺼진다 — `readOnly`와 따로 판단하지 않는다. */
 export interface UseCodeMirrorEditorOptions {
   readonly path: string;
   readonly content: string;
@@ -151,31 +111,17 @@ export interface UseCodeMirrorEditorOptions {
   readonly revealAt?: RevealPosition | null;
 }
 
-/** CodeMirror 타입이 새지 않는다 — 부르는 컴포넌트는 이 둘만 안다. */
 export interface UseCodeMirrorEditorResult {
-  /** CodeMirror 가 실제로 그려질 호스트 엘리먼트에 건다. */
   readonly hostRef: RefObject<HTMLDivElement | null>;
-  /** 검색 패널을 연다 — 폰에는 Ctrl+F 가 없어 버튼으로도 열 수 있어야 한다. */
   readonly openSearch: () => void;
 }
 
-/**
- * `path`·`content` 를 받아 CodeMirror 인스턴스 하나의 생애주기(생성·내용 동기화·스크롤 기억·정리)를
- * 관리한다. 컴포넌트는 이 훅이 돌려주는 `hostRef` 를 DOM 에 걸기만 하면 된다 — CodeMirror 를 직접
- * 알 필요가 없다.
- */
-/**
- * `readOnly`에 좌우되는 확장(단축키·편집 가능 여부·변경 리스너)을 한데 묶는다 — 아래 `Compartment`
- * 로 감싸 껐다 켰다 할 수 있게 하기 위함. `onSaveRef`/`onChangeRef`는 최신 콜백을 담은 ref라
- * 값 자체는 안 바뀌므로 여기 클로저에 잡아도 안전하다.
- */
 const readOnlyExtensions = (
   readOnly: boolean,
   onSaveRef: RefObject<(() => void) | undefined>,
   onChangeRef: RefObject<((content: string) => void) | undefined>,
 ): Extension[] => [
   keymap.of(
-    // 편집 가능할 때만 가로챈다 — 읽기 전용 뷰에서 브라우저 기본 저장 대화상자를 막을 이유가 없다.
     readOnly
       ? []
       : [
@@ -200,7 +146,6 @@ const readOnlyExtensions = (
       ]),
 ];
 
-/** `path`가 바뀌면 에디터를 다시 만들고, `content`만 바뀌면 dispatch로 반영한다 — 스크롤과 선택을 지키기 위해서다. */
 export const useCodeMirrorEditor = ({
   path,
   content,
@@ -212,31 +157,14 @@ export const useCodeMirrorEditor = ({
   const hostRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<EditorView | null>(null);
   const readOnlyCompartmentRef = useRef<Compartment | null>(null);
-  /** 최초 문서를 읽되 **의존성으로 삼지는 않는다** — 내용이 바뀔 때마다 에디터를 다시 만들면
-   *  스크롤과 선택이 날아간다. 이후 변경은 아래 두 번째 effect 가 dispatch 로 반영한다. */
   const initialDocRef = useRef(content);
   initialDocRef.current = content;
-  /**
-   * 매 렌더마다 최신 콜백을 담아 둔다. 에디터는 `path`(와 `readOnly`)가 바뀔 때만 다시 만들기
-   * 때문에, 그사이 부모가 새 함수를 내려줘도 CodeMirror 리스너는 여전히 첫 번째 것을 참조하는
-   * 낡은 클로저 문제가 생긴다 — ref 로 최신 값을 항상 가리키게 한다.
-   */
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
   const onSaveRef = useRef(onSave);
   onSaveRef.current = onSave;
-  /**
-   * 파일마다 스크롤 위치를 기억한다.
-   *
-   * 탭을 오가면 이 컴포넌트가 언마운트됐다 다시 붙어서, 아무것도 안 하면 매번 맨 위로 돌아간다 —
-   * 긴 파일을 보다가 대화를 확인하고 돌아오면 읽던 자리를 잃는다.
-   */
   const scrollByPathRef = useRef(new Map<string, number>());
 
-  // 에디터는 `path`가 바뀔 때만 다시 만들고, 그 사이에는 문서만 갈아 끼운다 — 매번 다시 만들면
-  // 스크롤과 선택이 날아간다. `readOnly`는 별도 `Compartment`로 감싸 재구성만 한다(destroy/재생성
-  // 없이) — 파일을 여는 동안(loading→loaded, readOnly가 true→false) 에디터 DOM 전체가 다시
-  // 그려지며 깜박이던 걸 없앤다(2026-09 지적으로 확인).
   useEffect(() => {
     if (hostRef.current === null) return undefined;
 
@@ -249,17 +177,12 @@ export const useCodeMirrorEditor = ({
         doc: initialDocRef.current,
         extensions: [
           lineNumbers(),
-          // 코드 접기/펼치기 거터 — 가터에 뜨는 화살표를 눌러도, `foldKeymap`(아래 keymap)의
-          // 단축키로도 접을 수 있다.
           foldGutter(),
           highlightActiveLine(),
           highlightActiveLineGutter(),
           drawSelection(),
           highlightSelectionMatches(),
-          // Ctrl+D(다음 일치 선택)·Ctrl+Shift+L(모두 선택, 둘 다 `searchKeymap`)이 실제로
-          // 멀티커서를 만들려면 이 facet이 켜져 있어야 한다(CodeMirror 6 기본값은 false).
           EditorState.allowMultipleSelections.of(true),
-          // 폰에서 긴 파일을 훑는 유일한 수단이다 — 스크롤만으로는 못 찾는다.
           search({ top: true }),
           history(),
           keymap.of([
@@ -271,9 +194,6 @@ export const useCodeMirrorEditor = ({
           syntaxHighlighting(highlight, { fallback: true }),
           theme,
           readOnlyCompartment.of(readOnlyExtensions(readOnly, onSaveRef, onChangeRef)),
-          // 읽기 전용이면 본문이 포커스를 못 받아 단축키가 닿지 않는다 — 검색을 쓰려면 필요하다.
-          // CodeMirror는 `.cm-content`에 항상 `role="textbox"`를 붙이므로(읽기 전용이어도) 이름이
-          // 없으면 `aria-input-field-name` 위반이다 — `aria-label`로 채운다.
           EditorView.contentAttributes.of({ tabindex: "0", "aria-label": `${path} 내용` }),
           EditorView.lineWrapping,
           ...(language === undefined ? [] : [LANGUAGE_EXTENSION[language]()]),
@@ -295,7 +215,7 @@ export const useCodeMirrorEditor = ({
       viewRef.current = null;
       readOnlyCompartmentRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- 언어는 경로에서 나오므로 경로가 바뀔 때만 다시 만든다. 내용만 바뀌는 경우는 아래 훅이 맡는다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path]);
 
   useEffect(() => {
@@ -311,16 +231,11 @@ export const useCodeMirrorEditor = ({
     editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: content } });
   }, [content]);
 
-  /**
-   * 요청한 위치로 커서를 옮기고 그 줄이 보이게 스크롤한다. 파일이 아직 안 읽혔으면(줄이 없으면)
-   * 내용이 도착한 뒤에 다시 시도한다 — 그래서 `content`도 의존성이다. 같은 `seq`는 한 번만 적용한다.
-   */
   const appliedRevealRef = useRef<number | null>(null);
   useEffect(() => {
     const editor = viewRef.current;
     if (editor === null || revealAt === null || appliedRevealRef.current === revealAt.seq) return;
     const { doc } = editor.state;
-    // 아직 내용이 덜 왔다 — 다음 content에서 다시
     if (revealAt.line > doc.lines) return;
     const line = doc.line(revealAt.line);
     const pos = Math.min(line.from + Math.max(revealAt.column - 1, 0), line.to);

@@ -88,7 +88,6 @@ describe("paneTree", () => {
     const next = withoutTabs(tree, new Set(["1", "4"]));
 
     expect(findLeaf(next, "a")).toEqual({ kind: "leaf", id: "a", tabs: [tab("2"), tab("3")], activeTabId: "2" });
-    // 빈 잎은 남는다 — 걷어내는 것은 pruneTree의 몫이다.
     expect(findLeaf(next, "b")).toEqual({ kind: "leaf", id: "b", tabs: [], activeTabId: null });
   });
 

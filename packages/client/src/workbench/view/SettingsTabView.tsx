@@ -5,7 +5,6 @@ import { Text } from "#component/Text";
 import type { SettingsRow } from "../viewmodel/ISettingsViewModel";
 import styles from "./SettingsTabView.module.css";
 
-/** 줄의 `type`마다 입력이 다르다 — 스위치·숫자·글·라디오. */
 const SettingsInput = observer(function SettingsInput({
   row,
   onChange,
@@ -64,7 +63,6 @@ const SettingsInput = observer(function SettingsInput({
   }
 });
 
-/** 설정 탭. 등록된 스키마를 줄로 편다 — 키가 늘면 줄이 는다. 밝기는 여기 없다 — 헤더의 토글이 바꾼다. */
 export const SettingsTabView = observer(function SettingsTabView() {
   const viewModel = useViewModel("arka.workbench.settingsViewModel");
   return (

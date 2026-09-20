@@ -23,8 +23,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** 키 칩이 여러 개인 줄과 하나인 줄이 섞여 있고, 같은 키에 둘이 걸린 줄은 충돌 표시가 붙는다. */
 export const Default: Story = {};
 
-/** 등록된 것이 없으면 머리만 남는다. */
 export const Empty: Story = { args: { rows: [] } };

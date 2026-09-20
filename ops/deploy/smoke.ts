@@ -3,19 +3,11 @@ import { mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-/**
- * Docker 경계 스모크.
- *
- * 컨테이너 **안**은 이미지가 고정이라 매트릭스 테스트가 필요 없다. 깨지는 곳은 언제나 경계다 —
- * ① 볼륨 마운트 권한(호스트 UID/GID), ② bind mount에서 파일 watch(inotify), ③ 재시작 후 데이터
- * 유지, ④ 정적 클라이언트가 같은 오리진에서 나오는가. 이 넷만 본다.
- */
 const REPO_ROOT = path.resolve(import.meta.dirname, "../..");
 const IMAGE = process.env["IMAGE"] ?? "arka:smoke";
 const PORT = Number(process.env["PORT"] ?? 3997);
 const NAME = `arka-smoke-${String(process.pid)}`;
 const BASE = `http://127.0.0.1:${String(PORT)}`;
-/** `/api/*`는 프로토콜 헤더가 있어야 통과한다. */
 const H = { "x-arka-protocol": "1", "content-type": "application/json" };
 
 const docker = (...args: readonly string[]): string => {
@@ -36,14 +28,12 @@ const api = async (path: string, init: RequestInit = {}): Promise<Response> => {
   return response;
 };
 
-/** 헬스가 설 때까지 기다린다. 컨테이너가 아직 부팅 중일 수 있어 폴링 말고는 방법이 없다. */
 const waitHealthy = async (): Promise<void> => {
   for (let i = 0; i < 30; i += 1) {
-    try {
-      if ((await fetch(`${BASE}/api/health`)).ok) return;
-    } catch {
-      /* 아직 안 떴다 */
-    }
+    const healthy = await fetch(`${BASE}/api/health`)
+      .then((response) => response.ok)
+      .catch(() => false);
+    if (healthy) return;
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
   fail("서버가 healthy가 되지 않았다");
@@ -53,8 +43,6 @@ const workspace = mkdtempSync(path.join(tmpdir(), "arka-ws-"));
 
 try {
   console.log("# build");
-  // **`build.ts`를 통한다** — 직접 `docker build`를 부르면 회수 단계를 비껴가고, 그렇게 쌓인
-  // 중간 이미지가 656개까지 간 적이 있다. 빌드하는 길은 저장소에 하나뿐이어야 한다.
   spawnSync("node", [`${REPO_ROOT}/ops/deploy/build.ts`, IMAGE], { stdio: "inherit" });
   docker(
     "run",
@@ -83,12 +71,8 @@ try {
   if (onHost !== "hello") fail(`내용 불일치: ${onHost}`);
 
   console.log("# ② bind mount에서 watch — 호스트가 바꾸면 SSE가 알린다");
-  // 비재귀 감시라 바뀐 파일이 아니라 감시한 디렉터리(루트 = "")를 알린다. 하트비트(빈 배열)가 아닌
-  // 프레임이 하나라도 오면 inotify가 bind mount를 통과한 것이다. **첫 유효 프레임에서 끝낸다** —
-  // 정해둔 시간만큼 기다렸다가 훑으면 느린 기계에서 헛되이 실패한다.
   const watch = await api("/api/files/watch?path=");
   const reader = watch.body?.getReader();
-  // `fail`은 화살표 함수라 TS가 `never`로 흐름을 좁히지 않는다 — 여기서는 직접 던진다.
   if (reader === undefined) throw new Error("watch 응답에 본문이 없다");
   const deadline = setTimeout(() => void reader.cancel(), 8_000);
   await new Promise((resolve) => setTimeout(resolve, 1_000));

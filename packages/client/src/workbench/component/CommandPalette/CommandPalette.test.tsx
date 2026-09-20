@@ -11,7 +11,6 @@ const ROWS: CommandRow[] = [
   { id: "c", label: "테마 전환", keybinding: "ctrl+j" },
 ];
 
-/** 검색어는 제어다 — 타이핑을 보려면 바깥이 상태를 든다. */
 const Typing = () => {
   const [query, setQuery] = useState("");
   return <CommandPalette open query={query} onQueryChange={setQuery} rows={ROWS} />;
@@ -60,9 +59,6 @@ describe("CommandPalette", () => {
 
   implementsDataComponent((extra) => <CommandPalette open query="" rows={ROWS} {...extra} />, "CommandPalette");
 
-  // `implementsClassName`은 못 쓴다 — `className`은 `[cmdk-dialog]`에 실리는데,
-  // `data-testid`(ref와 동일)는 `[cmdk-root]`에 실려 서로 다른 노드다(ui/test-implements-helpers,
-  // 의도된 예외 — draft 상태라 warn에 머문다).
   it("넘긴 className 을 그대로 싣는다", () => {
     render(<CommandPalette open query="" rows={ROWS} className="extra" />);
 

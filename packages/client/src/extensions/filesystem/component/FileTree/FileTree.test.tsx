@@ -17,8 +17,6 @@ const ITEMS = [
   },
 ];
 
-// `src`에 폴더 자식이 둘 있어(components, styles) 압축(`compactFolderChains`) 대상이 아니다 —
-// 이 픽스처는 압축이 아니라 평범한 3단 중첩(aria-level 등)을 검사하려는 것이다.
 const NESTED_ITEMS = [
   {
     id: "src",
@@ -127,8 +125,6 @@ describe("FileTree", () => {
       const srcRow = rows.find((row) => row.id === "src");
       const mainRow = rows.find((row) => row.id === "main");
 
-      // 각 <li>는 자기 row div와 중첩 서브트리 <ul>을 형제로 두므로, `:scope > div`로 좁히지
-      // 않으면 펼쳐진 자식의 아이콘까지 같이 잡힌다.
       expect(srcRow?.querySelector(":scope > div [data-file-icon]")).toBeNull();
       expect(mainRow?.querySelector(":scope > div [data-file-icon]")).toHaveAttribute("data-file-icon", "fileTypeTs");
     });
@@ -143,7 +139,6 @@ describe("FileTree", () => {
 
       const row = screen.getByRole("treeitem", { name: "src" });
       expect(row.querySelector(':scope > div [data-icon="loading"]')).toBeInTheDocument();
-      // 펼쳐졌지만 자식이 없다 — 그 자리에 별도 안내 행("불러오는 중…" 등)을 만들지 않는다.
       expect(screen.queryByRole("status")).toBeNull();
     });
 
@@ -324,8 +319,6 @@ describe("FileTree", () => {
     it("포커스 대상이 접혀서 사라지면 첫 행으로 되돌아간다(자가치유)", () => {
       const { rerender } = render(<FileTree items={ITEMS} expandedIds={["src"]} />);
 
-      // 마우스/탭으로 진입했을 때의 focusedId 동기화(onFocus)를 재현한다 — act로 감싸야
-      // 실제 focus 이벤트가 동기적으로 반영된다.
       const mainRow = screen.getByRole("treeitem", { name: "main.ts" });
       act(() => mainRow.focus());
       expect(mainRow).toHaveAttribute("tabindex", "0");
@@ -336,9 +329,6 @@ describe("FileTree", () => {
     });
 
     it("자식 행에 포커스가 가도 부모 행으로 버블링되어 포커스가 되돌아가지 않는다", () => {
-      // React의 onFocus는 native focus와 달리 조상까지 버블링된다 — 폴더 행 <li> 안에 자식
-      // 행이 DOM으로 중첩되므로, 이 가드가 없으면 자식에 포커스를 줘도 곧이어 부모의 onFocus가
-      // 다시 불려 focusedId가 부모로 덮인다(직접 재현해서 확인한 회귀).
       render(<FileTree items={ITEMS} expandedIds={["src"]} />);
 
       const mainRow = screen.getByRole("treeitem", { name: "main.ts" });
@@ -383,7 +373,6 @@ describe("FileTree", () => {
 
       fireEvent.click(screen.getByText("src"));
 
-      // controlled라 내부 상태를 안 갖는다 — onToggleFolder가 없으면 그대로다.
       expect(screen.getByText("main.ts")).toBeInTheDocument();
       expect(screen.getByRole("treeitem", { name: "src" })).toHaveAttribute("aria-expanded", "true");
     });
@@ -465,7 +454,6 @@ describe("FileTree", () => {
       expect(isSelected("c.ts")).toBe(true);
       expect(isSelected("b.ts")).toBe(false);
 
-      // 다시 Ctrl+클릭하면 제거된다.
       fireEvent.click(screen.getByText("c.ts"), { ctrlKey: true });
       expect(isSelected("c.ts")).toBe(false);
       expect(isSelected("a.ts")).toBe(true);
@@ -518,7 +506,6 @@ describe("FileTree", () => {
 
       expect(isSelected("inner.ts")).toBe(true);
       expect(isSelected("zebra.ts")).toBe(true);
-      // 'src'는 flat 순서상 anchor(inner) 앞이라 범위 밖이다.
       expect(isSelected("src")).toBe(false);
     });
 
@@ -571,13 +558,6 @@ describe("FileTree", () => {
       expect(onContextMenu).not.toHaveBeenCalled();
     });
 
-    /**
-     * `onContextMenu`를 안 부르는 것만으론 부족하다 — 실제 소비처(`apps/workbench`)는 이 컴포넌트를
-     * `Menu.Trigger`(Radix, `onContextMenu`를 모르는 채로 그저 감싸는 조상)로 감싸는데, 이
-     * 이벤트가 거기까지 버블링돼 버리면 "우클릭 대상 없음" 상태로 메뉴가 열려 버린다(그 메뉴에서
-     * "새 파일"을 고르면 대상이 없으니 워크스페이스 루트에 파일이 생기는 사고로 이어졌다 — 실제로
-     * 겪은 회귀). 그래서 disabled 행에서는 조상까지 아예 못 나가게 막아야 한다.
-     */
     it("disabled 행의 우클릭은 조상 요소로 버블링되지 않는다", () => {
       const onAncestorContextMenu = vi.fn();
       render(
