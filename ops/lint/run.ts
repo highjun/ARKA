@@ -42,6 +42,8 @@ run("markdownlint-cli2", ["--config", "ops/.markdownlint-cli2.jsonc"]);
 
 /*
  * **코드의 모양**. `--check`만 한다 — 고치는 것은 `pnpm --filter ops run format`이고,
- * 관문이 남의 파일을 조용히 고쳐서는 안 된다. 마크다운은 대상이 아니다(`.prettierignore`).
+ * 관문이 남의 파일을 조용히 고쳐서는 안 된다. 마크다운은 대상이 아니다(`ops/.prettierignore`).
  */
-run("prettier", ["--config", "ops/prettier.config.ts", "--check", "--log-level", "warn", "."]);
+const PRETTIER = ["--config", "ops/prettier.config.ts", "--ignore-path", "ops/.prettierignore"];
+
+run("prettier", [...PRETTIER, "--check", "--log-level", "warn", "."]);

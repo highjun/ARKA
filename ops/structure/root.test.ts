@@ -16,7 +16,6 @@ import { REPO_ROOT } from "./repo.ts";
 const REASONS: Readonly<Record<string, string>> = {
   ".github": "GitHub가 읽는 자리가 루트 하나로 정해져 있다 — 워크플로·CODEOWNERS·dependabot.",
   ".gitignore": "git이 읽는 자리가 루트다. 패키지마다 두면 무엇이 무시되는지 흩어진다.",
-  ".prettierignore": "prettier가 읽는 자리가 실행 cwd(루트)다. 설정 본문은 `ops/prettier.config.ts`에 있다.",
   "AGENTS.md": "에이전트가 시작할 때 읽는 자리가 루트 하나로 정해져 있다.",
   LICENSE: "저장소 하나에 라이선스 하나다. GitHub가 루트에서 찾는다.",
   docs: "패키지 하나가 아니라 저장소 전체를 설명하는 글이다 — 컨셉·계약·그림.",

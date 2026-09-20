@@ -9,7 +9,7 @@
     "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
     "test:smoke": "node deploy/smoke.ts",
     "check": "node pipeline/check.ts",
-    "format": "prettier --config prettier.config.ts --write ..",
+    "format": "prettier --config prettier.config.ts --ignore-path .prettierignore --write ..",
     "verify": "node pipeline/verify.ts"
   },
   "exports": {
