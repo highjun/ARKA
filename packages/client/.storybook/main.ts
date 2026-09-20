@@ -18,7 +18,27 @@ const config: StorybookConfig = {
   stories: ["../src/**/*.stories.tsx"],
   // jsdom엔 레이아웃·페인트가 없어 단위 테스트의 axe는 `color-contrast`를 끈다
   // (`shared/utils/axe.tsx`). 실제 브라우저에서 그걸 보는 자리가 여기다.
-  addons: ["@storybook/addon-a11y"],
+  addons: [
+    "@storybook/addon-a11y",
+    /**
+     * **그림을 스토리 위에 겹쳐 본다.** Figma 프레임을 받아 투명도를 조절해 얹고, 어긋난
+     * 픽셀을 `pixelmatch`로 빨갛게 칠한다. 미리보기 틀을 그림 크기에 맞춰 바꾼다.
+     *
+     * 공식 길인 Code Connect는 Organization·Enterprise 전용이라 우리 플랜(Professional)에서
+     * 막혀 있다. 이 애드온은 개인 액세스 토큰만 쓴다.
+     *
+     * **토큰은 저장소에 안 들어간다** — `packages/client/.env`의 `FIGMA_TOKEN`이고
+     * `.env`는 gitignore다. 값은 사용자가 직접 넣는다(`ops/figma/README.md`).
+     *
+     * `envLocation`과 `staticDirs`의 경로는 **이 파일이 있는 `.storybook/` 기준**이다.
+     */
+    {
+      name: "storybook-addon-figma-sync",
+      options: { envLocation: "../.env" },
+    },
+  ],
+  // 받아 둔 그림과 diff가 여기 쌓인다. 캐시라 gitignore다.
+  staticDirs: [{ from: "./.storybook-addon-figma-sync", to: "/figma-sync-assets" }],
   framework: { name: "@storybook/react-vite", options: {} },
   // 로컬 전용 도구라 사용 통계를 밖으로 보내지 않는다.
   core: { disableTelemetry: true },

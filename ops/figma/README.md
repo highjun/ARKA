@@ -7,7 +7,10 @@
 | --- | --- |
 | `meta.js` | 세트마다 **설명 한 줄과 prop 표**. 스크립트가 아니라 데이터다 |
 | `spec.js` | 세트 + `meta` → **스펙 시트 한 장**. 견본 블록·표·변형 덤프를 짠다 |
-| `serve.mjs` | 플러그인이 위 둘을 `fetch`할 수 있게 여는 서버 |
+| `links.js` | 세트 이름 → **노드 id 표**를 뽑는다. 결과가 `links.json` |
+| `links.json` | 그 표. 어느 스토리에 **어느 그림**을 겹칠지 가리킨다 |
+| `compare.mjs` | 스토리와 그림을 나란히 놓고 **얼마나 다른지 센다** |
+| `serve.mjs` | 플러그인이 위 스크립트들을 `fetch`할 수 있게 여는 서버 |
 
 `serve.mjs`가 따로 있는 이유는 **Figma 플러그인의 `fetch`가 CORS를 보기 때문**이다.
 `python3 -m http.server`로는 연결이 닿아도 "Failed to fetch"가 난다.
@@ -50,3 +53,52 @@ await spec.audit("01 Shared"); // 끊긴 인스턴스·겹침·고정폭 글자�
   시트는 표만 세우고 견본은 건너뛴다.
 - 컴파운드의 루트는 **`X/Root`** — Figma 세트 이름도, `meta`의 항목도, 시트의 첫 절도 그 이름이다.
   머리 항목 `X`는 설명·부품 목록만 들고 prop 표가 없다.
+
+## 그림과 실제를 대조한다
+
+**공식 길인 Code Connect는 못 쓴다** — Organization·Enterprise 전용이고 우리는 Professional이다.
+대신 `storybook-addon-figma-sync`가 그림을 스토리 위에 겹쳐 주고, 어긋난 픽셀을 빨갛게 칠한다.
+
+### 한 번만 하는 준비
+
+1. Figma에서 개인 액세스 토큰을 받는다 — `Settings > Account > Personal access tokens`
+2. `packages/client/.env.example`을 `.env`로 복사하고 `FIGMA_TOKEN=`에 값을 넣는다.
+   **`.env`는 gitignore다** — 토큰은 저장소에 안 들어간다.
+
+### 눈으로 보기
+
+```sh
+pnpm --filter client dev:storybook
+```
+
+스토리를 열고 툴바의 **Figma Sync** 패널에 그림 주소를 붙여넣는다. 주소는 `links.json`에 있다 —
+`https://www.figma.com/design/<fileKey>/ARKASHIC?node-id=<default를 하이픈으로>`.
+투명도를 움직여 겹쳐 보고, **Analyze Screenshot**으로 차이를 본다(나란히·겹쳐·차이만 셋).
+
+### 한꺼번에 재기
+
+```sh
+node ops/figma/compare.mjs            # 스토리 전부
+node ops/figma/compare.mjs Sidebar    # 이름으로 걸러서
+```
+
+닮음이 낮은 것부터 나온다. 그림이 없는 스토리는 **까닭과 함께** 건너뛴 목록에 남는다 —
+조용히 빠지면 무엇을 안 봤는지 알 수 없다.
+
+### 맞으면 기준을 만든다
+
+사용자가 보고 승인한 스토리만 회귀 검사의 기준이 된다(→ `docs/CONVENTIONS.md`).
+
+```sh
+pnpm --filter client test:visual-regression -g "<스토리 id>" --update-snapshots
+```
+
+승인이 쌓이면 그 뒤로는 어긋남을 기계가 잡는다.
+
+### 대조에서 걸리는 것
+
+- 그림과 스토리의 **크기가 다르면 온통 빨갛다.** 애드온이 미리보기 틀을 그림 크기로 바꾸지만,
+  스토리 데코레이터가 고정 크기를 주면 그것이 이긴다. `links.json`의 `w`·`h`에 맞춘다.
+- 비교 전에 **둘 다 흰 배경에 합성한다**(투명 때문에 생기는 거짓 차이를 없애려고).
+  다크로 그린 그림과 다크로 뜬 스토리는 둘 다 제 배경이 있어 괜찮다.
+- 화면에서 빼고 싶은 것에는 `data-figma-sync-ignore="true"`를 단다.
