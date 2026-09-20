@@ -1,0 +1,75 @@
+/* 화면 구석에 떠 있다 — 빈 자리가 아래 것을 가로채지 않게 포인터를 껐다가 줄에서만 켠다.
+   `fixed` 인 까닭: 셸 안 어디에 놓이든 구석은 뷰포트의 구석이다. */
+.root {
+  position: fixed;
+  z-index: 20;
+  display: flex;
+  max-width: 100%;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  pointer-events: none;
+}
+
+.root[data-placement="bottom-right"] {
+  right: 0;
+  bottom: 0;
+  align-items: flex-end;
+}
+
+.root[data-placement="bottom-left"] {
+  bottom: 0;
+  left: 0;
+  align-items: flex-start;
+}
+
+/* 폭은 글에 맞추되 360에서 멈춘다. `width: 360px` 은 좁은 화면을 깨뜨린다고 Primer 린트가 막는다. */
+.item {
+  display: flex;
+  width: max-content;
+  min-width: 280px;
+  max-width: min(360px, 100%);
+  flex-direction: column;
+  gap: var(--space-xs);
+  border-style: solid;
+  border-width: var(--borderWidth-thin);
+  border-color: var(--borderColor-default);
+  border-radius: var(--borderRadius-medium);
+  background-color: var(--bgColor-default);
+  box-shadow: var(--shadow-floating-small);
+  padding: var(--space-sm);
+  pointer-events: auto;
+}
+
+.line {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
+}
+
+.message {
+  min-width: 0;
+  flex-grow: 1;
+  font-size: var(--text-body-size-medium);
+  line-height: var(--text-body-lineHeight-medium);
+  color: var(--fgColor-default);
+}
+
+/* 색은 아이콘에만 싣는다 — 면까지 물들이면 읽을 글이 묻힌다. */
+.item[data-severity="info"] .glyph {
+  color: var(--fgColor-accent);
+}
+
+.item[data-severity="warning"] .glyph {
+  color: var(--fgColor-attention);
+}
+
+.item[data-severity="error"] .glyph {
+  color: var(--fgColor-danger);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-xs);
+}

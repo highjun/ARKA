@@ -12,6 +12,18 @@ export interface Notification {
   readonly at: number;
   /** 읽었나. **종의 배지는 안 읽은 수다** — 닫지 않은 수가 아니다. */
   readonly isRead: boolean;
+  /**
+   * 토스트가 스스로 사라지기까지의 밀리초. 없으면 ×로만 닫힌다.
+   *
+   * **안 읽은 것은 전부 토스트로 뜬다** — 이 값은 뜨느냐가 아니라 **얼마나 머무느냐**다.
+   * 오류에 안 주는 까닭: 놓치면 안 되는 것이 조용히 사라지면 안 된다.
+   */
+  readonly timeout?: number;
+}
+
+/** `notify`에 얹는 것. 지금은 수명 하나다. */
+export interface NotifyOptions {
+  readonly timeout?: number;
 }
 
 declare module "#core/di" {
@@ -30,7 +42,7 @@ export interface INotifications {
   /** 안 읽은 수. 종의 배지가 이 값이다. */
   readonly unreadCount: number;
   /** 만든 알림의 id를 돌려준다 — 같은 것이 이미 있으면 그 id다. */
-  notify(severity: Severity, message: string): string;
+  notify(severity: Severity, message: string, options?: NotifyOptions): string;
   /** 하나를 목록에서 지운다. 읽음 표시가 아니라 제거다. */
   dismiss(id: string): void;
   /** 전부 읽음으로. **개별 읽음은 없다** — 목록을 여는 순간 다 본 것이다. */

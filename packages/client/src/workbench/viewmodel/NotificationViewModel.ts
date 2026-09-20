@@ -10,6 +10,8 @@ export class NotificationViewModel implements INotificationViewModel {
   readonly #notifications: INotifications;
   readonly #subscription: Disposable;
   private itemsState: readonly Notification[];
+  /** 화면에서 닫은 토스트의 id. 목록에서 지우는 것이 아니라 **구석에서만 걷는 것**이다. */
+  private dismissedToastIds: readonly string[] = [];
 
   /**
    * Model을 구독해 목록을 값으로 옮기고, **여는 명령을 스스로 등록한다** — 팔레트와 같은 방식이다.
@@ -20,7 +22,11 @@ export class NotificationViewModel implements INotificationViewModel {
   constructor({ notifications, commands }: { notifications: INotifications; commands: ICommandService }) {
     this.#notifications = notifications;
     this.itemsState = notifications.items;
-    makeAutoObservable<this, "itemsState">(this, { itemsState: observableRef }, { autoBind: true });
+    makeAutoObservable<this, "itemsState" | "dismissedToastIds">(
+      this,
+      { itemsState: observableRef, dismissedToastIds: observableRef },
+      { autoBind: true },
+    );
     this.#subscription = notifications.onDidChange(() => this.sync());
     commands.actions.add({
       id: "shell.openNotifications",
@@ -42,9 +48,20 @@ export class NotificationViewModel implements INotificationViewModel {
     return this.itemsState.filter((n) => !n.isRead).length;
   }
 
+  /** 안 읽었고 아직 안 닫은 것. */
+  get toasts(): readonly Notification[] {
+    return this.itemsState.filter((n) => !n.isRead && !this.dismissedToastIds.includes(n.id));
+  }
+
   /** 없는 id면 조용히 넘어간다. */
   dismiss(id: string): void {
     this.#notifications.dismiss(id);
+  }
+
+  /** 두 번 닫아도 안전하다. */
+  dismissToast(id: string): void {
+    if (this.dismissedToastIds.includes(id)) return;
+    this.dismissedToastIds = [...this.dismissedToastIds, id];
   }
 
   /** 목록을 여는 순간 부른다 — 여는 명령이 부른다. */

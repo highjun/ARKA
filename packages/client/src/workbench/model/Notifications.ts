@@ -1,6 +1,6 @@
 import type { Disposable } from "#core/di";
 import { Emitter } from "#core/events";
-import type { INotifications, Notification, Severity } from "./INotifications";
+import type { INotifications, Notification, NotifyOptions, Severity } from "./INotifications";
 
 /**
  * `INotifications`의 유일한 구현체.
@@ -45,7 +45,7 @@ export class Notifications implements INotifications {
    * **이미 읽은 것과 같은 것이 또 오면 안 읽음으로 되돌리고 시각을 갱신한다.** 같은 오류가
    * 다시 났다는 것은 새 소식이다 — 한 번 읽었다고 조용히 넘기면 두 번째를 놓친다.
    */
-  notify(severity: Severity, message: string): string {
+  notify(severity: Severity, message: string, options?: NotifyOptions): string {
     const same = this.#items.find((n) => n.severity === severity && n.message === message);
     if (same !== undefined) {
       if (!same.isRead) return same.id;
@@ -53,7 +53,14 @@ export class Notifications implements INotifications {
       this.#changed.fire();
       return same.id;
     }
-    const notification: Notification = { id: this.#newId(), severity, message, at: this.#now(), isRead: false };
+    const notification: Notification = {
+      id: this.#newId(),
+      severity,
+      message,
+      at: this.#now(),
+      isRead: false,
+      ...(options?.timeout === undefined ? {} : { timeout: options.timeout }),
+    };
     this.#items = [...this.#items, notification].slice(-Notifications.MAX);
     this.#changed.fire();
     return notification.id;

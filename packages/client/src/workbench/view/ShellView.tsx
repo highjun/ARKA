@@ -6,6 +6,7 @@ import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
 import { ModeToggle } from "#component/ModeToggle";
 import { Text } from "#component/Text";
+import { Toast } from "#component/Toast";
 import { CommandCenter } from "../component/CommandCenter";
 import { CommandPalette } from "../component/CommandPalette";
 import { Shell } from "../component/Shell";
@@ -109,14 +110,29 @@ export const ShellView = observer(function ShellView() {
         colorMode={shell.colorMode}
         isNarrow={shell.isNarrow}
         overlays={
-          <CommandPalette
-            open={palette.isOpen}
-            onOpenChange={(open) => (open ? palette.open() : palette.close())}
-            query={palette.query}
-            onQueryChange={(value) => palette.setQuery(value)}
-            rows={palette.rows}
-            onSelect={(actionId) => palette.run(actionId)}
-          />
+          <>
+            <CommandPalette
+              open={palette.isOpen}
+              onOpenChange={(open) => (open ? palette.open() : palette.close())}
+              query={palette.query}
+              onQueryChange={(value) => palette.setQuery(value)}
+              rows={palette.rows}
+              onSelect={(actionId) => palette.run(actionId)}
+            />
+            {notifications.toasts.length === 0 ? null : (
+              <Toast>
+                {notifications.toasts.map((item) => (
+                  <Toast.Item
+                    key={item.id}
+                    severity={item.severity}
+                    message={item.message}
+                    timeout={item.timeout}
+                    onDismiss={() => notifications.dismissToast(item.id)}
+                  />
+                ))}
+              </Toast>
+            )}
+          </>
         }
         brand={
           <span className={styles["brandGroup"]}>
