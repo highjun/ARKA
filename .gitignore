@@ -21,9 +21,3 @@ docs/draft/
 
 # 복사해서 채우는 원본. 값이 없으므로 비밀이 아니다.
 !ops/deploy/.env.example
-!packages/client/.env.example
-
-# 받아 둔 Figma 그림과 diff. 캐시라 다시 받으면 된다.
-# **폴더는 남긴다** — `staticDirs`가 없는 폴더를 가리키면 스토리북 빌드가 죽는다.
-packages/client/.storybook/.storybook-addon-figma-sync/*
-!packages/client/.storybook/.storybook-addon-figma-sync/.gitkeep
