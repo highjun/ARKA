@@ -2,8 +2,6 @@
 #
 # `main`은 사이트 루트, PR은 `pr-<번호>/` 하위 경로에 올리고 PR이 닫히면 그 폴더를 지운다.
 # 정적 파일이라 **띄워 둘 서버가 없다** — 예전의 PR별 앱 미리보기와 무게가 다르다.
-#
-# 앱 전체를 만져 봐야 하면 Codespaces로 그 브랜치를 띄운다(→ `.devcontainer/README.md`).
 name: Storybook
 
 on:
@@ -94,8 +92,6 @@ jobs:
               '<!-- arka-storybook -->',
               `### 스토리북 — ${closed ? '내렸습니다' : '올라갔습니다'}`,
               closed ? '이 PR의 스토리북을 지웠습니다.' : url,
-              '',
-              '앱 전체를 만져 보려면 Code → Codespaces에서 이 브랜치를 띄웁니다(`.devcontainer/README.md`).',
             ].join('\n');
             const { owner, repo } = context.repo;
             const issue_number = context.payload.pull_request.number;

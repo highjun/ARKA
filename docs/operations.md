@@ -84,9 +84,6 @@ curl -s "$ARKA_ORIGIN/api/version"   # Access 뒤라 로그인한 브라우저�
 지우는 자체 도구가 배포 코드의 대부분이었다(2026-09-13 걷어냈다). 지금은 이렇게 나눠 본다 —
 화면은 스토리북이, 부팅은 `check`의 컨테이너 단계가, 동작은 e2e가 본다.
 
-**앱 전체를 만져 봐야 하면 Codespaces로 그 브랜치를 띄운다**(→ [`.devcontainer/README.md`](../.devcontainer/README.md)).
-포트가 기본 비공개라 GitHub에 로그인한 본인만 닿는다 — 인증이 없는 앱을 공개 URL에 두지 않는다.
-
 **그림의 정본은 Figma다.** 스토리북은 코드가 그린 것을 보여 주고, Figma 시트는 그려야 할 것을
 든다. 시트를 검토하는 잣대는 [figma/review-checklist.md](figma/review-checklist.md)에 있다.
 
