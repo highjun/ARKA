@@ -1,0 +1,77 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  image:
+    name: image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      IMAGE: ghcr.io/${{ github.repository_owner }}/arka:${{ github.sha }}
+      LATEST: ghcr.io/${{ github.repository_owner }}/arka:latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: 이미지를 굽는다
+        run: |
+          DOCKER_BUILDKIT=1 docker build -f ops/deploy/Dockerfile \
+            --build-arg ARKA_GIT_SHA="${{ github.sha }}" -t "$IMAGE" .
+
+      - name: 올린다
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker push "$IMAGE"
+          docker tag "$IMAGE" "$LATEST" && docker push "$LATEST"
+
+  deploy:
+    name: deploy
+    needs: [image]
+    runs-on: [self-hosted, linux, arka]
+    environment: production
+    permissions:
+      contents: read
+      packages: read
+    env:
+      IMAGE: ghcr.io/${{ github.repository_owner }}/arka:${{ github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: 값이 있는지 먼저 본다
+        run: test -r "$ARKA_SECURE/.env" || { echo "::error::ARKA_SECURE가 가리키는 .env가 없습니다 — 러너 유닛(ops/deploy/arka-gha-runner.service)이 주는 값입니다"; exit 1; }
+
+      - name: 구운 이미지를 당긴다
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker pull "$IMAGE"
+
+      - name: 올린다
+        run: |
+          set -a; . "$ARKA_SECURE/.env"; set +a
+          ARKA_IMAGE="$IMAGE" docker compose -f ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
+
+      - name: 익명 접근이 막히는지 본다
+        run: |
+          set -a; . "$ARKA_SECURE/.env"; set +a
+          node ops/smoke/anon.ts "$ARKA_ORIGIN"
+
+      - name: 안 쓰는 이미지를 걷는다
+        if: always()
+        run: docker image prune -f
+
+      - name: 실패하면 로그와 되돌리는 법을 남긴다
+        if: failure()
+        run: |
+          docker logs --tail 100 arka-app || true
+          echo "::error::되돌리려면 옛 커밋 SHA 태그를 당겨 같은 compose 명령을 돌립니다"
