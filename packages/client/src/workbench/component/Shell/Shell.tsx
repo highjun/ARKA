@@ -40,9 +40,7 @@ const hasContent = (node: ReactNode): boolean => node !== null && node !== undef
 
 /** 레일 아래 묶음의 설정 줄. 사이드바 id 와 겹치지 않게 접두사를 붙인다. */
 const SETTINGS_ID = "shell.settings";
-const SETTINGS_ROW: readonly SidebarRow[] = [
-  { id: SETTINGS_ID, title: "설정", iconId: "settingsGear", isActive: false },
-];
+const SETTINGS_ROW: readonly SidebarRow[] = [{ id: SETTINGS_ID, title: "설정", iconId: "settingsGear" }];
 
 /**
  * 앱의 뼈대. 확장이 꽂히는 자리를 전부 낸다. `children`을 막는다 — 슬롯이 정해져 있어 아무 자식이나 받지 않는다.
@@ -65,6 +63,8 @@ export interface ShellProps extends Omit<ComponentPropsWithoutRef<"div">, "child
 
   /** 주면 사이드바(활동 레일+패널)가 생긴다 — 안 주면 사이드바 자체가 없다(헤더의 모바일 토글 버튼도 안 뜬다). */
   readonly sidebars?: readonly SidebarRow[];
+  /** 지금 열린 사이드바의 id. 레일 위 묶음의 활성 표시가 이것으로 갈린다 — 아래 묶음은 활성이 없다. */
+  readonly activeSidebarId?: string | null;
   /** 레일의 아이콘을 클릭하면 그 id와 함께 호출된다. */
   readonly onSidebarSelect?: (id: string) => void;
   /** 레일 맨 아래 설정 톱니를 누르면 호출된다. 계약 밖이다. */
@@ -122,6 +122,7 @@ export const Shell = ({
   brand,
   actions,
   sidebars,
+  activeSidebarId,
   onSidebarSelect,
   onSettingsSelect,
   sidebarTitle,
@@ -216,12 +217,15 @@ export const Shell = ({
                   </div>
                   <div className={styles["sidebarBody"]}>
                     {/* **설정은 아래 묶음의 한 줄이다** — 레일이 따로 그리는 톱니가 아니다.
-                        셸은 그 줄을 여기서 만들어 넣고, 고르면 `onSettingsSelect` 로 보낸다. */}
-                    <ActivityBar
-                      topItems={sidebars}
-                      bottomItems={SETTINGS_ROW}
-                      onSelect={(id) => (id === SETTINGS_ID ? onSettingsSelect?.() : onSidebarSelect?.(id))}
-                    />
+                        셸이 그 줄을 만들어 넣고, 아래 묶음은 활성이 없으므로 `activeId` 도 안 받는다. */}
+                    <ActivityBar>
+                      <ActivityBar.Top
+                        items={sidebars}
+                        activeId={activeSidebarId}
+                        onSelect={(id) => onSidebarSelect?.(id)}
+                      />
+                      <ActivityBar.Bottom items={SETTINGS_ROW} onSelect={() => onSettingsSelect?.()} />
+                    </ActivityBar>
                     {expanded && (
                       <Panel
                         density="compact"

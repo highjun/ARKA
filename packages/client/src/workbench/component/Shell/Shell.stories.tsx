@@ -5,9 +5,9 @@ import { Shell } from "./index";
 import type { SidebarRow } from "../ActivityBar";
 
 const SIDEBARS: readonly SidebarRow[] = [
-  { id: "files", iconId: "files", title: "탐색기", isActive: true },
-  { id: "search", iconId: "search", title: "검색", isActive: false },
-  { id: "agent", iconId: "brain", title: "에이전트", isActive: false },
+  { id: "files", iconId: "files", title: "탐색기" },
+  { id: "search", iconId: "search", title: "검색" },
+  { id: "agent", iconId: "brain", title: "에이전트" },
 ];
 
 const meta = {

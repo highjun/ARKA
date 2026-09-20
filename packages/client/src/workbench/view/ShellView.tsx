@@ -173,6 +173,7 @@ export const ShellView = observer(function ShellView() {
           </span>
         }
         sidebars={shell.sidebars}
+        activeSidebarId={shell.activeSidebarId}
         onSidebarSelect={(id) => shell.toggleSidebar(id)}
         onSettingsSelect={() => commands.execute("shell.openSettings")}
         sidebarTitle={activeSidebar?.title}

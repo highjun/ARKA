@@ -313,7 +313,7 @@ globalThis.__arka.spec = (() => {
     if (!rows.length) return 0;
     return await table(
       into,
-      "Props 표",
+      "Props Table",
       ["name", "type", "description"],
       rows.map((r) => [r.name, r.type, r.desc]),
       [T_NAME, T_TYPE, null],
@@ -329,12 +329,12 @@ globalThis.__arka.spec = (() => {
    * @param 절들 - `[{ 번호, 이름, 무엇 }]`.
    */
   const partIndex = async (into, 절들, 번호) => {
-    const blk = box("부품 목록", "VERTICAL", GAP_LABEL);
+    const blk = box("Parts", "VERTICAL", GAP_LABEL);
     into.appendChild(blk);
     blk.appendChild(await text(`${번호} 부품 목록`, "Title/Medium", "fgColor/default", "Head"));
     return await table(
       blk,
-      "부품 목록 표",
+      "Parts Table",
       ["#", "name", "무엇"],
       절들.map((절) => [절.번호, 절.이름, 절.무엇]),
       [T_NUM, T_NAME, null],
@@ -374,23 +374,37 @@ globalThis.__arka.spec = (() => {
     return null;
   };
 
+  /** 두 자리 번호. 글자 차례와 숫자 차례가 같아야 왼쪽 레이어 목록이 차례가 된다. */
+  const 두자리 = (n) => String(n).padStart(2, "0");
+
+  /**
+   * 시트 프레임 이름 — `01 Text Spec`. `묶음` 에 없는 세트는 번호 없이 `Text Spec`.
+   *
+   * **옛 이름도 찾아야 한다.** 번호가 붙기 전에 그린 시트를 못 찾으면 한 페이지에 둘이 남는다.
+   */
+  const sheetNameOf = (name) => {
+    const 자리 = meta()?.자리(name);
+    return 자리 ? `${두자리(자리.번호)} ${name} Spec` : `${name} Spec`;
+  };
+  const isSheetOf = (nodeName, name) => new RegExp(`^(?:\\d+ )?${name} Spec$`, "u").test(nodeName);
+
   /**
    * 노드를 품고 있는 옛 시트를 조상에서 찾아 노드를 꺼내고 지운다.
    * 안 그러면 다시 돌릴 때 시트가 시트 안에 겹쳐 쌓인다.
    */
-  const unwrap = (nodes, sheetName) => {
+  const unwrap = (nodes, name) => {
     let home = null;
     for (const n of nodes) {
       let up = n.parent,
         oldSheet = null;
       while (up && up.type !== "PAGE" && up.type !== "SECTION") {
-        if (up.name === sheetName) oldSheet = up;
+        if (isSheetOf(up.name, name)) oldSheet = up;
         up = up.parent;
       }
       home = home ?? (oldSheet ? oldSheet.parent : n.parent);
       home.appendChild(n);
     }
-    for (const c of [...home.children]) if (!nodes.includes(c) && c.name === sheetName) c.remove();
+    for (const c of [...home.children]) if (!nodes.includes(c) && isSheetOf(c.name, name)) c.remove();
     return home;
   };
 
@@ -417,8 +431,8 @@ globalThis.__arka.spec = (() => {
       if (node.type === "COMPONENT") return await this.plain(node);
 
       const set = node;
-      const sheetName = `${setName} Spec`;
-      const home = unwrap([set], sheetName);
+      const sheetName = sheetNameOf(setName);
+      const home = unwrap([set], setName);
 
       const sheet = box(sheetName, "HORIZONTAL", GAP_COL, { align: "MIN", fill: "bgColor/default", pad: PAD });
       home.appendChild(sheet);
@@ -466,10 +480,10 @@ globalThis.__arka.spec = (() => {
       // (`Menu/Trigger`·`NavList/Group` 처럼 코드에만 있는 부품이 시트에서 사라지지 않게.)
       const 이름들 = [...parts, name];
       const nodes = 이름들.map((p) => findNode(p));
-      const sheetName = `${name} Spec`;
-      const home = unwrap(nodes.filter(Boolean), sheetName);
+      const sheetName = sheetNameOf(name);
+      const home = unwrap(nodes.filter(Boolean), name);
       // 부품이 저마다 제 시트를 갖고 있었다면 그것도 걷는다.
-      for (const p of parts) for (const c of [...home.children]) if (c.name === `${p} Spec`) c.remove();
+      for (const p of parts) for (const c of [...home.children]) if (isSheetOf(c.name, p)) c.remove();
 
       const sheet = box(sheetName, "HORIZONTAL", GAP_COL, { align: "MIN", fill: "bgColor/default", pad: PAD });
       home.appendChild(sheet);
@@ -522,10 +536,10 @@ globalThis.__arka.spec = (() => {
         인스턴스 += n;
         // 축도 속성도 없는 부품 — 견본 하나로 족하다. 제목을 달아야 번호가 안 비어 보인다.
         if (!n) {
-          const blk = box("견본", "VERTICAL", GAP_AXIS);
+          const blk = box("Sample", "VERTICAL", GAP_AXIS);
           block.appendChild(blk);
           blk.appendChild(await text(`${절.번호}.1. 견본`, "Title/Small", "fgColor/default", "Head"));
-          const r = box("Sample", "HORIZONTAL", GAP_CELL, { align: "MIN" });
+          const r = box("Sample Row", "HORIZONTAL", GAP_CELL, { align: "MIN" });
           blk.appendChild(r);
           const inst =
             node.type === "COMPONENT_SET"
@@ -560,8 +574,8 @@ globalThis.__arka.spec = (() => {
 
     /** 변형이 없는 컴포넌트의 시트 — 제목·코드 경로·견본뿐이다. */
     async plain(comp) {
-      const sheetName = `${comp.name} Spec`;
-      const home = unwrap([comp], sheetName);
+      const sheetName = sheetNameOf(comp.name);
+      const home = unwrap([comp], comp.name);
       const sheet = box(sheetName, "HORIZONTAL", GAP_COL, { align: "MIN", fill: "bgColor/default", pad: PAD });
       home.appendChild(sheet);
       const doc = box("Doc", "VERTICAL", GAP_AXIS);
@@ -596,25 +610,25 @@ globalThis.__arka.spec = (() => {
       const 묶음들 = meta()?.묶음?.[pageName];
       if (!묶음들) throw new Error(`묶음 없음: ${pageName}`);
 
-      const 이름 = `${pageName} 목차`;
-      for (const c of [...page.children]) if (c.name === 이름) c.remove();
+      // **레이어 이름은 영어에 번호, 보이는 글은 한글이다.** 앞자리 `00` 이 시트 앞에 세운다.
+      const 이름 = "00 Contents";
+      const 옛것 = [`${pageName} 목차`, 이름];
       const sec = page.children.find((c) => c.type === "SECTION" && c.name === "Components");
       const home = sec ?? page;
-      for (const c of [...home.children]) if (c.name === 이름) c.remove();
+      for (const 어디 of [page, home]) for (const c of [...어디.children]) if (옛것.includes(c.name)) c.remove();
 
       const frame = box(이름, "VERTICAL", GAP_LABEL, { fill: "bgColor/default", pad: PAD });
       home.appendChild(frame);
-      frame.appendChild(await text(이름, "Title/Large", "fgColor/default", "Title"));
+      frame.appendChild(await text(`${pageName} 목차`, "Title/Large", "fgColor/default", "Title"));
 
       const 줄들 = [];
       for (const [묶음이름, 이름들] of 묶음들)
         for (const n of 이름들) 줄들.push([String(meta().자리(n).번호), n, 묶음이름, meta().of(n)?.설명 ?? ""]);
-      await table(frame, "목차 표", ["#", "name", "묶음", "무엇"], 줄들, [T_NUM, T_NAME, T_GROUP, null], {
+      await table(frame, "Contents Table", ["#", "name", "묶음", "무엇"], 줄들, [T_NUM, T_NAME, T_GROUP, null], {
         폭: DOC_W + T_GROUP + T_GAP,
       });
 
-      // **맨 앞으로 보낸다.** `insertChild(0, …)` 은 오토레이아웃 안에서도 차례를 바꾼다.
-      home.insertChild(0, frame);
+      // 자리는 `layout()` 이 잡는다 — 여기서는 만들기만 한다.
       return { 목차: pageName, 줄: 줄들.length };
     },
 
@@ -638,76 +652,135 @@ globalThis.__arka.spec = (() => {
     },
 
     /**
-     * 시트를 세로로 쌓는다 — 아래로 내리며 읽는다.
+     * **페이지를 오토레이아웃으로 쌓는다.** 되그리기 뒤에 한 번 부른다.
      *
-     * **간격은 오토레이아웃이 잡는다.** 좌표로 놓으면 시트 하나 높이가 바뀔 때마다 아래가 다 어긋난다.
-     * Figma **`SECTION` 은 오토레이아웃을 못 걸므로**, 섹션 안에 세로 오토레이아웃 프레임
-     * `Sheets` 를 하나 두고 그 안에 담는다. 섹션은 그 프레임 크기에 맞춰 한 번 늘린다.
+     * ```
+     * Components [SECTION]
+     *   Page [FRAME · VERTICAL AUTO]
+     *     00 Contents
+     *     01 Typography [FRAME · VERTICAL AUTO]  ← 묶음
+     *       Title · 01 Text Spec · 02 Kbd Spec …
+     * ```
+     *
+     * **묶음이 SECTION 이 아니라 FRAME 인 까닭** — Figma `SECTION` 에는 오토레이아웃을 못 건다.
+     * 그래서 예전에는 묶음마다 y 를 손으로 계산했는데, 시트가 커지자 그대로 어긋나 옆 묶음을
+     * 덮었다(2026-09-20 실측: `Activity Bar` 가 308px 삐져나와 `Sidebar` 와 겹쳤다). 프레임이면
+     * 안이 커지는 만큼 바깥이 늘어 겹칠 수가 없다.
+     *
+     * `Components` SECTION 은 페이지의 바깥 테두리로만 남고 마지막에 `Page` 크기로 한 번 맞춘다.
      */
-    async stack(pageName, order, { gap = 96, pad = 40 } = {}) {
+    async layout(pageName, { gap = 160, inner = 96, pad = 40 } = {}) {
+      if (!Object.keys(S).length) await this.boot();
+      await figma.loadAllPagesAsync();
+      const page = figma.root.children.find((p) => p.name === pageName);
+      if (!page) throw new Error(`페이지 없음: ${pageName}`);
+      const 묶음들 = meta()?.묶음?.[pageName];
+      if (!묶음들) throw new Error(`묶음 없음: ${pageName}`);
+
+      const sec = page.children.find((c) => c.type === "SECTION" && c.name === "Components");
+      if (!sec) throw new Error(`Components 섹션 없음: ${pageName}`);
+
+      // 시트와 목차를 먼저 다 찾아 둔다 — 옛 묶음(SECTION)을 지우기 전에 꺼내야 딸려 죽지 않는다.
+      const 시트들 = new Map();
+      let 목차 = null;
+      for (const n of sec.findAll((x) => x.type === "FRAME")) {
+        if (/Spec$/u.test(n.name)) 시트들.set(n.name.replace(/^\d+ /u, "").replace(/ Spec$/u, ""), n);
+        else if (n.name === "00 Contents" || n.name === `${pageName} 목차`) 목차 = n;
+      }
+
+      let 판 = sec.children.find((c) => c.type === "FRAME" && c.name === "Page");
+      if (!판) {
+        판 = box("Page", "VERTICAL", gap, { pad });
+        sec.appendChild(판);
+      }
+      판.itemSpacing = gap;
+      판.paddingTop = 판.paddingBottom = 판.paddingLeft = 판.paddingRight = pad;
+      판.fills = [];
+
+      if (목차) 판.appendChild(목차);
+
+      const 빠진것 = [];
+      for (const [i, [묶음이름, 이름들]] of 묶음들.entries()) {
+        const 이름 = `${두자리(i + 1)} ${묶음이름}`;
+        let 묶음 = 판.children.find((c) => c.type === "FRAME" && c.name === 이름);
+        if (!묶음) {
+          묶음 = box(이름, "VERTICAL", inner);
+          판.appendChild(묶음);
+        }
+        묶음.itemSpacing = inner;
+        for (const c of [...묶음.children]) if (c.type === "TEXT" && c.name === "Title") c.remove();
+        묶음.appendChild(await text(이름, "Title/Large", "fgColor/muted", "Title"));
+        for (const n of 이름들) {
+          const sh = 시트들.get(n);
+          if (sh) 묶음.appendChild(sh);
+          else 빠진것.push(n);
+        }
+        판.appendChild(묶음);
+      }
+
+      // 옛 묶음 SECTION 과 빈 `Sheets` 프레임을 걷는다 — 위에서 내용물을 다 꺼낸 뒤다.
+      const 걷은것 = [];
+      for (const c of [...sec.children]) {
+        if (c === 판) continue;
+        걷은것.push(`${c.name}(${c.type})`);
+        c.remove();
+      }
+
+      판.x = 0;
+      판.y = 0;
+      sec.resizeWithoutConstraints(Math.ceil(판.width), Math.ceil(판.height));
+      return {
+        페이지: pageName,
+        묶음: 판.children.map((c) => c.name),
+        빠진것,
+        걷은것,
+        크기: `${Math.round(판.width)}x${Math.round(판.height)}`,
+      };
+    },
+
+    /**
+     * **페이지 한 장을 훑는다.** `async` 다 — 부르는 쪽이 `await` 를 빠뜨리면 풀리지 않은
+     * Promise 가 빈 객체로 찍혀 "깨끗"처럼 보인다(2026-09-20 에 그렇게 겹침을 놓쳤다).
+     *
+     * **겹침은 좌표가 아니라 구조로 본다.** 좌표 비교는 이미 어긋난 뒤에야 알고, 예전 판은
+     * 있지도 않은 `Sheets` 프레임 하나를 전제해 시트 목록이 빈 채로 0 을 돌려줬다. 시트가
+     * 오토레이아웃 프레임의 자식이면 겹칠 수가 없으므로 **그 자리에 있는지**만 본다.
+     */
+    async audit(pageName) {
       await figma.loadAllPagesAsync();
       const page = figma.root.children.find((p) => p.name === pageName);
       const sec = page.children.find((c) => c.type === "SECTION" && c.name === "Components");
       if (!sec) throw new Error(`Components 섹션 없음: ${pageName}`);
 
-      let sheets = sec.children.find((c) => c.type === "FRAME" && c.name === "Sheets");
-      if (!sheets) {
-        sheets = box("Sheets", "VERTICAL", gap, { pad });
-        sec.appendChild(sheets);
-      }
-      sheets.itemSpacing = gap;
-      sheets.paddingTop = sheets.paddingBottom = sheets.paddingLeft = sheets.paddingRight = pad;
-
-      const all = [...sec.children, ...sheets.children].filter((c) => /Spec$/.test(c.name));
-      const list = order
-        ? order.map((n) => all.find((c) => c.name === `${n} Spec`)).filter(Boolean)
-        : all.slice().sort((a, b) => a.y - b.y);
-      // `appendChild` 는 맨 뒤에 붙는다 — 원하는 차례대로 부르면 그 차례가 된다.
-      for (const sh of list) sheets.appendChild(sh);
-
-      sheets.x = 0;
-      sheets.y = 0;
-      sec.resizeWithoutConstraints(Math.ceil(sheets.width), Math.ceil(sheets.height));
-      // 보드는 섹션 오른쪽으로 민다.
-      let bx = sec.x + sec.width + 400;
-      for (const f of page.children)
-        if (f.type === "FRAME") {
-          f.x = bx;
-          f.y = 0;
-          bx += f.width + 400;
-        }
-
-      return {
-        시트: list.map((sh) => sh.name.replace(" Spec", "")),
-        빠진것: [...sec.children, ...sheets.children]
-          .filter((c) => /Spec$/.test(c.name) && !list.includes(c))
-          .map((c) => c.name),
-        남은것: sec.children.filter((c) => c !== sheets).map((c) => `${c.name}(${c.type})`),
-        섹션: `${Math.round(sec.width)}x${Math.round(sec.height)}`,
-      };
-    },
-
-    async audit(pageName) {
-      await figma.loadAllPagesAsync();
-      const page = figma.root.children.find((p) => p.name === pageName);
-      const sec = page.children.find((c) => c.type === "SECTION" && c.name === "Components");
       let inst = 0,
         끊김 = 0;
       for (const n of sec.findAll((x) => x.type === "INSTANCE")) {
         inst += 1;
         if (!(await n.getMainComponentAsync())) 끊김 += 1;
       }
-      const sheets = sec.children.find((c) => c.type === "FRAME" && c.name === "Sheets");
-      const sh = (sheets ?? sec).children.filter((c) => /Spec$/.test(c.name)).sort((a, b) => a.y - b.y);
-      const 겹침 = [];
-      for (let i = 1; i < sh.length; i += 1)
-        if (sh[i].y < sh[i - 1].y + sh[i - 1].height) 겹침.push(`${sh[i - 1].name}↔${sh[i].name}`);
+
+      const sh = sec.findAll((c) => c.type === "FRAME" && /Spec$/u.test(c.name));
+      const 이름틀린시트 = [];
+      for (const c of sh) {
+        const 세트 = c.name.replace(/^\d+ /u, "").replace(/ Spec$/u, "");
+        const 자리 = meta()?.자리(세트);
+        const 바람 = 자리 ? `${두자리(자리.번호)} ${세트} Spec` : `${세트} Spec`;
+        if (c.name !== 바람) 이름틀린시트.push(`${c.name} ≠ ${바람}`);
+      }
+      // 오토레이아웃 밖에 있으면 손으로 놓인 것이라 언제든 겹친다.
+      const 흐름밖시트 = sh
+        .filter((c) => !(c.parent?.layoutMode && c.parent.layoutMode !== "NONE"))
+        .map((c) => `${c.name} ← ${c.parent?.name ?? "?"}`);
+      const 판 = sec.children.find((c) => c.type === "FRAME" && c.name === "Page");
+
       return {
-        시트: sh.map((c) => c.name.replace(" Spec", "")),
-        세트: sec.findAll((n) => n.type === "COMPONENT_SET").map((n) => n.name),
+        시트: sh.length,
+        세트: sec.findAll((n) => n.type === "COMPONENT_SET").length,
         인스턴스: inst,
         끊긴인스턴스: 끊김,
-        겹침,
+        흐름밖시트,
+        이름틀린시트,
+        섹션이판보다큰가: 판 ? Math.round(sec.height - 판.height) : "Page 없음",
         고정폭글자: sec.findAll((n) => n.type === "TEXT" && n.textAutoResize === "NONE").length,
         스타일없는글자: sec.findAll((n) => n.type === "TEXT" && !n.textStyleId).length,
         루트에뜬것: page.children.filter((c) => c.type !== "SECTION" && c.type !== "FRAME").map((c) => c.name),

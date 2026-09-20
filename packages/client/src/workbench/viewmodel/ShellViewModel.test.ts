@@ -64,7 +64,7 @@ const make = () => {
 };
 
 const activeIds = (viewModel: ShellViewModel): string[] =>
-  viewModel.sidebars.filter((sidebar) => sidebar.isActive).map((sidebar) => sidebar.id);
+  viewModel.activeSidebarId === null ? [] : [viewModel.activeSidebarId];
 
 describe("IShellViewModel — 사이드바", () => {
   it("레지스트리 순서대로 내고, 첫 사이드바가 처음부터 활성이다", () => {

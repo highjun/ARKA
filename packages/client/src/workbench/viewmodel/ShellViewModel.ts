@@ -87,10 +87,14 @@ export class ShellViewModel implements IShellViewModel {
     this.#registerCommands();
   }
 
-  /** 레지스트리 순서 그대로. 활성은 하나뿐이거나 없다. */
+  /** 레지스트리 순서 그대로. 활성은 줄에 안 싣는다 — `activeSidebarId` 가 든다. */
   get sidebars(): readonly SidebarRow[] {
-    const activeId = this.#activeSidebarId();
-    return this.#sidebars.list().map(({ id, title, iconId }) => ({ id, title, iconId, isActive: id === activeId }));
+    return this.#sidebars.list().map(({ id, title, iconId }) => ({ id, title, iconId }));
+  }
+
+  /** 활성은 하나뿐이거나 없다. */
+  get activeSidebarId(): string | null {
+    return this.#activeSidebarId();
   }
 
   /** 액션의 라벨은 명령에서 가져온다 — descriptor는 id만 든다. */

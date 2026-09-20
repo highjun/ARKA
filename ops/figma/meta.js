@@ -635,16 +635,28 @@ globalThis.__arka.meta = (() => {
       },
     },
     ActivityBar: {
-      설명: "workbench/component/ActivityBar · 왼쪽 48px 레일. 위 묶음과 아래 묶음이 별개다 (코드는 아직 items 한 벌)",
+      설명: "workbench/component/ActivityBar · 왼쪽 48px 레일. 위 묶음과 아래 묶음이 별개다",
       props: {
-        topItems: { t: "object", d: "위 묶음 — 기능들. `[{ id, iconId, label }]`" },
-        bottomItems: { t: "object", d: "아래 묶음 — 계정·설정. 위와 완전히 별개다" },
-        activeId: { t: "string", d: '지금 자리 — "explorer". `defaultActiveId` 와 짝' },
-        renderItemContextMenu: { t: "slot", d: "주면 우클릭 메뉴가 생긴다" },
-        onSelect: { t: "action", d: "고를 때. 표준 `onSelect` 를 가로챈다" },
-        onActiveIdChange: { t: "action", d: "지금 자리가 바뀔 때" },
+        children: { t: "slot", d: "`.Top` + `.Bottom`. 사이는 늘어나는 빈 칸이 민다" },
       },
-      부품: ["ActivityBar/Item"],
+      부품: ["ActivityBar/Item", "ActivityBar/Top", "ActivityBar/Bottom"],
+    },
+    "ActivityBar/Top": {
+      설명: "workbench/component/ActivityBar · 위 묶음 — 기능들. 넘치면 여기만 스크롤된다",
+      props: {
+        items: { t: "object", d: "기능들 — `[{ id, iconId, label }]`" },
+        activeId: { t: "string", d: '지금 자리 — "explorer". **활성은 위 묶음만 든다**' },
+        renderItemContextMenu: { t: "slot", n: "renderItemMenu", d: "주면 우클릭 메뉴가 생긴다" },
+        onSelect: { t: "action", d: "고를 때. 표준 `onSelect` 를 가로챈다" },
+      },
+    },
+    "ActivityBar/Bottom": {
+      설명: "workbench/component/ActivityBar · 아래 묶음 — 계정·설정. 위가 넘쳐도 밀리지 않는다",
+      props: {
+        items: { t: "object", d: "계정·설정" },
+        onSelect: { t: "action", d: "고를 때" },
+      },
+      css: { state: "**활성이 없다** — 사이드바가 아니라서 「지금 여기」가 없다" },
     },
     "ActivityBar/Item": {
       설명: "workbench/component/ActivityBar · 레일의 아이콘 한 칸 48×48",
@@ -816,27 +828,32 @@ globalThis.__arka.meta = (() => {
 
   const 이름 = (k, p) => p.n ?? k;
 
-  /** 페이지의 시트 묶음. `stack()` 이 읽어 SECTION 여덟으로 가른다. 없는 페이지는 한 줄로 쌓인다. */
+  /**
+   * 페이지의 시트 묶음. `layout()` 이 읽어 오토레이아웃 프레임으로 쌓는다.
+   *
+   * **묶음 이름은 영어다** — 레이어 이름이 되고 목차 표의 「묶음」 칸에도 같은 말이 선다.
+   * 보이는 글은 한글이지만 이것은 이름이라 식별자 쪽이다.
+   */
   const 묶음 = {
     "01 Shared": [
-      ["글자", ["Text", "Kbd", "Link", "Markdown", "CodeBlock"]],
-      ["동작", ["Button", "IconButton", "ButtonGroup", "SegmentedControl", "ModeToggle"]],
-      ["폼", ["TextInput", "Textarea", "Checkbox", "Radio", "ToggleSwitch", "FormControl"]],
-      ["이동", ["NavList", "UnderlineNav"]],
-      ["표시", ["Icon", "Label", "CounterLabel", "Avatar", "DataTable"]],
-      ["되알림", ["Banner", "Blankslate", "Spinner", "ProgressBar"]],
-      ["떠 있는 것", ["Menu", "Select", "Dialog", "Tooltip"]],
-      ["배치", ["Container"]],
+      ["Typography", ["Text", "Kbd", "Link", "Markdown", "CodeBlock"]],
+      ["Actions", ["Button", "IconButton", "ButtonGroup", "SegmentedControl", "ModeToggle"]],
+      ["Forms", ["TextInput", "Textarea", "Checkbox", "Radio", "ToggleSwitch", "FormControl"]],
+      ["Navigation", ["NavList", "UnderlineNav"]],
+      ["Display", ["Icon", "Label", "CounterLabel", "Avatar", "DataTable"]],
+      ["Feedback", ["Banner", "Blankslate", "Spinner", "ProgressBar"]],
+      ["Overlays", ["Menu", "Select", "Dialog", "Tooltip"]],
+      ["Layout", ["Container"]],
     ],
     // VS Code 의 창 구역 이름을 따른다 — 어디에 무엇이 있는지가 곧 이름이 되게.
     // **차례는 작은 것부터다** — 원자에서 시작해 구역을 거쳐 창 한 장으로 끝난다.
     "02 Workbench": [
-      ["액티비티 바", ["ActivityBar"]],
-      ["사이드바", ["Panel", "SideBar"]],
-      ["편집 자리", ["Tab"]],
-      ["겹쳐 뜨는 것", ["CommandPalette"]],
-      ["화면 한 장", ["SettingsEditor"]],
-      ["창", ["Sash", "TitleBar", "Shell"]],
+      ["Activity Bar", ["ActivityBar"]],
+      ["Sidebar", ["Panel", "SideBar"]],
+      ["Editor", ["Tab"]],
+      ["Overlays", ["CommandPalette"]],
+      ["Screen", ["SettingsEditor"]],
+      ["Window", ["Sash", "TitleBar", "Shell"]],
     ],
   };
 

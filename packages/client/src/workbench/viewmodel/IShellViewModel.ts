@@ -3,12 +3,11 @@ import type { IconId } from "#component/Icon";
 import type { BottomDescriptor } from "../model/IBottomDescriptor";
 import type { SidebarDescriptor } from "../model/ISidebarDescriptor";
 
-/** 활동 레일에 그릴 사이드바 한 줄. */
+/** 활동 레일에 그릴 사이드바 한 줄. **활성은 줄이 들지 않는다** — `activeSidebarId` 하나가 든다. */
 export interface SidebarRow {
   readonly id: string;
   readonly title: string;
   readonly iconId: IconId;
-  readonly isActive: boolean;
 }
 
 /** 사이드바 머리의 버튼 한 줄. `label`은 명령의 것이다 — 툴팁으로 쓴다. */
@@ -54,6 +53,8 @@ declare module "#core/di" {
  */
 export interface IShellViewModel extends Disposable {
   readonly sidebars: readonly SidebarRow[];
+  /** 지금 열린 사이드바. 없으면 `null`. 레일의 활성 표시가 이것 하나로 갈린다. */
+  readonly activeSidebarId: string | null;
   /** 지금 열린 사이드바. VM이 레지스트리에서 풀어 준다 — **View는 레지스트리를 모른다.** */
   readonly activeSidebar: ActiveSidebar | null;
   /** 같은 것을 다시 고르면 사이드바가 닫힌다. */

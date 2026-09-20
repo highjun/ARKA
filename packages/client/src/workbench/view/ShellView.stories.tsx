@@ -58,9 +58,10 @@ const SPLIT: PaneRowNode = {
 const shellViewModel = (state: Partial<IShellViewModel>): IShellViewModel => ({
   dispose: () => undefined,
   sidebars: [
-    { id: "explorer", title: "탐색기", iconId: "files", isActive: true },
-    { id: "search", title: "검색", iconId: "search", isActive: false },
+    { id: "explorer", title: "탐색기", iconId: "files" },
+    { id: "search", title: "검색", iconId: "search" },
   ],
+  activeSidebarId: "explorer",
   activeSidebar: { id: "explorer", title: "탐색기", Content: panel("탐색기"), actions: [] },
   toggleSidebar: () => undefined,
   revealSidebar: () => undefined,
