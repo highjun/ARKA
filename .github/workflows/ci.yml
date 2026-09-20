@@ -101,12 +101,11 @@ jobs:
       cancel-in-progress: false
     env:
       IMAGE: ghcr.io/${{ github.repository_owner }}/arka:${{ github.sha }}
-      ARKA_SECURE: ${{ vars.ARKA_SECURE }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: 값이 있는지 먼저 본다
-        run: test -r "$ARKA_SECURE/.env" || { echo "::error::ARKA_SECURE가 가리키는 .env가 없습니다 — 환경 변수 ARKA_SECURE를 이 기계의 ops/secure 경로로 두세요"; exit 1; }
+        run: test -r "$ARKA_SECURE/.env" || { echo "::error::ARKA_SECURE가 가리키는 .env가 없습니다 — 러너 유닛(ops/deploy/arka-gha-runner.service)이 주는 값입니다"; exit 1; }
 
       - name: 검사한 이미지를 당긴다
         run: |
