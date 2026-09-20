@@ -1,0 +1,7 @@
+tunnel: <터널 ID>
+credentials-file: /etc/cloudflared/creds.json
+
+ingress:
+  - hostname: <공개 호스트 이름>
+    service: http://app:3000
+  - service: http_status:404

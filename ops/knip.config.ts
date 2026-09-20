@@ -30,7 +30,7 @@ const config: KnipConfig = {
       entry: [
         "lint/run.ts",
         "lint/index.ts",
-        "deploy/{build,renderTunnel}.ts",
+        "deploy/build.ts",
         "smoke/{local,anon}.ts",
         "hooks/{preCommit,prePush}.ts",
         "*.config.ts",

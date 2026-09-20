@@ -114,7 +114,6 @@ jobs:
       - name: 올린다
         run: |
           set -a; . "$ARKA_SECURE/.env"; set +a
-          node ops/deploy/renderTunnel.ts "$ARKA_TUNNEL_CONFIG"
           ARKA_IMAGE="$IMAGE" docker compose -f ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
 
       - name: 익명 접근이 막히는지 본다
