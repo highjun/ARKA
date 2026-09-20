@@ -41,6 +41,11 @@
   color: var(--fgColor-default);
 }
 
+/* 아래 창 높이는 **배치의 결정**이라 셸이 준다 — 부품은 남는 자리를 채운다. 그림 실측 300. */
+.bottom {
+  height: 300px;
+}
+
 /* 높이는 `TitleBar` 가 제가 든다 — 여기서는 아래 줄만 긋는다. */
 .titleBar {
   border-style: solid;
