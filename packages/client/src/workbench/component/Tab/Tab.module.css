@@ -1,4 +1,4 @@
-/* `chrome` 변형 — 클래스 합성이 아니라 루트의 `data-chrome`이 고른다(→ ADR 0008). 프레임이
+/* `chrome` 변형 — 클래스 합성이 아니라 루트의 `data-chrome`이 고른다. 프레임이
    붙는 자리는 단일 그룹(`.group`)과 분할 루트(`.splitRoot*`) 셋뿐이다. */
 [data-chrome="bordered"] {
   border-radius: var(--borderRadius-small);

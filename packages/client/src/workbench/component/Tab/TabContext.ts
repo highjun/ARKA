@@ -15,7 +15,7 @@ export const useTabClassNames = () => useContext(ClassNamesContext);
  * 여기가 슬롯별 클래스를 한 번 정의해 넘긴다.
  *
  * `chrome`은 여기서 갈라 합성하지 않는다 — 변형은 `data-chrome`이 실어 CSS가 속성 선택자로
- * 받는다(→ ADR 0008). 값이 DOM에 보이므로 어느 모양인지 개발자 도구에서 바로 읽힌다.
+ * 받는다. 값이 DOM에 보이므로 어느 모양인지 개발자 도구에서 바로 읽힌다.
  * 나머지(orientation·divider·active·alwaysVisible)는 전부 상태로 고르는 `[data-*]` 슬롯이라
  * `Tab.module.css`의 속성 선택자가 그대로 처리한다.
  */

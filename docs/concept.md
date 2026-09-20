@@ -28,7 +28,7 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
 - 데스크톱이 본작업, 모바일이 보조작업이되 **기능은 동등하다**. 화면 크기와 인터랙션 방식에서 오는 편의만 다르다.
 - 사용자는 한 명이다.
 
-원본 아키텍처 문서는 저장소 밖에 있다. 리포에 넣지 않는다 — 한 번 통째로 넣었다가 리뷰 불가로 롤백한 전례가 있고, 결정의 요지는 각 ADR이 스스로 담는다. 그 문서는 자체 번호표를 갖고 있으므로 `ADR NNNN`은 언제나 `docs/adr/`의 번호다.
+원본 아키텍처 문서는 저장소 밖에 있다. 리포에 넣지 않는다 — 한 번 통째로 넣었다가 리뷰 불가로 롤백한 전례가 있다. 결정과 그 이유는 그것을 들인 PR 본문에 있고, squash 커밋으로 `main`에 남는다.
 
 ## 아키텍처 (v1)
 
@@ -41,7 +41,7 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
 - Leveraging VSCode OSS
   - 대부분의 v1 기능은 VSCode와 겹치되, 실제 사용자가 인터랙션하는 클라이언트를 재설계하는 부분이 크다.
   - VSCode의 검증된 계약을 벤치마킹하되, 우리가 원하는 기능에 맞춰서 단순화하여 가져온다.
-  - **구조 결정은 VSCode의 대응 개념을 따르고 ADR로 남긴다** — contribution point(확장이 기능을 끼우는 자리)·command·service·extension host. 같은 것을 새 이름으로 부르지 않는다.
+  - **구조 결정은 VSCode의 대응 개념을 따른다** — contribution point(확장이 기능을 끼우는 자리)·command·service·extension host. 같은 것을 새 이름으로 부르지 않는다.
 - VSCode 대비 변경 1: 에디터 코어 - **CodeMirror 6**
   - VSCode에서 제공하는 Monaco는 무겁고, 모바일을 지원하지 않는다.
   - 따라서, Mobile 지원 커버가 가능한 CodeMirror 6를 활용한다.
@@ -161,7 +161,7 @@ ARKA는 개인 워크스페이스 기반의 Integrated Development Environment(I
 
 ##### `shared/` — 커널도 확장도 아니다
 
-트리·목록 같은 공통 UI 부품이 여기 산다. **Primer에서 온다**(→ [ADR 0009](adr/0009-primer-first.md)). 아무것도 import하지 않는다.
+트리·목록 같은 공통 UI 부품이 여기 산다. **Primer에서 온다.** 아무것도 import하지 않는다.
 
 ##### 모델 — v1.0이 지는 규칙
 

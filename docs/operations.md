@@ -1,7 +1,7 @@
 # 운영 — 이 기계에서 무엇이 어떻게 도는가
 
 실배포는 **사용자 PC 한 대**에서 돈다. 이 문서는 그것을 다시 세우거나 고치는 사람을
-위한 것이다. 왜 이 모양인지는 [ADR 0006](adr/0006-deploy-shape.md)에 있다.
+위한 것이다.
 
 ```text
 GitHub ──▶ self-hosted 러너 ──▶ docker compose ──▶ cloudflared 터널 ──▶ Cloudflare Access ──▶ 사람

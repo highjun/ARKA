@@ -3,7 +3,7 @@ import type { KnipConfig } from "knip";
 /**
  * **죽은 표면을 찾는다** — 안 쓰는 파일·export·의존성, phantom 의존성, 안 쓰는 catalog 항목.
  * 한때 컴포넌트의 29%가 아무도 안 쓰는 채 쌓였고, `index.ts`에 "바깥이 부르는 것만"이라는
- * 규약은 이것 없이는 검사할 수 없다(→ ADR 0011).
+ * 규약은 이것 없이는 검사할 수 없다.
  *
  * **진입점 선언이 정확도의 전부다.** 빠뜨리면 거기서 닿는 것이 전부 "안 쓰는 것"으로 뜬다.
  */
@@ -13,7 +13,7 @@ const config: KnipConfig = {
     ".": {
       entry: ["eslint.config.ts"],
       project: ["*.ts"],
-      // **루트 `package.json`은 의존성 없이 둔다**(→ ADR 0001) — 루트 설정을 읽는 것은 `ops`의
+      // **루트 `package.json`은 의존성 없이 둔다** — 루트 설정을 읽는 것은 `ops`의
       // ESLint 바이너리이고 플러그인도 그쪽에서 풀린다. 루트에 또 선언하면 eslint가 두 벌이 된다.
       ignoreDependencies: ["eslint", "@eslint/json", "eslint-plugin-package-json", "eslint-plugin-yml"],
     },

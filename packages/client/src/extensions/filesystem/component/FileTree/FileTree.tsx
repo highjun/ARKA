@@ -312,7 +312,7 @@ const Row = ({
 /**
  * `onSelect`·`onContextMenu`를 가로챈다 — 행 단위로 다시 정의한다.
  *
- * **이 저장소에서 바탕이 `HTMLAttributes`인 유일한 자리다**(→ ADR 0008). 항목이 없으면 `<div>`,
+ * **이 저장소에서 바탕이 `HTMLAttributes`인 유일한 자리다**. 항목이 없으면 `<div>`,
  * 있으면 `<ul role="tree">`를 그려 실제 태그가 갈리는데, 이벤트 핸들러의 제네릭이 원소별이라
  * (`ClipboardEventHandler<HTMLDivElement>` ≠ `<HTMLUListElement>`) 태그를 하나로 정하면
  * 나머지 분기에서 거짓이 된다. 그래서 공통 조상으로 둔다 — 분기마다 실제 태그로 좁혀 넘긴다.

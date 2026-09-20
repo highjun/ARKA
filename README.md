@@ -31,7 +31,6 @@ pnpm --filter ops check                   # CI의 `check` 잡이 부르는 것�
 | --- | --- |
 | [docs/concept.md](docs/concept.md) | 무엇을 왜 만드나 |
 | [docs/operations.md](docs/operations.md) | 이 기계에서 무엇이 어떻게 도나, 장애가 나면 |
-| [docs/adr/](docs/adr/) | 왜 이 모양인가 |
 | [스토리북](https://highjun.github.io/ARKASHIC/) | 컴포넌트를 눈으로 — PR마다 `pr-<번호>/`에도 올라간다 |
 | [SECURITY.md](SECURITY.md) | **인증이 없다는 전제.** 직접 세우기 전에 읽는다 |
 

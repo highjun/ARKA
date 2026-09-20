@@ -46,7 +46,7 @@ const CODE_COMPONENTS: MarkdownComponents = {
 
 /**
  * 마크다운을 React 요소로 그린다. 원문 HTML은 켜지 않는다 — 그래서 정화기가 필요 없고,
- * `<script>`가 든 문서도 글자로만 남는다(→ ADR 0009).
+ * `<script>`가 든 문서도 글자로만 남는다.
  *
  * 메시지마다 다시 파싱하는 비용은 `memo`로 막는다 — 스트리밍 중에는 마지막 메시지만 바뀐다.
  *

@@ -12,7 +12,7 @@ import type { Linter } from "eslint";
 import { arkaRules } from "./rules/index.ts";
 
 /**
- * **공개 면에는 문서가 필수다**(→ ADR 0004).
+ * **공개 면에는 문서가 필수다**.
  *
  * `z.infer` 별칭은 뺀다 — 바로 위 스키마(`export const X`)가 문서를 들고 있고 이름도 같아,
  * 여기 문서를 달면 글자 그대로의 동어반복이 된다. 실측으로 476건 중 46건이 이 형태였다.
@@ -37,7 +37,7 @@ const REQUIRE_JSDOC: Linter.RuleEntry = [
   },
 ];
 
-// 주석 규칙이 자기 자신을 끄지 못하게 막을 목록(→ ADR 0004). `sonarjs/no-commented-code`만
+// 주석 규칙이 자기 자신을 끄지 못하게 막을 목록. `sonarjs/no-commented-code`만
 // 뺀다 — 주석 처리된 코드를 알아보는 휴리스틱이라 오탐이 있을 수 있다.
 const COMMENT_RULES = [
   "jsdoc/*",
@@ -60,8 +60,8 @@ const COMMENT_RULES = [
  * export default [...ops.configs.base, { files: ["src/**"], rules: { … } }];
  * ```
  *
- * **여기 있는 규칙은 전부 ADR이 든다.** 주인 없는 규칙은 껐다(2026-09-13 지웠다. git 이력에 있다) —
- * 규칙은 결정이 낳는 것이라, 결정이 아직 재작성되지 않았으면 강제할 근거가 없다.
+ * **여기 있는 규칙은 전부 규약의 문장 하나를 강제한다.** 주인 없는 규칙은 껐다(2026-09-13 지웠다.
+ * git 이력에 있다) — 지킬 문장이 없으면 강제할 근거도 없다.
  */
 const base: Linter.Config[] = [
   // 산출물은 검사하지 않는다 — 번들된 코드가 규칙에 걸려도 고칠 소스가 여기가 아니다.
@@ -77,7 +77,7 @@ const base: Linter.Config[] = [
     },
   },
   {
-    // **선언하지 않은 것을 import하면 잡는다**(→ ADR 0002). Node와 ESLint의 해석기가
+    // **선언하지 않은 것을 import하면 잡는다**. Node와 ESLint의 해석기가
     // `node_modules`를 위로 걸어 올라가 저장소 루트에서 찾아 주기 때문에, 선언이 빠져도 조용히
     // 동작한다 — 이 규칙이 없으면 패키지가 스스로 설 수 있는지 아무도 모른다.
     files: ["**/*.{ts,tsx,js}"],
@@ -85,7 +85,7 @@ const base: Linter.Config[] = [
   },
 
   {
-    // **각 패키지의 `tsconfig.json`을 검사한다**(→ ADR 0001). 이 블록이 없으면 `eslint .`은
+    // **각 패키지의 `tsconfig.json`을 검사한다**. 이 블록이 없으면 `eslint .`은
     // `.json`을 아예 집지 않는다. 주석이 있으므로 언어는 `json/jsonc`다. 같은 금지가 루트
     // `eslint.config.ts`에도 있다 — 루트 파일은 이 설정을 거치지 않아서다.
     files: ["**/tsconfig*.json"],
@@ -118,7 +118,7 @@ const base: Linter.Config[] = [
         sourceType: "module",
         ecmaVersion: "latest",
         // 어느 tsconfig에도 없는 설정 파일 둘. `eslint.config.ts`는 `ops/lint`가 TS 원본이라
-        // 패키지 옵션으로 ops 소스를 컴파일하게 되어 뺐고(→ ADR 0001의 대가),
+        // 패키지 옵션으로 ops 소스를 컴파일하게 되어 뺐고,
         // `stylelint.config.ts`는 `@primer/stylelint-config`가 타입을 안 싣는다. 파싱만 한다.
         projectService: { allowDefaultProject: ["eslint.config.ts", "stylelint.config.ts"] },
       },
@@ -137,7 +137,7 @@ const base: Linter.Config[] = [
       // 그 주석이 "쓸모없는 지시"로 남아 오히려 노이즈가 된다.
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-empty-object-type": "error",
-      // `@ts-ignore`는 왜 껐는지를 남기지 않고 타입 오류를 숨긴다(→ ADR 0004). `@ts-expect-error`는
+      // `@ts-ignore`는 왜 껐는지를 남기지 않고 타입 오류를 숨긴다. `@ts-expect-error`는
       // 오류가 사라지면 스스로 실패하므로 설명과 함께 허용한다.
       /*
        * **타입이 있어야 판정되는 것들.** `await`를 빼먹은 Promise는 테스트도 타입 검사도
@@ -160,7 +160,7 @@ const base: Linter.Config[] = [
   },
 
   {
-    // **주석으로 우회하는 길을 막는다**(→ ADR 0004). 규칙을 끄는 것 자체는 막지 않고,
+    // **주석으로 우회하는 길을 막는다**. 규칙을 끄는 것 자체는 막지 않고,
     // 무엇을 왜 끄는지를 남기게 한다 — 사유 없는 `eslint-disable`은 다음 사람이 되살릴 근거가 없다.
     files: ["**/*.{ts,tsx,js,mjs,cjs}"],
     plugins: { "@eslint-community/eslint-comments": comments, arka: arkaRules },
@@ -184,16 +184,16 @@ const base: Linter.Config[] = [
       // `allowWholeFile: false` — 파일 끝까지 열어 두는 `eslint-disable`을 허용하지 않는다.
       "@eslint-community/eslint-comments/disable-enable-pair": ["error", { allowWholeFile: false }],
       "@eslint-community/eslint-comments/no-restricted-disable": ["error", ...COMMENT_RULES],
-      // 주석은 대상 **위**에 둔다(→ ADR 0004). 줄 끝에 붙으면 코드가 밀려 읽기가 나빠지고,
+      // 주석은 대상 **위**에 둔다. 줄 끝에 붙으면 코드가 밀려 읽기가 나빠지고,
       // 길어질수록 가로로 흐른다.
       "line-comment-position": ["error", { position: "above" }],
-      // 주석 한 덩어리의 상한. 넘으면 코드가 아니라 문서라 ADR로 간다.
+      // 주석 한 덩어리의 상한. 넘으면 코드가 아니라 문서라 PR 본문으로 간다.
       "arka/max-comment-lines": ["error", { line: 4, block: 4, tsdoc: 10 }],
     },
   },
 
   {
-    // **선언 위의 주석은 `/** */`다**(→ ADR 0004). 그래야 에디터 hover에 뜬다.
+    // **선언 위의 주석은 `/** */`다**. 그래야 에디터 hover에 뜬다.
     files: ["**/*.{ts,tsx}"],
     plugins: { jsdoc, tsdoc, sonarjs },
     rules: {
@@ -238,19 +238,19 @@ const base: Linter.Config[] = [
      * **테스트의 규율.** 네 패키지가 전부 vitest를 쓰므로 바탕에 둔다. 이 블록이 대신하는 것은
      * client 설정에 있던 `no-restricted-syntax` 선택자 둘이다 — 그 배열은 한 파일에 한 벌이라
      * 블록이 겹치면 통째로 덮이는데(2026-09-09·09-14에 두 번 겪었다), 규칙 이름이 갈리면
-     * 그 함정에서 그만큼 벗어난다(→ ADR 0011).
+     * 그 함정에서 그만큼 벗어난다.
      */
     files: ["**/*.{test,spec}.{ts,tsx}"],
     plugins: { vitest },
     rules: {
       /*
-       * `it`/`test` 이름은 **한글 문장**이다(→ ADR 0004). `describe`는 대상의 식별자라 영문
+       * `it`/`test` 이름은 **한글 문장**이다. `describe`는 대상의 식별자라 영문
        * 그대로다 — 실측 186건이 그 모양이고, 규약이 둘을 묶어 적던 것을 2026-09-14에 갈랐다.
        */
       "vitest/valid-title": [
         "error",
         {
-          mustMatch: { it: ["[가-힣]", "`it()`/`test()` 이름은 한글 문장으로 쓰세요(→ ADR 0004)."] },
+          mustMatch: { it: ["[가-힣]", "`it()`/`test()` 이름은 한글 문장으로 쓰세요."] },
         },
       ],
       /*
@@ -258,15 +258,15 @@ const base: Linter.Config[] = [
        * 갖는다**(`expectNoA11yViolations`·`expectResponse`) — 그래야 이 규칙이 알아본다.
        */
       "vitest/expect-expect": ["error", { assertFunctionNames: ["expect", "expect*"] }],
-      // 외부 `.snap`은 두지 않고 인라인만 쓴다(→ ADR 0010). 인라인도 커지면 읽히지 않는다.
+      // 외부 `.snap`은 두지 않고 인라인만 쓴다. 인라인도 커지면 읽히지 않는다.
       "vitest/no-restricted-matchers": [
         "error",
         {
-          toMatchSnapshot: "외부 `.snap` 대신 `toMatchInlineSnapshot`을 쓰세요 — 갱신이 diff에 드러납니다(→ ADR 0010).",
+          toMatchSnapshot: "외부 `.snap` 대신 `toMatchInlineSnapshot`을 쓰세요 — 갱신이 diff에 드러납니다.",
         },
       ],
       "vitest/no-large-snapshots": ["error", { maxSize: 20, inlineMaxSize: 12 }],
-      // 대상 옆에 `<Name>.test.ts`로 둔다(→ ADR 0002).
+      // 대상 옆에 `<Name>.test.ts`로 둔다.
       "vitest/consistent-test-filename": ["error", { pattern: String.raw`.*\.(test|spec)\.tsx?$` }],
       // 최상위 `describe`가 없으면 실패 출력에서 무엇의 테스트인지 안 보인다.
       "vitest/require-top-level-describe": "error",
@@ -275,7 +275,7 @@ const base: Linter.Config[] = [
       "vitest/no-disabled-tests": "error",
       // 같은 이름이 둘이면 어느 쪽이 깨졌는지 출력으로 가려지지 않는다.
       "vitest/no-identical-title": "error",
-      // 주석 처리된 테스트는 지운다 — 미룬 일은 `docs/tasks/`에 적는다(→ ADR 0004).
+      // 주석 처리된 테스트는 지운다 — 미룬 일은 `docs/tasks/`에 적는다.
       "vitest/no-commented-out-tests": "error",
     },
   },
@@ -296,7 +296,7 @@ const base: Linter.Config[] = [
           // 하이픈·밑줄을 쓰지 않는다. 대소문자는 export 이름이 정한다.
           "src/**/*.{ts,tsx,css}": "+([a-zA-Z0-9])*(.+([a-z0-9]))",
           "test/**/*.{ts,tsx}": "+([a-zA-Z0-9])*(.+([a-z0-9]))",
-          // 계약은 `I`로 시작한다 — `view/`가 만져도 되는 것이라는 레이어 표시다(→ ADR 0007).
+          // 계약은 `I`로 시작한다 — `view/`가 만져도 되는 것이라는 레이어 표시다.
           "src/**/{model,viewmodel,domain}/I*.ts": "I+([A-Z])*([a-zA-Z0-9])",
           // 흉내는 `Mock`으로 시작한다. 계약 스위트에 걸리는 구현이라는 표시다.
           "src/**/Mock*.ts": "Mock+([A-Z])*([a-zA-Z0-9])",

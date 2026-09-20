@@ -21,7 +21,7 @@ const COMPONENT = /(?:^|\/)(?:shared\/component|[^/]+\/component)\/(?<name>[A-Z]
 
 /**
  * 규약이 파일 시스템에 대해 말하는 것을 본다 — 린트는 구문을 보고, 이건 "옆에 파일이 있나"라서
- * 테스트가 맞는 자리다(→ ADR 0010).
+ * 테스트가 맞는 자리다.
  */
 describe("컴포넌트 폴더 구조", () => {
   const components = FILES.filter((file) => COMPONENT.test(file));
@@ -63,7 +63,7 @@ describe("컴포넌트 폴더 구조", () => {
     expect(wrong).toEqual([]);
   });
 
-  it("컴포넌트 폴더 밖에는 `component/` 배럴이 없다 — 경로로 가져온다(→ ADR 0008)", () => {
+  it("컴포넌트 폴더 밖에는 `component/` 배럴이 없다 — 경로로 가져온다", () => {
     const groupBarrels = FILES.filter((file) => /(?:^|\/)components?\/index\.ts$/u.test(file));
 
     expect(groupBarrels).toEqual([]);

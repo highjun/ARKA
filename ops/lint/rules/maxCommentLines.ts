@@ -28,7 +28,7 @@ type Options = { readonly line: number; readonly block: number; readonly tsdoc: 
 const DEFAULTS: Options = { line: 4, block: 4, tsdoc: 10 };
 
 /**
- * 주석이 길어지면 코드가 아니라 문서다 — ADR로 옮기고 링크만 남긴다(→ ADR 0004).
+ * 주석이 길어지면 코드가 아니라 문서다 — 배경은 PR 본문에 적고 주석은 짧게 남긴다.
  *
  * 세 가지를 따로 센다. 연속된 `//`는 빈 줄이나 코드가 끼면 묶음이 끊긴다. TSDoc은 `@example`
  * 구간과 빈 줄을 뺀 **내용 줄**만 센다 — 예제 코드까지 세면 좋은 예제가 벌을 받는다.
@@ -38,8 +38,7 @@ export const maxCommentLines: Rule.RuleModule = {
     type: "suggestion",
     docs: { description: "주석 한 덩어리의 줄 수를 제한한다" },
     messages: {
-      tooLong:
-        "{{kind}} 주석이 {{actual}}줄입니다(상한 {{max}}). 배경 설명은 ADR로 옮기고 `(→ ADR NNNN)` 링크만 남기세요.",
+      tooLong: "{{kind}} 주석이 {{actual}}줄입니다(상한 {{max}}). 배경 설명은 PR 본문으로 옮기고 주석은 짧게 남기세요.",
     },
     schema: [
       {

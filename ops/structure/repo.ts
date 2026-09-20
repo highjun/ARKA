@@ -23,6 +23,3 @@ export const MARKDOWN = TRACKED.filter((file) => file.endsWith(".md"));
 
 /** 추적되는 TypeScript·CSS 전부 — 주석 안의 인용을 여기서 찾는다. */
 export const SOURCE = TRACKED.filter((file) => /\.(?:ts|tsx|css)$/u.test(file));
-
-/** ADR 파일. 번호 순으로 온다(`git ls-files`가 정렬해 준다). */
-export const ADRS = TRACKED.filter((file) => /^docs\/adr\/\d{4}-.+\.md$/u.test(file));
