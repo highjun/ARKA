@@ -8,8 +8,8 @@ const formatBuildLabel = (iso: string, gitSha?: string): string => {
   const at = new Date(iso);
   if (Number.isNaN(at.getTime())) return "";
   const two = (value: number): string => String(value).padStart(2, "0");
-  const time = `v${String(at.getFullYear())}.${two(at.getMonth() + 1)}.${two(at.getDate())} ${two(at.getHours())}:${two(at.getMinutes())}`;
-  return gitSha === undefined ? time : `${time} · ${gitSha.replace(/^([0-9a-f]{7})[0-9a-f]*/u, "$1")}`;
+  const time = `${String(at.getFullYear())}-${two(at.getMonth() + 1)}-${two(at.getDate())} ${two(at.getHours())}:${two(at.getMinutes())}`;
+  return gitSha === undefined ? time : `${time}(${gitSha.replace(/^([0-9a-f]{7})[0-9a-f]*/u, "$1")})`;
 };
 
 export class AppLifetime implements IAppLifetime {

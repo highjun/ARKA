@@ -22,7 +22,7 @@ import { findLeaf } from "./model/paneTree";
 import { TabLayout } from "./model/TabLayout";
 import { TabSystem } from "./model/TabSystem";
 import { Workspace } from "./model/Workspace";
-import { keybindingsTabProvider } from "./view/keybindingsTabProvider";
+import { notificationsTabProvider } from "./view/notificationsTabProvider";
 import { settingsTabProvider } from "./view/settingsTabProvider";
 import { AppStatusViewModel } from "./viewmodel/AppStatusViewModel";
 import { CommandPaletteViewModel } from "./viewmodel/CommandPaletteViewModel";
@@ -162,7 +162,11 @@ export const workbench: ExtensionModule = {
     {
       id: "arka.workbench.notificationViewModel",
       lifetime: "singleton",
-      create: (c) => new NotificationViewModel({ notifications: c.resolve("arka.workbench.notifications") }),
+      create: (c) =>
+        new NotificationViewModel({
+          notifications: c.resolve("arka.workbench.notifications"),
+          commands: c.resolve("arka.commands"),
+        }),
     },
     {
       id: "arka.workbench.appStatusViewModel",
@@ -233,7 +237,7 @@ export const workbench: ExtensionModule = {
     });
     const tabProviders = c.resolve("arka.workbench.tabSystem");
     tabProviders.add(settingsTabProvider);
-    tabProviders.add(keybindingsTabProvider);
+    tabProviders.add(notificationsTabProvider);
 
     const commands = c.resolve("arka.commands");
     const activeTab = () => {
@@ -270,5 +274,6 @@ export const workbench: ExtensionModule = {
     c.resolve("arka.workbench.tabSystemViewModel");
     c.resolve("arka.workbench.commandPaletteViewModel");
     c.resolve("arka.workbench.appStatusViewModel");
+    c.resolve("arka.workbench.notificationViewModel");
   },
 };

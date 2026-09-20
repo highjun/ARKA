@@ -1,32 +1,95 @@
 .root {
-  height: 100%;
+  display: flex;
   max-width: 64ch;
+  flex-direction: column;
+  gap: var(--space-lg);
   padding: var(--space-lg);
-  overflow: auto;
 }
 
 .section {
-  margin-bottom: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* 설정 줄과 단축키 줄이 **같은 기하**다 — 한 화면이 두 벌로 읽히지 않게. */
+.row {
+  display: flex;
+  min-height: var(--arka-row-height);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  border-radius: var(--borderRadius-medium);
+  padding-block: var(--space-xs);
+  padding-inline: var(--space-xs);
+}
+
+.row:hover {
+  background-color: var(--control-transparent-bgColor-hover);
+}
+
+.text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.control {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.keys {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* 연필은 올렸을 때만 — 줄마다 떠 있으면 눈이 어지럽다. */
+.edit {
+  visibility: hidden;
+}
+
+.row:hover .edit,
+.row:focus-within .edit {
+  visibility: visible;
+}
+
+/* 키를 기다리는 동안 테두리를 accent 로 둘러 「지금 여기」를 말한다. */
+.keys[data-recording] {
+  border-style: solid;
+  border-width: var(--borderWidth-thin);
+  border-color: var(--borderColor-accent-emphasis);
+  border-radius: var(--borderRadius-medium);
+  background-color: var(--control-bgColor-rest);
+  padding-block: var(--space-xs);
+  padding-inline: var(--space-sm);
 }
 
 .options {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  padding: 0;
-  margin: var(--space-sm) 0 0;
+  align-items: center;
+  gap: var(--space-sm);
   border: 0;
+  margin: 0;
+  padding: 0;
 }
 
 .legend {
-  margin-bottom: var(--space-xs);
-  font-size: var(--text-body-size-small);
-  color: var(--fgColor-muted);
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .option {
-  display: flex;
-  gap: var(--space-sm);
-  align-items: center;
+  display: inline-flex;
   min-height: var(--arka-row-height);
+  align-items: center;
+  gap: var(--space-xs);
 }

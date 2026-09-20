@@ -18,8 +18,8 @@ describe("ISettingsViewModel", () => {
     const { viewModel } = make();
 
     expect(viewModel.rows).toEqual([
-      { id: "a.flag", title: "깃발", type: "boolean", value: true },
-      { id: "a.mode", title: "모드", type: "enum", value: "x", options: ["x", "y"] },
+      { id: "a.flag", title: "깃발", category: "일반", type: "boolean", value: true },
+      { id: "a.mode", title: "모드", category: "일반", type: "enum", value: "x", options: ["x", "y"] },
     ]);
   });
 
@@ -30,5 +30,20 @@ describe("ISettingsViewModel", () => {
 
     expect(viewModel.rows[1]?.value).toBe("y");
     expect(saved.at(-1)).toEqual({ "a.flag": true, "a.mode": "y" });
+  });
+
+  it("범주를 안 적으면 「일반」이다 — 범주를 짓는 것은 확장의 몫이다", () => {
+    const { viewModel } = make();
+
+    expect(viewModel.rows.map((row) => row.category)).toEqual(["일반", "일반"]);
+  });
+
+  it("찾을 말을 들지만 거르지는 않는다 — 거르기는 화면의 순수 변환이다", () => {
+    const { viewModel } = make();
+
+    viewModel.setQuery("깃발");
+
+    expect(viewModel.query).toBe("깃발");
+    expect(viewModel.rows).toHaveLength(2);
   });
 });

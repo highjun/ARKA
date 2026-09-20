@@ -33,6 +33,7 @@
 - **축인데 축이 아닌 것** — 값이 사실 서로 다른 부품이다(`split=no|yes`가 그랬다)
 - 그리는 데도 뜻에도 영향이 없는 **순수 통과** — `role` · `aria-*` · `alt`
 - 반대로 **짝이 빠진 것** — `value`만 있고 `defaultValue`가 없거나, `open`만 있고 `onOpenChange`가 없거나
+- **루트가 부품의 prop을 되풀이한다** — `Panel.title`은 `Panel/Header`의 것이다. 한 prop은 한 표에만 (기계)
 
 ## D. CSS-State와 인터랙션
 
@@ -74,6 +75,7 @@ focus · disabled=yes       연결 없음이 정상
 ## F. 구조와 이름
 
 - 부품 이름이 **`부모/부품`** 꼴인가 (기계)
+- 컴파운드의 루트는 **`부모/Root`**이고 부품 목록 맨 위다. 머리 항목엔 prop 표가 없다 (기계)
 - 한 부품이 **두 가지를 겸하지 않나** (눈)
 - 루트의 부품 목록이 실제 세트와 맞나 (기계)
 - **기본 변형**이 가장 흔한 조합인가 (기계)
@@ -113,8 +115,16 @@ focus · disabled=yes       연결 없음이 정상
   걸 hover가 없으니 인터랙션 0이 정상이다(D-2 · E).
 - **`DataTable/Row`에 `focus`가 없다** — 표의 행은 포커스를 받지 않는다(E).
 - **그릇에는 `state` 축이 없다** — `SegmentedControl` · `Banner` · `Dialog` · `CommandPalette` ·
-  `Shell` · `Panel` · `Tab/*`. 조작은 그 안의 부품이 한다(E).
+  `Shell` · `Sidebar` · `Bottom` · `Tab/*` · `Toast/*` · `Notifications/*` · `Settings/*`.
+  조작은 그 안의 부품이 한다(E).
+- **목록의 줄에는 `state` 축이 없다** — `Notifications/Row`는 줄 자체가 눌리지 않는다.
+  × 와 동작 단추가 제 `:hover`를 든다(D-1 · E).
+- **`state`는 CSS-State의 이름이다.** 내용이 갈리는 축은 `mode`로 부른다 —
+  `CommandPalette.mode` · `Notifications/TabPanel.mode`(F).
 - **`focus` 변형에는 연결이 없다** — 키보드 포커스는 프로토타입으로 표현할 수 없다(D-2).
 - **아이콘 글리프 속 레이어 이름이 기본값이다** — SVG를 가져온 것이라 그대로 둔다(F).
-- **슬래시 이름의 부모가 Figma에 없을 수 있다** — `Menu` · `Select` · `Tab`은 코드에만 있는
-  루트다. 시트는 표만 세운다(F).
+- **`Menu/Root` · `Select/Root` · `Tab/Root`는 Figma에 없다** — 코드에만 있는 루트라 `가상`이다.
+  시트는 표만 세운다(F).
+- **같은 키가 루트와 부품에 같이 서는 것** — Figma 축이 부품에 걸려 루트를 비추거나(`Menu/Content.kind`),
+  루트가 내려 주거나(`Tab/Root.chrome`), 이름만 같은 것(`Select/Item.value`). `meta`에 `겹침`으로 이유를
+  적어 뒀다(C).

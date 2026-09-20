@@ -3,7 +3,7 @@ import { Notifications } from "./Notifications";
 
 const make = () => {
   let id = 0;
-  return new Notifications({ newId: () => `n${String(++id)}` });
+  return new Notifications({ newId: () => `n${String(++id)}`, now: () => 1_000 });
 };
 
 describe("Notifications", () => {
@@ -12,7 +12,7 @@ describe("Notifications", () => {
     const listener = vi.fn();
     notifications.onDidChange(listener);
     expect(notifications.notify("error", "실패")).toBe("n1");
-    expect(notifications.items).toEqual([{ id: "n1", severity: "error", message: "실패" }]);
+    expect(notifications.items).toEqual([{ id: "n1", severity: "error", message: "실패", at: 1_000, isRead: false }]);
     expect(listener).toHaveBeenCalledTimes(1);
   });
 
@@ -40,5 +40,57 @@ describe("Notifications", () => {
     for (let i = 0; i < Notifications.MAX + 2; i += 1) notifications.notify("info", String(i));
     expect(notifications.items).toHaveLength(Notifications.MAX);
     expect(notifications.items[0]?.message).toBe("2");
+  });
+
+  it("읽음은 낱개로만 된다 — 하나를 읽어도 나머지는 안 읽음이다", () => {
+    const notifications = make();
+    notifications.notify("error", "실패");
+    notifications.notify("info", "저장했다");
+    expect(notifications.unreadCount).toBe(2);
+
+    notifications.markRead("n1");
+
+    expect(notifications.unreadCount).toBe(1);
+    expect(notifications.items).toHaveLength(2);
+    expect(notifications.items[0]?.isRead).toBe(true);
+    expect(notifications.items[1]?.isRead).toBe(false);
+  });
+
+  it("이미 읽었거나 없는 id면 아무 일도 없다", () => {
+    const notifications = make();
+    notifications.notify("info", "저장했다");
+    const id = notifications.items[0]?.id ?? "";
+    notifications.markRead(id);
+    const listener = vi.fn();
+    notifications.onDidChange(listener);
+
+    notifications.markRead(id);
+    notifications.markRead("없는-것");
+
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  it("읽은 것과 같은 것이 또 오면 안 읽음으로 되돌린다 — 두 번째를 놓치지 않는다", () => {
+    const notifications = make();
+    const id = notifications.notify("error", "끊김");
+    notifications.markRead(id);
+
+    expect(notifications.notify("error", "끊김")).toBe(id);
+
+    expect(notifications.unreadCount).toBe(1);
+    expect(notifications.items).toHaveLength(1);
+  });
+
+  it("모두 지우면 비고, 이미 비었으면 아무 일도 없다", () => {
+    const notifications = make();
+    const listener = vi.fn();
+    notifications.notify("info", "a");
+    notifications.onDidChange(listener);
+
+    notifications.clear();
+    notifications.clear();
+
+    expect(notifications.items).toEqual([]);
+    expect(listener).toHaveBeenCalledTimes(1);
   });
 });

@@ -36,7 +36,7 @@ describe("AppLifetime", () => {
     await lifetime.load();
 
     expect(contract.isOutdated).toBe(false);
-    expect(contract.buildId).toMatch(/^v2026\.09\.\d\d \d\d:\d\d$/u);
+    expect(contract.buildId).toMatch(/^2026-09-\d\d \d\d:\d\d$/u);
     expect(listener).toHaveBeenCalledTimes(1);
   });
 
@@ -65,7 +65,7 @@ describe("AppLifetime", () => {
 
     await lifetime.load();
 
-    expect(contract.buildId).toMatch(/ · 0123456-dirty$/u);
+    expect(contract.buildId).toMatch(/\(0123456-dirty\)$/u);
   });
 
   it("requestReload는 주입받은 새로고침을 부른다", () => {

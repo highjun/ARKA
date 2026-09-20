@@ -273,7 +273,7 @@ export interface Notification {
   readonly message: string;
 }
 
-/** 화면 구석에 쌓이는 알림. 확장도 여기에 낸다. */
+/** 쌓이는 알림. 확장도 여기에 낸다 — **그것이 어떻게 보이는지는 모른다**(지금은 제목 줄의 종이다). */
 export interface INotifications {
   readonly items: readonly Notification[];
   /** 돌려주는 것은 나중에 지울 수 있는 id다. */
@@ -297,6 +297,8 @@ export interface IErrorLog {
 /** 뼈대. 루트 컨테이너에 살므로 이 VM의 수명이 "앱이 사는 동안"이다. */
 export interface IShellViewModel extends Disposable {
   readonly sidebars: readonly SidebarRow[];
+  /** 지금 열린 사이드바의 id. 레일 위 묶음의 활성 표시가 이것 하나로 갈린다. */
+  readonly activeSidebarId: string | null;
   /** 지금 열린 사이드바. VM이 레지스트리에서 풀어 준다 — **View는 레지스트리를 모른다.** */
   readonly activeSidebar: ActiveSidebar | null;
   /** 같은 것을 다시 고르면 사이드바가 닫힌다. */
@@ -311,12 +313,11 @@ export interface IShellViewModel extends Disposable {
   readonly isNarrow: boolean;
 }
 
-/** 활동 레일에 그릴 사이드바 한 줄. */
+/** 활동 레일에 그릴 사이드바 한 줄. **활성은 줄이 들지 않는다** — `activeSidebarId` 하나가 든다. */
 export interface SidebarRow {
   readonly id: string;
   readonly title: string;
   readonly iconId: IconId;
-  readonly isActive: boolean;
 }
 
 /** 열린 사이드바 하나를 그리는 데 필요한 전부. */
@@ -419,7 +420,7 @@ export interface PaneRowSplit {
 /** `kind`로 갈리는 판별 유니온. */
 export type PaneRowNode = PaneRowLeaf | PaneRowSplit;
 
-/** 구석에 쌓인 알림. */
+/** 쌓인 알림. 안 읽은 수가 제목 줄 종의 배지로 뜨고, 누르면 목록이 열린다. */
 export interface INotificationViewModel {
   readonly items: readonly Notification[];
   dismiss(id: string): void;
@@ -502,6 +503,7 @@ export interface ShellProps extends Omit<ComponentPropsWithoutRef<"div">, "child
   readonly isNarrow?: boolean;
 
   readonly sidebars?: readonly SidebarRow[];
+  readonly activeSidebarId?: string | null;
   readonly onSidebarSelect?: (id: string) => void;
 
   readonly sidebarTitle?: string;
@@ -521,14 +523,29 @@ export interface ShellProps extends Omit<ComponentPropsWithoutRef<"div">, "child
   readonly overlays?: ReactNode;
 }
 
-/** 사이드바를 고르는 세로 아이콘 줄. 맨 아래에 설정 톱니가 따로 붙는다 — 사이드바가 아니다. */
-export interface ActivityBarProps extends Omit<ComponentPropsWithoutRef<"nav">, "onSelect"> {
+/**
+ * 사이드바를 고르는 세로 아이콘 줄. **위와 아래는 완전히 별개의 부품이다** — 사이를 늘어나는
+ * 빈 칸이 밀어, 위가 넘쳐 스크롤이 생겨도 아래는 제자리에 남는다.
+ *
+ * 부품은 `Object.assign`으로 붙인다 — `ActivityBar.Top`·`ActivityBar.Bottom`.
+ */
+export interface ActivityBarRootProps extends ComponentPropsWithoutRef<"nav"> {
   readonly ref?: Ref<HTMLElement>;
+}
+
+/** 위 묶음 — 기능들. **활성은 여기만 든다.** */
+export interface ActivityBarTopProps extends Omit<ComponentPropsWithoutRef<"div">, "children" | "onSelect"> {
   readonly items: readonly SidebarRow[];
+  readonly activeId?: string | null;
   readonly onSelect?: (id: string) => void;
   readonly renderItemMenu?: (item: SidebarRow) => ReactNode;
-  readonly onSettingsSelect?: () => void;
 }
+
+/**
+ * 아래 묶음 — 계정·설정. **`activeId`가 없다** — 사이드바가 아니라서 "지금 여기"가 없다.
+ * 활성이 될 수 없는 것에 활성 prop 을 두면 그리는 쪽이 매번 `false`를 지어내야 한다.
+ */
+export type ActivityBarBottomProps = Omit<ActivityBarTopProps, "activeId">;
 
 /**
  * 탭과 분할. `tree`를 주면 분할, `tabs`만 주면 단일 그룹이다.
@@ -584,20 +601,8 @@ export interface CommandPaletteProps
   readonly onSelect?: (actionId: string) => void;
 }
 
-/** 구석에 쌓이는 알림. */
-export interface NotificationListProps extends Omit<ComponentPropsWithoutRef<"div">, "children"> {
-  readonly items: readonly Notification[];
-  readonly onDismiss?: (id: string) => void;
-}
-
-/** 단축키 표. */
+/** 단축키 표. **설정 화면 안의 한 범주다** — 제 화면을 갖지 않는다. */
 export interface KeybindingTableProps extends Omit<ComponentPropsWithoutRef<"table">, "children"> {
   readonly rows: readonly KeybindingRow[];
-}
-
-/** 셸이 죽었을 때 대신 뜨는 것. **셸 밖에 있다** — 렌더 경계는 자기 오류를 못 잡는다. */
-export interface CrashScreenProps extends Omit<ComponentPropsWithoutRef<"div">, "children"> {
-  readonly message: string;
-  readonly onReload?: () => void;
 }
 ```

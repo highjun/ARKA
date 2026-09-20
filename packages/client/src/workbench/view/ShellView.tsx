@@ -1,12 +1,14 @@
 import { ContainerProvider, useViewModel } from "#core/viewmodel";
 import { observer } from "mobx-react-lite";
-import { Banner, ConfirmationDialog } from "@primer/react";
+import { Banner, ConfirmationDialog, CounterLabel } from "@primer/react";
 import { Menu } from "#component/Menu";
 import { Icon } from "#component/Icon";
+import { IconButton } from "#component/IconButton";
 import { ModeToggle } from "#component/ModeToggle";
 import { Text } from "#component/Text";
+import { Toast } from "#component/Toast";
+import { CommandCenter } from "../component/CommandCenter";
 import { CommandPalette } from "../component/CommandPalette";
-import { NotificationList } from "../component/NotificationList";
 import { Shell } from "../component/Shell";
 import { Tab } from "../component/Tab";
 import type { ReactNode } from "react";
@@ -83,14 +85,30 @@ export const ShellView = observer(function ShellView() {
         colorMode={shell.colorMode}
         isNarrow={shell.isNarrow}
         overlays={
-          <CommandPalette
-            open={palette.isOpen}
-            onOpenChange={(open) => (open ? palette.open() : palette.close())}
-            query={palette.query}
-            onQueryChange={(value) => palette.setQuery(value)}
-            rows={palette.rows}
-            onSelect={(actionId) => palette.run(actionId)}
-          />
+          <>
+            <CommandPalette
+              open={palette.isOpen}
+              onOpenChange={(open) => (open ? palette.open() : palette.close())}
+              query={palette.query}
+              onQueryChange={(value) => palette.setQuery(value)}
+              rows={palette.rows}
+              onSelect={(actionId) => palette.run(actionId)}
+            />
+            {notifications.toasts.length === 0 ? null : (
+              <Toast>
+                {notifications.toasts.map((item) => (
+                  <Toast.Item
+                    key={item.id}
+                    severity={item.severity}
+                    message={item.message}
+                    timeout={item.timeout}
+                    onDismiss={() => notifications.markRead(item.id)}
+                    onTimeout={() => notifications.dismissToast(item.id)}
+                  />
+                ))}
+              </Toast>
+            )}
+          </>
         }
         brand={
           <span className={styles["brandGroup"]}>
@@ -100,11 +118,35 @@ export const ShellView = observer(function ShellView() {
             </span>
           </span>
         }
+        center={
+          <CommandCenter
+            value={appStatus.workspaceName === "" ? "ARKA" : appStatus.workspaceName}
+            onClick={() => palette.open()}
+          />
+        }
         actions={
           <span className={styles["trailingGroup"]}>
             <Text size="small" tone="muted" className={styles["buildId"]}>
               {appStatus.buildId}
             </Text>
+            {/* **누르면 탭이 열린다** — 메뉴는 동작 목록이라 읽을 것을 담는 그릇이 아니었다.
+                고르면 읽히는 게 아니라 지워지던 것이 그 탓이다. */}
+            <span className={styles["bell"]}>
+              <IconButton
+                variant="invisible"
+                size="small"
+                aria-label={
+                  notifications.unreadCount === 0 ? "알림" : `안 읽은 알림 ${String(notifications.unreadCount)}건`
+                }
+                onClick={() => commands.execute("shell.openNotifications")}
+                icon={() => <Icon iconId="bell" size="sm" />}
+              />
+              {notifications.unreadCount === 0 ? null : (
+                <CounterLabel scheme="primary" className={styles["bellBadge"]}>
+                  {notifications.unreadCount}
+                </CounterLabel>
+              )}
+            </span>
             <ModeToggle
               values={["light", "dark"]}
               value={shell.colorMode}
@@ -116,6 +158,7 @@ export const ShellView = observer(function ShellView() {
           </span>
         }
         sidebars={shell.sidebars}
+        activeSidebarId={shell.activeSidebarId}
         onSidebarSelect={(id) => shell.toggleSidebar(id)}
         onSettingsSelect={() => commands.execute("shell.openSettings")}
         sidebarTitle={activeSidebar?.title}
@@ -151,8 +194,6 @@ export const ShellView = observer(function ShellView() {
           }
         />
       </Shell>
-
-      <NotificationList items={notifications.items} onDismiss={(id) => notifications.dismiss(id)} />
 
       {pendingClose === null ? null : (
         <ConfirmationDialog
