@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-const REPO_ROOT = path.resolve(import.meta.dirname, "../..");
+const REPO_ROOT = path.resolve(import.meta.dirname, "../../..");
 const IMAGE = process.env["IMAGE"] ?? "arka:smoke";
 const PORT = Number(process.env["PORT"] ?? 3997);
 const NAME = `arka-smoke-${String(process.pid)}`;

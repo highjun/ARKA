@@ -7,7 +7,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "node lint/run.ts",
     "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
-    "test:smoke": "node deploy/smoke.ts",
+    "test:smoke": "node deploy/smoke/local.ts",
     "format": "prettier --config prettier.config.ts --ignore-path .prettierignore --write .."
   },
   "exports": {

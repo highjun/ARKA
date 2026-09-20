@@ -104,12 +104,14 @@ jobs:
       - name: 올린다
         run: |
           set -a; . "$HOME/ARKA/secure/env/arka.env"; set +a
-          ARKA_IMAGE="$IMAGE" docker compose -f ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
+          node ops/deploy/renderTunnel.ts "$RUNNER_TEMP/cloudflared.yml"
+          ARKA_TUNNEL_CONFIG="$RUNNER_TEMP/cloudflared.yml" ARKA_IMAGE="$IMAGE" \
+            docker compose -f ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
 
       - name: 익명 접근이 막히는지 본다
         run: |
           set -a; . "$HOME/ARKA/secure/env/arka.env"; set +a
-          node ops/deploy/anonSmoke.ts "$ARKA_ORIGIN"
+          node ops/deploy/smoke/anon.ts "$ARKA_ORIGIN"
 
       - name: 안 쓰는 이미지를 걷는다
         if: always()
