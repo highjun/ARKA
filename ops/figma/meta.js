@@ -401,7 +401,7 @@ globalThis.__arka.meta = (() => {
         timeout: { t: "number", d: "밀리초. 주면 스스로 사라진다. 없으면 × 로만 닫힌다" },
         onDismiss: { t: "action", d: "× 를 누르거나 시간이 다 됐을 때" },
       },
-      css: { state: "`:hover` 동안 사라지는 시계를 멈춘다" },
+      css: { timer: "`:hover` 동안 사라지는 시계를 멈춘다. 모양은 안 바뀐다" },
     },
     Dialog: {
       설명: "@primer/react Dialog · ConfirmationDialog · 앱을 막고 답을 받아 내는 창",
@@ -772,7 +772,7 @@ globalThis.__arka.meta = (() => {
         items: { t: "object", d: "계정·설정" },
         onSelect: { t: "action", d: "고를 때" },
       },
-      css: { state: "**활성이 없다** — 사이드바가 아니라서 「지금 여기」가 없다" },
+      css: { active: "활성이 없다 — 사이드바가 아니라서 「지금 여기」가 없다" },
     },
     "ActivityBar/Item": {
       설명: "workbench/component/ActivityBar · 레일의 아이콘 한 칸 48×48",
@@ -945,7 +945,7 @@ globalThis.__arka.meta = (() => {
     "Notifications/TabPanel": {
       설명: "workbench/view/NotificationsTabView (예상 자리) · Notifications.TabPanel · 줄들과 도구 줄. 비면 `Blankslate` 가 선다",
       props: {
-        state: { t: "enum", d: "Figma 축 — list | empty. 코드는 `items` 로만 갈린다" },
+        mode: { t: "enum", d: "Figma 축 — list | empty. 코드는 `items` 로만 갈린다" },
         items: { t: "object", d: "알림들 — `[{ id, severity, message, at, isRead }]`" },
         unreadCount: { t: "number", d: "안 읽은 수. 종의 배지와 같은 값이다" },
         onMarkAllRead: { t: "action", d: "「모두 읽음」. 탭을 열 때도 이것이 돈다" },
@@ -963,7 +963,6 @@ globalThis.__arka.meta = (() => {
         action: { t: "slot", d: "오른쪽 단추. 명령 id 로 가리킨다" },
         onDismiss: { t: "action", d: "× 를 누를 때" },
       },
-      css: { state: "`:hover` 가 면을 밝힌다" },
     },
     // 설정은 확장이다 — 세 자리(레일 아래 묶음의 칸 · 탭 머리 · 탭 본문)가 각각 별개의 UI 라 부품도 각각이다
     // (2026-09-20 사용자 결정).
@@ -1183,7 +1182,12 @@ globalThis.__arka.meta = (() => {
       const 빠짐 = [],
         세트없음 = [],
         루트없는컴파운드 = [],
-        루트에겹친prop = [];
+        루트에겹친prop = [],
+        state축표없음 = [],
+        state표축없음 = [],
+        state값이름 = [];
+      /** CSS-State 의 값은 이 다섯뿐이다. 내용의 갈래는 `state` 가 아니라 `mode` 로 부른다. */
+      const 좋은state = new Set(["rest", "hover", "active", "focus", "disabled"]);
       for (const [name, e] of Object.entries(M)) {
         if (!e.부품) continue;
         const root = `${name}/Root`;
@@ -1212,6 +1216,11 @@ globalThis.__arka.meta = (() => {
           for (const k of keys) {
             if (!e.props?.[k] && !e.css?.[k]) 빠짐.push(`${n.name}.${k}`);
           }
+          // D-1 — `state` 축과 표의 `css.state` 는 짝이다. 한쪽만 있으면 흠이다.
+          const st = defs["state"];
+          if (st?.type === "VARIANT" && !e.css?.state) state축표없음.push(n.name);
+          if (!st && e.css?.state) state표축없음.push(n.name);
+          for (const v of st?.variantOptions ?? []) if (!좋은state.has(v)) state값이름.push(`${n.name}.state=${v}`);
         }
       }
       return {
@@ -1219,6 +1228,9 @@ globalThis.__arka.meta = (() => {
         표에없는세트: 세트없음,
         루트없는컴파운드,
         루트에겹친prop,
+        state축표없음,
+        state표축없음,
+        state값이름,
         표: Object.keys(M).length,
       };
     },
