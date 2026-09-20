@@ -975,7 +975,6 @@ globalThis.__arka.meta = (() => {
         "Settings/TabHeader",
         "Settings/TabPanel",
         "Settings/Row",
-        "Settings/Keybindings",
         "Settings/Keybinding",
       ],
     },
@@ -997,21 +996,21 @@ globalThis.__arka.meta = (() => {
       props: {},
     },
     "Settings/TabPanel": {
-      설명: "workbench/view/SettingsTabView · Settings.TabPanel · 탭 본문. 왼쪽 범주 목록과 오른쪽 줄들",
+      설명: "workbench/view/SettingsTabView · Settings.TabPanel · 탭 본문. 맨 위 찾기 칸과 범주별 줄들",
       props: {
-        sections: { t: "object", d: "범주와 줄들 — `[{ title, rows }]`. 단축키도 한 범주다" },
-        onChange: { t: "action", d: "줄에서 값을 바꿀 때" },
-      },
-    },
-    "Settings/Keybindings": {
-      설명: "workbench/view/SettingsTabView · Settings.Keybindings · 단축키 범주. 찾기 칸과 줄들",
-      props: {
-        rows: { t: "object", d: "줄들 — `[{ id, keys, label, commandId }]`" },
-        query: { t: "string", d: "찾을 말 — 명령 이름과 id 를 함께 건다" },
+        sections: {
+          t: "object",
+          d: "범주와 줄들 — `[{ title, rows }]`. **단축키도 한 범주다** — 제 그릇을 갖지 않는다",
+        },
+        query: {
+          t: "string",
+          d: "찾을 말. **화면에 하나뿐이다** — 범주마다 제 검색창을 두면 같은 일을 두 곳에서 한다",
+        },
         recordingId: {
           t: "string",
-          d: "지금 재지정 중인 줄의 id. **한 번에 하나다** — 줄이 아니라 여기가 드는 까닭이다",
+          d: "지금 재지정 중인 단축키 줄의 id. **한 번에 하나다** — 줄이 아니라 여기가 드는 까닭이다",
         },
+        onChange: { t: "action", d: "줄에서 값을 바꿀 때" },
         onQueryChange: { t: "action", d: "찾을 말이 바뀔 때" },
         onRecordingChange: { t: "action", d: "재지정을 열고 닫을 때. `null` 이면 닫는다" },
         onRebind: { t: "action", d: "새 조합을 받았을 때 — `(id, keys)`" },
