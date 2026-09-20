@@ -744,10 +744,21 @@ globalThis.__arka.spec = (() => {
         묶음.appendChild(await text(이름, "Title/Large", "fgColor/muted", "Title"));
         for (const n of 이름들) {
           const sh = 시트들.get(n);
-          if (sh) 묶음.appendChild(sh);
-          else 빠진것.push(n);
+          if (!sh) {
+            빠진것.push(n);
+            continue;
+          }
+          // **번호는 여기서 맞춘다.** 묶음에 시트가 끼거나 빠지면 뒤 시트의 번호가 다 밀리는데,
+          // 그때마다 시트를 다시 그리지 않게 이름만 고친다(2026-09-20 `Bottom`·`Settings` 를 끼우며).
+          sh.name = sheetNameOf(n);
+          묶음.appendChild(sh);
         }
         판.appendChild(묶음);
+      }
+      // 시트가 하나도 남지 않은 옛 묶음 프레임을 걷는다 — 번호가 밀리면 이름이 갈려 껍데기가 남는다.
+      for (const c of [...판.children]) {
+        if (c === 목차 || !/^\d\d /u.test(c.name)) continue;
+        if (!c.findOne((x) => x.type === "FRAME" && /Spec$/u.test(x.name))) c.remove();
       }
 
       // 옛 묶음 SECTION 과 빈 `Sheets` 프레임을 걷는다 — 위에서 내용물을 다 꺼낸 뒤다.

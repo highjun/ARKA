@@ -115,7 +115,7 @@ focus · disabled=yes       연결 없음이 정상
   걸 hover가 없으니 인터랙션 0이 정상이다(D-2 · E).
 - **`DataTable/Row`에 `focus`가 없다** — 표의 행은 포커스를 받지 않는다(E).
 - **그릇에는 `state` 축이 없다** — `SegmentedControl` · `Banner` · `Dialog` · `CommandPalette` ·
-  `Shell` · `Panel` · `Tab/*`. 조작은 그 안의 부품이 한다(E).
+  `Shell` · `Sidebar` · `Bottom` · `Tab/*`. 조작은 그 안의 부품이 한다(E).
 - **`focus` 변형에는 연결이 없다** — 키보드 포커스는 프로토타입으로 표현할 수 없다(D-2).
 - **아이콘 글리프 속 레이어 이름이 기본값이다** — SVG를 가져온 것이라 그대로 둔다(F).
 - **`Menu/Root` · `Select/Root` · `Tab/Root`는 Figma에 없다** — 코드에만 있는 루트라 `가상`이다.

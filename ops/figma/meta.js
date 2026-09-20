@@ -759,35 +759,55 @@ globalThis.__arka.meta = (() => {
       },
       css: { state: "`:hover` `:active` `:focus-visible`" },
     },
-    Panel: {
-      설명: "workbench/component/Panel · 머리와 내용 둘뿐인 그릇. 사이드바와 아래 독이 이것이다 — 따로 `SideBar` 를 두지 않는다",
-      부품: ["Panel/Root", "Panel/Header"],
+    // `Panel` 이라 부르던 것이다 — 실은 사이드바만 맡는다. 아래 창은 `Bottom` 이 따로다(2026-09-20 사용자 정정).
+    Sidebar: {
+      설명: "workbench/component/Sidebar (지금 코드는 Panel) · 레일 오른쪽 사이드바. 머리와 내용 둘뿐인 그릇",
+      부품: ["Sidebar/Root", "Sidebar/Header"],
     },
-    "Panel/Root": {
-      설명: "workbench/component/Panel · Panel.Root · 머리와 내용을 세로로 쌓는 그릇",
+    "Sidebar/Root": {
+      설명: "workbench/component/Sidebar (지금 코드는 Panel) · Sidebar.Root · 머리와 내용을 세로로 쌓는 그릇",
       props: {
-        // `title`·`actions` 는 `Panel/Header` 의 것이다 — 루트가 되풀이하지 않는다(2026-09-20 사용자 정정).
+        // `title`·`actions` 는 `Sidebar/Header` 의 것이다 — 루트가 되풀이하지 않는다.
         density: { t: "enum", d: "comfortable | compact. compact 면 머리가 얕고 제목이 대문자가 된다" },
         header: { t: "slot", n: "children", d: "`.Header` + 내용. Figma 에선 머리를 INSTANCE_SWAP 으로 갈아 끼운다" },
       },
     },
-    "Panel/Header": {
-      설명: "workbench/component/Panel · Panel.Header · 머리. 제목이거나 탭 줄이다. `title`·`actions` 둘 다 없으면 안 선다",
+    "Sidebar/Header": {
+      설명: "workbench/component/Sidebar (지금 코드는 Panel) · Sidebar.Header · 제목과 오른쪽 동작. 둘 다 없으면 안 선다",
       props: {
-        kind: { t: "enum", d: "title | tabs. tabs 면 `UnderlineNav` 가 들어선다" },
         title: { t: "slot", d: "왼쪽. 아이콘을 섞을 수 있어 글자가 아니다" },
         actions: { t: "slot", d: "오른쪽 아이콘들" },
       },
     },
+    Bottom: {
+      설명: "workbench/component/Bottom (예상 자리) · 편집 자리 아래 창. 확장의 `BottomDescriptor` 가 탭 하나씩 꽂힌다 — 터미널이 여기다",
+      부품: ["Bottom/Root", "Bottom/Header", "Bottom/Panel"],
+    },
+    "Bottom/Root": {
+      설명: "workbench/component/Bottom (예상 자리) · Bottom.Root · 머리와 본문을 세로로 쌓는 독",
+      props: { children: { t: "slot", d: "`.Header` + `.Panel`" } },
+    },
+    "Bottom/Header": {
+      설명: "workbench/component/Bottom (예상 자리) · Bottom.Header · 아래 창들의 탭 줄(`UnderlineNav`)과 오른쪽 동작",
+      props: {
+        tabs: { t: "object", d: "`BottomRow[]` — `[{ id, title, iconId, isActive }]`" },
+        actions: { t: "slot", d: "오른쪽 — 더하기 · 키우기 · 넘침 · 닫기" },
+        onSelect: { t: "action", d: "탭을 고를 때. 같은 것을 다시 고르면 닫힌다" },
+      },
+    },
+    "Bottom/Panel": {
+      설명: "workbench/component/Bottom (예상 자리) · Bottom.Panel · 고른 아래 창의 `Content` 가 서는 자리",
+      props: { children: { t: "slot", d: "고른 `BottomDescriptor.Content`" } },
+    },
     "Tab/Panel": {
-      설명: "workbench/component/Tab · (L3) 고른 탭의 본문이 서는 자리. 확장의 편집기가 여기 꽂힌다",
+      설명: "workbench/component/Tab · (L3) 고른 탭의 본문이 서는 자리. 확장의 편집기가 여기 꽂힌다. 띠보다 어둡다(`bgColor/inset`) — 활성 탭만 같은 색으로 본문에 붙는다",
       props: {
         children: { t: "slot", d: "고른 탭의 내용. 코드에선 `Container` 가 감싼 `role=tabpanel` 이다" },
         emptyMessage: { t: "slot", d: '고른 탭이 없을 때 — 기본 "No selected tab"' },
       },
     },
     "Tab/Strip": {
-      설명: "workbench/component/Tab · Tab.Strip · (L3) `Header` 여럿과 오른쪽 `Actions` 로 된 띠 한 겹",
+      설명: "workbench/component/Tab · Tab.Strip · (L3) `Header` 여럿과 오른쪽 `Actions` 로 된 띠 한 겹. `Header` 높이만큼만 선다",
       props: {
         tabItems: { t: "object", d: "탭들 — `[{ id, title, iconId, isDirty, isPreview }]`" },
         activeTab: { t: "string", d: "지금 탭의 id" },
@@ -838,8 +858,8 @@ globalThis.__arka.meta = (() => {
       },
     },
     "Tab/Actions": {
-      설명: "workbench/component/Tab · (L4) 띠 오른쪽 끝 아이콘들. 코드엔 넘침 하나뿐이다",
-      props: { actions: { t: "slot", d: "놓을 아이콘 단추들" } },
+      설명: "workbench/component/Tab · (L4) 띠 오른쪽 끝. 넘침 `…` 단추 하나뿐이다",
+      props: { actions: { t: "slot", d: "넘침 `…` `IconButton` 하나. 더 놓지 않는다(2026-09-20 사용자 결정)" } },
     },
     Sash: {
       설명: "workbench/component/Sash (예상 자리) · 구역 사이의 끌 수 있는 경계",
@@ -847,7 +867,10 @@ globalThis.__arka.meta = (() => {
         orientation: { t: "enum", d: "vertical | horizontal" },
         onResize: { t: "action", d: "끌 때" },
       },
-      css: { state: "`:hover` 가 선을 accent 로 밝힌다. `:active` 동안 굵어진다" },
+      css: {
+        state:
+          "평소엔 1px 줄. `:hover` 에 얇고 둥근 손잡이(4×48)가 가운데 뜬다. `:active` 동안 손잡이가 accent. `:focus-visible` 은 손잡이 accent + 고리",
+      },
     },
     CommandPalette: {
       설명: "workbench/component/CommandPalette · 가운데 뜨는 명령 찾기. 파일 찾기도 같은 위젯이다",
@@ -875,25 +898,51 @@ globalThis.__arka.meta = (() => {
       // 짚인 줄은 cmdk 가 정한다 — 소비자가 넘기는 값이 아니라 CSS-State 다.
       css: { selected: "`[cmdk-item][data-selected=true]` 를 cmdk 가 붙인다. 마우스와 키보드 둘 다 이것을 움직인다" },
     },
-    "SettingsEditor/Keybindings": {
-      설명: "workbench/view/SettingsTabView · Settings 의 단축키 범주. 명령·키·id 표",
+    // 설정은 확장이다 — 세 자리(레일 아래 묶음의 칸 · 탭 머리 · 탭 본문)가 각각 별개의 UI 라 부품도 각각이다
+    // (2026-09-20 사용자 결정).
+    Settings: {
+      설명: "extensions/settings (예상 자리) · 설정 확장. 레일 아래 묶음의 칸 · 탭 머리 · 탭 본문 세 자리에 꽂힌다",
+      부품: [
+        "Settings/Root",
+        "Settings/ActivityItem",
+        "Settings/TabHeader",
+        "Settings/TabPanel",
+        "Settings/Row",
+        "Settings/Keybindings",
+      ],
+    },
+    "Settings/Root": {
+      가상: true,
+      설명: "extensions/settings (예상 자리) · 확장이 신고하는 것. 그릴 것은 없다",
       props: {
-        rows: { t: "object", d: "행들 — `[{ id, keys, label, commandId }]`" },
+        uri: { t: "string", d: "`arka:settings`. 탭이 이 좌표로 열린다(`TabProviderDescriptor`)" },
+        title: { t: "string", d: '"설정". 레일 칸의 툴팁과 탭 이름' },
+        iconId: { t: "enum", d: "settingsGear. 레일 칸과 탭 머리가 같은 글리프를 쓴다" },
       },
     },
-    SettingsEditor: {
-      설명: "workbench/view/SettingsTabView · 범주별 설정 줄. 보고 그 자리에서 바꾼다",
-      부품: ["SettingsEditor/Root", "SettingsEditor/Row", "SettingsEditor/Keybindings"],
+    "Settings/ActivityItem": {
+      설명: "extensions/settings (예상 자리) · Settings.ActivityItem · 레일 아래 묶음의 칸. `ActivityBar/Item` 에 톱니를 꽂은 것",
+      props: {},
     },
-    "SettingsEditor/Root": {
-      설명: "workbench/view/SettingsTabView · SettingsEditor.Root · 왼쪽 범주 목록과 오른쪽 줄들",
+    "Settings/TabHeader": {
+      설명: "extensions/settings (예상 자리) · Settings.TabHeader · 탭 머리. `Tab/Header` 에 톱니와 「설정」",
+      props: {},
+    },
+    "Settings/TabPanel": {
+      설명: "workbench/view/SettingsTabView · Settings.TabPanel · 탭 본문. 왼쪽 범주 목록과 오른쪽 줄들",
       props: {
         sections: { t: "object", d: "범주와 줄들 — `[{ title, rows }]`. 단축키도 한 범주다" },
         onChange: { t: "action", d: "줄에서 값을 바꿀 때" },
       },
     },
-    "SettingsEditor/Row": {
-      설명: "workbench/view/SettingsTabView · 설정 한 줄. 이름·설명 왼쪽, 컨트롤 오른쪽",
+    "Settings/Keybindings": {
+      설명: "workbench/view/SettingsTabView · Settings.Keybindings · 단축키 범주. 명령·키 표",
+      props: {
+        rows: { t: "object", d: "행들 — `[{ id, keys, label, commandId }]`" },
+      },
+    },
+    "Settings/Row": {
+      설명: "workbench/view/SettingsTabView · Settings.Row · 설정 한 줄. 이름·설명 왼쪽, 컨트롤 오른쪽",
       props: {
         label: { t: "string", d: '설정 이름 — "테마"' },
         description: { t: "string", d: "아래 흐린 한 줄. 없으면 안 그린다" },
@@ -954,10 +1003,11 @@ globalThis.__arka.meta = (() => {
     // **차례는 작은 것부터다** — 원자에서 시작해 구역을 거쳐 창 한 장으로 끝난다.
     "02 Workbench": [
       ["Activity Bar", ["ActivityBar"]],
-      ["Sidebar", ["Panel"]],
+      ["Sidebar", ["Sidebar"]],
       ["Editor", ["Tab"]],
+      ["Bottom", ["Bottom"]],
       ["Overlays", ["CommandPalette"]],
-      ["Screen", ["SettingsEditor"]],
+      ["Extension", ["Settings"]],
       ["Window", ["Sash", "TitleBar", "Shell"]],
     ],
   };
