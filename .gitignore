@@ -6,7 +6,8 @@ storybook-static/
 .env
 .env.*
 .claude
-docs/USER_NOTE.md
+# 사용자 개인 메모. 저장소의 모양이 아니다.
+USER_NOTE.md
 docs/draft/
 
 # 키·인증서 파일. 이름만 봐도 비밀인 것은 손이 닿기 전에 막는다.
@@ -21,3 +22,5 @@ docs/draft/
 
 # 복사해서 채우는 원본. 값이 없으므로 비밀이 아니다.
 !ops/deploy/.env.example
+
+

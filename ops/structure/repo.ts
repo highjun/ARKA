@@ -6,7 +6,7 @@ import path from "node:path";
 export const REPO_ROOT = path.resolve(import.meta.dirname, "../..");
 
 /**
- * **추적되는 파일만 본다.** `git ls-files`가 경계다 — 추적하지 않는 것(`docs/USER_NOTE.md`,
+ * **추적되는 파일만 본다.** `git ls-files`가 경계다 — 추적하지 않는 것(`USER_NOTE.md`,
  * 빌드 산출물, 로컬 메모)은 저장소의 모양이 아니고, 있다가 없어도 검사가 흔들려선 안 된다.
  */
 export const TRACKED: readonly string[] = (() => {

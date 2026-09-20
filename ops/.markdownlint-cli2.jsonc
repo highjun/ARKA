@@ -24,7 +24,7 @@
     "!**/node_modules/**",
     "!.output/**",
     // 추적하지 않는 사용자 개인 메모(→ CLAUDE.md).
-    "!docs/USER_NOTE.md",
+    "!USER_NOTE.md",
     // 테스트가 읽고 쓰는 자료다. 문서가 아니다.
     "!packages/client/test/e2e/fixture/**",
   ],
