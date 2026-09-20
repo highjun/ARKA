@@ -69,6 +69,21 @@ describe("Toast", () => {
       expect(onDismiss).toHaveBeenCalledTimes(1);
     });
 
+    it("`onTimeout`을 주면 시계는 그쪽으로 간다 — ×와 구별된다", () => {
+      const onDismiss = vi.fn();
+      const onTimeout = vi.fn();
+      render(
+        <Toast.Item severity="info" message="저장했다" timeout={3000} onDismiss={onDismiss} onTimeout={onTimeout} />,
+      );
+
+      act(() => {
+        vi.advanceTimersByTime(3000);
+      });
+
+      expect(onTimeout).toHaveBeenCalledTimes(1);
+      expect(onDismiss).not.toHaveBeenCalled();
+    });
+
     it("`timeout`이 없으면 시계가 안 돈다 — ×로만 닫힌다", () => {
       const onDismiss = vi.fn();
       render(<Toast.Item severity="error" message="터졌다" onDismiss={onDismiss} />);

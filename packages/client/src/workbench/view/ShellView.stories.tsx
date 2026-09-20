@@ -105,7 +105,7 @@ const notificationViewModel = (state: Partial<INotificationViewModel>): INotific
   toasts: [],
   dismiss: () => undefined,
   dismissToast: () => undefined,
-  markAllRead: () => undefined,
+  markRead: () => undefined,
   clear: () => undefined,
   ...state,
 });

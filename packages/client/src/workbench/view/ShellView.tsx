@@ -127,7 +127,8 @@ export const ShellView = observer(function ShellView() {
                     severity={item.severity}
                     message={item.message}
                     timeout={item.timeout}
-                    onDismiss={() => notifications.dismissToast(item.id)}
+                    onDismiss={() => notifications.markRead(item.id)}
+                    onTimeout={() => notifications.dismissToast(item.id)}
                   />
                 ))}
               </Toast>

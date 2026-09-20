@@ -31,19 +31,32 @@ describe("INotificationViewModel", () => {
     notifications.notify("error", "실패");
     expect(viewModel.unreadCount).toBe(1);
 
-    viewModel.markAllRead();
+    viewModel.markRead("n");
 
     expect(viewModel.items).toHaveLength(1);
     expect(viewModel.unreadCount).toBe(0);
   });
 
-  it("여는 명령을 스스로 등록하고, 열면서 다 읽음으로 만든다", () => {
+  it("여는 명령을 스스로 등록한다 — 여는 것은 읽는 것이 아니다", () => {
     const { notifications, commands, viewModel, open } = make();
     notifications.notify("warning", "느리다");
 
     commands.execute("shell.openNotifications");
 
     expect(open).toHaveBeenCalledTimes(1);
+    expect(viewModel.unreadCount).toBe(1);
+  });
+
+  it("읽으면 토스트에서 빠지고, 시간이 다 되어 걷힌 것은 안 읽음으로 남는다", () => {
+    const { notifications, viewModel } = make();
+    notifications.notify("info", "저장했다");
+    expect(viewModel.toasts).toHaveLength(1);
+
+    viewModel.dismissToast("n");
+    expect(viewModel.toasts).toEqual([]);
+    expect(viewModel.unreadCount).toBe(1);
+
+    viewModel.markRead("n");
     expect(viewModel.unreadCount).toBe(0);
   });
 

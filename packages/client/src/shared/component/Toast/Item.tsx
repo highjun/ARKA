@@ -21,10 +21,12 @@ export interface ToastItemProps extends Omit<ComponentPropsWithoutRef<"div">, "c
   readonly message: string;
   /** 아래 오른쪽 단추. 없으면 그 줄도 없다. */
   readonly action?: ReactNode;
-  /** 밀리초. 주면 스스로 사라진다. 없으면 ×로만 닫힌다. */
+  /** 밀리초. 주면 스스로 사라진다. 없으면 누를 때까지 머문다. */
   readonly timeout?: number;
-  /** ×를 누르거나 시간이 다 됐을 때. */
+  /** ×를 눌렀을 때. **사람이 본 것이다** — 받는 쪽이 읽음으로 셀 수 있다. */
   readonly onDismiss?: () => void;
+  /** `timeout`이 다 됐을 때. 없으면 `onDismiss`가 대신 온다 — 누른 것과 구별하려면 둘 다 준다. */
+  readonly onTimeout?: () => void;
 }
 
 /**
@@ -32,6 +34,9 @@ export interface ToastItemProps extends Omit<ComponentPropsWithoutRef<"div">, "c
  *
  * `timeout`을 주면 그만큼 뒤에 스스로 닫는다. 시계를 **컴포넌트가 든다**: 언제 뜨는지는
  * 화면이 아는 일이라, 목록을 쥔 쪽이 줄마다 타이머를 거는 것보다 여기가 가깝다.
+ *
+ * **×와 시계를 가른다** — 누른 것은 사람이 본 것이고 시간이 다 된 것은 아니다. 그 차이를
+ * 쓰는 쪽은 `onTimeout`을 함께 준다.
  */
 export const ToastItem = ({
   severity,
@@ -39,15 +44,16 @@ export const ToastItem = ({
   action,
   timeout,
   onDismiss,
+  onTimeout,
   className,
   ref,
   ...props
 }: ToastItemProps) => {
   useEffect(() => {
     if (timeout === undefined) return undefined;
-    const id = setTimeout(() => onDismiss?.(), timeout);
+    const id = setTimeout(() => (onTimeout ?? onDismiss)?.(), timeout);
     return () => clearTimeout(id);
-  }, [timeout, onDismiss]);
+  }, [timeout, onTimeout, onDismiss]);
 
   return (
     <div

@@ -73,3 +73,24 @@
   flex-direction: column;
   gap: 2px;
 }
+
+/* 누르는 줄. 글처럼 보이게 단추의 겉을 걷는다 — 신호는 면의 밝기(`data-unread`)가 이미 든다. */
+.read {
+  display: flex;
+  min-width: 0;
+  flex-grow: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  border: none;
+  border-radius: var(--borderRadius-small);
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  text-align: start;
+  appearance: none;
+}
+
+.read:hover {
+  background-color: var(--bgColor-neutral-muted);
+}

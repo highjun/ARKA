@@ -71,7 +71,7 @@ describe("registerServices", () => {
       expect(screen.getByLabelText("알림")).toBeDefined();
     });
 
-    it("알림이 오면 안 읽은 수가 붙고, 종을 누르면 탭이 열리며 읽음이 된다", async () => {
+    it("알림이 오면 안 읽은 수가 붙고, 종을 누르면 탭이 열린다 — 여는 것은 읽는 것이 아니다", async () => {
       const container = mountWith(new MockWorkspaceFiles({}));
       act(() => {
         container.resolve("arka.workbench.notifications").notify("error", "터졌다");
@@ -79,7 +79,12 @@ describe("registerServices", () => {
 
       fireEvent.click(await screen.findByLabelText("안 읽은 알림 1건"));
 
-      expect(await screen.findByText("터졌다")).toBeDefined();
+      // 탭이 열리고 구석의 토스트는 걷혔지만, 아직 아무도 누르지 않았으니 안 읽음이다.
+      const row = await screen.findByRole("button", { name: /터졌다/u });
+      expect(screen.getByLabelText("안 읽은 알림 1건")).toBeDefined();
+
+      fireEvent.click(row);
+
       expect(await screen.findByLabelText("알림")).toBeDefined();
     });
   });
