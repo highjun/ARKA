@@ -497,12 +497,25 @@ globalThis.__arka.meta = (() => {
     },
     Tab: {
       가상: true,
-      설명: "workbench/component/Tab · 편집 자리 한 벌 (루트)",
+      설명: "workbench/component/Tab · 편집 자리 한 벌 (L1 루트) — 안에 `Split` 하나거나 `Group` 하나",
       props: {
         tree: { t: "object", d: "주면 `Tab.Split`, 없으면 `Tab.Group` 이 선다. 갈래를 정하는 것이 이 하나다" },
         chrome: { t: "enum", d: "bordered | none. none 이면 테두리를 안 그린다. 기본 bordered" },
       },
-      부품: ["Tab/Actions", "Tab/Header", "Tab/Strip", "Tab/Group", "Tab/Split"],
+      부품: ["Tab/Header", "Tab/Actions", "Tab/Strip", "Tab/Panel", "Tab/Group", "Tab/Split"],
+      /**
+       * **네 겹이다.** 부품이 여섯이라 그냥 늘어놓으면 무엇이 무엇 안에 있는지가 안 보인다.
+       * 시트의 부품 목록이 이 값을 「계층」 칸으로 세운다 — 루트는 `부품` 에 없으므로 L1 이다.
+       */
+      계층: {
+        "Tab/Header": "L4",
+        "Tab/Actions": "L4",
+        "Tab/Strip": "L3",
+        "Tab/Panel": "L3",
+        "Tab/Group": "L2",
+        "Tab/Split": "L2",
+        Tab: "L1",
+      },
     },
 
     "Menu/Content": {
@@ -626,14 +639,6 @@ globalThis.__arka.meta = (() => {
       },
       css: { state: "`:hover` 가 면을 밝힌다" },
     },
-    SideBar: {
-      설명: "workbench/component/SideBar (예상 자리) · 왼쪽 300px. 제목 줄 + 본문",
-      props: {
-        title: { t: "string", d: '대문자로 적히는 제목 — "EXPLORER"' },
-        actions: { t: "slot", d: "제목 줄 오른쪽 아이콘들" },
-        children: { t: "slot", d: "본문 — 확장 뷰 하나가 통째로 든다" },
-      },
-    },
     ActivityBar: {
       설명: "workbench/component/ActivityBar · 왼쪽 48px 레일. 위 묶음과 아래 묶음이 별개다",
       props: {
@@ -669,7 +674,7 @@ globalThis.__arka.meta = (() => {
       css: { state: "`:hover` `:active` `:focus-visible`" },
     },
     Panel: {
-      설명: "workbench/component/Panel · 머리와 내용 둘뿐인 그릇. 사이드바와 아래 독이 이것이다",
+      설명: "workbench/component/Panel · 머리와 내용 둘뿐인 그릇. 사이드바와 아래 독이 이것이다 — 따로 `SideBar` 를 두지 않는다",
       props: {
         density: { t: "enum", d: "comfortable | compact. compact 면 머리가 얕고 제목이 대문자가 된다" },
         title: { t: "slot", d: "머리 왼쪽. 아이콘을 섞을 수 있어 글자가 아니다" },
@@ -687,8 +692,15 @@ globalThis.__arka.meta = (() => {
         actions: { t: "slot", d: "오른쪽 아이콘들" },
       },
     },
+    "Tab/Panel": {
+      설명: "workbench/component/Tab · (L3) 고른 탭의 본문이 서는 자리. 확장의 편집기가 여기 꽂힌다",
+      props: {
+        children: { t: "slot", d: "고른 탭의 내용. 코드에선 `Container` 가 감싼 `role=tabpanel` 이다" },
+        emptyMessage: { t: "slot", d: '고른 탭이 없을 때 — 기본 "No selected tab"' },
+      },
+    },
     "Tab/Strip": {
-      설명: "workbench/component/Tab · Tab.Strip · 탭 띠 한 겹",
+      설명: "workbench/component/Tab · Tab.Strip · (L3) `Header` 여럿과 오른쪽 `Actions` 로 된 띠 한 겹",
       props: {
         tabItems: { t: "object", d: "탭들 — `[{ id, title, iconId, isDirty, isPreview }]`" },
         activeTab: { t: "string", d: "지금 탭의 id" },
@@ -703,7 +715,7 @@ globalThis.__arka.meta = (() => {
       },
     },
     "Tab/Header": {
-      설명: "workbench/component/Tab · Tab.Header · 탭 하나. 아이콘 · 이름 · 닫기",
+      설명: "workbench/component/Tab · Tab.Header · (L4) 탭 하나. 아이콘 · 이름 · 닫기",
       props: {
         active: { t: "boolean", n: "isActive", d: "지금 보는 탭. 닫기 단추가 자리를 차지한다" },
         dirty: { t: "boolean", n: "isDirty", d: "안 저장됨. 닫기 자리에 점이 뜬다" },
@@ -716,7 +728,7 @@ globalThis.__arka.meta = (() => {
       css: { state: "`:hover` 가 비활성 탭의 이름을 밝힌다" },
     },
     "Tab/Group": {
-      설명: "workbench/component/Tab · Tab.Group · 탭 띠와 그 아래 내용. 편집 자리 한 칸",
+      설명: "workbench/component/Tab · Tab.Group · (L2) `Strip` 하나 + `Panel` 하나. 편집 자리 한 칸",
       props: {
         tabItems: { t: "object", d: "탭들 — `[{ id, title, iconId, isDirty, isPreview, content }]`" },
         activeTab: { t: "string", d: "지금 탭의 id. `defaultActiveTab` 과 짝" },
@@ -729,7 +741,7 @@ globalThis.__arka.meta = (() => {
       },
     },
     "Tab/Split": {
-      설명: "workbench/component/Tab · Tab.Split · 그룹 둘을 Sash 로 가른 편집 자리",
+      설명: "workbench/component/Tab · Tab.Split · (L2) `Group` 둘 이상을 `Sash` 로 가른다",
       props: {
         tree: { t: "object", d: "가름을 담은 재귀 트리 — leaf 이거나 split 이다" },
         activeLeaf: { t: "string", d: "지금 자리의 id. 그 그룹의 탭만 밝다" },
@@ -739,7 +751,7 @@ globalThis.__arka.meta = (() => {
       },
     },
     "Tab/Actions": {
-      설명: "workbench/component/Tab · 그룹 오른쪽 위 아이콘. 코드엔 넘침 하나뿐이다",
+      설명: "workbench/component/Tab · (L4) 띠 오른쪽 끝 아이콘들. 코드엔 넘침 하나뿐이다",
       props: { actions: { t: "slot", d: "놓을 아이콘 단추들" } },
     },
     Sash: {
@@ -849,7 +861,7 @@ globalThis.__arka.meta = (() => {
     // **차례는 작은 것부터다** — 원자에서 시작해 구역을 거쳐 창 한 장으로 끝난다.
     "02 Workbench": [
       ["Activity Bar", ["ActivityBar"]],
-      ["Sidebar", ["Panel", "SideBar"]],
+      ["Sidebar", ["Panel"]],
       ["Editor", ["Tab"]],
       ["Overlays", ["CommandPalette"]],
       ["Screen", ["SettingsEditor"]],

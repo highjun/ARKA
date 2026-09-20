@@ -249,6 +249,7 @@ globalThis.__arka.spec = (() => {
   };
 
   const T_NUM = 56,
+    T_LEVEL = 48,
     T_GROUP = 120,
     T_NAME = 180,
     T_TYPE = 96,
@@ -326,19 +327,43 @@ globalThis.__arka.spec = (() => {
    * 이게 없으면 시트가 곧장 첫 부품으로 뛰어들어, 읽는 사람이 끝까지 스크롤해야 절이 몇인지
    * 안다. **`#` 칸에 절 번호를 그대로 적는다** — `28.4` 를 보고 내려가면 `28.4. Item` 이 있다.
    *
-   * @param 절들 - `[{ 번호, 이름, 무엇 }]`.
+   * **`meta` 에 `계층` 이 있으면 그 칸이 하나 더 선다**(`Tab` 하나가 쓴다). 부품이 여섯쯤
+   * 되면 늘어놓는 것만으로는 무엇이 무엇 안에 있는지가 안 보인다.
+   *
+   * @param 절들 - `[{ 번호, 이름, 무엇, 계층 }]`.
    */
   const partIndex = async (into, 절들, 번호) => {
     const blk = box("Parts", "VERTICAL", GAP_LABEL);
     into.appendChild(blk);
     blk.appendChild(await text(`${번호} 부품 목록`, "Title/Medium", "fgColor/default", "Head"));
+    const 계층있나 = 절들.some((절) => 절.계층);
     return await table(
       blk,
       "Parts Table",
-      ["#", "name", "무엇"],
-      절들.map((절) => [절.번호, 절.이름, 절.무엇]),
-      [T_NUM, T_NAME, null],
+      계층있나 ? ["#", "계층", "name", "무엇"] : ["#", "name", "무엇"],
+      절들.map((절) => (계층있나 ? [절.번호, 절.계층 ?? "", 절.이름, 절.무엇] : [절.번호, 절.이름, 절.무엇])),
+      계층있나 ? [T_NUM, T_LEVEL, T_NAME, null] : [T_NUM, T_NAME, null],
     );
+  };
+
+  /**
+   * 문서 열 폭을 못 박는다 — 덤프가 시트마다 같은 x 에서 시작하게.
+   *
+   * **자식에서 재고, 덤프까지 다 짠 뒤에 부른다.** 부품을 덤프로 옮기기 전에 재면 아직 자리를
+   * 못 잡은 폭이 잡혀 시트가 옆으로 수천 px 부푼다(2026-09-20 실측: 자식이 다 1092 이하인데
+   * 7732 로 굳었다).
+   */
+  const fitDoc = (doc) => fixW(doc, Math.max(DOC_W, ...doc.children.map((c) => Math.ceil(c.width))));
+
+  /**
+   * 덤프에 낱개 컴포넌트를 놓는다.
+   *
+   * **폭을 FIXED 로 못 박는다.** 컴포넌트가 `FILL` 인 채로 오토레이아웃 칸에 들어가면 그 칸의
+   * 폭까지 늘어나고, 그 폭이 다시 시트 폭을 밀어 수천 px 로 부푼다(2026-09-20 `Tab/Panel` 실측).
+   */
+  const putInDump = (dump, node) => {
+    dump.appendChild(node);
+    if (node.layoutSizingHorizontal === "FILL") node.layoutSizingHorizontal = "FIXED";
   };
 
   /** 세트를 오른쪽 덤프로 접는다. */
@@ -449,14 +474,13 @@ globalThis.__arka.spec = (() => {
       const axisW = await measureAxes([set]);
       // 부품이 없으니 절이 곧 견본 묶음이다 — `6.1. Props` · `6.2. CSS-State`.
       const 인스턴스 = await blocks(doc, set, { defaults, axisW, prefix: N ? `${N}.` : "", 층: "Title/Medium" });
-      // 덤프가 시트마다 같은 x 에서 시작하도록 문서 너비를 못 박는다. 다만 축 값이 많아
-      // 줄이 더 길면 그쪽에 맞춘다 — 고정폭보다 넓은 줄은 삐져나가기 때문이다.
-      fixW(doc, Math.max(DOC_W, Math.ceil(doc.width)));
-
       const dump = box(`${setName} Variants`, "VERTICAL", 12);
       sheet.appendChild(dump);
       dump.appendChild(await text("Variants", "Caption", "fgColor/muted", "Caption"));
       await dumpInto(dump, set);
+      // 덤프가 시트마다 같은 x 에서 시작하도록 문서 너비를 못 박는다. 다만 축 값이 많아
+      // 줄이 더 길면 그쪽에 맞춘다 — 고정폭보다 넓은 줄은 삐져나가기 때문이다.
+      fitDoc(doc);
 
       return {
         세트: setName,
@@ -503,8 +527,10 @@ globalThis.__arka.spec = (() => {
       const axisW = await measureAxes(nodes.filter(Boolean));
       // **`N.1` 은 부품 목록, 절은 `N.2` 부터.** 차례의 `#` 와 절 제목이 글자로 같아야 눈이 따라간다.
       const 짧게 = (full) => (full.includes("/") ? full.split("/").slice(1).join("/") : full);
+      const 계층 = meta()?.of(name)?.계층 ?? {};
       const 절들 = 이름들.map((full, i) => ({
         번호: N ? `${N}.${String(i + 2)}` : String(i + 1),
+        계층: 계층[full] ?? "",
         이름: 짧게(full),
         무엇: meta()?.of(full)?.설명 ?? "",
         full,
@@ -547,19 +573,21 @@ globalThis.__arka.spec = (() => {
               : node.createInstance();
           inst.name = 절.이름;
           r.appendChild(inst);
+          // **견본은 제 크기로 선다.** 바탕이 `FILL` 이면 인스턴스가 그것을 물려받아 칸을
+          // 밀고, 그 폭이 다시 문서 열을 부풀린다(2026-09-20 `Tab/Panel`·`ActivityBar/Top` 실측).
+          if (inst.layoutSizingHorizontal === "FILL") inst.layoutSizingHorizontal = "FIXED";
           인스턴스 += 1;
         }
       }
-      fixW(doc, Math.max(DOC_W, Math.ceil(doc.width)));
-
       const dump = box(`${name} Variants`, "VERTICAL", 20);
       sheet.appendChild(dump);
       dump.appendChild(await text("Variants", "Caption", "fgColor/muted", "Caption"));
       for (const node of nodes) {
         if (!node) continue;
         if (node.type === "COMPONENT_SET") await dumpInto(dump, node);
-        else dump.appendChild(node);
+        else putInDump(dump, node);
       }
+      fitDoc(doc);
 
       return {
         시트: name,
@@ -592,7 +620,7 @@ globalThis.__arka.spec = (() => {
         prefix: N ? `${N}.` : "",
         층: "Title/Medium",
       });
-      fixW(doc, Math.max(DOC_W, Math.ceil(doc.width)));
+      fitDoc(doc);
       return { 세트: comp.name, 인스턴스, 표, 변형: 0, 크기: `${Math.round(sheet.width)}x${Math.round(sheet.height)}` };
     },
 
@@ -612,10 +640,13 @@ globalThis.__arka.spec = (() => {
 
       // **레이어 이름은 영어에 번호, 보이는 글은 한글이다.** 앞자리 `00` 이 시트 앞에 세운다.
       const 이름 = "00 Contents";
-      const 옛것 = [`${pageName} 목차`, 이름];
+      const 옛것 = new Set([`${pageName} 목차`, 이름]);
       const sec = page.children.find((c) => c.type === "SECTION" && c.name === "Components");
       const home = sec ?? page;
-      for (const 어디 of [page, home]) for (const c of [...어디.children]) if (옛것.includes(c.name)) c.remove();
+      // **깊이를 가리지 않고 걷는다.** `layout()` 이 목차를 `Page` 안으로 옮기므로 직속 자식만
+      // 보면 못 찾아 한 페이지에 둘이 선다(2026-09-20 실측).
+      for (const c of [...page.findAll((n) => 옛것.has(n.name)), ...page.children.filter((n) => 옛것.has(n.name))])
+        c.remove();
 
       const frame = box(이름, "VERTICAL", GAP_LABEL, { fill: "bgColor/default", pad: PAD });
       home.appendChild(frame);
@@ -773,6 +804,16 @@ globalThis.__arka.spec = (() => {
         .map((c) => `${c.name} ← ${c.parent?.name ?? "?"}`);
       const 판 = sec.children.find((c) => c.type === "FRAME" && c.name === "Page");
 
+      // **문서 열이 자식보다 넓으면 부푼 것이다.** 자리를 못 잡은 폭을 굳히면 이렇게 되고,
+      // 겹치지는 않지만 시트 하나가 옆으로 수천 px 뻗어 페이지를 못 읽게 만든다.
+      const 부푼시트 = [];
+      for (const c of sh) {
+        const doc = c.children.find((x) => x.name === "Doc");
+        if (!doc?.children.length) continue;
+        const 최대 = Math.max(DOC_W, ...doc.children.map((x) => Math.ceil(x.width)));
+        if (Math.round(doc.width) > 최대) 부푼시트.push(`${c.name} ${Math.round(doc.width)} > ${최대}`);
+      }
+
       return {
         시트: sh.length,
         세트: sec.findAll((n) => n.type === "COMPONENT_SET").length,
@@ -780,6 +821,7 @@ globalThis.__arka.spec = (() => {
         끊긴인스턴스: 끊김,
         흐름밖시트,
         이름틀린시트,
+        부푼시트,
         섹션이판보다큰가: 판 ? Math.round(sec.height - 판.height) : "Page 없음",
         고정폭글자: sec.findAll((n) => n.type === "TEXT" && n.textAutoResize === "NONE").length,
         스타일없는글자: sec.findAll((n) => n.type === "TEXT" && !n.textStyleId).length,
