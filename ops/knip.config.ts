@@ -31,7 +31,7 @@ const config: KnipConfig = {
         "lint/run.ts",
         "lint/index.ts",
         "deploy/{build,smoke,anonSmoke}.ts",
-        "{preCommit,prePush}.ts",
+        "hooks/{preCommit,prePush}.ts",
         "*.config.ts",
       ],
       project: ["**/*.ts"],
