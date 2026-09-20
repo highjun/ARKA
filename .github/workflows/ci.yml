@@ -25,6 +25,11 @@ jobs:
       LATEST: ghcr.io/${{ github.repository_owner }}/arka:latest
       ARKA_NAME: ci
       ARKA_WORKSPACE: /tmp/arka-ci-workspace
+      NODE_ENV: production
+      ARKA_CONTAINER_HOST: 0.0.0.0
+      ARKA_CONTAINER_PORT: "3000"
+      ARKA_CONTAINER_WORKSPACE: /workspace
+      ARKA_CLIENT_ROOT: /app/dist/client
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -106,12 +111,13 @@ jobs:
           set -a; . "$HOME/ARKA/secure/env/arka.env"; set +a
           node ops/deploy/renderTunnel.ts "$RUNNER_TEMP/cloudflared.yml"
           ARKA_TUNNEL_CONFIG="$RUNNER_TEMP/cloudflared.yml" ARKA_IMAGE="$IMAGE" \
-            docker compose -f ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
+            docker compose -f ops/deploy/compose.yml -f ops/deploy/compose.tunnel.yml \
+              up -d --no-build --wait
 
       - name: 익명 접근이 막히는지 본다
         run: |
           set -a; . "$HOME/ARKA/secure/env/arka.env"; set +a
-          node ops/deploy/smoke/anon.ts "$ARKA_ORIGIN"
+          node ops/smoke/anon.ts "$ARKA_ORIGIN"
 
       - name: 안 쓰는 이미지를 걷는다
         if: always()
