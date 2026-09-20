@@ -11,7 +11,7 @@ import { Panel } from "./Panel";
 import * as stories from "./Panel.stories";
 
 /**
- * 스토리를 그대로 가져다 단정한다(→ ADR 0010). 그림과 테스트가 **같은 입력**을 보므로, 스토리가
+ * 스토리를 그대로 가져다 단정한다. 그림과 테스트가 **같은 입력**을 보므로, 스토리가
  * 낡으면 테스트가 알려준다 — 값을 두 곳에 적어 두면 한쪽만 고쳐지는 일이 생긴다.
  */
 const { Compact, NoHeader } = composeStories(stories);

@@ -12,12 +12,11 @@ import styles from "./DirectoryTreeView.module.css";
 
 /**
  * DI·구독·마크업이 한 파일에 있다 — `binding.tsx`+`styled.tsx` 분리가 지키려던 것("DI를 아는
- * 파일을 하나로 가둔다")은 이제 호출 표면 제한(→ ADR 0007 — `useViewModel`
- * 하나만 부른다)으로 지킨다(2026-09-04, D9). Storybook 격리 렌더링이라는 원래 명분은 실현된 적이
+ * 파일을 하나로 가둔다")은 이제 호출 표면 제한(`useViewModel` 하나만 부른다)으로 지킨다(2026-09-04, D9). Storybook 격리 렌더링이라는 원래 명분은 실현된 적이
  * 없어서(스토리는 있었지만 아무도 안 열어봄) 그 파일과 함께 스토리도 지웠다.
  *
  * 우클릭 메뉴·삭제 확인의 **상태와 결정**은 전부 `IDirectoryTreeViewModel`에 있다 — 이 파일에는
- * `useState`/`useEffect`/`useCallback`이 없다(→ ADR 0007). 이름 입력은
+ * `useState`/`useEffect`/`useCallback`이 없다. 이름 입력은
  * 더는 `Dialog`+`TextInput` 모달이 아니다 — `FileTree`의 `editingId`가 트리 행 자체를 `<input>`
  * 으로 바꾼다(2026-09-05, B8) — 새 파일/새 폴더도 실존하지 않는 "유령 행"을 그 자리로 끼워 넣어
  * 같은 인라인 입력을 쓴다(`IDirectoryTreeViewModel`의 `#withEditingGhost`).

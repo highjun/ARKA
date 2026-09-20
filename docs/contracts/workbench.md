@@ -486,7 +486,7 @@ export interface KeybindingRow {
 
 ## `workbench/component` — Props
 
-컴포넌트는 원소 속성 위에 얇게 얹고 변형은 `data-<축>`으로 싣는다(→ [ADR 0008](../adr/0008-component-surface.md)).
+컴포넌트는 원소 속성 위에 얇게 얹고 변형은 `data-<축>`으로 싣는다.
 
 ```ts
 /**

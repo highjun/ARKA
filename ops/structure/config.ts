@@ -75,11 +75,11 @@ export const declaredPackages = (): ReadonlySet<string> => {
 
 /**
  * `.github/workflows/*.yml`이 선언한 잡 — **id와 `name:` 둘 다 담는다.** 두 이름이 갈린 자리가
- * 실제로 있다(`storybook.yml`은 id가 `publish`, `name`이 `storybook`). ADR은 사람이 보는 이름으로
- * 인용하므로 어느 쪽이든 받는다.
+ * 실제로 있다(`storybook.yml`은 id가 `publish`, `name`이 `storybook`). 인용하는 쪽이 사람이 보는
+ * 이름을 쓰기도 해서 어느 쪽이든 받는다.
  *
  * **YAML 파서를 들이지 않는다** — 워크플로가 둘이고 잡 선언이 들여쓰기 두 칸으로 평평해,
- * 의존성 하나가 이 정규식보다 비싸다(→ ADR 0003).
+ * 의존성 하나가 이 정규식보다 비싸다.
  */
 export const workflowJobs = (): ReadonlySet<string> => {
   const names = new Set<string>();

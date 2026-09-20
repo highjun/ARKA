@@ -1,8 +1,7 @@
-# 배치·설정·결정이 사는 자리. 파급이 전역이라 리뷰 요청이 자동으로 붙어야 한다(→ ADR 0003).
+# 배치·설정·결정이 사는 자리. 파급이 전역이라 리뷰 요청이 자동으로 붙어야 한다.
 # 로컬에서 막는 훅은 없다 — 모든 변경이 PR을 거치고, 여기 적힌 자리는 사용자 리뷰가 자동으로 붙는다.
 
 /.github/        @highjun
 /ops/deploy/     @highjun
 /CLAUDE.md       @highjun
 /docs/CONVENTIONS.md  @highjun
-/docs/adr/       @highjun

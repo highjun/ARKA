@@ -10,7 +10,7 @@ const foldersIn = (dir: string): string[] =>
   readdirSync(dir).filter((entry) => statSync(path.join(dir, entry)).isDirectory());
 
 /**
- * **슬라이스 안의 계층은 이 다섯뿐이다**(→ [ADR 0007](../../../docs/adr/0007-client-layers.md)의
+ * **슬라이스 안의 계층은 이 다섯뿐이다**(의
  * server 판). 늘리려면 이 줄과 `eslint.config.ts`의 `LAYER_ALLOW`를 함께 고쳐야 한다 —
  * 의존 방향을 정하지 않은 계층이 생기면 zone이 그 폴더를 아예 안 본다.
  */

@@ -11,7 +11,7 @@ import * as Dropdown from "@radix-ui/react-dropdown-menu";
  * 값 하나를 고르는 목록. `Menu`의 `RadioGroup`·`RadioItem`이었던 것을 떼어 냈다(2026-09-18) —
  * 메뉴는 동작 목록이고 값을 고르는 것은 다른 부품이다(Figma 의 오버레이 분류와 맞춘다).
  *
- * `Menu`와 같은 이유로 Radix 를 쓴다(→ ADR 0009). 우클릭 `kind`는 없다 — 값 고르기는 늘 단추가 연다.
+ * `Menu`와 같은 이유로 Radix 를 쓴다. 우클릭 `kind`는 없다 — 값 고르기는 늘 단추가 연다.
  * props 를 라이브러리 타입에서 파생시키지 않고 직접 선언한다 — 계약이 라이브러리를 따라 바뀌지 않게.
  */
 export interface SelectProps {

@@ -29,7 +29,7 @@ export interface ContainerProps extends ComponentPropsWithoutRef<"div"> {
  * 스크롤바 모양이 앱 전체에서 같아야 하기 때문이다.
  *
  * 예전에는 Radix ScrollArea로 스크롤바를 직접 그렸다. `scrollbar-width`·`scrollbar-color`가
- * Baseline에 들어오면서 그 일이 CSS 두 줄이 됐고(→ ADR 0009), 라이브러리가 끼워 넣던 래퍼
+ * Baseline에 들어오면서 그 일이 CSS 두 줄이 됐고, 라이브러리가 끼워 넣던 래퍼
  * `div`를 우회하느라 쌓였던 CSS 다섯 뭉치가 함께 사라졌다 — 퍼센트 높이가 끊기던 것,
  * `display: table` 때문에 ellipsis가 안 걸리던 것, 빈 공간에서 우클릭이 안 먹던 것이 전부
  * 그 래퍼 탓이었다.

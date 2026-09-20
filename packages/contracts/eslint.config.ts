@@ -2,7 +2,7 @@ import ops from "ops/lint";
 
 /**
  * contracts는 **아무도 import하지 않는다.** 양쪽이 다 필요한 코드라면 이미 여기 있어야 하고,
- * 한쪽만 쓰는 코드라면 여기서 빼야 한다(→ ADR 0001).
+ * 한쪽만 쓰는 코드라면 여기서 빼야 한다.
  */
 export default [
   ...ops.configs.base,

@@ -1,6 +1,6 @@
 # 컨벤션
 
-에이전트가 작업할 때 지켜야 할 규칙. 왜 그렇게 정했는지는 각 항목의 ADR에 있다.
+에이전트가 작업할 때 지켜야 할 규칙.
 
 ## 작업 방식
 
@@ -21,7 +21,7 @@
 
 사용자가 코드를 읽고 의도대로 되었는지 판정하는 절차다. 판정은 사용자만 한다 — 에이전트는 자료를 준비할 뿐 Accept/Reject를 스스로 정하지 않는다.
 
-거기서 나온 것은 **둘 중 하나로만** 나간다 — 결정이면 `docs/adr/`, 할 일이면 `docs/tasks/`. **중간 문서를 두지 않는다.** 진행 상황·후보·계획을 담는 산문 문서를 세 번 만들었다가 세 번 다 낡혔다(`REVIEW_CHECKLIST`·`ADR_CANDIDATE`·`lint-plan`). 낡는 이유는 같다 — 아무도 검사하지 않는 목록이라서다.
+거기서 나온 것은 **할 일로만** 나간다 — `docs/tasks/`. **중간 문서를 두지 않는다.** 진행 상황·후보·계획을 담는 산문 문서를 네 번 만들었다가 네 번 다 낡혔다(`REVIEW_CHECKLIST`·`ADR_CANDIDATE`·`lint-plan`·`docs/adr/`). 낡는 이유는 같다 — 아무도 검사하지 않는 목록이라서다.
 
 ### 계약 우선 리뷰
 
@@ -56,13 +56,13 @@
 
 ### 브랜치
 
-- **한 번에 한 슬라이스. 브랜치 = 슬라이스** — 여러 슬라이스를 한 브랜치에서 건드리면 검토가 뒤섞인다. **저장소 전체를 다스리는 라운드(린트·파이프라인·규약)는 예외다** — 규칙 하나를 켜면 닿는 슬라이스가 전부다. 그래서 이것은 기계가 아니라 리뷰가 본다(→ [ADR 0011](adr/0011-lint-off-the-shelf.md)).
+- **한 번에 한 슬라이스. 브랜치 = 슬라이스** — 여러 슬라이스를 한 브랜치에서 건드리면 검토가 뒤섞인다. **저장소 전체를 다스리는 라운드(린트·파이프라인·규약)는 예외다** — 규칙 하나를 켜면 닿는 슬라이스가 전부다. 그래서 이것은 기계가 아니라 리뷰가 본다.
 - **`core/`·`contracts/` 변경은 별도 브랜치로 먼저 머지한다.** 파급이 어디까지 갈지 정적으로 알 수 없다.
 - 브랜치 수명은 짧게. 에이전트는 빠르게 많이 만들어내므로 오래 두면 충돌 규모가 감당 불가가 된다.
 
 ### PR과 머지
 
-GitHub Flow다. `main` 하나가 언제나 배포 가능하고 나머지는 짧게 사는 브랜치다(→ [ADR 0005](adr/0005-ci-gate.md)).
+GitHub Flow다. `main` 하나가 언제나 배포 가능하고 나머지는 짧게 사는 브랜치다.
 
 ```sh
 git switch -c feat/검색-패널        # main에서 딴다
@@ -117,79 +117,7 @@ printf '%s' "feat(client): 검색 패널을 연다" | pnpm --filter ops exec com
 2. **추상화는 사례 2~3개 뒤에** — 이벤트 버스, 기여 지점, 서버 DI
 3. **되돌리기 비싼 것을 먼저** — contracts, 이벤트 스키마, 의존 방향, 인증 자리
 
-## ADR
-
-구조 결정의 **정본이자 유일한 자리**다. `docs/adr/NNNN-kebab-case.md`. 아직 못 정한 것은 ADR이 아니라 **할 일**이므로 `docs/tasks/`로 간다 — 결정을 반쯤 적어 둔 문서를 따로 만들지 않는다.
-
-### 형식 — 6절 고정
-
-```markdown
-# ADR NNNN: <결정을 서술하는 한 문장>
-
-## 맥락:
-<왜 지금 정해야 했나. 3문장 이하.>
-
-## 결정:
-- <정한 것>
-
-## 기각:
-- <대안> — <사유>
-
-## 대가:
-<감수하는 비용·위험. 감수할 것이 없으면 절을 통째로 뺀다.>
-
-## 강제:
-- **린트** `import-x/no-restricted-paths` — <무엇을 막는지>
-- **리뷰** — "이 셋으로 나눈 게 맞는가"는 사람만 판정한다
-
-## 상태:
-승인됨 (2026-09-08)
-```
-
-`대가:`만 선택이고 나머지 다섯은 필수다. 자리는 고정이다.
-
-### 각 절에 무엇을 쓰나
-
-- **맥락** — 왜 *지금* 정해야 했나. **3문장 상한.** 결정문 안에 이미 섞여 있는 경우가 많으니 꺼내 오면 된다.
-- **결정** — 정한 것만. 구현 세부·릴리스 노트를 쓰지 않는다.
-- **기각** — 실제로 고려하고 버린 대안과 사유. `<대안> — <사유>` 한 줄씩, 대안마다 한 불릿.
-- **대가** — Consequences의 **부정 절반만**. "결과"로 두면 자화자찬 절이 된다. **`기각:`으로 설명되는 것은 여기 다시 쓰지 않는다** — 대안을 버려서 잃은 것(예: Turborepo를 기각했으니 빌드 캐싱이 없다)은 이미 `기각:`의 대우다. `대가:`에는 **고른 길 자체가 무는 값**만 적는다.
-- **강제** — "이 코드가 잘못 동작하면 누가 알려주는가"를 결정 자신에게 되묻는 절이다. 줄마다 **알려주는 장치를 이름으로** 먼저 적는다(`- **린트**`·`- **테스트**`·`- **타입**`·`- **리뷰**`·`- **stylelint**`·`- **룰셋**`·`- **CODEOWNERS**` …). 쓸 수 있는 이름의 집합은 `ops/structure/adr.test.ts`가 들고 있다 — 늘리려면 그 파일을 고쳐야 하고, 그것이 리뷰 지점이다.
-  - **`아무도`라는 값은 없다.** 결정이 ADR에 적혀 있고 이 저장소가 리뷰를 하는 한 최소한 `리뷰`가 본다. "아무도 안 본다"는 사실이 아니고, ADR이 스스로를 무의미하다고 선언하게 만든다.
-  - **린트는 규칙 ID로 적는다** — `import-x/no-restricted-paths`, `@eslint-react/no-forward-ref` 처럼. 산문으로 적으면 기계가 실재를 대조할 수 없다. 규칙 하나가 여러 설정을 갖는 경우(zone 등)는 ID 뒤에 무엇을 막는지 덧붙인다. **`ops/structure/adr.test.ts`가 그 ID를 실효 설정과 대조한다** — 접두를 빼먹은 인용이 네 번 났다.
-  - **`리뷰`만 적힌 줄이 다음 린트 규칙의 대기열**이다. `grep -- '- \*\*리뷰\*\*' docs/adr/*.md`로 뽑는다 — 따로 목록을 두지 않는다.
-- **상태** — **한 줄.** 첫 낱말의 어휘는 셋뿐이다. 개정은 같은 줄에 이어 적는다.
-
-```text
-승인됨 (2026-09-08)
-승인됨 (2026-09-08, 사후 기록)
-대체됨 (2026-09-08 → 2026-09-09, → [ADR NNNN](경로))
-폐기됨 (2026-09-08 → 2026-09-09, 이유 한 줄)
-```
-
-**낡은 ADR을 지우지 않는다.** 본문은 그때의 결정이라 변하지 않으므로 상태 줄만 바꾼다 — 그래야 "왜 그때 그렇게 정했나"가 남는다. 대신할 것이 있으면 `대체됨`이고 **그 자리를 반드시 적는다**(`ops/structure/adr.test.ts`가 본다). 대신할 것 없이 죽었으면 `폐기됨`이다.
-
-`제안됨`은 없다 — **ADR 파일은 결정된 뒤에만 생긴다.** 정하는 중인 것은 `docs/tasks/`에 있다. `사후 기록`은 결정과 함께 쓰이지 않았다는 표시로, 도입 커밋 제목에 ADR 번호가 없으면 그렇다.
-
-### 쓰지 않는 것
-
-- **"현재 코드는 어떻다"를 본문에 쓰지 않는다.** 결정은 과거의 사실이라 변하지 않지만 코드는 변한다. 실측을 문서에 캐시하면 코드가 그 격차를 메운 순간 **역방향 거짓말**이 된다 — 이 저장소가 세 번 겪었다. 격차는 할 일 태스크(`docs/tasks/`)로 나간다(제목에 `ADR NNNN`).
-- **지금 있는 폴더를 열거하지 않는다.** 파일트리는 *규칙의 모양*만 남기고 인스턴스 이름(`filesystem`·`git` 같은)은 지운다. 규칙이 인스턴스가 아니라 모양을 보는 것과 같은 이유다.
-- **구현 세부·릴리스 노트를 쓰지 않는다.** 환경변수명·번들러·스크립트 경로는 코드가 정본이고, 필요하면 코드가 `(→ ADR NNNN)`으로 역참조한다.
-- **뒤집힌 결정에 취소선을 긋지 않는다.** 지우고 `상태:` 줄에 개정을 적는다. 죽은 문장이 40줄 예산을 계속 먹고, 같은 사건을 한 ADR은 취소선으로 다른 ADR은 괄호 실측으로 적어 둔 자리가 실제로 났다.
-
-### 길이
-
-**본문 25줄 목표, 40줄 초과 금지.** 소스 30여 곳이 링크하므로 짧아야 링크할 값어치가 있다. 40줄을 넘으면 결정이 둘 이상 섞인 것이니 쪼갠다.
-
-### 인용 표기
-
-- 코드·설정 주석: **`(→ ADR NNNN)`**
-- 마크다운: **`→ [ADR NNNN](경로)`** — 맨경로(`→ docs/adr/…`)를 쓰지 않는다. 파일을 옮기면 조용히 깨진다.
-
-**저장소 밖 원본 아키텍처 문서는 자체 ADR 번호표를 갖고 있고 이 저장소의 번호와 겹친다.** `ADR NNNN`은 언제나 `docs/adr/`의 번호다 — 원본 번호를 옮겨 적지 않는다. → [concept.md](concept.md)
-
-### 규칙을 켜는 시점
+## 규칙을 켜는 시점
 
 - **위반이 0건일 때 켜는 것이 가장 싸다.** 전건 위반인 규칙은 규칙이 아니라 백로그다 — 위반을 먼저 0으로 만들고 켠다.
 - **규칙이 죽어 있어도 초록이다.** 글롭이 어긋나 매치가 0개면 통과한다. 켤 때 일부러 깨뜨려 무는지 보고, `npx eslint --print-config <파일>`로 살아 있는지 확인한다.
@@ -203,29 +131,29 @@ printf '%s' "feat(client): 검색 패널을 연다" | pnpm --filter ops exec com
 ## 주석·문서
 
 - 한글로 쓴다. 코드 식별자와 런타임 문자열(`throw new Error(...)` 등)만 영문.
-- **주석은 자리가 형태와 필수 여부를 정한다.** → [ADR 0004](adr/0004-comment-rules.md)
+- **주석은 자리가 형태와 필수 여부를 정한다.**
   - **공개 선언에는 `/** */`가 필수다** — export function·최상위 화살표·export class·public 메서드·export interface/type/enum. `private`·`protected`·`#private`·constructor는 제외.
   - 선언 위에 주석을 달면 `/** */`다. `//`·`/* */`는 전환한다. 비공개 선언에 문서 블록을 **요구하지는 않는다**.
   - 함수 본문 안에서만 `//`를 쓴다 — 연속 4줄까지, 코드 줄 끝에는 달지 않는다.
   - 타입 표기(`@param {T}`)는 하지 않는다. 시그니처가 말한다.
   - 주석 처리된 코드와 `TODO`·`FIXME`·`XXX`·`HACK`은 남기지 않는다. 미룬 일은 `docs/tasks/`에.
-  - 배경 설명은 ADR로 옮기고 `(→ ADR NNNN)` 링크만 남긴다.
+  - 배경 설명은 `docs/`로 옮기고 링크만 남긴다.
 
 ## 자리
 
-- **다스리는 범위가 하나면 그 안에, 여럿이면 그 위에 둔다.** 설정·테스트·커맨드·의존성 선언·자산·진입점이 모두 대상이다. → [ADR 0002](adr/0002-live-next-to-what-they-govern.md)
-- **`packages/*/src/` 밖은 사용자 승인 없이 건드리지 않는다.** 설정 파일·루트 항목·`ops/`·문서·`test/`가 거기 있고 파급이 전역이다. 늘리는 쪽이 특히 그렇다 — 새 설정·새 의존성·새 스크립트는 넣기 전에 묻는다. → [ADR 0003](adr/0003-approval-outside-src.md)
-- **사용자만 할 수 있는 일은 `docs/USER_NOTE.md` 맨 위 "사용자가 해야 할 일"에 적는다** — sudo, 클라우드 콘솔, 비밀값. **이 파일은 추적하지 않는다**(사용자 개인 메모다). 규칙이 될 내용은 여기나 ADR로 옮긴다.
+- **다스리는 범위가 하나면 그 안에, 여럿이면 그 위에 둔다.** 설정·테스트·커맨드·의존성 선언·자산·진입점이 모두 대상이다.
+- **`packages/*/src/` 밖은 사용자 승인 없이 건드리지 않는다.** 설정 파일·루트 항목·`ops/`·문서·`test/`가 거기 있고 파급이 전역이다. 늘리는 쪽이 특히 그렇다 — 새 설정·새 의존성·새 스크립트는 넣기 전에 묻는다.
+- **사용자만 할 수 있는 일은 `docs/USER_NOTE.md` 맨 위 "사용자가 해야 할 일"에 적는다** — sudo, 클라우드 콘솔, 비밀값. **이 파일은 추적하지 않는다**(사용자 개인 메모다). 규칙이 될 내용은 여기로 옮긴다.
 - **자리를 열거하지 않는다.** 무엇이 어디 있는지 적어 두는 글롭·목록은 대상이 늘 때 따라오지 않는다. 아래 `## 루트`·`## 패키지`·`## 코드 구조`·`## 테스트`는 이 규칙의 적용이다.
 
 ## 루트
 
-- 루트에 놓이는 것은 **패키지들이 공유하는 것**이거나 **루트 자신을 다스리는 것**이다. 아니면 그것을 다스리는 패키지 안으로 들여보낸다 — 설정도 테스트도. → [ADR 0002](adr/0002-live-next-to-what-they-govern.md)
-- 루트도 의미 단위로 묶는다 — `packages/`는 구현(배포된다), `ops/`는 운영 스크립트(앱에 딸려 나가지 않는다 — 다만 `ops/deploy/`가 배포를 수행한다), `docs/`는 글, `.output/`은 산출물. 항목별 뜻은 ADR의 트리에 있다.
+- 루트에 놓이는 것은 **패키지들이 공유하는 것**이거나 **루트 자신을 다스리는 것**이다. 아니면 그것을 다스리는 패키지 안으로 들여보낸다 — 설정도 테스트도.
+- 루트도 의미 단위로 묶는다 — `packages/`는 구현(배포된다), `ops/`는 운영 스크립트(앱에 딸려 나가지 않는다 — 다만 `ops/deploy/`가 배포를 수행한다), `docs/`는 글, `.output/`은 산출물.
 - **루트 항목을 늘리거나 줄이려면 왜 전역인지를 한 문장으로 적고 승인을 받는다.** 그 문장을 쓸 수 없으면 전역이 아니다.
 
 ## 패키지
-- 패키지는 `contracts`·`client`·`server` 3개뿐이다. → [ADR 0001](adr/0001-monorepo-pnpm.md)
+- 패키지는 `contracts`·`client`·`server` 3개뿐이다.
 - `contracts`는 `client`·`server`를 import하지 않는다.
 - `client`와 `server`는 서로 import하지 않는다.
 - 공유가 필요하면 `contracts`에 두고 패키지명으로 가져온다 — `import { URI } from "contracts"`. tsconfig `paths` 별칭은 쓰지 않는다(tsc만 알아서 vitest·node에서 깨진다).
@@ -236,24 +164,24 @@ printf '%s' "feat(client): 검색 패널을 연다" | pnpm --filter ops exec com
 - 코드는 도메인별 슬라이스 아래에 모은다. 레이어를 최상위로 두지 않는다.
 - 도메인을 모르는 것(DI·설정·부팅)만 `core/`에 둔다.
 - 슬라이스 내부 — client는 `model/` `infra/` `viewmodel/` `view/` `component/`, server는 `domain/` `infra/` `services/` `runtime/` `transport/`. `runtime/`은 **요청보다 오래 사는 것**을 든다(`RunManager`) — 요청 하나로 끝나는 `services/`와 수명이 다르다. 두 목록은 `eslint.config.ts`의 zone과 구조 테스트가 닫힌 집합으로 든다.
-- 의존은 안쪽(`model`/`domain`)을 향한다. 어느 구현이 꽂힐지는 모듈이 정한다 — client는 슬라이스마다 `ExtensionModule` 하나(`index.ts`)이고, 조립부(`workbench/registerServices.tsx`)는 모듈 목록을 켤 뿐이다. → [ADR 0014](adr/0014-extension-model.md)
-- `index.ts`에는 바깥이 실제로 부르는 것만 넣는다. 내부 구현·에러 타입·유틸은 내보내지 않는다. **`knip`이 본다** — 아무도 안 부르는 export는 관문에서 막힌다. → [ADR 0011](adr/0011-lint-off-the-shelf.md)
+- 의존은 안쪽(`model`/`domain`)을 향한다. 어느 구현이 꽂힐지는 모듈이 정한다 — client는 슬라이스마다 `ExtensionModule` 하나(`index.ts`)이고, 조립부(`workbench/registerServices.tsx`)는 모듈 목록을 켤 뿐이다.
+- `index.ts`에는 바깥이 실제로 부르는 것만 넣는다. 내부 구현·에러 타입·유틸은 내보내지 않는다. **`knip`이 본다** — 아무도 안 부르는 export는 관문에서 막힌다.
 - 슬라이스끼리 직접 import하지 않는다. `InstanceMap`의 id나 명령·문맥으로만 소통한다.
 - `shared/`는 아무것도 import할 수 없다. 공통 추출은 아래로만 한다.
 - client는 `core/ workbench/ extensions/ shared/` 넷이다. **의존 방향·슬라이스 경계·`shared/`의 고립을 세 패키지 모두 `eslint.config.ts`의 zone이 강제한다** — server는 2026-09-14까지 비어 있었다.
 - **빈 레이어를 미리 만들지 않는다.** 실제 I/O나 유스케이스가 생길 때 폴더를 만든다.
-- 파일 이름: 클래스·React 컴포넌트·계약(`I<Name>.ts`)은 PascalCase, 함수 모듈은 camelCase. 폴더는 camelCase(컴포넌트 폴더는 그 컴포넌트 이름). 하이픈·밑줄은 쓰지 않는다 — `public/`의 자산만 예외다. **`check-file`이 하이픈·밑줄과 계층 폴더·접두를 보고, 컴포넌트 폴더의 PascalCase는 구조 테스트가 본다.** PascalCase냐 camelCase냐는 파일이 내보내는 이름을 따르므로 기계가 판정하지 못한다 — 그 한 칸만 리뷰다. → [ADR 0011](adr/0011-lint-off-the-shelf.md)
-- **`model/`은 사실과 사건을, `viewmodel/`은 화면 상태를 다룬다.** `model`→`viewmodel`은 이벤트로, `viewmodel`→`view`는 `observer`로 잇는다. observable은 ViewModel이 소유한다(MobX `makeAutoObservable` 클래스). → [ADR 0007](adr/0007-client-layers.md)
+- 파일 이름: 클래스·React 컴포넌트·계약(`I<Name>.ts`)은 PascalCase, 함수 모듈은 camelCase. 폴더는 camelCase(컴포넌트 폴더는 그 컴포넌트 이름). 하이픈·밑줄은 쓰지 않는다 — `public/`의 자산만 예외다. **`check-file`이 하이픈·밑줄과 계층 폴더·접두를 보고, 컴포넌트 폴더의 PascalCase는 구조 테스트가 본다.** PascalCase냐 camelCase냐는 파일이 내보내는 이름을 따르므로 기계가 판정하지 못한다 — 그 한 칸만 리뷰다.
+- **`model/`은 사실과 사건을, `viewmodel/`은 화면 상태를 다룬다.** `model`→`viewmodel`은 이벤트로, `viewmodel`→`view`는 `observer`로 잇는다. observable은 ViewModel이 소유한다(MobX `makeAutoObservable` 클래스).
 - **`model/`은 도메인 타입·규칙(순수 로직)과 `infra/`가 구현할 인터페이스 선언까지다.** React·fetch·window·전역 상태를 런타임으로 알지 않는다.
 - **`view/`가 부르는 훅은 `useViewModel` 하나뿐이다.** 로컬 상태가 필요하면 ViewModel로 옮긴다. DI 접근(`resolve`)도 하지 않는다 — `Promise.resolve`도 같은 선택자에 걸리므로 `async`로 쓴다.
-- **위 두 줄은 린트가 본다** — `no-restricted-syntax`가 `view/`의 훅과 DI 접근을, `@typescript-eslint/no-restricted-imports`가 `model/`의 상태 라이브러리를 막는다(`import type`은 허용한다). → [ADR 0011](adr/0011-lint-off-the-shelf.md)
+- **위 두 줄은 린트가 본다** — `no-restricted-syntax`가 `view/`의 훅과 DI 접근을, `@typescript-eslint/no-restricted-imports`가 `model/`의 상태 라이브러리를 막는다(`import type`은 허용한다).
 - **코드의 모양은 `prettier`가 정한다.** 손으로 맞추지 않는다 — 고치려면 `pnpm --filter ops run format`이고, 관문은 `--check`만 한다. 마크다운은 `markdownlint`가 든다.
-- CSS는 `stylelint`가 본다 — client의 `lint`가 ESLint에 이어 돌린다. 값은 Primer 토큰만 참조한다 — 색·간격·테두리·그림자·글꼴에 리터럴을 쓰지 않는다. → [ADR 0009](adr/0009-primer-first.md)
+- CSS는 `stylelint`가 본다 — client의 `lint`가 ESLint에 이어 돌린다. 값은 Primer 토큰만 참조한다 — 색·간격·테두리·그림자·글꼴에 리터럴을 쓰지 않는다.
 
 ## 컴포넌트
 
-- **모양이 있는 기본 컴포넌트는 Primer에서 가져온다.** 없는 축을 더할 때만 감싼다 — 이름만 바꾸는 겹은 두지 않고, 감쌀 때는 슬롯 표식(`asSlot`)을 다시 붙인다. 예외 둘: 메뉴는 Radix 한 체계, 아이콘은 자작이다. → [ADR 0009](adr/0009-primer-first.md)
-- **props는 원소 속성 위에 얹는다** — `ComponentPropsWithoutRef<'x'>`에 자기 것을 더하고 `className`·`style`·`aria-*`·`data-*`를 통과시킨다. **`ref`는 보통 prop이다**(`forwardRef`를 쓰지 않는다). → [ADR 0008](adr/0008-component-surface.md)
+- **모양이 있는 기본 컴포넌트는 Primer에서 가져온다.** 없는 축을 더할 때만 감싼다 — 이름만 바꾸는 겹은 두지 않고, 감쌀 때는 슬롯 표식(`asSlot`)을 다시 붙인다. 예외 둘: 메뉴는 Radix 한 체계, 아이콘은 자작이다.
+- **props는 원소 속성 위에 얹는다** — `ComponentPropsWithoutRef<'x'>`에 자기 것을 더하고 `className`·`style`·`aria-*`·`data-*`를 통과시킨다. **`ref`는 보통 prop이다**(`forwardRef`를 쓰지 않는다).
 - **변형은 `data-<축>`으로 싣는다.** CSS는 루트 클래스 안에서 `:where([data-x])`로 갈린다. 클래스 이름 맵을 만들지 않는다.
 - **`value`/`defaultValue`/`onChange` 삼종은 `useControllableState`가 중재한다.** 손으로 `useState`를 두지 않는다.
 - **슬롯이 둘까지면 `ReactNode` prop, 셋 이상이면 부품으로 가른다.** compound는 `Object.assign`이고, 타입은 `<Name>Props`·`<Name><Sub>Props`로 평평하다.
@@ -270,7 +198,7 @@ printf '%s' "feat(client): 검색 패널을 연다" | pnpm --filter ops exec com
 - **단위** — 계약이 못 잡는 것만. 대상 옆 `*.test.ts`. 적을수록 좋은 신호다.
 - **스모크** — view가 렌더되고 이벤트가 연결되는지만. 스타일은 Storybook 담당.
 - **Storybook** — 시각 검증. 최소 세트는 기본 / 빈 / 로딩 / 에러 — **그 상태가 실제로 있는 것만**이다. `SettingsTabView`처럼 ViewModel에 로딩·실패가 없는 화면에 그 스토리를 만들면 일어날 수 없는 상태를 그리게 된다.
-  - `shared/component/`와 슬라이스의 `component/`는 **전부** 스토리를 갖는다. → [ADR 0010](adr/0010-ui-verification.md)
+  - `shared/component/`와 슬라이스의 `component/`는 **전부** 스토리를 갖는다.
   - `view/`는 **조합이 드러나는 것만** 갖는다 — 화면 한 구역을 실제로 채우는 view. 컴포넌트 하나에 값을 꽂는 얇은 바인딩은 그 컴포넌트 스토리가 이미 같은 그림을 덮는다. 어느 view가 대상인지는 `.storybook/main.ts`의 주석이 이름으로 적는다 — **글롭은 전부를 집으므로 기계가 보는 목록은 아니다**. 새 view에 스토리가 없어도 아무도 알려주지 않는다.
 - **E2E** — `test/e2e/*.spec.ts`.
 - **VRT** — 스토리를 순회해 찍는다. `pnpm --filter client test:visual-regression`(비교). 기준을 만들 때는 **스토리를 골라** 인자를 넘긴다 — `test:visual-regression -g "<스토리 id>" --update-snapshots`. **Docker에서만** 생성·비교한다.
@@ -278,7 +206,7 @@ printf '%s' "feat(client): 검색 패널을 연다" | pnpm --filter ops exec com
   - 그래서 기준이 없는 스토리는 **실패가 아니라 건너뜀**이다. 없는 것이 정상인 기간이 있다.
 - **모든 테스트가 자기 패키지 안에 있다.** 자리는 *무엇이 돌리는가*로 갈린다 — 단위·계약·스모크·스토리는 **대상 옆**에 두고(vitest가 소스와 함께 본다), **대상을 특정할 수 없는 것**만 패키지의 `test/` 아래로 묶는다 — 앱 전체를 보는 E2E(`test/e2e/`), 스토리 전부를 도는 VRT(`test/vrt/`), 테스트 환경 자체를 세우는 설정(`test/vitestSetup.ts`). 단위 테스트를 소스에서 떼어내는 `tests/` 폴더나 던더 폴더는 쓰지 않는다.
 - Mock은 `Mock<Name>.ts`.
-- **렌더 테스트는 스토리를 가져다 쓸 수 있다** — `composeStories`(portable stories)가 Storybook이 정한 길이다. 로직 테스트(훅·ViewModel)는 단언마다 자기 최소 입력을 쓴다. → [ADR 0010](adr/0010-ui-verification.md)
+- **렌더 테스트는 스토리를 가져다 쓸 수 있다** — `composeStories`(portable stories)가 Storybook이 정한 길이다. 로직 테스트(훅·ViewModel)는 단언마다 자기 최소 입력을 쓴다.
 - 스냅샷은 인라인(`toMatchInlineSnapshot`)만 쓴다. 외부 `.snap` 파일은 두지 않는다 — 안 열고 갱신하게 된다.
 - 커버리지 목표를 두지 않는다.
 - `it`/`test` 이름은 한글 문장으로 쓴다. `describe`는 **대상의 식별자**라 영문 그대로다(`describe('Timestamp')`). 파일마다 최상위 `describe` 하나가 전부를 감싸고 훅도 그 안에 둔다. 단정 헬퍼는 `expect`로 시작하는 이름을 갖는다 — 그래야 `vitest/expect-expect`가 알아본다. TSDoc의 `@throws`에 적은 경우는 각각 테스트로 확인한다 — 적어두기만 하면 주장일 뿐이다.
@@ -296,5 +224,5 @@ E2E는 `pnpm --filter client test:e2e`로 돌린다. 조립이 맞물리는지�
 - [ ] `pnpm --filter ops check` 통과 (typecheck → lint → test:unit → test:integration → build). **CI의 `check` 잡이 부르는 것과 같은 명령이다.**
 - [ ] 이번 라운드가 한 가지 관심사인가
 - [ ] 스스로 판단한 지점을 신고했는가
-- [ ] 패키지의 `src/` 밖을 건드렸다면 PR 본문에 **무엇을 왜 바꿨는지** 적었는가 — 승인은 사용자가 PR에서 한다 → [ADR 0003](adr/0003-approval-outside-src.md)
+- [ ] 패키지의 `src/` 밖을 건드렸다면 PR 본문에 **무엇을 왜 바꿨는지** 적었는가 — 승인은 사용자가 PR에서 한다
 - [ ] PR을 연다면 **제목이 `<타입>(<scope>): <한글 설명>` 형식인가** → 위 「PR과 머지」

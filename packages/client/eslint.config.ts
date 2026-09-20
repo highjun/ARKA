@@ -11,22 +11,22 @@ import ops from "ops/lint";
  * 여기 모아 두고 블록마다 펴 쓴다.
  */
 const RESTRICTED_SYNTAX = [
-  // **`#contracts`로 가져온다**(→ ADR 0001). 맨이름 `"contracts"`는 서드파티와 구분되지 않는다.
+  // **`#contracts`로 가져온다**. 맨이름 `"contracts"`는 서드파티와 구분되지 않는다.
   // `import-x`로는 못 한다 — 둘이 같은 파일로 풀려 구분이 사라진다. 문자열을 보는 코어 규칙이라야
   // 갈린다. `no-restricted-imports`는 동적 `import()`를 놓쳐서(2026-09-10 실측) 형태별로 넷이다.
   ...["ImportDeclaration", "ExportNamedDeclaration", "ExportAllDeclaration", "ImportExpression"].map((node) => ({
     selector: `${node}[source.value=/^contracts(\\/|$)/]`,
     message: "`#contracts`로 가져오세요 — 맨이름은 서드파티와 구분되지 않습니다.",
   })),
-  // 테스트 이름을 보던 셀렉터 둘은 `vitest/valid-title`로 갈았다(→ ADR 0011).
+  // 테스트 이름을 보던 셀렉터 둘은 `vitest/valid-title`로 갈았다.
   /*
-   * **props 바탕은 `ComponentPropsWithoutRef<'tag'>`다**(→ ADR 0008). `HTMLAttributes<HTMLXElement>`는
+   * **props 바탕은 `ComponentPropsWithoutRef<'tag'>`다**. `HTMLAttributes<HTMLXElement>`는
    * 원소 고유 속성을 빠뜨린다 — `href`·`disabled`·`type`이 없어서 소비처가 캐스트하게 된다.
    * 루트 태그가 갈리는 컴포넌트만 예외이고, 그 자리는 사유를 적은 `eslint-disable`로 드러난다.
    */
   {
     selector: "TSTypeReference > Identifier[name=/^(?:[A-Za-z]+)?HTMLAttributes$/]",
-    message: "props 바탕은 `ComponentPropsWithoutRef<'tag'>`를 쓰세요 — 원소 고유 속성이 빠집니다(→ ADR 0008).",
+    message: "props 바탕은 `ComponentPropsWithoutRef<'tag'>`를 쓰세요 — 원소 고유 속성이 빠집니다.",
   },
 ];
 
@@ -34,7 +34,7 @@ const RESTRICTED_SYNTAX = [
 const SLICES = ["filesystem"];
 
 /**
- * **의존은 안쪽을 향한다**(→ ADR 0007). 계층마다 *자기 슬라이스 안에서* 볼 수 있는 것.
+ * **의존은 안쪽을 향한다**. 계층마다 *자기 슬라이스 안에서* 볼 수 있는 것.
  *
  * `view`가 `model`을 보는 것은 DI 토큰과 타입 때문이다 — 값을 읽는 길은 `useViewModel` 하나고
  * 그건 위 선택자가 따로 본다.
@@ -53,11 +53,11 @@ const LAYER_ZONES = ["./src/workbench", ...SLICES.map((slice) => `./src/extensio
     target: `${root}/${layer}`,
     from: root,
     except: allowed.map((name) => `./${name}`),
-    message: "의존은 안쪽을 향합니다 — 이 계층은 자기 아래만 봅니다(→ ADR 0007).",
+    message: "의존은 안쪽을 향합니다 — 이 계층은 자기 아래만 봅니다.",
   })),
 );
 
-/** `view/`에만 더 걸리는 것 — 훅 하나와 DI 접근 금지(→ ADR 0007). */
+/** `view/`에만 더 걸리는 것 — 훅 하나와 DI 접근 금지. */
 /*
  * **브라우저 패키지에 Node 전역이 보인다** — `tsconfig`의 `types: ["vitest/globals"]`가
  * `@types/node`를 전이로 끌고 온다(→ TASK-44). `types` 배열은 전역 자동 포함만 통제하고 전이
@@ -73,7 +73,7 @@ const NODE_GLOBALS = [
 ];
 
 /*
- * **`model/`·`viewmodel/`은 브라우저 API를 직접 보지 않는다**(→ ADR 0007). 플랫폼에 닿는 것은
+ * **`model/`·`viewmodel/`은 브라우저 API를 직접 보지 않는다**. 플랫폼에 닿는 것은
  * 조립부(`registerServices.tsx`)가 얇은 함수로 주입한다 — 그래야 이 계층이 jsdom 없이도 돈다.
  * 규약과 코드 주석이 이 규칙을 인용해 왔는데 정작 설정에는 없었다(2026-09-14 실측).
  */
@@ -90,17 +90,17 @@ const PLATFORM_GLOBALS = [
   "prompt",
 ].map((name) => ({
   name,
-  message: "`model/`·`viewmodel/`은 플랫폼에 직접 닿지 않습니다 — 조립부가 주입하는 함수를 받으세요(→ ADR 0007).",
+  message: "`model/`·`viewmodel/`은 플랫폼에 직접 닿지 않습니다 — 조립부가 주입하는 함수를 받으세요.",
 }));
 
 const VIEW_ONLY_SYNTAX = [
   {
     selector: 'CallExpression[callee.name=/^use[A-Z]/]:not([callee.name="useViewModel"])',
-    message: "`view/`는 `useViewModel` 하나만 부릅니다 — 상태가 필요하면 ViewModel로 올리세요(→ ADR 0007).",
+    message: "`view/`는 `useViewModel` 하나만 부릅니다 — 상태가 필요하면 ViewModel로 올리세요.",
   },
   {
     selector: 'CallExpression[callee.property.name="resolve"]',
-    message: "`view/`는 DI 컨테이너를 직접 보지 않습니다 — `useViewModel`이 그 자리입니다(→ ADR 0007).",
+    message: "`view/`는 DI 컨테이너를 직접 보지 않습니다 — `useViewModel`이 그 자리입니다.",
   },
 ];
 
@@ -119,8 +119,8 @@ export default [
   },
 
   {
-    // Primer 를 잘못 쓰는 것을 그 배포자가 잡는다(→ ADR 0009). 프리셋을 통째로 켜는 것은 규칙
-    // 전부가 결정 하나에 달려 있어서다(→ ADR 0011). 이 플러그인의 `configs.recommended`는
+    // Primer 를 잘못 쓰는 것을 그 배포자가 잡는다. 프리셋을 통째로 켜는 것은 규칙
+    // 전부가 결정 하나에 달려 있어서다. 이 플러그인의 `configs.recommended`는
     // eslintrc 모양(`parserOptions`)이라 그대로 못 펴고 `plugins`·`rules`·`settings`만 가져온다.
     files: ["src/**/*.tsx"],
     plugins: { "primer-react": primerReact },
@@ -128,10 +128,10 @@ export default [
     rules: {
       ...primerReact.configs.recommended.rules,
       /*
-       * 프리셋 밖의 규칙. ADR이 인용하던 셋 중 **이것만** 켠다 — 나머지 둘은 우리 결정과
-       * 어긋난다는 것을 실측으로 확인했고 그 ADR의 `기각:`으로 옮겼다.
+       * 프리셋 밖의 규칙. 후보 셋 중 **이것만** 켠다 — 나머지 둘은 우리 규약과 어긋난다는 것을
+       * 실측으로 확인했다.
        */
-      // 폐기된 진입점(→ ADR 0009).
+      // 폐기된 진입점.
       "primer-react/no-deprecated-entrypoints": "error",
       // 와일드카드 import — 무엇을 쓰는지 감춘다.
       "primer-react/no-wildcard-imports": "error",
@@ -153,7 +153,7 @@ export default [
   },
 
   {
-    // React 19 전용 — `forwardRef` 는 더 쓰지 않는다(→ ADR 0008).
+    // React 19 전용 — `forwardRef` 는 더 쓰지 않는다.
     files: ["src/**/*.tsx"],
     plugins: { "@eslint-react": eslintReact },
     rules: { "@eslint-react/no-forward-ref": "error", "@eslint-react/no-context-provider": "error" },
@@ -176,7 +176,7 @@ export default [
       // 서브패스 import를 전부 위반으로 보고, 위 정규식이 `contracts/*`를 이미 덮는다.
       "import-x/no-relative-packages": "error",
       /*
-       * 슬라이스끼리 직접 import하지 않는다(→ ADR 0007). 슬라이스를 열거하는 것은
+       * 슬라이스끼리 직접 import하지 않는다. 슬라이스를 열거하는 것은
        * `eslint-plugin-boundaries`의 캡처 변수(`{{from.slice}}`)가 v7에서 우리 배치에 안 걸렸기
        * 때문이다 — 다섯 줄이면 정확히 같은 경계를 표현한다. 새 슬라이스를 더할 때 여기 한 줄을
        * 빼먹으면 그 슬라이스만 검사에서 빠진다(리뷰가 볼 자리다).
@@ -195,21 +195,21 @@ export default [
               target: `./src/extensions/${slice}`,
               from: "./src/extensions",
               except: [`./${slice}`],
-              message: "슬라이스끼리 직접 import하지 않습니다 — DI 토큰이나 이벤트로 소통하세요(→ ADR 0007).",
+              message: "슬라이스끼리 직접 import하지 않습니다 — DI 토큰이나 이벤트로 소통하세요.",
             })),
-            // `shared/`는 아무것도 import할 수 없다 — 공통 추출은 아래로만 한다(→ ADR 0007).
+            // `shared/`는 아무것도 import할 수 없다 — 공통 추출은 아래로만 한다.
             {
               target: "./src/shared",
               from: "./src",
               except: ["./shared"],
-              message: "`shared/`는 아무것도 import하지 않습니다 — 공통 추출은 아래로만 합니다(→ ADR 0007).",
+              message: "`shared/`는 아무것도 import하지 않습니다 — 공통 추출은 아래로만 합니다.",
             },
             // `core/`는 도메인을 모른다. 아래(`shared/`)만 본다.
             {
               target: "./src/core",
               from: "./src",
               except: ["./core", "./shared"],
-              message: "`core/`는 도메인을 모릅니다 — `workbench/`·`extensions/`를 import하지 않습니다(→ ADR 0007).",
+              message: "`core/`는 도메인을 모릅니다 — `workbench/`·`extensions/`를 import하지 않습니다.",
             },
             ...LAYER_ZONES,
           ],
@@ -219,7 +219,7 @@ export default [
   },
 
   {
-    // Primer `IconButton`을 직접 가져오면 터치 최소 타겟 CSS를 잃는다(→ ADR 0009). 여기서만
+    // Primer `IconButton`을 직접 가져오면 터치 최소 타겟 CSS를 잃는다. 여기서만
     // `no-restricted-imports`를 쓰는 이유는 막을 것이 모듈 이름이 아니라 **가져오는 이름**이고
     // `importNames`가 별칭(`IconButton as PrimerIconButton`)까지 잡기 때문이다. 그 겹 자신은
     // 가져와야 하므로 `ignores`로 대상에서 뺀다 — 규칙을 끄는 것이 아니다.
@@ -244,7 +244,7 @@ export default [
 
   {
     /*
-     * `model/`은 상태 라이브러리와 React를 **런타임으로** 모른다(→ ADR 0007). 이 규칙을 쓰는
+     * `model/`은 상태 라이브러리와 React를 **런타임으로** 모른다. 이 규칙을 쓰는
      * 이유는 `allowTypeImports` 하나다 — `import type`은 컴파일에서 지워져 결합을 만들지 않으므로
      * 허용해야 하고, 그 구분을 아는 것이 타입을 읽는 이 규칙뿐이다. 이름이 코어
      * `no-restricted-imports`와 달라 위 블록을 덮지 않는다.
@@ -258,15 +258,14 @@ export default [
             (name) => ({
               name,
               allowTypeImports: true,
-              message:
-                "`model/`은 상태 라이브러리와 React를 런타임으로 모릅니다 — 화면 상태는 ViewModel이 소유합니다(→ ADR 0007).",
+              message: "`model/`은 상태 라이브러리와 React를 런타임으로 모릅니다 — 화면 상태는 ViewModel이 소유합니다.",
             }),
           ),
           patterns: [
             {
               group: ["@nanostores/*", "@radix-ui/*"],
               allowTypeImports: true,
-              message: "`model/`은 상태 라이브러리를 런타임으로 모릅니다(→ ADR 0007).",
+              message: "`model/`은 상태 라이브러리를 런타임으로 모릅니다.",
             },
           ],
         },

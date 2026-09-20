@@ -317,7 +317,7 @@ export declare function useViewModel<K extends InstanceId>(id: K): InstanceMap[K
 ```
 
 컨테이너를 꺼내 주는 훅은 없다. 서비스가 필요한 화면은 **VM이 생성자로 받는다.** 훅이 받는 것은
-`InstanceId` 전부라 타입이 막아 주지 않는다 — 이건 린트가 지킨다(→ ADR 0007).
+`InstanceId` 전부라 타입이 막아 주지 않는다 — 이건 린트가 지킨다.
 
 구현이 지키는 규칙 셋. 계약에 적히지 않으므로 여기 적어 둔다.
 

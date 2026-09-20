@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import { expectNoA11yViolations } from "./axe";
 
 /**
- * 컴포넌트의 정형 계약(→ ADR 0010)을 함수로 만든 것 — primer/react의
+ * 컴포넌트의 정형 계약을 함수로 만든 것 — primer/react의
  * `utils/testing.tsx`(`implementsClassName`)가 `describe` 안에서 `it()`을 직접 생성해 호출 한 줄로
  * 끝내는 패턴을 그대로 가져와 data-component·ref·axe까지 넓혔다.
  *
@@ -44,7 +44,7 @@ export function implementsDataComponent(
 
 /**
  * `ref`가 실제 DOM 원소에 닿는지 본다 — React 19부터 `ref`는 보통 prop이라 전달 경로가
- * 래퍼가 아니라 스프레드다(→ ADR 0008). `elementType`은 생성자다 — `instanceof`로 보므로
+ * 래퍼가 아니라 스프레드다. `elementType`은 생성자다 — `instanceof`로 보므로
  * `HTMLDivElement`처럼 넘긴다.
  */
 export function implementsRef<T>(

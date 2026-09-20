@@ -5,7 +5,7 @@ import { step } from "./run.ts";
  * CI에서 빨간 경로가 남는다(2026-09-14까지 순서가 실제로 갈려 있었고 `build`는 CI에만 있었다).
  *
  * **이름 하나가 명령 하나다.** 인자로 골라 부를 수 있어서, CI의 잡과 `pre-push` 훅이 목록을
- * 따로 적지 않고 **여기 있는 것과 같은 명령**을 부른다(→ ADR 0013).
+ * 따로 적지 않고 **여기 있는 것과 같은 명령**을 부른다.
  *
  *     pnpm --filter ops check                    선언 순서대로 전부
  *     pnpm --filter ops check typecheck lint     고른 것만, 준 순서대로
@@ -23,7 +23,7 @@ const STAGES: Readonly<Record<string, () => void>> = {
   "test:unit": () => step("pnpm", "-r", "--if-present", "run", "test:unit"),
   /*
    * **통합은 따로 부른다** — 앱을 세우고 라우트를 두드리는 것이라 단위와 실패의 뜻이 다르다.
-   * 한쪽만 이름이 있으면 CI가 둘을 따로 실을 때 CI에만 있는 검사가 생긴다(→ ADR 0005).
+   * 한쪽만 이름이 있으면 CI가 둘을 따로 실을 때 CI에만 있는 검사가 생긴다.
    */
   "test:integration": () => step("pnpm", "-r", "--if-present", "run", "test:integration"),
   /** 가장 비싸서 마지막이다. */
@@ -31,7 +31,7 @@ const STAGES: Readonly<Record<string, () => void>> = {
   /*
    * **죽은 표면.** 패키지 하나만 봐서는 알 수 없어(다른 패키지가 쓰는지 봐야 한다) 패키지의
    * `lint`가 아니라 여기 있다. `--no-config-hints`인 이유는 진입점을 **일부러 명시**해서다 —
-   * knip의 기본 탐지에 맡기면 그것이 바뀔 때 진입점이 조용히 사라진다(→ ADR 0011).
+   * knip의 기본 탐지에 맡기면 그것이 바뀔 때 진입점이 조용히 사라진다.
    */
   knip: () => step("npx", "--prefix", "ops", "knip", "--config", "ops/knip.ts", "--no-config-hints"),
 };

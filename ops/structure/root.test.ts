@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { REPO_ROOT } from "./repo.ts";
 
 /**
- * **루트에 있는 것마다 왜 전역인지를 적는다**(→ [ADR 0002](../../docs/adr/0002-live-next-to-what-they-govern.md)).
+ * **루트에 있는 것마다 왜 전역인지를 적는다**.
  *
  * 목록이 아니라 **사유표**를 잠근다. 항목을 늘리려면 사유를 써야 하고, 그 문장이 diff에 뜨는 것이
  * 이 장치의 값이다 — 승인을 막는 것이 아니라 눈에 띄게 만든다. 실재 집합과 양방향으로 대조하니

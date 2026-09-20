@@ -6,7 +6,7 @@ import { build } from "esbuild";
  * (`ops/deploy/Dockerfile`이 `dist/`만 복사한다).
  *
  * 나가는 자리는 `.output/dist/server` — 클라이언트 산출물(`.output/dist/client`)과 나란히 놓여
- * 그 둘이 배포 단위 하나가 된다(→ ADR 0002). 이미지는 이 폴더만 복사한다.
+ * 그 둘이 배포 단위 하나가 된다. 이미지는 이 폴더만 복사한다.
  */
 const repoRoot = path.resolve(import.meta.dirname, "../..");
 
