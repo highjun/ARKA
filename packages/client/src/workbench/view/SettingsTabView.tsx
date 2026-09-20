@@ -10,17 +10,12 @@ import type { KeybindingRow } from "../viewmodel/IKeybindingViewModel";
 import type { SettingsRow } from "../viewmodel/ISettingsViewModel";
 import styles from "./SettingsTabView.module.css";
 
-/**
- * 찾을 말과 맞나. **거르는 법이 한 곳에 산다** — 설정 줄과 단축키 줄이 같은 말로 걸러져야
- * 한 화면으로 읽힌다.
- */
 const matches = (query: string, ...fields: readonly (string | undefined)[]): boolean => {
   const needle = query.trim().toLowerCase();
   if (needle === "") return true;
   return fields.some((field) => field !== undefined && field.toLowerCase().includes(needle));
 };
 
-/** 값의 갈래마다 다른 컨트롤. 지금은 날 `input`이다 — Primer 위젯으로 옮기는 것은 다음 라운드다. */
 const SettingsInput = ({ row, onChange }: { readonly row: SettingsRow; readonly onChange: (v: unknown) => void }) => {
   if (row.type === "boolean")
     return <input type="checkbox" checked={row.value === true} onChange={(e) => onChange(e.target.checked)} />;
@@ -47,7 +42,6 @@ const SettingsInput = ({ row, onChange }: { readonly row: SettingsRow; readonly 
   return <input type="text" value={String(row.value)} onChange={(e) => onChange(e.target.value)} />;
 };
 
-/** 설정 한 줄 — 왼쪽에 이름과 설명, 오른쪽에 컨트롤. */
 const Row = ({ row, onChange }: { readonly row: SettingsRow; readonly onChange: (v: unknown) => void }) => (
   <div className={styles["row"]} data-component="Settings/Row">
     <span className={styles["text"]}>
@@ -64,11 +58,6 @@ const Row = ({ row, onChange }: { readonly row: SettingsRow; readonly onChange: 
   </div>
 );
 
-/**
- * 단축키 한 줄 — **설정 줄과 같은 기하다**. 왼쪽에 명령 이름과 id, 오른쪽에 키캡.
- *
- * 연필을 누르면 키를 기다린다. 기다리는 동안 눌린 조합을 그대로 건다 — Esc는 그만두기다.
- */
 const KeybindingRowView = ({
   row,
   isRecording,
@@ -101,8 +90,6 @@ const KeybindingRowView = ({
           row.keybinding.split("+").map((key) => <Kbd key={key}>{key}</Kbd>)
         )}
       </span>
-      {/* **같은 단추가 키를 받는다** — 눌러서 켰으니 포커스가 이미 여기 있다. 따로 칸을 띄우면
-          `autoFocus` 가 필요한데 그것은 접근성 린트가 막는다. */}
       <IconButton
         variant="invisible"
         size="small"
@@ -132,10 +119,6 @@ const KeybindingRowView = ({
   </div>
 );
 
-/**
- * 설정 화면. **찾기 칸은 맨 위에 하나뿐이다** — 범주마다 제 검색창을 두면 같은 일을 두 곳에서
- * 한다. 단축키도 한 범주일 뿐 제 화면이 아니다.
- */
 export const SettingsTabView = observer(() => {
   const viewModel = useViewModel("arka.workbench.settingsViewModel");
   const keybindings = useViewModel("arka.workbench.keybindingViewModel");

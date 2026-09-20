@@ -35,10 +35,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-/** 가운데 칸이 비어도 좌우는 제자리다 — 격자가 잡기 때문이다. */
 export const NoCenter: Story = { args: { center: undefined } };
 
-/** 작업 공간 이름이 길어져도 가운데 칸이 안 밀린다. */
 export const LongBrand: Story = {
   args: { brand: <Text size="small">아주 긴 작업 공간 이름이 여기 들어간다</Text> },
 };

@@ -10,7 +10,6 @@ const TOP: readonly SidebarRow[] = [
   { id: "agent", iconId: "brain", title: "에이전트" },
 ];
 
-/** 아래 묶음 — 계정과 설정. 위가 넘쳐도 밀리지 않고, **활성이 되지 않는다**. */
 const BOTTOM: readonly SidebarRow[] = [
   { id: "account", iconId: "account", title: "계정" },
   { id: "settings", iconId: "settingsGear", title: "설정" },
@@ -41,7 +40,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-/** 위가 비어도 아래 묶음은 남는다 — 둘은 별개다. */
 export const EmptyTop: Story = {
   args: {
     children: (
@@ -53,12 +51,10 @@ export const EmptyTop: Story = {
   },
 };
 
-/** 아래 묶음이 없으면 그 자리도 안 잡는다. */
 export const TopOnly: Story = {
   args: { children: <ActivityBar.Top items={TOP} activeId="files" onSelect={() => undefined} /> },
 };
 
-/** 아무것도 안 열린 상태 — `activeId`가 없으면 밝은 줄도 없다. */
 export const NoneActive: Story = {
   args: {
     children: (

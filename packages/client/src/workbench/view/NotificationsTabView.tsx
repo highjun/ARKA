@@ -7,13 +7,8 @@ import { Text } from "#component/Text";
 import type { Notification, Severity } from "../model/INotifications";
 import styles from "./NotificationsTabView.module.css";
 
-/** 무게마다 글리프가 다르다 — 색은 CSS가 `data-severity`로 고른다. */
 const GLYPH = { info: "bell", warning: "warning", error: "error" } as const;
 
-/**
- * 상대 시각. **분 아래로는 안 센다** — 알림에서 초는 읽는 사람에게 뜻이 없다.
- * 순수 함수로 둬서 지금 시각을 밖에서 넣는다(테스트가 붙잡을 수 있게).
- */
 export const formatAgo = (at: number, now: number): string => {
   const minutes = Math.floor((now - at) / 60_000);
   if (minutes < 1) return "방금";
@@ -23,10 +18,6 @@ export const formatAgo = (at: number, now: number): string => {
   return `${String(Math.floor(hours / 24))}일 전`;
 };
 
-/**
- * 줄 하나. **안 읽은 것만 누를 수 있다** — 읽은 줄에 아무 일도 안 하는 단추를 두면 초점만
- * 늘고 하는 일이 없다. 누르는 이름은 메시지 그대로다(메일함과 같다).
- */
 const Row = ({
   item,
   onRead,
@@ -68,11 +59,6 @@ const Row = ({
   );
 };
 
-/**
- * 쌓인 알림을 열어 보는 탭. 제목 줄의 종이 이것을 연다.
- *
- * **누른 것이 읽은 것이다** — 여는 것만으로 다 읽음이 되면 안 본 것이 배지에서 사라진다.
- */
 export const NotificationsTabView = observer(() => {
   const notifications = useViewModel("arka.workbench.notificationViewModel");
   const { items } = notifications;

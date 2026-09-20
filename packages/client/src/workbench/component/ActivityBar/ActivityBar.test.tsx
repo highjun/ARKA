@@ -16,7 +16,6 @@ const TOP: SidebarRow[] = [
 
 const BOTTOM: SidebarRow[] = [{ id: "settings", iconId: "settingsGear", title: "설정" }];
 
-/** 위·아래를 다 갖춘 한 벌. 하네스가 루트에 props 를 꽂을 수 있게 children 으로만 짠다. */
 const 한벌 = (extra: Record<string, unknown> = {}) => (
   <ActivityBar {...extra}>
     <ActivityBar.Top items={TOP} activeId="explorer" />

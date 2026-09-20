@@ -28,7 +28,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-/** 동작이 붙은 줄 — 단추는 명령 id 로 가리킨 것을 쓰는 쪽이 조립해 넘긴다. */
 export const WithAction: Story = {
   args: {
     children: (
@@ -45,5 +44,4 @@ export const WithAction: Story = {
   },
 };
 
-/** 왼쪽 구석에 쌓는다. */
 export const BottomLeft: Story = { args: { placement: "bottom-left" } };

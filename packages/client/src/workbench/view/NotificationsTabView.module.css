@@ -40,7 +40,6 @@
   padding: 0;
 }
 
-/* 안 읽은 것은 면이 밝다 — 점을 따로 찍지 않는다. 신호가 둘이면 하나는 군더더기다. */
 .row {
   display: flex;
   align-items: flex-start;
@@ -53,7 +52,6 @@
   background-color: var(--bgColor-muted);
 }
 
-/* 색은 아이콘에만 싣는다 — 면까지 물들이면 읽을 글이 묻힌다. 타입 선택자(`svg`)는 stylelint 가 막는다. */
 .row[data-severity="info"] .glyph {
   color: var(--fgColor-accent);
 }
@@ -74,7 +72,6 @@
   gap: 2px;
 }
 
-/* 누르는 줄. 글처럼 보이게 단추의 겉을 걷는다 — 신호는 면의 밝기(`data-unread`)가 이미 든다. */
 .read {
   display: flex;
   min-width: 0;

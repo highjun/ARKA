@@ -1,27 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 
-/**
- * 폰이 정본 폼팩터다. 데스크톱은 대조군으로만 둔다.
- *
- * 여기서 검사하는 것은 배선이 아니라 **눈에 보이는가**다 — 그건 jsdom이 영영 알 수 없다.
- * jsdom은 CSS 레이아웃을 적용하지 않아 요소가 화면 밖으로 밀려 있어도 `getByText`가 찾는다.
- * 조립이 맞물리는지는 `src/workbench/registerServices.test.tsx`가 이미 본다.
- */
-
-/*
- * **`@critical`은 "이것이 깨지면 앱이 앱이 아니다"만 붙인다** — 워크스페이스가 보이고, 파일을
- * 열고, 편집한 것을 잃지 않는다. 나머지는 기능이라 `main`이 든다.
- *
- * 태그를 늘리고 싶으면 먼저 물어라 — **이것 없이도 앱을 쓸 수 있나.** 쓸 수 있으면 기능이다.
- */
-
 const PHONE = { width: 390, height: 844 };
 const DESKTOP = { width: 1280, height: 800 };
 
-/**
- * 트리 항목은 **행**을 노린다. 터치 영역을 넓히는 `::after`가 글자 위를 덮어서, 글자를 직접
- * 겨냥하면 Playwright가 "가려졌다"고 막는다 — 실제 클릭은 행으로 전달돼 동작하는데도.
- */
 const treeRow = (page: Page, name: string) => page.getByRole("treeitem", { name, exact: true });
 
 test.describe("폰", () => {
@@ -35,10 +16,6 @@ test.describe("폰", () => {
     await expect(page.getByText("README.md", { exact: true })).toBeVisible();
   });
 
-  /**
-   * 드로어 배경이 비치면 트리를 읽을 수 없다. 실제로 그 상태로 배포된 적이 있고, 그때 jsdom
-   * 테스트는 전부 초록이었다 — 이 테스트가 존재하는 이유다.
-   */
   test("드로어에 불투명한 배경이 있다", async ({ page }) => {
     await page.goto("/");
     await page.getByLabel("사이드바 열기").click();
@@ -50,7 +27,6 @@ test.describe("폰", () => {
       for (let node: HTMLElement | null = element as HTMLElement; node; node = node.parentElement) {
         const background = getComputedStyle(node).backgroundColor;
         const alpha = /rgba?\([^)]*,\s*([\d.]+)\s*\)$/u.exec(background)?.[1];
-        // alpha가 없으면 rgb(...)라 불투명하다.
         if (background !== "transparent" && alpha !== "0") return true;
       }
       return false;
@@ -81,15 +57,9 @@ test.describe("데스크톱", () => {
   test("빌드 표시가 화면에 보인다", async ({ page }) => {
     await page.goto("/");
 
-    // 서버가 주는 ISO를 보는 사람의 시간대로 서식한 결과라, 형식만 확인한다.
-    // 커밋 SHA는 이미지가 구워 넣으므로 여기(소스로 띄운 서버)에는 없다.
     await expect(page.getByText(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(\([0-9a-f]{7}(-dirty)?\))?$/u)).toBeVisible();
   });
 
-  /**
-   * 전역 키 리스너는 `infra/GlobalKeybindings`가 건다(2026-09-08, Workbench.tsx 해체).
-   * 조립부가 기여 등록을 빠뜨리면 타입 검사도 단위 테스트도 통과하는데 단축키만 조용히 죽는다.
-   */
   test("ctrl+k로 커맨드 팔레트가 열린다", async ({ page }) => {
     await page.goto("/");
     await page.keyboard.press("Control+k");
@@ -105,11 +75,6 @@ test.describe("데스크톱", () => {
   });
 });
 
-/**
- * dirty 표시와 닫기 확인은 **셸이 파일을 직접 모르게 된 뒤에도** 도는지 봐야 하는 흐름이다
- * (2026-09-08 — `ITabDirtyState`로 결합을 끊음). 조립부가 계약을 잘못 이으면 타입 검사도
- * 단위 테스트도 통과하는데 화면에서만 조용히 죽는다.
- */
 test.describe("저장하지 않은 변경", () => {
   test.use({ viewport: DESKTOP });
 

@@ -55,7 +55,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-/** 동작 없이 탭 줄만 — 첫 기여자가 하나뿐일 때의 모습이다. */
 export const NoActions: Story = {
   args: {
     children: (
@@ -69,7 +68,6 @@ export const NoActions: Story = {
   },
 };
 
-/** 아무것도 안 고른 상태 — 띠만 서고 본문이 없다. */
 export const NoSelection: Story = {
   args: {
     children: <Bottom.Header tabs={TABS.map((tab) => ({ ...tab, isActive: false }))} actions={동작} />,

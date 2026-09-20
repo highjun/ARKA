@@ -1,55 +1,10 @@
-/**
- * 세트마다 **설명 한 줄과 prop 표**. 시트가 여기서 읽는다. 플러그인 안에서 돈다.
- *
- *     (0, eval)(await (await fetch("http://localhost:9230/tool/meta.js")).text());
- *     await globalThis.__arka.meta.apply();   // 설명을 Figma 에 써 넣는다
- *     globalThis.__arka.meta.audit();         // 표에 빠진 축·속성을 센다
- *
- * **설명은 `<위치> · <역할 한 줄>`.** 위치가 곧 출처다 — 라이브러리를 그대로 쓰면 라이브러리
- * 이름을, 우리가 변형하면 **코드에서 살 자리**(이미 있으면 현재 자리, 없으면 예상 자리)를 적는다.
- *
- * **분류는 두 층이다.**
- *
- *     1. React Props   바깥에서 넣는 것
- *        enum · string · number · boolean · object · action · slot
- *     2. CSS-State     prop 이 아니다. CSS 선택자로만 갈린다 (`:hover` `[data-disabled]` …)
- *
- * **Figma 의 속성 타입을 그대로 쓰면 거짓말이 된다.** `leadingVisual`·`description`·`action` 은
- * Figma 에선 BOOLEAN 이지만 코드에선 `ReactNode` — `slot` 이다. 그래서 갈래를 손으로 적는다.
- *
- * **무엇을 적는가 — 보이는 것이나 뜻을 바꾸는 prop 만.** 상속한 DOM 속성과 순수 a11y 통과
- * (`aria-*`·`role`·`alt`)는 안 적는다 — 단 보이는 글자가 되면(`IconButton` 의 `aria-label` 은
- * 툴팁이 된다) 적는다. `ButtonGroup.role` 처럼 키보드 이동 방식만 바꾸는 것도 안 적는다.
- * **가로채 뜻을 바꾼 것**(`Menu.Item.onSelect`, `ModeToggle.value`)은 적는다.
- *
- * 키는 **Figma 의 축·속성 이름**이다. 코드의 prop 이름이 다르면 `n` 에 적는다 —
- * 표엔 `n` 이, 견본 블록엔 키가 선다.
- *
- * **Compound 는 시트 머리 하나 + 부품마다 한 항목이다.** 머리 항목 `X` 는 `설명`·`부품`·(있으면)
- * `계층` 만 갖고 **`props` 가 없다.** `부품` 의 첫 줄은 언제나 **`X/Root`** — 전체에 속하는 prop
- * (갈래를 정하는 것 · 제어 짝 · `children`)만 든다. Figma 에 몸이 있으면 세트 이름도 `X/Root`,
- * 없으면 `가상: true` — 표만 서고 `apply()`·`audit()` 은 건너뛴다.
- *
- * **prop 은 한 표에만 산다.** 부품이 드는 것을 루트가 되풀이하지 않는다(`Panel.title` 은
- * `Panel/Header` 의 것이다). Figma 의 기계 속성(머리를 갈아 끼우는 INSTANCE_SWAP)은 Figma 이름을
- * 키로 두고 `n` 으로 React 이름(`children`)을 가리킨다. `audit()` 의 `루트에겹친prop` 이 이것을 센다.
- * 같은 키가 두 표에 서야 할 때는 **`겹침: "<이유>"`** 를 달아 검사에서 뺀다 — Figma 축이 부품에
- * 걸려 루트 prop 을 거울처럼 비추는 것(`Menu/Content.kind`), 루트가 부품에 내려 주는 것
- * (`Tab/Root.chrome`), 이름만 같고 뜻이 다른 것(`Select/Item.value`).
- *
- * 예외 — 라이브러리를 그대로 쓰는 루트(`Banner`·`Dialog`)의 `title` 같은 줄임 prop 은 남긴다.
- * 라이브러리 API 를 적는 표라서다. `d` 에 「`.Title` 의 줄임」이라고 적는다.
- */
 globalThis.__arka = globalThis.__arka ?? {};
 
 globalThis.__arka.meta = (() => {
-  /** `t` 갈래. `n` 코드 이름(다를 때만). `d` 한 줄 설명. */
   const M = {
-    // ── 01 Shared · 글자와 아이콘 ────────────────────────────────────────────
     Text: {
       설명: "shared/component/Text · 본문 글자",
       props: {
-        // `variant`(body | caption) 는 뺐다 — 제품 17곳 중 명시한 곳 0, caption 은 렌더된 적이 없다(2026-09-18).
         size: { t: "enum", d: "small | medium | large. 기본 medium" },
         tone: { t: "enum", d: "default | muted | danger. 기본 default" },
         children: { t: "slot", d: "적을 말" },
@@ -94,7 +49,6 @@ globalThis.__arka.meta = (() => {
       },
     },
 
-    // ── 01 Shared · 입력 ────────────────────────────────────────────────────
     TextInput: {
       설명: "@primer/react TextInput · 한 줄 입력칸",
       props: {
@@ -206,7 +160,6 @@ globalThis.__arka.meta = (() => {
       설명: "@primer/react SegmentedControl · SegmentedControl.Root · 칸들을 한 줄에 붙이는 띠",
       props: {
         count: { t: "slot", n: "children", d: "`SegmentedControl.Button`·`.IconButton` 들. 지금 두셋" },
-        // Figma 축이 루트 세트에 걸려 있어 여기 남긴다 — 세트를 다시 지어야 옮길 수 있다(2026-09-20).
         selected: {
           t: "boolean",
           겹침: "Figma 축이 루트 세트에 걸려 있다",
@@ -236,7 +189,6 @@ globalThis.__arka.meta = (() => {
       },
     },
 
-    // ── 01 Shared · 표식 ────────────────────────────────────────────────────
     CounterLabel: {
       설명: "@primer/react CounterLabel · 숫자 하나를 담는 알약. 안 읽은 수",
       props: {
@@ -287,7 +239,6 @@ globalThis.__arka.meta = (() => {
       },
     },
 
-    // ── 01 Shared · 담는 것 ─────────────────────────────────────────────────
     Container: {
       설명: "shared/component/Container · 넘치는 것을 스크롤로 받아 내는 그릇",
       props: {
@@ -299,12 +250,9 @@ globalThis.__arka.meta = (() => {
     ButtonGroup: {
       설명: "@primer/react ButtonGroup · 단추가 틈 없이 붙어 바깥 모서리만 둥근 줄",
       props: {
-        // `role` 은 뺐다 — "toolbar" 일 때만 화살표 순회를 켜는 스위치라 디자인 인터페이스가 아니다.
         count: { t: "slot", n: "children", d: "붙일 Button·IconButton 들. 지금 둘셋" },
       },
     },
-    // `ActionBar` 는 2026-09-18 에 버렸다 — IconButton 여럿 + 구분선일 뿐이고 Primer 가 더하는 건
-    // 좁아질 때 넘침 메뉴로 접는 것 하나. 제품 import 0건.
     UnderlineNav: {
       설명: "@primer/react UnderlineNav · 밑줄로 지금 자리를 알리는 탭 줄. 아래 독과 설정 범위가 이것이다",
       부품: ["UnderlineNav/Root", "UnderlineNav/Item"],
@@ -372,7 +320,6 @@ globalThis.__arka.meta = (() => {
       css: { state: "`:hover` 가 본문 줄만 밝힌다" },
     },
 
-    // ── 01 Shared · 떠 있는 것과 알리는 것 ──────────────────────────────────
     Tooltip: {
       설명: "@primer/react Tooltip · 올리면 anchor 옆에 뜨는 짧은 말. 꼬리가 없다",
       props: {
@@ -528,8 +475,6 @@ globalThis.__arka.meta = (() => {
       props: { href: { t: "string", d: "" }, children: { t: "slot", d: "" } },
     },
 
-    // ── 01 Shared · 메뉴와 고르기 ───────────────────────────────────────────
-    // 컴파운드 시트의 머리말. 세트가 아니라 묶음이라 `apply()` 는 건너뛴다.
     Menu: {
       가상: true,
       설명: "shared/component/Menu · 눌러서 여는 할 일 목록",
@@ -577,10 +522,6 @@ globalThis.__arka.meta = (() => {
       가상: true,
       설명: "workbench/component/Tab · 편집 자리 한 벌 — 안에 `Split` 하나거나 `Group` 하나",
       부품: ["Tab/Root", "Tab/Header", "Tab/Actions", "Tab/Strip", "Tab/Panel", "Tab/Group", "Tab/Split"],
-      /**
-       * **네 겹이다.** 부품이 여섯이라 그냥 늘어놓으면 무엇이 무엇 안에 있는지가 안 보인다.
-       * 시트의 부품 목록이 이 값을 「계층」 칸으로 세운다 — 루트가 L1 이다.
-       */
       계층: {
         "Tab/Root": "L1",
         "Tab/Header": "L4",
@@ -672,7 +613,6 @@ globalThis.__arka.meta = (() => {
       css: { state: "`:hover`" },
     },
 
-    // ── 01 Shared · 글 ─────────────────────────────────────────────────────
     ModeToggle: {
       설명: "shared/component/ModeToggle · 두 값 사이를 오가는 아이콘 단추. 밝게/어둡게가 이것이다",
       props: {
@@ -695,7 +635,6 @@ globalThis.__arka.meta = (() => {
     CodeBlock: {
       설명: "shared/component/CodeBlock · 줄 번호와 복사 단추가 있는 코드 덩어리",
       props: {
-        // 셋만(사용자 결정 2026-09-18). `title`·`showFileName`·`hasContent`·`copyLabel`·`copiedLabel`·`copied` 는 뺐다.
         content: { t: "string", d: "코드 원문" },
         language: { t: "string", d: '말머리에 적히는 언어 — "typescript"' },
         fileName: { t: "string", d: '언어 옆 파일 이름 — "index.ts"' },
@@ -703,7 +642,6 @@ globalThis.__arka.meta = (() => {
       css: { token: "`[data-token=keyword|string|comment|number|function]` 이 색을 가른다" },
     },
 
-    // ── 02 Workbench · 줄들 ────────────────────────────────────────────────
     Shell: {
       설명: "workbench/component/Shell · 위 부품을 다 품는 창 한 장",
       props: {
@@ -792,7 +730,6 @@ globalThis.__arka.meta = (() => {
       },
       css: { state: "`:hover` `:active` `:focus-visible`" },
     },
-    // `Panel` 이라 부르던 것이다 — 실은 사이드바만 맡는다. 아래 창은 `Bottom` 이 따로다(2026-09-20 사용자 정정).
     Sidebar: {
       설명: "workbench/component/Sidebar · 레일 오른쪽 사이드바. 머리와 본문 둘뿐인 그릇",
       부품: ["Sidebar/Root", "Sidebar/Header", "Sidebar/Body"],
@@ -800,7 +737,6 @@ globalThis.__arka.meta = (() => {
     "Sidebar/Root": {
       설명: "workbench/component/Sidebar · Sidebar.Root · 머리와 본문을 세로로 쌓는 그릇",
       props: {
-        // `title`·`actions` 는 `Sidebar/Header` 의 것이다 — 루트가 되풀이하지 않는다.
         density: { t: "enum", d: "comfortable | compact. compact 면 머리가 얕고 제목이 대문자가 된다" },
         header: {
           t: "slot",
@@ -945,11 +881,8 @@ globalThis.__arka.meta = (() => {
         shortcut: { t: "object", d: '오른쪽 키캡들 — `["⌘", "K"]`. 비면 묶음이 안 그려진다' },
         label: { t: "string", d: "명령 이름" },
       },
-      // 짚인 줄은 cmdk 가 정한다 — 소비자가 넘기는 값이 아니라 CSS-State 다.
       css: { selected: "`[cmdk-item][data-selected=true]` 를 cmdk 가 붙인다. 마우스와 키보드 둘 다 이것을 움직인다" },
     },
-    // 알림도 확장처럼 꽂힌다 — **탭 하나**다(2026-09-20 사용자 결정). 제목 줄의 종이 트리거라
-    // 레일에는 칸을 두지 않는다. 설정은 톱니가 레일 아래에, 알림은 종이 제목 줄에 있다.
     Notifications: {
       설명: "workbench/view/NotificationsTabView (예상 자리) · 쌓인 알림을 열어 보는 탭. 제목 줄의 종이 연다",
       부품: ["Notifications/Root", "Notifications/TabHeader", "Notifications/TabPanel", "Notifications/Row"],
@@ -989,8 +922,6 @@ globalThis.__arka.meta = (() => {
         onDismiss: { t: "action", d: "× 를 누를 때" },
       },
     },
-    // 설정은 확장이다 — 세 자리(레일 아래 묶음의 칸 · 탭 머리 · 탭 본문)가 각각 별개의 UI 라 부품도 각각이다
-    // (2026-09-20 사용자 결정).
     Settings: {
       설명: "extensions/settings (예상 자리) · 설정 확장. 레일 아래 묶음의 칸 · 탭 머리 · 탭 본문 세 자리에 꽂힌다",
       부품: [
@@ -1062,7 +993,6 @@ globalThis.__arka.meta = (() => {
       },
     },
 
-    // ── 03~09 · 기능 페이지 (아직 훑기 전이라 얇다) ─────────────────────────
     FileIcon: {
       설명: "extensions/filesystem/component/FileIcon · 확장자로 고르는 파일 아이콘",
       props: {
@@ -1093,12 +1023,6 @@ globalThis.__arka.meta = (() => {
 
   const 이름 = (k, p) => p.n ?? k;
 
-  /**
-   * 페이지의 시트 묶음. `layout()` 이 읽어 오토레이아웃 프레임으로 쌓는다.
-   *
-   * **묶음 이름은 영어다** — 레이어 이름이 되고 목차 표의 「묶음」 칸에도 같은 말이 선다.
-   * 보이는 글은 한글이지만 이것은 이름이라 식별자 쪽이다.
-   */
   const 묶음 = {
     "01 Shared": [
       ["Typography", ["Text", "Kbd", "Link", "Markdown", "CodeBlock"]],
@@ -1110,8 +1034,6 @@ globalThis.__arka.meta = (() => {
       ["Overlays", ["Menu", "Select", "Dialog", "Tooltip", "Toast"]],
       ["Layout", ["Container"]],
     ],
-    // VS Code 의 창 구역 이름을 따른다 — 어디에 무엇이 있는지가 곧 이름이 되게.
-    // **차례는 작은 것부터다** — 원자에서 시작해 구역을 거쳐 창 한 장으로 끝난다.
     "02 Workbench": [
       ["Activity Bar", ["ActivityBar"]],
       ["Sidebar", ["Sidebar"]],
@@ -1123,7 +1045,6 @@ globalThis.__arka.meta = (() => {
     ],
   };
 
-  /** `묶음` 을 편 차례표 — `이름 → { 페이지, 묶음, 번호 }`. 한 번만 만든다. */
   const 자리표 = (() => {
     const 표 = {};
     for (const [페이지, 묶음들] of Object.entries(묶음)) {
@@ -1139,39 +1060,26 @@ globalThis.__arka.meta = (() => {
   return {
     M,
     묶음,
-    /**
-     * 시트가 페이지 몇 번째인가 — `{ 페이지, 묶음, 번호, 총 }`. `묶음` 에 없으면 `null`.
-     *
-     * **이 번호가 곧 시트 제목의 `N` 이다**(`28. Menu`). 절은 `N.1`·`N.2`, 항은 `N.2.1` 로
-     * 이어진다 — 차례와 본문이 글자로 맞물리게 하는 것이 번호를 두는 까닭이다.
-     */
     자리(setName) {
       return 자리표[setName] ?? null;
     },
-    /** 세트 하나의 `{ 설명, props, css }`. 없으면 `null`. */
     of(setName) {
       return M[setName] ?? null;
     },
-    /** 축·속성 하나의 갈래 낱말. `props` 에 없으면 `null` — 시트는 아무것도 안 적는다. */
     kind(setName, key) {
       return M[setName]?.props?.[key]?.t ?? null;
     },
-    /** 그 키가 CSS-State 인가. */
     isCss(setName, key) {
       return Boolean(M[setName]?.css?.[key]);
     },
-    /** 표에 실을 줄들 — `[{ name, type, desc }]`. 정의 순서를 지킨다. */
     rows(setName) {
       const e = M[setName];
       if (!e) return [];
       return Object.entries(e.props ?? {}).map(([k, p]) => ({ name: 이름(k, p), type: p.t, desc: p.d }));
     },
 
-    /** 표의 `설명` 을 각 세트의 Figma description 에 써 넣는다. */
     async apply() {
       await figma.loadAllPagesAsync();
-      // **이름 색인을 한 번만 만든다.** 이름마다 `findOne` 을 돌리면 열 페이지를 82번 훑어
-      // 30초를 넘긴다(2026-09-17 에 그렇게 두 번 끊겼다).
       const byName = new Map();
       for (const p of figma.root.children) {
         for (const n of p.findAll(
@@ -1183,7 +1091,7 @@ globalThis.__arka.meta = (() => {
       const 씀 = [],
         못찾음 = [];
       for (const [name, e] of Object.entries(M)) {
-        if (e.가상 || e.부품) continue; // Figma 노드가 없는 항목 · 컴파운드 머리(노드는 `X/Root` 가 든다)
+        if (e.가상 || e.부품) continue;
         const node = byName.get(name);
         if (!node) {
           못찾음.push(name);
@@ -1195,13 +1103,6 @@ globalThis.__arka.meta = (() => {
       return { 씀: 씀.length, 못찾음 };
     },
 
-    /**
-     * 표에 **빠진 축·속성**을 센다. 파일에 있는데 여기 없으면 시트가 그 줄을 안 그린다 —
-     * 조용히 사라지지 않게 여기서 잡는다.
-     *
-     * 컴파운드 규칙도 여기서 센다 — `루트없는컴파운드`(머리에 `props` 가 있거나 `부품` 첫 줄이
-     * `X/Root` 가 아니다) · `루트에겹친prop`(루트와 부품이 같은 키를 든다. `children` 은 뺀다).
-     */
     async audit() {
       await figma.loadAllPagesAsync();
       const 빠짐 = [],
@@ -1211,14 +1112,12 @@ globalThis.__arka.meta = (() => {
         state축표없음 = [],
         state표축없음 = [],
         state값이름 = [];
-      /** CSS-State 의 값은 이 다섯뿐이다. 내용의 갈래는 `state` 가 아니라 `mode` 로 부른다. */
       const 좋은state = new Set(["rest", "hover", "active", "focus", "disabled"]);
       for (const [name, e] of Object.entries(M)) {
         if (!e.부품) continue;
         const root = `${name}/Root`;
         if (e.props || e.부품[0] !== root || !M[root]) 루트없는컴파운드.push(name);
         const rootProps = M[root]?.props ?? {};
-        // `X/` 로 시작하지 않는 부품은 형제 컴포넌트다(`ConfirmationDialog`·`CommandCenter`) — 안 잰다.
         for (const part of e.부품.slice(1).filter((p) => p.startsWith(`${name}/`))) {
           for (const [k, p] of Object.entries(M[part]?.props ?? {})) {
             if (k === "children" || !rootProps[k] || p.겹침 || rootProps[k].겹침) continue;
@@ -1230,7 +1129,7 @@ globalThis.__arka.meta = (() => {
         for (const n of p.findAll(
           (x) => x.type === "COMPONENT_SET" || (x.type === "COMPONENT" && x.parent?.type !== "COMPONENT_SET"),
         )) {
-          if (/^Icon\//.test(n.name)) continue; // Foundation 의 글리프는 표 밖이다
+          if (/^Icon\//.test(n.name)) continue;
           const defs = n.componentPropertyDefinitions ?? {};
           const keys = Object.keys(defs).map((k) => k.split("#")[0]);
           const e = M[n.name];
@@ -1241,7 +1140,6 @@ globalThis.__arka.meta = (() => {
           for (const k of keys) {
             if (!e.props?.[k] && !e.css?.[k]) 빠짐.push(`${n.name}.${k}`);
           }
-          // D-1 — `state` 축과 표의 `css.state` 는 짝이다. 한쪽만 있으면 흠이다.
           const st = defs["state"];
           if (st?.type === "VARIANT" && !e.css?.state) state축표없음.push(n.name);
           if (!st && e.css?.state) state표축없음.push(n.name);

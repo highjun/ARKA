@@ -129,8 +129,6 @@ export const ShellView = observer(function ShellView() {
             <Text size="small" tone="muted" className={styles["buildId"]}>
               {appStatus.buildId}
             </Text>
-            {/* **누르면 탭이 열린다** — 메뉴는 동작 목록이라 읽을 것을 담는 그릇이 아니었다.
-                고르면 읽히는 게 아니라 지워지던 것이 그 탓이다. */}
             <span className={styles["bell"]}>
               <IconButton
                 variant="invisible"

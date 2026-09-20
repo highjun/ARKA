@@ -19,5 +19,4 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-/** 이름이 길어도 칸은 560px 에서 멈춘다. */
 export const LongValue: Story = { args: { value: "아주 긴 작업 공간 이름이 여기 들어간다" } };

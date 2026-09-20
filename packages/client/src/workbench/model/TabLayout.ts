@@ -29,7 +29,6 @@ const legacyUriOf = (kind: string, id: string): URI | null => {
       return URI.file(id);
     case "settings":
       return URI.parse("arka:///settings");
-    // 단축키가 제 화면을 갖던 때의 탭 — 이제 설정 안의 한 범주라 거기로 보낸다.
     case "keybindings":
       return URI.parse("arka:///settings");
     case "markdownPreview":
