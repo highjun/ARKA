@@ -99,8 +99,12 @@ jobs:
       cancel-in-progress: false
     env:
       IMAGE: ghcr.io/${{ github.repository_owner }}/arka:${{ github.sha }}
+      ARKA_SECURE: ${{ vars.ARKA_SECURE }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: 값이 있는지 먼저 본다
+        run: test -r "$ARKA_SECURE/.env" || { echo "::error::ARKA_SECURE가 가리키는 .env가 없습니다 — 환경 변수 ARKA_SECURE를 이 기계의 ops/secure 경로로 두세요"; exit 1; }
 
       - name: 검사한 이미지를 당긴다
         run: |
@@ -109,14 +113,13 @@ jobs:
 
       - name: 올린다
         run: |
-          set -a; . "$HOME/ARKA/secure/env/arka.env"; set +a
-          node ops/deploy/renderTunnel.ts "$RUNNER_TEMP/cloudflared.yml"
-          ARKA_TUNNEL_CONFIG="$RUNNER_TEMP/cloudflared.yml" ARKA_IMAGE="$IMAGE" \
-            docker compose -f ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
+          set -a; . "$ARKA_SECURE/.env"; set +a
+          node ops/deploy/renderTunnel.ts "$ARKA_TUNNEL_CONFIG"
+          ARKA_IMAGE="$IMAGE" docker compose -f ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
 
       - name: 익명 접근이 막히는지 본다
         run: |
-          set -a; . "$HOME/ARKA/secure/env/arka.env"; set +a
+          set -a; . "$ARKA_SECURE/.env"; set +a
           node ops/smoke/anon.ts "$ARKA_ORIGIN"
 
       - name: 안 쓰는 이미지를 걷는다

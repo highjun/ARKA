@@ -5,6 +5,7 @@ dist/
 storybook-static/
 .env
 .env.*
+ops/secure
 .claude
 USER_NOTE.md
 docs/draft/
