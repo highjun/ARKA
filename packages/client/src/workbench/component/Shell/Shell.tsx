@@ -5,7 +5,7 @@ import { PortalProvider } from "#utils/portal";
 import styles from "./Shell.module.css";
 import { SplitPageLayout, ThemeProvider } from "@primer/react";
 import { Container } from "#component/Container";
-import { Panel } from "../Panel";
+import { Sidebar } from "../Sidebar";
 import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
 import { ActivityBar } from "../ActivityBar";
@@ -227,31 +227,32 @@ export const Shell = ({
                       <ActivityBar.Bottom items={SETTINGS_ROW} onSelect={() => onSettingsSelect?.()} />
                     </ActivityBar>
                     {expanded && (
-                      <Panel
-                        density="compact"
-                        className={styles["sidebarPanel"]}
-                        title={sidebarTitle}
-                        actions={
-                          sidebarActions !== undefined && sidebarActions.length > 0 ? (
-                            <>
-                              {sidebarActions.map((action) => (
-                                <IconButton
-                                  key={action.actionId}
-                                  variant="invisible"
-                                  size="small"
-                                  aria-label={action.label}
-                                  onClick={() => onSidebarActionActivate?.(action.actionId)}
-                                  icon={() => <Icon iconId={action.iconId} size="sm" />}
-                                />
-                              ))}
-                            </>
-                          ) : undefined
-                        }
-                      >
-                        <Container chrome="none" className={styles["sidebarPanelBody"]}>
-                          {sidebarContent}
-                        </Container>
-                      </Panel>
+                      <Sidebar density="compact" className={styles["sidebarSurface"]}>
+                        <Sidebar.Header
+                          title={sidebarTitle}
+                          actions={
+                            sidebarActions !== undefined && sidebarActions.length > 0 ? (
+                              <>
+                                {sidebarActions.map((action) => (
+                                  <IconButton
+                                    key={action.actionId}
+                                    variant="invisible"
+                                    size="small"
+                                    aria-label={action.label}
+                                    onClick={() => onSidebarActionActivate?.(action.actionId)}
+                                    icon={() => <Icon iconId={action.iconId} size="sm" />}
+                                  />
+                                ))}
+                              </>
+                            ) : undefined
+                          }
+                        />
+                        <Sidebar.Body>
+                          <Container chrome="none" className={styles["sidebarSurfaceBody"]}>
+                            {sidebarContent}
+                          </Container>
+                        </Sidebar.Body>
+                      </Sidebar>
                     )}
                   </div>
                 </div>

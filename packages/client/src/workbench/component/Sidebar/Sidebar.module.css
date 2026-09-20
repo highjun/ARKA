@@ -7,8 +7,7 @@
 }
 
 /* 헤더 높이·padding·title 타이포는 `agent/ChatRoom`의 헤더 값으로 통일한다(2026-09-01 —
- * Panel 도입 전엔 Shell 사이드바 패널·ChatRoom·SessionList 셋이 각기 다른 토큰을
- * 썼다). */
+ * 그전엔 Shell 사이드바 패널·ChatRoom·SessionList 셋이 각기 다른 토큰을 썼다). */
 .header {
   display: flex;
   height: var(--control-large-size);

@@ -247,7 +247,7 @@
   flex-grow: 1;
 }
 
-.sidebarPanel {
+.sidebarSurface {
   display: flex;
   min-width: 0;
   flex-grow: 1;
@@ -257,7 +257,7 @@
   border-color: var(--borderColor-default);
 }
 
-.sidebarPanelBody {
+.sidebarSurfaceBody {
   min-height: 0;
   flex-grow: 1;
 }

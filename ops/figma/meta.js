@@ -786,22 +786,35 @@ globalThis.__arka.meta = (() => {
     },
     // `Panel` 이라 부르던 것이다 — 실은 사이드바만 맡는다. 아래 창은 `Bottom` 이 따로다(2026-09-20 사용자 정정).
     Sidebar: {
-      설명: "workbench/component/Sidebar (지금 코드는 Panel) · 레일 오른쪽 사이드바. 머리와 내용 둘뿐인 그릇",
-      부품: ["Sidebar/Root", "Sidebar/Header"],
+      설명: "workbench/component/Sidebar · 레일 오른쪽 사이드바. 머리와 본문 둘뿐인 그릇",
+      부품: ["Sidebar/Root", "Sidebar/Header", "Sidebar/Body"],
     },
     "Sidebar/Root": {
-      설명: "workbench/component/Sidebar (지금 코드는 Panel) · Sidebar.Root · 머리와 내용을 세로로 쌓는 그릇",
+      설명: "workbench/component/Sidebar · Sidebar.Root · 머리와 본문을 세로로 쌓는 그릇",
       props: {
         // `title`·`actions` 는 `Sidebar/Header` 의 것이다 — 루트가 되풀이하지 않는다.
         density: { t: "enum", d: "comfortable | compact. compact 면 머리가 얕고 제목이 대문자가 된다" },
-        header: { t: "slot", n: "children", d: "`.Header` + 내용. Figma 에선 머리를 INSTANCE_SWAP 으로 갈아 끼운다" },
+        header: {
+          t: "slot",
+          n: "children",
+          d: "`.Header` + `.Body`. Figma 에선 머리를 INSTANCE_SWAP 으로 갈아 끼운다",
+        },
       },
     },
     "Sidebar/Header": {
-      설명: "workbench/component/Sidebar (지금 코드는 Panel) · Sidebar.Header · 제목과 오른쪽 동작. 둘 다 없으면 안 선다",
+      설명: "workbench/component/Sidebar · Sidebar.Header · 제목과 오른쪽 동작. 둘 다 없으면 안 선다",
       props: {
         title: { t: "slot", d: "왼쪽. 아이콘을 섞을 수 있어 글자가 아니다" },
         actions: { t: "slot", d: "오른쪽 아이콘들" },
+      },
+    },
+    "Sidebar/Body": {
+      설명: "workbench/component/Sidebar · Sidebar.Body · 확장의 사이드바 내용이 서는 자리",
+      props: {
+        children: {
+          t: "slot",
+          d: "`SidebarDescriptor.Content`. **넘치는 것은 안 받는다** — 스크롤이 필요하면 안에 `Container` 를 둔다",
+        },
       },
     },
     Bottom: {
