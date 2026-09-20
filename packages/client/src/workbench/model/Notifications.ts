@@ -74,10 +74,10 @@ export class Notifications implements INotifications {
     this.#changed.fire();
   }
 
-  /** 다 읽은 상태면 아무 일도 안 한다 — 헛된 알림을 안 낸다. */
-  markAllRead(): void {
-    if (this.unreadCount === 0) return;
-    this.#items = this.#items.map((n) => (n.isRead ? n : { ...n, isRead: true }));
+  /** 이미 읽었거나 없는 id면 아무 일도 안 한다 — 헛된 알림을 안 낸다. */
+  markRead(id: string): void {
+    if (!this.#items.some((n) => n.id === id && !n.isRead)) return;
+    this.#items = this.#items.map((n) => (n.id === id ? { ...n, isRead: true } : n));
     this.#changed.fire();
   }
 
