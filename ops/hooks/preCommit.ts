@@ -29,18 +29,17 @@ CI가 쓰는 판과 같아야 합니다. 한 줄로 깝니다.
     process.exit(1);
   }
 
-  const { status } = spawnSync(
-    "gitleaks",
-    ["git", "--staged", "--gitleaks-ignore-path", "ops/.gitleaksignore", "--redact", "--no-banner"],
-    { cwd: REPO_ROOT, stdio: "inherit" },
-  );
+  const { status } = spawnSync("gitleaks", ["git", "--staged", "--redact", "--no-banner"], {
+    cwd: REPO_ROOT,
+    stdio: "inherit",
+  });
 
   if (status !== 0) {
     console.error(`
 [비밀] 커밋을 세웠습니다. 위에 찍힌 자리를 비우고 다시 하세요.
 
 커밋 뒤에 발견하면 이력을 다시 써야 합니다 — 그 전에 막는 것이 이 훅입니다.
-정말 비밀이 아니면 지문을 \`ops/.gitleaksignore\`에 적습니다.
+정말 비밀이 아니면 값을 \`.env\`로 옮기고 코드는 변수만 읽게 하세요.
 `);
     process.exit(status ?? 1);
   }

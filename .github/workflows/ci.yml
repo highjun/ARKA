@@ -30,6 +30,8 @@ jobs:
       ARKA_CONTAINER_PORT: "3000"
       ARKA_CONTAINER_WORKSPACE: /workspace
       ARKA_CLIENT_ROOT: /app/dist/client
+      ARKA_TUNNEL_CONFIG: /dev/null
+      ARKA_TUNNEL_CREDENTIALS: /dev/null
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -50,8 +52,7 @@ jobs:
           fi
           echo "범위=$RANGE"
           docker run --rm -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.30.1 \
-            git /repo --gitleaks-ignore-path /repo/ops/.gitleaksignore \
-            --log-opts="--no-merges $RANGE" --redact --no-banner
+            git /repo --log-opts="--no-merges $RANGE" --redact --no-banner
 
       - name: 이미지를 굽는다
         run: node ops/deploy/build.ts "$IMAGE"
@@ -111,8 +112,7 @@ jobs:
           set -a; . "$HOME/ARKA/secure/env/arka.env"; set +a
           node ops/deploy/renderTunnel.ts "$RUNNER_TEMP/cloudflared.yml"
           ARKA_TUNNEL_CONFIG="$RUNNER_TEMP/cloudflared.yml" ARKA_IMAGE="$IMAGE" \
-            docker compose -f ops/deploy/compose.yml -f ops/deploy/compose.tunnel.yml \
-              up -d --no-build --wait
+            docker compose -f ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
 
       - name: 익명 접근이 막히는지 본다
         run: |
