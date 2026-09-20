@@ -4,6 +4,10 @@ import type { Descriptor, Registry } from "#core/registry";
 /** 확장이 더하는 설정 한 칸. `type`이 `default`의 타입을 정한다 — 어긋나면 컴파일에서 잡힌다. */
 export type SettingsDescriptor = Descriptor & {
   readonly title: string;
+  /** 어느 범주에 서나. 없으면 「일반」이다 — 범주를 짓는 것은 확장의 몫이라 커널이 목록을 안 든다. */
+  readonly category?: string;
+  /** 제목 아래 한 줄. 없으면 안 그린다 — 제목이 이미 말하는 것을 되풀이하지 않는다. */
+  readonly description?: string;
   /** 화면 폭에 따라 값이 갈리는가. 설정에 "기기" 개념을 두지 않기로 한 결정의 대응물이다. */
   readonly byViewportWidth?: boolean;
 } & (

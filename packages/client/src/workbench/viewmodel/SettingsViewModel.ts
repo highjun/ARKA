@@ -8,6 +8,7 @@ export class SettingsViewModel implements ISettingsViewModel {
   readonly #settings: ISettings;
   readonly #subscription: Disposable;
   private rowsState: readonly SettingsRow[];
+  private queryState = "";
 
   /** 값이 바뀔 때마다 줄을 다시 편다 — 스키마는 부팅 때 굳는다. */
   constructor({ settings }: { settings: ISettings }) {
@@ -20,6 +21,16 @@ export class SettingsViewModel implements ISettingsViewModel {
   /** 스키마 순서 그대로. */
   get rows(): readonly SettingsRow[] {
     return this.rowsState;
+  }
+
+  /** 찾을 말. 화면에 하나뿐이고 단축키 줄도 이것으로 걸러진다. */
+  get query(): string {
+    return this.queryState;
+  }
+
+  /** 거르지는 않는다 — 그것은 화면의 순수 변환이다. */
+  setQuery(value: string): void {
+    this.queryState = value;
   }
 
   /** `ISettings.set`에 넘긴다 — 저장과 알림은 그쪽이 한다. */
@@ -40,6 +51,8 @@ export class SettingsViewModel implements ISettingsViewModel {
     return this.#settings.schema.list().map((descriptor) => ({
       id: descriptor.id,
       title: descriptor.title,
+      category: descriptor.category ?? "일반",
+      ...(descriptor.description === undefined ? {} : { description: descriptor.description }),
       type: descriptor.type,
       value: this.#settings.get<unknown>(descriptor.id),
       ...(descriptor.type === "enum" ? { options: descriptor.options } : {}),
