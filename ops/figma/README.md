@@ -28,14 +28,14 @@ const { meta, spec } = globalThis.__arka;
 await spec.boot(); // 변수와 텍스트 스타일을 한 번 읽는다
 await meta.apply(); // 표의 설명을 각 세트의 description에 써 넣는다
 await spec.sheet("Text"); // 세트 하나 → 시트 한 장
-await spec.group("Menu", ["Menu/Trigger", "Menu/Content", "Menu/Item"]);
+await spec.group("Menu"); // 부품은 meta의 `부품`이 정본 — 첫 줄이 `Menu/Root`
 ```
 
 검사는 둘이다.
 
 ```js
-meta.audit(); // 표에 없는 축·속성, 표에 없는 세트
-spec.audit("01 Shared"); // 끊긴 인스턴스·겹침·고정폭 글자·스타일 없는 글자·루트에 뜬 것
+await meta.audit(); // 표에 없는 축·속성 · 표에 없는 세트 · 루트 없는 컴파운드 · 루트에 겹친 prop
+await spec.audit("01 Shared"); // 끊긴 인스턴스·겹침·고정폭 글자·스타일 없는 글자·루트에 뜬 것
 ```
 
 ## 걸리는 것
@@ -46,5 +46,7 @@ spec.audit("01 Shared"); // 끊긴 인스턴스·겹침·고정폭 글자·스�
   컴포넌트가 있는지 센다.
 - 포트는 매니페스트가 허용하는 `9223`–`9232` 안이어야 한다. 그 대역에 낡은 MCP 서버가
   떠 있으면 모든 호출이 29초로 늘어난다 — `ss -ltnp`로 먼저 본다.
-- `가상: true`인 부품은 Figma에 노드가 없다(`Menu/Trigger`처럼 코드에만 있는 것).
+- `가상: true`인 부품은 Figma에 노드가 없다(`Menu/Root`처럼 코드에만 있는 것).
   시트는 표만 세우고 견본은 건너뛴다.
+- 컴파운드의 루트는 **`X/Root`** — Figma 세트 이름도, `meta`의 항목도, 시트의 첫 절도 그 이름이다.
+  머리 항목 `X`는 설명·부품 목록만 들고 prop 표가 없다.

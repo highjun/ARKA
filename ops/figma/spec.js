@@ -5,7 +5,7 @@
  *     (0, eval)(await (await fetch("http://localhost:9230/tool/spec.js")).text());
  *     await globalThis.__arka.spec.boot();
  *     await globalThis.__arka.spec.sheet("Text", { defaults: { size: "medium" } });
- *     await globalThis.__arka.spec.group("Menu", ["Menu/Content","Menu/Item","Menu/RadioItem","Menu/Label","Menu/Separator"]);
+ *     await globalThis.__arka.spec.group("Menu");   // 부품은 meta 의 `부품` — 첫 줄이 `Menu/Root`
  *     await globalThis.__arka.spec.stack("01 Shared");
  *
  * **왼쪽은 문서, 오른쪽은 덤프.** 페이지를 아래로 내리면 왼쪽 열만 읽으면 된다.
@@ -17,7 +17,7 @@
  * ② **덤프 — 세트 자체.** 모든 조합. 오른쪽에 접어 두고 필요할 때만 본다.
  *
  * **컴파운드는 `group()` 으로 한 장에 모은다** — `Menu/Content`·`Menu/Item`… 을 따로 흩어 두면
- * 파일만 봐선 한 컴포넌트의 부품인지 알 수가 없다.
+ * 파일만 봐선 한 컴포넌트의 부품인지 알 수가 없다. 절은 `N.1 부품 목록` → `N.2 Root` → 부품들.
  *
  * **자리는 전부 오토레이아웃이 잡는다.** 좌표를 손으로 주면 변형 폭이 바뀔 때마다 어긋난다.
  * `resize()` 는 두 축의 사이징을 FIXED 로 덮으므로 **사이징을 resize 뒤에 다시 건다.**
@@ -495,14 +495,16 @@ globalThis.__arka.spec = (() => {
      * **컴파운드 한 장.** 부품 여럿을 한 시트에 절로 쌓고, 덤프도 한 칸에 모은다.
      *
      * `parts` 를 안 주면 `meta` 의 `부품` 을 읽는다 — 거기가 정본이다.
-     * **루트는 어느 목록에도 안 적는다. 여기서 맨 뒤에 붙인다** — 작은 조각부터 읽고
-     * 마지막에 전체를 보는 차례다(두 페이지 공통).
+     * **루트가 맨 앞이다 — `X/Root`.** 무엇의 부품인지부터 보고 조각으로 내려가는 차례다
+     * (2026-09-20 사용자 정정. 그전엔 루트를 맨 뒤에 붙였다). `parts` 첫 줄이 `X/Root` 가 아니면
+     * 옛 꼴이라 멈춘다 — 조용히 옛 시트가 나오지 않게.
      */
     async group(name, parts = meta()?.of(name)?.부품 ?? [], { defaults = null, source = null } = {}) {
       if (!Object.keys(S).length) await this.boot();
+      if (parts[0] !== `${name}/Root`) throw new Error(`부품 첫 줄이 ${name}/Root 가 아니다: ${parts[0]}`);
       // **`가상: true` 인 부품은 Figma 노드가 없다** — 표만 세우고 견본은 건너뛴다.
-      // (`Menu/Trigger`·`NavList/Group` 처럼 코드에만 있는 부품이 시트에서 사라지지 않게.)
-      const 이름들 = [...parts, name];
+      // (`Menu/Root`·`NavList/Group` 처럼 코드에만 있는 부품이 시트에서 사라지지 않게.)
+      const 이름들 = parts;
       const nodes = 이름들.map((p) => findNode(p));
       const sheetName = sheetNameOf(name);
       const home = unwrap(nodes.filter(Boolean), name);
@@ -519,7 +521,7 @@ globalThis.__arka.spec = (() => {
       const 자리 = meta()?.자리(name) ?? null;
       const N = 자리 ? String(자리.번호) : null;
       head.appendChild(await text(N ? `${N}. ${name}` : name, "Title/Large", "fgColor/default", "Title"));
-      // **루트의 설명을 먼저 쓴다.** 노드 쪽을 먼저 보면 루트가 가상일 때(`Menu`) 노드가 있는
+      // **머리의 설명을 먼저 쓴다.** 노드 쪽을 먼저 보면 루트가 가상일 때(`Menu`) 노드가 있는
       // 첫 부품의 것을 집어 와 `Menu` 자리에 `Menu.Content` 의 설명이 선다.
       const src = source ?? meta()?.of(name)?.설명 ?? nodes.find((n) => n?.description)?.description;
       if (src) head.appendChild(await text(src, "Caption", "fgColor/muted", "Source"));
@@ -542,15 +544,14 @@ globalThis.__arka.spec = (() => {
         표 = 0;
       for (const [i, node] of nodes.entries()) {
         const 절 = 절들[i];
-        const 루트인가 = i === nodes.length - 1;
         const block = box(`Part/${절.이름}`, "VERTICAL", GAP_AXIS);
         doc.appendChild(block);
         // 제목과 설명은 한 머리다 — 떼어 놓으면 설명이 아래 표에 붙어 보인다.
-        // 루트는 설명을 안 단다 — 시트 머리에 이미 같은 줄이 섰다.
+        // `Root` 도 설명을 단다 — 시트 머리는 컴파운드 전체의 말이고 이건 루트 부품의 말이다.
         const 머리 = box("Head", "VERTICAL", 6);
         block.appendChild(머리);
         머리.appendChild(await text(`${절.번호}. ${절.이름}`, "Title/Medium", "fgColor/default", "Part"));
-        if (절.무엇 && !루트인가) 머리.appendChild(await text(절.무엇, "Caption", "fgColor/muted", "PartDesc"));
+        if (절.무엇) 머리.appendChild(await text(절.무엇, "Caption", "fgColor/muted", "PartDesc"));
         표 += await propTable(block, 절.full);
         if (!node) continue; // 가상 부품 — 표까지만
         const n = await blocks(block, node, {

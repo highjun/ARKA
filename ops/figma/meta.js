@@ -25,9 +25,20 @@
  * 키는 **Figma 의 축·속성 이름**이다. 코드의 prop 이름이 다르면 `n` 에 적는다 —
  * 표엔 `n` 이, 견본 블록엔 키가 선다.
  *
- * **Compound 는 루트와 서브컴포넌트가 각각 한 항목이다.** 루트에 `부품: ["Menu/Trigger", …]` 를
- * 두면 시트가 루트 표 다음에 부품마다 제목 + 표(+ Figma 노드가 있으면 견본)를 쌓는다.
- * Figma 노드가 없는 항목은 `가상: true` — 표만 서고 `apply()`·`audit()` 은 건너뛴다.
+ * **Compound 는 시트 머리 하나 + 부품마다 한 항목이다.** 머리 항목 `X` 는 `설명`·`부품`·(있으면)
+ * `계층` 만 갖고 **`props` 가 없다.** `부품` 의 첫 줄은 언제나 **`X/Root`** — 전체에 속하는 prop
+ * (갈래를 정하는 것 · 제어 짝 · `children`)만 든다. Figma 에 몸이 있으면 세트 이름도 `X/Root`,
+ * 없으면 `가상: true` — 표만 서고 `apply()`·`audit()` 은 건너뛴다.
+ *
+ * **prop 은 한 표에만 산다.** 부품이 드는 것을 루트가 되풀이하지 않는다(`Panel.title` 은
+ * `Panel/Header` 의 것이다). Figma 의 기계 속성(머리를 갈아 끼우는 INSTANCE_SWAP)은 Figma 이름을
+ * 키로 두고 `n` 으로 React 이름(`children`)을 가리킨다. `audit()` 의 `루트에겹친prop` 이 이것을 센다.
+ * 같은 키가 두 표에 서야 할 때는 **`겹침: "<이유>"`** 를 달아 검사에서 뺀다 — Figma 축이 부품에
+ * 걸려 루트 prop 을 거울처럼 비추는 것(`Menu/Content.kind`), 루트가 부품에 내려 주는 것
+ * (`Tab/Root.chrome`), 이름만 같고 뜻이 다른 것(`Select/Item.value`).
+ *
+ * 예외 — 라이브러리를 그대로 쓰는 루트(`Banner`·`Dialog`)의 `title` 같은 줄임 prop 은 남긴다.
+ * 라이브러리 API 를 적는 표라서다. `d` 에 「`.Title` 의 줄임」이라고 적는다.
  */
 globalThis.__arka = globalThis.__arka ?? {};
 
@@ -145,6 +156,16 @@ globalThis.__arka.meta = (() => {
     },
     FormControl: {
       설명: "@primer/react FormControl · 라벨·입력·설명을 한 덩어리로 묶는다",
+      부품: [
+        "FormControl/Root",
+        "FormControl/Label",
+        "FormControl/Caption",
+        "FormControl/Validation",
+        "FormControl/LeadingVisual",
+      ],
+    },
+    "FormControl/Root": {
+      설명: "@primer/react FormControl · FormControl.Root · 라벨·입력·설명을 세로로 쌓는 그릇",
       props: {
         required: { t: "boolean", d: "라벨 옆에 * 가 붙는다" },
         validation: { t: "enum", d: "Figma 축 — none | error. 코드에선 `FormControl.Validation` 을 넣고 빼는 것이다" },
@@ -153,7 +174,6 @@ globalThis.__arka.meta = (() => {
         layout: { t: "enum", d: "vertical | horizontal. 체크박스·라디오는 horizontal" },
         children: { t: "slot", d: "`.Label` + 컨트롤 + `.Caption`/`.Validation`" },
       },
-      부품: ["FormControl/Label", "FormControl/Caption", "FormControl/Validation", "FormControl/LeadingVisual"],
     },
     "FormControl/Label": {
       가상: true,
@@ -180,14 +200,22 @@ globalThis.__arka.meta = (() => {
     },
     SegmentedControl: {
       설명: "@primer/react SegmentedControl · 칸을 나눠 하나만 고르는 띠",
+      부품: ["SegmentedControl/Root", "SegmentedControl/Button", "SegmentedControl/IconButton"],
+    },
+    "SegmentedControl/Root": {
+      설명: "@primer/react SegmentedControl · SegmentedControl.Root · 칸들을 한 줄에 붙이는 띠",
       props: {
         count: { t: "slot", n: "children", d: "`SegmentedControl.Button`·`.IconButton` 들. 지금 두셋" },
-        selected: { t: "boolean", d: "Figma 축 — 어느 칸이 골라졌나. 코드에선 `SegmentedControl.Button` 의 prop 이다" },
+        // Figma 축이 루트 세트에 걸려 있어 여기 남긴다 — 세트를 다시 지어야 옮길 수 있다(2026-09-20).
+        selected: {
+          t: "boolean",
+          겹침: "Figma 축이 루트 세트에 걸려 있다",
+          d: "Figma 축 — 어느 칸이 골라졌나. 코드에선 `SegmentedControl.Button` 의 prop 이다",
+        },
         size: { t: "enum", d: "small | medium" },
         fullWidth: { t: "boolean", d: "부모 폭을 다 쓴다" },
         onChange: { t: "action", d: "고를 때. 값이 아니라 인덱스를 준다" },
       },
-      부품: ["SegmentedControl/Button", "SegmentedControl/IconButton"],
     },
     "SegmentedControl/Button": {
       가상: true,
@@ -279,11 +307,14 @@ globalThis.__arka.meta = (() => {
     // 좁아질 때 넘침 메뉴로 접는 것 하나. 제품 import 0건.
     UnderlineNav: {
       설명: "@primer/react UnderlineNav · 밑줄로 지금 자리를 알리는 탭 줄. 아래 독과 설정 범위가 이것이다",
+      부품: ["UnderlineNav/Root", "UnderlineNav/Item"],
+    },
+    "UnderlineNav/Root": {
+      설명: "@primer/react UnderlineNav · UnderlineNav.Root · 칸들을 가로로 늘어놓고 아래 줄을 긋는다",
       props: {
         variant: { t: "enum", d: "inset | flush. flush 면 항목의 좌우 여백을 없앤다" },
         children: { t: "slot", d: "`.Item` 들" },
       },
-      부품: ["UnderlineNav/Item"],
     },
     "UnderlineNav/Item": {
       설명: "@primer/react UnderlineNav.Item · 탭 한 칸. 지금 것만 밑줄이 있다",
@@ -297,10 +328,13 @@ globalThis.__arka.meta = (() => {
     },
     NavList: {
       설명: "@primer/react NavList · 세로 이동 목록. 설정 범주 트리가 이것이다",
+      부품: ["NavList/Root", "NavList/Item", "NavList/Group"],
+    },
+    "NavList/Root": {
+      설명: "@primer/react NavList · NavList.Root · 줄들을 세로로 쌓는 목록",
       props: {
         children: { t: "slot", d: "`.Item`·`.Group`·`.Divider`" },
       },
-      부품: ["NavList/Item", "NavList/Group"],
     },
     "NavList/Group": {
       가상: true,
@@ -319,13 +353,16 @@ globalThis.__arka.meta = (() => {
     },
     DataTable: {
       설명: "@primer/react DataTable · 머리 줄과 본문 줄의 키가 다른 표. 단축키 표의 뼈대",
+      부품: ["DataTable/Root", "DataTable/Row"],
+    },
+    "DataTable/Root": {
+      설명: "@primer/react DataTable · DataTable.Root · 열 정의와 행 데이터로 표를 그린다",
       props: {
         columns: { t: "object", d: "열 정의 배열 — `[{ header, field, rowHeader }]`" },
         data: { t: "object", d: "행 데이터 배열" },
         cellPadding: { t: "enum", d: "condensed | normal | spacious" },
         gridTemplateColumns: { t: "string", d: '열 폭 — "auto 1fr auto"' },
       },
-      부품: ["DataTable/Row"],
     },
     "DataTable/Row": {
       설명: "@primer/react DataTable · 표의 한 줄. 머리 줄은 더 얕고 굵다",
@@ -346,21 +383,8 @@ globalThis.__arka.meta = (() => {
     },
     Dialog: {
       설명: "@primer/react Dialog · ConfirmationDialog · 앱을 막고 답을 받아 내는 창",
-      props: {
-        kind: {
-          t: "enum",
-          d: "Figma 축 — dialog | confirmation. confirmation 은 별개 컴포넌트 `ConfirmationDialog` 다(× 가 없고 400)",
-        },
-        tone: { t: "enum", d: "Figma 축 — default | danger. `ConfirmationDialog.confirmButtonType` 이다" },
-        title: { t: "slot", d: "창 제목" },
-        subtitle: { t: "slot", d: "제목 아래 한 줄" },
-        width: { t: "enum", d: "small | medium | large | xlarge" },
-        position: { t: "enum", d: "center | left | right" },
-        footerButtons: { t: "object", d: "아래 단추들 — `[{ content, buttonType, onClick }]`" },
-        children: { t: "slot", d: "몸통" },
-        onClose: { t: "action", d: "닫을 때. 무엇으로 닫았는지를 준다" },
-      },
       부품: [
+        "Dialog/Root",
         "Dialog/Header",
         "Dialog/Title",
         "Dialog/Subtitle",
@@ -369,6 +393,23 @@ globalThis.__arka.meta = (() => {
         "Dialog/Buttons",
         "ConfirmationDialog",
       ],
+    },
+    "Dialog/Root": {
+      설명: "@primer/react Dialog · Dialog.Root · 화면을 덮고 가운데 창을 띄운다",
+      props: {
+        kind: {
+          t: "enum",
+          d: "Figma 축 — dialog | confirmation. confirmation 은 별개 컴포넌트 `ConfirmationDialog` 다(× 가 없고 400)",
+        },
+        tone: { t: "enum", d: "Figma 축 — default | danger. `ConfirmationDialog.confirmButtonType` 이다" },
+        title: { t: "slot", d: "창 제목. `.Title` 의 줄임 — Primer 가 둘 다 받는다" },
+        subtitle: { t: "slot", d: "제목 아래 한 줄. `.Subtitle` 의 줄임" },
+        width: { t: "enum", d: "small | medium | large | xlarge" },
+        position: { t: "enum", d: "center | left | right" },
+        footerButtons: { t: "object", d: "아래 단추들 — `[{ content, buttonType, onClick }]`. `.Buttons` 의 줄임" },
+        children: { t: "slot", d: "몸통" },
+        onClose: { t: "action", d: "닫을 때. 무엇으로 닫았는지를 준다" },
+      },
     },
     "Dialog/Header": { 가상: true, 설명: "머리 — 제목과 ×", props: { children: { t: "slot", d: "" } } },
     "Dialog/Title": { 가상: true, 설명: "제목 글", props: { children: { t: "slot", d: "" } } },
@@ -394,6 +435,10 @@ globalThis.__arka.meta = (() => {
     },
     Banner: {
       설명: "@primer/react Banner · 화면 안에 흐르는 알림 띠. 오버레이가 아니다",
+      부품: ["Banner/Root", "Banner/Title", "Banner/Description", "Banner/PrimaryAction", "Banner/SecondaryAction"],
+    },
+    "Banner/Root": {
+      설명: "@primer/react Banner · Banner.Root · 아이콘 · 글 · 단추를 한 띠에 놓는다",
       props: {
         severity: {
           t: "enum",
@@ -402,12 +447,11 @@ globalThis.__arka.meta = (() => {
         },
         flush: { t: "boolean", d: "좁은 자리에 꽉 채운다 — 좌우 테두리와 모서리만 없앤다" },
         layout: { t: "enum", d: "default | compact. 우리 코드는 네 곳 다 compact" },
-        title: { t: "slot", d: "굵은 첫 줄" },
-        description: { t: "slot", d: "아래 흐린 설명" },
-        action: { t: "slot", n: "primaryAction", d: "오른쪽 단추(`Banner.PrimaryAction`)" },
+        title: { t: "slot", d: "굵은 첫 줄. `.Title` 의 줄임 — Primer 가 둘 다 받는다" },
+        description: { t: "slot", d: "아래 흐린 설명. `.Description` 의 줄임" },
+        action: { t: "slot", n: "primaryAction", d: "오른쪽 단추. `.PrimaryAction` 의 줄임" },
         onDismiss: { t: "action", d: "주면 오른쪽 위에 × 가 생긴다" },
       },
-      부품: ["Banner/Title", "Banner/Description", "Banner/PrimaryAction", "Banner/SecondaryAction"],
     },
     "Banner/Title": {
       가상: true,
@@ -427,18 +471,22 @@ globalThis.__arka.meta = (() => {
     },
     Blankslate: {
       설명: "@primer/react Blankslate · 아무것도 없을 때 무엇을 하면 되는지 알리는 자리",
-      props: {
-        size: { t: "enum", d: "Figma 축 — narrow | default | spacious. 코드에선 `narrow`·`spacious` 두 boolean 이다" },
-        border: { t: "boolean", d: "둘레에 테두리를 그린다" },
-        children: { t: "slot", d: "아래 부품들" },
-      },
       부품: [
+        "Blankslate/Root",
         "Blankslate/Visual",
         "Blankslate/Heading",
         "Blankslate/Description",
         "Blankslate/PrimaryAction",
         "Blankslate/SecondaryAction",
       ],
+    },
+    "Blankslate/Root": {
+      설명: "@primer/react Blankslate · Blankslate.Root · 부품들을 가운데 세로로 쌓는 자리",
+      props: {
+        size: { t: "enum", d: "Figma 축 — narrow | default | spacious. 코드에선 `narrow`·`spacious` 두 boolean 이다" },
+        border: { t: "boolean", d: "둘레에 테두리를 그린다" },
+        children: { t: "slot", d: "아래 부품들" },
+      },
     },
     "Blankslate/Visual": { 가상: true, 설명: "맨 위 그림이나 아이콘", props: { children: { t: "slot", d: "" } } },
     "Blankslate/Heading": {
@@ -462,7 +510,12 @@ globalThis.__arka.meta = (() => {
     // 컴파운드 시트의 머리말. 세트가 아니라 묶음이라 `apply()` 는 건너뛴다.
     Menu: {
       가상: true,
-      설명: "shared/component/Menu · 눌러서 여는 할 일 목록 (루트)",
+      설명: "shared/component/Menu · 눌러서 여는 할 일 목록",
+      부품: ["Menu/Root", "Menu/Trigger", "Menu/Content", "Menu/Item", "Menu/Label", "Menu/Separator"],
+    },
+    "Menu/Root": {
+      가상: true,
+      설명: "shared/component/Menu · Menu.Root · 열림 상태를 쥔다. 그릴 것은 없다",
       props: {
         kind: { t: "enum", d: "dropdown | context. Content 의 최소 폭이 갈린다(180 | 220)" },
         open: { t: "boolean", d: "열려 있다. 제어할 때만 준다" },
@@ -470,7 +523,6 @@ globalThis.__arka.meta = (() => {
         children: { t: "slot", d: "`.Trigger` + `.Content`" },
         onOpenChange: { t: "action", d: "열고 닫을 때" },
       },
-      부품: ["Menu/Trigger", "Menu/Content", "Menu/Item", "Menu/Label", "Menu/Separator"],
     },
     "Menu/Trigger": {
       가상: true,
@@ -483,7 +535,12 @@ globalThis.__arka.meta = (() => {
     },
     Select: {
       가상: true,
-      설명: "shared/component/Select · 값 하나를 고르는 목록 (루트)",
+      설명: "shared/component/Select · 값 하나를 고르는 목록",
+      부품: ["Select/Root", "Select/Trigger", "Select/Content", "Select/Item"],
+    },
+    "Select/Root": {
+      가상: true,
+      설명: "shared/component/Select · Select.Root · 값과 열림 상태를 쥔다. 그릴 것은 없다",
       props: {
         value: { t: "string", d: "지금 값" },
         defaultValue: { t: "string", d: "비제어일 때 처음 값. `value` 와 짝" },
@@ -493,35 +550,50 @@ globalThis.__arka.meta = (() => {
         onValueChange: { t: "action", d: "고를 때" },
         onOpenChange: { t: "action", d: "열고 닫을 때" },
       },
-      부품: ["Select/Trigger", "Select/Content", "Select/Item"],
     },
     Tab: {
       가상: true,
-      설명: "workbench/component/Tab · 편집 자리 한 벌 (L1 루트) — 안에 `Split` 하나거나 `Group` 하나",
-      props: {
-        tree: { t: "object", d: "주면 `Tab.Split`, 없으면 `Tab.Group` 이 선다. 갈래를 정하는 것이 이 하나다" },
-        chrome: { t: "enum", d: "bordered | none. none 이면 테두리를 안 그린다. 기본 bordered" },
-      },
-      부품: ["Tab/Header", "Tab/Actions", "Tab/Strip", "Tab/Panel", "Tab/Group", "Tab/Split"],
+      설명: "workbench/component/Tab · 편집 자리 한 벌 — 안에 `Split` 하나거나 `Group` 하나",
+      부품: ["Tab/Root", "Tab/Header", "Tab/Actions", "Tab/Strip", "Tab/Panel", "Tab/Group", "Tab/Split"],
       /**
        * **네 겹이다.** 부품이 여섯이라 그냥 늘어놓으면 무엇이 무엇 안에 있는지가 안 보인다.
-       * 시트의 부품 목록이 이 값을 「계층」 칸으로 세운다 — 루트는 `부품` 에 없으므로 L1 이다.
+       * 시트의 부품 목록이 이 값을 「계층」 칸으로 세운다 — 루트가 L1 이다.
        */
       계층: {
+        "Tab/Root": "L1",
         "Tab/Header": "L4",
         "Tab/Actions": "L4",
         "Tab/Strip": "L3",
         "Tab/Panel": "L3",
         "Tab/Group": "L2",
         "Tab/Split": "L2",
-        Tab: "L1",
+      },
+    },
+    "Tab/Root": {
+      가상: true,
+      설명: "workbench/component/Tab · Tab.Root · (L1) 갈래를 정한다. 제 DOM 이 없다",
+      props: {
+        tree: {
+          t: "object",
+          겹침: "`Split` 에 그대로 내려 준다",
+          d: "주면 `Tab.Split`, 없으면 `Tab.Group` 이 선다. 갈래를 정하는 것이 이 하나다",
+        },
+        chrome: {
+          t: "enum",
+          겹침: "`Group` 에 그대로 내려 준다",
+          d: "bordered | none. none 이면 테두리를 안 그린다. 기본 bordered",
+        },
       },
     },
 
     "Menu/Content": {
       설명: "shared/component/Menu · Menu.Content · 할 일들이 뜨는 면",
       props: {
-        kind: { t: "enum", d: "Figma 축 — dropdown 180 | context 220. 코드에선 `Menu` 루트의 prop 이다" },
+        kind: {
+          t: "enum",
+          겹침: "Figma 축이 여기 걸려 루트 prop 을 비춘다",
+          d: "Figma 축 — dropdown 180 | context 220. 코드에선 `Menu` 루트의 prop 이다",
+        },
         children: { t: "slot", d: "`.Item`·`.Label`·`.Separator`" },
       },
     },
@@ -548,10 +620,18 @@ globalThis.__arka.meta = (() => {
     "Select/Trigger": {
       설명: "shared/component/Select · Select.Trigger · 값 고르기를 여는 단추. 지금 값이 적혀 있다",
       props: {
-        open: { t: "boolean", d: "Figma 축 — 열려 있는 동안의 모양. 코드에선 `Select` 루트의 prop 이다" },
+        open: {
+          t: "boolean",
+          겹침: "Figma 축이 여기 걸려 루트 prop 을 비춘다",
+          d: "Figma 축 — 열려 있는 동안의 모양. 코드에선 `Select` 루트의 prop 이다",
+        },
         disabled: { t: "boolean", d: "열 수 없게 한다" },
         visual: { t: "slot", d: "값 앞 아이콘" },
-        value: { t: "string", d: '적히는 지금 값 — "Claude Opus 5". 생략하면 루트가 든 값' },
+        value: {
+          t: "string",
+          겹침: "생략하면 루트의 값을 쓴다 — 덮어쓰기용",
+          d: '적히는 지금 값 — "Claude Opus 5". 생략하면 루트가 든 값',
+        },
       },
       css: { state: "`:hover`. 열리면 Radix 가 `[data-state=open]` 을 붙인다" },
     },
@@ -564,7 +644,7 @@ globalThis.__arka.meta = (() => {
       props: {
         selected: { t: "boolean", d: "고른 줄. 생략하면 루트가 든 값과 같은지로 정한다" },
         disabled: { t: "boolean", d: "고를 수 없게 한다" },
-        value: { t: "string", d: "고르면 올라갈 값" },
+        value: { t: "string", 겹침: "줄 제 값이다. 루트의 지금 값과 다른 것", d: "고르면 올라갈 값" },
         children: { t: "slot", d: "줄에 적히는 말" },
       },
       css: { state: "`:hover`" },
@@ -624,12 +704,15 @@ globalThis.__arka.meta = (() => {
     },
     TitleBar: {
       설명: "workbench/component/TitleBar (예상 자리) · 창 맨 위 35px. 왼쪽 이름 · 가운데 명령 칸 · 오른쪽 빌드·알림·테마",
+      부품: ["TitleBar/Root", "CommandCenter"],
+    },
+    "TitleBar/Root": {
+      설명: "workbench/component/TitleBar (예상 자리) · TitleBar.Root · 왼쪽 · 가운데 · 오른쪽 세 자리를 낸다",
       props: {
         brand: { t: "slot", d: "왼쪽 — 마크 20×20 과 작업 공간 이름" },
         center: { t: "slot", d: "가운데 — `CommandCenter`. 누르면 팔레트가 열린다" },
         actions: { t: "slot", d: "오른쪽 — 빌드 표시 · 알림 종 · `ModeToggle` 셋뿐이다" },
       },
-      부품: ["CommandCenter"],
     },
     CommandCenter: {
       설명: "workbench/component/CommandCenter (예상 자리) · 제목 줄 가운데 칸. 누르면 팔레트가 열린다",
@@ -641,10 +724,13 @@ globalThis.__arka.meta = (() => {
     },
     ActivityBar: {
       설명: "workbench/component/ActivityBar · 왼쪽 48px 레일. 위 묶음과 아래 묶음이 별개다",
+      부품: ["ActivityBar/Root", "ActivityBar/Item", "ActivityBar/Top", "ActivityBar/Bottom"],
+    },
+    "ActivityBar/Root": {
+      설명: "workbench/component/ActivityBar · ActivityBar.Root · 레일. `.Top` 과 `.Bottom` 사이를 빈 칸이 민다",
       props: {
         children: { t: "slot", d: "`.Top` + `.Bottom`. 사이는 늘어나는 빈 칸이 민다" },
       },
-      부품: ["ActivityBar/Item", "ActivityBar/Top", "ActivityBar/Bottom"],
     },
     "ActivityBar/Top": {
       설명: "workbench/component/ActivityBar · 위 묶음 — 기능들. 넘치면 여기만 스크롤된다",
@@ -675,20 +761,21 @@ globalThis.__arka.meta = (() => {
     },
     Panel: {
       설명: "workbench/component/Panel · 머리와 내용 둘뿐인 그릇. 사이드바와 아래 독이 이것이다 — 따로 `SideBar` 를 두지 않는다",
+      부품: ["Panel/Root", "Panel/Header"],
+    },
+    "Panel/Root": {
+      설명: "workbench/component/Panel · Panel.Root · 머리와 내용을 세로로 쌓는 그릇",
       props: {
+        // `title`·`actions` 는 `Panel/Header` 의 것이다 — 루트가 되풀이하지 않는다(2026-09-20 사용자 정정).
         density: { t: "enum", d: "comfortable | compact. compact 면 머리가 얕고 제목이 대문자가 된다" },
-        title: { t: "slot", d: "머리 왼쪽. 아이콘을 섞을 수 있어 글자가 아니다" },
-        actions: { t: "slot", d: "머리 오른쪽. `title` 과 둘 다 없으면 머리가 통째로 안 선다" },
-        header: { t: "slot", d: "Figma 속성 — 머리 통째로 갈아 끼운다. 코드에선 위의 `title`+`actions` 둘이다" },
-        children: { t: "slot", d: "내용" },
+        header: { t: "slot", n: "children", d: "`.Header` + 내용. Figma 에선 머리를 INSTANCE_SWAP 으로 갈아 끼운다" },
       },
-      부품: ["Panel/Header"],
     },
     "Panel/Header": {
-      설명: "workbench/component/Panel · Panel 의 머리. 제목이거나 탭 줄이다 (Figma 전용 부품)",
+      설명: "workbench/component/Panel · Panel.Header · 머리. 제목이거나 탭 줄이다. `title`·`actions` 둘 다 없으면 안 선다",
       props: {
         kind: { t: "enum", d: "title | tabs. tabs 면 `UnderlineNav` 가 들어선다" },
-        title: { t: "slot", d: "제목. 아이콘을 섞을 수 있어 글자가 아니다" },
+        title: { t: "slot", d: "왼쪽. 아이콘을 섞을 수 있어 글자가 아니다" },
         actions: { t: "slot", d: "오른쪽 아이콘들" },
       },
     },
@@ -764,6 +851,10 @@ globalThis.__arka.meta = (() => {
     },
     CommandPalette: {
       설명: "workbench/component/CommandPalette · 가운데 뜨는 명령 찾기. 파일 찾기도 같은 위젯이다",
+      부품: ["CommandPalette/Root", "CommandPalette/Item"],
+    },
+    "CommandPalette/Root": {
+      설명: "workbench/component/CommandPalette · CommandPalette.Root · 입력칸과 결과 줄들을 담는 창",
       props: {
         mode: { t: "enum", d: "Figma 축 — command `>` | quickOpen 파일 | empty. 코드는 `items` 로만 갈린다" },
         items: { t: "object", d: "결과들 — `[{ id, label, shortcut }]`" },
@@ -774,7 +865,6 @@ globalThis.__arka.meta = (() => {
         onSelect: { t: "action", d: "필수. 고를 때" },
         onOpenChange: { t: "action", d: "여닫을 때" },
       },
-      부품: ["CommandPalette/Item"],
     },
     "CommandPalette/Item": {
       설명: "workbench/component/CommandPalette · 결과 한 줄",
@@ -793,11 +883,14 @@ globalThis.__arka.meta = (() => {
     },
     SettingsEditor: {
       설명: "workbench/view/SettingsTabView · 범주별 설정 줄. 보고 그 자리에서 바꾼다",
+      부품: ["SettingsEditor/Root", "SettingsEditor/Row", "SettingsEditor/Keybindings"],
+    },
+    "SettingsEditor/Root": {
+      설명: "workbench/view/SettingsTabView · SettingsEditor.Root · 왼쪽 범주 목록과 오른쪽 줄들",
       props: {
         sections: { t: "object", d: "범주와 줄들 — `[{ title, rows }]`. 단축키도 한 범주다" },
         onChange: { t: "action", d: "줄에서 값을 바꿀 때" },
       },
-      부품: ["SettingsEditor/Row", "SettingsEditor/Keybindings"],
     },
     "SettingsEditor/Row": {
       설명: "workbench/view/SettingsTabView · 설정 한 줄. 이름·설명 왼쪽, 컨트롤 오른쪽",
@@ -805,7 +898,7 @@ globalThis.__arka.meta = (() => {
         label: { t: "string", d: '설정 이름 — "테마"' },
         description: { t: "string", d: "아래 흐린 한 줄. 없으면 안 그린다" },
         control: { t: "slot", d: "오른쪽 컨트롤 — `ModeToggle`·`ToggleSwitch`·`TextInput` 무엇이든" },
-        onChange: { t: "action", d: "값을 바꿀 때" },
+        onChange: { t: "action", 겹침: "줄 하나의 것. 루트는 모든 줄의 것을 모은다", d: "값을 바꿀 때" },
       },
     },
 
@@ -929,7 +1022,7 @@ globalThis.__arka.meta = (() => {
       const 씀 = [],
         못찾음 = [];
       for (const [name, e] of Object.entries(M)) {
-        if (e.가상) continue; // Figma 노드가 없는 항목
+        if (e.가상 || e.부품) continue; // Figma 노드가 없는 항목 · 컴파운드 머리(노드는 `X/Root` 가 든다)
         const node = byName.get(name);
         if (!node) {
           못찾음.push(name);
@@ -944,11 +1037,29 @@ globalThis.__arka.meta = (() => {
     /**
      * 표에 **빠진 축·속성**을 센다. 파일에 있는데 여기 없으면 시트가 그 줄을 안 그린다 —
      * 조용히 사라지지 않게 여기서 잡는다.
+     *
+     * 컴파운드 규칙도 여기서 센다 — `루트없는컴파운드`(머리에 `props` 가 있거나 `부품` 첫 줄이
+     * `X/Root` 가 아니다) · `루트에겹친prop`(루트와 부품이 같은 키를 든다. `children` 은 뺀다).
      */
     async audit() {
       await figma.loadAllPagesAsync();
       const 빠짐 = [],
-        세트없음 = [];
+        세트없음 = [],
+        루트없는컴파운드 = [],
+        루트에겹친prop = [];
+      for (const [name, e] of Object.entries(M)) {
+        if (!e.부품) continue;
+        const root = `${name}/Root`;
+        if (e.props || e.부품[0] !== root || !M[root]) 루트없는컴파운드.push(name);
+        const rootProps = M[root]?.props ?? {};
+        // `X/` 로 시작하지 않는 부품은 형제 컴포넌트다(`ConfirmationDialog`·`CommandCenter`) — 안 잰다.
+        for (const part of e.부품.slice(1).filter((p) => p.startsWith(`${name}/`))) {
+          for (const [k, p] of Object.entries(M[part]?.props ?? {})) {
+            if (k === "children" || !rootProps[k] || p.겹침 || rootProps[k].겹침) continue;
+            루트에겹친prop.push(`${root}.${k} = ${part}.${k}`);
+          }
+        }
+      }
       for (const p of figma.root.children) {
         for (const n of p.findAll(
           (x) => x.type === "COMPONENT_SET" || (x.type === "COMPONENT" && x.parent?.type !== "COMPONENT_SET"),
@@ -966,7 +1077,13 @@ globalThis.__arka.meta = (() => {
           }
         }
       }
-      return { 표에없는키: 빠짐, 표에없는세트: 세트없음, 표: Object.keys(M).length };
+      return {
+        표에없는키: 빠짐,
+        표에없는세트: 세트없음,
+        루트없는컴파운드,
+        루트에겹친prop,
+        표: Object.keys(M).length,
+      };
     },
   };
 })();
