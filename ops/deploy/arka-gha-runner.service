@@ -9,8 +9,6 @@ WorkingDirectory=%h/actions-runner
 ExecStart=%h/actions-runner/run.sh
 Restart=always
 RestartSec=5
-KillMode=process
-KillSignal=SIGTERM
 TimeoutStopSec=5min
 Environment=HOME=%h
 Environment=PATH=%h/.nvm/versions/node/v24.15.0/bin:%h/.local/bin:%h/.local/share/pnpm:/usr/local/bin:/usr/bin:/bin
