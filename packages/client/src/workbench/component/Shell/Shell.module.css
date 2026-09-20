@@ -97,45 +97,6 @@
 /* ─── 아래 창 ─── */
 
 /* 터미널 같은 것이 온다. 높이는 우선 고정이다 — 끌어서 바꾸는 손잡이는 첫 기여자가 생길 때. */
-.bottom {
-  display: flex;
-  flex-shrink: 0;
-  flex-direction: column;
-  border-style: solid;
-  border-width: var(--borderWidth-thin) 0 0;
-  border-color: var(--borderColor-default);
-}
-
-.bottomStrip {
-  display: flex;
-  flex-shrink: 0;
-  gap: var(--space-xs);
-  padding-inline: var(--space-sm);
-}
-
-.bottomTab {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  padding-block: var(--space-xs);
-  padding-inline: var(--space-sm);
-  border: 0;
-  background: none;
-  color: var(--fgColor-muted);
-  cursor: pointer;
-  font: inherit;
-}
-
-.bottomTab[data-active] {
-  color: var(--fgColor-default);
-  border-block-end: var(--borderWidth-thick) solid var(--borderColor-accent-emphasis);
-}
-
-.bottomBody {
-  height: 240px;
-  min-height: 0;
-  overflow: auto;
-}
 
 /* ContextMenu·CommandPalette가 여기로 포탈된다 — 레이아웃에 자리를 차지하면 안 된다. */
 .portalRoot {

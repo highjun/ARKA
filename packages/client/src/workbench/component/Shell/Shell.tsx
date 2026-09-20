@@ -5,10 +5,12 @@ import { PortalProvider } from "#utils/portal";
 import styles from "./Shell.module.css";
 import { SplitPageLayout, ThemeProvider } from "@primer/react";
 import { Container } from "#component/Container";
+import { Bottom } from "../Bottom";
 import { Sidebar } from "../Sidebar";
 import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
 import { ActivityBar } from "../ActivityBar";
+import type { BottomTab } from "../Bottom";
 import type { SidebarRow } from "../ActivityBar";
 import type { IconId } from "#component/Icon";
 
@@ -18,14 +20,6 @@ interface SidebarActionRow {
   readonly iconId: IconId;
   /** 명령의 이름 — 툴팁으로 쓴다. */
   readonly label: string;
-}
-
-/** 아래 창의 탭 한 줄 — `workbench/viewmodel`의 `BottomRow`와 구조가 같다. */
-interface BottomRow {
-  readonly id: string;
-  readonly title: string;
-  readonly iconId: IconId;
-  readonly isActive: boolean;
 }
 
 /** 패널이 없으면(아이콘 바만) 좁게, 있으면(아이콘 바+패널) 넓게 — 폭 값 자체는 워크벤치가 쓰던
@@ -90,7 +84,7 @@ export interface ShellProps extends Omit<ComponentPropsWithoutRef<"div">, "child
   readonly sidebarWidthStorageKey?: string;
 
   /** 주면 아래 창(탭 띠)이 생긴다 — 안 주거나 비면 아래 창 자체가 없다. */
-  readonly bottoms?: readonly BottomRow[];
+  readonly bottoms?: readonly BottomTab[];
   /** 열린 아래 창의 본문. 없으면 띠만 남는다. */
   readonly bottomContent?: ReactNode;
   /** 아래 창의 탭을 누르면 그 id와 함께 호출된다. */
@@ -262,29 +256,10 @@ export const Shell = ({
               <div className={styles["contentFill"]}>
                 <div className={styles["main"]}>{children}</div>
                 {hasBottom && (
-                  <section aria-label="아래 창" data-component="ShellBottom" className={styles["bottom"]}>
-                    <div role="tablist" aria-orientation="horizontal" className={styles["bottomStrip"]}>
-                      {bottoms.map((bottom) => (
-                        <button
-                          key={bottom.id}
-                          type="button"
-                          role="tab"
-                          aria-selected={bottom.isActive}
-                          data-active={bottom.isActive ? "" : undefined}
-                          className={styles["bottomTab"]}
-                          onClick={() => onBottomSelect?.(bottom.id)}
-                        >
-                          <Icon iconId={bottom.iconId} size="sm" />
-                          {bottom.title}
-                        </button>
-                      ))}
-                    </div>
-                    {hasContent(bottomContent) && (
-                      <div role="tabpanel" className={styles["bottomBody"]}>
-                        {bottomContent}
-                      </div>
-                    )}
-                  </section>
+                  <Bottom>
+                    <Bottom.Header tabs={bottoms} onSelect={(id) => onBottomSelect?.(id)} />
+                    {hasContent(bottomContent) && <Bottom.Panel>{bottomContent}</Bottom.Panel>}
+                  </Bottom>
                 )}
               </div>
             </SplitPageLayout.Content>
