@@ -43,7 +43,12 @@ const workspace = mkdtempSync(path.join(tmpdir(), "arka-ws-"));
 
 try {
   console.log("# build");
-  spawnSync("node", [`${REPO_ROOT}/ops/deploy/build.ts`, IMAGE], { stdio: "inherit" });
+  const built = spawnSync(
+    "docker",
+    ["build", "-f", "ops/deploy/Dockerfile", "--build-arg", "ARKA_GIT_SHA=smoke", "-t", IMAGE, "."],
+    { cwd: REPO_ROOT, stdio: "inherit", env: { ...process.env, DOCKER_BUILDKIT: "1" } },
+  );
+  if (built.status !== 0) throw new Error("이미지 빌드 실패");
   docker(
     "run",
     "-d",
@@ -55,6 +60,16 @@ try {
     `127.0.0.1:${String(PORT)}:3000`,
     "-v",
     `${workspace}:/workspace`,
+    "-e",
+    "NODE_ENV=production",
+    "-e",
+    "ARKA_HOST=0.0.0.0",
+    "-e",
+    "ARKA_PORT=3000",
+    "-e",
+    "ARKA_WORKSPACE=/workspace",
+    "-e",
+    "ARKA_CLIENT_ROOT=/app/dist/client",
     IMAGE,
   );
   await waitHealthy();

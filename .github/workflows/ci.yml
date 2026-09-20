@@ -55,7 +55,9 @@ jobs:
             git /repo --log-opts="--no-merges $RANGE" --redact --no-banner
 
       - name: 이미지를 굽는다
-        run: node ops/deploy/build.ts "$IMAGE"
+        run: |
+          DOCKER_BUILDKIT=1 docker build -f ops/deploy/Dockerfile \
+            --build-arg ARKA_GIT_SHA="${{ github.sha }}" -t "$IMAGE" .
 
       - name: 그 이미지가 뜨는가
         run: |

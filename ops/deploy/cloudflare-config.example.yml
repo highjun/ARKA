@@ -1,5 +1,5 @@
 tunnel: <터널 ID>
-credentials-file: /etc/cloudflared/creds.json
+credentials-file: <Credential 파일 위치>
 
 ingress:
   - hostname: <공개 호스트 이름>
