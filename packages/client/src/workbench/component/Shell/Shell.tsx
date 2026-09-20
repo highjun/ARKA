@@ -25,8 +25,10 @@ interface SidebarActionRow {
 
 /** 패널이 없으면(아이콘 바만) 좁게, 있으면(아이콘 바+패널) 넓게 — 폭 값 자체는 워크벤치가 쓰던
  * 값을 그대로 컴포넌트 기본으로 가져온다. */
+/** 레일만 남은 폭. **아래 둘은 레일(48)을 품은 값이다** — `SplitPageLayout.Sidebar` 가 레일과
+ * 사이드바를 함께 담아서다. 그림의 사이드바 300 에 레일 48 을 더해 348 이다(2026-09-20 실측). */
 const COLLAPSED_WIDTH = { min: "48px", default: "48px", max: "48px" } as const;
-const EXPANDED_WIDTH = { min: "304px", default: "304px", max: "304px" } as const;
+const EXPANDED_WIDTH = { min: "348px", default: "348px", max: "348px" } as const;
 /** `sidebarResizable`일 때 쓰는 기본 최소/최대 — 최소는 `sidebarMinWidth`로 덮어쓸 수 있다. */
 const RESIZABLE_DEFAULT_MIN_WIDTH = "240px";
 const RESIZABLE_MAX_WIDTH = "480px";
@@ -265,7 +267,7 @@ export const Shell = ({
               <div className={styles["contentFill"]}>
                 <div className={styles["main"]}>{children}</div>
                 {hasBottom && (
-                  <Bottom>
+                  <Bottom className={styles["bottom"]}>
                     <Bottom.Header tabs={bottoms} onSelect={(id) => onBottomSelect?.(id)} />
                     {hasContent(bottomContent) && <Bottom.Panel>{bottomContent}</Bottom.Panel>}
                   </Bottom>

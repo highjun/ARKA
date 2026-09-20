@@ -84,7 +84,7 @@ describe("Shell", () => {
 
     expect(screen.getByText("패널 내용")).toBeInTheDocument();
     expect(container.querySelector('[data-component="ShellSidebar"]')).toHaveStyle({
-      "--pane-width-custom": "304px",
+      "--pane-width-custom": "348px",
     } as never);
   });
 
@@ -107,7 +107,7 @@ describe("Shell", () => {
 
     const sidebar = container.querySelector('[data-component="ShellSidebar"]');
     expect(sidebar).toHaveAttribute("data-resizable", "true");
-    expect(sidebar).toHaveStyle({ "--pane-min-width": "200px", "--pane-width-custom": "304px" } as never);
+    expect(sidebar).toHaveStyle({ "--pane-min-width": "200px", "--pane-width-custom": "348px" } as never);
     expect(screen.getByRole("slider", { name: /splitter/i })).toBeInTheDocument();
   });
 
