@@ -1,8 +1,5 @@
 # ARKASHIC — 에이전트 작업 규칙
 
-- 규칙 — [CONVENTIONS.md](docs/CONVENTIONS.md)
-- 운영 — [operations.md](docs/operations.md)
-
 ## 글 쓰는 법
 
 답변·PR·커밋·문서 전부에 적용한다.

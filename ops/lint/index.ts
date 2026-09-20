@@ -60,8 +60,8 @@ const COMMENT_RULES = [
  * export default [...ops.configs.base, { files: ["src/**"], rules: { … } }];
  * ```
  *
- * **여기 있는 규칙은 전부 `docs/CONVENTIONS.md`의 항목이 든다.** 주인 없는 규칙은 껐다
- * (2026-09-13 지웠다. git 이력에 있다) — 규약이 없으면 강제할 근거가 없다.
+ * **규약은 여기 있는 규칙이 전부다.** 지키게 하지 못하는 규약은 두지 않는다 — 글로만 적힌
+ * 규칙은 아무도 검사하지 않아 낡는다.
  */
 const base: Linter.Config[] = [
   // 산출물은 검사하지 않는다 — 번들된 코드가 규칙에 걸려도 고칠 소스가 여기가 아니다.

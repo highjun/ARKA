@@ -43,7 +43,7 @@ const mentioned = (file: string): boolean => {
   const candidates = [file, parts.at(-1) ?? file];
   for (let depth = parts.length - 1; depth > 0; depth -= 1) candidates.push(`${parts.slice(0, depth).join("/")}/`);
 
-  // `docs/` 최상위 문서는 확장자 없이 부른다 — `CONVENTIONS`·`workflow`·`operations`.
+  // `docs/` 최상위 문서는 확장자 없이 부른다 — `concept`.
   const doc = /^docs\/(?<name>[^/]+)\.md$/u.exec(file)?.groups?.["name"];
   if (doc !== undefined) candidates.push(doc);
 

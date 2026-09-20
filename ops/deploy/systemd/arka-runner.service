@@ -1,5 +1,5 @@
 # GitHub Actions self-hosted 러너. **사용자 유닛이다** — sudo가 필요 없다.
-# 공식 `svc.sh`는 시스템 systemd를 쓰므로 쓰지 않는다. 설치 절차는 docs/operations.md.
+# 공식 `svc.sh`는 시스템 systemd를 쓰므로 쓰지 않는다.
 #
 # `PATH`를 박아 두는 이유: 사용자 유닛은 로그인 셸을 거치지 않아 nvm의 node도 pnpm도 안 보인다.
 [Unit]

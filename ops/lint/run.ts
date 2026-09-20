@@ -30,7 +30,7 @@ lint([".", ...MAX_WARNINGS], OPS_ROOT);
 lint(["--config", "eslint.config.ts", "tsconfig.json", ...MAX_WARNINGS], REPO_ROOT);
 
 /*
- * **마크다운도 여기서 본다.** 2026-09-14까지 `docs/**`·`README`·`CLAUDE.md`는 기계 검사가
+ * **마크다운도 여기서 본다.** 2026-09-14까지 이 저장소의 마크다운은 기계 검사가
  * 0건이었다. 대상 글롭과 끈 규칙의 이유는 `ops/.markdownlint-cli2.jsonc`가 적는다.
  */
 const run = (file: string, args: readonly string[]): void => {

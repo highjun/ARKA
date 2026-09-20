@@ -187,4 +187,4 @@ jobs:
         if: failure()
         run: |
           docker logs --tail 100 arka-app || true
-          echo "::error::되돌리려면 docs/operations.md의 '되돌리기' — 옛 커밋 SHA 태그를 당겨 같은 compose 명령을 돌립니다"
+          echo "::error::되돌리려면 옛 커밋 SHA 태그를 당겨 같은 compose 명령을 돌립니다"
