@@ -7,6 +7,7 @@ import { SplitPageLayout, ThemeProvider } from "@primer/react";
 import { Container } from "#component/Container";
 import { Bottom } from "../Bottom";
 import { Sidebar } from "../Sidebar";
+import { TitleBar } from "../TitleBar";
 import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
 import { ActivityBar } from "../ActivityBar";
@@ -52,6 +53,8 @@ export interface ShellProps extends Omit<ComponentPropsWithoutRef<"div">, "child
 
   /** 사이드바 토글 버튼(모바일 전용) 뒤에 이어지는 앱 정체성. 계약 밖이다. */
   readonly brand?: ReactNode;
+  /** 제목 줄 가운데 — `CommandCenter`. 없으면 그 칸이 빈다. 계약 밖이다. */
+  readonly center?: ReactNode;
   /** 헤더 우측 — 실행 가능한 액션들. 계약 밖이다. */
   readonly actions?: ReactNode;
 
@@ -114,6 +117,7 @@ export const Shell = ({
   colorMode,
   isNarrow,
   brand,
+  center,
   actions,
   sidebars,
   activeSidebarId,
@@ -160,22 +164,25 @@ export const Shell = ({
         <PortalProvider container={portalRoot ?? undefined}>
           <SplitPageLayout className={styles["layout"]}>
             <SplitPageLayout.Header padding="none" divider="line">
-              <div className={styles["headerRow"]}>
-                <span className={styles["headerGroup"]}>
-                  {hasSidebar && (
-                    <IconButton
-                      variant="invisible"
-                      size="small"
-                      className={styles["sidebarToggle"]}
-                      aria-label="사이드바 열기"
-                      onClick={() => setSidebarOpen(true)}
-                      icon={() => <Icon iconId="layoutSidebarLeft" size="sm" />}
-                    />
-                  )}
-                  {brand}
-                </span>
-                <span className={styles["headerGroup"]}>{actions}</span>
-              </div>
+              <TitleBar
+                brand={
+                  <>
+                    {hasSidebar && (
+                      <IconButton
+                        variant="invisible"
+                        size="small"
+                        className={styles["sidebarToggle"]}
+                        aria-label="사이드바 열기"
+                        onClick={() => setSidebarOpen(true)}
+                        icon={() => <Icon iconId="layoutSidebarLeft" size="sm" />}
+                      />
+                    )}
+                    {brand}
+                  </>
+                }
+                center={center}
+                actions={actions}
+              />
             </SplitPageLayout.Header>
             {hasSidebar && (
               <SplitPageLayout.Sidebar

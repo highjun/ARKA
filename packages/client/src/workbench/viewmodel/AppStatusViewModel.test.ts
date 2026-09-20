@@ -52,19 +52,19 @@ describe("IAppStatusViewModel — 낡은 클라이언트", () => {
   it("커밋 SHA가 있으면 빌드 표시에 앞 7자를 잇는다 — 무엇이 떠 있는지 눈으로 본다", async () => {
     const { viewModel } = make(info({ gitSha: "0123456789ab" }));
     await settled();
-    expect(viewModel.buildId).toMatch(/ · 0123456$/u);
+    expect(viewModel.buildId).toMatch(/\(0123456\)$/u);
   });
 
   it("더러운 트리 표시는 지우지 않는다 — 그게 신호다", async () => {
     const { viewModel } = make(info({ gitSha: "0123456789ab-dirty" }));
     await settled();
-    expect(viewModel.buildId).toMatch(/ · 0123456-dirty$/u);
+    expect(viewModel.buildId).toMatch(/\(0123456-dirty\)$/u);
   });
 
   it("커밋 SHA가 없으면 시각만 남는다 — 소스에서 바로 띄운 서버다", async () => {
     const { viewModel } = make(info({}));
     await settled();
-    expect(viewModel.buildId).toMatch(/^v\d{4}\.\d{2}\.\d{2} \d{2}:\d{2}$/u);
+    expect(viewModel.buildId).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/u);
   });
 
   it("서버 정보를 못 읽으면 낡지 않은 것으로 둔다 — 진단이 기능을 막지 않는다", async () => {

@@ -108,24 +108,10 @@
 
 /* ─── 헤더 ─── */
 
-.headerRow {
-  display: flex;
-  height: 100%;
-  align-items: center;
-  justify-content: space-between;
-  padding-inline: var(--space-md);
-}
-
 /* brand/actions 자체의 내부 간격은 소비자가 자기 콘텐츠를 감싸며 정한다(브랜드 로고+텍스트 vs
    순수 버튼들에 따라 필요한 간격이 다르다) — 이 gap 은 오직 Shell 이 직접 그리는 사이드바
    토글 버튼과 brand 사이만을 위한 것이다(사이드바가 없을 땐 group 의 자식이 하나뿐이라 gap
    자체가 아무 효과도 없다). */
-.headerGroup {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  min-width: 0;
-}
 
 /* 좁은 화면(< 768px)에서만 보인다 — 데스크톱은 Sidebar 가 항상 도킹되어 있어 토글이 필요 없다.
    `display: inline-grid`인 이유는 `IconButton`(Primer) 자신이 아이콘을 가운데 놓으려고

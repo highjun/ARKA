@@ -6,6 +6,7 @@ import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
 import { ModeToggle } from "#component/ModeToggle";
 import { Text } from "#component/Text";
+import { CommandCenter } from "../component/CommandCenter";
 import { CommandPalette } from "../component/CommandPalette";
 import { Shell } from "../component/Shell";
 import { Tab } from "../component/Tab";
@@ -124,6 +125,12 @@ export const ShellView = observer(function ShellView() {
               {appStatus.workspaceName === "" ? "ARKA" : appStatus.workspaceName}
             </span>
           </span>
+        }
+        center={
+          <CommandCenter
+            value={appStatus.workspaceName === "" ? "ARKA" : appStatus.workspaceName}
+            onClick={() => palette.open()}
+          />
         }
         actions={
           <span className={styles["trailingGroup"]}>
