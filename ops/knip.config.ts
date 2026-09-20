@@ -28,17 +28,15 @@ const config: KnipConfig = {
     "packages/contracts": { entry: ["src/index.ts", "src/**/*.test.ts"], project: ["src/**/*.ts"] },
     ops: {
       entry: [
-        "pipeline/{check,verify}.ts",
         "lint/run.ts",
         "lint/index.ts",
         "deploy/{build,smoke,anonSmoke}.ts",
         "{preCommit,prePush}.ts",
         "structure/*.test.ts",
         "*.config.ts",
-        ".markdownlint-cli2.jsonc",
       ],
       project: ["**/*.ts"],
-      ignoreDependencies: ["eslint-plugin-package-json", "eslint-plugin-yml", "@commitlint/cli", "markdownlint-cli2"],
+      ignoreDependencies: ["eslint-plugin-package-json", "eslint-plugin-yml"],
       ignoreBinaries: ["gitleaks"],
     },
   },

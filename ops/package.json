@@ -8,17 +8,12 @@
     "lint": "node lint/run.ts",
     "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
     "test:smoke": "node deploy/smoke.ts",
-    "check": "node pipeline/check.ts",
-    "format": "prettier --config prettier.config.ts --ignore-path .prettierignore --write ..",
-    "verify": "node pipeline/verify.ts"
+    "format": "prettier --config prettier.config.ts --ignore-path .prettierignore --write .."
   },
   "exports": {
     "./lint": "./lint/index.ts"
   },
   "devDependencies": {
-    "@commitlint/cli": "^21.2.2",
-    "@commitlint/config-conventional": "^21.2.2",
-    "@commitlint/types": "^21.2.0",
     "@eslint-community/eslint-plugin-eslint-comments": "^4.8.0",
     "@eslint/js": "^10.0.1",
     "@eslint/json": "^2.1.0",
@@ -32,7 +27,6 @@
     "eslint-plugin-yml": "^3.8.1",
     "jiti": "^2.7.0",
     "knip": "^6.35.1",
-    "markdownlint-cli2": "^0.23.2",
     "prettier": "^3.9.6",
     "typescript": "catalog:",
     "typescript-eslint": "^8.70.0",

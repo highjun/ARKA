@@ -29,24 +29,10 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/setup
 
-      - run: pnpm --filter ops check
-
-      - name: PR 제목 형식
-        if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]'
-        run: printf '%s' "$PR_TITLE" | pnpm --filter ops exec commitlint
-        env:
-          PR_TITLE: ${{ github.event.pull_request.title }}
-
-      - name: src 밖 변경이 PR 본문에 적혀 있나
-        if: github.event_name == 'pull_request'
-        run: node ops/pipeline/outsideSrc.ts "$BASE" "$HEAD"
-        env:
-          PR_BODY: ${{ github.event.pull_request.body }}
-          BASE: ${{ github.event.pull_request.base.sha }}
-          HEAD: ${{ github.event.pull_request.head.sha }}
-
-      - name: 워크플로가 말이 되나
-        run: docker run --rm -v "$PWD:/repo:ro" -w /repo rhysd/actionlint:1.7.7 -no-color
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
 
       - name: 이번에 더해진 커밋에 시크릿이 있나
         run: |

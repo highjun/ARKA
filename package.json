@@ -9,6 +9,9 @@
     "node": ">=24"
   },
   "scripts": {
+    "typecheck": "pnpm -r --if-present run typecheck",
+    "lint": "pnpm -r --if-present run lint && npx --prefix ops knip --config ops/knip.config.ts --no-config-hints",
+    "test": "pnpm -r --if-present run test:unit && pnpm -r --if-present run test:integration",
     "build": "pnpm -r --if-present run build",
     "prepare": "simple-git-hooks"
   },

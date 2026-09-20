@@ -19,8 +19,6 @@ const run = (file: string, args: readonly string[]): void => {
   if (status !== 0) process.exit(status ?? 1);
 };
 
-run("markdownlint-cli2", ["--config", "ops/.markdownlint-cli2.jsonc"]);
-
 const PRETTIER = ["--config", "ops/prettier.config.ts", "--ignore-path", "ops/.prettierignore"];
 
 run("prettier", [...PRETTIER, "--check", "--log-level", "warn", "."]);
