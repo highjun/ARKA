@@ -6,14 +6,14 @@ const clientRoot = path.resolve(import.meta.dirname, "../..");
 const repoRoot = path.resolve(clientRoot, "../..");
 const PORT = 5199;
 
-const origin = process.env["ARKA_E2E_ORIGIN"];
+const origin = process.env["ARKA_E2E_ORIGIN"] ?? "";
 
 export default defineConfig({
   timeout: 60_000,
   outputDir: path.join(clientRoot, ".output/playwright/test-results"),
   reporter: [["list"], ["html", { outputFolder: path.join(clientRoot, ".output/playwright/report"), open: "never" }]],
-  use: { baseURL: origin ?? `http://127.0.0.1:${String(PORT)}` },
-  ...(origin === undefined
+  use: { baseURL: origin === "" ? `http://127.0.0.1:${String(PORT)}` : origin },
+  ...(origin === ""
     ? {
         webServer: {
           command: "pnpm --filter client build && pnpm --filter server exec tsx src/index.ts",
