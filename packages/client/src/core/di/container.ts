@@ -32,6 +32,7 @@ export class Container {
   }
 
   register<K extends InstanceId>(id: K, lifetime: Lifetime, create: (container: Container) => InstanceMap[K]): void {
+    if (this.#disposed) throw new ContainerDisposedError(this.#name);
     this.#providers.set(id, { lifetime, create });
   }
 
@@ -41,14 +42,16 @@ export class Container {
     if (owner === undefined) throw new InstanceNotRegisteredError(id);
 
     const provider = owner.#providers.get(id) as Provider<K>;
-    const cacheHolder = provider.lifetime === "singleton" ? owner : provider.lifetime === "scoped" ? this : undefined;
+    const host = provider.lifetime === "singleton" ? owner : this;
+    const cacheHolder = provider.lifetime === "transient" ? undefined : host;
     if (cacheHolder !== undefined && cacheHolder.#instances.has(id))
       return cacheHolder.#instances.get(id) as InstanceMap[K];
 
-    return this.#create(id, provider, cacheHolder);
+    return host.#create(id, provider, cacheHolder);
   }
 
   createChild(name: string): Container {
+    if (this.#disposed) throw new ContainerDisposedError(this.#name);
     const child = new Container(name, this);
     this.#children.add(child);
     return child;
