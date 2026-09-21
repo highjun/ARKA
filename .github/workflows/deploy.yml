@@ -12,46 +12,49 @@ permissions:
   contents: read
 
 jobs:
-  image:
-    name: image
+  promote:
+    name: promote
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+      pull-requests: read
     env:
-      IMAGE: ghcr.io/${{ github.repository_owner }}/arka:${{ github.sha }}
-      LATEST: ghcr.io/${{ github.repository_owner }}/arka:latest
+      REPO: ghcr.io/${{ github.repository_owner }}/arka
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: 이미지를 굽는다
+      - name: 이 커밋을 만든 PR을 찾는다
+        id: pr
         run: |
-          DOCKER_BUILDKIT=1 docker build -f ops/deploy/Dockerfile \
-            --build-arg ARKA_GIT_SHA="${{ github.sha }}" -t "$IMAGE" .
+          number=$(gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" --jq '.[0].number // empty')
+          test -n "$number" || { echo "::error::PR 없이 들어온 커밋입니다 — 검사를 통과한 이미지가 없습니다"; exit 1; }
+          echo "number=$number" >> "$GITHUB_OUTPUT"
 
-      - name: 올린다
+      - name: 검사를 통과한 이미지에 이 커밋의 이름을 붙인다
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker push "$IMAGE"
-          docker tag "$IMAGE" "$LATEST" && docker push "$LATEST"
+          echo "$GH_TOKEN" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker buildx imagetools create \
+            -t "$REPO:sha-${{ github.sha }}" -t "$REPO:latest" \
+            "$REPO:pr-${{ steps.pr.outputs.number }}"
 
   deploy:
     name: deploy
-    needs: [image]
+    needs: [promote]
     runs-on: [self-hosted, linux, arka]
     environment: production
     permissions:
       contents: read
       packages: read
     env:
-      IMAGE: ghcr.io/${{ github.repository_owner }}/arka:${{ github.sha }}
+      IMAGE: ghcr.io/${{ github.repository_owner }}/arka:sha-${{ github.sha }}
+      GIT_SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: 값이 있는지 먼저 본다
         run: test -r "$ARKA_SECURE/.env" || { echo "::error::ARKA_SECURE가 가리키는 .env가 없습니다 — 러너 유닛(ops/deploy/arka-gha-runner.service)이 주는 값입니다"; exit 1; }
 
-      - name: 구운 이미지를 당긴다
+      - name: 검사를 통과한 이미지를 당긴다
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker pull "$IMAGE"
@@ -59,7 +62,8 @@ jobs:
       - name: 올린다
         run: |
           set -a; . "$ARKA_SECURE/.env"; set +a
-          ARKA_IMAGE="$IMAGE" docker compose -f ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
+          ARKA_IMAGE="$IMAGE" ARKA_GIT_SHA="$GIT_SHA" \
+            docker compose -f ops/deploy/compose.yml --profile tunnel up -d --no-build --wait
 
       - name: 익명 접근이 막히는지 본다
         run: |
@@ -74,4 +78,4 @@ jobs:
         if: failure()
         run: |
           docker logs --tail 100 arka-app || true
-          echo "::error::되돌리려면 옛 커밋 SHA 태그를 당겨 같은 compose 명령을 돌립니다"
+          echo "::error::되돌리려면 옛 커밋의 sha- 태그를 당겨 같은 compose 명령을 돌립니다"

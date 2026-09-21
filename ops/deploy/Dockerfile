@@ -13,8 +13,6 @@ RUN pnpm run build
 FROM node:26-alpine
 WORKDIR /app
 COPY --from=build /app/.output/dist ./dist
-ARG ARKA_GIT_SHA=""
-ENV ARKA_GIT_SHA=$ARKA_GIT_SHA
 VOLUME ["/workspace"]
 EXPOSE 3000
 CMD ["node", "dist/server/index.js"]
