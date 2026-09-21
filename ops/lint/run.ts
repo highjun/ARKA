@@ -12,7 +12,7 @@ const lint = (args: readonly string[], cwd: string): void => {
 const MAX_WARNINGS = ["--max-warnings", "0"];
 
 lint([".", ...MAX_WARNINGS], OPS_ROOT);
-lint(["--config", "eslint.config.ts", "tsconfig.json", ...MAX_WARNINGS], REPO_ROOT);
+lint(["--config", "eslint.config.ts", ".", ...MAX_WARNINGS], REPO_ROOT);
 
 const run = (file: string, args: readonly string[]): void => {
   const { status } = spawnSync(file, args, { cwd: REPO_ROOT, stdio: "inherit" });

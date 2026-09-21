@@ -9,11 +9,11 @@
     "node": ">=24"
   },
   "scripts": {
-    "typecheck": "pnpm -r --if-present run typecheck",
-    "lint": "pnpm -r --if-present run lint && npx --prefix ops knip --config ops/knip.config.ts --no-config-hints",
-    "test": "pnpm -r --if-present run test:unit && pnpm -r --if-present run test:integration",
     "build": "pnpm -r --if-present run build",
-    "prepare": "simple-git-hooks"
+    "lint": "pnpm -r --if-present run lint && npx --prefix ops knip --config ops/knip.config.ts --no-config-hints",
+    "prepare": "simple-git-hooks",
+    "test": "pnpm -r --if-present run test:unit && pnpm -r --if-present run test:integration",
+    "typecheck": "pnpm -r --if-present run typecheck"
   },
   "devDependencies": {
     "simple-git-hooks": "^2.14.0"
