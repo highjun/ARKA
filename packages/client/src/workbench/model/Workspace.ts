@@ -53,7 +53,8 @@ export class Workspace implements IWorkspace {
   }
 
   relativize(uri: URI): string | null {
-    return uri.scheme === "file" && uri.authority === "" ? uri.path : null;
+    if (uri.scheme !== "file" || uri.authority !== "") return null;
+    return normalize(uri.path);
   }
 
   onDidChange(listener: () => void): Disposable {

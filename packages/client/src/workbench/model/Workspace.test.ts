@@ -53,4 +53,12 @@ describe("Workspace", () => {
     expect(make().relativize(URI.file("docs/a.md"))).toBe("docs/a.md");
     expect(make().relativize(URI.parse("arka:///settings"))).toBeNull();
   });
+
+  it("relativize는 resolve와 짝이다 — 루트 밖은 null이고 안쪽은 정리해서 돌려준다", () => {
+    const workspace = make();
+
+    expect(workspace.relativize(URI.file("../바깥.md"))).toBeNull();
+    expect(workspace.relativize(URI.file("a/../../바깥.md"))).toBeNull();
+    expect(workspace.relativize(URI.file("docs/./a/../b.md"))).toBe("docs/b.md");
+  });
 });
