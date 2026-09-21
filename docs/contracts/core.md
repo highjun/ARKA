@@ -243,7 +243,12 @@ export interface ICommandService {
   readonly keybindings: Collection<Keybinding>;
   readonly menus: Collection<MenuItem>;
 
-  /** 사용자 재정의 전부 — `actionId → 키`. `null`이면 기본값을 꺼 둔 것이다. */
+  /**
+   * 사용자 재정의 전부 — `actionId → 키`. `null`이면 기본값을 꺼 둔 것이다.
+   *
+   * **기본값을 덮어쓰는 것만이 아니다** — 기여된 키바인딩이 없는 명령도 여기서 키를 얻는다.
+   * 그 경우 걸러낼 `when`이 없으므로 조건 없이 걸린다.
+   */
   readonly overrides: ReadonlyMap<string, string | null>;
   /** 재정의를 쓴다. `settings.json`에 남고 `matchKeybinding`이 곧바로 이것을 먼저 본다. */
   setKeybinding(actionId: string, keybinding: string | null): void;
@@ -268,8 +273,6 @@ export interface ICommandService {
 /** 확장이 더하는 설정 한 칸. `type`이 `default`의 타입을 정한다 — 어긋나면 컴파일에서 잡힌다. */
 export type SettingsDescriptor = Descriptor & {
   readonly title: string;
-  /** 화면 폭에 따라 값이 갈리는가. 설정에 "기기" 개념을 두지 않기로 한 결정의 대응물이다. */
-  readonly byViewportWidth?: boolean;
 } & (
   | { readonly type: "boolean"; readonly default: boolean }
   | { readonly type: "number"; readonly default: number }

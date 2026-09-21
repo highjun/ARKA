@@ -1,7 +1,17 @@
+import { CoreError } from "#core/errors";
 import type { Disposable } from "#core/di";
 import { Emitter } from "#core/events";
 import { Registry } from "#core/registry";
 import type { ISettings, SettingsDescriptor, SettingsStore } from "./ISettings";
+
+export class SettingsValueError extends CoreError {
+  readonly id: string;
+
+  constructor(id: string, type: string, value: unknown) {
+    super(`${id}: ${type}이어야 합니다 — 받은 것: ${JSON.stringify(value)}`);
+    this.id = id;
+  }
+}
 
 const conforms = (descriptor: SettingsDescriptor, value: unknown): boolean => {
   switch (descriptor.type) {
@@ -34,7 +44,8 @@ export class Settings implements ISettings {
   }
 
   set(id: string, value: unknown): void {
-    this.schema.get(id);
+    const descriptor = this.schema.get(id);
+    if (!conforms(descriptor, value)) throw new SettingsValueError(id, descriptor.type, value);
     this.#values = { ...this.#values, [id]: value };
     this.#store.save(this.#values);
     this.#changed.fire(id);
