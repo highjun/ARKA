@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { declarations, isClean, render } from "./needsReview.ts";
+import { changesIn, declarations } from "./contracts.ts";
 
 const one = (source: string, key: string): string | undefined => declarations(source).get(key);
 
@@ -91,51 +91,33 @@ describe("declarations", () => {
   });
 });
 
-describe("isClean", () => {
-  it("둘 다 비면 깨끗하다", () => {
-    expect(isClean({ contracts: [], outside: [], ui: [] })).toBe(true);
+describe("changesIn", () => {
+  it("같은 내용이면 아무것도 세지 않는다", () => {
+    const source = `export const A = z.string();`;
+    expect(changesIn("a.ts", source, source)).toStrictEqual([]);
   });
 
-  it("packages 밖이 하나라도 있으면 아니다", () => {
-    expect(isClean({ contracts: [], outside: [{ path: "ops/knip.config.ts", status: "modified" }], ui: [] })).toBe(
-      false,
-    );
-  });
-});
-
-describe("render", () => {
-  it("그림만 바뀌어도 센다", () => {
-    const text = render({
-      contracts: [],
-      outside: [],
-      ui: [{ story: "workbench-sidebar--default", change: "changed" }],
-    });
-    expect(text).toContain("### UI 1건");
-    expect(text).toContain("`workbench-sidebar--default` — 바뀜");
-  });
-
-  it("곁들인 마크다운이 있으면 깨끗해도 적는다", () => {
-    const text = render({ contracts: [], outside: [], ui: [] }, "### UI — 승인된 그림이 없는 스토리 99개");
-    expect(text).toContain("## 사용자 검토가 필요합니다");
-    expect(text).toContain("승인된 그림이 없는 스토리 99개");
+  it("생긴 것과 없어진 것과 바뀐 것을 가른다", () => {
+    const before = `
+      export const Kept = z.string();
+      export const Gone = z.number();
+      export const Moved = z.object({ a: z.string() });
+    `;
+    const after = `
+      export const Kept = z.string();
+      export const Moved = z.object({ a: z.number() });
+      export const Fresh = z.boolean();
+    `;
+    expect(changesIn("a.ts", before, after)).toStrictEqual([
+      { file: "a.ts", name: "Gone", kind: "const", change: "removed" },
+      { file: "a.ts", name: "Moved", kind: "const", change: "changed" },
+      { file: "a.ts", name: "Fresh", kind: "const", change: "added" },
+    ]);
   });
 
-  it("깨끗하면 아무 말도 안 한다", () => {
-    expect(render({ contracts: [], outside: [], ui: [] })).toBe("");
-  });
-
-  it("두 갈래를 세어 적는다", () => {
-    const text = render({
-      contracts: [{ file: "filesystem/types.ts", name: "FileEntry", kind: "const", change: "changed" }],
-      outside: [
-        { path: "ops/deploy/compose.yml", status: "modified" },
-        { path: "pnpm-lock.yaml", status: "modified" },
-      ],
-      ui: [],
-    });
-    expect(text).toContain("### 계약 1건");
-    expect(text).toContain("`FileEntry` (const) — 바뀜");
-    expect(text).toContain("### `packages/` 밖 2건");
-    expect(text).toContain("`pnpm-lock.yaml` — 고침");
+  it("파일이 통째로 생기면 전부 생긴 것이다", () => {
+    expect(changesIn("a.ts", "", `export type A = string;`)).toStrictEqual([
+      { file: "a.ts", name: "A", kind: "type", change: "added" },
+    ]);
   });
 });

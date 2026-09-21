@@ -1,7 +1,7 @@
 ---
 description: 사용자 검토가 필요하다고 걸린 PR의 항목을 가져와 읽는다
 argument-hint: <pr-number>
-allowed-tools: Bash(gh:*), Bash(git:*), Bash(node ops/needsReview.ts:*)
+allowed-tools: Bash(gh:*), Bash(git:*), Bash(node ops/review/index.ts:*)
 ---
 
 PR #$1 에서 사용자 검토가 걸린 항목을 가져와 사용자가 판단할 수 있게 정리해라.

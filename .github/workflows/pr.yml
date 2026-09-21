@@ -95,7 +95,7 @@ jobs:
       - name: 사용자 검토가 필요한지 본다
         id: review
         run: |
-          node ops/needsReview.ts \
+          node ops/review/index.ts \
             "${{ github.event.pull_request.base.sha }}" \
             "${{ github.event.pull_request.head.sha }}" \
             .output/vrt/ui.md > "$RUNNER_TEMP/review.md"
