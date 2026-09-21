@@ -389,3 +389,25 @@ export interface ExtensionActivationFailure {
   readonly error: Error;
 }
 ```
+
+## `core/http` — 서버와 말하는 배관
+
+두 개뿐이고 **둘 다 프로토콜을 모른다.** 커널이 도메인을 모른다는 규칙이 여기에도 걸린다 —
+프로토콜 헤더를 만드는 일은 `#contracts`의 `protocolHeaders()`가 하고, 부르는 쪽은 `infra/`다.
+
+```ts
+/**
+ * SSE 스트림을 읽는다. 한 줄씩 모아 `data:` 하나가 끝날 때마다 `onData`를 부른다.
+ *
+ * `idleTimeoutMs` 동안 아무것도 안 오면 스스로 끊는다 — 죽은 연결을 붙잡고 있지 않는다.
+ * 기본 45초다. 되살리는 일은 부르는 쪽이 한다.
+ */
+export declare function readSse(
+  url: string,
+  options: { readonly headers?: Record<string, string>; readonly signal: AbortSignal; readonly idleTimeoutMs?: number },
+  onData: (data: string) => void,
+): Promise<void>;
+
+/** 끊을 수 있는 기다림. `signal`이 서면 곧바로 풀린다 — 재시도 사이의 대기가 이것이다. */
+export declare function sleep(ms: number, signal: AbortSignal): Promise<void>;
+```
