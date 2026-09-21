@@ -5,11 +5,8 @@ import { usePortalContainer } from "#utils/portal";
 import styles from "./CommandPalette.module.css";
 import { Command } from "cmdk";
 
-export interface CommandRow {
-  readonly id: string;
-  readonly label: string;
-  readonly keybinding: string;
-}
+export type { CommandRow } from "../../row/commandRows";
+import type { CommandRow } from "../../row/commandRows";
 
 const keysOf = (keybinding: string): readonly string[] =>
   keybinding === "" ? [] : keybinding.split("+").map((key) => key.charAt(0).toUpperCase() + key.slice(1));

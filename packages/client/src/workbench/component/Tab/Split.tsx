@@ -27,10 +27,10 @@ import type {
   TabId,
   TabSplitOrientation,
 } from "./shared";
+export type { PaneId } from "../../row/tabRows";
+import type { PaneId } from "../../row/tabRows";
 import { ClassNamesContext, useTabClassNames } from "./TabContext";
 import { GroupImpl } from "./Group";
-
-export type PaneId = string;
 
 export interface TabSplitProps extends Omit<
   ComponentPropsWithoutRef<"div">,

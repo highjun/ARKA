@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
 import { Bottom } from "./index";
-import type { BottomTab } from "./index";
+import type { BottomRow } from "./index";
 
-const TABS: readonly BottomTab[] = [
+const TABS: readonly BottomRow[] = [
   { id: "problems", title: "PROBLEMS", iconId: "warning", isActive: false },
   { id: "output", title: "OUTPUT", iconId: "file", isActive: false },
   { id: "terminal", title: "TERMINAL", iconId: "monitor", isActive: true },

@@ -5,13 +5,9 @@ import { Container } from "#component/Container";
 import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
 import { Menu } from "#component/Menu";
-import type { IconId } from "#component/Icon";
 
-export interface SidebarRow {
-  readonly id: string;
-  readonly title: string;
-  readonly iconId: IconId;
-}
+export type { SidebarRow } from "../../row/shellRows";
+import type { SidebarRow } from "../../row/shellRows";
 
 interface ItemsProps extends Omit<ComponentPropsWithoutRef<"div">, "children" | "onSelect"> {
   readonly ref?: Ref<HTMLDivElement>;

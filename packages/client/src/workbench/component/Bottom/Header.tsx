@@ -1,19 +1,14 @@
 import { clsx } from "clsx";
 import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
 import { Icon } from "#component/Icon";
-import type { IconId } from "#component/Icon";
 import styles from "./Bottom.module.css";
 
-export interface BottomTab {
-  readonly id: string;
-  readonly title: string;
-  readonly iconId: IconId;
-  readonly isActive: boolean;
-}
+export type { BottomRow } from "../../row/shellRows";
+import type { BottomRow } from "../../row/shellRows";
 
 export interface BottomHeaderProps extends Omit<ComponentPropsWithoutRef<"div">, "children" | "onSelect"> {
   readonly ref?: Ref<HTMLDivElement>;
-  readonly tabs: readonly BottomTab[];
+  readonly tabs: readonly BottomRow[];
   readonly actions?: ReactNode;
   readonly onSelect?: (id: string) => void;
 }
