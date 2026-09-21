@@ -83,12 +83,22 @@ jobs:
           path: packages/client/.output/playwright/
           retention-days: 7
 
+      - name: 그림이 승인된 것과 같은가
+        run: pnpm --filter client run test:visual-regression
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: failure()
+        with:
+          name: vrt-report
+          path: .output/vrt/
+          retention-days: 7
+
       - name: 사용자 검토가 필요한지 본다
         id: review
         run: |
           node ops/needsReview.ts \
             "${{ github.event.pull_request.base.sha }}" \
-            "${{ github.event.pull_request.head.sha }}" > "$RUNNER_TEMP/review.md"
+            "${{ github.event.pull_request.head.sha }}" \
+            .output/vrt/ui.md > "$RUNNER_TEMP/review.md"
           if [ -s "$RUNNER_TEMP/review.md" ]; then
             echo "state=pending" >> "$GITHUB_OUTPUT"
             echo "description=검토 필요" >> "$GITHUB_OUTPUT"

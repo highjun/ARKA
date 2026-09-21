@@ -1,9 +1,11 @@
 import { spawnSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import ts from "typescript";
 
 const REPO_ROOT = path.resolve(import.meta.dirname, "..");
 const CONTRACTS = "packages/contracts/src/";
+const SNAPSHOTS = "packages/client/test/vrt/snapshots/";
 
 export type DeclarationKind = "type" | "interface" | "function" | "class" | "const";
 
@@ -19,9 +21,15 @@ export type OutsideChange = {
   readonly status: "added" | "modified" | "removed" | "renamed";
 };
 
+export type UiChange = {
+  readonly story: string;
+  readonly change: "added" | "removed" | "changed";
+};
+
 export type Review = {
   readonly contracts: readonly ContractChange[];
   readonly outside: readonly OutsideChange[];
+  readonly ui: readonly UiChange[];
 };
 
 const STATUS: Readonly<Record<string, OutsideChange["status"]>> = {
@@ -131,10 +139,19 @@ export const review = (base: string, head: string): Review => {
     }
   }
 
-  return { contracts, outside: changed.filter((c) => !c.path.startsWith("packages/")) };
+  const ui = changed
+    .filter((c) => c.path.startsWith(SNAPSHOTS) && c.path.endsWith(".png"))
+    .map(({ path: file, status }) => ({
+      story: file.slice(SNAPSHOTS.length, -".png".length),
+      change:
+        status === "added" ? ("added" as const) : status === "removed" ? ("removed" as const) : ("changed" as const),
+    }));
+
+  return { contracts, outside: changed.filter((c) => !c.path.startsWith("packages/")), ui };
 };
 
-export const isClean = (found: Review): boolean => found.contracts.length === 0 && found.outside.length === 0;
+export const isClean = (found: Review): boolean =>
+  found.contracts.length === 0 && found.outside.length === 0 && found.ui.length === 0;
 
 const CHANGE_WORD: Readonly<Record<ContractChange["change"], string>> = {
   added: "생김",
@@ -149,8 +166,8 @@ const STATUS_WORD: Readonly<Record<OutsideChange["status"], string>> = {
   renamed: "옮김",
 };
 
-export const render = (found: Review): string => {
-  if (isClean(found)) return "";
+export const render = (found: Review, extra = ""): string => {
+  if (isClean(found) && extra.trim() === "") return "";
 
   const lines = ["## 사용자 검토가 필요합니다", ""];
 
@@ -170,15 +187,26 @@ export const render = (found: Review): string => {
     lines.push("");
   }
 
+  if (found.ui.length > 0) {
+    lines.push(`### UI ${String(found.ui.length)}건`, "");
+    for (const u of found.ui) {
+      lines.push(`- \`${u.story}\` — ${CHANGE_WORD[u.change]}`);
+    }
+    lines.push("");
+  }
+
+  if (extra.trim() !== "") lines.push(extra.trim(), "");
+
   lines.push("`/review-pr`로 내용을 보고, `/approve-pr`이나 `/reject-pr`로 정합니다.");
   return lines.join("\n");
 };
 
 if (process.argv[1] === import.meta.filename) {
-  const [base, head] = process.argv.slice(2);
+  const [base, head, extraPath] = process.argv.slice(2);
   if (base === undefined || head === undefined) {
-    console.error("쓰임: node ops/needsReview.ts <base> <head>");
+    console.error("쓰임: node ops/needsReview.ts <base> <head> [곁들일 마크다운 파일]");
     process.exit(2);
   }
-  process.stdout.write(render(review(base, head)));
+  const extra = extraPath !== undefined && existsSync(extraPath) ? readFileSync(extraPath, "utf8") : "";
+  process.stdout.write(render(review(base, head), extra));
 }

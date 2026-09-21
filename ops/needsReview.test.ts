@@ -93,17 +93,35 @@ describe("declarations", () => {
 
 describe("isClean", () => {
   it("둘 다 비면 깨끗하다", () => {
-    expect(isClean({ contracts: [], outside: [] })).toBe(true);
+    expect(isClean({ contracts: [], outside: [], ui: [] })).toBe(true);
   });
 
   it("packages 밖이 하나라도 있으면 아니다", () => {
-    expect(isClean({ contracts: [], outside: [{ path: "ops/knip.config.ts", status: "modified" }] })).toBe(false);
+    expect(isClean({ contracts: [], outside: [{ path: "ops/knip.config.ts", status: "modified" }], ui: [] })).toBe(
+      false,
+    );
   });
 });
 
 describe("render", () => {
+  it("그림만 바뀌어도 센다", () => {
+    const text = render({
+      contracts: [],
+      outside: [],
+      ui: [{ story: "workbench-sidebar--default", change: "changed" }],
+    });
+    expect(text).toContain("### UI 1건");
+    expect(text).toContain("`workbench-sidebar--default` — 바뀜");
+  });
+
+  it("곁들인 마크다운이 있으면 깨끗해도 적는다", () => {
+    const text = render({ contracts: [], outside: [], ui: [] }, "### UI — 승인된 그림이 없는 스토리 99개");
+    expect(text).toContain("## 사용자 검토가 필요합니다");
+    expect(text).toContain("승인된 그림이 없는 스토리 99개");
+  });
+
   it("깨끗하면 아무 말도 안 한다", () => {
-    expect(render({ contracts: [], outside: [] })).toBe("");
+    expect(render({ contracts: [], outside: [], ui: [] })).toBe("");
   });
 
   it("두 갈래를 세어 적는다", () => {
@@ -113,6 +131,7 @@ describe("render", () => {
         { path: "ops/deploy/compose.yml", status: "modified" },
         { path: "pnpm-lock.yaml", status: "modified" },
       ],
+      ui: [],
     });
     expect(text).toContain("### 계약 1건");
     expect(text).toContain("`FileEntry` (const) — 바뀜");
