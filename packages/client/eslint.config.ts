@@ -131,6 +131,12 @@ export default [
               message: "슬라이스끼리 직접 import하지 않습니다 — DI 토큰이나 이벤트로 소통하세요.",
             })),
             {
+              target: "./src/extensions",
+              from: "./src/workbench",
+              except: ["./index.ts"],
+              message: "확장은 `#workbench` 배럴만 봅니다 — 그것이 계약이 약속한 표면 전부입니다.",
+            },
+            {
               target: "./src/shared",
               from: "./src",
               except: ["./shared"],

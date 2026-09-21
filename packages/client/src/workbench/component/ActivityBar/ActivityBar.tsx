@@ -20,11 +20,11 @@ interface ItemsProps extends Omit<ComponentPropsWithoutRef<"div">, "children" | 
   readonly renderItemMenu?: (item: SidebarRow) => ReactNode;
 }
 
-interface ActivityBarTopProps extends ItemsProps {
+export interface ActivityBarTopProps extends ItemsProps {
   readonly activeId?: string | null;
 }
 
-type ActivityBarBottomProps = ItemsProps;
+export type ActivityBarBottomProps = ItemsProps;
 
 export interface ActivityBarRootProps extends ComponentPropsWithoutRef<"nav"> {
   readonly ref?: Ref<HTMLElement>;

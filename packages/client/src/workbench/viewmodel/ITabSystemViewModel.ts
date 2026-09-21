@@ -27,7 +27,7 @@ export interface PaneRowLeaf {
   readonly size?: number;
 }
 
-interface PaneRowSplit {
+export interface PaneRowSplit {
   readonly kind: "split";
   readonly id: PaneId;
   readonly orientation: SplitOrientation;

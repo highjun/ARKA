@@ -9,7 +9,7 @@ export interface SidebarRow {
   readonly iconId: IconId;
 }
 
-interface SidebarActionRow {
+export interface SidebarActionRow {
   readonly actionId: string;
   readonly iconId: IconId;
   readonly label: string;

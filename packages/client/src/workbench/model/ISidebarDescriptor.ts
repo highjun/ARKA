@@ -2,7 +2,7 @@ import type { Descriptor, Registry } from "#core/registry";
 import type { IconId } from "#component/Icon";
 import type { ComponentType } from "react";
 
-interface SidebarAction {
+export interface SidebarAction {
   readonly actionId: string;
   readonly iconId: IconId;
 }

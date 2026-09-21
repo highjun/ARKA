@@ -10,6 +10,8 @@ const config: KnipConfig = {
     "packages/client": {
       entry: [
         "src/workbench/main.tsx",
+        "src/workbench/index.ts",
+        "src/core/*/index.ts",
         "src/**/*.stories.tsx",
         ".storybook/{main,preview}.ts",
         "test/vrt/run.ts",

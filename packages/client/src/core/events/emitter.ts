@@ -1,6 +1,6 @@
 import type { Disposable } from "#core/di";
 
-type Listener<T> = (value: T) => void;
+export type Listener<T> = (value: T) => void;
 
 export class Emitter<T = void> {
   readonly #listeners = new Set<Listener<T>>();
