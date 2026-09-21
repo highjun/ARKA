@@ -18,6 +18,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+      pull-requests: write
+      statuses: write
     env:
       ARKA_IMAGE: ghcr.io/${{ github.repository_owner }}/arka:pr-${{ github.event.pull_request.number }}
       ARKA_NAME: ci
@@ -80,3 +82,47 @@ jobs:
           name: playwright-report
           path: packages/client/.output/playwright/
           retention-days: 7
+
+      - name: 사용자 검토가 필요한지 본다
+        id: review
+        run: |
+          node ops/needsReview.ts \
+            "${{ github.event.pull_request.base.sha }}" \
+            "${{ github.event.pull_request.head.sha }}" > "$RUNNER_TEMP/review.md"
+          if [ -s "$RUNNER_TEMP/review.md" ]; then
+            echo "state=pending" >> "$GITHUB_OUTPUT"
+            echo "description=검토 필요" >> "$GITHUB_OUTPUT"
+          else
+            echo "state=success" >> "$GITHUB_OUTPUT"
+            echo "description=검토 필요 없음" >> "$GITHUB_OUTPUT"
+            echo "## 사용자 검토가 필요 없습니다" > "$RUNNER_TEMP/review.md"
+          fi
+
+      - name: 판정을 PR에 적는다
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MARKER: <!-- arka:review -->
+          ISSUE: repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments
+        run: |
+          printf '%s\n%s\n' "$MARKER" "$(cat "$RUNNER_TEMP/review.md")" > "$RUNNER_TEMP/comment.md"
+          id=$(gh api "$ISSUE" --paginate --jq "[.[] | select(.body | startswith(\"$MARKER\"))] | .[0].id // empty")
+          if [ -n "$id" ]; then
+            gh api --method PATCH "repos/${{ github.repository }}/issues/comments/$id" -F body=@"$RUNNER_TEMP/comment.md"
+          else
+            gh api --method POST "$ISSUE" -F body=@"$RUNNER_TEMP/comment.md"
+          fi
+
+      - name: review 상태를 올린다
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api --method POST "repos/${{ github.repository }}/statuses/${{ github.event.pull_request.head.sha }}" \
+            -f state="${{ steps.review.outputs.state }}" \
+            -f context=review \
+            -f description="${{ steps.review.outputs.description }}" \
+            -f target_url="${{ github.event.pull_request.html_url }}"
+
+      - name: 초록이 되면 알아서 들어가게 둔다
+        env:
+          GH_TOKEN: ${{ secrets.ARKA_MERGE_TOKEN }}
+        run: gh pr merge "${{ github.event.pull_request.number }}" --auto --squash --repo "${{ github.repository }}"

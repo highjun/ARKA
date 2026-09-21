@@ -6,7 +6,8 @@ storybook-static/
 .env
 .env.*
 ops/secure
-.claude
+.claude/*
+!.claude/commands/
 USER_NOTE.md
 docs/draft/
 

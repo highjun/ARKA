@@ -27,7 +27,14 @@ const config: KnipConfig = {
     },
     "packages/contracts": { entry: ["src/index.ts", "src/**/*.test.ts"], project: ["src/**/*.ts"] },
     ops: {
-      entry: ["lint/run.ts", "lint/index.ts", "smoke/{local,anon}.ts", "hooks/{preCommit,prePush}.ts", "*.config.ts"],
+      entry: [
+        "lint/run.ts",
+        "lint/index.ts",
+        "smoke/{local,anon}.ts",
+        "hooks/{preCommit,prePush}.ts",
+        "needsReview.ts",
+        "*.config.ts",
+      ],
       project: ["**/*.ts"],
       ignoreDependencies: ["eslint-plugin-package-json", "eslint-plugin-yml"],
       ignoreBinaries: ["gitleaks"],
