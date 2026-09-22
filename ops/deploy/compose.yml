@@ -10,7 +10,7 @@ services:
     restart: unless-stopped
     user: "${ARKA_UID}:${ARKA_GID}"
     environment:
-      NODE_ENV: ${NODE_ENV}
+      NODE_ENV: ${ARKA_NODE_ENV}
       ARKA_HOST: ${ARKA_CONTAINER_HOST}
       ARKA_PORT: ${ARKA_CONTAINER_PORT}
       ARKA_WORKSPACE: ${ARKA_CONTAINER_WORKSPACE}

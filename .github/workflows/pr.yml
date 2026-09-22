@@ -27,7 +27,7 @@ jobs:
       ARKA_PUBLISH: 127.0.0.1:3000
       ARKA_E2E_ORIGIN: http://127.0.0.1:3000
       ARKA_GIT_SHA: ${{ github.sha }}
-      NODE_ENV: production
+      ARKA_NODE_ENV: production
       ARKA_CONTAINER_HOST: 0.0.0.0
       ARKA_CONTAINER_PORT: "3000"
       ARKA_CONTAINER_WORKSPACE: /workspace
