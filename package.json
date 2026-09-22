@@ -13,6 +13,7 @@
     "lint": "pnpm -r --if-present run lint && npx --prefix ops knip --config ops/knip.config.ts --no-config-hints",
     "test": "pnpm -r --if-present run test:unit && pnpm -r --if-present run test:integration",
     "build": "pnpm -r --if-present run build",
+    "dev": "pnpm -r --parallel --if-present run dev",
     "prepare": "simple-git-hooks"
   },
   "devDependencies": {
