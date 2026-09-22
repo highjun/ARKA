@@ -3,7 +3,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import type { ZodType } from "zod";
-import { PROTOCOL_HEADER, PROTOCOL_VERSION } from "#contracts";
+import { protocolHeaders } from "#contracts";
 import { createApp } from "./app";
 import { makeConfig } from "./core/config.testing";
 
@@ -23,7 +23,7 @@ export const probeApp = async (): Promise<RouteProbe & { dispose: () => Promise<
 
 export const withProtocol = (init: RequestInit = {}): RequestInit => ({
   ...init,
-  headers: { ...(init.headers as Record<string, string> | undefined), [PROTOCOL_HEADER]: String(PROTOCOL_VERSION) },
+  headers: { ...(init.headers as Record<string, string> | undefined), ...protocolHeaders() },
 });
 
 export const expectResponse = async <T>(

@@ -82,6 +82,7 @@
     "#contracts": "contracts",
     "#core/*": "./src/core/*/index.ts",
     "#core/errors": "./src/core/errors.ts",
-    "#utils/*": "./src/shared/utils/*.tsx"
+    "#utils/*": "./src/shared/utils/*.tsx",
+    "#workbench": "./src/workbench/index.ts"
   }
 }

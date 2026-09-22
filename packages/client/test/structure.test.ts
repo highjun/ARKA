@@ -1,4 +1,4 @@
-import { readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -58,5 +58,38 @@ describe("컴포넌트 폴더 구조", () => {
     const groupBarrels = FILES.filter((file) => /(?:^|\/)components?\/index\.ts$/u.test(file));
 
     expect(groupBarrels).toEqual([]);
+  });
+});
+
+const ROW_TYPES = [
+  "TabRow",
+  "PaneRowLeaf",
+  "PaneRowSplit",
+  "PaneRowNode",
+  "SplitEdge",
+  "TabContextTarget",
+  "TabContentProps",
+  "PaneId",
+  "SplitOrientation",
+  "SidebarRow",
+  "SidebarActionRow",
+  "BottomRow",
+  "CommandRow",
+] as const;
+
+const declares = (file: string, name: string): boolean =>
+  new RegExp(String.raw`^export (?:interface|type) ${name}\b`, "mu").test(readFileSync(path.join(SRC, file), "utf8"));
+
+describe("행 타입은 한 곳에서만 선언한다", () => {
+  const sources = FILES.filter((file) => /\.tsx?$/u.test(file) && !/\.(?:test|stories)\.tsx?$/u.test(file));
+
+  it("소스를 하나라도 찾는다 — 목록이 비면 아래 검사가 조용히 통과한다", () => {
+    expect(sources.length).toBeGreaterThan(0);
+  });
+
+  it.each(ROW_TYPES)("`%s`는 `row/` 밖에서 선언되지 않는다", (name) => {
+    const outside = sources.filter((file) => !file.includes(`${path.sep}row${path.sep}`) && declares(file, name));
+
+    expect(outside).toEqual([]);
   });
 });

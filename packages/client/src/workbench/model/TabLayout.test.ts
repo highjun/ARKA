@@ -16,7 +16,6 @@ const fakeStorage = (seed: Record<string, string> = {}): IStorage => {
 const make = (storage: IStorage = fakeStorage()): ITabLayout => new TabLayout({ storage });
 
 const tabsOf = (node: PaneNode): readonly OpenTab[] => (node.kind === "leaf" ? node.tabs : []);
-const activeOf = (node: PaneNode): string | null => (node.kind === "leaf" ? node.activeTabId : null);
 
 const tab = (id: string): OpenTab => ({ id, kind: "arka.filesystem.text", uri: URI.file(id), title: id });
 const rootLeaf = (tabs: readonly OpenTab[], activeTabId: string | null = null): PaneNode => ({
@@ -92,52 +91,5 @@ describe("ITabLayout — 지속", () => {
   it("저장된 트리가 깨져 있으면 빈 루트 leaf로 시작한다", () => {
     expect(make(fakeStorage({ "workbench.tabTree": "{망가진 json" })).tree).toEqual(rootLeaf([]));
     expect(make(fakeStorage({ "workbench.tabTree": JSON.stringify({ nonsense: true }) })).tree).toEqual(rootLeaf([]));
-  });
-});
-
-describe("ITabLayout — 옛 스키마 이식", () => {
-  it("uri가 없는 file 탭은 경로로 uri를 만들고, kind는 텍스트 provider의 id가 된다", () => {
-    const storage = fakeStorage({
-      "workbench.tabTree": JSON.stringify(rootLeaf([{ id: "a", kind: "file", title: "a" } as OpenTab], "a")),
-    });
-
-    expect(make(storage).tree).toEqual(rootLeaf([tab("a")], "a"));
-  });
-
-  it("설정·단축키·미리보기 탭은 가상 경로를 얻고, 모르는 kind는 버린다", () => {
-    const storage = fakeStorage({
-      "workbench.tabTree": JSON.stringify({
-        kind: "leaf",
-        id: ROOT_PANE_ID,
-        tabs: [
-          { id: "settings", kind: "settings", title: "설정" },
-          { id: "preview:docs/a.md", kind: "markdownPreview", title: "미리보기 a.md" },
-          { id: "chat:1", kind: "chat", title: "대화" },
-        ],
-        activeTabId: "chat:1",
-      }),
-    });
-
-    const tree = make(storage).tree;
-    expect(tabsOf(tree).map((t) => t.uri.toString())).toEqual(["arka:///settings", "markdown-preview:///docs/a.md"]);
-    expect(tabsOf(tree).map((t) => t.kind)).toEqual(["arka.workbench.settings", "arka.markdown.preview"]);
-    expect(activeOf(tree)).toBe("settings");
-  });
-
-  it("트리 키가 없으면 구 flat 배열을 단일 루트 leaf로 옮긴다", () => {
-    const storage = fakeStorage({
-      "workbench.tabs": JSON.stringify([
-        { id: "a", kind: "file", title: "a" },
-        { id: "b", kind: "file", title: "b" },
-      ]),
-      "workbench.activeTabId": "b",
-    });
-
-    expect(make(storage).tree).toEqual(rootLeaf([tab("a"), tab("b")], "b"));
-  });
-
-  it("구 데이터도 없거나 깨져 있으면 빈 루트 leaf로 시작한다", () => {
-    expect(make().tree).toEqual(rootLeaf([]));
-    expect(make(fakeStorage({ "workbench.tabs": "{망가진 json" })).tree).toEqual(rootLeaf([]));
   });
 });

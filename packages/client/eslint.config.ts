@@ -19,12 +19,25 @@ const RESTRICTED_SYNTAX = [
 const SLICES = ["filesystem"];
 
 const LAYER_ALLOW: Readonly<Record<string, readonly string[]>> = {
-  model: ["model"],
-  infra: ["model", "infra"],
-  viewmodel: ["model", "viewmodel"],
-  view: ["model", "viewmodel", "view", "component"],
-  component: ["component"],
+  row: ["row"],
+  model: ["model", "row"],
+  infra: ["model", "infra", "row"],
+  viewmodel: ["model", "viewmodel", "row"],
+  view: ["model", "viewmodel", "view", "component", "row"],
+  component: ["component", "row"],
 };
+
+const ROW_ONLY_SYNTAX = [
+  {
+    selector:
+      "ExportNamedDeclaration > :matches(VariableDeclaration, FunctionDeclaration, ClassDeclaration, TSEnumDeclaration)",
+    message: "`row/`는 타입만 삽니다 — 값이 필요하면 model로 올리세요.",
+  },
+  {
+    selector: 'ImportDeclaration[importKind!="type"]',
+    message: "`row/`는 타입만 가져옵니다 — 런타임 0바이트여야 층을 가로지를 수 있습니다.",
+  },
+];
 
 const LAYER_ZONES = ["./src/workbench", ...SLICES.map((slice) => `./src/extensions/${slice}`)].flatMap((root) =>
   Object.entries(LAYER_ALLOW).map(([layer, allowed]) => ({
@@ -131,6 +144,12 @@ export default [
               message: "슬라이스끼리 직접 import하지 않습니다 — DI 토큰이나 이벤트로 소통하세요.",
             })),
             {
+              target: "./src/extensions",
+              from: "./src/workbench",
+              except: ["./index.ts"],
+              message: "확장은 `#workbench` 배럴만 봅니다 — 그것이 계약이 약속한 표면 전부입니다.",
+            },
+            {
               target: "./src/shared",
               from: "./src",
               except: ["./shared"],
@@ -201,6 +220,11 @@ export default [
   {
     files: ["src/**/model/**/*.{ts,tsx}", "src/**/viewmodel/**/*.{ts,tsx}"],
     rules: { "no-restricted-globals": ["error", ...NODE_GLOBALS, ...PLATFORM_GLOBALS] },
+  },
+
+  {
+    files: ["src/**/row/**/*.ts"],
+    rules: { "no-restricted-syntax": ["error", ...RESTRICTED_SYNTAX, ...ROW_ONLY_SYNTAX] },
   },
 
   {

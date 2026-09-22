@@ -23,4 +23,4 @@ const BottomRoot = ({ className, children, ref, ...props }: BottomRootProps) => 
 
 export const Bottom = Object.assign(BottomRoot, { Header: BottomHeader, Panel: BottomPanel });
 
-export type { BottomTab } from "./Header";
+export type { BottomRow } from "./Header";

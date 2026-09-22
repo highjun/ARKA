@@ -1,42 +1,12 @@
-import type { ComponentType, ReactNode } from "react";
+export type { PaneRowLeaf, PaneRowNode, PaneRowSplit, SplitEdge, TabRow } from "../../row/tabRows";
+export type { SplitOrientation as TabSplitOrientation } from "../../row/tabRows";
 
 export type TabChrome = "bordered" | "none";
 
 export type TabId = string;
 
-export interface TabRow {
-  readonly id: TabId;
-  readonly kind: string;
-  readonly title: string;
-  readonly icon: ReactNode;
-  readonly Content: ComponentType<{ readonly tabId: TabId }>;
-  readonly isPreview: boolean;
-  readonly isDirty: boolean;
-}
-
-export type TabSplitOrientation = "horizontal" | "vertical";
-
-export interface PaneRowLeaf {
-  readonly kind: "leaf";
-  readonly id: string;
-  readonly tabs: readonly TabRow[];
-  readonly activeTabId: TabId | null;
-  readonly size?: number;
-}
-
-export interface PaneRowSplit {
-  readonly kind: "split";
-  readonly id: string;
-  readonly orientation: TabSplitOrientation;
-  readonly children: readonly PaneRowNode[];
-  readonly size?: number;
-}
-
-export type PaneRowNode = PaneRowLeaf | PaneRowSplit;
-
 export type StripDropPosition = "before" | "after";
 export type SplitDropPosition = "left" | "right" | "top" | "bottom" | "center";
-export type SplitEdge = Exclude<SplitDropPosition, "center">;
 export type TabDropZone = "strip" | "panel";
 
 export interface TabClassNames {

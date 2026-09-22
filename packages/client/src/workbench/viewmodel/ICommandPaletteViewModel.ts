@@ -1,10 +1,7 @@
 import type { Disposable } from "#core/di";
 
-export interface CommandRow {
-  readonly id: string;
-  readonly label: string;
-  readonly keybinding: string;
-}
+export type { CommandRow } from "../row/commandRows";
+import type { CommandRow } from "../row/commandRows";
 
 declare module "#core/di" {
   interface InstanceMap {

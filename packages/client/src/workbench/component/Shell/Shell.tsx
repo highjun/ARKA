@@ -11,15 +11,10 @@ import { TitleBar } from "../TitleBar";
 import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
 import { ActivityBar } from "../ActivityBar";
-import type { BottomTab } from "../Bottom";
+import type { BottomRow } from "../Bottom";
 import type { SidebarRow } from "../ActivityBar";
-import type { IconId } from "#component/Icon";
 
-interface SidebarActionRow {
-  readonly actionId: string;
-  readonly iconId: IconId;
-  readonly label: string;
-}
+import type { SidebarActionRow } from "../../row/shellRows";
 
 const COLLAPSED_WIDTH = { min: "48px", default: "48px", max: "48px" } as const;
 const EXPANDED_WIDTH = { min: "348px", default: "348px", max: "348px" } as const;
@@ -55,7 +50,7 @@ export interface ShellProps extends Omit<ComponentPropsWithoutRef<"div">, "child
   readonly sidebarMinWidth?: `${number}px`;
   readonly sidebarWidthStorageKey?: string;
 
-  readonly bottoms?: readonly BottomTab[];
+  readonly bottoms?: readonly BottomRow[];
   readonly bottomContent?: ReactNode;
   readonly onBottomSelect?: (id: string) => void;
 

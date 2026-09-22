@@ -9,11 +9,11 @@ import {
 } from "#utils/testing";
 import { Bottom } from "./Bottom";
 import * as stories from "./Bottom.stories";
-import type { BottomTab } from "./Bottom";
+import type { BottomRow } from "./Bottom";
 
 const { Default, NoSelection } = composeStories(stories);
 
-const TABS: readonly BottomTab[] = [
+const TABS: readonly BottomRow[] = [
   { id: "problems", title: "PROBLEMS", iconId: "warning", isActive: false },
   { id: "terminal", title: "TERMINAL", iconId: "monitor", isActive: true },
 ];

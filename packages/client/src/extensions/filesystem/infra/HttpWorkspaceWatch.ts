@@ -1,5 +1,5 @@
-import { apiHeaders, readSse, sleep } from "#core/http";
-import { WatchEvent } from "#contracts";
+import { readSse, sleep } from "#core/http";
+import { WatchEvent, protocolHeaders } from "#contracts";
 import type { IWorkspaceWatch, WorkspaceWatchUnsubscribe } from "../model/IWorkspaceWatch";
 
 const RETRY_MS = 2_000;
@@ -43,7 +43,7 @@ class HttpWorkspaceWatchAdapter implements IWorkspaceWatch {
         const forwardAbort = (): void => attempt?.abort();
         controller.signal.addEventListener("abort", forwardAbort, { once: true });
         try {
-          await readSse(url, { headers: apiHeaders(), signal: attempt.signal }, (data) => {
+          await readSse(url, { headers: protocolHeaders(), signal: attempt.signal }, (data) => {
             const changed = parse(data);
             if (changed !== null && changed.length > 0) onChange(changed);
           }).catch(() => undefined);

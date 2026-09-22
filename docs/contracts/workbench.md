@@ -59,7 +59,7 @@ export interface SidebarAction {
 
 ### TabSystem
 
-탭에 열리는 것은 전부 **`Uri` 하나로 가리킨다** — `file:///…/a.pdf`도 `arka:settings`도 같은 좌표다.
+탭에 열리는 것은 전부 **`URI` 하나로 가리킨다** — `file:///…/a.pdf`도 `arka:///settings`도 같은 좌표다.
 커널이 탭에 대해 아는 것은 `uri`와 더티 여부뿐이다.
 
 ```ts
@@ -76,7 +76,7 @@ export interface TabProviderDescriptor extends Descriptor {
    * 열 수 있으면 그릴 것을 돌려준다. 못 열면 `undefined` — 다음 것에게 넘어간다.
    * 판정에 I/O가 필요하면(텍스트인가) 여기서 한다. **커널은 바이트를 모른다.**
    */
-  readonly openTab: (uri: Uri) => Promise<TabDescriptor | undefined>;
+  readonly openTab: (uri: URI) => Promise<TabDescriptor | undefined>;
 }
 
 /**
@@ -111,7 +111,7 @@ export interface ITabSystem {
    * `priority` 순으로 provider에게 묻고 처음 받는 것으로 연다.
    * 같은 `uri`가 이미 열려 있으면 새로 열지 않고 그 탭을 활성화한다. 아무도 못 열면 알림을 낸다.
    */
-  open(uri: Uri, options?: OpenOptions): Promise<void>;
+  open(uri: URI, options?: OpenOptions): Promise<void>;
   /** 새로고침 복원. `kind`로 provider를 바로 찾아 `openTab`을 다시 부른다 — 우선순위를 안 돈다. */
   restore(tabs: readonly OpenTab[]): Promise<void>;
   /**
@@ -139,29 +139,36 @@ export interface BottomDescriptor extends Descriptor {
 ```ts
 /** 무엇이 작업 범위인가. **루트는 하나**고 서버 설정으로 고정된다 — 앱 안에서 바꾸지 않는다. */
 export interface IWorkspace {
-  readonly root: Uri;
+  readonly root: URI;
   /** 화면에 보이는 이름. 루트 디렉터리 이름이다. */
   readonly name: string;
-  /** 루트 기준 상대 경로를 절대 Uri로 만든다. 루트 밖을 가리키면 던진다. */
-  resolve(relativePath: string): Uri;
+  /** 루트 기준 상대 경로를 절대 URI로 만든다. 루트 밖을 가리키면 던진다. */
+  resolve(relativePath: string): URI;
   /** 위의 반대. 루트 밖이면 `null`. */
-  relativize(uri: Uri): string | null;
+  relativize(uri: URI): string | null;
 }
+```
 
-/** 파일·리소스를 가리키는 좌표. **모두가 이것을 쓴다** — 문자열 경로를 돌리지 않는다. */
-export interface Uri {
+좌표는 **workbench 것이 아니다** — `#contracts`의 `URI` 클래스다(`packages/contracts/src/common/uri.ts`).
+서버와 함께 쓰므로 그쪽에 산다. 문자열 경로를 돌리지 않고 모두가 이것을 쓴다.
+
+```ts
+export declare class URI {
   readonly scheme: string;
+  /** 지금은 늘 빈 문자열이다. `toString()`이 `scheme://authority/path`를 만들 때 쓴다. */
+  readonly authority: string;
   readonly path: string;
   /** `Map`·`Set` 키로 쓸 때 이것을 쓴다. */
   toString(): string;
+  /** `scheme://authority/path` 꼴만 받는다. `?`·`#`가 있으면 던진다. */
+  static parse(value: string): URI;
+  /** 앞의 `/`를 뗀다 — scheme이 `file`인 URI의 `path`에는 앞 `/`가 없다. */
+  static file(path: string): URI;
 }
-
-/** `Uri`를 만드는 유일한 길. 문자열을 직접 조립하지 않는다. */
-export declare const Uri: {
-  parse(value: string): Uri;
-  file(path: string): Uri;
-};
 ```
+
+**인터페이스가 아니라 클래스다.** 구조가 같은 객체를 지어 넘기면 `arka.workbench.open`이 `instanceof`로 가려
+조용히 버린다. 가상 경로는 `arka:///settings` 꼴이다 — `arka:settings`는 `parse`가 거부한다.
 
 ## `workbench/` — 탭
 
@@ -172,7 +179,7 @@ export interface OpenTab {
   /** 연 `TabProviderDescriptor.id`. 복원할 때 같은 것의 `openTab`을 다시 부른다. */
   readonly kind: string;
   /** 무엇을 열었나. 커널이 탭에 대해 아는 것은 이것과 더티 여부뿐이다. 저장은 `toString()`으로. */
-  readonly uri: Uri;
+  readonly uri: URI;
   readonly title: string;
 }
 
@@ -218,15 +225,6 @@ export interface ITabLayout {
   /** 미리보기 자리에 있는 탭. **전역 하나다** — 다음 파일을 열면 이 탭이 갈린다. */
   readonly previewTabId: string | null;
   setPreviewTabId(id: string | null): void;
-  onDidChange(listener: () => void): Disposable;
-}
-
-/** **커널이 탭 안에 대해 아는 것은 이것뿐이다.** 무엇이 더러운지는 그 탭을 그린 확장이 안다. */
-export interface IDirtyState {
-  /** 없거나 더러워질 수 없는 탭이면 `false`. */
-  isDirty(tabId: string): boolean;
-  /** 어느 탭이든 저장 안 된 것이 있나. 떠날 때 묻는 자리가 쓴다. */
-  hasAnyDirty(): boolean;
   onDidChange(listener: () => void): Disposable;
 }
 ```
@@ -599,10 +597,5 @@ export interface CommandPaletteProps
   readonly onQueryChange?: (value: string) => void;
   readonly rows: readonly CommandRow[];
   readonly onSelect?: (actionId: string) => void;
-}
-
-/** 단축키 표. **설정 화면 안의 한 범주다** — 제 화면을 갖지 않는다. */
-export interface KeybindingTableProps extends Omit<ComponentPropsWithoutRef<"table">, "children"> {
-  readonly rows: readonly KeybindingRow[];
 }
 ```

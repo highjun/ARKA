@@ -1,5 +1,4 @@
-import { apiHeaders } from "#core/http";
-import { DirectoryListing, FileContent, FileErrorBody } from "#contracts";
+import { DirectoryListing, FileContent, FileErrorBody, protocolHeaders } from "#contracts";
 import type { FileEntryType, IWorkspaceFiles } from "../model/IWorkspaceFiles";
 
 class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
@@ -16,7 +15,7 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
   async write(path: string, content: string): Promise<void> {
     const response = await this.#fetch("/api/files/content", {
       method: "PUT",
-      headers: { ...apiHeaders(), "content-type": "application/json" },
+      headers: { ...protocolHeaders(), "content-type": "application/json" },
       body: JSON.stringify({ path, content }),
     });
     if (!response.ok) {
@@ -28,7 +27,7 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
   async create(path: string, type: FileEntryType): Promise<void> {
     const response = await this.#fetch("/api/files", {
       method: "POST",
-      headers: { ...apiHeaders(), "content-type": "application/json" },
+      headers: { ...protocolHeaders(), "content-type": "application/json" },
       body: JSON.stringify({ path, type }),
     });
     if (!response.ok) {
@@ -40,7 +39,7 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
   async move(from: string, to: string): Promise<void> {
     const response = await this.#fetch("/api/files/move", {
       method: "POST",
-      headers: { ...apiHeaders(), "content-type": "application/json" },
+      headers: { ...protocolHeaders(), "content-type": "application/json" },
       body: JSON.stringify({ from, to }),
     });
     if (!response.ok) {
@@ -52,7 +51,7 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
   async remove(path: string): Promise<void> {
     const response = await this.#fetch(`/api/files?${new URLSearchParams({ path }).toString()}`, {
       method: "DELETE",
-      headers: apiHeaders(),
+      headers: protocolHeaders(),
     });
     if (!response.ok) {
       const reason = await this.#reasonOf(response);
@@ -62,7 +61,7 @@ class HttpWorkspaceFilesAdapter implements IWorkspaceFiles {
 
   async #get(endpoint: string, path: string): Promise<unknown> {
     const response = await this.#fetch(`${endpoint}?${new URLSearchParams({ path }).toString()}`, {
-      headers: apiHeaders(),
+      headers: protocolHeaders(),
     });
 
     if (!response.ok) {

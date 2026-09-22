@@ -1,7 +1,8 @@
 import type { URI } from "#contracts";
 import type { Disposable } from "#core/di";
+import type { PaneId, SplitOrientation } from "../row/tabRows";
 
-export type SplitOrientation = "horizontal" | "vertical";
+export type { PaneId, SplitOrientation } from "../row/tabRows";
 
 export interface OpenTab {
   readonly id: string;
@@ -9,8 +10,6 @@ export interface OpenTab {
   readonly uri: URI;
   readonly title: string;
 }
-
-export type PaneId = string;
 
 export interface PaneLeaf {
   readonly kind: "leaf";

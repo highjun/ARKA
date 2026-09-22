@@ -1,32 +1,15 @@
 import type { Disposable } from "#core/di";
-import type { IconId } from "#component/Icon";
 import type { BottomDescriptor } from "../model/IBottomDescriptor";
 import type { SidebarDescriptor } from "../model/ISidebarDescriptor";
+import type { BottomRow, SidebarActionRow, SidebarRow } from "../row/shellRows";
 
-export interface SidebarRow {
-  readonly id: string;
-  readonly title: string;
-  readonly iconId: IconId;
-}
-
-interface SidebarActionRow {
-  readonly actionId: string;
-  readonly iconId: IconId;
-  readonly label: string;
-}
+export type { BottomRow, SidebarActionRow, SidebarRow } from "../row/shellRows";
 
 export interface ActiveSidebar {
   readonly id: string;
   readonly title: string;
   readonly Content: SidebarDescriptor["Content"];
   readonly actions: readonly SidebarActionRow[];
-}
-
-export interface BottomRow {
-  readonly id: string;
-  readonly title: string;
-  readonly iconId: IconId;
-  readonly isActive: boolean;
 }
 
 export interface ActiveBottom {
