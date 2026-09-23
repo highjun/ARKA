@@ -3,7 +3,6 @@ import { clsx } from "clsx";
 import styles from "./Icon.module.css";
 import { icons } from "./data";
 import codicon from "@iconify-json/codicon/icons.json";
-import octicon from "@iconify-json/octicon/icons.json";
 import * as Iconify from "@iconify/react/offline";
 
 export type IconId = keyof typeof icons;
@@ -11,7 +10,6 @@ type IconSize = "sm" | "md" | "lg";
 export const ICON_MAP: Record<IconId, string> = icons;
 
 Iconify.addCollection(codicon as Parameters<typeof Iconify.addCollection>[0]);
-Iconify.addCollection(octicon as Parameters<typeof Iconify.addCollection>[0]);
 
 export interface IconProps extends Omit<ComponentPropsWithoutRef<"span">, "id"> {
   readonly ref?: Ref<HTMLSpanElement>;
