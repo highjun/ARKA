@@ -32,7 +32,7 @@ describe("IAppStatusViewModel — 낡은 클라이언트", () => {
     const { viewModel } = make(info({ protocolVersion: 999 }));
     await settled();
     expect(viewModel.isOutdated).toBe(true);
-    expect(viewModel.buildId).not.toBe("");
+    expect(viewModel.builtAt).not.toBe("");
     expect(viewModel.workspaceName).toBe("ws");
   });
 
@@ -48,29 +48,31 @@ describe("IAppStatusViewModel — 낡은 클라이언트", () => {
     expect(viewModel.isOutdated).toBe(false);
   });
 
-  it("커밋 SHA가 있으면 빌드 표시에 앞 7자를 잇는다 — 무엇이 떠 있는지 눈으로 본다", async () => {
+  it("커밋 SHA가 있으면 앞 7자만 남긴다 — 무엇이 떠 있는지 눈으로 본다", async () => {
     const { viewModel } = make(info({ gitSha: "0123456789ab" }));
     await settled();
-    expect(viewModel.buildId).toMatch(/\(0123456\)$/u);
+    expect(viewModel.gitSha).toBe("0123456");
   });
 
   it("더러운 트리 표시는 지우지 않는다 — 그게 신호다", async () => {
     const { viewModel } = make(info({ gitSha: "0123456789ab-dirty" }));
     await settled();
-    expect(viewModel.buildId).toMatch(/\(0123456-dirty\)$/u);
+    expect(viewModel.gitSha).toBe("0123456-dirty");
   });
 
   it("커밋 SHA가 없으면 시각만 남는다 — 소스에서 바로 띄운 서버다", async () => {
     const { viewModel } = make(info({}));
     await settled();
-    expect(viewModel.buildId).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/u);
+    expect(viewModel.builtAt).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/u);
+    expect(viewModel.gitSha).toBe("");
   });
 
   it("서버 정보를 못 읽으면 낡지 않은 것으로 둔다 — 진단이 기능을 막지 않는다", async () => {
     const { viewModel } = make();
     await settled();
     expect(viewModel.isOutdated).toBe(false);
-    expect(viewModel.buildId).toBe("");
+    expect(viewModel.builtAt).toBe("");
+    expect(viewModel.gitSha).toBe("");
     expect(viewModel.workspaceName).toBe("");
   });
 

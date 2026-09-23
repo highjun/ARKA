@@ -7,7 +7,8 @@ declare module "#core/di" {
 }
 export interface IAppLifetime {
   readonly isOutdated: boolean;
-  readonly buildId: string;
+  readonly builtAt: string;
+  readonly gitSha: string;
   load(): Promise<void>;
   requestReload(reason: "versionMismatch" | "userRequested"): void;
   onDidChange(listener: () => void): Disposable;

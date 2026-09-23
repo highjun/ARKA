@@ -4,20 +4,23 @@ import { Emitter } from "#core/events";
 import type { IAppLifetime } from "./IAppLifetime";
 import type { IServerInfo } from "./IServerInfo";
 
-const formatBuildLabel = (iso: string, gitSha?: string): string => {
+const formatBuiltAt = (iso: string): string => {
   const at = new Date(iso);
   if (Number.isNaN(at.getTime())) return "";
   const two = (value: number): string => String(value).padStart(2, "0");
-  const time = `${String(at.getFullYear())}-${two(at.getMonth() + 1)}-${two(at.getDate())} ${two(at.getHours())}:${two(at.getMinutes())}`;
-  return gitSha === undefined ? time : `${time}(${gitSha.replace(/^([0-9a-f]{7})[0-9a-f]*/u, "$1")})`;
+  return `${String(at.getFullYear())}-${two(at.getMonth() + 1)}-${two(at.getDate())} ${two(at.getHours())}:${two(at.getMinutes())}`;
 };
+
+const shortSha = (gitSha?: string): string =>
+  gitSha === undefined ? "" : gitSha.replace(/^([0-9a-f]{7})[0-9a-f]*/u, "$1");
 
 export class AppLifetime implements IAppLifetime {
   readonly #serverInfo: IServerInfo;
   readonly #reload: () => void;
   readonly #changed = new Emitter();
   #isOutdated = false;
-  #buildId = "";
+  #builtAt = "";
+  #gitSha = "";
 
   constructor({ serverInfo, reload }: { serverInfo: IServerInfo; reload: () => void }) {
     this.#serverInfo = serverInfo;
@@ -28,14 +31,19 @@ export class AppLifetime implements IAppLifetime {
     return this.#isOutdated;
   }
 
-  get buildId(): string {
-    return this.#buildId;
+  get builtAt(): string {
+    return this.#builtAt;
+  }
+
+  get gitSha(): string {
+    return this.#gitSha;
   }
 
   async load(): Promise<void> {
     const info = await this.#serverInfo.load();
     if (info === null) return;
-    this.#buildId = formatBuildLabel(info.builtAt, info.gitSha);
+    this.#builtAt = formatBuiltAt(info.builtAt);
+    this.#gitSha = this.#builtAt === "" ? "" : shortSha(info.gitSha);
     this.#isOutdated = info.protocolVersion !== PROTOCOL_VERSION || info.protocolHeader !== PROTOCOL_HEADER;
     this.#changed.fire();
   }

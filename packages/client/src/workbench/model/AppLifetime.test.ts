@@ -25,7 +25,8 @@ describe("AppLifetime", () => {
     const { contract } = make(info());
 
     expect(contract.isOutdated).toBe(false);
-    expect(contract.buildId).toBe("");
+    expect(contract.builtAt).toBe("");
+    expect(contract.gitSha).toBe("");
   });
 
   it("버전과 헤더가 같으면 낡지 않았다", async () => {
@@ -36,7 +37,7 @@ describe("AppLifetime", () => {
     await lifetime.load();
 
     expect(contract.isOutdated).toBe(false);
-    expect(contract.buildId).toMatch(/^2026-09-\d\d \d\d:\d\d$/u);
+    expect(contract.builtAt).toMatch(/^2026-09-\d\d \d\d:\d\d$/u);
     expect(listener).toHaveBeenCalledTimes(1);
   });
 
@@ -57,7 +58,8 @@ describe("AppLifetime", () => {
     await lifetime.load();
 
     expect(contract.isOutdated).toBe(false);
-    expect(contract.buildId).toBe("");
+    expect(contract.builtAt).toBe("");
+    expect(contract.gitSha).toBe("");
   });
 
   it("커밋이 있으면 앞 7자를 붙인다", async () => {
@@ -65,7 +67,7 @@ describe("AppLifetime", () => {
 
     await lifetime.load();
 
-    expect(contract.buildId).toMatch(/\(0123456-dirty\)$/u);
+    expect(contract.gitSha).toBe("0123456-dirty");
   });
 
   it("requestReload는 주입받은 새로고침을 부른다", () => {

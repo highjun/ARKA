@@ -7,7 +7,8 @@ declare module "#core/di" {
 }
 export interface IAppStatusViewModel extends Disposable {
   readonly workspaceName: string;
-  readonly buildId: string;
+  readonly builtAt: string;
+  readonly gitSha: string;
   readonly isOutdated: boolean;
   reload(): void;
 }

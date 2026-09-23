@@ -9,15 +9,21 @@ export class AppStatusViewModel implements IAppStatusViewModel {
   readonly #workspace: IWorkspace;
   readonly #subscriptions: readonly Disposable[];
   private workspaceNameState = "";
-  private buildIdState = "";
+  private builtAtState = "";
+  private gitShaState = "";
   private isOutdatedState = false;
 
   constructor({ appLifetime, workspace }: { appLifetime: IAppLifetime; workspace: IWorkspace }) {
     this.#appLifetime = appLifetime;
     this.#workspace = workspace;
-    makeAutoObservable<this, "workspaceNameState" | "buildIdState" | "isOutdatedState">(
+    makeAutoObservable<this, "workspaceNameState" | "builtAtState" | "gitShaState" | "isOutdatedState">(
       this,
-      { workspaceNameState: observable, buildIdState: observable, isOutdatedState: observable },
+      {
+        workspaceNameState: observable,
+        builtAtState: observable,
+        gitShaState: observable,
+        isOutdatedState: observable,
+      },
       { autoBind: true },
     );
     this.#subscriptions = [
@@ -32,8 +38,12 @@ export class AppStatusViewModel implements IAppStatusViewModel {
     return this.workspaceNameState;
   }
 
-  get buildId(): string {
-    return this.buildIdState;
+  get builtAt(): string {
+    return this.builtAtState;
+  }
+
+  get gitSha(): string {
+    return this.gitShaState;
   }
 
   get isOutdated(): boolean {
@@ -49,7 +59,8 @@ export class AppStatusViewModel implements IAppStatusViewModel {
   }
 
   private syncLifetime(): void {
-    this.buildIdState = this.#appLifetime.buildId;
+    this.builtAtState = this.#appLifetime.builtAt;
+    this.gitShaState = this.#appLifetime.gitSha;
     this.isOutdatedState = this.#appLifetime.isOutdated;
   }
 
