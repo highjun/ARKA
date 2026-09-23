@@ -5,6 +5,7 @@
   border-style: solid;
   border-width: var(--borderWidth-thin) 0 0;
   border-color: var(--borderColor-default);
+  background-color: var(--bgColor-default);
 }
 
 .header {
@@ -20,7 +21,6 @@
   display: inline-flex;
   height: 100%;
   align-items: center;
-  gap: var(--space-xs);
   padding-block: var(--space-xs);
   padding-inline: var(--space-sm);
   border: 0;
@@ -28,6 +28,7 @@
   color: var(--fgColor-muted);
   cursor: pointer;
   font: inherit;
+  text-transform: capitalize;
 }
 
 .tab[data-active] {
@@ -35,12 +36,9 @@
   border-block-end: var(--borderWidth-thick) solid var(--borderColor-accent-emphasis);
 }
 
-.actions {
-  display: flex;
+.close {
   margin-inline-start: auto;
   flex-shrink: 0;
-  align-items: center;
-  gap: var(--space-xs);
 }
 
 .panel {

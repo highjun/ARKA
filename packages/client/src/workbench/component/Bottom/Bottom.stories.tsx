@@ -1,32 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Icon } from "#component/Icon";
-import { IconButton } from "#component/IconButton";
 import { Bottom } from "./index";
-import type { BottomTab } from "./index";
+import type { BottomItem } from "./index";
 
-const TABS: readonly BottomTab[] = [
-  { id: "problems", title: "PROBLEMS", iconId: "warning", isActive: false },
-  { id: "output", title: "OUTPUT", iconId: "file", isActive: false },
-  { id: "terminal", title: "TERMINAL", iconId: "monitor", isActive: true },
+const ITEMS: readonly BottomItem[] = [
+  { id: "problems", title: "problems" },
+  { id: "output", title: "output" },
+  { id: "terminal", title: "terminal" },
 ];
-
-const 동작 = (
-  <>
-    <IconButton variant="invisible" size="small" aria-label="새 터미널" icon={() => <Icon iconId="add" size="sm" />} />
-    <IconButton
-      variant="invisible"
-      size="small"
-      aria-label="더 보기"
-      icon={() => <Icon iconId="ellipsis" size="sm" />}
-    />
-    <IconButton
-      variant="invisible"
-      size="small"
-      aria-label="아래 창 닫기"
-      icon={() => <Icon iconId="close" size="sm" />}
-    />
-  </>
-);
 
 const meta = {
   title: "01-workbench/Bottom",
@@ -41,7 +21,7 @@ const meta = {
   ],
   render: (args) => (
     <Bottom {...args}>
-      <Bottom.Header tabs={TABS} actions={동작} />
+      <Bottom.Header items={ITEMS} defaultActiveId="terminal" onClose={() => undefined} />
       <Bottom.Panel>
         <div style={{ padding: 8 }}>확장의 아래 창이 꽂히는 자리</div>
       </Bottom.Panel>

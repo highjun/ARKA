@@ -9,13 +9,13 @@ import {
 } from "#utils/testing";
 import { Bottom } from "./Bottom";
 import * as stories from "./Bottom.stories";
-import type { BottomTab } from "./Bottom";
+import type { BottomItem } from "./Bottom";
 
 const { Default } = composeStories(stories);
 
-const TABS: readonly BottomTab[] = [
-  { id: "problems", title: "PROBLEMS", iconId: "warning", isActive: false },
-  { id: "terminal", title: "TERMINAL", iconId: "monitor", isActive: true },
+const ITEMS: readonly BottomItem[] = [
+  { id: "problems", title: "problems" },
+  { id: "terminal", title: "terminal" },
 ];
 
 describe("Bottom", () => {
@@ -24,7 +24,7 @@ describe("Bottom", () => {
   implementsRef((extra) => <Bottom {...extra}>content</Bottom>, HTMLElement);
   implementsNoA11yViolations(() => (
     <Bottom>
-      <Bottom.Header tabs={TABS} />
+      <Bottom.Header items={ITEMS} />
       <Bottom.Panel>content</Bottom.Panel>
     </Bottom>
   ));
@@ -39,7 +39,7 @@ describe("Bottom", () => {
   it("Panel을 안 주면 본문 없이 띠만 그린다", () => {
     render(
       <Bottom>
-        <Bottom.Header tabs={TABS.map((tab) => ({ ...tab, isActive: false }))} />
+        <Bottom.Header items={ITEMS} />
       </Bottom>,
     );
 
@@ -47,44 +47,69 @@ describe("Bottom", () => {
     expect(screen.queryByRole("tabpanel")).not.toBeInTheDocument();
   });
 
-  it("활성 탭만 `aria-selected`가 참이다", () => {
+  it("`activeId`로 고른 탭만 `aria-selected`가 참이다", () => {
     render(
       <Bottom>
-        <Bottom.Header tabs={TABS} />
+        <Bottom.Header items={ITEMS} activeId="terminal" />
       </Bottom>,
     );
 
-    expect(screen.getByRole("tab", { name: /TERMINAL/u })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByRole("tab", { name: /PROBLEMS/u })).toHaveAttribute("aria-selected", "false");
+    expect(screen.getByRole("tab", { name: "terminal" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "problems" })).toHaveAttribute("aria-selected", "false");
+  });
+
+  it("`activeId`를 안 주면 누른 탭을 제 손으로 켠다", () => {
+    render(
+      <Bottom>
+        <Bottom.Header items={ITEMS} />
+      </Bottom>,
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: "problems" }));
+
+    expect(screen.getByRole("tab", { name: "problems" })).toHaveAttribute("aria-selected", "true");
   });
 
   it("줄을 누르면 그 id로 알린다", () => {
-    const onSelect = vi.fn();
+    const onItemSelect = vi.fn();
     render(
       <Bottom>
-        <Bottom.Header tabs={TABS} onSelect={onSelect} />
+        <Bottom.Header items={ITEMS} activeId="terminal" onItemSelect={onItemSelect} />
       </Bottom>,
     );
 
-    fireEvent.click(screen.getByRole("tab", { name: /PROBLEMS/u }));
+    fireEvent.click(screen.getByRole("tab", { name: "problems" }));
 
-    expect(onSelect).toHaveBeenCalledWith("problems");
+    expect(onItemSelect).toHaveBeenCalledWith("problems");
   });
 
-  it("actions를 안 주면 그 자리도 안 생긴다", () => {
+  it("onClose를 안 주면 닫기 단추도 안 생긴다", () => {
     const { container } = render(
       <Bottom>
-        <Bottom.Header tabs={TABS} />
+        <Bottom.Header items={ITEMS} />
       </Bottom>,
     );
 
-    expect(container.querySelectorAll("button")).toHaveLength(TABS.length);
+    expect(container.querySelectorAll("button")).toHaveLength(ITEMS.length);
+  });
+
+  it("닫기 단추를 누르면 onClose를 부른다", () => {
+    const onClose = vi.fn();
+    render(
+      <Bottom>
+        <Bottom.Header items={ITEMS} onClose={onClose} />
+      </Bottom>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "아래 창 닫기" }));
+
+    expect(onClose).toHaveBeenCalledOnce();
   });
 
   it("부품은 제 `data-component`를 싣는다 — 그림의 부품 이름과 같은 말이다", () => {
     const { container } = render(
       <Bottom>
-        <Bottom.Header tabs={TABS} />
+        <Bottom.Header items={ITEMS} />
         <Bottom.Panel>본문</Bottom.Panel>
       </Bottom>,
     );

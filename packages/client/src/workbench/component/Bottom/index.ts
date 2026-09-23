@@ -1,2 +1,2 @@
 export { Bottom } from "./Bottom";
-export type { BottomTab } from "./Bottom";
+export type { BottomItem } from "./Bottom";
