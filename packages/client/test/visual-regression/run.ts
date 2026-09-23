@@ -1,15 +1,17 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { STORYBOOK_STATIC } from "./vrt.config.ts";
+import { STORYBOOK_STATIC } from "./config.ts";
 
 const CLIENT_ROOT = path.resolve(import.meta.dirname, "../..");
 const REPO_ROOT = path.resolve(CLIENT_ROOT, "../..");
 const IMAGE = "mcr.microsoft.com/playwright:v1.63.0-noble";
-const SNAPSHOTS = path.join(import.meta.dirname, "snapshots");
-const REPORT = path.join(REPO_ROOT, ".output/vrt/ui.md");
+const SRC = path.join(CLIENT_ROOT, "src");
+const REPORT = path.join(REPO_ROOT, ".output/visual-regression/ui.md");
 
-type StorybookIndex = { readonly entries: Record<string, { readonly type: string }> };
+type StorybookIndex = {
+  readonly entries: Record<string, { readonly type: string; readonly importPath: string }>;
+};
 
 const run = (file: string, args: readonly string[], cwd: string): void => {
   const { status } = spawnSync(file, args, { cwd, stdio: "inherit" });
@@ -22,8 +24,9 @@ const withoutBaseline = (): readonly string[] => {
   ) as StorybookIndex;
   return Object.entries(index.entries)
     .filter(([, entry]) => entry.type === "story")
-    .map(([id]) => id)
-    .filter((id) => !existsSync(path.join(SNAPSHOTS, `${id}.png`)))
+    .map(([id, entry]) => ({ id, dir: path.dirname(entry.importPath).replace(/^\.\/src\//u, "") }))
+    .filter(({ id, dir }) => !existsSync(path.join(SRC, dir, "snapshots", `${id}--light.png`)))
+    .map(({ id }) => id)
     .sort();
 };
 
@@ -33,7 +36,7 @@ const report = (missing: readonly string[]): string =>
     "",
     "기준 이미지가 없는 스토리는 비교하지 않고 건너뛴다. 아직 사람이 본 적 없는 그림이라는 뜻이다.",
     "승인하려면 그림을 떠서 이 PR에 함께 커밋한다 —",
-    "`pnpm --filter client run test:visual-regression -- --update-snapshots`",
+    "`pnpm --filter client exec node test/visual-regression/run.ts --update-snapshots`",
     "",
     "<details><summary>목록</summary>",
     "",
@@ -71,7 +74,7 @@ run(
     "packages/client/node_modules/.bin/playwright",
     "test",
     "-c",
-    "packages/client/test/vrt/vrt.config.ts",
+    "packages/client/test/visual-regression/config.ts",
     ...process.argv.slice(2),
   ],
   REPO_ROOT,

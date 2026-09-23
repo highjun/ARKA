@@ -8,10 +8,13 @@ const PORT = 6008;
 export const STORYBOOK_STATIC = ".output/storybook-static";
 
 export default defineConfig({
-  testDir: path.join(clientRoot, "test/vrt"),
-  snapshotPathTemplate: "{testDir}/snapshots/{arg}{ext}",
-  outputDir: path.join(repoRoot, ".output/vrt/test-results"),
-  reporter: [["list"], ["html", { outputFolder: path.join(repoRoot, ".output/vrt/report"), open: "never" }]],
+  testDir: path.join(clientRoot, "test/visual-regression"),
+  snapshotPathTemplate: path.join(clientRoot, "src", "{arg}{ext}"),
+  outputDir: path.join(repoRoot, ".output/visual-regression/test-results"),
+  reporter: [
+    ["list"],
+    ["html", { outputFolder: path.join(repoRoot, ".output/visual-regression/report"), open: "never" }],
+  ],
   updateSnapshots: "none",
   use: { baseURL: `http://127.0.0.1:${PORT}` },
   webServer: {

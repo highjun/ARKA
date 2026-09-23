@@ -5,7 +5,7 @@ import ts from "typescript";
 
 const REPO_ROOT = path.resolve(import.meta.dirname, "..");
 const CONTRACTS = "packages/contracts/src/";
-const SNAPSHOTS = "packages/client/test/vrt/snapshots/";
+const SNAPSHOT = /^packages\/client\/src\/.+\/snapshots\/(?<story>[^/]+)\.png$/u;
 
 export type DeclarationKind = "type" | "interface" | "function" | "class" | "const";
 
@@ -140,9 +140,10 @@ export const review = (base: string, head: string): Review => {
   }
 
   const ui = changed
-    .filter((c) => c.path.startsWith(SNAPSHOTS) && c.path.endsWith(".png"))
-    .map(({ path: file, status }) => ({
-      story: file.slice(SNAPSHOTS.length, -".png".length),
+    .map(({ path: file, status }) => ({ story: SNAPSHOT.exec(file)?.groups?.["story"], status }))
+    .filter((c): c is { story: string; status: OutsideChange["status"] } => c.story !== undefined)
+    .map(({ story, status }) => ({
+      story,
       change:
         status === "added" ? ("added" as const) : status === "removed" ? ("removed" as const) : ("changed" as const),
     }));

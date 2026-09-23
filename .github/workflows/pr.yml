@@ -88,8 +88,8 @@ jobs:
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: failure()
         with:
-          name: vrt-report
-          path: .output/vrt/
+          name: visual-regression-report
+          path: .output/visual-regression/
           retention-days: 7
 
       - name: 사용자 검토가 필요한지 본다
@@ -98,7 +98,7 @@ jobs:
           node ops/needsReview.ts \
             "${{ github.event.pull_request.base.sha }}" \
             "${{ github.event.pull_request.head.sha }}" \
-            .output/vrt/ui.md > "$RUNNER_TEMP/review.md"
+            .output/visual-regression/ui.md > "$RUNNER_TEMP/review.md"
           if [ -s "$RUNNER_TEMP/review.md" ]; then
             echo "state=pending" >> "$GITHUB_OUTPUT"
             echo "description=검토 필요" >> "$GITHUB_OUTPUT"
