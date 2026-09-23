@@ -12,46 +12,52 @@ const walk = (dir: string): string[] =>
 
 const FILES = walk(SRC).map((file) => path.relative(SRC, file));
 
-const COMPONENT = /(?:^|\/)(?:shared\/component|[^/]+\/component)\/(?<name>[A-Z][A-Za-z0-9]*)\/\k<name>\.tsx$/u;
+const MARKER = "component/";
+
+const folderOf = (file: string): string | null => {
+  const at = file.indexOf(MARKER);
+  if (at < 0) return null;
+  const name = file.slice(at + MARKER.length).split("/")[0] ?? "";
+  return name === "" || name.includes(".") ? null : `${file.slice(0, at + MARKER.length)}${name}`;
+};
+
+const nameOf = (folder: string): string => folder.split("/").at(-1) ?? "";
 
 describe("컴포넌트 폴더 구조", () => {
-  const components = FILES.filter((file) => COMPONENT.test(file));
+  const folders = [...new Set(FILES.map(folderOf).filter((folder) => folder !== null))];
 
-  it("컴포넌트를 하나라도 찾는다 — 정규식이 낡으면 이 테스트가 조용히 비어 버린다", () => {
-    expect(components.length).toBeGreaterThan(0);
+  it("컴포넌트 폴더를 하나라도 찾는다 — 경로 규칙이 낡으면 이 테스트가 조용히 비어 버린다", () => {
+    expect(folders.length).toBeGreaterThan(0);
+  });
+
+  it("폴더 이름은 PascalCase다", () => {
+    expect(folders.filter((folder) => !/^[A-Z][A-Za-z0-9]*$/u.test(nameOf(folder)))).toEqual([]);
+  });
+
+  it("뿌리가 있다 — `<이름>.tsx`거나, 조립을 배럴이 맡는 폴더는 `Root.tsx`", () => {
+    const missing = folders.filter(
+      (folder) => !FILES.includes(`${folder}/${nameOf(folder)}.tsx`) && !FILES.includes(`${folder}/Root.tsx`),
+    );
+
+    expect(missing).toEqual([]);
   });
 
   it("컴포넌트마다 스토리가 있다", () => {
-    const missing = components.filter((file) => !FILES.includes(file.replace(/\.tsx$/u, ".stories.tsx")));
+    const missing = folders.filter((folder) => !FILES.includes(`${folder}/${nameOf(folder)}.stories.tsx`));
 
     expect(missing).toEqual([]);
   });
 
   it("컴포넌트마다 테스트가 있다", () => {
-    const missing = components.filter((file) => !FILES.includes(file.replace(/\.tsx$/u, ".test.tsx")));
+    const missing = folders.filter((folder) => !FILES.includes(`${folder}/${nameOf(folder)}.test.tsx`));
 
     expect(missing).toEqual([]);
   });
 
   it("컴포넌트마다 배럴이 있다 — 밖에서 부르는 자리는 `index.ts` 하나다", () => {
-    const missing = components.filter((file) => !FILES.includes(path.join(path.dirname(file), "index.ts")));
+    const missing = folders.filter((folder) => !FILES.includes(`${folder}/index.ts`));
 
     expect(missing).toEqual([]);
-  });
-
-  it("`component/` 바로 아래 폴더는 PascalCase이고 같은 이름의 `.tsx`를 갖는다", () => {
-    const folders = new Set(
-      FILES.filter((file) => /(?:^|\/)component\//u.test(file)).map((file) => {
-        const after = file.split("component/")[1] ?? "";
-        return `${file.slice(0, file.length - after.length)}${after.split("/")[0] ?? ""}`;
-      }),
-    );
-    const wrong = [...folders].filter((folder) => {
-      const name = folder.split("/").at(-1) ?? "";
-      return !/^[A-Z][A-Za-z0-9]*$/u.test(name) || !FILES.includes(`${folder}/${name}.tsx`);
-    });
-
-    expect(wrong).toEqual([]);
   });
 
   it("컴포넌트 폴더 밖에는 `component/` 배럴이 없다 — 경로로 가져온다", () => {
