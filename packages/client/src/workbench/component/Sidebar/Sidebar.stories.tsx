@@ -10,6 +10,7 @@ const 새파일 = (
 const meta = {
   title: "01-workbench/Sidebar",
   component: Sidebar,
+  subcomponents: { Header: Sidebar.Header, Body: Sidebar.Body },
   decorators: [
     (Story) => (
       <div style={{ height: 480, width: 720 }}>
@@ -17,47 +18,17 @@ const meta = {
       </div>
     ),
   ],
-  args: {
-    children: (
-      <>
-        <Sidebar.Header title="탐색기" actions={새파일} />
-        <Sidebar.Body>
-          <div style={{ padding: 8 }}>본문 내용</div>
-        </Sidebar.Body>
-      </>
-    ),
-  },
+  render: (args) => (
+    <Sidebar {...args}>
+      <Sidebar.Header title="탐색기" actions={새파일} />
+      <Sidebar.Body>
+        <div style={{ padding: 8 }}>본문 내용</div>
+      </Sidebar.Body>
+    </Sidebar>
+  ),
 } satisfies Meta<typeof Sidebar>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-
-export const TitleOnly: Story = {
-  args: {
-    children: (
-      <>
-        <Sidebar.Header title="탐색기" />
-        <Sidebar.Body>
-          <div style={{ padding: 8 }}>본문 내용</div>
-        </Sidebar.Body>
-      </>
-    ),
-  },
-};
-
-export const NoHeader: Story = {
-  args: {
-    children: (
-      <>
-        <Sidebar.Header />
-        <Sidebar.Body>
-          <div style={{ padding: 8 }}>본문 내용</div>
-        </Sidebar.Body>
-      </>
-    ),
-  },
-};
-
-export const Compact: Story = { args: { density: "compact" } };

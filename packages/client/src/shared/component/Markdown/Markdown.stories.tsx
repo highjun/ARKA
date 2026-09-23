@@ -38,13 +38,3 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-
-export const CodeOnly: Story = {
-  args: { source: ["```json", '{ "ok": true }', "```"].join("\n") },
-};
-
-export const RawHtmlIsText: Story = {
-  args: { source: "<script>alert(1)</script> 뒤에 오는 문단." },
-};
-
-export const Empty: Story = { args: { source: "" } };

@@ -31,6 +31,7 @@ const 동작 = (
 const meta = {
   title: "01-workbench/Bottom",
   component: Bottom,
+  subcomponents: { Header: Bottom.Header, Panel: Bottom.Panel },
   decorators: [
     (Story) => (
       <div style={{ width: 720 }}>
@@ -38,38 +39,17 @@ const meta = {
       </div>
     ),
   ],
-  args: {
-    children: (
-      <>
-        <Bottom.Header tabs={TABS} actions={동작} />
-        <Bottom.Panel>
-          <div style={{ padding: 8 }}>확장의 아래 창이 꽂히는 자리</div>
-        </Bottom.Panel>
-      </>
-    ),
-  },
+  render: (args) => (
+    <Bottom {...args}>
+      <Bottom.Header tabs={TABS} actions={동작} />
+      <Bottom.Panel>
+        <div style={{ padding: 8 }}>확장의 아래 창이 꽂히는 자리</div>
+      </Bottom.Panel>
+    </Bottom>
+  ),
 } satisfies Meta<typeof Bottom>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-
-export const NoActions: Story = {
-  args: {
-    children: (
-      <>
-        <Bottom.Header tabs={TABS} />
-        <Bottom.Panel>
-          <div style={{ padding: 8 }}>확장의 아래 창이 꽂히는 자리</div>
-        </Bottom.Panel>
-      </>
-    ),
-  },
-};
-
-export const NoSelection: Story = {
-  args: {
-    children: <Bottom.Header tabs={TABS.map((tab) => ({ ...tab, isActive: false }))} actions={동작} />,
-  },
-};

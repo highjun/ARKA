@@ -11,33 +11,3 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-export const Sizes: Story = {
-  render: (args) => (
-    <span style={{ display: "inline-flex", alignItems: "baseline", gap: 16 }}>
-      <Text {...args} size="small">
-        small
-      </Text>
-      <Text {...args} size="medium">
-        medium
-      </Text>
-      <Text {...args} size="large">
-        large
-      </Text>
-    </span>
-  ),
-};
-export const Tones: Story = {
-  render: (args) => (
-    <span style={{ display: "inline-flex", gap: 16 }}>
-      <Text {...args} tone="default">
-        default
-      </Text>
-      <Text {...args} tone="muted">
-        muted
-      </Text>
-      <Text {...args} tone="danger">
-        danger
-      </Text>
-    </span>
-  ),
-};

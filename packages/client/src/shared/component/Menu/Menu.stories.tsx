@@ -6,7 +6,6 @@ import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
 import { Kbd } from "#component/Kbd";
 import { Menu } from "./index";
-import styles from "./Menu.module.css";
 
 const OverlayStage = ({ children }: { readonly children: ReactNode }) => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
@@ -57,22 +56,3 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = { args: { defaultOpen: true } };
-export const Closed: Story = { args: { defaultOpen: false } };
-
-export const Context: Story = {
-  args: { kind: "context", defaultOpen: true },
-  render: (args) => (
-    <Menu {...args}>
-      <Menu.Trigger>
-        <div className={styles["demoTrigger"]}>여기를 우클릭</div>
-      </Menu.Trigger>
-      <Menu.Content>
-        <Menu.Label>파일</Menu.Label>
-        <Menu.Item onSelect={() => undefined}>새 파일</Menu.Item>
-        <Menu.Item onSelect={() => undefined}>이름 바꾸기</Menu.Item>
-        <Menu.Separator />
-        <Menu.Item disabled>삭제</Menu.Item>
-      </Menu.Content>
-    </Menu>
-  ),
-};

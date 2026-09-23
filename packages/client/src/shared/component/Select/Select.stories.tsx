@@ -49,4 +49,3 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = { args: { defaultOpen: true, defaultValue: "opus" } };
-export const Closed: Story = { args: { defaultOpen: false, defaultValue: "opus" } };

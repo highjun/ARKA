@@ -53,4 +53,3 @@ const story = (state: Partial<ISettingsViewModel>): Story => ({
 });
 
 export const Default: Story = story({});
-export const Empty: Story = story({ rows: [] });

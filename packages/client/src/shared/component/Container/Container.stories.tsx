@@ -28,22 +28,3 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-export const NoChrome: Story = { args: { chrome: "none" } };
-export const Horizontal: Story = {
-  args: { scroll: "horizontal" },
-  render: (args) => (
-    <Container {...args} style={{ height: "100%" }}>
-      <div style={{ padding: 8, whiteSpace: "nowrap", width: 2000 }}>
-        가로로만 넘치는 한 줄 — 세로 스크롤바는 뜨지 않는다.
-      </div>
-    </Container>
-  ),
-};
-export const NoScroll: Story = {
-  args: { scroll: "none" },
-  render: (args) => (
-    <Container {...args}>
-      <div style={{ padding: 8 }}>테두리만 있는 상자</div>
-    </Container>
-  ),
-};

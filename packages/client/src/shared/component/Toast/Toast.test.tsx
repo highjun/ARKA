@@ -7,10 +7,11 @@ import {
   implementsRef,
   implementsNoA11yViolations,
 } from "#utils/testing";
+import { Button } from "@primer/react";
 import { Toast } from "./Toast";
 import * as stories from "./Toast.stories";
 
-const { Default, WithAction } = composeStories(stories);
+const { Default } = composeStories(stories);
 
 describe("Toast", () => {
   implementsClassName((extra) => <Toast {...extra} />);
@@ -28,8 +29,20 @@ describe("Toast", () => {
     expect(screen.getAllByRole("status")).toHaveLength(3);
   });
 
-  it("`WithAction` 스토리는 동작 단추를 아래에 둔다", () => {
-    render(<WithAction />);
+  it("action을 주면 동작 단추를 아래에 둔다", () => {
+    render(
+      <Toast>
+        <Toast.Item
+          severity="error"
+          message="저장하지 못했다"
+          action={
+            <Button size="small" variant="invisible">
+              다시 시도
+            </Button>
+          }
+        />
+      </Toast>,
+    );
 
     expect(screen.getByRole("button", { name: "다시 시도" })).toBeInTheDocument();
   });

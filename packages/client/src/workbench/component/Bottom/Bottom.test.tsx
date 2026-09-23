@@ -11,7 +11,7 @@ import { Bottom } from "./Bottom";
 import * as stories from "./Bottom.stories";
 import type { BottomTab } from "./Bottom";
 
-const { Default, NoSelection } = composeStories(stories);
+const { Default } = composeStories(stories);
 
 const TABS: readonly BottomTab[] = [
   { id: "problems", title: "PROBLEMS", iconId: "warning", isActive: false },
@@ -36,8 +36,12 @@ describe("Bottom", () => {
     expect(screen.getByRole("tabpanel")).toBeInTheDocument();
   });
 
-  it("`NoSelection` 스토리는 본문 없이 띠만 그린다", () => {
-    render(<NoSelection />);
+  it("Panel을 안 주면 본문 없이 띠만 그린다", () => {
+    render(
+      <Bottom>
+        <Bottom.Header tabs={TABS.map((tab) => ({ ...tab, isActive: false }))} />
+      </Bottom>,
+    );
 
     expect(screen.getByRole("tablist")).toBeInTheDocument();
     expect(screen.queryByRole("tabpanel")).not.toBeInTheDocument();

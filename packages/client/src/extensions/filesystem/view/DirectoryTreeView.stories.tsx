@@ -124,22 +124,3 @@ export const Default: Story = story({
   expandedIds: ["packages", "packages/client"],
   selectedIds: ["CONVENTIONS.md"],
 });
-
-export const Empty: Story = story({ status: "loaded" });
-
-export const Loading: Story = story({ status: "loading" });
-
-export const Error: Story = story({ status: "error", failure: "워크스페이스를 읽지 못했다 — ENOENT" });
-
-export const Editing: Story = story({ rows: ROWS, expandedIds: ["packages"], editingId: "CONVENTIONS.md" });
-
-export const DeleteConfirm: Story = story({
-  rows: ROWS,
-  expandedIds: ["packages"],
-  deleteTargets: [
-    { id: "packages", name: "packages", type: "folder" },
-    { id: "package.json", name: "package.json", type: "file" },
-  ],
-});
-
-export const FailureNotice: Story = story({ rows: ROWS, failureNotice: "같은 이름이 이미 있다 — EEXIST" });

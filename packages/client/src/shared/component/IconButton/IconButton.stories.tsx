@@ -12,23 +12,3 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-export const Variants: Story = {
-  render: (args) => (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-      <IconButton {...args} variant="default" />
-      <IconButton {...args} variant="primary" />
-      <IconButton {...args} variant="invisible" />
-      <IconButton {...args} variant="danger" />
-      <IconButton {...args} disabled />
-    </span>
-  ),
-};
-export const Sizes: Story = {
-  render: (args) => (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-      <IconButton {...args} size="small" />
-      <IconButton {...args} size="medium" />
-      <IconButton {...args} size="large" />
-    </span>
-  ),
-};

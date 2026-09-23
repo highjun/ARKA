@@ -1,4 +1,3 @@
-import { composeStories } from "@storybook/react-vite";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import {
@@ -8,10 +7,6 @@ import {
   implementsNoA11yViolations,
 } from "#utils/testing";
 import { Sidebar } from "./Sidebar";
-import * as stories from "./Sidebar.stories";
-
-const { Compact, NoHeader } = composeStories(stories);
-
 describe("Sidebar", () => {
   implementsClassName((extra) => <Sidebar {...extra}>content</Sidebar>);
   implementsDataComponent((extra) => <Sidebar {...extra}>content</Sidebar>, "Sidebar");
@@ -23,14 +18,23 @@ describe("Sidebar", () => {
     </Sidebar>
   ));
 
-  it("`NoHeader` 스토리는 머리 행을 그리지 않는다", () => {
-    const { container } = render(<NoHeader />);
+  it("Header를 안 주면 머리 행을 그리지 않는다", () => {
+    const { container } = render(
+      <Sidebar>
+        <Sidebar.Body>content</Sidebar.Body>
+      </Sidebar>,
+    );
 
     expect(container.querySelector("header")).toBeNull();
   });
 
-  it("`Compact` 스토리는 `data-density`에 compact를 싣는다", () => {
-    render(<Compact />);
+  it("density를 compact로 주면 `data-density`에 싣는다", () => {
+    render(
+      <Sidebar density="compact">
+        <Sidebar.Header title="탐색기" />
+        <Sidebar.Body>content</Sidebar.Body>
+      </Sidebar>,
+    );
 
     expect(screen.getByText("탐색기").closest('[data-component="Sidebar"]')).toHaveAttribute("data-density", "compact");
   });

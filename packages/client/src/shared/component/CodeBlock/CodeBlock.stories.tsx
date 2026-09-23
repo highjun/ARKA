@@ -25,8 +25,3 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-export const NoFileName: Story = { args: { fileName: undefined } };
-export const PlainText: Story = {
-  args: { language: undefined, fileName: undefined, content: "언어 이름표 없이 그대로 보여주는 글" },
-};
-export const Empty: Story = { args: { content: "", fileName: undefined } };

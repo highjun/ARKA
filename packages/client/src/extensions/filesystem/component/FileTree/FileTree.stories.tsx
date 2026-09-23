@@ -48,19 +48,3 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-export const Empty: Story = { args: { items: [], emptyLabel: "파일이 없습니다" } };
-export const Collapsed: Story = { args: { defaultExpandedIds: [], defaultSelectedIds: [] } };
-export const Bordered: Story = { args: { chrome: "bordered" } };
-export const Loading: Story = {
-  args: {
-    items: [
-      { id: "src", name: "src", type: "folder", loading: true, children: [] },
-      { id: "package.json", name: "package.json", type: "file" },
-    ],
-    defaultExpandedIds: [],
-    defaultSelectedIds: [],
-  },
-};
-export const Editing: Story = {
-  args: { editingId: "src/main.ts", onEditCommit: () => undefined, onEditCancel: () => undefined },
-};
