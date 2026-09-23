@@ -114,6 +114,16 @@ export class ShellViewModel implements IShellViewModel {
     this.setSidebarOpen(true);
   }
 
+  toggleSidebarExpanded(): void {
+    const current = this.#activeSidebarId();
+    if (current !== null) {
+      this.activeSidebarIdState = null;
+      return;
+    }
+    const first = this.#sidebars.list()[0];
+    if (first !== undefined) this.activeSidebarIdState = first.id;
+  }
+
   get bottoms(): readonly BottomRow[] {
     return this.#bottoms
       .list()
@@ -129,6 +139,15 @@ export class ShellViewModel implements IShellViewModel {
   toggleBottom(id: string): void {
     if (this.#bottoms.tryGet(id) === undefined) return;
     this.activeBottomIdState = this.activeBottomIdState === id ? null : id;
+  }
+
+  toggleBottomOpen(): void {
+    if (this.activeBottomIdState !== null) {
+      this.activeBottomIdState = null;
+      return;
+    }
+    const first = this.#bottoms.list()[0];
+    if (first !== undefined) this.activeBottomIdState = first.id;
   }
 
   get isNarrow(): boolean {

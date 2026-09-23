@@ -92,6 +92,16 @@ describe("IShellViewModel — 사이드바", () => {
     expect(activeIds(viewModel)).toEqual(["search"]);
   });
 
+  it("toggleSidebarExpanded는 열려 있으면 접고, 접혀 있으면 첫 사이드바를 편다 — 타이틀바 버튼이 이것을 부른다", () => {
+    const { viewModel } = make();
+
+    viewModel.toggleSidebarExpanded();
+    expect(activeIds(viewModel)).toEqual([]);
+
+    viewModel.toggleSidebarExpanded();
+    expect(activeIds(viewModel)).toEqual(["explorer"]);
+  });
+
   it("모르는 id는 무시한다", () => {
     const { viewModel } = make();
 
@@ -132,6 +142,16 @@ describe("IShellViewModel — 아래 창", () => {
     expect(viewModel.activeBottom?.id).toBe("terminal");
 
     viewModel.toggleBottom("terminal");
+    expect(viewModel.activeBottom).toBeNull();
+  });
+
+  it("toggleBottomOpen은 id 없이 첫 탭을 여닫는다 — 타이틀바 버튼이 이것을 부른다", () => {
+    const { viewModel } = make();
+
+    viewModel.toggleBottomOpen();
+    expect(viewModel.activeBottom?.id).toBe("terminal");
+
+    viewModel.toggleBottomOpen();
     expect(viewModel.activeBottom).toBeNull();
   });
 });

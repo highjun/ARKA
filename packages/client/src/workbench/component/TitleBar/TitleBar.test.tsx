@@ -10,7 +10,7 @@ import {
 import { TitleBar } from "./TitleBar";
 import * as stories from "./TitleBar.stories";
 
-const { Default, NoCenter } = composeStories(stories);
+const { Default } = composeStories(stories);
 
 describe("TitleBar", () => {
   implementsClassName((extra) => <TitleBar {...extra} />);
@@ -26,8 +26,8 @@ describe("TitleBar", () => {
     expect(screen.getByText("2026-09-20 11:18(a1b2c3d)")).toBeInTheDocument();
   });
 
-  it("`NoCenter` 스토리는 가운데를 비워도 좌우가 남는다", () => {
-    render(<NoCenter />);
+  it("가운데를 비워도 좌우가 남는다", () => {
+    render(<TitleBar brand="ARKA" actions={<button type="button">알림</button>} />);
 
     expect(screen.getByText("ARKA")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "명령 팔레트 열기" })).not.toBeInTheDocument();

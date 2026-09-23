@@ -176,6 +176,56 @@ describe("Shell", () => {
     expect(document.querySelector('[data-component="ShellBottom"]')).not.toBeInTheDocument();
   });
 
+  it("여닫기 콜백을 주면 타이틀바 오른쪽 끝에 버튼 둘이 뜨고, 펼침 여부를 눌린 상태로 알린다", () => {
+    const onSidebarToggle = vi.fn();
+    const onBottomToggle = vi.fn();
+    render(
+      <Shell
+        colorMode="light"
+        sidebars={SIDEBARS}
+        sidebarContent="탐색기"
+        bottoms={BOTTOMS}
+        onSidebarToggle={onSidebarToggle}
+        onBottomToggle={onBottomToggle}
+      >
+        본문
+      </Shell>,
+    );
+
+    const sidebarToggle = screen.getByRole("button", { name: "사이드바 접기" });
+    const bottomToggle = screen.getByRole("button", { name: "아래 창 펼치기" });
+    expect(sidebarToggle).toHaveAttribute("aria-pressed", "true");
+    expect(bottomToggle).toHaveAttribute("aria-pressed", "false");
+
+    fireEvent.click(sidebarToggle);
+    fireEvent.click(bottomToggle);
+
+    expect(onSidebarToggle).toHaveBeenCalledOnce();
+    expect(onBottomToggle).toHaveBeenCalledOnce();
+  });
+
+  it("아래 창 탭이 없으면 아래 창 버튼도 없다 — 열 것이 없다", () => {
+    render(
+      <Shell colorMode="light" sidebars={SIDEBARS} onSidebarToggle={vi.fn()} onBottomToggle={vi.fn()}>
+        본문
+      </Shell>,
+    );
+
+    expect(screen.getByRole("button", { name: "사이드바 펼치기" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "아래 창 펼치기" })).not.toBeInTheDocument();
+  });
+
+  it("여닫기 콜백을 안 주면 그 버튼도 없다", () => {
+    render(
+      <Shell colorMode="light" sidebars={SIDEBARS} bottoms={BOTTOMS}>
+        본문
+      </Shell>,
+    );
+
+    expect(screen.queryByRole("button", { name: "사이드바 펼치기" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "아래 창 펼치기" })).not.toBeInTheDocument();
+  });
+
   it("isNarrow 는 data-narrow 로 실린다", () => {
     render(
       <Shell colorMode="light" isNarrow>

@@ -12,7 +12,7 @@ import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
 import { ActivityBar } from "../ActivityBar";
 import type { BottomTab } from "../Bottom";
-import type { SidebarRow } from "../ActivityBar";
+import type { ActivityBarItem } from "../ActivityBar";
 import type { IconId } from "#component/Icon";
 
 interface SidebarActionRow {
@@ -29,7 +29,7 @@ const RESIZABLE_MAX_WIDTH = "480px";
 const hasContent = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
 
 const SETTINGS_ID = "shell.settings";
-const SETTINGS_ROW: readonly SidebarRow[] = [{ id: SETTINGS_ID, title: "설정", iconId: "settingsGear" }];
+const SETTINGS_ROW: readonly ActivityBarItem[] = [{ id: SETTINGS_ID, title: "설정", iconId: "settingsGear" }];
 
 export interface ShellProps extends Omit<ComponentPropsWithoutRef<"div">, "children"> {
   readonly ref?: Ref<HTMLDivElement>;
@@ -40,7 +40,7 @@ export interface ShellProps extends Omit<ComponentPropsWithoutRef<"div">, "child
   readonly center?: ReactNode;
   readonly actions?: ReactNode;
 
-  readonly sidebars?: readonly SidebarRow[];
+  readonly sidebars?: readonly ActivityBarItem[];
   readonly activeSidebarId?: string | null;
   readonly onSidebarSelect?: (id: string) => void;
   readonly onSettingsSelect?: () => void;
@@ -58,6 +58,8 @@ export interface ShellProps extends Omit<ComponentPropsWithoutRef<"div">, "child
   readonly bottoms?: readonly BottomTab[];
   readonly bottomContent?: ReactNode;
   readonly onBottomSelect?: (id: string) => void;
+  readonly onSidebarToggle?: () => void;
+  readonly onBottomToggle?: () => void;
 
   readonly children: ReactNode;
   readonly overlays?: ReactNode;
@@ -85,6 +87,8 @@ export const Shell = ({
   bottoms,
   bottomContent,
   onBottomSelect,
+  onSidebarToggle,
+  onBottomToggle,
   children,
   overlays,
   className,
@@ -101,6 +105,31 @@ export const Shell = ({
   const hasSidebar = sidebars !== undefined;
   const expanded = hasContent(sidebarContent);
   const hasBottom = bottoms !== undefined && bottoms.length > 0;
+  const bottomOpen = hasContent(bottomContent);
+  const layoutToggles = (
+    <>
+      {onSidebarToggle === undefined ? null : (
+        <IconButton
+          variant="invisible"
+          size="small"
+          aria-label={expanded ? "사이드바 접기" : "사이드바 펼치기"}
+          aria-pressed={expanded}
+          onClick={onSidebarToggle}
+          icon={() => <Icon iconId="layoutSidebarLeft" size="sm" />}
+        />
+      )}
+      {onBottomToggle === undefined || !hasBottom ? null : (
+        <IconButton
+          variant="invisible"
+          size="small"
+          aria-label={bottomOpen ? "아래 창 접기" : "아래 창 펼치기"}
+          aria-pressed={bottomOpen}
+          onClick={onBottomToggle}
+          icon={() => <Icon iconId="layoutPanel" size="sm" />}
+        />
+      )}
+    </>
+  );
 
   return (
     <ThemeProvider colorMode={colorMode}>
@@ -130,7 +159,12 @@ export const Shell = ({
               </>
             }
             center={center}
-            actions={actions}
+            actions={
+              <>
+                {actions}
+                {layoutToggles}
+              </>
+            }
           />
           <SplitPageLayout className={styles["layout"]}>
             {hasSidebar && (
@@ -170,9 +204,9 @@ export const Shell = ({
                       <ActivityBar.Top
                         items={sidebars}
                         activeId={activeSidebarId}
-                        onSelect={(id) => onSidebarSelect?.(id)}
+                        onItemClick={(id) => onSidebarSelect?.(id)}
                       />
-                      <ActivityBar.Bottom items={SETTINGS_ROW} onSelect={() => onSettingsSelect?.()} />
+                      <ActivityBar.Bottom items={SETTINGS_ROW} onItemClick={() => onSettingsSelect?.()} />
                     </ActivityBar>
                     {expanded && (
                       <Sidebar density="compact" className={styles["sidebarSurface"]}>

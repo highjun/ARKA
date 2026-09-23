@@ -103,3 +103,40 @@
   font-size: var(--text-body-size-small);
   color: var(--fgColor-muted);
 }
+
+.trigger {
+  display: grid;
+  width: 40vw;
+  max-width: 560px;
+  height: var(--control-medium-size);
+  align-items: center;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-sm);
+  border-style: solid;
+  border-width: var(--borderWidth-thin);
+  border-color: var(--borderColor-default);
+  border-radius: var(--borderRadius-medium);
+  background-color: var(--control-bgColor-rest);
+  color: var(--fgColor-muted);
+  cursor: pointer;
+  font-size: var(--text-caption-size);
+  line-height: var(--text-caption-lineHeight);
+  padding-inline: var(--space-sm);
+}
+
+.trigger:hover {
+  background-color: var(--control-bgColor-hover);
+}
+
+.trigger:focus-visible {
+  outline: var(--borderWidth-thick) solid var(--focus-outlineColor);
+  outline-offset: -1px;
+}
+
+.triggerPlaceholder {
+  min-width: 0;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

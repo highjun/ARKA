@@ -11,22 +11,3 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-export const Combination: Story = {
-  render: (args) => (
-    <span style={{ display: "inline-flex", gap: 4 }}>
-      <Kbd {...args}>Ctrl</Kbd>
-      <Kbd {...args}>Shift</Kbd>
-      <Kbd {...args}>P</Kbd>
-    </span>
-  ),
-};
-export const OnEmphasis: Story = {
-  args: { tone: "onEmphasis" },
-  decorators: [
-    (Story) => (
-      <div style={{ display: "inline-block", padding: 8, background: "var(--bgColor-accent-emphasis)" }}>
-        <Story />
-      </div>
-    ),
-  ],
-};

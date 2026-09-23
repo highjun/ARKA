@@ -2,6 +2,8 @@ import type { ICommandService } from "#core/commands";
 import { makeAutoObservable, observable } from "mobx";
 import type { CommandRow, ICommandPaletteViewModel } from "./ICommandPaletteViewModel";
 
+const OPEN_ACTION_ID = "shell.openCommandPalette";
+
 export class CommandPaletteViewModel implements ICommandPaletteViewModel {
   readonly #commands: ICommandService;
   private isOpenState = false;
@@ -15,8 +17,8 @@ export class CommandPaletteViewModel implements ICommandPaletteViewModel {
       { autoBind: true },
     );
 
-    commands.actions.add({ id: "shell.openCommandPalette", label: "커맨드 팔레트 열기", execute: () => this.open() });
-    commands.keybindings.add({ keybinding: "ctrl+k", actionId: "shell.openCommandPalette" });
+    commands.actions.add({ id: OPEN_ACTION_ID, label: "커맨드 팔레트 열기", execute: () => this.open() });
+    commands.keybindings.add({ keybinding: "ctrl+k", actionId: OPEN_ACTION_ID });
   }
 
   get isOpen(): boolean {
@@ -46,6 +48,10 @@ export class CommandPaletteViewModel implements ICommandPaletteViewModel {
       label: action.label,
       keybinding: this.#effectiveKeybinding(action.id),
     }));
+  }
+
+  get keybinding(): string {
+    return this.#effectiveKeybinding(OPEN_ACTION_ID);
   }
 
   run(actionId: string): void {

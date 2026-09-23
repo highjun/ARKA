@@ -36,21 +36,6 @@ const ONE_PANE: PaneRowNode = {
   ],
 };
 
-const SPLIT: PaneRowNode = {
-  kind: "split",
-  id: "root",
-  orientation: "horizontal",
-  children: [
-    ONE_PANE,
-    {
-      kind: "leaf",
-      id: "leaf-2",
-      activeTabId: "chat:///1",
-      tabs: [row("chat:///1", "빌드 실패 분석", { kind: "chat", icon: <Icon iconId="brain" size="sm" /> })],
-    },
-  ],
-};
-
 const shellViewModel = (state: Partial<IShellViewModel>): IShellViewModel => ({
   dispose: () => undefined,
   sidebars: [
@@ -61,9 +46,11 @@ const shellViewModel = (state: Partial<IShellViewModel>): IShellViewModel => ({
   activeSidebar: { id: "explorer", title: "탐색기", Content: panel("탐색기"), actions: [] },
   toggleSidebar: () => undefined,
   revealSidebar: () => undefined,
+  toggleSidebarExpanded: () => undefined,
   bottoms: [],
   activeBottom: null,
   toggleBottom: () => undefined,
+  toggleBottomOpen: () => undefined,
   isNarrow: false,
   colorMode: "light",
   toggleColorMode: () => undefined,
@@ -126,6 +113,7 @@ const paletteViewModel = (state: Partial<ICommandPaletteViewModel>): ICommandPal
     { id: "shell.openSettings", label: "설정 열기", keybinding: "ctrl+," },
     { id: "shell.toggleTheme", label: "테마 전환", keybinding: "ctrl+j" },
   ],
+  keybinding: "ctrl+k",
   run: () => undefined,
   ...state,
 });
@@ -184,35 +172,3 @@ const story = (fixture: Fixture): Story => ({
 });
 
 export const Default: Story = story({});
-
-export const Empty: Story = story({
-  tabs: { tree: { kind: "leaf", id: "leaf-1", activeTabId: null, tabs: [] }, activeTab: null },
-});
-
-export const Split: Story = story({ tabs: { tree: SPLIT, activePaneId: "leaf-2" } });
-
-export const Notifications: Story = story({
-  notifications: {
-    items: [
-      {
-        id: "1",
-        severity: "error",
-        message: "파일을 저장하지 못했다 — EACCES",
-        at: Date.now() - 180_000,
-        isRead: false,
-      },
-      { id: "2", severity: "warning", message: "연결이 불안정하다", at: Date.now() - 60_000, isRead: false },
-    ],
-    unreadCount: 2,
-  },
-});
-
-export const Outdated: Story = story({ appStatus: { isOutdated: true } });
-
-export const ConfirmClose: Story = story({
-  tabs: { pendingClose: { paneId: "leaf-1", tabId: "file:///CONVENTIONS.md" } },
-});
-
-export const PaletteOpen: Story = story({ palette: { isOpen: true } });
-
-export const SidebarClosed: Story = story({ shell: { isSidebarOpen: false } });

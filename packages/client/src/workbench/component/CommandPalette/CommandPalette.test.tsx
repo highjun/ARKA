@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { implementsDataComponent, implementsRef, implementsNoA11yViolations } from "#utils/testing";
+import {
+  implementsClassName,
+  implementsDataComponent,
+  implementsRef,
+  implementsNoA11yViolations,
+} from "#utils/testing";
 import { CommandPalette } from "./CommandPalette";
 import type { CommandRow } from "./CommandPalette";
 
@@ -68,4 +73,46 @@ describe("CommandPalette", () => {
   implementsRef((extra) => <CommandPalette open query="" rows={ROWS} {...extra} />, HTMLDivElement);
 
   implementsNoA11yViolations(() => <CommandPalette open query="" rows={ROWS} />);
+});
+
+describe("CommandPalette.Trigger", () => {
+  implementsClassName((extra) => <CommandPalette.Trigger {...extra} />);
+  implementsDataComponent((extra) => <CommandPalette.Trigger {...extra} />, "CommandPalette/Trigger");
+  implementsRef((extra) => <CommandPalette.Trigger {...extra} />, HTMLButtonElement);
+  implementsNoA11yViolations(() => <CommandPalette.Trigger keybinding="ctrl+k" />);
+
+  it("팔레트 문구와 단축키를 적는다", () => {
+    render(<CommandPalette.Trigger keybinding="ctrl+k" />);
+
+    expect(screen.getByRole("button", { name: "명령 팔레트 열기" })).toHaveTextContent("커맨드 검색...");
+    expect(screen.getByText("Ctrl")).toBeInTheDocument();
+    expect(screen.getByText("K")).toBeInTheDocument();
+  });
+
+  it("단축키가 없으면 키를 그리지 않는다", () => {
+    render(<CommandPalette.Trigger />);
+
+    expect(document.querySelectorAll("kbd")).toHaveLength(0);
+  });
+
+  it("문구는 바꿀 수 있다", () => {
+    render(<CommandPalette.Trigger placeholder="파일로 이동..." />);
+
+    expect(screen.getByRole("button", { name: "명령 팔레트 열기" })).toHaveTextContent("파일로 이동...");
+  });
+
+  it("누르면 알린다 — 여는 것은 받는 쪽이 한다", () => {
+    const onClick = vi.fn();
+    render(<CommandPalette.Trigger keybinding="ctrl+k" onClick={onClick} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "명령 팔레트 열기" }));
+
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("읽어 주는 이름은 문구가 아니라 하는 일이다", () => {
+    render(<CommandPalette.Trigger />);
+
+    expect(screen.queryByRole("button", { name: "커맨드 검색..." })).not.toBeInTheDocument();
+  });
 });

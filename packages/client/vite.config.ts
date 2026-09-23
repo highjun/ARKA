@@ -3,6 +3,7 @@ import path from "node:path";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import { defineConfig } from "vitest/config";
+import { PRODUCT_NAME } from "./src/workbench/model/product.ts";
 
 const clientRoot = path.resolve(import.meta.dirname);
 
@@ -12,13 +13,17 @@ export default defineConfig({
   root: path.join(clientRoot, "src/workbench"),
   plugins: [
     react(),
+    {
+      name: "arka-product-name",
+      transformIndexHtml: (html: string) => html.replaceAll("%PRODUCT_NAME%", PRODUCT_NAME),
+    },
     VitePWA({
       registerType: "autoUpdate",
       filename: "app-sw.js",
       includeAssets: ["arka-mark.svg"],
       manifest: {
-        name: "ARKA",
-        short_name: "ARKA",
+        name: PRODUCT_NAME,
+        short_name: PRODUCT_NAME,
         description: "Agent Development Environment",
         lang: "ko",
         display: "standalone",
@@ -63,7 +68,7 @@ export default defineConfig({
   },
   test: {
     root: clientRoot,
-    exclude: ["**/node_modules/**", "test/e2e/**", "test/vrt/**"],
+    exclude: ["**/node_modules/**", "test/e2e/**", "test/visual-regression/**"],
     environment: "jsdom",
     setupFiles: ["./test/vitestSetup.ts"],
     globals: true,

@@ -55,4 +55,9 @@ describe("ICommandPaletteViewModel", () => {
     expect(run).toHaveBeenCalledOnce();
     expect(viewModel.isOpen).toBe(false);
   });
+
+  it("자기를 여는 실효 키를 내놓는다 — 재정의하면 그쪽을 따른다", () => {
+    expect(make().viewModel.keybinding).toBe("ctrl+k");
+    expect(make({ "shell.openCommandPalette": "ctrl+shift+p" }).viewModel.keybinding).toBe("ctrl+shift+p");
+  });
 });

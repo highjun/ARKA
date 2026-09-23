@@ -1,18 +1,16 @@
 import type { ComponentPropsWithoutRef, Ref } from "react";
-import { Kbd } from "#component/Kbd";
+import { Kbd, keysOf } from "#component/Kbd";
 import { clsx } from "clsx";
 import { usePortalContainer } from "#utils/portal";
 import styles from "./CommandPalette.module.css";
 import { Command } from "cmdk";
+import { CommandPaletteTrigger } from "./Trigger";
 
 export interface CommandRow {
   readonly id: string;
   readonly label: string;
   readonly keybinding: string;
 }
-
-const keysOf = (keybinding: string): readonly string[] =>
-  keybinding === "" ? [] : keybinding.split("+").map((key) => key.charAt(0).toUpperCase() + key.slice(1));
 
 type PaletteDialogAttrs = Omit<ComponentPropsWithoutRef<"div">, "onSelect" | "defaultValue"> & {
   readonly open: boolean;
@@ -82,6 +80,8 @@ export interface CommandPaletteProps extends Omit<ComponentPropsWithoutRef<"div"
   readonly onSelect?: (actionId: string) => void;
 }
 
-export const CommandPalette = ({ className, ref, ...props }: CommandPaletteProps) => (
+const CommandPaletteRoot = ({ className, ref, ...props }: CommandPaletteProps) => (
   <PaletteDialog {...props} ref={ref} className={clsx(className, styles["content"])} data-component="CommandPalette" />
 );
+
+export const CommandPalette = Object.assign(CommandPaletteRoot, { Trigger: CommandPaletteTrigger });

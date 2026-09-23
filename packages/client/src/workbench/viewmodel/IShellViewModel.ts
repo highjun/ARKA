@@ -45,9 +45,11 @@ export interface IShellViewModel extends Disposable {
   readonly activeSidebar: ActiveSidebar | null;
   toggleSidebar(id: string): void;
   revealSidebar(id: string): void;
+  toggleSidebarExpanded(): void;
   readonly bottoms: readonly BottomRow[];
   readonly activeBottom: ActiveBottom | null;
   toggleBottom(id: string): void;
+  toggleBottomOpen(): void;
   readonly isNarrow: boolean;
 
   readonly colorMode: "light" | "dark";

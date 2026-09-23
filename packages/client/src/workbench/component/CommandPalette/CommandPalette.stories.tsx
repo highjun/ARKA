@@ -25,6 +25,7 @@ const OverlayStage = ({ children }: { readonly children: ReactNode }) => {
 const meta = {
   title: "01-workbench/CommandPalette",
   component: CommandPalette,
+  subcomponents: { Trigger: CommandPalette.Trigger },
   decorators: [
     (Story) => (
       <OverlayStage>
@@ -39,5 +40,3 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-export const Empty: Story = { args: { rows: [] } };
-export const NoMatch: Story = { args: { query: "없는 명령" } };

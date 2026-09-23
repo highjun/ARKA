@@ -7,10 +7,10 @@ import { IconButton } from "#component/IconButton";
 import { ModeToggle } from "#component/ModeToggle";
 import { Text } from "#component/Text";
 import { Toast } from "#component/Toast";
-import { CommandCenter } from "../component/CommandCenter";
 import { CommandPalette } from "../component/CommandPalette";
 import { Shell } from "../component/Shell";
 import { Tab } from "../component/Tab";
+import { PRODUCT_NAME } from "../model/product";
 import type { ReactNode } from "react";
 import type { ICommandService } from "#core/commands";
 import type { TabContentProps } from "../model/ITabProviderDescriptor";
@@ -113,17 +113,10 @@ export const ShellView = observer(function ShellView() {
         brand={
           <span className={styles["brandGroup"]}>
             <img src="/arka-mark.svg" alt="" width={20} height={20} />
-            <span className={styles["brandText"]}>
-              {appStatus.workspaceName === "" ? "ARKA" : appStatus.workspaceName}
-            </span>
+            <span className={styles["brandText"]}>{PRODUCT_NAME}</span>
           </span>
         }
-        center={
-          <CommandCenter
-            value={appStatus.workspaceName === "" ? "ARKA" : appStatus.workspaceName}
-            onClick={() => palette.open()}
-          />
-        }
+        center={<CommandPalette.Trigger keybinding={palette.keybinding} onClick={() => palette.open()} />}
         actions={
           <span className={styles["trailingGroup"]}>
             <Text size="small" tone="muted" className={styles["buildId"]}>
@@ -170,6 +163,8 @@ export const ShellView = observer(function ShellView() {
         bottoms={shell.bottoms}
         bottomContent={activeBottom === null ? undefined : <activeBottom.Content />}
         onBottomSelect={(id) => shell.toggleBottom(id)}
+        onSidebarToggle={() => shell.toggleSidebarExpanded()}
+        onBottomToggle={() => shell.toggleBottomOpen()}
       >
         <Tab
           className={styles["tab"]}

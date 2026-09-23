@@ -18,5 +18,6 @@ export interface ICommandPaletteViewModel extends Disposable {
   readonly query: string;
   setQuery(value: string): void;
   readonly rows: readonly CommandRow[];
+  readonly keybinding: string;
   run(actionId: string): void;
 }
