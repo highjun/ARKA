@@ -36,14 +36,13 @@ export const TabHeader = ({
       onSelect?.();
     }
   };
-  const closeButton = (pinned: boolean) =>
+  const closeButton =
     onClose === undefined ? null : (
       <IconButton
         variant="invisible"
         size="small"
         aria-label={`${tab.title} 닫기`}
         draggable={false}
-        className={pinned ? classNames.headerCloseButtonPinned : classNames.headerCloseButtonHover}
         onClick={handleHeaderCloseClick(onClose)}
         onDragStart={preventDragStart}
         icon={() => <Icon iconId="close" size="sm" />}
@@ -66,7 +65,7 @@ export const TabHeader = ({
       <span data-preview={tab.isPreview ? "" : undefined} className={classNames.headerLabel}>
         {tab.title}
       </span>
-      {isActive ? <span className={classNames.headerActionSlot}>{closeButton(true)}</span> : closeButton(false)}
+      {closeButton}
     </div>
   );
 };

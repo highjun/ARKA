@@ -50,4 +50,3 @@ export const Tab = Object.assign(TabRoot, { Header: TabHeader, Strip: TabStrip, 
 
 export type { PaneRowLeaf, PaneRowSplit, TabRow } from "./shared";
 export type { TabGroupProps } from "./Group";
-export type { TabSplitProps } from "./Split";

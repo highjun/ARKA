@@ -43,9 +43,6 @@ export interface TabClassNames {
   readonly header?: string;
   readonly headerLabel?: string;
   readonly headerIcon?: string;
-  readonly headerActionSlot?: string;
-  readonly headerCloseButtonPinned?: string;
-  readonly headerCloseButtonHover?: string;
   readonly headerContextMenuTrigger?: string;
   readonly stripRoot?: string;
   readonly stripListContainer?: string;

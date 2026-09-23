@@ -10,10 +10,7 @@ export const buildClassNames = (): TabClassNames => {
   return {
     header: styles["header"],
     headerLabel: styles["headerLabel"],
-    headerActionSlot: styles["headerActionSlot"],
-    headerCloseButtonHover: styles["headerCloseButtonHover"],
     headerIcon: styles["headerIcon"],
-    headerCloseButtonPinned: styles["headerCloseButtonPinned"],
     headerContextMenuTrigger: styles["headerContextMenuTrigger"],
 
     stripRoot: styles["stripRoot"],

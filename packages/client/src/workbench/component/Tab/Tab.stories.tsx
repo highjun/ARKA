@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Icon } from "#component/Icon";
 import { Tab } from "./index";
-import type { PaneRowSplit, TabGroupProps, TabRow, TabSplitProps } from "./index";
+import type { TabGroupProps, TabRow } from "./index";
 
 const content = (text: string) => () => <div style={{ padding: 16 }}>{text}</div>;
 
@@ -35,19 +35,10 @@ const ROWS: readonly TabRow[] = [
   },
 ];
 
-const SPLIT_TREE: PaneRowSplit = {
-  kind: "split",
-  id: "root",
-  orientation: "horizontal",
-  children: [
-    { kind: "leaf", id: "left", activeTabId: "readme", tabs: ROWS },
-    { kind: "leaf", id: "right", activeTabId: "main", tabs: ROWS.slice(0, 2) },
-  ],
-};
-
 const meta = {
   title: "01-workbench/Tab",
   component: Tab,
+  subcomponents: { Header: Tab.Header, Strip: Tab.Strip, Group: Tab.Group, Split: Tab.Split },
   decorators: [
     (Story) => (
       <div style={{ height: 480, width: 720 }}>
@@ -66,29 +57,5 @@ const meta = {
 export default meta;
 
 type GroupStory = StoryObj<Meta<TabGroupProps>>;
-type SplitStory = StoryObj<Meta<TabSplitProps>>;
 
 export const Default: GroupStory = {};
-export const Empty: GroupStory = { args: { tabs: [], activeTabId: null, emptyMessage: "탐색기에서 파일을 고르세요." } };
-export const NoChrome: GroupStory = { args: { chrome: "none" } };
-export const Split: SplitStory = {
-  render: () => (
-    <Tab
-      tree={SPLIT_TREE}
-      activePaneId="left"
-      onSelect={() => undefined}
-      onClose={() => undefined}
-      style={{ height: "100%" }}
-    />
-  ),
-};
-export const SplitVertical: SplitStory = {
-  render: () => (
-    <Tab
-      tree={{ ...SPLIT_TREE, orientation: "vertical" }}
-      activePaneId="right"
-      onSelect={() => undefined}
-      style={{ height: "100%" }}
-    />
-  ),
-};

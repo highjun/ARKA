@@ -39,11 +39,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  transition: padding-right var(--motion-duration-short) var(--motion-easing-move);
-}
-
-.header:not([data-active]) .headerLabel {
-  padding-right: var(--control-small-size);
 }
 
 .headerLabel[data-preview] {
@@ -51,46 +46,15 @@
   padding-right: 0.2em;
 }
 
-.headerActionSlot {
-  position: relative;
-  display: grid;
-  width: var(--control-small-size);
-  height: var(--control-small-size);
-  flex-shrink: 0;
-  place-items: center;
-}
-
 @media (pointer: coarse) {
   .header {
     height: var(--control-minTarget-coarse);
     min-width: 135px;
   }
-
-  .header:not([data-active]) .headerLabel {
-    padding-right: var(--control-minTarget-coarse);
-  }
-
-  .headerActionSlot {
-    width: var(--control-minTarget-coarse);
-    height: var(--control-minTarget-coarse);
-  }
 }
 
 .headerIcon {
   transform: translateY(1px);
-}
-
-.headerCloseButtonPinned {
-  position: absolute;
-  opacity: 1;
-}
-
-.headerCloseButtonHover {
-  position: absolute;
-  top: 50%;
-  right: var(--space-xs);
-  transform: translateY(-50%);
-  opacity: 1;
 }
 
 .headerContextMenuTrigger {
