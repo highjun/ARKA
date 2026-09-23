@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:storybook": "storybook dev --no-open",
+    "dev:storybook": "storybook dev --no-open -p 6006",
     "build:storybook": "storybook build -o .output/storybook-static",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
@@ -13,7 +13,7 @@
     "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
     "test:e2e": "playwright test -c test/e2e/playwright.config.ts",
     "test:e2e:critical": "playwright test -c test/e2e/playwright.config.ts --grep @critical",
-    "test:visual-regression": "node test/vrt/run.ts"
+    "test:visual-regression": "node test/visual-regression/run.ts"
   },
   "dependencies": {
     "@codemirror/commands": "^6.11.0",
@@ -29,7 +29,6 @@
     "@codemirror/view": "^6.43.11",
     "@fontsource-variable/cascadia-code": "^5.3.0",
     "@iconify-json/codicon": "^1.2.72",
-    "@iconify-json/octicon": "^1.2.34",
     "@iconify/react": "^6.0.2",
     "@lezer/highlight": "^1.2.3",
     "@primer/primitives": "^11.10.0",
@@ -53,6 +52,7 @@
     "@playwright/test": "catalog:",
     "@primer/stylelint-config": "^13.6.0",
     "@storybook/addon-a11y": "^10.6.0",
+    "@storybook/addon-docs": "^10.6.0",
     "@storybook/react-vite": "^10.6.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
@@ -82,6 +82,7 @@
     "#contracts": "contracts",
     "#core/*": "./src/core/*/index.ts",
     "#core/errors": "./src/core/errors.ts",
-    "#utils/*": "./src/shared/utils/*.tsx"
+    "#utils/*": "./src/shared/utils/*.tsx",
+    "#visual-regression": "./src/shared/visualRegression.ts"
   }
 }

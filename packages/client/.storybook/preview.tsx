@@ -5,6 +5,7 @@ import "../src/workbench/reset.css";
 import "../src/workbench/globals.css";
 
 const preview: Preview = {
+  tags: ["autodocs"],
   parameters: {
     backgrounds: { disable: true },
   },
