@@ -1,22 +1,23 @@
 import { clsx } from "clsx";
 import { Icon } from "#component/Icon";
 import { IconButton } from "#component/IconButton";
-import styles from "./ActivityBar.module.css";
+import styles from "./Sidebar.module.css";
 import type { IconId } from "#component/Icon";
 
-export interface ActivityBarItem {
+export interface SidebarItem {
   readonly id: string;
   readonly title: string;
   readonly iconId: IconId;
 }
 
-interface ActivityBarItemProps {
-  readonly item: ActivityBarItem;
+/** 밖에서 한 칸만 따로 그릴 일이 없어 내보내지 않는다 — 줄(`RailTop`·`RailBottom`)이 채운다. */
+interface SidebarRailItemProps {
+  readonly item: SidebarItem;
   readonly pressed?: boolean;
   readonly onClick?: (id: string) => void;
 }
 
-export const Item = ({ item, pressed, onClick }: ActivityBarItemProps) => (
+export const RailItem = ({ item, pressed, onClick }: SidebarRailItemProps) => (
   <IconButton
     variant="invisible"
     size="medium"

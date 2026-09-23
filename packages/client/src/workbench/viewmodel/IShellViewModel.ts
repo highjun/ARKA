@@ -7,26 +7,12 @@ export interface SidebarRow {
   readonly id: string;
   readonly title: string;
   readonly iconId: IconId;
-}
-
-interface SidebarActionRow {
-  readonly actionId: string;
-  readonly iconId: IconId;
-  readonly label: string;
-}
-
-export interface ActiveSidebar {
-  readonly id: string;
-  readonly title: string;
   readonly Content: SidebarDescriptor["Content"];
-  readonly actions: readonly SidebarActionRow[];
 }
 
 export interface BottomRow {
   readonly id: string;
   readonly title: string;
-  readonly iconId: IconId;
-  readonly isActive: boolean;
 }
 
 export interface ActiveBottom {
@@ -42,7 +28,6 @@ declare module "#core/di" {
 export interface IShellViewModel extends Disposable {
   readonly sidebars: readonly SidebarRow[];
   readonly activeSidebarId: string | null;
-  readonly activeSidebar: ActiveSidebar | null;
   toggleSidebar(id: string): void;
   revealSidebar(id: string): void;
   toggleSidebarExpanded(): void;

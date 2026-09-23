@@ -41,7 +41,6 @@ const make = () => {
     title: "탐색기",
     iconId: "files",
     Content: NOOP_CONTENT,
-    actions: [{ actionId: "filesystem.newFile", iconId: "file" }],
   });
   sidebars.add({ id: "search", title: "검색", iconId: "search", Content: NOOP_CONTENT });
   const bottoms = new Registry<BottomDescriptor>();
@@ -50,7 +49,6 @@ const make = () => {
     overridesStore: { load: () => ({}), save: () => undefined },
     reportError: () => undefined,
   });
-  commands.actions.add({ id: "filesystem.newFile", label: "새 파일", execute: () => undefined });
   const opened: unknown[] = [];
   commands.actions.add({ id: "arka.workbench.open", label: "열기", execute: (context) => void opened.push(context) });
   const storage = fakeStorage();
@@ -70,25 +68,53 @@ describe("IShellViewModel — 사이드바", () => {
 
     expect(viewModel.sidebars.map((sidebar) => sidebar.id)).toEqual(["explorer", "search"]);
     expect(activeIds(viewModel)).toEqual(["explorer"]);
-    expect(viewModel.activeSidebar?.title).toBe("탐색기");
+    expect(viewModel.sidebars[0]?.title).toBe("탐색기");
   });
 
-  it("활성 사이드바의 액션은 명령의 라벨을 단다", () => {
+  it("줄이 본문까지 싣는다 — 화면이 등록된 사이드바를 한꺼번에 들고 있으려면 필요하다", () => {
     const { viewModel } = make();
 
-    expect(viewModel.activeSidebar?.actions).toEqual([
-      { actionId: "filesystem.newFile", iconId: "file", label: "새 파일" },
-    ]);
+    expect(viewModel.sidebars.map((sidebar) => sidebar.Content)).toEqual([NOOP_CONTENT, NOOP_CONTENT]);
   });
 
-  it("같은 것을 다시 고르면 닫힌다 — 폰에서 사이드바를 접는 유일한 수단이다", () => {
+  it("넓은 화면에서 같은 것을 다시 고르면 접힌다 — 레일만 남는다", () => {
     const { viewModel } = make();
 
     viewModel.toggleSidebar("explorer");
     expect(activeIds(viewModel)).toEqual([]);
-    expect(viewModel.activeSidebar).toBeNull();
 
     viewModel.toggleSidebar("search");
+    expect(activeIds(viewModel)).toEqual(["search"]);
+  });
+
+  it("좁은 화면에서 같은 것을 다시 골라도 그대로다 — 닫는 것은 타이틀바 단추 몫이다", () => {
+    const { viewModel, viewport } = make();
+    viewport.setNarrow(true);
+    viewModel.setSidebarOpen(true);
+
+    viewModel.toggleSidebar("explorer");
+
+    expect(activeIds(viewModel)).toEqual(["explorer"]);
+    expect(viewModel.isSidebarOpen).toBe(true);
+  });
+
+  it("좁은 화면에서는 늘 하나가 선다 — 넓은 화면에서 접어 둔 채 좁아져도 빈 드로어를 안 보여 준다", () => {
+    const { viewModel, viewport } = make();
+
+    viewModel.toggleSidebar("explorer");
+    expect(activeIds(viewModel)).toEqual([]);
+
+    viewport.setNarrow(true);
+
+    expect(activeIds(viewModel)).toEqual(["explorer"]);
+  });
+
+  it("다른 것을 고르면 폭과 상관없이 그것으로 바뀐다", () => {
+    const { viewModel, viewport } = make();
+    viewport.setNarrow(true);
+
+    viewModel.toggleSidebar("search");
+
     expect(activeIds(viewModel)).toEqual(["search"]);
   });
 
@@ -135,7 +161,7 @@ describe("IShellViewModel — 사이드바", () => {
 describe("IShellViewModel — 아래 창", () => {
   it("처음에는 닫혀 있고, 고르면 열리고, 다시 고르면 닫힌다", () => {
     const { viewModel } = make();
-    expect(viewModel.bottoms).toEqual([{ id: "terminal", title: "터미널", iconId: "bell", isActive: false }]);
+    expect(viewModel.bottoms).toEqual([{ id: "terminal", title: "터미널" }]);
     expect(viewModel.activeBottom).toBeNull();
 
     viewModel.toggleBottom("terminal");
@@ -204,10 +230,11 @@ describe("IShellViewModel — 모바일 드로어", () => {
   });
 
   it("사이드바를 고르는 것은 닫지 않는다 — 활동 선택은 패널 안에서 하는 일이다", () => {
-    const { viewModel } = make();
+    const { viewModel, viewport } = make();
+    viewport.setNarrow(true);
     viewModel.setSidebarOpen(true);
 
-    viewModel.toggleSidebar("explorer");
+    viewModel.toggleSidebar("search");
     viewModel.toggleSidebar("explorer");
 
     expect(viewModel.isSidebarOpen).toBe(true);

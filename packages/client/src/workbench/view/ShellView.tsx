@@ -1,24 +1,36 @@
 import { ContainerProvider, useViewModel } from "#core/viewmodel";
 import { observer } from "mobx-react-lite";
-import { Banner, ConfirmationDialog, CounterLabel } from "@primer/react";
+import { Banner, ConfirmationDialog } from "@primer/react";
 import { Menu } from "#component/Menu";
-import { Icon } from "#component/Icon";
-import { IconButton } from "#component/IconButton";
-import { ModeToggle } from "#component/ModeToggle";
 import { Text } from "#component/Text";
 import { Toast } from "#component/Toast";
-import { CommandPalette } from "../component/CommandPalette";
 import { Shell } from "../component/Shell";
 import { Tab } from "../component/Tab";
 import { PRODUCT_NAME } from "../model/product";
 import type { ReactNode } from "react";
 import type { ICommandService } from "#core/commands";
 import type { TabContentProps } from "../model/ITabProviderDescriptor";
+import type { TabTree } from "../component/Tab";
 import type { PaneRowNode, TabContextTarget, TabRow } from "../viewmodel/ITabSystemViewModel";
 import styles from "./ShellView.module.css";
 
 const collectRows = (node: PaneRowNode): readonly TabRow[] =>
   node.kind === "leaf" ? node.tabs : node.children.flatMap(collectRows);
+
+/**
+ * ViewModel의 칸 트리를 `Tab`이 읽는 모양으로 옮긴다.
+ * 두 계층이 같은 트리를 따로 선언하고 있어서 생긴 자리 — 타입을 합치면 사라진다.
+ */
+const toTabTree = (node: PaneRowNode): TabTree =>
+  node.kind === "leaf"
+    ? { kind: "group", id: node.id, items: node.tabs, activeItemId: node.activeTabId, size: node.size }
+    : {
+        kind: "split",
+        id: node.id,
+        orientation: node.orientation,
+        children: node.children.map(toTabTree),
+        size: node.size,
+      };
 
 const buildTabMenu = (commands: ICommandService) => (paneId: string, tabId: string) => {
   const context: TabContextTarget = { paneId, tabId };
@@ -53,7 +65,7 @@ export const ShellView = observer(function ShellView() {
   const tree = tabs.tree;
   const rowsById = new Map(collectRows(tree).map((row) => [row.id, row] as const));
 
-  const renderContent = (_paneId: string, tabId: string): ReactNode => {
+  const renderContent = (tabId: string): ReactNode => {
     const row = rowsById.get(tabId);
     if (row === undefined) return null;
     const contentProps: TabContentProps = { tabId };
@@ -64,7 +76,9 @@ export const ShellView = observer(function ShellView() {
     );
   };
 
-  const activeSidebar = shell.activeSidebar;
+  const sidebarRows = shell.sidebars;
+  const sidebarById = new Map(sidebarRows.map((row) => [row.id, row] as const));
+  const activeSidebarId = shell.activeSidebarId;
   const activeBottom = shell.activeBottom;
   const pendingClose = tabs.pendingClose;
 
@@ -86,14 +100,6 @@ export const ShellView = observer(function ShellView() {
         isNarrow={shell.isNarrow}
         overlays={
           <>
-            <CommandPalette
-              open={palette.isOpen}
-              onOpenChange={(open) => (open ? palette.open() : palette.close())}
-              query={palette.query}
-              onQueryChange={(value) => palette.setQuery(value)}
-              rows={palette.rows}
-              onSelect={(actionId) => palette.run(actionId)}
-            />
             {notifications.toasts.length === 0 ? null : (
               <Toast>
                 {notifications.toasts.map((item) => (
@@ -110,57 +116,35 @@ export const ShellView = observer(function ShellView() {
             )}
           </>
         }
-        brand={
-          <span className={styles["brandGroup"]}>
-            <img src="/arka-mark.svg" alt="" width={20} height={20} />
-            <span className={styles["brandText"]}>{PRODUCT_NAME}</span>
-          </span>
-        }
-        center={<CommandPalette.Trigger keybinding={palette.keybinding} onClick={() => palette.open()} />}
-        actions={
-          <span className={styles["trailingGroup"]}>
-            <Text size="small" tone="muted" className={styles["buildId"]}>
-              {appStatus.buildId}
-            </Text>
-            <span className={styles["bell"]}>
-              <IconButton
-                variant="invisible"
-                size="small"
-                aria-label={
-                  notifications.unreadCount === 0 ? "알림" : `안 읽은 알림 ${String(notifications.unreadCount)}건`
-                }
-                onClick={() => commands.execute("shell.openNotifications")}
-                icon={() => <Icon iconId="bell" size="sm" />}
-              />
-              {notifications.unreadCount === 0 ? null : (
-                <CounterLabel scheme="primary" className={styles["bellBadge"]}>
-                  {notifications.unreadCount}
-                </CounterLabel>
-              )}
-            </span>
-            <ModeToggle
-              values={["light", "dark"]}
-              value={shell.colorMode}
-              labels={["어둡게 전환", "밝게 전환"]}
-              onValueChange={() => shell.toggleColorMode()}
-            >
-              {[<Icon key="sun" iconId="sun" size="sm" />, <Icon key="moon" iconId="moon" size="sm" />]}
-            </ModeToggle>
-          </span>
-        }
-        sidebars={shell.sidebars}
-        activeSidebarId={shell.activeSidebarId}
+        brandName={PRODUCT_NAME}
+        brandIconSrc="/arka-mark.svg"
+        paletteOpen={palette.isOpen}
+        paletteQuery={palette.query}
+        paletteRows={palette.rows}
+        paletteKeybinding={palette.keybinding}
+        onPaletteOpenChange={(open) => (open ? palette.open() : palette.close())}
+        onPaletteQueryChange={(value) => palette.setQuery(value)}
+        onPaletteSelect={(actionId) => palette.run(actionId)}
+        buildTimestamp={appStatus.builtAt}
+        buildSha={appStatus.gitSha === "" ? undefined : appStatus.gitSha}
+        notificationCount={notifications.unreadCount}
+        onNotificationsOpen={() => commands.execute("shell.openNotifications")}
+        onColorModeToggle={() => shell.toggleColorMode()}
+        sidebars={sidebarRows}
+        activeSidebarId={activeSidebarId}
         onSidebarSelect={(id) => shell.toggleSidebar(id)}
         onSettingsSelect={() => commands.execute("shell.openSettings")}
-        sidebarTitle={activeSidebar?.title}
-        sidebarContent={activeSidebar === null ? undefined : <activeSidebar.Content />}
-        sidebarActions={activeSidebar?.actions}
-        onSidebarActionActivate={(actionId) => commands.execute(actionId)}
+        sidebarTitle={activeSidebarId === null ? undefined : sidebarById.get(activeSidebarId)?.title}
+        renderSidebarContent={(id) => {
+          const row = sidebarById.get(id);
+          return row === undefined ? null : <row.Content />;
+        }}
         sidebarOpen={shell.isSidebarOpen}
         onSidebarOpenChange={(open) => shell.setSidebarOpen(open)}
         sidebarResizable
         sidebarWidthStorageKey="arka-workbench:sidebar-width"
         bottoms={shell.bottoms}
+        activeBottomId={activeBottom?.id ?? null}
         bottomContent={activeBottom === null ? undefined : <activeBottom.Content />}
         onBottomSelect={(id) => shell.toggleBottom(id)}
         onSidebarToggle={() => shell.toggleSidebarExpanded()}
@@ -168,18 +152,16 @@ export const ShellView = observer(function ShellView() {
       >
         <Tab
           className={styles["tab"]}
-          chrome="none"
-          tree={tree}
-          activePaneId={tabs.activePaneId}
-          isNarrow={shell.isNarrow}
+          tree={toTabTree(tree)}
+          activeGroupId={tabs.activePaneId}
           renderContent={renderContent}
-          onSelect={(paneId, tabId) => tabs.selectTab(paneId, tabId)}
-          onClose={(paneId, tabId) => tabs.requestCloseTab(paneId, tabId)}
-          onReorder={(paneId, nextTabIds) => tabs.reorderTabs(paneId, nextTabIds)}
-          onPin={(_paneId, tabId) => tabs.pinTab(tabId)}
-          onSplit={(paneId, tabId, edge) => tabs.splitTab(paneId, tabId, edge)}
-          onResize={(branchId, childId, nextSize) => tabs.resizePane(branchId, childId, nextSize)}
-          renderTabMenu={buildTabMenu(commands)}
+          onItemSelect={(groupId, itemId) => tabs.selectTab(groupId, itemId)}
+          onItemClose={(groupId, itemId) => tabs.requestCloseTab(groupId, itemId)}
+          onItemReorder={(groupId, nextItemIds) => tabs.reorderTabs(groupId, nextItemIds)}
+          onItemPin={(_groupId, itemId) => tabs.pinTab(itemId)}
+          onGroupSplit={(groupId, itemId, edge) => tabs.splitTab(groupId, itemId, edge)}
+          onSplitResize={(splitId, childId, nextSize) => tabs.resizePane(splitId, childId, nextSize)}
+          renderItemMenu={buildTabMenu(commands)}
           emptyMessage={
             <Text size="small" tone="muted">
               탐색기에서 파일을 고르세요.

@@ -1,41 +1,92 @@
+/* 레일(왼쪽 좁은 줄)과 패널을 한 판에 놓는다. 레일 위·아래가 각각 제 칸이라
+   따로 감싸는 부품 없이도 위는 늘어나고 아래는 바닥에 붙는다. */
 .root {
-  display: flex;
+  display: grid;
   min-height: 0;
   height: 100%;
-  flex-direction: column;
   overflow: hidden;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  background-color: var(--bgColor-default);
 }
 
-.header {
+.railTop,
+.railBottom {
   display: flex;
-  height: var(--control-large-size);
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-sm);
+  background-color: var(--bgColor-inset);
+}
+
+.railTop {
+  min-height: 0;
+  grid-area: 1 / 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--control-transparent-bgColor-active) transparent;
+}
+
+.railBottom {
+  grid-area: 2 / 1;
+}
+
+.item {
+  position: relative;
+  color: var(--fgColor-muted);
+}
+
+.item:hover {
+  color: var(--fgColor-default);
+}
+
+.item[aria-pressed="true"] {
+  color: var(--fgColor-accent);
+}
+
+.item[aria-pressed="true"]::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: calc(var(--space-sm) * -1);
+  width: 2px;
+  height: var(--base-size-24);
+  border-radius: var(--borderRadius-full);
+  transform: translateY(-50%);
+  background-color: var(--bgColor-accent-emphasis);
+}
+
+.panel {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  grid-area: 1 / 2 / -1 / -1;
+  overflow: hidden;
+  border-style: solid;
+  border-width: 0 0 0 var(--borderWidth-thin);
+  border-color: var(--borderColor-default);
+}
+
+.panelHeader {
+  display: flex;
+  height: var(--control-small-size);
   flex-shrink: 0;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-xs);
   border-style: solid;
   border-width: 0 0 var(--borderWidth-thin) 0;
   border-color: var(--borderColor-muted);
   background-color: var(--bgColor-default);
-  padding-inline: var(--space-lg);
+  padding-inline: var(--space-sm);
 }
 
-.title {
+.panelTitle {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: var(--text-body-size-small);
-  line-height: var(--text-body-lineHeight-small);
-  color: var(--fgColor-default);
-}
-
-.root[data-density="compact"] .header {
-  height: var(--control-small-size);
-  padding-inline: var(--space-sm);
-}
-
-.root[data-density="compact"] .title {
   font-size: var(--base-text-size-xs);
   font-weight: var(--base-text-weight-semibold);
   line-height: var(--base-text-lineHeight-tight);
@@ -44,16 +95,10 @@
   color: var(--fgColor-muted);
 }
 
-.actions {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: var(--space-xs);
-}
-
-.body {
+.panelBody {
   display: flex;
   min-height: 0;
   flex-grow: 1;
   flex-direction: column;
+  overflow-y: auto;
 }

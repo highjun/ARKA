@@ -72,10 +72,6 @@ export const filesystem: ExtensionModule = {
       title: "탐색기",
       iconId: "files",
       Content: DirectoryTreeView,
-      actions: [
-        { actionId: "filesystem.newFile", iconId: "newFile" },
-        { actionId: "filesystem.newFolder", iconId: "newFolder" },
-      ],
     });
     c.resolve("arka.workbench.tabSystem").add(
       createTextTabProvider({

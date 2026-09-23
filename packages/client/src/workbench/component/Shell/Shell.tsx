@@ -4,22 +4,12 @@ import { clsx } from "clsx";
 import { PortalProvider } from "#utils/portal";
 import styles from "./Shell.module.css";
 import { SplitPageLayout, ThemeProvider } from "@primer/react";
-import { Container } from "#component/Container";
 import { Bottom } from "../Bottom";
 import { Sidebar } from "../Sidebar";
 import { TitleBar } from "../TitleBar";
-import { Icon } from "#component/Icon";
-import { IconButton } from "#component/IconButton";
-import { ActivityBar } from "../ActivityBar";
-import type { BottomTab } from "../Bottom";
-import type { ActivityBarItem } from "../ActivityBar";
-import type { IconId } from "#component/Icon";
-
-interface SidebarActionRow {
-  readonly actionId: string;
-  readonly iconId: IconId;
-  readonly label: string;
-}
+import type { CommandRow } from "../TitleBar";
+import type { BottomItem } from "../Bottom";
+import type { SidebarItem } from "../Sidebar";
 
 const COLLAPSED_WIDTH = { min: "48px", default: "48px", max: "48px" } as const;
 const EXPANDED_WIDTH = { min: "348px", default: "348px", max: "348px" } as const;
@@ -29,33 +19,46 @@ const RESIZABLE_MAX_WIDTH = "480px";
 const hasContent = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
 
 const SETTINGS_ID = "shell.settings";
-const SETTINGS_ROW: readonly ActivityBarItem[] = [{ id: SETTINGS_ID, title: "설정", iconId: "settingsGear" }];
+const SETTINGS_ROW: readonly SidebarItem[] = [{ id: SETTINGS_ID, title: "설정", iconId: "settingsGear" }];
 
 export interface ShellProps extends Omit<ComponentPropsWithoutRef<"div">, "children"> {
   readonly ref?: Ref<HTMLDivElement>;
   readonly colorMode: "light" | "dark";
+  readonly onColorModeToggle?: () => void;
   readonly isNarrow?: boolean;
 
-  readonly brand?: ReactNode;
-  readonly center?: ReactNode;
-  readonly actions?: ReactNode;
+  readonly brandName: string;
+  readonly brandIconSrc?: string;
+  readonly paletteOpen?: boolean;
+  readonly paletteQuery?: string;
+  readonly paletteRows?: readonly CommandRow[];
+  readonly paletteKeybinding?: string;
+  readonly onPaletteOpenChange?: (open: boolean) => void;
+  readonly onPaletteQueryChange?: (query: string) => void;
+  readonly onPaletteSelect?: (actionId: string) => void;
 
-  readonly sidebars?: readonly ActivityBarItem[];
+  readonly buildTimestamp?: string;
+  readonly buildSha?: string;
+
+  readonly notificationCount?: number;
+  readonly onNotificationsOpen?: () => void;
+
+  readonly sidebars?: readonly SidebarItem[];
   readonly activeSidebarId?: string | null;
   readonly onSidebarSelect?: (id: string) => void;
   readonly onSettingsSelect?: () => void;
 
   readonly sidebarTitle?: string;
-  readonly sidebarContent?: ReactNode;
-  readonly sidebarActions?: readonly SidebarActionRow[];
-  readonly onSidebarActionActivate?: (actionId: string) => void;
+  /** id 로 본문을 그린다. 등록된 사이드바를 한꺼번에 받아 열어본 것을 계속 들고 있으려면 이 꼴이어야 한다. */
+  readonly renderSidebarContent?: (id: string) => ReactNode;
   readonly sidebarOpen?: boolean;
   readonly onSidebarOpenChange?: (open: boolean) => void;
   readonly sidebarResizable?: boolean;
   readonly sidebarMinWidth?: `${number}px`;
   readonly sidebarWidthStorageKey?: string;
 
-  readonly bottoms?: readonly BottomTab[];
+  readonly bottoms?: readonly BottomItem[];
+  readonly activeBottomId?: string | null;
   readonly bottomContent?: ReactNode;
   readonly onBottomSelect?: (id: string) => void;
   readonly onSidebarToggle?: () => void;
@@ -67,24 +70,34 @@ export interface ShellProps extends Omit<ComponentPropsWithoutRef<"div">, "child
 
 export const Shell = ({
   colorMode,
+  onColorModeToggle,
   isNarrow,
-  brand,
-  center,
-  actions,
+  brandName,
+  brandIconSrc,
+  paletteOpen,
+  paletteQuery,
+  paletteRows,
+  paletteKeybinding,
+  onPaletteOpenChange,
+  onPaletteQueryChange,
+  onPaletteSelect,
+  buildTimestamp,
+  buildSha,
+  notificationCount,
+  onNotificationsOpen,
   sidebars,
   activeSidebarId,
   onSidebarSelect,
   onSettingsSelect,
   sidebarTitle,
-  sidebarContent,
-  sidebarActions,
-  onSidebarActionActivate,
+  renderSidebarContent,
   sidebarOpen,
   onSidebarOpenChange,
   sidebarResizable,
   sidebarMinWidth,
   sidebarWidthStorageKey,
   bottoms,
+  activeBottomId,
   bottomContent,
   onBottomSelect,
   onSidebarToggle,
@@ -103,34 +116,14 @@ export const Shell = ({
     onSidebarOpenChange?.(next);
   };
   const hasSidebar = sidebars !== undefined;
-  const expanded = hasContent(sidebarContent);
+  /** 좁은 화면에서는 사이드바 단추가 드로어를 여닫고, 넓은 화면에서는 패널을 접고 편다. */
+  const narrow = isNarrow === true;
+  /** 넓은 화면의 접기는 바깥이 맡는다 — 콜백이 없으면 그릴 단추도 없다. 드로어는 Shell 이 제 손으로 여닫는다. */
+  const hasSidebarToggle = sidebars !== undefined && (narrow || onSidebarToggle !== undefined);
+  const activeSidebar = activeSidebarId ?? null;
+  const expanded = activeSidebar !== null && renderSidebarContent !== undefined;
   const hasBottom = bottoms !== undefined && bottoms.length > 0;
   const bottomOpen = hasContent(bottomContent);
-  const layoutToggles = (
-    <>
-      {onSidebarToggle === undefined ? null : (
-        <IconButton
-          variant="invisible"
-          size="small"
-          aria-label={expanded ? "사이드바 접기" : "사이드바 펼치기"}
-          aria-pressed={expanded}
-          onClick={onSidebarToggle}
-          icon={() => <Icon iconId="layoutSidebarLeft" size="sm" />}
-        />
-      )}
-      {onBottomToggle === undefined || !hasBottom ? null : (
-        <IconButton
-          variant="invisible"
-          size="small"
-          aria-label={bottomOpen ? "아래 창 접기" : "아래 창 펼치기"}
-          aria-pressed={bottomOpen}
-          onClick={onBottomToggle}
-          icon={() => <Icon iconId="layoutPanel" size="sm" />}
-        />
-      )}
-    </>
-  );
-
   return (
     <ThemeProvider colorMode={colorMode}>
       <div
@@ -143,28 +136,27 @@ export const Shell = ({
         <PortalProvider container={portalRoot ?? undefined}>
           <TitleBar
             className={styles["titleBar"]}
-            brand={
-              <>
-                {hasSidebar && (
-                  <IconButton
-                    variant="invisible"
-                    size="small"
-                    className={styles["sidebarToggle"]}
-                    aria-label="사이드바 열기"
-                    onClick={() => setSidebarOpen(true)}
-                    icon={() => <Icon iconId="layoutSidebarLeft" size="sm" />}
-                  />
-                )}
-                {brand}
-              </>
+            brandName={brandName}
+            brandIconSrc={brandIconSrc}
+            paletteOpen={paletteOpen}
+            paletteQuery={paletteQuery}
+            paletteRows={paletteRows}
+            paletteKeybinding={paletteKeybinding}
+            onPaletteOpenChange={onPaletteOpenChange}
+            onPaletteQueryChange={onPaletteQueryChange}
+            onPaletteSelect={onPaletteSelect}
+            buildTimestamp={buildTimestamp}
+            buildSha={buildSha}
+            notificationCount={notificationCount}
+            onNotificationsOpen={onNotificationsOpen}
+            sidebarVisible={narrow ? resolvedSidebarOpen : expanded}
+            onSidebarToggle={
+              hasSidebarToggle ? () => (narrow ? setSidebarOpen(!resolvedSidebarOpen) : onSidebarToggle?.()) : undefined
             }
-            center={center}
-            actions={
-              <>
-                {actions}
-                {layoutToggles}
-              </>
-            }
+            bottomOpen={bottomOpen}
+            onBottomToggle={hasBottom ? onBottomToggle : undefined}
+            colorMode={colorMode}
+            onColorModeToggle={onColorModeToggle}
           />
           <SplitPageLayout className={styles["layout"]}>
             {hasSidebar && (
@@ -189,55 +181,17 @@ export const Shell = ({
                 data-component="ShellSidebar"
                 className={clsx(styles["sidebar"], resolvedSidebarOpen && styles["sidebarOpen"])}
               >
-                <div className={styles["sidebarInner"]} data-state={resolvedSidebarOpen ? "open" : "closed"}>
-                  <div className={styles["sidebarCloseButtonRow"]}>
-                    <IconButton
-                      variant="invisible"
-                      size="small"
-                      aria-label="사이드바 닫기"
-                      onClick={() => setSidebarOpen(false)}
-                      icon={() => <Icon iconId="close" size="sm" />}
-                    />
-                  </div>
-                  <div className={styles["sidebarBody"]}>
-                    <ActivityBar>
-                      <ActivityBar.Top
-                        items={sidebars}
-                        activeId={activeSidebarId}
-                        onItemClick={(id) => onSidebarSelect?.(id)}
-                      />
-                      <ActivityBar.Bottom items={SETTINGS_ROW} onItemClick={() => onSettingsSelect?.()} />
-                    </ActivityBar>
-                    {expanded && (
-                      <Sidebar density="compact" className={styles["sidebarSurface"]}>
-                        <Sidebar.Header
-                          title={sidebarTitle}
-                          actions={
-                            sidebarActions !== undefined && sidebarActions.length > 0 ? (
-                              <>
-                                {sidebarActions.map((action) => (
-                                  <IconButton
-                                    key={action.actionId}
-                                    variant="invisible"
-                                    size="small"
-                                    aria-label={action.label}
-                                    onClick={() => onSidebarActionActivate?.(action.actionId)}
-                                    icon={() => <Icon iconId={action.iconId} size="sm" />}
-                                  />
-                                ))}
-                              </>
-                            ) : undefined
-                          }
-                        />
-                        <Sidebar.Body>
-                          <Container chrome="none" className={styles["sidebarSurfaceBody"]}>
-                            {sidebarContent}
-                          </Container>
-                        </Sidebar.Body>
-                      </Sidebar>
-                    )}
-                  </div>
-                </div>
+                <Sidebar data-state={resolvedSidebarOpen ? "open" : "closed"}>
+                  <Sidebar.RailTop
+                    items={sidebars}
+                    activeId={activeSidebarId}
+                    onItemClick={(id) => onSidebarSelect?.(id)}
+                  />
+                  <Sidebar.RailBottom items={SETTINGS_ROW} onItemClick={() => onSettingsSelect?.()} />
+                  {activeSidebar === null || renderSidebarContent === undefined ? null : (
+                    <Sidebar.Panel title={sidebarTitle} body={renderSidebarContent(activeSidebar)} />
+                  )}
+                </Sidebar>
               </SplitPageLayout.Sidebar>
             )}
             <SplitPageLayout.Content padding="none" className={styles["content"]}>
@@ -245,7 +199,11 @@ export const Shell = ({
                 <div className={styles["main"]}>{children}</div>
                 {hasBottom && (
                   <Bottom className={styles["bottom"]}>
-                    <Bottom.Header tabs={bottoms} onSelect={(id) => onBottomSelect?.(id)} />
+                    <Bottom.Header
+                      items={bottoms}
+                      activeId={activeBottomId ?? null}
+                      onItemSelect={(id) => onBottomSelect?.(id)}
+                    />
                     {hasContent(bottomContent) && <Bottom.Panel>{bottomContent}</Bottom.Panel>}
                   </Bottom>
                 )}

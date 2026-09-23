@@ -9,7 +9,7 @@ import type { SidebarDescriptor } from "../model/ISidebarDescriptor";
 import type { ITabLayout } from "../model/ITabLayout";
 import type { IViewport } from "../model/IViewport";
 import { findLeaf } from "../model/paneTree";
-import type { ActiveBottom, ActiveSidebar, BottomRow, IShellViewModel, SidebarRow } from "./IShellViewModel";
+import type { ActiveBottom, BottomRow, IShellViewModel, SidebarRow } from "./IShellViewModel";
 
 export class ShellViewModel implements IShellViewModel {
   readonly #sidebars: Registry<SidebarDescriptor>;
@@ -80,32 +80,22 @@ export class ShellViewModel implements IShellViewModel {
   }
 
   get sidebars(): readonly SidebarRow[] {
-    return this.#sidebars.list().map(({ id, title, iconId }) => ({ id, title, iconId }));
+    return this.#sidebars.list().map(({ id, title, iconId, Content }) => ({ id, title, iconId, Content }));
   }
 
   get activeSidebarId(): string | null {
     return this.#activeSidebarId();
   }
 
-  get activeSidebar(): ActiveSidebar | null {
-    const id = this.#activeSidebarId();
-    const descriptor = id === null ? undefined : this.#sidebars.tryGet(id);
-    if (descriptor === undefined) return null;
-    return {
-      id: descriptor.id,
-      title: descriptor.title,
-      Content: descriptor.Content,
-      actions: (descriptor.actions ?? []).map((action) => ({
-        actionId: action.actionId,
-        iconId: action.iconId,
-        label: this.#commands.actions.tryGet(action.actionId)?.label ?? action.actionId,
-      })),
-    };
-  }
-
   toggleSidebar(id: string): void {
     if (this.#sidebars.tryGet(id) === undefined) return;
-    this.activeSidebarIdState = this.#activeSidebarId() === id ? null : id;
+    if (this.#activeSidebarId() !== id) {
+      this.activeSidebarIdState = id;
+      return;
+    }
+    /** 좁은 화면에는 접힘이 없다 — 같은 것을 다시 눌러도 그대로 둔다. 닫는 것은 타이틀바 단추 몫이다. */
+    if (this.isNarrowState) return;
+    this.activeSidebarIdState = null;
   }
 
   revealSidebar(id: string): void {
@@ -125,9 +115,7 @@ export class ShellViewModel implements IShellViewModel {
   }
 
   get bottoms(): readonly BottomRow[] {
-    return this.#bottoms
-      .list()
-      .map(({ id, title, iconId }) => ({ id, title, iconId, isActive: id === this.activeBottomIdState }));
+    return this.#bottoms.list().map(({ id, title }) => ({ id, title }));
   }
 
   get activeBottom(): ActiveBottom | null {
@@ -182,7 +170,11 @@ export class ShellViewModel implements IShellViewModel {
   }
 
   #activeSidebarId(): string | null {
-    return this.activeSidebarIdState === undefined ? (this.#sidebars.list()[0]?.id ?? null) : this.activeSidebarIdState;
+    const first = this.#sidebars.list()[0]?.id ?? null;
+    if (this.activeSidebarIdState === undefined) return first;
+    /** 좁은 화면에서는 늘 하나가 선다 — 접어 둔 채 창이 좁아져도 빈 드로어를 보여 주지 않는다. */
+    if (this.isNarrowState && this.activeSidebarIdState === null) return first;
+    return this.activeSidebarIdState;
   }
 
   #activeTabId(): string | null {

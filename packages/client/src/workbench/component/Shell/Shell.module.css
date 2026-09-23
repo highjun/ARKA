@@ -27,6 +27,7 @@
 }
 
 .layout {
+  position: relative;
   min-height: 0;
   flex-grow: 1;
 }
@@ -54,6 +55,16 @@
   flex-grow: 1;
 }
 
+.regularOnly {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .regularOnly {
+    display: inline-grid;
+  }
+}
+
 .portalRoot {
   position: fixed;
   inset: 0;
@@ -61,17 +72,15 @@
   pointer-events: none;
 }
 
-.sidebarToggle {
-  display: inline-grid;
-}
-
-@media (min-width: 768px) {
-  .sidebarToggle {
-    display: none;
-  }
-}
-
-.sidebar {
+/* 좁은 화면에서는 드로어다. 타이틀바 밖인 `.layout` 안을 채우므로 타이틀바는 안 덮인다 —
+   Primer 의 `responsiveVariant="fullscreen"` 은 뷰포트 전체(position:fixed, 100vw/100vh)를 덮어
+   자리만 여기서 다시 잡는다. 안쪽 폭 100%·구분선 숨김은 그 변형의 규칙을 그대로 쓴다. */
+.layout .sidebar {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
   visibility: hidden;
   transition:
     transform 200ms var(--motion-easing-move),
@@ -79,58 +88,21 @@
   transform: translateX(-100%);
 }
 
-.sidebar.sidebarOpen {
+.layout .sidebar.sidebarOpen {
   visibility: visible;
   transition: transform 200ms var(--motion-easing-move);
   transform: translateX(0);
 }
 
 @media (min-width: 768px) {
-  .sidebar,
-  .sidebar.sidebarOpen {
+  .layout .sidebar,
+  .layout .sidebar.sidebarOpen {
+    position: static;
+    inset: auto;
+    z-index: auto;
+    width: auto;
     visibility: visible;
     transition: none;
     transform: none;
   }
-}
-
-.sidebarInner {
-  display: flex;
-  height: 100%;
-  min-height: 0;
-  flex-direction: column;
-}
-
-.sidebarCloseButtonRow {
-  display: flex;
-  flex-shrink: 0;
-  justify-content: flex-end;
-  padding: var(--space-xs);
-}
-
-@media (min-width: 768px) {
-  .sidebarCloseButtonRow {
-    display: none;
-  }
-}
-
-.sidebarBody {
-  display: flex;
-  min-height: 0;
-  flex-grow: 1;
-}
-
-.sidebarSurface {
-  display: flex;
-  min-width: 0;
-  flex-grow: 1;
-  flex-direction: column;
-  border-style: solid;
-  border-width: 0 0 0 var(--borderWidth-thin);
-  border-color: var(--borderColor-default);
-}
-
-.sidebarSurfaceBody {
-  min-height: 0;
-  flex-grow: 1;
 }

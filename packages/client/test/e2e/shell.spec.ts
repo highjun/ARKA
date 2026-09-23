@@ -5,6 +5,12 @@ const DESKTOP = { width: 1280, height: 800 };
 
 const treeRow = (page: Page, name: string) => page.getByRole("treeitem", { name, exact: true });
 
+const boxOf = async (page: Page, selector: string) => {
+  const box = await page.locator(selector).boundingBox();
+  if (box === null) throw new Error(`${selector} 가 화면에 없다`);
+  return box;
+};
+
 test.describe("폰", () => {
   test.use({ viewport: PHONE });
 
@@ -33,6 +39,41 @@ test.describe("폰", () => {
     });
 
     expect(opaque).toBe(true);
+  });
+
+  test("드로어를 열어도 타이틀바는 덮이지 않는다 — 같은 버튼으로 닫는다", async ({ page }) => {
+    await page.goto("/");
+    await page.getByLabel("사이드바 열기").click();
+
+    await expect(page.getByText("README.md", { exact: true })).toBeVisible();
+
+    const titleBar = await boxOf(page, '[data-component="TitleBar"]');
+    const drawer = await boxOf(page, '[data-component="ShellSidebar"]');
+    expect(drawer.y).toBeGreaterThanOrEqual(titleBar.y + titleBar.height);
+
+    await page.getByLabel("사이드바 닫기").click();
+
+    await expect(page.getByText("README.md", { exact: true })).toBeHidden();
+  });
+
+  test("활성 아이콘을 다시 눌러도 접히지 않는다 — 폰에는 레일만 남는 상태가 없다", async ({ page }) => {
+    await page.goto("/");
+    await page.getByLabel("사이드바 열기").click();
+    await expect(page.getByText("README.md", { exact: true })).toBeVisible();
+
+    await page.getByRole("button", { name: "탐색기" }).click();
+
+    await expect(page.getByText("README.md", { exact: true })).toBeVisible();
+  });
+
+  test("닫으면 레일까지 같이 닫힌다", async ({ page }) => {
+    await page.goto("/");
+    await page.getByLabel("사이드바 열기").click();
+    await expect(page.getByRole("navigation", { name: "활동 막대" })).toBeVisible();
+
+    await page.getByLabel("사이드바 닫기").click();
+
+    await expect(page.getByRole("navigation", { name: "활동 막대" })).toBeHidden();
   });
 
   test("파일을 누르면 탭이 열리고 내용이 보인다", { tag: "@critical" }, async ({ page }) => {

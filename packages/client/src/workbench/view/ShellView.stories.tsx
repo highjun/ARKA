@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { CommandService } from "#core/commands";
 import { Container } from "#core/di";
 import { ContainerProvider } from "#core/viewmodel";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Icon } from "#component/Icon";
+import { isNarrowViewport } from "#utils/story";
 import { Text } from "#component/Text";
 import type { IAppStatusViewModel } from "../viewmodel/IAppStatusViewModel";
 import type { ICommandPaletteViewModel } from "../viewmodel/ICommandPaletteViewModel";
@@ -39,11 +41,10 @@ const ONE_PANE: PaneRowNode = {
 const shellViewModel = (state: Partial<IShellViewModel>): IShellViewModel => ({
   dispose: () => undefined,
   sidebars: [
-    { id: "explorer", title: "탐색기", iconId: "files" },
-    { id: "search", title: "검색", iconId: "search" },
+    { id: "explorer", title: "탐색기", iconId: "files", Content: panel("탐색기") },
+    { id: "search", title: "검색", iconId: "search", Content: panel("검색") },
   ],
   activeSidebarId: "explorer",
-  activeSidebar: { id: "explorer", title: "탐색기", Content: panel("탐색기"), actions: [] },
   toggleSidebar: () => undefined,
   revealSidebar: () => undefined,
   toggleSidebarExpanded: () => undefined,
@@ -96,7 +97,8 @@ const notificationViewModel = (state: Partial<INotificationViewModel>): INotific
 const appStatusViewModel = (state: Partial<IAppStatusViewModel>): IAppStatusViewModel => ({
   dispose: () => undefined,
   workspaceName: "ARKA",
-  buildId: "ab90700",
+  builtAt: "2026-09-20 11:18",
+  gitSha: "ab90700",
   isOutdated: false,
   reload: () => undefined,
   ...state,
@@ -136,9 +138,23 @@ type Fixture = {
 
 const story = (fixture: Fixture): Story => ({
   decorators: [
-    (Story) => {
+    (Story, { globals }) => {
+      const [activeSidebarId, setActiveSidebarId] = useState<string | null>("explorer");
+      const [isSidebarOpen, setSidebarOpen] = useState(true);
+      const narrow = isNarrowViewport(globals);
       const container = new Container("story");
-      container.register("arka.workbench.shellViewModel", "singleton", () => shellViewModel(fixture.shell ?? {}));
+      container.register("arka.workbench.shellViewModel", "singleton", () =>
+        shellViewModel({
+          isNarrow: narrow,
+          activeSidebarId,
+          isSidebarOpen,
+          setSidebarOpen,
+          /** 좁은 화면에는 접힘이 없다 — ShellViewModel 의 규칙을 스토리에서도 같은 꼴로 흉내 낸다. */
+          toggleSidebar: (id) => setActiveSidebarId((current) => (current === id && !narrow ? null : id)),
+          toggleSidebarExpanded: () => setActiveSidebarId((current) => (current === null ? "explorer" : null)),
+          ...fixture.shell,
+        }),
+      );
       container.register("arka.workbench.tabSystemViewModel", "singleton", () =>
         tabSystemViewModel(fixture.tabs ?? {}, container),
       );
