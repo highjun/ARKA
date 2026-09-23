@@ -1,10 +1,9 @@
 import type { ComponentPropsWithoutRef, Ref } from "react";
+import { Icon } from "#component/Icon";
 import { Kbd, keysOf } from "#component/Kbd";
-import { clsx } from "clsx";
 import { usePortalContainer } from "#utils/portal";
-import styles from "./CommandPalette.module.css";
+import styles from "./TitleBar.module.css";
 import { Command } from "cmdk";
-import { CommandPaletteTrigger } from "./Trigger";
 
 export interface CommandRow {
   readonly id: string;
@@ -42,7 +41,7 @@ const PaletteDialog = ({
       onOpenChange={onOpenChange}
       label="커맨드 팔레트"
       contentClassName={className}
-      overlayClassName={styles["overlay"]}
+      overlayClassName={styles["paletteOverlay"]}
       container={container}
     >
       <Command.Input placeholder="커맨드 검색..." value={query} onValueChange={onQueryChange} />
@@ -52,11 +51,11 @@ const PaletteDialog = ({
           const keys = keysOf(row.keybinding);
           return (
             <Command.Item key={row.id} value={row.label} onSelect={() => onSelect?.(row.id)}>
-              <span className={styles["itemLabel"]}>{row.label}</span>
+              <span className={styles["paletteItemLabel"]}>{row.label}</span>
               {keys.length > 0 && (
-                <span className={styles["shortcuts"]}>
+                <span className={styles["paletteShortcuts"]}>
                   {keys.map((key) => (
-                    <Kbd key={key} className={styles["shortcutKey"]}>
+                    <Kbd key={key} className={styles["paletteShortcutKey"]}>
                       {key}
                     </Kbd>
                   ))}
@@ -70,18 +69,59 @@ const PaletteDialog = ({
   );
 };
 
-export interface CommandPaletteProps extends Omit<ComponentPropsWithoutRef<"div">, "onSelect" | "defaultValue"> {
-  readonly ref?: Ref<HTMLDivElement>;
+const PLACEHOLDER = "커맨드 검색...";
+
+interface PaletteProps {
   readonly open: boolean;
-  readonly onOpenChange?: (open: boolean) => void;
   readonly query: string;
-  readonly onQueryChange?: (value: string) => void;
   readonly rows: readonly CommandRow[];
+  readonly placeholder?: string;
+  readonly keybinding?: string;
+  readonly onOpenChange?: (open: boolean) => void;
+  readonly onQueryChange?: (query: string) => void;
   readonly onSelect?: (actionId: string) => void;
 }
 
-const CommandPaletteRoot = ({ className, ref, ...props }: CommandPaletteProps) => (
-  <PaletteDialog {...props} ref={ref} className={clsx(className, styles["content"])} data-component="CommandPalette" />
-);
+/** 넓으면 가운데 입력 필드, 좁으면 아이콘 버튼 — 같은 진입구가 꼴만 바꾼다. */
+export const PaletteField = ({
+  placeholder = PLACEHOLDER,
+  keybinding = "",
+  onOpenChange,
+  compact = false,
+}: Pick<PaletteProps, "placeholder" | "keybinding" | "onOpenChange"> & { readonly compact?: boolean }) => {
+  const keys = keysOf(keybinding);
 
-export const CommandPalette = Object.assign(CommandPaletteRoot, { Trigger: CommandPaletteTrigger });
+  return (
+    <button
+      type="button"
+      aria-label="명령 팔레트 열기"
+      className={compact ? styles["paletteButton"] : styles["paletteField"]}
+      onClick={() => onOpenChange?.(true)}
+    >
+      <Icon iconId="search" size="sm" />
+      {compact ? null : (
+        <>
+          <span className={styles["paletteFieldPlaceholder"]}>{placeholder}</span>
+          <span className={styles["paletteFieldKeys"]}>
+            {keys.map((key) => (
+              <Kbd key={key}>{key}</Kbd>
+            ))}
+          </span>
+        </>
+      )}
+    </button>
+  );
+};
+
+export const Palette = ({ open, query, rows, onOpenChange, onQueryChange, onSelect }: PaletteProps) => (
+  <PaletteDialog
+    open={open}
+    query={query}
+    rows={rows}
+    onOpenChange={onOpenChange}
+    onQueryChange={onQueryChange}
+    onSelect={onSelect}
+    className={styles["paletteContent"]}
+    data-component="TitleBar/Palette"
+  />
+);

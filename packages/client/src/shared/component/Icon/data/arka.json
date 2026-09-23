@@ -1,0 +1,13 @@
+{
+  "prefix": "arka",
+  "width": 16,
+  "height": 16,
+  "icons": {
+    "sun": {
+      "body": "<g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" stroke-linecap=\"round\"><circle cx=\"8\" cy=\"8\" r=\"3.2\"/><path d=\"M8 1.6v1.7M8 12.7v1.7M12.7 8h1.7M1.6 8h1.7M11.32 4.68l1.21-1.21M3.47 12.53l1.21-1.21M11.32 11.32l1.21 1.21M3.47 3.47l1.21 1.21\"/></g>"
+    },
+    "moon": {
+      "body": "<path fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" stroke-linejoin=\"round\" d=\"M8.4 2.2a4.2 4.2 0 0 0 5.4 5.4 5.9 5.9 0 1 1-5.4-5.4Z\"/>"
+    }
+  }
+}

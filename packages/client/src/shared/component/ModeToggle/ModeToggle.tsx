@@ -43,6 +43,7 @@ export interface ModeToggleProps extends Omit<
   readonly defaultValue?: string;
   readonly onValueChange?: (value: string) => void;
   readonly disabled?: boolean;
+  readonly size?: "small" | "medium" | "large";
 }
 
 export const ModeToggle = ({
@@ -53,6 +54,7 @@ export const ModeToggle = ({
   disabled = false,
   labels,
   onValueChange,
+  size = "medium",
   value,
   values,
   ref,
@@ -74,6 +76,7 @@ export const ModeToggle = ({
       {...props}
       {...toggleProps}
       icon={icon}
+      size={size}
       aria-label={getLabel(labels, currentIndex, ariaLabel)}
       disabled={disabled}
       variant="invisible"

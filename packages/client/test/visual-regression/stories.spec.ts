@@ -13,7 +13,7 @@ type StorybookIndex = {
 const CLIENT_ROOT = path.resolve(import.meta.dirname, "../..");
 const SRC = path.join(CLIENT_ROOT, "src");
 const THEMES = ["light", "dark"] as const;
-const BASE: VisualRegressionShot = { name: "", target: "", pseudo: [] };
+const BASE: VisualRegressionShot = { name: "" };
 
 const index = JSON.parse(
   readFileSync(path.join(CLIENT_ROOT, STORYBOOK_STATIC, "index.json"), "utf8"),
@@ -95,9 +95,10 @@ for (const { id, dir, shots } of shotsOf) {
           !existsSync(path.join(SRC, dir, "snapshots", `${name}.png`)) && testInfo.config.updateSnapshots === "none",
           "기준 이미지 없음 — 아직 사람이 승인한 그림이 아니다",
         );
+        if (shot.viewport !== undefined) await page.setViewportSize({ ...shot.viewport });
         await page.goto(`/iframe.html?id=${id}&viewMode=story&globals=colorMode:${theme}`);
         await page.locator("#storybook-root").waitFor({ state: "visible" });
-        if (shot.pseudo.length > 0) await force(page, shot.target, shot.pseudo);
+        if (shot.pseudo !== undefined && shot.target !== undefined) await force(page, shot.target, shot.pseudo);
         await expect(page.locator("#storybook-root")).toHaveScreenshot([dir, "snapshots", `${name}.png`]);
       });
     }
