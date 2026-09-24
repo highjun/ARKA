@@ -12,6 +12,8 @@ import { createGlobalKeybindings } from "./infra/GlobalKeybindings";
 import { createServerInfoPort } from "./infra/HttpServerInfo";
 import { createStoragePort } from "./infra/LocalStorage";
 import { createUnloadGuard } from "./infra/UnloadGuard";
+import { createUpdateNotifier } from "./infra/UpdateNotifier";
+import { createUpdateWatch } from "./infra/UpdateWatch";
 import { createViewportQuery } from "./infra/ViewportQuery";
 import { AppLifetime } from "./model/AppLifetime";
 import { ColorMode } from "./model/ColorMode";
@@ -41,6 +43,8 @@ declare module "#core/di" {
     "arka.workbench.documentDensity": Disposable;
     "arka.workbench.globalKeybindings": Disposable;
     "arka.workbench.unloadGuard": Disposable;
+    "arka.workbench.updateWatch": Disposable;
+    "arka.workbench.updateNotifier": Disposable;
   }
 }
 
@@ -231,6 +235,20 @@ export const workbench: ExtensionModule = {
       lifetime: "singleton",
       create: (c) => createUnloadGuard({ tabs: c.resolve("arka.workbench.tabs") }),
     },
+    {
+      id: "arka.workbench.updateWatch",
+      lifetime: "singleton",
+      create: (c) => createUpdateWatch({ appLifetime: c.resolve("arka.workbench.appLifetime") }),
+    },
+    {
+      id: "arka.workbench.updateNotifier",
+      lifetime: "singleton",
+      create: (c) =>
+        createUpdateNotifier({
+          appLifetime: c.resolve("arka.workbench.appLifetime"),
+          notifications: c.resolve("arka.workbench.notifications"),
+        }),
+    },
   ],
   activate: (c) => {
     c.resolve("arka.settings").schema.add({
@@ -275,6 +293,8 @@ export const workbench: ExtensionModule = {
     c.resolve("arka.workbench.documentDensity");
     c.resolve("arka.workbench.globalKeybindings");
     c.resolve("arka.workbench.unloadGuard");
+    c.resolve("arka.workbench.updateWatch");
+    c.resolve("arka.workbench.updateNotifier");
     c.resolve("arka.workbench.shellViewModel");
     c.resolve("arka.workbench.tabSystemViewModel");
     c.resolve("arka.workbench.commandPaletteViewModel");
