@@ -1,4 +1,5 @@
 import eslintReact from "@eslint-react/eslint-plugin";
+import boundaries from "eslint-plugin-boundaries";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import primerReact from "eslint-plugin-primer-react";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -16,25 +17,59 @@ const RESTRICTED_SYNTAX = [
   },
 ];
 
-const SLICES = ["filesystem"];
+const SLICE_ROOTS = "./src/{workbench,extensions/*}";
 
-const LAYER_ALLOW: Readonly<Record<string, readonly string[]>> = {
+const LAYERS = ["api", "model", "infra", "viewmodel", "view", "component", "contrib", "data"] as const;
+
+const LAYER_ALLOW: Readonly<Record<(typeof LAYERS)[number], readonly string[]>> = {
   api: ["api"],
   model: ["api", "model"],
   infra: ["api", "model", "infra"],
   viewmodel: ["api", "model", "viewmodel"],
-  view: ["api", "model", "viewmodel", "view", "component"],
+  view: ["api", "model", "viewmodel", "view", "component", "contrib"],
   component: ["component"],
+  contrib: ["api", "model", "component", "contrib"],
+  data: ["data"],
 };
 
-const LAYER_ZONES = ["./src/workbench", ...SLICES.map((slice) => `./src/extensions/${slice}`)].flatMap((root) =>
-  Object.entries(LAYER_ALLOW).map(([layer, allowed]) => ({
-    target: `${root}/${layer}`,
-    from: root,
-    except: allowed.map((name) => `./${name}`),
+const LAYER_ZONES = LAYERS.map((layer) => {
+  const forbidden = LAYERS.filter((other) => !LAYER_ALLOW[layer].includes(other));
+  return {
+    target: `${SLICE_ROOTS}/${layer}/**`,
+    from: [`${SLICE_ROOTS}/{${forbidden.join(",")}}/**`, `${SLICE_ROOTS}/*.{ts,tsx}`],
     message: "의존은 안쪽을 향합니다 — 이 계층은 자기 아래만 봅니다.",
-  })),
-);
+  };
+});
+
+const SAME_SLICE = { type: "extension", captured: { name: "{{from.element.captured.name}}" } };
+
+const BOUNDARY_POLICIES = [
+  { from: { element: { type: "app" } }, allow: { to: { element: { type: "*" } } } },
+  {
+    from: { element: { type: "extension" } },
+    allow: {
+      to: {
+        element: [
+          SAME_SLICE,
+          { type: "workbench", fileInternalPath: "index.ts" },
+          { type: "core" },
+          { type: "shared" },
+        ],
+      },
+    },
+  },
+  {
+    from: { element: { type: "extension" } },
+    dependency: { kind: "type" },
+    allow: { to: { element: { type: "extension", fileInternalPath: "index.ts" } } },
+  },
+  {
+    from: { element: { type: "workbench" } },
+    allow: { to: { element: [{ type: "workbench" }, { type: "core" }, { type: "shared" }] } },
+  },
+  { from: { element: { type: "core" } }, allow: { to: { element: [{ type: "core" }, { type: "shared" }] } } },
+  { from: { element: { type: "shared" } }, allow: { to: { element: { type: "shared" } } } },
+];
 
 const NODE_GLOBALS = [
   { name: "process", message: "브라우저 패키지입니다 — 빌드 타임 값은 `import.meta.env`를 쓰세요." },
@@ -125,12 +160,17 @@ export default [
               message:
                 "client는 server를 import할 수 없습니다. 공유할 코드는 contracts로 옮기고 `#contracts`로 가져오세요.",
             },
-            ...SLICES.map((slice) => ({
-              target: `./src/extensions/${slice}`,
+            {
+              target: "./src/extensions/*",
+              from: "./src/workbench",
+              except: ["./index.ts"],
+              message: "확장은 workbench를 `#workbench` 배럴로만 봅니다.",
+            },
+            {
+              target: "./src/workbench",
               from: "./src/extensions",
-              except: [`./${slice}`],
-              message: "슬라이스끼리 직접 import하지 않습니다 — DI 토큰이나 이벤트로 소통하세요.",
-            })),
+              message: "workbench는 확장을 모릅니다 — 확장 목록은 app/만 압니다.",
+            },
             {
               target: "./src/shared",
               from: "./src",
@@ -144,6 +184,50 @@ export default [
               message: "`core/`는 도메인을 모릅니다 — `workbench/`·`extensions/`를 import하지 않습니다.",
             },
             ...LAYER_ZONES,
+          ],
+        },
+      ],
+    },
+  },
+
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    plugins: { boundaries },
+    settings: {
+      "boundaries/elements": [
+        { type: "app", pattern: "src/app" },
+        { type: "extension", pattern: "src/extensions/*", capture: ["name"] },
+        { type: "workbench", pattern: "src/workbench" },
+        { type: "core", pattern: "src/core" },
+        { type: "shared", pattern: "src/shared" },
+      ],
+      "import/resolver": { node: { extensions: [".ts", ".tsx", ".js", ".jsx", ".json"] } },
+    },
+    rules: {
+      "boundaries/dependencies": [
+        "error",
+        {
+          default: "disallow",
+          message:
+            "층은 아래만 봅니다(app → extensions → workbench → core → shared). 확장은 서로 모르고, workbench는 #workbench 배럴로만 봅니다.",
+          policies: BOUNDARY_POLICIES,
+        },
+      ],
+    },
+  },
+
+  {
+    files: ["src/extensions/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              regex: "^#extensions/",
+              allowTypeImports: true,
+              message: "다른 확장은 타입으로만 봅니다 — 값은 DI 토큰이나 레지스트리로 받으세요.",
+            },
           ],
         },
       ],
