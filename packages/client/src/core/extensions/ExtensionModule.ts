@@ -10,13 +10,15 @@ export type Registration = {
 
 export interface ExtensionModule {
   readonly id: string;
+  /** 먼저 켜져 있어야 하는 확장의 id. 다른 확장의 타입을 import하면 여기 적는다 — 구조 테스트가 대조한다. */
+  readonly dependsOn?: readonly string[];
   readonly provides?: readonly Registration[];
   readonly activate?: (container: Container) => void;
 }
 
 export interface ExtensionActivationFailure {
   readonly id: string;
-  readonly phase: "provides" | "activate";
+  readonly phase: "dependsOn" | "provides" | "activate";
   readonly error: Error;
 }
 

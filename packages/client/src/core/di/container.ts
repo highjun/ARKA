@@ -1,4 +1,9 @@
-import { CircularDependencyError, ContainerDisposedError, InstanceNotRegisteredError } from "./errors";
+import {
+  CircularDependencyError,
+  ContainerDisposedError,
+  InstanceAlreadyRegisteredError,
+  InstanceNotRegisteredError,
+} from "./errors";
 import type { InstanceId, InstanceMap } from "./instanceMap";
 
 export interface Disposable {
@@ -32,6 +37,7 @@ export class Container {
   }
 
   register<K extends InstanceId>(id: K, lifetime: Lifetime, create: (container: Container) => InstanceMap[K]): void {
+    if (this.#providers.has(id)) throw new InstanceAlreadyRegisteredError(id);
     this.#providers.set(id, { lifetime, create });
   }
 

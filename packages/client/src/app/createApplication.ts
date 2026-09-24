@@ -4,9 +4,17 @@ import { extensions } from "./extensions";
 import { collectTabs } from "../workbench/model/paneTree";
 import { workbench } from "../workbench/workbenchModule";
 
+/** overrides가 물리는 토큰은 본 모듈에서 뺀다 — 같은 토큰을 두 번 등록하면 컨테이너가 막는다. */
+const without = (module: ExtensionModule, overridden: ReadonlySet<string>): ExtensionModule => ({
+  ...module,
+  provides: module.provides?.filter((registration) => !overridden.has(registration.id)),
+});
+
 export function createApplication(overrides: readonly ExtensionModule[] = []): Container {
   const container = new Container("app");
-  const result = activateExtensions([workbench, ...extensions, ...overrides], container);
+  const overridden = new Set(overrides.flatMap((module) => (module.provides ?? []).map((r) => r.id)));
+  const modules = [workbench, ...extensions].map((module) => without(module, overridden));
+  const result = activateExtensions([...modules, ...overrides], container);
 
   const notifications = container.resolve("arka.workbench.notifications");
   for (const failure of result.failed)

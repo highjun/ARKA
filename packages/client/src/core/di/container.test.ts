@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import { CircularDependencyError, Container, ContainerDisposedError, InstanceNotRegisteredError } from "#core/di";
+import {
+  CircularDependencyError,
+  Container,
+  ContainerDisposedError,
+  InstanceAlreadyRegisteredError,
+  InstanceNotRegisteredError,
+} from "#core/di";
 
 declare module "#core/di" {
   interface InstanceMap {
@@ -16,6 +22,16 @@ declare module "#core/di" {
 }
 
 describe("Container", () => {
+  describe("등록", () => {
+    it("같은 토큰을 두 번 등록하면 막는다 — 뒤가 앞을 조용히 덮지 않는다", () => {
+      const c = new Container();
+      c.register("test.counter", "singleton", () => ({ id: 1 }));
+
+      expect(() => c.register("test.counter", "singleton", () => ({ id: 2 }))).toThrow(InstanceAlreadyRegisteredError);
+      expect(c.resolve("test.counter")).toEqual({ id: 1 });
+    });
+  });
+
   describe("수명", () => {
     it("singleton은 몇 번을 조회해도 한 번만 만든다", () => {
       const create = vi.fn(() => ({ id: 1 }));

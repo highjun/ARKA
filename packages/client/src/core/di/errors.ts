@@ -24,3 +24,11 @@ export class ContainerDisposedError extends CoreError {
     this.containerName = containerName;
   }
 }
+
+export class InstanceAlreadyRegisteredError extends CoreError {
+  readonly id: InstanceId;
+  constructor(id: InstanceId) {
+    super(`"${id}"이(가) 이미 등록돼 있습니다 — 같은 토큰을 두 확장이 물리면 뒤가 앞을 조용히 덮습니다.`);
+    this.id = id;
+  }
+}

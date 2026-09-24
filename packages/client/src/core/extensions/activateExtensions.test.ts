@@ -3,6 +3,7 @@ import { Container } from "#core/di";
 import { Collection } from "#core/registry";
 import {
   activateExtensions,
+  ExtensionDependencyError,
   type ActivationResult,
   type ExtensionActivationFailure,
   type ExtensionModule,
@@ -116,5 +117,64 @@ describe("activateExtensions", () => {
 
     expect(result.failed[0]?.error).toBeInstanceOf(Error);
     expect(result.failed[0]?.error.message).toBe("문자열");
+  });
+
+  describe("dependsOn", () => {
+    const make = (id: string, order: string[], dependsOn?: readonly string[]): ExtensionModule => ({
+      id,
+      dependsOn,
+      activate: () => order.push(id),
+    });
+
+    it("기대는 확장이 먼저 켜진다 — 목록 순서보다 앞선다", () => {
+      const order: string[] = [];
+      const result = activateExtensions(
+        [make("arka.pack", order, ["arka.editor"]), make("arka.other", order), make("arka.editor", order)],
+        new Container(),
+      );
+
+      expect(order).toEqual(["arka.editor", "arka.pack", "arka.other"]);
+      expect(result.failed).toEqual([]);
+    });
+
+    it("목록에 없는 확장에 기대면 켜지 않고 failed에 남긴다", () => {
+      const order: string[] = [];
+      const result = activateExtensions([make("arka.pack", order, ["arka.missing"])], new Container());
+
+      expect(order).toEqual([]);
+      expect(result.activated).toEqual([]);
+      expect(result.failed.map((f) => [f.id, f.phase, f.error instanceof ExtensionDependencyError])).toEqual([
+        ["arka.pack", "dependsOn", true],
+      ]);
+    });
+
+    it("서로 기대면 둘 다 켜지 않는다", () => {
+      const order: string[] = [];
+      const result = activateExtensions(
+        [make("arka.a", order, ["arka.b"]), make("arka.b", order, ["arka.a"])],
+        new Container(),
+      );
+
+      expect(order).toEqual([]);
+      expect(result.failed.map((f) => f.id).sort()).toEqual(["arka.a", "arka.b"]);
+    });
+
+    it("기댄 확장이 켜지지 못하면 같이 실패한다", () => {
+      const order: string[] = [];
+      const broken: ExtensionModule = {
+        id: "arka.editor",
+        provides: [{ id: "test.ext.log", lifetime: "singleton", create: () => [] }],
+        activate: () => {
+          throw new Error("boom");
+        },
+      };
+      const result = activateExtensions([broken, make("arka.pack", order, ["arka.editor"])], new Container());
+
+      expect(order).toEqual([]);
+      expect(result.failed.map((f) => [f.id, f.phase])).toEqual([
+        ["arka.editor", "activate"],
+        ["arka.pack", "dependsOn"],
+      ]);
+    });
   });
 });

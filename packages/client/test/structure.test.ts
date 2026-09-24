@@ -101,6 +101,38 @@ const valueExports = (file: string): string[] => {
   });
 };
 
+/** 확장 배럴의 `export const <slice> = { id, dependsOn, … }`에서 id와 dependsOn을 읽는다. */
+const moduleOf = (slice: string): { readonly id?: string; readonly dependsOn: readonly string[] } => {
+  const file = path.join(EXTENSIONS, slice, "index.ts");
+  const source = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.ESNext, true, ts.ScriptKind.TS);
+  const literal = source.statements
+    .filter(ts.isVariableStatement)
+    .flatMap((statement) => statement.declarationList.declarations)
+    .find((d) => ts.isIdentifier(d.name) && d.name.text === slice)?.initializer;
+  if (literal === undefined || !ts.isObjectLiteralExpression(literal)) return { dependsOn: [] };
+
+  const prop = (name: string): ts.Expression | undefined =>
+    literal.properties.filter(ts.isPropertyAssignment).find((p) => ts.isIdentifier(p.name) && p.name.text === name)
+      ?.initializer;
+  const id = prop("id");
+  const dependsOn = prop("dependsOn");
+  return {
+    id: id !== undefined && ts.isStringLiteral(id) ? id.text : undefined,
+    dependsOn:
+      dependsOn !== undefined && ts.isArrayLiteralExpression(dependsOn)
+        ? dependsOn.elements.filter(ts.isStringLiteral).map((e) => e.text)
+        : [],
+  };
+};
+
+const importedExtensions = (slice: string): string[] => [
+  ...new Set(
+    FILES.filter((file) => file.startsWith(`extensions/${slice}/`)).flatMap((file) =>
+      [...readFileSync(path.join(SRC, file), "utf8").matchAll(/"#extensions\/([^"/]+)"/gu)].map((m) => m[1] ?? ""),
+    ),
+  ),
+];
+
 describe("확장 슬라이스 구조", () => {
   const slices = foldersIn(EXTENSIONS);
 
@@ -148,6 +180,23 @@ describe("확장 슬라이스 구조", () => {
       .filter(({ slice, values }) => values.length !== 1 || values[0] !== slice);
 
     expect(wrong).toEqual([]);
+  });
+
+  it("확장 id는 `arka.<폴더>`다 — 토큰·명령 이름의 접두가 폴더에서 바로 읽힌다", () => {
+    const wrong = slices.filter((slice) => moduleOf(slice).id !== `arka.${slice}`);
+
+    expect(wrong).toEqual([]);
+  });
+
+  it("다른 확장의 타입을 가져오면 `dependsOn`에 그 확장이 있다 — 켜는 순서가 거기서 나온다", () => {
+    const undeclared = slices.flatMap((slice) => {
+      const declared = new Set(moduleOf(slice).dependsOn);
+      return importedExtensions(slice)
+        .filter((other) => !declared.has(`arka.${other}`))
+        .map((other) => `${slice} → ${other}`);
+    });
+
+    expect(undeclared).toEqual([]);
   });
 
   it("확장 폴더는 전부 `app/extensions.ts`에 올라 있다 — 목록은 손으로 쓰되 빠뜨리면 여기서 걸린다", () => {
