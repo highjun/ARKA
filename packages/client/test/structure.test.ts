@@ -77,7 +77,7 @@ const foldersIn = (dir: string): string[] =>
 const filesIn = (dir: string): string[] => readdirSync(dir).filter((entry) => statSync(path.join(dir, entry)).isFile());
 
 const SLICE_LAYERS = new Set(["model", "infra", "viewmodel", "view", "component", "contrib", "data"]);
-const WORKBENCH_LAYERS = new Set([...SLICE_LAYERS, "api"]);
+const WORKBENCH_LAYERS = new Set([...SLICE_LAYERS, "api", "row"]);
 const CONTRIBUTION = /^[a-z][a-zA-Z0-9]*\.contribution(?:\.test)?\.tsx$/u;
 
 const valueExports = (file: string): string[] => {
@@ -227,5 +227,37 @@ describe("workbench 구조", () => {
 
     expect(from.length).toBeGreaterThan(0);
     expect(from.filter((p) => !p?.startsWith("./api/"))).toEqual([]);
+  });
+});
+
+const ROW_TYPES = [
+  "TabRow",
+  "PaneRowLeaf",
+  "PaneRowSplit",
+  "PaneRowNode",
+  "SplitEdge",
+  "TabContextTarget",
+  "TabContentProps",
+  "PaneId",
+  "SplitOrientation",
+  "SidebarRow",
+  "BottomRow",
+  "CommandRow",
+] as const;
+
+const declares = (file: string, name: string): boolean =>
+  new RegExp(String.raw`^export (?:interface|type) ${name}\b`, "mu").test(readFileSync(path.join(SRC, file), "utf8"));
+
+describe("행 타입은 한 곳에서만 선언한다", () => {
+  const sources = FILES.filter((file) => /\.tsx?$/u.test(file) && !/\.(?:test|stories)\.tsx?$/u.test(file));
+
+  it("소스를 하나라도 찾는다 — 목록이 비면 아래 검사가 조용히 통과한다", () => {
+    expect(sources.length).toBeGreaterThan(0);
+  });
+
+  it.each(ROW_TYPES)("`%s`는 `row/` 밖에서 선언되지 않는다", (name) => {
+    const outside = sources.filter((file) => !file.includes(`${path.sep}row${path.sep}`) && declares(file, name));
+
+    expect(outside).toEqual([]);
   });
 });

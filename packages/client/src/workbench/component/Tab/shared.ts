@@ -1,14 +1,12 @@
 import type { ReactNode } from "react";
+import type { SplitOrientation } from "../../row/tabRows";
+
+export type { SplitEdge, SplitOrientation } from "../../row/tabRows";
 
 export type TabId = string;
 
 /** 칸 트리 마디의 id. 칸과 가지가 한 이름 공간을 쓴다 — 가지도 크기 조절 대상이라서다. */
 export type GroupId = string;
-
-export type SplitOrientation = "horizontal" | "vertical";
-
-/** 탭을 칸 가장자리로 끌어다 놓아 쪼갤 수 있는 네 방향. */
-export type SplitEdge = "left" | "right" | "top" | "bottom";
 
 /** 띠 안에서 끌고 있는 탭이 어느 탭의 앞/뒤에 들어갈지. */
 export type StripDropPosition = "before" | "after";

@@ -10,6 +10,7 @@ const config: KnipConfig = {
     "packages/client": {
       entry: [
         "src/app/main.tsx",
+        "src/core/*/index.ts",
         "src/**/*.stories.tsx",
         ".storybook/{main,preview}.ts",
         "test/visual-regression/run.ts",
@@ -33,7 +34,7 @@ const config: KnipConfig = {
         "lint/index.ts",
         "smoke/{local,anon}.ts",
         "hooks/{preCommit,prePush}.ts",
-        "needsReview.ts",
+        "review/index.ts",
         "*.config.ts",
       ],
       project: ["**/*.ts"],

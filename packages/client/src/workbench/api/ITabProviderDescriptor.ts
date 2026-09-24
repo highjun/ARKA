@@ -1,10 +1,9 @@
 import type { URI } from "#contracts";
 import type { Descriptor, Registry } from "#core/registry";
 import type { ComponentType, ReactNode } from "react";
+import type { TabContentProps } from "../row/tabRows";
 
-export interface TabContentProps {
-  readonly tabId: string;
-}
+export type { TabContentProps } from "../row/tabRows";
 
 export interface TabDescriptor {
   readonly icon: ReactNode;

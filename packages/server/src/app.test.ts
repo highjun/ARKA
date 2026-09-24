@@ -2,7 +2,7 @@ import { realpathSync } from "node:fs";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { HealthResponse, PROTOCOL_HEADER, PROTOCOL_VERSION, VersionResponse } from "#contracts";
+import { HealthResponse, PROTOCOL_HEADER, PROTOCOL_VERSION, protocolHeaders, VersionResponse } from "#contracts";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createApp } from "./app";
 import { makeConfig } from "./core/config.testing";
@@ -11,7 +11,7 @@ import type { LogFields, Logger } from "./core/log";
 let workspaceRoot: string;
 const withProtocol = (init: RequestInit = {}): RequestInit => ({
   ...init,
-  headers: { ...(init.headers as Record<string, string> | undefined), [PROTOCOL_HEADER]: String(PROTOCOL_VERSION) },
+  headers: { ...(init.headers as Record<string, string> | undefined), ...protocolHeaders() },
 });
 const logged: { event: string; fields: LogFields | undefined }[] = [];
 const log: Logger = {

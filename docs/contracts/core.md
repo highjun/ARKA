@@ -243,7 +243,12 @@ export interface ICommandService {
   readonly keybindings: Collection<Keybinding>;
   readonly menus: Collection<MenuItem>;
 
-  /** 사용자 재정의 전부 — `actionId → 키`. `null`이면 기본값을 꺼 둔 것이다. */
+  /**
+   * 사용자 재정의 전부 — `actionId → 키`. `null`이면 기본값을 꺼 둔 것이다.
+   *
+   * **기본값을 덮어쓰는 것만이 아니다** — 기여된 키바인딩이 없는 명령도 여기서 키를 얻는다.
+   * 그 경우 걸러낼 `when`이 없으므로 조건 없이 걸린다.
+   */
   readonly overrides: ReadonlyMap<string, string | null>;
   /** 재정의를 쓴다. `settings.json`에 남고 `matchKeybinding`이 곧바로 이것을 먼저 본다. */
   setKeybinding(actionId: string, keybinding: string | null): void;
@@ -268,8 +273,6 @@ export interface ICommandService {
 /** 확장이 더하는 설정 한 칸. `type`이 `default`의 타입을 정한다 — 어긋나면 컴파일에서 잡힌다. */
 export type SettingsDescriptor = Descriptor & {
   readonly title: string;
-  /** 화면 폭에 따라 값이 갈리는가. 설정에 "기기" 개념을 두지 않기로 한 결정의 대응물이다. */
-  readonly byViewportWidth?: boolean;
 } & (
   | { readonly type: "boolean"; readonly default: boolean }
   | { readonly type: "number"; readonly default: number }
@@ -388,4 +391,26 @@ export interface ExtensionActivationFailure {
   readonly phase: "provides" | "activate";
   readonly error: Error;
 }
+```
+
+## `core/http` — 서버와 말하는 배관
+
+두 개뿐이고 **둘 다 프로토콜을 모른다.** 커널이 도메인을 모른다는 규칙이 여기에도 걸린다 —
+프로토콜 헤더를 만드는 일은 `#contracts`의 `protocolHeaders()`가 하고, 부르는 쪽은 `infra/`다.
+
+```ts
+/**
+ * SSE 스트림을 읽는다. 한 줄씩 모아 `data:` 하나가 끝날 때마다 `onData`를 부른다.
+ *
+ * `idleTimeoutMs` 동안 아무것도 안 오면 스스로 끊는다 — 죽은 연결을 붙잡고 있지 않는다.
+ * 기본 45초다. 되살리는 일은 부르는 쪽이 한다.
+ */
+export declare function readSse(
+  url: string,
+  options: { readonly headers?: Record<string, string>; readonly signal: AbortSignal; readonly idleTimeoutMs?: number },
+  onData: (data: string) => void,
+): Promise<void>;
+
+/** 끊을 수 있는 기다림. `signal`이 서면 곧바로 풀린다 — 재시도 사이의 대기가 이것이다. */
+export declare function sleep(ms: number, signal: AbortSignal): Promise<void>;
 ```

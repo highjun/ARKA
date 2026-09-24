@@ -5,7 +5,6 @@ export type SettingsDescriptor = Descriptor & {
   readonly title: string;
   readonly category?: string;
   readonly description?: string;
-  readonly byViewportWidth?: boolean;
 } & (
     | { readonly type: "boolean"; readonly default: boolean }
     | { readonly type: "number"; readonly default: number }

@@ -1,41 +1,7 @@
 import type { Container, Disposable } from "#core/di";
-import type { PaneId, SplitOrientation } from "../model/ITabLayout";
-import type { TabDescriptor } from "../api/ITabProviderDescriptor";
+import type { PaneId, PaneRowNode, SplitEdge } from "../row/tabRows";
 
-export type SplitEdge = "left" | "right" | "top" | "bottom";
-
-export interface TabContextTarget {
-  readonly paneId: PaneId;
-  readonly tabId: string;
-}
-
-export interface TabRow {
-  readonly id: string;
-  readonly kind: string;
-  readonly title: string;
-  readonly icon: TabDescriptor["icon"];
-  readonly Content: TabDescriptor["Content"];
-  readonly isPreview: boolean;
-  readonly isDirty: boolean;
-}
-
-export interface PaneRowLeaf {
-  readonly kind: "leaf";
-  readonly id: PaneId;
-  readonly tabs: readonly TabRow[];
-  readonly activeTabId: string | null;
-  readonly size?: number;
-}
-
-interface PaneRowSplit {
-  readonly kind: "split";
-  readonly id: PaneId;
-  readonly orientation: SplitOrientation;
-  readonly children: readonly PaneRowNode[];
-  readonly size?: number;
-}
-
-export type PaneRowNode = PaneRowLeaf | PaneRowSplit;
+export type { PaneRowLeaf, PaneRowNode, SplitEdge, TabContextTarget, TabRow } from "../row/tabRows";
 
 declare module "#core/di" {
   interface InstanceMap {

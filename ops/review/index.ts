@@ -1,24 +1,15 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import ts from "typescript";
+import { changesIn, type ContractChange } from "./contracts.ts";
 
-const REPO_ROOT = path.resolve(import.meta.dirname, "..");
+const REPO_ROOT = path.resolve(import.meta.dirname, "../..");
 const CONTRACT_ROOTS: readonly { readonly root: string; readonly file: RegExp }[] = [
   { root: "packages/contracts/src/", file: /^packages\/contracts\/src\/.+\.ts$/u },
   { root: "packages/client/src/", file: /^packages\/client\/src\/workbench\/api\/.+\.ts$/u },
   { root: "packages/client/src/", file: /^packages\/client\/src\/extensions\/[^/]+\/index\.ts$/u },
 ];
 const SNAPSHOT = /^packages\/client\/src\/.+\/snapshots\/(?<story>[^/]+)\.png$/u;
-
-export type DeclarationKind = "type" | "interface" | "function" | "class" | "const";
-
-export type ContractChange = {
-  readonly file: string;
-  readonly name: string;
-  readonly kind: DeclarationKind;
-  readonly change: "added" | "removed" | "changed";
-};
 
 export type OutsideChange = {
   readonly path: string;
@@ -60,53 +51,6 @@ export const changedFiles = (base: string, head: string): readonly OutsideChange
     });
 };
 
-const printer = ts.createPrinter({ removeComments: true });
-
-const normalize = (text: string): string =>
-  text
-    .replace(/\s+/gu, " ")
-    .replace(/\s*([(){}[\],;:<>.|&=?])\s*/gu, "$1")
-    .replace(/,([)\]}])/gu, "$1")
-    .replace(/=[|&]/gu, "=")
-    .trim();
-
-const isExported = (node: ts.Node): boolean =>
-  ts.canHaveModifiers(node) && (ts.getModifiers(node) ?? []).some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
-
-const declared = (node: ts.Statement): { kind: DeclarationKind; name: string } | null => {
-  if (ts.isTypeAliasDeclaration(node)) return { kind: "type", name: node.name.text };
-  if (ts.isInterfaceDeclaration(node)) return { kind: "interface", name: node.name.text };
-  if (ts.isFunctionDeclaration(node) && node.name !== undefined) return { kind: "function", name: node.name.text };
-  if (ts.isClassDeclaration(node) && node.name !== undefined) return { kind: "class", name: node.name.text };
-  return null;
-};
-
-export const declarations = (source: string): ReadonlyMap<string, string> => {
-  const file = ts.createSourceFile("contract.ts", source, ts.ScriptTarget.ESNext, true, ts.ScriptKind.TS);
-  const found = new Map<string, string>();
-
-  for (const statement of file.statements) {
-    if (!isExported(statement)) continue;
-
-    if (ts.isVariableStatement(statement)) {
-      for (const declaration of statement.declarationList.declarations) {
-        if (!ts.isIdentifier(declaration.name)) continue;
-        found.set(
-          `const ${declaration.name.text}`,
-          normalize(printer.printNode(ts.EmitHint.Unspecified, declaration, file)),
-        );
-      }
-      continue;
-    }
-
-    const named = declared(statement);
-    if (named === null) continue;
-    found.set(`${named.kind} ${named.name}`, normalize(printer.printNode(ts.EmitHint.Unspecified, statement, file)));
-  }
-
-  return found;
-};
-
 const at = (rev: string, file: string): string => {
   const { status, stdout } = git("show", `${rev}:${file}`);
   return status === 0 ? stdout : "";
@@ -117,32 +61,11 @@ export const contractRoot = (file: string): string | undefined =>
 
 export const review = (base: string, head: string): Review => {
   const changed = changedFiles(base, head);
-  const contracts: ContractChange[] = [];
 
-  for (const { path: file } of changed) {
-    const root = contractRoot(file);
-    if (root === undefined) continue;
-
-    const before = declarations(at(base, file));
-    const after = declarations(at(head, file));
-
-    for (const [key, text] of before) {
-      const [kind, ...rest] = key.split(" ");
-      const entry = { file: file.slice(root.length), name: rest.join(" "), kind: kind as DeclarationKind };
-      if (!after.has(key)) contracts.push({ ...entry, change: "removed" });
-      else if (after.get(key) !== text) contracts.push({ ...entry, change: "changed" });
-    }
-    for (const key of after.keys()) {
-      if (before.has(key)) continue;
-      const [kind, ...rest] = key.split(" ");
-      contracts.push({
-        file: file.slice(root.length),
-        name: rest.join(" "),
-        kind: kind as DeclarationKind,
-        change: "added",
-      });
-    }
-  }
+  const contracts = changed
+    .map(({ path: file }) => ({ file, root: contractRoot(file) }))
+    .filter((c): c is { file: string; root: string } => c.root !== undefined)
+    .flatMap(({ file, root }) => changesIn(file.slice(root.length), at(base, file), at(head, file)));
 
   const ui = changed
     .map(({ path: file, status }) => ({ story: SNAPSHOT.exec(file)?.groups?.["story"], status }))
@@ -210,7 +133,7 @@ export const render = (found: Review, extra = ""): string => {
 if (process.argv[1] === import.meta.filename) {
   const [base, head, extraPath] = process.argv.slice(2);
   if (base === undefined || head === undefined) {
-    console.error("쓰임: node ops/needsReview.ts <base> <head> [곁들일 마크다운 파일]");
+    console.error("쓰임: node ops/review/index.ts <base> <head> [곁들일 마크다운 파일]");
     process.exit(2);
   }
   const extra = extraPath !== undefined && existsSync(extraPath) ? readFileSync(extraPath, "utf8") : "";

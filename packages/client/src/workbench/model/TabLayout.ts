@@ -16,35 +16,13 @@ type StoredNode =
       size?: number;
     };
 
-const KIND_OF_LEGACY: Readonly<Record<string, string>> = {
-  file: "arka.filesystem.text",
-  settings: "arka.workbench.settings",
-  keybindings: "arka.workbench.keybindings",
-  markdownPreview: "arka.markdown.preview",
-};
-
-const legacyUriOf = (kind: string, id: string): URI | null => {
-  switch (kind) {
-    case "file":
-      return URI.file(id);
-    case "settings":
-      return URI.parse("arka:///settings");
-    case "keybindings":
-      return URI.parse("arka:///settings");
-    case "markdownPreview":
-      return id.startsWith("preview:") ? URI.parse(`markdown-preview:///${id.slice("preview:".length)}`) : null;
-    default:
-      return null;
-  }
-};
-
 const restoreTab = (value: unknown): OpenTab | null => {
   if (typeof value !== "object" || value === null) return null;
   const { id, kind, title, uri } = value as { id?: unknown; kind?: unknown; title?: unknown; uri?: unknown };
   if (typeof id !== "string" || typeof kind !== "string" || typeof title !== "string") return null;
+  if (typeof uri !== "string") return null;
   try {
-    const parsed = typeof uri === "string" ? URI.parse(uri) : legacyUriOf(kind, id);
-    return parsed === null ? null : { id, kind: KIND_OF_LEGACY[kind] ?? kind, uri: parsed, title };
+    return { id, kind, uri: URI.parse(uri), title };
   } catch {
     return null;
   }
@@ -83,8 +61,6 @@ export class TabLayout implements ITabLayout {
   static readonly #TREE_KEY = "workbench.tabTree";
   static readonly #ACTIVE_PANE_ID_KEY = "workbench.activePaneId";
   static readonly #PREVIEW_TAB_ID_KEY = "workbench.previewTabId";
-  static readonly #LEGACY_TABS_KEY = "workbench.tabs";
-  static readonly #LEGACY_ACTIVE_TAB_ID_KEY = "workbench.activeTabId";
 
   readonly #storage: IStorage;
   readonly #changed = new Emitter();
@@ -138,35 +114,16 @@ export class TabLayout implements ITabLayout {
 
   static #restoreTree(storage: IStorage): PaneNode {
     const raw = storage.get(TabLayout.#TREE_KEY);
-    if (raw !== null) {
-      try {
-        const restored = restoreNode(JSON.parse(raw));
-        if (restored !== null) return restored;
-      } catch {
-        return TabLayout.#migrateLegacyTree(storage);
-      }
+    if (raw === null) return TabLayout.#emptyTree();
+    try {
+      return restoreNode(JSON.parse(raw)) ?? TabLayout.#emptyTree();
+    } catch {
+      return TabLayout.#emptyTree();
     }
-    return TabLayout.#migrateLegacyTree(storage);
   }
 
-  static #migrateLegacyTree(storage: IStorage): PaneNode {
-    const activeTabId = TabLayout.#restoreId(storage, TabLayout.#LEGACY_ACTIVE_TAB_ID_KEY);
-    const raw = storage.get(TabLayout.#LEGACY_TABS_KEY);
-    let tabs: readonly OpenTab[] = [];
-    if (raw !== null) {
-      try {
-        const parsed: unknown = JSON.parse(raw);
-        tabs = Array.isArray(parsed) ? parsed.map(restoreTab).filter((tab): tab is OpenTab => tab !== null) : [];
-      } catch {
-        tabs = [];
-      }
-    }
-    return {
-      kind: "leaf",
-      id: ROOT_PANE_ID,
-      tabs,
-      activeTabId: tabs.some((tab) => tab.id === activeTabId) ? activeTabId : null,
-    };
+  static #emptyTree(): PaneNode {
+    return { kind: "leaf", id: ROOT_PANE_ID, tabs: [], activeTabId: null };
   }
 
   static #restoreActivePaneId(storage: IStorage): PaneId {

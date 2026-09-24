@@ -19,18 +19,31 @@ const RESTRICTED_SYNTAX = [
 
 const SLICE_ROOTS = "./src/{workbench,extensions/*}";
 
-const LAYERS = ["api", "model", "infra", "viewmodel", "view", "component", "contrib", "data"] as const;
+const LAYERS = ["row", "api", "model", "infra", "viewmodel", "view", "component", "contrib", "data"] as const;
 
 const LAYER_ALLOW: Readonly<Record<(typeof LAYERS)[number], readonly string[]>> = {
-  api: ["api"],
-  model: ["api", "model"],
-  infra: ["api", "model", "infra"],
-  viewmodel: ["api", "model", "viewmodel"],
-  view: ["api", "model", "viewmodel", "view", "component", "contrib"],
-  component: ["component"],
-  contrib: ["api", "model", "component", "contrib"],
+  row: ["row"],
+  api: ["row", "api"],
+  model: ["row", "api", "model"],
+  infra: ["row", "api", "model", "infra"],
+  viewmodel: ["row", "api", "model", "viewmodel"],
+  view: ["row", "api", "model", "viewmodel", "view", "component", "contrib"],
+  component: ["row", "component"],
+  contrib: ["row", "api", "model", "component", "contrib"],
   data: ["data"],
 };
+
+const ROW_ONLY_SYNTAX = [
+  {
+    selector:
+      "ExportNamedDeclaration > :matches(VariableDeclaration, FunctionDeclaration, ClassDeclaration, TSEnumDeclaration)",
+    message: "`row/`는 타입만 삽니다 — 값이 필요하면 model로 올리세요.",
+  },
+  {
+    selector: 'ImportDeclaration[importKind!="type"]',
+    message: "`row/`는 타입만 가져옵니다 — 런타임 0바이트여야 층을 가로지를 수 있습니다.",
+  },
+];
 
 const LAYER_ZONES = LAYERS.map((layer) => {
   const forbidden = LAYERS.filter((other) => !LAYER_ALLOW[layer].includes(other));
@@ -286,6 +299,11 @@ export default [
   {
     files: ["src/**/model/**/*.{ts,tsx}", "src/**/viewmodel/**/*.{ts,tsx}"],
     rules: { "no-restricted-globals": ["error", ...NODE_GLOBALS, ...PLATFORM_GLOBALS] },
+  },
+
+  {
+    files: ["src/**/row/**/*.ts"],
+    rules: { "no-restricted-syntax": ["error", ...RESTRICTED_SYNTAX, ...ROW_ONLY_SYNTAX] },
   },
 
   {

@@ -1,19 +1,8 @@
 import type { Disposable } from "#core/di";
-import type { IconId } from "#ui/Icon";
 import type { BottomDescriptor } from "../api/IBottomDescriptor";
-import type { SidebarDescriptor } from "../api/ISidebarDescriptor";
+import type { BottomRow, SidebarRow } from "../row/shellRows";
 
-export interface SidebarRow {
-  readonly id: string;
-  readonly title: string;
-  readonly iconId: IconId;
-  readonly Content: SidebarDescriptor["Content"];
-}
-
-export interface BottomRow {
-  readonly id: string;
-  readonly title: string;
-}
+export type { BottomRow, SidebarRow } from "../row/shellRows";
 
 export interface ActiveBottom {
   readonly id: string;

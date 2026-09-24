@@ -18,6 +18,8 @@ declare module "#core/di" {
     "test.self": object;
     "test.leaf": { readonly id: number };
     "test.branch": { readonly leaf: { readonly id: number } };
+    "test.host": { readonly host: Container };
+    "test.scopedLeaf": { readonly id: number };
   }
 }
 
@@ -230,6 +232,53 @@ describe("Container", () => {
       c.register("test.branch", "singleton", (container) => ({ leaf: container.resolve("test.leaf") }));
 
       expect(c.resolve("test.branch").leaf.id).toBe(1);
+    });
+  });
+
+  describe("죽은 컨테이너", () => {
+    it("dispose된 컨테이너에는 register할 수 없다", () => {
+      const c = new Container("app");
+      c.dispose();
+
+      expect(() => {
+        c.register("test.counter", "singleton", () => ({ id: 1 }));
+      }).toThrow(ContainerDisposedError);
+    });
+
+    it("dispose된 부모에서는 자식을 딸 수 없다 — 딸아도 아무도 정리하지 않는다", () => {
+      const root = new Container("app");
+      root.dispose();
+
+      expect(() => root.createChild("tab")).toThrow(ContainerDisposedError);
+    });
+  });
+
+  describe("팩토리가 받는 컨테이너", () => {
+    it("singleton 팩토리는 등록한 컨테이너를 받는다 — 꺼낸 자식이 아니다", () => {
+      const root = new Container("app");
+      root.register("test.host", "singleton", (container) => ({ host: container }));
+      const tab = root.createChild("tab");
+
+      expect(tab.resolve("test.host").host).toBe(root);
+    });
+
+    it("scoped 팩토리는 꺼낸 자식을 받는다", () => {
+      const root = new Container("app");
+      root.register("test.host", "scoped", (container) => ({ host: container }));
+      const tab = root.createChild("tab");
+
+      expect(tab.resolve("test.host").host).toBe(tab);
+    });
+
+    it("루트에서 처음 꺼낸 singleton이 뒤에 온 탭의 scoped를 붙잡지 않는다", () => {
+      const root = new Container("app");
+      let next = 0;
+      root.register("test.scopedLeaf", "scoped", () => ({ id: (next += 1) }));
+      root.register("test.branch", "singleton", (container) => ({ leaf: container.resolve("test.scopedLeaf") }));
+      const tab = root.createChild("tab");
+
+      expect(tab.resolve("test.branch").leaf).toBe(root.resolve("test.scopedLeaf"));
+      expect(tab.resolve("test.scopedLeaf").id).not.toBe(root.resolve("test.scopedLeaf").id);
     });
   });
 });

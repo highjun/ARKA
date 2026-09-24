@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { DescriptorNotFoundError } from "#core/registry";
-import { Settings, type ISettings, type SettingsDescriptor, type SettingsStore } from "#core/settings";
+import {
+  Settings,
+  SettingsValueError,
+  type ISettings,
+  type SettingsDescriptor,
+  type SettingsStore,
+} from "#core/settings";
 
 const memoryStore = (initial: Record<string, unknown> = {}): SettingsStore & { saved: Record<string, unknown> } => {
   const store = {
@@ -92,5 +98,24 @@ describe("Settings", () => {
 
     expect(() => settings.set("test.unknown", 1)).toThrow(DescriptorNotFoundError);
     expect(store.saved).toEqual({});
+  });
+
+  describe("값 검사", () => {
+    it("스키마와 타입이 다른 값은 던진다 — 조용히 default로 되돌리면 바뀐 줄 안다", () => {
+      const settings = withDensity(memoryStore());
+
+      expect(() => {
+        settings.set("test.wrap", "예");
+      }).toThrow(SettingsValueError);
+      expect(settings.get<boolean>("test.wrap")).toBe(true);
+    });
+
+    it("enum은 목록에 없는 값을 던진다", () => {
+      const settings = withDensity(memoryStore());
+
+      expect(() => {
+        settings.set("test.density", "없는값");
+      }).toThrow(SettingsValueError);
+    });
   });
 });

@@ -4,12 +4,9 @@ import { Kbd, keysOf } from "#ui/Kbd";
 import { usePortalContainer } from "#lib/portal";
 import styles from "./TitleBar.module.css";
 import { Command } from "cmdk";
+import type { CommandRow } from "../../row/commandRows";
 
-export interface CommandRow {
-  readonly id: string;
-  readonly label: string;
-  readonly keybinding: string;
-}
+export type { CommandRow } from "../../row/commandRows";
 
 type PaletteDialogAttrs = Omit<ComponentPropsWithoutRef<"div">, "onSelect" | "defaultValue"> & {
   readonly open: boolean;

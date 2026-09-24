@@ -11,7 +11,7 @@ import type { Linter } from "eslint";
 const COMMENT_RULES = ["no-warning-comments", "@eslint-community/eslint-comments/*"];
 
 const base: Linter.Config[] = [
-  { ignores: ["**/node_modules/**", "**/dist/**", "**/storybook-static/**", "**/.output/**"] },
+  { ignores: ["**/node_modules/**", "**/.output/**"] },
 
   {
     plugins: { "import-x": importX },
@@ -85,7 +85,6 @@ const base: Linter.Config[] = [
         },
       ],
       "@eslint-community/eslint-comments/no-unlimited-disable": "error",
-      // `allowWholeFile: false` — 파일 끝까지 열어 두는 `eslint-disable`을 허용하지 않는다.
       "@eslint-community/eslint-comments/disable-enable-pair": ["error", { allowWholeFile: false }],
       "@eslint-community/eslint-comments/no-restricted-disable": ["error", ...COMMENT_RULES],
     },
