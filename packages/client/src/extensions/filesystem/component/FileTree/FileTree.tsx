@@ -4,12 +4,15 @@ import { clsx } from "clsx";
 import { useTreeNavigation, flattenVisible } from "./useTreeNavigation";
 import {
   compactFolderChains,
+  dropParentIdOf,
   isApplePlatform,
+  movableSources,
   nextSelection,
   selectAll,
   selectionIncluding,
   selectionIntentOf,
 } from "./shared";
+import type { DroppableRow } from "./shared";
 import type { FlatTreeNode } from "./useTreeNavigation";
 import styles from "./FileTree.module.css";
 import { Icon } from "#component/Icon";
@@ -42,7 +45,7 @@ interface RowProps {
   readonly registerNode: ReturnType<typeof useTreeNavigation>["registerNode"];
   readonly setFocusedId: ReturnType<typeof useTreeNavigation>["setFocusedId"];
   readonly dndEnabled: boolean;
-  readonly dropTargetId: FileTreeItemId | undefined;
+  readonly dropParentId: FileTreeItemId | null | undefined;
   readonly onRowDragStart: (node: FlatTreeNode, event: DragEvent<HTMLElement>) => void;
   readonly onRowDragOver: (node: FlatTreeNode, event: DragEvent<HTMLElement>) => void;
   readonly onRowDrop: (node: FlatTreeNode, event: DragEvent<HTMLElement>) => void;
@@ -91,6 +94,13 @@ const EditableLabel = ({
   );
 };
 
+const toDropRow = (node: FlatTreeNode): DroppableRow => ({
+  id: node.item.id,
+  type: node.item.type,
+  disabled: node.item.disabled,
+  parentId: node.parentId,
+});
+
 const Row = ({
   node,
   expandedIds,
@@ -103,7 +113,7 @@ const Row = ({
   registerNode,
   setFocusedId,
   dndEnabled,
-  dropTargetId,
+  dropParentId,
   onRowDragStart,
   onRowDragOver,
   onRowDrop,
@@ -149,9 +159,9 @@ const Row = ({
       aria-disabled={item.disabled || undefined}
       tabIndex={item.id === focusedId ? 0 : -1}
       data-active={isSelected ? "" : undefined}
-      data-drop={dropTargetId === item.id ? "inside" : undefined}
+      data-drop={dropParentId === item.id ? "inside" : undefined}
       className={styles["item"]}
-      draggable={dndEnabled && !item.disabled}
+      draggable={dndEnabled && !item.disabled && !isEditing}
       onDragStart={(event) => onRowDragStart(node, event)}
       onDragEnter={(event) => onRowDragOver(node, event)}
       onDragOver={(event) => onRowDragOver(node, event)}
@@ -193,8 +203,9 @@ const Row = ({
         <ul role="group" className={styles["group"]}>
           <span
             aria-hidden="true"
+            data-component="FileTree/Guide"
             className={styles["guide"]}
-            style={{ left: `calc(${level} * var(--space-md) + var(--space-sm) + var(--base-size-20) / 2)` }}
+            style={{ left: `calc(${level} * var(--space-md))` }}
           />
           {item.children?.map((child) => (
             <Row
@@ -210,7 +221,7 @@ const Row = ({
               registerNode={registerNode}
               setFocusedId={setFocusedId}
               dndEnabled={dndEnabled}
-              dropTargetId={dropTargetId}
+              dropParentId={dropParentId}
               onRowDragStart={onRowDragStart}
               onRowDragOver={onRowDragOver}
               onRowDrop={onRowDrop}
@@ -242,7 +253,8 @@ export interface FileTreeProps extends Omit<HTMLAttributes<HTMLElement>, "childr
   readonly onActivate?: (item: FileTreeItem) => void;
   readonly onRowDoubleClick?: (item: FileTreeItem) => void;
   readonly onContextMenu?: (item: FileTreeItem, event: MouseEvent<HTMLElement>) => void;
-  readonly onItemDrop?: (source: FileTreeItem, target: FileTreeItem) => void;
+  /** `target`이 `null`이면 트리 루트로 옮긴다. */
+  readonly onItemDrop?: (sources: readonly FileTreeItem[], target: FileTreeItem | null) => void;
   readonly editingId?: FileTreeItemId;
   readonly onEditCommit?: (item: FileTreeItem, value: string) => void;
   readonly onEditCancel?: (item: FileTreeItem) => void;
@@ -280,8 +292,10 @@ export const FileTree = ({
   const resolvedSelectedIds = selectedIds ?? uncontrolledSelectedIds;
   const anchorRef = useRef<FileTreeItemId | undefined>(resolvedSelectedIds[0]);
   const compactedItems = useMemo(() => compactFolderChains(items), [items]);
-  const draggedIdRef = useRef<FileTreeItemId | undefined>(undefined);
-  const [dropTargetId, setDropTargetId] = useState<FileTreeItemId | undefined>(undefined);
+  /** 끌고 있는 행들. 선택 안의 행을 끌면 선택 전부가, 밖의 행을 끌면 그 행만 담긴다. */
+  const draggedIdsRef = useRef<readonly FileTreeItemId[]>([]);
+  /** 놓으면 들어갈 폴더. `null`은 루트, `undefined`는 놓을 수 없는 자리다. */
+  const [dropParentId, setDropParentId] = useState<FileTreeItemId | null | undefined>(undefined);
 
   const handleToggleFolder = (item: FileTreeItem, expanded: boolean) => {
     const nextExpandedIds = expanded
@@ -301,6 +315,7 @@ export const FileTree = ({
   const selectedSet = useMemo(() => new Set(resolvedSelectedIds), [resolvedSelectedIds]);
   const flat = useMemo(() => flattenVisible(compactedItems, expandedSet), [compactedItems, expandedSet]);
   const orderRows = useMemo(() => flat.map((node) => node.item), [flat]);
+  const dropRows = useMemo(() => flat.map(toDropRow), [flat]);
 
   const activateNode = (node: FlatTreeNode) => {
     const { item } = node;
@@ -326,20 +341,52 @@ export const FileTree = ({
 
   const handleSelectAll = () => commitSelection(selectAll(orderRows));
 
-  const handleFocusMoved = (id: FileTreeItemId) => {
-    anchorRef.current = id;
+  /** 화살표·Home·End — 포커스가 가는 곳으로 선택도 따라간다. 비활성 행은 포커스만 지나간다. */
+  const handleSelectSingle = (node: FlatTreeNode) => {
+    const { item } = node;
+    if (item.disabled) return;
+    anchorRef.current = item.id;
+    commitSelection([item.id]);
   };
 
-  const { effectiveFocusedId, registerNode, onRowKeyDown, setFocusedId } = useTreeNavigation(
-    compactedItems,
-    expandedSet,
-    resolvedSelectedIds[0],
-    handleToggleFolder,
-    activateNode,
-    handleExtendSelection,
-    handleSelectAll,
-    handleFocusMoved,
-  );
+  const handleToggleSelection = (node: FlatTreeNode) => {
+    const { item } = node;
+    if (item.disabled) return;
+    const { ids, anchorId } = nextSelection({
+      intent: "toggle",
+      current: resolvedSelectedIds,
+      order: orderRows,
+      anchorId: anchorRef.current,
+      targetId: item.id,
+    });
+    anchorRef.current = anchorId;
+    commitSelection(ids);
+  };
+
+  const handleCollapseSelection = (node: FlatTreeNode) => {
+    const { item } = node;
+    anchorRef.current = item.id;
+    commitSelection(item.disabled ? [] : [item.id]);
+  };
+
+  /** 행이 없는 바닥을 누르면 선택을 놓는다. */
+  const handleRootClick = (event: MouseEvent<HTMLElement>) => {
+    if (event.target !== event.currentTarget) return;
+    commitSelection([]);
+  };
+
+  const { effectiveFocusedId, registerNode, onRowKeyDown, setFocusedId } = useTreeNavigation({
+    items: compactedItems,
+    expandedIds: expandedSet,
+    fallbackId: resolvedSelectedIds[0],
+    onToggleFolder: handleToggleFolder,
+    onActivateRow: activateNode,
+    onSelectSingle: handleSelectSingle,
+    onExtendSelection: handleExtendSelection,
+    onToggleSelection: handleToggleSelection,
+    onSelectAll: handleSelectAll,
+    onCollapseSelection: handleCollapseSelection,
+  });
 
   const handleRowClick = (node: FlatTreeNode, event: MouseEvent<HTMLElement>) => {
     const { item } = node;
@@ -381,35 +428,63 @@ export const FileTree = ({
     onContextMenu?.(item, event);
   };
 
+  /** 놓을 수 있으면 들어갈 폴더를, 없으면 `undefined`를 준다. */
+  const draggedRows = () => dropRows.filter((row) => draggedIdsRef.current.includes(row.id));
+
+  const resolveDropParentId = (node: FlatTreeNode | null): FileTreeItemId | null | undefined => {
+    const sources = draggedRows();
+    if (sources.length === 0) return undefined;
+    const parentId = dropParentIdOf(node === null ? undefined : toDropRow(node));
+    return movableSources(sources, parentId, dropRows).length > 0 ? parentId : undefined;
+  };
+
+  const handleDragOver = (node: FlatTreeNode | null, event: DragEvent<HTMLElement>) => {
+    const parentId = resolveDropParentId(node);
+    setDropParentId(parentId);
+    if (parentId === undefined) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (node: FlatTreeNode | null, event: DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    const parentId = resolveDropParentId(node);
+    if (parentId !== undefined) {
+      const sources = movableSources(draggedRows(), parentId, dropRows)
+        .map((row) => flat.find((flatNode) => flatNode.item.id === row.id)?.item)
+        .filter((item) => item !== undefined);
+      const target = parentId === null ? null : (flat.find((flatNode) => flatNode.item.id === parentId)?.item ?? null);
+      if (sources.length > 0) onItemDrop?.(sources, target);
+    }
+    endDrag();
+  };
+
+  const endDrag = () => {
+    draggedIdsRef.current = [];
+    setDropParentId(undefined);
+  };
+
   const handleRowDragStart = (node: FlatTreeNode, event: DragEvent<HTMLElement>) => {
     event.stopPropagation();
+    const ids = selectionIncluding(resolvedSelectedIds, node.item.id);
+    draggedIdsRef.current = ids;
     event.dataTransfer.effectAllowed = "move";
-    draggedIdRef.current = node.item.id;
+    // 데이터가 빈 드래그는 Firefox 가 시작조차 하지 않는다.
+    event.dataTransfer.setData("text/plain", ids.join("\n"));
   };
 
   const handleRowDragOver = (node: FlatTreeNode, event: DragEvent<HTMLElement>) => {
     event.stopPropagation();
-    const draggedId = draggedIdRef.current;
-    if (draggedId === undefined || node.item.type !== "folder" || node.item.id === draggedId) return;
-    event.preventDefault();
-    setDropTargetId((current) => (current === node.item.id ? current : node.item.id));
+    handleDragOver(node, event);
   };
 
   const handleRowDrop = (node: FlatTreeNode, event: DragEvent<HTMLElement>) => {
     event.stopPropagation();
-    event.preventDefault();
-    const draggedId = draggedIdRef.current;
-    if (draggedId !== undefined && node.item.type === "folder" && node.item.id !== draggedId) {
-      const source = flat.find((flatNode) => flatNode.item.id === draggedId)?.item;
-      if (source) onItemDrop?.(source, node.item);
-    }
-    draggedIdRef.current = undefined;
-    setDropTargetId(undefined);
+    handleDrop(node, event);
   };
 
   const handleRowDragEnd = () => {
-    draggedIdRef.current = undefined;
-    setDropTargetId(undefined);
+    endDrag();
   };
 
   if (compactedItems.length === 0) {
@@ -427,13 +502,20 @@ export const FileTree = ({
   }
 
   return (
+    // 빈 바닥을 눌러 선택을 놓는 것은 마우스 전용 편의다 — 키보드에서 같은 일은 행 위의 Escape 가 한다.
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <ul
       ref={ref as Ref<HTMLUListElement>}
       aria-label="파일 탐색기"
       role="tree"
       aria-multiselectable="true"
       data-chrome={chrome}
+      data-drop={dropParentId === null ? "root" : undefined}
       className={clsx(className, styles["root"])}
+      onClick={handleRootClick}
+      onDragEnter={(event) => handleDragOver(null, event)}
+      onDragOver={(event) => handleDragOver(null, event)}
+      onDrop={(event) => handleDrop(null, event)}
       {...props}
       data-component="FileTree"
     >
@@ -451,7 +533,7 @@ export const FileTree = ({
           registerNode={registerNode}
           setFocusedId={setFocusedId}
           dndEnabled={onItemDrop !== undefined}
-          dropTargetId={dropTargetId}
+          dropParentId={dropParentId}
           onRowDragStart={handleRowDragStart}
           onRowDragOver={handleRowDragOver}
           onRowDrop={handleRowDrop}

@@ -3,7 +3,7 @@ export interface SelectableRow {
   readonly disabled?: boolean;
 }
 
-export type SelectionIntent = "replace" | "toggle" | "range";
+export type SelectionIntent = "replace" | "toggle" | "range" | "rangeAdd";
 
 export const isApplePlatform = (): boolean =>
   typeof navigator !== "undefined" && /mac|iphone|ipad|ipod/iu.test(navigator.platform ?? navigator.userAgent ?? "");
@@ -12,8 +12,9 @@ export const selectionIntentOf = (
   event: { readonly metaKey: boolean; readonly ctrlKey: boolean; readonly shiftKey: boolean },
   apple: boolean = isApplePlatform(),
 ): SelectionIntent => {
-  if (event.shiftKey) return "range";
-  if (apple ? event.metaKey : event.ctrlKey) return "toggle";
+  const multi = apple ? event.metaKey : event.ctrlKey;
+  if (event.shiftKey) return multi ? "rangeAdd" : "range";
+  if (multi) return "toggle";
   return "replace";
 };
 
@@ -56,8 +57,11 @@ export const nextSelection = ({
   const min = Math.min(effectiveAnchorIndex, targetIndex);
   const max = Math.max(effectiveAnchorIndex, targetIndex);
   const rangeIds = order.slice(min, max + 1).map((row) => row.id);
+  const ids = withoutDisabled(order, rangeIds);
+  if (intent === "range") return { ids, anchorId: effectiveAnchorId };
 
-  return { ids: withoutDisabled(order, rangeIds), anchorId: effectiveAnchorId };
+  // rangeAdd — 이미 고른 것 위에 범위를 얹는다.
+  return { ids: [...current, ...ids.filter((id) => !current.includes(id))], anchorId: effectiveAnchorId };
 };
 
 export const selectAll = (order: readonly SelectableRow[]): readonly string[] =>
@@ -96,3 +100,52 @@ export const compactFolderChains = <T extends CompactableItem>(items: readonly T
     if (segments.length === 1) return { ...item, children: compactedChildren } as T;
     return { ...(terminal as T), name: segments.join("/"), children: compactedChildren };
   });
+
+export interface DroppableRow {
+  readonly id: string;
+  readonly type: "folder" | "file";
+  readonly disabled?: boolean;
+  readonly parentId: string | null;
+}
+
+/** 이 행에 놓으면 어느 폴더로 들어가는가. 폴더면 그 폴더, 파일이면 그 파일이 든 폴더, 행 밖이면 루트(`null`). */
+export const dropParentIdOf = (row: DroppableRow | undefined): string | null =>
+  row === undefined ? null : row.type === "folder" ? row.id : row.parentId;
+
+/** 제자리·자기 자신·자기 안쪽·비활성으로는 못 간다. */
+export const canDropInto = (
+  source: DroppableRow,
+  targetParentId: string | null,
+  order: readonly DroppableRow[],
+): boolean => {
+  if (source.disabled === true) return false;
+  if (targetParentId === source.parentId) return false;
+  if (targetParentId === null) return true;
+
+  const byId = new Map(order.map((row) => [row.id, row]));
+  const target = byId.get(targetParentId);
+  if (target === undefined || target.type !== "folder" || target.disabled === true) return false;
+
+  for (let id: string | null = targetParentId; id !== null; id = byId.get(id)?.parentId ?? null) {
+    if (id === source.id) return false;
+  }
+  return true;
+};
+
+/** 갈 수 있는 것만 남긴다. 선택 안에 조상과 자손이 함께 있으면 조상만 옮긴다. */
+export const movableSources = <T extends DroppableRow>(
+  sources: readonly T[],
+  targetParentId: string | null,
+  order: readonly DroppableRow[],
+): readonly T[] => {
+  const sourceIds = new Set(sources.map((row) => row.id));
+  const byId = new Map(order.map((row) => [row.id, row]));
+  const hasSourceAncestor = (row: T): boolean => {
+    for (let id = row.parentId; id !== null; id = byId.get(id)?.parentId ?? null) {
+      if (sourceIds.has(id)) return true;
+    }
+    return false;
+  };
+
+  return sources.filter((row) => canDropInto(row, targetParentId, order) && !hasSourceAncestor(row));
+};

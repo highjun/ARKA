@@ -6,28 +6,39 @@ import type {
   KeyboardEvent,
   KeyboardEventHandler,
   MouseEventHandler,
-  MutableRefObject,
   PointerEventHandler,
   ReactNode,
+  Ref,
+  RefObject,
   SetStateAction,
 } from "react";
 import { clsx } from "clsx";
-import { getStripItemStates, useStripScrollHandle, useTabStrip } from "./useTabStrip";
+import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import { Container } from "#component/Container";
 import { Menu } from "#component/Menu";
-import type { StripDropPosition, TabClassNames, TabId, TabRow } from "./shared";
-import { ClassNamesContext, useTabClassNames } from "./TabContext";
-import { TabHeader } from "./Header";
+import styles from "./Tab.module.css";
+import { getStripItemStates, useStripScrollHandle, useTabStrip } from "./useTabStrip";
+import { Item } from "./Item";
+import { resolveActiveItem } from "./shared";
+import type { StripDropPosition, TabId, TabItem } from "./shared";
 
-export interface TabStripProps extends Omit<ComponentPropsWithoutRef<"div">, "children" | "onSelect"> {
-  readonly tabs: readonly TabRow[];
-  readonly activeTabId: TabId | null;
-  readonly onSelect?: (tabId: TabId) => void;
-  readonly onClose?: (tabId: TabId) => void;
-  readonly onReorder?: (nextTabIds: readonly TabId[]) => void;
-  readonly onPin?: (tabId: TabId) => void;
-  readonly renderTabMenu?: (tabId: TabId) => ReactNode;
-  readonly overlay?: ReactNode;
+export interface TabStripProps extends Omit<ComponentPropsWithoutRef<"div">, "children"> {
+  readonly ref?: Ref<HTMLDivElement>;
+  readonly items: readonly TabItem[];
+  readonly activeItemId?: TabId | null;
+  readonly defaultActiveItemId?: TabId | null;
+  /** 탭 우클릭 메뉴. 없으면 메뉴를 달지 않는다. */
+  readonly renderItemMenu?: (itemId: TabId) => ReactNode;
+  readonly onItemSelect?: (itemId: TabId) => void;
+  /** 없으면 닫기 버튼 자체를 안 그린다. */
+  readonly onItemClose?: (itemId: TabId) => void;
+  /**
+   * 탭을 이 띠의 `beforeItemId` 앞으로 옮긴다 — 맨 뒤면 `null`.
+   * 다른 띠에서 끌어온 탭도 같은 길로 들어온다. 없으면 끌어 옮기기를 끈다.
+   */
+  readonly onItemMove?: StripItemMove;
+  /** 미리보기 탭 더블클릭. 없으면 더블클릭이 아무 일도 안 한다. */
+  readonly onItemPin?: (itemId: TabId) => void;
 }
 
 export interface StripListHandlers {
@@ -36,26 +47,29 @@ export interface StripListHandlers {
   readonly onDrop: DragEventHandler<HTMLDivElement>;
 }
 
+/** 탭을 이 띠의 어느 자리로 옮긴다. `beforeItemId`가 `null`이면 맨 뒤. */
+export type StripItemMove = (itemId: TabId, beforeItemId: TabId | null) => void;
+
 export interface StripDropIndicator {
   readonly targetId: TabId;
   readonly position: StripDropPosition;
 }
 
 export interface StripContextValue {
-  readonly tabs: readonly TabRow[];
-  readonly activeTabId: TabId | null;
-  readonly reorderable: boolean;
-  readonly onSelect?: (tabId: TabId) => void;
-  readonly onClose?: (tabId: TabId) => void;
-  readonly onReorder?: (nextTabIds: readonly TabId[]) => void;
-  readonly onPin?: (tabId: TabId) => void;
-  readonly renderTabMenu?: (tabId: TabId) => ReactNode;
-  readonly onKeyDown: (event: KeyboardEvent<HTMLDivElement>, tab: TabRow) => void;
+  readonly items: readonly TabItem[];
+  readonly activeItemId: TabId | null;
+  readonly movable: boolean;
+  readonly onItemSelect?: (itemId: TabId) => void;
+  readonly onItemClose?: (itemId: TabId) => void;
+  readonly onItemMove?: StripItemMove;
+  readonly onItemPin?: (itemId: TabId) => void;
+  readonly renderItemMenu?: (itemId: TabId) => ReactNode;
+  readonly onKeyDown: (event: KeyboardEvent<HTMLDivElement>, item: TabItem) => void;
   readonly dropIndicator: StripDropIndicator | null;
   readonly setDropIndicator: Dispatch<SetStateAction<StripDropIndicator | null>>;
   readonly draggingId: TabId | null;
   readonly setDraggingId: Dispatch<SetStateAction<TabId | null>>;
-  readonly listRef: MutableRefObject<HTMLDivElement | null>;
+  readonly listRef: RefObject<HTMLDivElement | null>;
 }
 
 interface StripItemHandlers {
@@ -68,13 +82,13 @@ interface StripItemHandlers {
 }
 
 export interface StripItemState {
-  readonly tab: TabRow;
+  readonly item: TabItem;
   readonly isActive: boolean;
   readonly isDraggable: boolean;
   readonly isDragging: boolean;
   readonly indicatorPosition: StripDropPosition | null;
-  readonly onSelect: () => void;
-  readonly onClose: (() => void) | undefined;
+  readonly onItemSelect: () => void;
+  readonly onItemClose: (() => void) | undefined;
   readonly handlers: StripItemHandlers;
 }
 
@@ -85,53 +99,51 @@ const useStripContext = () => {
   return context;
 };
 
-export const StripItems = () => {
-  const classNames = useTabClassNames();
+const StripItems = () => {
   const context = useStripContext();
-  const items = getStripItemStates(context);
-  const { renderTabMenu } = context;
+  const { renderItemMenu } = context;
 
   return (
     <>
-      {items.map(({ tab, isActive, isDraggable, isDragging, indicatorPosition, onSelect, onClose, handlers }) => {
-        const header = (
-          <TabHeader
-            {...handlers}
-            tab={tab}
-            isActive={isActive}
-            onSelect={onSelect}
-            onClose={onClose}
-            aria-grabbed={isDraggable ? isDragging : undefined}
-            aria-selected={isActive}
-            tabIndex={isActive ? 0 : -1}
-            className={isDraggable ? classNames.stripDraggableHeader : undefined}
-            data-tab-id={tab.id}
-            data-reorderable={isDraggable ? "" : undefined}
-            data-dragging={isDragging ? "true" : "false"}
+      {getStripItemStates(context).map((state) => {
+        const item = (
+          <Item
+            {...state.handlers}
+            item={state.item}
+            isActive={state.isActive}
+            onItemSelect={state.onItemSelect}
+            onItemClose={state.onItemClose}
+            aria-grabbed={state.isDraggable ? state.isDragging : undefined}
+            aria-selected={state.isActive}
+            tabIndex={state.isActive ? 0 : -1}
+            className={state.isDraggable ? styles["stripDraggableItem"] : undefined}
+            data-tab-id={state.item.id}
+            data-movable={state.isDraggable ? "" : undefined}
+            data-dragging={state.isDragging ? "true" : "false"}
           />
         );
 
         return (
           <div
-            key={tab.id}
+            key={state.item.id}
             role="presentation"
-            className={classNames.stripItemWrapper}
-            data-tab-drop-wrapper={tab.id}
-            data-drop-target={indicatorPosition ?? undefined}
+            className={styles["stripItemWrapper"]}
+            data-tab-drop-wrapper={state.item.id}
+            data-drop-target={state.indicatorPosition ?? undefined}
           >
-            {indicatorPosition === "before" ? (
-              <span aria-hidden="true" className={classNames.stripIndicatorBefore} />
+            {state.indicatorPosition === "before" ? (
+              <span aria-hidden="true" className={styles["stripIndicatorBefore"]} />
             ) : null}
-            {renderTabMenu ? (
+            {renderItemMenu ? (
               <Menu kind="context">
-                <Menu.Trigger className={classNames.headerContextMenuTrigger}>{header}</Menu.Trigger>
-                <Menu.Content>{renderTabMenu(tab.id)}</Menu.Content>
+                <Menu.Trigger className={styles["itemMenuTrigger"]}>{item}</Menu.Trigger>
+                <Menu.Content>{renderItemMenu(state.item.id)}</Menu.Content>
               </Menu>
             ) : (
-              header
+              item
             )}
-            {indicatorPosition === "after" ? (
-              <span aria-hidden="true" className={classNames.stripIndicatorAfter} />
+            {state.indicatorPosition === "after" ? (
+              <span aria-hidden="true" className={styles["stripIndicatorAfter"]} />
             ) : null}
           </div>
         );
@@ -140,60 +152,70 @@ export const StripItems = () => {
   );
 };
 
-export const StripRootImpl = ({
-  tabs,
-  activeTabId,
-  onSelect,
-  onClose,
-  onReorder,
-  onPin,
-  renderTabMenu,
-  overlay,
+export const Strip = ({
+  items,
+  activeItemId,
+  defaultActiveItemId = null,
+  renderItemMenu,
+  onItemSelect,
+  onItemClose,
+  onItemMove,
+  onItemPin,
   className,
-  classNames: providedClassNames,
+  ref,
   ...props
-}: TabStripProps & { readonly classNames?: TabClassNames }) => {
-  const inherited = useTabClassNames();
-  const classNames = providedClassNames ?? inherited;
+}: TabStripProps) => {
+  const [current, setCurrent] = useControllableState<TabId | null>({
+    prop: activeItemId,
+    defaultProp: defaultActiveItemId,
+    caller: "Tab.Strip",
+  });
   const { context, listRef, listHandlers } = useTabStrip({
-    tabs,
-    activeTabId,
-    onSelect,
-    onClose,
-    onReorder,
-    onPin,
-    renderTabMenu,
+    items,
+    activeItemId: resolveActiveItem(items, current ?? null)?.id ?? null,
+    onItemSelect: (itemId) => {
+      setCurrent(itemId);
+      onItemSelect?.(itemId);
+    },
+    onItemClose,
+    onItemMove,
+    onItemPin,
+    renderItemMenu,
   });
   const viewportRef = useRef<HTMLDivElement | null>(null);
-  const { isOverflowing, onPointerDown: onScrollHandlePointerDown } = useStripScrollHandle(viewportRef);
+  const { thumb, onPointerDown: onScrollHandlePointerDown } = useStripScrollHandle(viewportRef);
 
   return (
-    <ClassNamesContext value={classNames}>
-      <StripContext value={context}>
-        <div {...props} className={clsx(className, classNames.stripRoot)}>
-          <Container ref={viewportRef} chrome="none" scroll="horizontal" className={classNames.stripListContainer}>
-            <div
-              ref={listRef}
-              role="tablist"
-              aria-orientation="horizontal"
-              className={classNames.stripList}
-              {...listHandlers}
-            >
-              <StripItems />
-            </div>
-          </Container>
-          {isOverflowing ? (
-            <div
-              role="presentation"
-              aria-hidden="true"
-              data-orientation="horizontal"
-              onPointerDown={onScrollHandlePointerDown}
-              className={classNames.stripScrollHandle}
-            />
-          ) : null}
-          {overlay}
-        </div>
-      </StripContext>
-    </ClassNamesContext>
+    <StripContext value={context}>
+      <div ref={ref} {...props} data-component="Tab/Strip" className={clsx(className, styles["stripRoot"])}>
+        <Container
+          ref={viewportRef}
+          chrome="none"
+          scroll="horizontal"
+          scrollbar="none"
+          className={styles["stripListContainer"]}
+        >
+          <div
+            ref={listRef}
+            role="tablist"
+            aria-orientation="horizontal"
+            className={styles["stripList"]}
+            {...listHandlers}
+          >
+            <StripItems />
+          </div>
+        </Container>
+        {thumb.isOverflowing ? (
+          <div
+            role="presentation"
+            aria-hidden="true"
+            data-orientation="horizontal"
+            onPointerDown={onScrollHandlePointerDown}
+            style={{ left: `${String(thumb.offset)}%`, width: `${String(thumb.size)}%` }}
+            className={styles["stripScrollHandle"]}
+          />
+        ) : null}
+      </div>
+    </StripContext>
   );
 };

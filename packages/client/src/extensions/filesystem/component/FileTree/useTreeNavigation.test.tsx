@@ -50,32 +50,38 @@ const noop = () => {};
 const TreeNavigationFixture = ({
   items,
   expandedIds,
-  initialFocusedId,
+  fallbackId,
   onToggleFolder,
   onActivateRow = noop,
+  onSelectSingle = noop,
   onExtendSelection = noop,
+  onToggleSelection = noop,
   onSelectAll = noop,
-  onFocusMoved = noop,
+  onCollapseSelection = noop,
 }: {
   readonly items: readonly FileTreeItem[];
   readonly expandedIds: ReadonlySet<string>;
-  readonly initialFocusedId?: string;
+  readonly fallbackId?: string;
   readonly onToggleFolder?: (item: FileTreeItem, expanded: boolean) => void;
   readonly onActivateRow?: (node: FlatTreeNode) => void;
+  readonly onSelectSingle?: (node: FlatTreeNode) => void;
   readonly onExtendSelection?: (node: FlatTreeNode) => void;
+  readonly onToggleSelection?: (node: FlatTreeNode) => void;
   readonly onSelectAll?: () => void;
-  readonly onFocusMoved?: (id: string) => void;
+  readonly onCollapseSelection?: (node: FlatTreeNode) => void;
 }) => {
-  const { flat, effectiveFocusedId, registerNode, onRowKeyDown, setFocusedId } = useTreeNavigation(
+  const { flat, effectiveFocusedId, registerNode, onRowKeyDown, setFocusedId } = useTreeNavigation({
     items,
     expandedIds,
-    initialFocusedId,
+    fallbackId,
     onToggleFolder,
     onActivateRow,
+    onSelectSingle,
     onExtendSelection,
+    onToggleSelection,
     onSelectAll,
-    onFocusMoved,
-  );
+    onCollapseSelection,
+  });
 
   return (
     <ul role="tree">
@@ -115,7 +121,7 @@ describe("useTreeNavigation hook", () => {
     expect(readme).toHaveFocus();
   });
 
-  it("focusedId가 flat에서 사라지면 effectiveFocusedId가 첫 항목으로 자가치유한다", () => {
+  it("부모를 접어 포커스 행이 사라지면 그 부모 행이 포커스를 받는다", () => {
     const { rerender } = render(<TreeNavigationFixture items={ITEMS} expandedIds={new Set(["src"])} />);
 
     const a = screen.getByRole("treeitem", { name: "a.ts" });
@@ -125,6 +131,20 @@ describe("useTreeNavigation hook", () => {
     rerender(<TreeNavigationFixture items={ITEMS} expandedIds={new Set()} />);
 
     expect(screen.getByRole("treeitem", { name: "src" })).toHaveAttribute("tabindex", "0");
+  });
+
+  it("포커스 행이 지워지면 같은 자리의 다음 행이 포커스를 받는다", () => {
+    const { rerender } = render(<TreeNavigationFixture items={ITEMS} expandedIds={new Set(["src"])} />);
+
+    fireEvent.focus(screen.getByRole("treeitem", { name: "a.ts" }));
+
+    const withoutA: FileTreeItem[] = [
+      { id: "src", name: "src", type: "folder", children: [{ id: "b", name: "b.ts", type: "file" }] },
+      { id: "readme", name: "README.md", type: "file" },
+    ];
+    rerender(<TreeNavigationFixture items={withoutA} expandedIds={new Set(["src"])} />);
+
+    expect(screen.getByRole("treeitem", { name: "b.ts" })).toHaveAttribute("tabindex", "0");
   });
 
   it("Enter는 onActivateRow를 그 행으로 부른다", () => {
@@ -138,32 +158,77 @@ describe("useTreeNavigation hook", () => {
     );
   });
 
-  it("수식키 없는 ArrowDown은 onFocusMoved만 부르고 onExtendSelection은 안 부른다", () => {
-    const onFocusMoved = vi.fn();
+  it("수식키 없는 ArrowDown은 선택도 함께 옮긴다", () => {
+    const onSelectSingle = vi.fn();
     const onExtendSelection = vi.fn();
     render(
       <TreeNavigationFixture
         items={ITEMS}
         expandedIds={new Set()}
-        onFocusMoved={onFocusMoved}
+        onSelectSingle={onSelectSingle}
         onExtendSelection={onExtendSelection}
       />,
     );
 
     fireEvent.keyDown(screen.getByRole("treeitem", { name: "src" }), { key: "ArrowDown" });
 
-    expect(onFocusMoved).toHaveBeenCalledWith("readme");
+    expect(onSelectSingle).toHaveBeenCalledWith(
+      expect.objectContaining({ item: expect.objectContaining({ id: "readme" }) }),
+    );
     expect(onExtendSelection).not.toHaveBeenCalled();
   });
 
-  it("Shift+ArrowDown은 onExtendSelection만 부르고 onFocusMoved는 안 부른다", () => {
-    const onFocusMoved = vi.fn();
+  it("Ctrl+ArrowDown은 포커스만 옮기고 선택은 건드리지 않는다", () => {
+    const onSelectSingle = vi.fn();
+    render(<TreeNavigationFixture items={ITEMS} expandedIds={new Set()} onSelectSingle={onSelectSingle} />);
+
+    fireEvent.keyDown(screen.getByRole("treeitem", { name: "src" }), { key: "ArrowDown", ctrlKey: true });
+
+    expect(screen.getByRole("treeitem", { name: "README.md" })).toHaveFocus();
+    expect(onSelectSingle).not.toHaveBeenCalled();
+  });
+
+  it("Ctrl+Space는 포커스 행의 선택을 뒤집는다", () => {
+    const onToggleSelection = vi.fn();
+    render(<TreeNavigationFixture items={ITEMS} expandedIds={new Set()} onToggleSelection={onToggleSelection} />);
+
+    fireEvent.keyDown(screen.getByRole("treeitem", { name: "src" }), { key: " ", ctrlKey: true });
+
+    expect(onToggleSelection).toHaveBeenCalledWith(
+      expect.objectContaining({ item: expect.objectContaining({ id: "src" }) }),
+    );
+  });
+
+  it("Shift+End는 앵커부터 마지막 행까지 범위를 넓힌다", () => {
+    const onExtendSelection = vi.fn();
+    render(<TreeNavigationFixture items={ITEMS} expandedIds={new Set()} onExtendSelection={onExtendSelection} />);
+
+    fireEvent.keyDown(screen.getByRole("treeitem", { name: "src" }), { key: "End", shiftKey: true });
+
+    expect(onExtendSelection).toHaveBeenCalledWith(
+      expect.objectContaining({ item: expect.objectContaining({ id: "readme" }) }),
+    );
+  });
+
+  it("Escape는 선택을 포커스 행 하나로 줄인다", () => {
+    const onCollapseSelection = vi.fn();
+    render(<TreeNavigationFixture items={ITEMS} expandedIds={new Set()} onCollapseSelection={onCollapseSelection} />);
+
+    fireEvent.keyDown(screen.getByRole("treeitem", { name: "src" }), { key: "Escape" });
+
+    expect(onCollapseSelection).toHaveBeenCalledWith(
+      expect.objectContaining({ item: expect.objectContaining({ id: "src" }) }),
+    );
+  });
+
+  it("Shift+ArrowDown은 범위만 넓히고 단일 선택은 안 한다", () => {
+    const onSelectSingle = vi.fn();
     const onExtendSelection = vi.fn();
     render(
       <TreeNavigationFixture
         items={ITEMS}
         expandedIds={new Set()}
-        onFocusMoved={onFocusMoved}
+        onSelectSingle={onSelectSingle}
         onExtendSelection={onExtendSelection}
       />,
     );
@@ -173,7 +238,7 @@ describe("useTreeNavigation hook", () => {
     expect(onExtendSelection).toHaveBeenCalledWith(
       expect.objectContaining({ item: expect.objectContaining({ id: "readme" }) }),
     );
-    expect(onFocusMoved).not.toHaveBeenCalled();
+    expect(onSelectSingle).not.toHaveBeenCalled();
   });
 
   it("Ctrl+A는 onSelectAll을 부른다", () => {

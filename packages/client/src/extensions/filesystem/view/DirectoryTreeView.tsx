@@ -51,12 +51,15 @@ export const DirectoryTreeView = observer(function DirectoryTreeView() {
     if (item.type !== "folder") viewModel.pinFile(item.id);
   };
   const handleExpand = (item: FileTreeItem, expanded: boolean) => viewModel.setFolderExpanded(item.id, expanded);
-  const handleDrop = (source: FileTreeItem, target: FileTreeItem) => {
+  /** `target`이 `null`이면 워크스페이스 루트로 옮긴다 — 모델은 루트를 빈 경로로 쓴다. */
+  const handleDrop = (sources: readonly FileTreeItem[], target: FileTreeItem | null) => {
     viewModel
-      .moveEntry(source.id, target.id)
-      .then((newPath) => {
-        fileContentViewModel.retargetOpenFile(source.id, newPath);
-        viewModel.retargetTabs(source.id, newPath);
+      .moveEntries(
+        sources.map((source) => source.id),
+        target?.id ?? "",
+      )
+      .then((moved) => {
+        for (const { from, to } of moved) fileContentViewModel.retargetOpenFile(from, to);
       })
       .catch(() => undefined);
   };

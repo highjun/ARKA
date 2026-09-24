@@ -1,12 +1,4 @@
-[data-chrome="bordered"] {
-  border-radius: var(--borderRadius-small);
-  border-style: solid;
-  border-width: var(--borderWidth-thin);
-  border-color: var(--borderColor-muted);
-  background-color: var(--bgColor-inset);
-}
-
-.header {
+.item {
   position: relative;
   display: inline-flex;
   height: var(--control-small-size);
@@ -20,7 +12,7 @@
   border-width: var(--borderWidth-thick) var(--borderWidth-thin) 0 0;
   border-top-color: transparent;
   border-right-color: var(--borderColor-muted);
-  padding-inline: var(--space-sm);
+  padding-inline: var(--space-sm) 0;
   padding-block: 0;
   font-size: var(--text-caption-size);
   line-height: var(--text-caption-lineHeight);
@@ -29,41 +21,93 @@
     border-top-color var(--motion-duration-short) var(--motion-easing-move);
 }
 
-.header[data-active] {
+.item[data-active] {
   background-color: var(--bgColor-inset);
+  border-top-color: var(--borderColor-muted);
+}
+
+/* 윗줄의 accent 는 포커스가 있는 칸에서만 켠다 — 칸이 여럿일 때 어디가 활성인지 가린다. */
+.group[data-active] .item[data-active] {
   border-top-color: var(--borderColor-accent-emphasis);
 }
 
-.headerLabel {
+/* 닫기 자리가 없으면 오른쪽 여백을 탭이 직접 낸다 — 있으면 버튼이 제 여백으로 낸다. */
+.item:not(:has(.itemClose)) {
+  padding-right: var(--space-sm);
+}
+
+.itemClose {
+  position: relative;
+  display: inline-flex;
+  min-width: var(--control-small-size);
+  min-height: var(--control-small-size);
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.itemCloseButton {
+  transition: opacity var(--motion-duration-short) var(--motion-easing-move);
+}
+
+.itemDirtyDot {
+  width: var(--base-size-12);
+  height: var(--base-size-12);
+  border-radius: var(--borderRadius-full);
+  background-color: var(--bgColor-neutral-emphasis);
+  pointer-events: none;
+}
+
+/* 저장 안 한 탭은 닫기 표 대신 점을 보인다 — 손이 올라오면 닫기 표로 돌아간다. */
+.item[data-dirty] .itemCloseButton {
+  position: absolute;
+  opacity: 0;
+}
+
+.item[data-dirty]:hover .itemCloseButton,
+.item[data-dirty]:focus-within .itemCloseButton {
+  opacity: 1;
+}
+
+.item[data-dirty]:hover .itemDirtyDot,
+.item[data-dirty]:focus-within .itemDirtyDot {
+  display: none;
+}
+
+.itemLabel {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.headerLabel[data-preview] {
+.itemLabel[data-preview] {
   font-style: italic;
   padding-right: 0.2em;
 }
 
 @media (pointer: coarse) {
-  .header {
+  .item {
     height: var(--control-minTarget-coarse);
     min-width: 135px;
   }
 }
 
-.headerIcon {
+.itemIcon {
   transform: translateY(1px);
 }
 
-.headerContextMenuTrigger {
+.itemMenuTrigger {
   display: contents;
 }
 
 .stripRoot {
   position: relative;
   display: flex;
+
+  /* 스크롤 손잡이가 앉을 자리. 넘치든 아니든 늘 비워 둬 높이가 튀지 않는다. */
+  --tab-strip-scroll-gutter: var(--base-size-8);
+
   flex-shrink: 0;
   user-select: none;
   align-items: center;
@@ -72,7 +116,17 @@
   border-style: solid;
   border-width: 0 0 var(--borderWidth-thin) 0;
   border-color: var(--borderColor-default);
+  padding-bottom: var(--tab-strip-scroll-gutter);
   background-color: var(--bgColor-default);
+}
+
+/* 띠를 잡으면 칸이 통째로 따라온다. */
+.stripRoot[draggable="true"] {
+  cursor: grab;
+}
+
+.stripRoot[draggable="true"]:active {
+  cursor: grabbing;
 }
 
 .stripListContainer {
@@ -139,24 +193,17 @@
   pointer-events: none;
 }
 
-.stripDraggableHeader {
+.stripDraggableItem {
   cursor: grab;
   touch-action: none;
 }
 
-.stripDraggableHeader:active {
+.stripDraggableItem:active {
   cursor: grabbing;
 }
 
-.stripDropOverlay {
-  position: absolute;
-  inset: 0;
-  opacity: 0.7;
-  background-color: var(--bgColor-accent-emphasis);
-  pointer-events: none;
-}
-
-.group {
+.root {
+  position: relative;
   display: flex;
   height: 100%;
   width: 100%;
@@ -167,160 +214,105 @@
   color: var(--fgColor-default);
 }
 
-.groupStrip {
-  border-radius: 0;
-  border-inline-width: 0;
-  border-top-width: 0;
-}
-
-.groupPanelWrapper {
+.split {
   position: relative;
+  display: flex;
   min-height: 0;
-  flex-grow: 1;
+  min-width: 0;
+  flex: 1 1 0;
   overflow: hidden;
 }
 
-.groupPanel {
-  height: 100%;
+.split[data-orientation="horizontal"] {
+  flex-direction: row;
+}
+
+.split[data-orientation="vertical"] {
+  flex-direction: column;
+}
+
+/* Sash 는 겹쳐 있어 자리를 차지하지 않는다 — 칸 사이의 금은 앞 자식이 긋는다. */
+.split[data-orientation="horizontal"] > :not(:last-child):not(.sash) {
+  border-right: var(--borderWidth-thin) solid var(--borderColor-muted);
+}
+
+.split[data-orientation="vertical"] > :not(:last-child):not(.sash) {
+  border-bottom: var(--borderWidth-thin) solid var(--borderColor-muted);
+}
+
+.group {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  flex: 1 1 0;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--bgColor-inset);
+  color: var(--fgColor-default);
+}
+
+.panel {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  flex-grow: 1;
+  overflow: hidden;
   background-color: var(--bgColor-inset);
   font-size: var(--text-body-size-medium);
   line-height: var(--text-body-lineHeight-medium);
 }
 
-.groupPanelContent {
-  height: 100%;
-  min-height: 0;
+/* 넘치는 것은 Container 가 든다 — 스크롤 막대도 거기 규칙을 그대로 따른다. */
+.panelScroll {
+  min-width: 0;
+  flex-grow: 1;
 }
 
-.groupPanelEmpty {
+.panel[data-empty] .panelScroll {
   display: grid;
-  height: 100%;
   place-items: center;
   padding: var(--space-md);
-  font-size: var(--text-body-size-medium);
-  line-height: var(--text-body-lineHeight-medium);
   font-style: italic;
   color: var(--fgColor-muted);
 }
 
-.panelDropIndicator {
+/* 놓으면 칸이 갈라질 자리. 내용이 비치도록 옅은 회색 상자로 덮는다. */
+.groupDropIndicator {
   position: absolute;
   inset: 0;
 
   --tab-drag-affordance-z: 10;
 
   z-index: var(--tab-drag-affordance-z);
-  opacity: 0.7;
-  background-color: var(--bgColor-accent-emphasis);
+  margin: var(--space-xs);
+  border-radius: var(--borderRadius-medium);
+  border-style: solid;
+  border-width: var(--borderWidth-thin);
+  border-color: var(--borderColor-default);
+  background-color: var(--bgColor-neutral-muted);
   pointer-events: none;
 }
 
-.panelDropIndicator[data-position="left"] {
+.groupDropIndicator[data-position="left"] {
   right: 50%;
 }
 
-.panelDropIndicator[data-position="right"] {
+.groupDropIndicator[data-position="right"] {
   left: 50%;
 }
 
-.panelDropIndicator[data-position="top"] {
+.groupDropIndicator[data-position="top"] {
   bottom: 50%;
 }
 
-.panelDropIndicator[data-position="bottom"] {
+.groupDropIndicator[data-position="bottom"] {
   top: 50%;
 }
 
-.splitRootHorizontal {
+.sash {
   position: relative;
-  display: flex;
-  height: 100%;
-  width: 100%;
-  flex-grow: 1;
-  flex-direction: row;
-  overflow: hidden;
-  color: var(--fgColor-default);
-}
-
-.splitRootVertical {
-  position: relative;
-  display: flex;
-  height: 100%;
-  width: 100%;
-  flex-grow: 1;
-  flex-direction: column;
-  overflow: hidden;
-  color: var(--fgColor-default);
-}
-
-.splitBranchHorizontal {
-  position: relative;
-  display: flex;
-  min-height: 0;
-  min-width: 0;
-  flex-grow: 1;
-  flex-direction: row;
-  overflow: hidden;
-  border-color: var(--borderColor-muted);
-}
-
-.splitBranchVertical {
-  position: relative;
-  display: flex;
-  min-height: 0;
-  min-width: 0;
-  flex-grow: 1;
-  flex-direction: column;
-  overflow: hidden;
-  border-color: var(--borderColor-muted);
-}
-
-.splitBranchDividerHorizontal {
-  border-style: solid;
-  border-width: 0 var(--borderWidth-thin) 0 0;
-}
-
-.splitBranchDividerVertical {
-  border-style: solid;
-  border-width: 0 0 var(--borderWidth-thin) 0;
-}
-
-.leafSection {
-  position: relative;
-  min-height: 0;
-  min-width: 0;
-  overflow: hidden;
-  border-color: var(--borderColor-muted);
-  background-color: var(--bgColor-inset);
-}
-
-.leafSectionActive {
-  outline: 1px solid var(--borderColor-accent-emphasis);
-  outline-offset: -1px;
-}
-
-.leafGroup {
-  height: 100%;
-  border-radius: 0;
-  border-width: 0;
-}
-
-.rootLeafSection {
-  position: relative;
-  display: flex;
-  height: 100%;
-  width: 100%;
-  min-height: 0;
-  flex-grow: 1;
-  flex-direction: column;
-}
-
-.rootLeafGroup {
-  height: 100%;
-}
-
-.resizeHandle {
-  position: absolute;
+  flex: 0 0 auto;
 
   --tab-drag-affordance-z: 10;
 
@@ -329,9 +321,26 @@
   border: none;
   background-color: transparent;
   outline: none;
+  touch-action: none;
 }
 
-.resizeHandle::after {
+.sash[data-orientation="horizontal"] {
+  width: 8px;
+  margin-inline: -4px;
+  cursor: col-resize;
+}
+
+.sash[data-orientation="vertical"] {
+  height: 8px;
+  margin-block: -4px;
+  cursor: row-resize;
+}
+
+.sash[aria-disabled="true"] {
+  cursor: default;
+}
+
+.sash::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -343,63 +352,61 @@
   border-color: var(--borderColor-muted);
   background-color: var(--bgColor-default);
   box-shadow: var(--shadow-resting-small);
+  opacity: 0;
+  transition: opacity var(--motion-duration-short) var(--motion-easing-move);
 }
 
-.resizeHandle[data-orientation="horizontal"] {
-  top: 0;
-  right: 0;
-  transform: translateX(50%);
-  width: 8px;
-  height: 100%;
-  cursor: col-resize;
-}
-
-.resizeHandle[data-orientation="horizontal"]::after {
+.sash[data-orientation="horizontal"]::after {
   width: 4px;
   height: var(--control-small-size);
 }
 
-.resizeHandle[data-orientation="vertical"] {
-  bottom: 0;
-  left: 0;
-  transform: translateY(50%);
-  width: 100%;
-  height: 8px;
-  cursor: row-resize;
-}
-
-.resizeHandle[data-orientation="vertical"]::after {
+.sash[data-orientation="vertical"]::after {
   width: var(--control-small-size);
   height: 4px;
 }
 
+.sash:hover::after,
+.sash:focus-visible::after,
+.sash[data-resizing]::after {
+  opacity: 1;
+}
+
+/* 띠의 스크롤 손잡이. 네이티브 막대를 껐으니 표시는 이것 하나다 — 손이 올라올 때만 뜬다. */
 .stripScrollHandle {
   position: absolute;
+  opacity: 0;
+  transition: opacity var(--motion-duration-short) var(--motion-easing-move);
   bottom: 0;
-  left: 50%;
-  transform: translate(-50%, 50%);
-  width: var(--control-small-size);
-  height: 8px;
+  min-width: var(--control-small-size);
+  height: var(--tab-strip-scroll-gutter);
   cursor: grab;
   touch-action: none;
+}
+
+.stripRoot:hover .stripScrollHandle,
+.stripRoot:focus-within .stripScrollHandle,
+.stripScrollHandle:active {
+  opacity: 1;
 }
 
 .stripScrollHandle:active {
   cursor: grabbing;
 }
 
+/* 손가락 화면엔 hover 가 없다 — 늘 보여야 끌 수 있다. */
+@media (pointer: coarse) {
+  .stripScrollHandle {
+    opacity: 1;
+  }
+}
+
+/* 엄지는 비워 둔 아래 칸을 거의 꽉 채운다 — 테두리 없이 회색 하나로. */
 .stripScrollHandle::after {
   content: "";
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: var(--control-small-size);
-  height: 4px;
+  inset-inline: 0;
+  inset-block: 1px;
   border-radius: var(--borderRadius-full);
-  border-style: solid;
-  border-width: var(--borderWidth-thin);
-  border-color: var(--borderColor-muted);
-  background-color: var(--bgColor-default);
-  box-shadow: var(--shadow-resting-small);
+  background-color: var(--bgColor-neutral-emphasis);
 }

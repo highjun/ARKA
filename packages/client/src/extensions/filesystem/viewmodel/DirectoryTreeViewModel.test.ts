@@ -309,17 +309,42 @@ describe("createEntry / renameEntry / removeEntry", () => {
     await expect(tree.createEntry("", "a.md", "file")).rejects.toThrow(/이미 있다/u);
   });
 
-  it("moveEntry 는 Model 에 위임하고 옮긴 뒤의 경로를 돌려준다", async () => {
+  it("moveEntries 는 Model 에 위임하고 옛·새 경로 짝을 돌려준다", async () => {
     const tree = viewModel({ "": [entry("a.md"), entry("projects", "dir")], projects: [] });
     tree.start();
     await settled();
     tree.setFolderExpanded("projects", true);
     await settled();
 
-    const to = await tree.moveEntry("a.md", "projects");
+    const moved = await tree.moveEntries(["a.md"], "projects");
 
-    expect(to).toBe("projects/a.md");
+    expect(moved).toEqual([{ from: "a.md", to: "projects/a.md" }]);
     expect(tree.rows.find((row) => row.id === "projects")?.children?.map((c) => c.id)).toEqual(["projects/a.md"]);
+  });
+
+  it("옮긴 뒤에는 옮긴 것들이 선택되고 목적지 폴더가 펼쳐진다", async () => {
+    const tree = viewModel({ "": [entry("a.md"), entry("b.md"), entry("projects", "dir")], projects: [] });
+    tree.start();
+    await settled();
+
+    await tree.moveEntries(["a.md", "b.md"], "projects");
+    await settled();
+
+    expect(tree.selectedIds).toEqual(["projects/a.md", "projects/b.md"]);
+    expect(tree.expandedIds).toContain("projects");
+  });
+
+  it("루트로 옮기면 빈 경로를 부모로 쓴다", async () => {
+    const tree = viewModel({ "": [entry("projects", "dir")], projects: [entry("a.md")] });
+    tree.start();
+    await settled();
+    tree.setFolderExpanded("projects", true);
+    await settled();
+
+    const moved = await tree.moveEntries(["projects/a.md"], "");
+
+    expect(moved).toEqual([{ from: "projects/a.md", to: "a.md" }]);
+    expect(tree.rows.map((row) => row.id)).toContain("a.md");
   });
 
   it("removeEntries는 후손을 걸러내고 나머지만 지운다", async () => {

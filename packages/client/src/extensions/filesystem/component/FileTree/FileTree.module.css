@@ -1,5 +1,7 @@
 .root {
   margin: 0;
+  /* 행이 없는 바닥까지 트리가 받는다 — 선택 놓기와 루트로 옮기기가 그 자리에서 일어난다. */
+  min-block-size: 100%;
   list-style: none;
   user-select: none;
   padding-block: var(--space-xs);
@@ -25,6 +27,7 @@
 
 .guide {
   position: absolute;
+  z-index: 1;
   top: 0;
   bottom: 0;
   width: 0;
@@ -153,4 +156,10 @@
   padding-block: var(--space-sm);
   font-style: italic;
   color: var(--fgColor-muted);
+}
+
+.root[data-drop="root"] {
+  outline: var(--borderWidth-thick) solid var(--fgColor-accent);
+  outline-offset: calc(-1 * var(--borderWidth-thick));
+  border-radius: var(--borderRadius-medium);
 }

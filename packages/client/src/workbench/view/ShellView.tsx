@@ -157,7 +157,7 @@ export const ShellView = observer(function ShellView() {
           renderContent={renderContent}
           onItemSelect={(groupId, itemId) => tabs.selectTab(groupId, itemId)}
           onItemClose={(groupId, itemId) => tabs.requestCloseTab(groupId, itemId)}
-          onItemReorder={(groupId, nextItemIds) => tabs.reorderTabs(groupId, nextItemIds)}
+          onItemMove={(groupId, itemId, beforeItemId) => tabs.moveTab(groupId, itemId, beforeItemId)}
           onItemPin={(_groupId, itemId) => tabs.pinTab(itemId)}
           onGroupSplit={(groupId, itemId, edge) => tabs.splitTab(groupId, itemId, edge)}
           onSplitResize={(splitId, childId, nextSize) => tabs.resizePane(splitId, childId, nextSize)}

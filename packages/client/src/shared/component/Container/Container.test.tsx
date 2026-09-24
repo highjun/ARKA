@@ -24,6 +24,18 @@ describe("Container", () => {
   implementsNoA11yViolations(() => <Container>content</Container>);
   implementsRef((extra) => <Container {...extra}>content</Container>, HTMLDivElement);
 
+  it("막대는 기본으로 그린다 — data-scrollbar 로 노출한다", () => {
+    const { container } = render(<Container>content</Container>);
+
+    expect(container.querySelector('[data-scrollbar="auto"]')).toBeInTheDocument();
+  });
+
+  it("scrollbar=\"none\" 이면 막대를 끈다 — 스스로 손잡이를 그리는 자리다", () => {
+    const { container } = render(<Container scrollbar="none">content</Container>);
+
+    expect(container.querySelector('[data-scrollbar="none"]')).toBeInTheDocument();
+  });
+
   it("chrome 을 data-chrome 으로 노출한다", () => {
     const { container } = render(<Container chrome="none">content</Container>);
 

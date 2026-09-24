@@ -26,6 +26,11 @@ declare module "#core/di" {
     "arka.filesystem.directoryTreeViewModel": IDirectoryTreeViewModel;
   }
 }
+export interface MovedEntry {
+  readonly from: string;
+  readonly to: string;
+}
+
 export interface IDirectoryTreeViewModel extends Disposable {
   readonly rows: readonly FileTreeRow[];
   readonly expandedIds: readonly string[];
@@ -42,7 +47,8 @@ export interface IDirectoryTreeViewModel extends Disposable {
   renameEntry(id: string, newName: string): Promise<void>;
   removeEntry(id: string): Promise<void>;
   removeEntries(ids: readonly string[]): Promise<void>;
-  moveEntry(id: string, toParentId: string): Promise<string>;
+  /** 순서대로 옮기고 (옛 경로 → 새 경로) 짝을 돌려준다. 실패한 것은 빠진다. */
+  moveEntries(ids: readonly string[], toParentId: string): Promise<readonly MovedEntry[]>;
 
   openFile(path: string): void;
   pinFile(path: string): void;

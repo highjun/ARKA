@@ -4,7 +4,7 @@ import type { Container, Disposable } from "#core/di";
 import { makeAutoObservable, observable, observableRef, reaction } from "mobx";
 import type { ITabLayout, OpenTab, PaneId, PaneLeaf, PaneNode, SplitOrientation } from "../model/ITabLayout";
 import type { ITabSystem } from "../model/ITabSystem";
-import { collectTabs, findLeaf, firstLeafId, neighbourOf, pruneTree, replaceLeaf } from "../model/paneTree";
+import { collectTabs, findLeaf, firstLeafId, leafOfTab, neighbourOf, pruneTree, replaceLeaf } from "../model/paneTree";
 import { ROOT_PANE_ID } from "../model/tabsShare";
 import type { ITabSystemViewModel, PaneRowNode, SplitEdge, TabContextTarget, TabRow } from "./ITabSystemViewModel";
 
@@ -164,40 +164,77 @@ export class TabSystemViewModel implements ITabSystemViewModel {
     this.#commit(nextTree, this.#layout.activePaneId);
   }
 
-  reorderTabs(paneId: PaneId, nextTabIds: readonly string[]): void {
+  /**
+   * 탭을 `targetPaneId` 칸의 `beforeTabId` 앞으로 옮긴다 — 맨 뒤면 `null`.
+   * 탭이 어느 칸에 있었는지는 여기서 찾는다. 같은 칸이면 그대로 순서 바꾸기다.
+   */
+  moveTab(targetPaneId: PaneId, tabId: string, beforeTabId: string | null): void {
     const tree = this.#layout.tree;
-    const leaf = findLeaf(tree, paneId);
-    if (!leaf) return;
+    const source = leafOfTab(tree, tabId);
+    if (!source || !findLeaf(tree, targetPaneId)) return;
+    const moved = source.tabs.find((tab) => tab.id === tabId);
+    if (!moved) return;
 
-    const byId = new Map(leaf.tabs.map((tab) => [tab.id, tab] as const));
-    const reordered = nextTabIds.map((id) => byId.get(id)).filter((tab): tab is OpenTab => tab !== undefined);
-    if (reordered.length !== leaf.tabs.length) return;
+    const detached = replaceLeaf(tree, source.id, (leaf) => {
+      const remaining = leaf.tabs.filter((tab) => tab.id !== tabId);
+      return {
+        kind: "leaf",
+        id: leaf.id,
+        tabs: remaining,
+        activeTabId: leaf.activeTabId === tabId ? (remaining[0]?.id ?? null) : leaf.activeTabId,
+        size: leaf.size,
+      };
+    });
 
-    const nextTree = replaceLeaf(tree, paneId, (l) => ({ ...l, tabs: reordered }));
-    this.#layout.setTree(nextTree);
+    const nextTree = replaceLeaf(detached, targetPaneId, (leaf) => {
+      const at = beforeTabId === null ? -1 : leaf.tabs.findIndex((tab) => tab.id === beforeTabId);
+      const index = at < 0 ? leaf.tabs.length : at;
+      return {
+        kind: "leaf",
+        id: leaf.id,
+        tabs: [...leaf.tabs.slice(0, index), moved, ...leaf.tabs.slice(index)],
+        activeTabId: tabId,
+        size: leaf.size,
+      };
+    });
+
+    this.#commit(nextTree, targetPaneId);
   }
 
-  splitTab(sourceLeafId: PaneId, tabId: string, position: SplitEdge): void {
+  /**
+   * `targetLeafId` 칸을 쪼개고 그 자리에 `tabId` 를 옮긴다.
+   * 탭이 어느 칸에 있었는지는 여기서 찾는다 — 그리는 쪽은 "어디에 놓았는지"만 안다.
+   */
+  splitTab(targetLeafId: PaneId, tabId: string, position: SplitEdge): void {
     const tree = this.#layout.tree;
-    const sourceLeaf = findLeaf(tree, sourceLeafId);
-    if (!sourceLeaf) return;
+    const sourceLeaf = leafOfTab(tree, tabId);
+    if (!sourceLeaf || !findLeaf(tree, targetLeafId)) return;
     const movedTab = sourceLeaf.tabs.find((tab) => tab.id === tabId);
     if (!movedTab) return;
+    // 혼자 있는 탭을 제 칸에 다시 놓는 것은 아무 일도 아니다.
+    if (sourceLeaf.id === targetLeafId && sourceLeaf.tabs.length < 2) return;
 
-    const remaining = sourceLeaf.tabs.filter((tab) => tab.id !== tabId);
-    const updatedSource: PaneLeaf = {
-      kind: "leaf",
-      id: sourceLeaf.id,
-      tabs: remaining,
-      activeTabId: sourceLeaf.activeTabId === tabId ? (remaining[0]?.id ?? null) : sourceLeaf.activeTabId,
-    };
-    const newLeafId = `${sourceLeafId}-split-${tabId}`;
+    const withoutMoved = replaceLeaf(tree, sourceLeaf.id, (leaf) => {
+      const remaining = leaf.tabs.filter((tab) => tab.id !== tabId);
+      return {
+        kind: "leaf",
+        id: leaf.id,
+        tabs: remaining,
+        activeTabId: leaf.activeTabId === tabId ? (remaining[0]?.id ?? null) : leaf.activeTabId,
+      };
+    });
+
+    const newLeafId = `${targetLeafId}-split-${tabId}`;
     const newLeaf: PaneLeaf = { kind: "leaf", id: newLeafId, tabs: [movedTab], activeTabId: tabId };
     const orientation: SplitOrientation = position === "left" || position === "right" ? "horizontal" : "vertical";
-    const children = position === "left" || position === "top" ? [newLeaf, updatedSource] : [updatedSource, newLeaf];
-    const splitNode: PaneNode = { kind: "split", id: `${sourceLeafId}-split-root`, orientation, children };
 
-    const nextTree = replaceLeaf(tree, sourceLeafId, () => splitNode);
+    const nextTree = replaceLeaf(withoutMoved, targetLeafId, (leaf) => ({
+      kind: "split",
+      id: `${targetLeafId}-split-root`,
+      orientation,
+      children: position === "left" || position === "top" ? [newLeaf, leaf] : [leaf, newLeaf],
+    }));
+
     this.#commit(nextTree, newLeafId);
   }
 

@@ -25,6 +25,8 @@ const preview: Preview = {
   parameters: {
     backgrounds: { disable: true },
     viewport: { options: VIEWPORTS },
+    /** 사이드바는 기본이 파일 글로브 순서다 — 제목의 `00-`·`01-`·`02-` 접두사가 먹도록 제목순으로 세운다. */
+    options: { storySort: { method: "alphabetical" } },
   },
   globalTypes: {
     colorMode: {

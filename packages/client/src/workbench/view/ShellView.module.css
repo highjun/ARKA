@@ -1,22 +1,10 @@
-.brandGroup {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
+.paletteButton {
+  display: inline-grid;
 }
 
-.brandText {
-  display: inline-flex;
-  align-items: center;
-  height: 20px;
-}
-
-.buildId {
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .buildId {
-    display: inline;
+@media (min-width: 1080px) {
+  .paletteButton {
+    display: none;
   }
 }
 

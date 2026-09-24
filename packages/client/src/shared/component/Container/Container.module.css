@@ -3,6 +3,14 @@
   height: 100%;
   color: var(--fgColor-default);
   scrollbar-width: thin;
+
+  /* 막대는 기본으로 숨긴다 — 자리는 그대로라 내용이 밀리지 않는다. */
+  scrollbar-color: transparent transparent;
+}
+
+/* 손이 올라오거나 안에 초점이 들어올 때만 막대를 보인다. */
+.root:hover,
+.root:focus-within {
   scrollbar-color: var(--control-transparent-bgColor-active) transparent;
 }
 
@@ -20,6 +28,11 @@
 
 .root[data-scroll="none"] {
   overflow: visible;
+}
+
+/* 스스로 손잡이를 그리는 자리는 막대를 아예 끈다 — 표시가 둘이 되지 않게. */
+.root[data-scrollbar="none"] {
+  scrollbar-width: none;
 }
 
 .root[data-chrome="visible"] {

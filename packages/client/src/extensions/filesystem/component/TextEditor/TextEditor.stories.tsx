@@ -13,7 +13,7 @@ main();
 `;
 
 const meta = {
-  title: "filesystem/TextEditor",
+  title: "02-filesystem/TextEditor",
   component: TextEditor,
   decorators: [
     (Story) => (

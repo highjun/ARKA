@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  canDropInto,
   compactFolderChains,
+  dropParentIdOf,
   isApplePlatform,
   nextSelection,
   selectAll,
@@ -49,8 +51,9 @@ describe("selectionIntentOf", () => {
     expect(selectionIntentOf({ metaKey: false, ctrlKey: false, shiftKey: true }, false)).toBe("range");
   });
 
-  it("shiftKey가 toggle 수식키보다 우선한다", () => {
-    expect(selectionIntentOf({ metaKey: true, ctrlKey: true, shiftKey: true }, true)).toBe("range");
+  it("toggle 수식키와 shiftKey를 함께 누르면 rangeAdd다 — 고른 것 위에 범위를 얹는다", () => {
+    expect(selectionIntentOf({ metaKey: true, ctrlKey: true, shiftKey: true }, true)).toBe("rangeAdd");
+    expect(selectionIntentOf({ metaKey: false, ctrlKey: true, shiftKey: true }, false)).toBe("rangeAdd");
   });
 
   it("아무 수식키도 없으면 replace다", () => {
@@ -203,5 +206,70 @@ describe("compactFolderChains", () => {
       { id: "y", name: "x/y", type: "folder", children: undefined },
       { id: "b/f", name: "f.ts", type: "file" },
     ]);
+  });
+});
+
+describe("dropParentIdOf", () => {
+  it("폴더 행은 그 폴더 자신이 목적지다", () => {
+    expect(dropParentIdOf({ id: "src", type: "folder", parentId: null })).toBe("src");
+  });
+
+  it("파일 행은 그 파일이 든 폴더가 목적지다", () => {
+    expect(dropParentIdOf({ id: "src/main.ts", type: "file", parentId: "src" })).toBe("src");
+  });
+
+  it("행 밖(바닥)은 루트가 목적지다", () => {
+    expect(dropParentIdOf(undefined)).toBeNull();
+  });
+
+  it("루트에 놓인 파일 행도 루트가 목적지다", () => {
+    expect(dropParentIdOf({ id: "package.json", type: "file", parentId: null })).toBeNull();
+  });
+});
+
+describe("canDropInto", () => {
+  const ORDER = [
+    { id: "src", type: "folder" as const, parentId: null },
+    { id: "src/components", type: "folder" as const, parentId: "src" },
+    { id: "src/main.ts", type: "file" as const, parentId: "src" },
+    { id: "locked", type: "folder" as const, parentId: null, disabled: true },
+    { id: "readme.md", type: "file" as const, parentId: null },
+  ];
+  const rowOf = (id: string) => ORDER.find((row) => row.id === id)!;
+
+  it("다른 폴더로는 갈 수 있다", () => {
+    expect(canDropInto(rowOf("src/main.ts"), "src/components", ORDER)).toBe(true);
+  });
+
+  it("루트로 뺄 수 있다", () => {
+    expect(canDropInto(rowOf("src/main.ts"), null, ORDER)).toBe(true);
+  });
+
+  it("이미 든 폴더로는 못 간다 — 제자리다", () => {
+    expect(canDropInto(rowOf("src/main.ts"), "src", ORDER)).toBe(false);
+  });
+
+  it("이미 루트에 있는 것은 루트로 못 간다", () => {
+    expect(canDropInto(rowOf("readme.md"), null, ORDER)).toBe(false);
+  });
+
+  it("자기 자신에게는 못 간다", () => {
+    expect(canDropInto(rowOf("src"), "src", ORDER)).toBe(false);
+  });
+
+  it("자기 안쪽으로는 못 간다", () => {
+    expect(canDropInto(rowOf("src"), "src/components", ORDER)).toBe(false);
+  });
+
+  it("비활성 폴더로는 못 간다", () => {
+    expect(canDropInto(rowOf("src/main.ts"), "locked", ORDER)).toBe(false);
+  });
+
+  it("비활성 행은 끌어도 못 놓는다", () => {
+    expect(canDropInto({ id: "x", type: "file", parentId: null, disabled: true }, "src", ORDER)).toBe(false);
+  });
+
+  it("파일은 목적지가 될 수 없다", () => {
+    expect(canDropInto(rowOf("src/main.ts"), "readme.md", ORDER)).toBe(false);
   });
 });

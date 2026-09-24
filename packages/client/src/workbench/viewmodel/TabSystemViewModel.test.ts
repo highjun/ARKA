@@ -418,6 +418,132 @@ describe("ITabSystemViewModel — 분할", () => {
     expect(tree.children.map((child) => child.id)).toEqual([`${ROOT_PANE_ID}-split-b`, ROOT_PANE_ID]);
   });
 
+  it("다른 칸의 가장자리에 놓으면 그 칸이 갈라지고 탭이 그리로 옮겨간다", () => {
+    const { tabLayout, viewModel } = make();
+    tabLayout.setTree({
+      kind: "split",
+      id: "root-split",
+      orientation: "horizontal",
+      children: [
+        {
+          kind: "leaf",
+          id: "left",
+          tabs: [
+            { id: "a", kind: "file", uri: URI.file("a"), title: "a" },
+            { id: "b", kind: "file", uri: URI.file("b"), title: "b" },
+          ],
+          activeTabId: "a",
+        },
+        {
+          kind: "leaf",
+          id: "right",
+          tabs: [{ id: "c", kind: "file", uri: URI.file("c"), title: "c" }],
+          activeTabId: "c",
+        },
+      ],
+    });
+
+    // left 에 있던 b 를 right 아래쪽 가장자리에 놓는다.
+    viewModel.splitTab("right", "b", "bottom");
+
+    const tree = viewModel.tree;
+    if (tree.kind !== "split") throw new Error("split 노드여야 한다");
+    const left = findLeaf(tree, "left");
+    expect(left && tabIdsOf(left)).toEqual(["a"]);
+
+    const created = findLeaf(tree, "right-split-b");
+    expect(created && tabIdsOf(created)).toEqual(["b"]);
+    expect(viewModel.activePaneId).toBe("right-split-b");
+
+    const branch = tree.children.find((child) => child.kind === "split" && child.id === "right-split-root");
+    if (branch === undefined || branch.kind !== "split") throw new Error("right 가 갈라져야 한다");
+    expect(branch.orientation).toBe("vertical");
+    expect(branch.children.map((child) => child.id)).toEqual(["right", "right-split-b"]);
+  });
+
+  it("혼자 있는 탭을 제 칸에 다시 놓으면 아무 일도 안 한다", () => {
+    const { tabLayout, viewModel } = make();
+    tabLayout.setTree({
+      kind: "leaf",
+      id: ROOT_PANE_ID,
+      tabs: [{ id: "a", kind: "file", uri: URI.file("a"), title: "a" }],
+      activeTabId: "a",
+    });
+
+    viewModel.splitTab(ROOT_PANE_ID, "a", "right");
+
+    expect(viewModel.tree.kind).toBe("leaf");
+  });
+
+  it("다른 칸의 탭을 끌어와 꽂으면 그 자리에 들어가고 원래 칸에서 빠진다", () => {
+    const { tabLayout, viewModel } = make();
+    tabLayout.setTree({
+      kind: "split",
+      id: "root-split",
+      orientation: "horizontal",
+      children: [
+        {
+          kind: "leaf",
+          id: "left",
+          tabs: [
+            { id: "a", kind: "file", uri: URI.file("a"), title: "a" },
+            { id: "b", kind: "file", uri: URI.file("b"), title: "b" },
+          ],
+          activeTabId: "a",
+        },
+        {
+          kind: "leaf",
+          id: "right",
+          tabs: [{ id: "c", kind: "file", uri: URI.file("c"), title: "c" }],
+          activeTabId: "c",
+        },
+      ],
+    });
+
+    // left 의 b 를 right 의 c 앞으로.
+    viewModel.moveTab("right", "b", "c");
+
+    const tree = viewModel.tree;
+    const left = findLeaf(tree, "left");
+    const right = findLeaf(tree, "right");
+    expect(left && tabIdsOf(left)).toEqual(["a"]);
+    expect(right && tabIdsOf(right)).toEqual(["b", "c"]);
+    expect(right?.activeTabId).toBe("b");
+    expect(viewModel.activePaneId).toBe("right");
+  });
+
+  it("beforeTabId 가 null 이면 맨 뒤로 간다", () => {
+    const { tabLayout, viewModel } = make();
+    tabLayout.setTree({
+      kind: "leaf",
+      id: ROOT_PANE_ID,
+      tabs: [
+        { id: "a", kind: "file", uri: URI.file("a"), title: "a" },
+        { id: "b", kind: "file", uri: URI.file("b"), title: "b" },
+      ],
+      activeTabId: "a",
+    });
+
+    viewModel.moveTab(ROOT_PANE_ID, "a", null);
+
+    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(["b", "a"]);
+  });
+
+  it("없는 탭·없는 칸으로 옮기면 무시한다", () => {
+    const { tabLayout, viewModel } = make();
+    tabLayout.setTree({
+      kind: "leaf",
+      id: ROOT_PANE_ID,
+      tabs: [{ id: "a", kind: "file", uri: URI.file("a"), title: "a" }],
+      activeTabId: "a",
+    });
+
+    viewModel.moveTab(ROOT_PANE_ID, "없는탭", null);
+    viewModel.moveTab("없는칸", "a", null);
+
+    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(["a"]);
+  });
+
   it("없는 leaf·탭을 분할하려 하면 무시한다", async () => {
     const { viewModel, tabs } = make();
     await preview(tabs, "a.md");
@@ -489,27 +615,11 @@ describe("ITabSystemViewModel — 재정렬", () => {
       activeTabId: "a",
     });
 
-    viewModel.reorderTabs(ROOT_PANE_ID, ["b", "a"]);
+    viewModel.moveTab(ROOT_PANE_ID, "b", "a");
 
     expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(["b", "a"]);
   });
 
-  it("id 개수가 안 맞으면 무시한다 — View 가 들고 있던 탭 집합이 어긋난 것이다", () => {
-    const { tabLayout, viewModel } = make();
-    tabLayout.setTree({
-      kind: "leaf",
-      id: ROOT_PANE_ID,
-      tabs: [
-        { id: "a", kind: "file", uri: URI.file("a"), title: "a" },
-        { id: "b", kind: "file", uri: URI.file("b"), title: "b" },
-      ],
-      activeTabId: "a",
-    });
-
-    viewModel.reorderTabs(ROOT_PANE_ID, ["a"]);
-
-    expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(["a", "b"]);
-  });
 });
 
 describe("ITabSystemViewModel — 분할된 상태에서 미리보기", () => {

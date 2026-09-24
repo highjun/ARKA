@@ -3,7 +3,13 @@ import type { Disposable } from "#core/di";
 import { makeAutoObservable, observable, observableRef, runInAction } from "mobx";
 import type { DirectoryMap, IDirectoryTreeModel } from "../model/IDirectoryTreeModel";
 import type { ICommandService } from "#core/commands";
-import type { ContextMenuTarget, IDirectoryTreeViewModel, EditingEntry, FileTreeRow } from "./IDirectoryTreeViewModel";
+import type {
+  ContextMenuTarget,
+  IDirectoryTreeViewModel,
+  EditingEntry,
+  FileTreeRow,
+  MovedEntry,
+} from "./IDirectoryTreeViewModel";
 import { GHOST_ID } from "./share";
 
 export class DirectoryTreeViewModel implements IDirectoryTreeViewModel {
@@ -156,13 +162,22 @@ export class DirectoryTreeViewModel implements IDirectoryTreeViewModel {
     for (const id of roots) await this.#model.removeEntry(id);
   }
 
-  async moveEntry(id: string, toParentId: string): Promise<string> {
-    try {
-      return await this.#model.moveToFolder(id, toParentId);
-    } catch (error) {
-      this.#reportFailure("옮기지 못했다")(error);
-      throw error;
+  /** 옮긴 뒤에는 옮긴 것들을 선택해 두고 목적지 폴더를 펼친다 — 어디로 갔는지 눈으로 좇게. */
+  async moveEntries(ids: readonly string[], toParentId: string): Promise<readonly MovedEntry[]> {
+    const moved: MovedEntry[] = [];
+    for (const id of ids) {
+      try {
+        const to = await this.#model.moveToFolder(id, toParentId);
+        moved.push({ from: id, to });
+        this.retargetTabs(id, to);
+      } catch (error) {
+        this.#reportFailure("옮기지 못했다")(error);
+      }
     }
+    if (moved.length === 0) return moved;
+    if (toParentId !== "") this.setFolderExpanded(toParentId, true);
+    this.setSelection(moved.map((entry) => entry.to));
+    return moved;
   }
 
   startWatching(): void {

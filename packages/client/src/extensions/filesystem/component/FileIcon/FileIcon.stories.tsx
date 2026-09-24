@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { FileIcon } from "./index";
 
 const meta = {
-  title: "filesystem/FileIcon",
+  title: "02-filesystem/FileIcon",
   component: FileIcon,
   args: { fileName: "main.ts" },
 } satisfies Meta<typeof FileIcon>;

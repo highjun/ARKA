@@ -56,7 +56,8 @@ export interface ITabSystemViewModel extends Disposable {
   closeOthers(paneId: PaneId, tabId: string): void;
   closeToRight(paneId: PaneId, tabId: string): void;
 
-  reorderTabs(paneId: PaneId, nextTabIds: readonly string[]): void;
+  /** 탭을 `targetPaneId` 칸의 `beforeTabId` 앞으로 옮긴다 — 맨 뒤면 `null`. 같은 칸이면 순서 바꾸기다. */
+  moveTab(targetPaneId: PaneId, tabId: string, beforeTabId: string | null): void;
   splitTab(paneId: PaneId, tabId: string, edge: SplitEdge): void;
   resizePane(branchId: PaneId, childId: PaneId, nextSize: number): void;
 

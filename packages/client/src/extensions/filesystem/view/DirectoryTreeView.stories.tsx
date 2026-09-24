@@ -21,7 +21,7 @@ const viewModel = (state: Partial<IDirectoryTreeViewModel>): IDirectoryTreeViewM
   renameEntry: () => Promise.resolve(),
   removeEntry: () => Promise.resolve(),
   removeEntries: () => Promise.resolve(),
-  moveEntry: () => Promise.resolve(""),
+  moveEntries: () => Promise.resolve([]),
   contextTarget: null,
   contextTargets: [],
   setContextTarget: () => undefined,
@@ -86,7 +86,7 @@ const ROWS: readonly FileTreeRow[] = [
 ];
 
 const meta = {
-  title: "filesystem/DirectoryTreeView",
+  title: "02-filesystem/DirectoryTreeView",
   component: DirectoryTreeView,
 } satisfies Meta<typeof DirectoryTreeView>;
 

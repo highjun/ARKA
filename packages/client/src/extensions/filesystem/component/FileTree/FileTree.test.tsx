@@ -83,6 +83,17 @@ describe("FileTree", () => {
       expect(screen.getByRole("treeitem", { name: "Button.tsx" })).toHaveAttribute("aria-level", "3");
     });
 
+    it("세로선은 깊이마다 자식 chevron 박스 왼쪽 끝에 선다", () => {
+      const { container } = render(<FileTree items={NESTED_ITEMS} expandedIds={["src", "components"]} />);
+
+      const guides = [...container.querySelectorAll<HTMLElement>('[data-component="FileTree/Guide"]')];
+
+      expect(guides.map((guide) => guide.style.left)).toEqual([
+        "calc(1 * var(--space-md))",
+        "calc(2 * var(--space-md))",
+      ]);
+    });
+
     it("폴더의 aria-expanded가 펼침 상태를 반영한다", () => {
       const { rerender } = render(<FileTree items={ITEMS} />);
 
@@ -191,7 +202,7 @@ describe("FileTree", () => {
       expect(first).toHaveFocus();
     });
 
-    it("수식키 없는 방향키는 선택을 바꾸지 않는다", () => {
+    it("수식키 없는 방향키는 선택도 함께 옮긴다", () => {
       render(<FileTree items={THREE_ITEMS} />);
 
       fireEvent.click(screen.getByText("a.ts"));
@@ -199,8 +210,52 @@ describe("FileTree", () => {
 
       fireEvent.keyDown(screen.getByRole("treeitem", { name: "a.ts" }), { key: "ArrowDown" });
 
+      expect(isSelected("a.ts")).toBe(false);
+      expect(isSelected("b.ts")).toBe(true);
+    });
+
+    it("Ctrl+방향키는 포커스만 옮기고 선택은 두고 간다", () => {
+      render(<FileTree items={THREE_ITEMS} />);
+
+      fireEvent.click(screen.getByText("a.ts"));
+      fireEvent.keyDown(screen.getByRole("treeitem", { name: "a.ts" }), { key: "ArrowDown", ctrlKey: true });
+
+      expect(screen.getByRole("treeitem", { name: "b.ts" })).toHaveFocus();
       expect(isSelected("a.ts")).toBe(true);
       expect(isSelected("b.ts")).toBe(false);
+    });
+
+    it("Ctrl+방향키로 옮긴 뒤 Ctrl+Space를 누르면 그 행이 선택에 더해진다", () => {
+      render(<FileTree items={THREE_ITEMS} />);
+
+      fireEvent.click(screen.getByText("a.ts"));
+      const a = screen.getByRole("treeitem", { name: "a.ts" });
+      fireEvent.keyDown(a, { key: "ArrowDown", ctrlKey: true });
+      fireEvent.keyDown(screen.getByRole("treeitem", { name: "b.ts" }), { key: " ", ctrlKey: true });
+
+      expect(isSelected("a.ts")).toBe(true);
+      expect(isSelected("b.ts")).toBe(true);
+    });
+
+    it("Shift+End는 앵커부터 마지막 행까지 고른다", () => {
+      render(<FileTree items={THREE_ITEMS} />);
+
+      fireEvent.click(screen.getByText("a.ts"));
+      fireEvent.keyDown(screen.getByRole("treeitem", { name: "a.ts" }), { key: "End", shiftKey: true });
+
+      expect(isSelected("a.ts")).toBe(true);
+      expect(isSelected("b.ts")).toBe(true);
+      expect(isSelected("c.ts")).toBe(true);
+    });
+
+    it("Escape는 선택을 포커스 행 하나로 줄인다", () => {
+      render(<FileTree items={THREE_ITEMS} defaultSelectedIds={["a", "b", "c"]} />);
+
+      fireEvent.keyDown(screen.getByRole("treeitem", { name: "b.ts" }), { key: "Escape" });
+
+      expect(isSelected("a.ts")).toBe(false);
+      expect(isSelected("b.ts")).toBe(true);
+      expect(isSelected("c.ts")).toBe(false);
     });
 
     it("Home/End로 첫/마지막 행으로 옮겨간다", () => {
@@ -339,7 +394,183 @@ describe("FileTree", () => {
     });
   });
 
+  describe("Drag and drop", () => {
+    /** NESTED_ITEMS 에 옮겨 갈 빈 폴더 하나를 더 둔 트리. */
+    const DROP_ITEMS = [...NESTED_ITEMS, { id: "docs", name: "docs", type: "folder" as const, children: [] }];
+    const dataTransfer = () => ({ setData: vi.fn(), effectAllowed: "", dropEffect: "" });
+
+    const dragTo = (sourceName: string, target: HTMLElement) => {
+      const transfer = dataTransfer();
+      fireEvent.dragStart(screen.getByRole("treeitem", { name: sourceName }), { dataTransfer: transfer });
+      fireEvent.dragOver(target, { dataTransfer: transfer });
+      fireEvent.drop(target, { dataTransfer: transfer });
+    };
+
+    const tree = () => screen.getByRole("tree");
+    const row = (name: string) => screen.getByRole("treeitem", { name });
+
+    it("파일 행에 놓으면 그 파일이 든 폴더로 옮긴다", () => {
+      const onItemDrop = vi.fn();
+      render(<FileTree items={NESTED_ITEMS} expandedIds={["src", "components"]} onItemDrop={onItemDrop} />);
+
+      dragTo("styles.css", row("Button.tsx"));
+
+      expect(onItemDrop).toHaveBeenCalledWith(
+        [expect.objectContaining({ id: "styles" })],
+        expect.objectContaining({ id: "components" }),
+      );
+    });
+
+    it("행이 없는 바닥에 놓으면 루트로 뺀다", () => {
+      const onItemDrop = vi.fn();
+      render(<FileTree items={NESTED_ITEMS} expandedIds={["src", "components"]} onItemDrop={onItemDrop} />);
+
+      dragTo("Button.tsx", tree());
+
+      expect(onItemDrop).toHaveBeenCalledWith([expect.objectContaining({ id: "button" })], null);
+    });
+
+    it("지금 든 폴더에는 놓을 수 없다", () => {
+      const onItemDrop = vi.fn();
+      render(<FileTree items={NESTED_ITEMS} expandedIds={["src", "components"]} onItemDrop={onItemDrop} />);
+
+      dragTo("styles.css", row("src"));
+
+      expect(onItemDrop).not.toHaveBeenCalled();
+    });
+
+    it("폴더를 제 안쪽으로는 놓을 수 없다", () => {
+      const onItemDrop = vi.fn();
+      render(<FileTree items={NESTED_ITEMS} expandedIds={["src", "components"]} onItemDrop={onItemDrop} />);
+
+      dragTo("src", row("Button.tsx"));
+
+      expect(onItemDrop).not.toHaveBeenCalled();
+    });
+
+    it("파일 행 위에서는 그 파일이 아니라 담은 폴더 행이 켜진다", () => {
+      render(<FileTree items={NESTED_ITEMS} expandedIds={["src", "components"]} onItemDrop={() => {}} />);
+
+      const transfer = dataTransfer();
+      fireEvent.dragStart(row("styles.css"), { dataTransfer: transfer });
+      fireEvent.dragOver(row("Button.tsx"), { dataTransfer: transfer });
+
+      expect(row("components")).toHaveAttribute("data-drop", "inside");
+      expect(row("Button.tsx")).not.toHaveAttribute("data-drop");
+    });
+
+    it("바닥 위에서는 트리 전체가 켜진다", () => {
+      render(<FileTree items={NESTED_ITEMS} expandedIds={["src", "components"]} onItemDrop={() => {}} />);
+
+      const transfer = dataTransfer();
+      fireEvent.dragStart(row("Button.tsx"), { dataTransfer: transfer });
+      fireEvent.dragOver(tree(), { dataTransfer: transfer });
+
+      expect(tree()).toHaveAttribute("data-drop", "root");
+    });
+
+    it("선택 안의 행을 끌면 선택 전부가 함께 간다", () => {
+      const onItemDrop = vi.fn();
+      render(
+        <FileTree
+          items={DROP_ITEMS}
+          expandedIds={["src", "components"]}
+          selectedIds={["button", "styles"]}
+          onItemDrop={onItemDrop}
+        />,
+      );
+
+      dragTo("styles.css", row("docs"));
+
+      expect(onItemDrop).toHaveBeenCalledWith(
+        [expect.objectContaining({ id: "button" }), expect.objectContaining({ id: "styles" })],
+        expect.objectContaining({ id: "docs" }),
+      );
+    });
+
+    it("선택 밖의 행을 끌면 그 행만 간다", () => {
+      const onItemDrop = vi.fn();
+      render(
+        <FileTree
+          items={DROP_ITEMS}
+          expandedIds={["src", "components"]}
+          selectedIds={["button"]}
+          onItemDrop={onItemDrop}
+        />,
+      );
+
+      dragTo("styles.css", row("docs"));
+
+      expect(onItemDrop).toHaveBeenCalledWith([expect.objectContaining({ id: "styles" })], expect.anything());
+    });
+
+    it("갈 수 없는 것이 섞여 있으면 갈 수 있는 것만 간다", () => {
+      const onItemDrop = vi.fn();
+      render(
+        <FileTree
+          items={DROP_ITEMS}
+          expandedIds={["src", "components"]}
+          selectedIds={["components", "styles"]}
+          onItemDrop={onItemDrop}
+        />,
+      );
+
+      // components 는 제 안쪽(button 이 든 폴더)으로 못 가고, styles 만 옮겨진다.
+      dragTo("styles.css", row("Button.tsx"));
+
+      expect(onItemDrop).toHaveBeenCalledWith(
+        [expect.objectContaining({ id: "styles" })],
+        expect.objectContaining({ id: "components" }),
+      );
+    });
+
+    it("조상과 자손을 함께 골랐으면 조상만 옮긴다", () => {
+      const onItemDrop = vi.fn();
+      render(
+        <FileTree
+          items={DROP_ITEMS}
+          expandedIds={["src", "components"]}
+          selectedIds={["components", "button"]}
+          onItemDrop={onItemDrop}
+        />,
+      );
+
+      dragTo("components", row("docs"));
+
+      expect(onItemDrop).toHaveBeenCalledWith(
+        [expect.objectContaining({ id: "components" })],
+        expect.objectContaining({ id: "docs" }),
+      );
+    });
+
+    it("onItemDrop을 안 넘기면 행이 끌리지 않는다", () => {
+      render(<FileTree items={NESTED_ITEMS} expandedIds={["src"]} />);
+
+      expect(row("styles.css")).not.toHaveAttribute("draggable", "true");
+    });
+  });
+
   describe("State", () => {
+    it("Ctrl+Shift+클릭은 이미 고른 것 위에 범위를 얹는다", () => {
+      render(<FileTree items={THREE_ITEMS} />);
+
+      fireEvent.click(screen.getByText("c.ts"));
+      fireEvent.click(screen.getByText("a.ts"), { ctrlKey: true });
+      fireEvent.click(screen.getByText("b.ts"), { ctrlKey: true, shiftKey: true });
+
+      expect(isSelected("a.ts")).toBe(true);
+      expect(isSelected("b.ts")).toBe(true);
+      expect(isSelected("c.ts")).toBe(true);
+    });
+
+    it("행이 없는 바닥을 누르면 선택을 놓는다", () => {
+      const { container } = render(<FileTree items={TWO_ITEMS} defaultSelectedIds={["a"]} />);
+
+      fireEvent.click(container.querySelector('[role="tree"]')!);
+
+      expect(isSelected("a.ts")).toBe(false);
+    });
+
     it("펼침 상태(expandedIds)에 따라 자식이 나타나고 사라진다", () => {
       const { rerender } = render(<FileTree items={ITEMS} />);
 
