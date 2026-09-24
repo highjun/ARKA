@@ -1,12 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { expectNoA11yViolations } from "#lib/axe";
-import {
-  implementsClassName,
-  implementsDataComponent,
-  implementsRef,
-  implementsNoA11yViolations,
-} from "#lib/testing";
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from "#lib/testing";
 import { Shell } from "./Shell";
 import { Menu } from "#ui/Menu";
 
@@ -30,7 +25,11 @@ describe("Shell", () => {
   });
 
   it("sidebars 를 안 주면 사이드바 자체가 없다(토글 버튼도 없다)", () => {
-    render(<Shell colorMode="light" brandName="ARKA">본문</Shell>);
+    render(
+      <Shell colorMode="light" brandName="ARKA">
+        본문
+      </Shell>,
+    );
 
     expect(screen.queryByRole("button", { name: "사이드바 열기" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "탐색기" })).not.toBeInTheDocument();
@@ -76,7 +75,13 @@ describe("Shell", () => {
 
   it("활성 사이드바가 있으면 넓은 폭으로 렌더된다", () => {
     const { container } = render(
-      <Shell colorMode="light" brandName="ARKA" sidebars={SIDEBARS} activeSidebarId="a" renderSidebarContent={() => "패널 내용"}>
+      <Shell
+        colorMode="light"
+        brandName="ARKA"
+        sidebars={SIDEBARS}
+        activeSidebarId="a"
+        renderSidebarContent={() => "패널 내용"}
+      >
         본문
       </Shell>,
     );
@@ -89,7 +94,13 @@ describe("Shell", () => {
 
   it("sidebarResizable 이 없으면 고정폭이다(리사이즈 불가)", () => {
     render(
-      <Shell colorMode="light" brandName="ARKA" sidebars={SIDEBARS} activeSidebarId="a" renderSidebarContent={() => "패널 내용"}>
+      <Shell
+        colorMode="light"
+        brandName="ARKA"
+        sidebars={SIDEBARS}
+        activeSidebarId="a"
+        renderSidebarContent={() => "패널 내용"}
+      >
         본문
       </Shell>,
     );
@@ -99,7 +110,15 @@ describe("Shell", () => {
 
   it("sidebarResizable 을 주면 드래그로 폭을 조절할 수 있다", () => {
     const { container } = render(
-      <Shell colorMode="light" brandName="ARKA" sidebars={SIDEBARS} activeSidebarId="a" renderSidebarContent={() => "패널 내용"} sidebarResizable sidebarMinWidth="200px">
+      <Shell
+        colorMode="light"
+        brandName="ARKA"
+        sidebars={SIDEBARS}
+        activeSidebarId="a"
+        renderSidebarContent={() => "패널 내용"}
+        sidebarResizable
+        sidebarMinWidth="200px"
+      >
         본문
       </Shell>,
     );
@@ -112,7 +131,13 @@ describe("Shell", () => {
 
   it("sidebarTitle 이 없으면 패널 머리 행 자체가 없다", () => {
     render(
-      <Shell colorMode="light" brandName="ARKA" sidebars={SIDEBARS} activeSidebarId="a" renderSidebarContent={() => "패널 내용"}>
+      <Shell
+        colorMode="light"
+        brandName="ARKA"
+        sidebars={SIDEBARS}
+        activeSidebarId="a"
+        renderSidebarContent={() => "패널 내용"}
+      >
         본문
       </Shell>,
     );
@@ -122,7 +147,14 @@ describe("Shell", () => {
 
   it("sidebarTitle 을 주면 패널 위에 제목이 뜬다", () => {
     render(
-      <Shell colorMode="light" brandName="ARKA" sidebars={SIDEBARS} activeSidebarId="a" renderSidebarContent={() => "패널 내용"} sidebarTitle="파일 탐색기">
+      <Shell
+        colorMode="light"
+        brandName="ARKA"
+        sidebars={SIDEBARS}
+        activeSidebarId="a"
+        renderSidebarContent={() => "패널 내용"}
+        sidebarTitle="파일 탐색기"
+      >
         본문
       </Shell>,
     );
@@ -425,7 +457,13 @@ describe("Shell", () => {
 
   it("axe 접근성 위반이 없다(Portal로 빠져나간 실제 내용까지)", async () => {
     render(
-      <Shell colorMode="light" brandName="ARKA" sidebars={SIDEBARS} activeSidebarId="a" renderSidebarContent={() => "패널"}>
+      <Shell
+        colorMode="light"
+        brandName="ARKA"
+        sidebars={SIDEBARS}
+        activeSidebarId="a"
+        renderSidebarContent={() => "패널"}
+      >
         본문
       </Shell>,
     );

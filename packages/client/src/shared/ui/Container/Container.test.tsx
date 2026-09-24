@@ -1,12 +1,7 @@
 import { createRef } from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import {
-  implementsClassName,
-  implementsDataComponent,
-  implementsRef,
-  implementsNoA11yViolations,
-} from "#lib/testing";
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from "#lib/testing";
 import { Container } from "./Container";
 
 describe("Container", () => {
@@ -30,7 +25,7 @@ describe("Container", () => {
     expect(container.querySelector('[data-scrollbar="auto"]')).toBeInTheDocument();
   });
 
-  it("scrollbar=\"none\" 이면 막대를 끈다 — 스스로 손잡이를 그리는 자리다", () => {
+  it('scrollbar="none" 이면 막대를 끈다 — 스스로 손잡이를 그리는 자리다', () => {
     const { container } = render(<Container scrollbar="none">content</Container>);
 
     expect(container.querySelector('[data-scrollbar="none"]')).toBeInTheDocument();

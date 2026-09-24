@@ -1,12 +1,7 @@
 import { composeStories } from "@storybook/react-vite";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  implementsClassName,
-  implementsDataComponent,
-  implementsRef,
-  implementsNoA11yViolations,
-} from "#lib/testing";
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from "#lib/testing";
 import { Button } from "@primer/react";
 import { Toast } from "./Toast";
 import * as stories from "./Toast.stories";

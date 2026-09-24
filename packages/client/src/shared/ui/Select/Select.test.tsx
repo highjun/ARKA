@@ -1,12 +1,7 @@
 import type { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import {
-  implementsClassName,
-  implementsDataComponent,
-  implementsRef,
-  implementsNoA11yViolations,
-} from "#lib/testing";
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from "#lib/testing";
 import { Select } from "./Select";
 
 const Demo = (props: Omit<ComponentProps<typeof Select>, "children">) => (

@@ -3,12 +3,7 @@ import type { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { expectNoA11yViolations } from "#lib/axe";
-import {
-  implementsClassName,
-  implementsDataComponent,
-  implementsRef,
-  implementsNoA11yViolations,
-} from "#lib/testing";
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from "#lib/testing";
 import { Menu } from "./Menu";
 
 const Demo = (

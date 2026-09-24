@@ -619,7 +619,6 @@ describe("ITabSystemViewModel — 재정렬", () => {
 
     expect(tabIdsOf(activeLeafOf(viewModel))).toEqual(["b", "a"]);
   });
-
 });
 
 describe("ITabSystemViewModel — 분할된 상태에서 미리보기", () => {

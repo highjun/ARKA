@@ -1,12 +1,7 @@
 import { composeStories } from "@storybook/react-vite";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import {
-  implementsClassName,
-  implementsDataComponent,
-  implementsRef,
-  implementsNoA11yViolations,
-} from "#lib/testing";
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from "#lib/testing";
 import { TitleBar } from "./index";
 import * as stories from "./TitleBar.stories";
 

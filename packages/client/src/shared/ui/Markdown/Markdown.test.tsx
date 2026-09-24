@@ -1,11 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import {
-  implementsClassName,
-  implementsDataComponent,
-  implementsNoA11yViolations,
-  implementsRef,
-} from "#lib/testing";
+import { implementsClassName, implementsDataComponent, implementsNoA11yViolations, implementsRef } from "#lib/testing";
 import { Markdown } from "./Markdown";
 
 describe("Markdown", () => {

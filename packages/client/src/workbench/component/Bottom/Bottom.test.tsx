@@ -1,12 +1,7 @@
 import { composeStories } from "@storybook/react-vite";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import {
-  implementsClassName,
-  implementsDataComponent,
-  implementsRef,
-  implementsNoA11yViolations,
-} from "#lib/testing";
+import { implementsClassName, implementsDataComponent, implementsRef, implementsNoA11yViolations } from "#lib/testing";
 import { Bottom } from "./Bottom";
 import * as stories from "./Bottom.stories";
 import type { BottomItem } from "./Bottom";

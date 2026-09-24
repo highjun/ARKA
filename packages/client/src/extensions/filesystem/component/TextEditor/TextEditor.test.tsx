@@ -1,11 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import {
-  implementsClassName,
-  implementsDataComponent,
-  implementsNoA11yViolations,
-  implementsRef,
-} from "#lib/testing";
+import { implementsClassName, implementsDataComponent, implementsNoA11yViolations, implementsRef } from "#lib/testing";
 import { TextEditor } from "./TextEditor";
 
 describe("TextEditor", () => {
