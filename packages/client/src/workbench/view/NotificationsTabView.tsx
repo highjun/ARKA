@@ -1,5 +1,6 @@
 import { useViewModel } from "#core/viewmodel";
 import { observer } from "mobx-react-lite";
+import { Button } from "@primer/react";
 import { Blankslate } from "@primer/react/experimental";
 import { Icon } from "#ui/Icon";
 import { IconButton } from "#ui/IconButton";
@@ -37,6 +38,12 @@ const Row = ({
       </Text>
     </>
   );
+  const action =
+    item.action === undefined ? null : (
+      <Button size="small" className={styles["action"]} onClick={item.action.run}>
+        {item.action.label}
+      </Button>
+    );
 
   return (
     <li className={styles["row"]} data-severity={item.severity} data-unread={item.isRead ? undefined : ""}>
@@ -48,6 +55,7 @@ const Row = ({
           {body}
         </button>
       )}
+      {action}
       <IconButton
         variant="invisible"
         size="small"

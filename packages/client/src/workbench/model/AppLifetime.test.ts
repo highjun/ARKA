@@ -90,7 +90,10 @@ describe("AppLifetime", () => {
 
     it("같은 gitSha면 몇 번을 물어도 없다 — 서버가 재시작만 해도 builtAt은 바뀌므로 그건 보지 않는다", async () => {
       const lifetime = new AppLifetime({
-        serverInfo: changing(info({ gitSha: "aaaaaaa", builtAt: "2026-09-18T01:02:00Z" }), info({ gitSha: "aaaaaaa", builtAt: "2026-09-19T01:02:00Z" })),
+        serverInfo: changing(
+          info({ gitSha: "aaaaaaa", builtAt: "2026-09-18T01:02:00Z" }),
+          info({ gitSha: "aaaaaaa", builtAt: "2026-09-19T01:02:00Z" }),
+        ),
         reload: vi.fn(),
       });
 

@@ -1,6 +1,6 @@
 import { ContainerProvider, useViewModel } from "#core/viewmodel";
 import { observer } from "mobx-react-lite";
-import { Banner, ConfirmationDialog } from "@primer/react";
+import { Button, ConfirmationDialog } from "@primer/react";
 import { Menu } from "#ui/Menu";
 import { Text } from "#ui/Text";
 import { Toast } from "#ui/Toast";
@@ -84,17 +84,6 @@ export const ShellView = observer(function ShellView() {
 
   return (
     <>
-      {appStatus.isOutdated ? (
-        <Banner
-          role="status"
-          variant="warning"
-          layout="compact"
-          flush
-          title="새 버전이 있다"
-          description="이 화면은 서버와 다른 프로토콜을 쓰고 있다."
-          primaryAction={<Banner.PrimaryAction onClick={() => appStatus.reload()}>다시 불러오기</Banner.PrimaryAction>}
-        />
-      ) : null}
       <Shell
         colorMode={shell.colorMode}
         isNarrow={shell.isNarrow}
@@ -108,6 +97,13 @@ export const ShellView = observer(function ShellView() {
                     severity={item.severity}
                     message={item.message}
                     timeout={item.timeout}
+                    action={
+                      item.action === undefined ? undefined : (
+                        <Button size="small" onClick={item.action.run}>
+                          {item.action.label}
+                        </Button>
+                      )
+                    }
                     onDismiss={() => notifications.markRead(item.id)}
                     onTimeout={() => notifications.dismissToast(item.id)}
                   />

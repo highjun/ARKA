@@ -91,3 +91,8 @@
 .read:hover {
   background-color: var(--bgColor-neutral-muted);
 }
+
+.action {
+  flex-shrink: 0;
+  align-self: center;
+}

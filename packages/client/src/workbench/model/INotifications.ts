@@ -3,7 +3,7 @@ import type { Disposable } from "#core/di";
 export type Severity = "info" | "warning" | "error";
 
 /** 알림에 붙는 단추 하나 — 누르면 `run`이 돈다. */
-export interface NotificationAction {
+interface NotificationAction {
   readonly label: string;
   readonly run: () => void;
 }
