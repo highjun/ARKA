@@ -100,6 +100,7 @@ const appStatusViewModel = (state: Partial<IAppStatusViewModel>): IAppStatusView
   builtAt: "2026-09-20 11:18",
   gitSha: "ab90700",
   isOutdated: false,
+  isUpdateAvailable: false,
   reload: () => undefined,
   ...state,
 });

@@ -12,17 +12,22 @@ export class AppStatusViewModel implements IAppStatusViewModel {
   private builtAtState = "";
   private gitShaState = "";
   private isOutdatedState = false;
+  private isUpdateAvailableState = false;
 
   constructor({ appLifetime, workspace }: { appLifetime: IAppLifetime; workspace: IWorkspace }) {
     this.#appLifetime = appLifetime;
     this.#workspace = workspace;
-    makeAutoObservable<this, "workspaceNameState" | "builtAtState" | "gitShaState" | "isOutdatedState">(
+    makeAutoObservable<
+      this,
+      "workspaceNameState" | "builtAtState" | "gitShaState" | "isOutdatedState" | "isUpdateAvailableState"
+    >(
       this,
       {
         workspaceNameState: observable,
         builtAtState: observable,
         gitShaState: observable,
         isOutdatedState: observable,
+        isUpdateAvailableState: observable,
       },
       { autoBind: true },
     );
@@ -50,6 +55,10 @@ export class AppStatusViewModel implements IAppStatusViewModel {
     return this.isOutdatedState;
   }
 
+  get isUpdateAvailable(): boolean {
+    return this.isUpdateAvailableState;
+  }
+
   reload(): void {
     this.#appLifetime.requestReload("userRequested");
   }
@@ -62,6 +71,7 @@ export class AppStatusViewModel implements IAppStatusViewModel {
     this.builtAtState = this.#appLifetime.builtAt;
     this.gitShaState = this.#appLifetime.gitSha;
     this.isOutdatedState = this.#appLifetime.isOutdated;
+    this.isUpdateAvailableState = this.#appLifetime.isUpdateAvailable;
   }
 
   private syncWorkspace(): void {

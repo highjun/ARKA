@@ -10,5 +10,6 @@ export interface IAppStatusViewModel extends Disposable {
   readonly builtAt: string;
   readonly gitSha: string;
   readonly isOutdated: boolean;
+  readonly isUpdateAvailable: boolean;
   reload(): void;
 }

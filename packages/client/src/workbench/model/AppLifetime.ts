@@ -19,6 +19,8 @@ export class AppLifetime implements IAppLifetime {
   readonly #reload: () => void;
   readonly #changed = new Emitter();
   #isOutdated = false;
+  #isUpdateAvailable = false;
+  #firstGitSha: string | undefined;
   #builtAt = "";
   #gitSha = "";
 
@@ -29,6 +31,10 @@ export class AppLifetime implements IAppLifetime {
 
   get isOutdated(): boolean {
     return this.#isOutdated;
+  }
+
+  get isUpdateAvailable(): boolean {
+    return this.#isUpdateAvailable;
   }
 
   get builtAt(): string {
@@ -45,6 +51,10 @@ export class AppLifetime implements IAppLifetime {
     this.#builtAt = formatBuiltAt(info.builtAt);
     this.#gitSha = this.#builtAt === "" ? "" : shortSha(info.gitSha);
     this.#isOutdated = info.protocolVersion !== PROTOCOL_VERSION || info.protocolHeader !== PROTOCOL_HEADER;
+    if (info.gitSha !== undefined) {
+      this.#firstGitSha ??= info.gitSha;
+      this.#isUpdateAvailable = info.gitSha !== this.#firstGitSha;
+    }
     this.#changed.fire();
   }
 

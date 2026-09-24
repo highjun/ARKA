@@ -67,7 +67,12 @@ export const workbench: ExtensionModule = {
       create: () => {
         const port = createServerInfoPort();
         let loading: Promise<ServerInfo | null> | undefined;
-        return { load: () => (loading ??= port.load()) };
+        return {
+          load: () =>
+            (loading ??= port.load().finally(() => {
+              loading = undefined;
+            })),
+        };
       },
     },
     {

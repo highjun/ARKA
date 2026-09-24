@@ -16,6 +16,15 @@ describe("Notifications", () => {
     expect(listener).toHaveBeenCalledTimes(1);
   });
 
+  it("단추를 실어 보내면 항목이 그대로 든다", () => {
+    const notifications = make();
+    const run = vi.fn();
+    notifications.notify("info", "새 버전", { action: { label: "다시 불러오기", run } });
+    notifications.items[0]?.action?.run();
+    expect(notifications.items[0]?.action?.label).toBe("다시 불러오기");
+    expect(run).toHaveBeenCalledTimes(1);
+  });
+
   it("같은 메시지는 하나로 합친다", () => {
     const notifications = make();
     expect(notifications.notify("error", "끊김")).toBe(notifications.notify("error", "끊김"));

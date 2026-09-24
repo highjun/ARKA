@@ -70,6 +70,44 @@ describe("AppLifetime", () => {
     expect(contract.gitSha).toBe("0123456-dirty");
   });
 
+  describe("새 배포", () => {
+    const changing = (...values: readonly (ServerInfo | null)[]): IServerInfo => {
+      const queue = [...values];
+      return { load: () => Promise.resolve(queue.length > 1 ? (queue.shift() ?? null) : (queue[0] ?? null)) };
+    };
+
+    it("처음 본 gitSha와 다음에 본 것이 다르면 새 버전이 있다", async () => {
+      const lifetime = new AppLifetime({
+        serverInfo: changing(info({ gitSha: "aaaaaaa" }), info({ gitSha: "bbbbbbb" })),
+        reload: vi.fn(),
+      });
+
+      await lifetime.load();
+      expect(lifetime.isUpdateAvailable).toBe(false);
+      await lifetime.load();
+      expect(lifetime.isUpdateAvailable).toBe(true);
+    });
+
+    it("같은 gitSha면 몇 번을 물어도 없다 — 서버가 재시작만 해도 builtAt은 바뀌므로 그건 보지 않는다", async () => {
+      const lifetime = new AppLifetime({
+        serverInfo: changing(info({ gitSha: "aaaaaaa", builtAt: "2026-09-18T01:02:00Z" }), info({ gitSha: "aaaaaaa", builtAt: "2026-09-19T01:02:00Z" })),
+        reload: vi.fn(),
+      });
+
+      await lifetime.load();
+      await lifetime.load();
+      expect(lifetime.isUpdateAvailable).toBe(false);
+    });
+
+    it("gitSha가 없는 서버는 판단하지 않는다", async () => {
+      const lifetime = new AppLifetime({ serverInfo: changing(info(), info()), reload: vi.fn() });
+
+      await lifetime.load();
+      await lifetime.load();
+      expect(lifetime.isUpdateAvailable).toBe(false);
+    });
+  });
+
   it("requestReload는 주입받은 새로고침을 부른다", () => {
     const { contract, reload } = make(info());
 

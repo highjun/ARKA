@@ -2,6 +2,12 @@ import type { Disposable } from "#core/di";
 
 export type Severity = "info" | "warning" | "error";
 
+/** 알림에 붙는 단추 하나 — 누르면 `run`이 돈다. */
+export interface NotificationAction {
+  readonly label: string;
+  readonly run: () => void;
+}
+
 export interface Notification {
   readonly id: string;
   readonly severity: Severity;
@@ -9,10 +15,12 @@ export interface Notification {
   readonly at: number;
   readonly isRead: boolean;
   readonly timeout?: number;
+  readonly action?: NotificationAction;
 }
 
 export interface NotifyOptions {
   readonly timeout?: number;
+  readonly action?: NotificationAction;
 }
 
 declare module "#core/di" {

@@ -44,6 +44,7 @@ export class Notifications implements INotifications {
       at: this.#now(),
       isRead: false,
       ...(options?.timeout === undefined ? {} : { timeout: options.timeout }),
+      ...(options?.action === undefined ? {} : { action: options.action }),
     };
     this.#items = [...this.#items, notification].slice(-Notifications.MAX);
     this.#changed.fire();
