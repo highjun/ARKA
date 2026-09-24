@@ -1,6 +1,6 @@
 import { Icon } from "#ui/Icon";
-import type { TabDescriptor, TabProviderDescriptor } from "../api/ITabProviderDescriptor";
-import { NotificationsTabView } from "./NotificationsTabView";
+import type { TabDescriptor, TabProviderDescriptor } from "./api/ITabProviderDescriptor";
+import { NotificationsTabView } from "./view/NotificationsTabView";
 
 const NOTIFICATIONS_TAB: TabDescriptor = {
   icon: <Icon iconId="bell" size="sm" />,

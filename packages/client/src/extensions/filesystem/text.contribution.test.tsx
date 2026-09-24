@@ -1,7 +1,7 @@
 import { URI } from "#contracts";
 import { describe, expect, it, vi } from "vitest";
-import type { IFileContentViewModel } from "../viewmodel/IFileContentViewModel";
-import { createTextTabProvider } from "./textTabProvider";
+import type { IFileContentViewModel } from "./viewmodel/IFileContentViewModel";
+import { createTextTabProvider } from "./text.contribution";
 
 const fakeFileContent = (opens: boolean, isDirty = false): IFileContentViewModel => ({
   dispose: () => undefined,

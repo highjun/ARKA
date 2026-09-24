@@ -1,8 +1,8 @@
 import { observable, observableRef } from "mobx";
 import type { TabProviderDescriptor } from "#workbench";
-import { FileIcon } from "../component/FileIcon";
-import type { IFileContentViewModel } from "../viewmodel/IFileContentViewModel";
-import { FileContentView } from "./FileContentView";
+import { FileIcon } from "./component/FileIcon";
+import type { IFileContentViewModel } from "./viewmodel/IFileContentViewModel";
+import { FileContentView } from "./view/FileContentView";
 
 const nameOf = (path: string): string => path.split("/").pop() ?? path;
 

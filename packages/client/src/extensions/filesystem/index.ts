@@ -4,7 +4,7 @@ import { createWorkspaceWatchPort } from "./infra/HttpWorkspaceWatch";
 import { DirectoryTreeModel } from "./model/DirectoryTreeModel";
 import { FileContentModel } from "./model/FileContentModel";
 import { DirectoryTreeView } from "./view/DirectoryTreeView";
-import { createTextTabProvider } from "./view/textTabProvider";
+import { createTextTabProvider } from "./text.contribution";
 import { DirectoryTreeViewModel } from "./viewmodel/DirectoryTreeViewModel";
 import { FileContentViewModel } from "./viewmodel/FileContentViewModel";
 

@@ -1,6 +1,6 @@
 import { URI } from "#contracts";
 import { describe, expect, it } from "vitest";
-import { settingsTabProvider } from "./settingsTabProvider";
+import { settingsTabProvider } from "./settings.contribution";
 
 describe("설정 탭 provider", () => {
   it("arka:///settings만 받는다", async () => {

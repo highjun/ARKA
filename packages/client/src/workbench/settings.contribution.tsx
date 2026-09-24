@@ -1,6 +1,6 @@
 import { Icon } from "#ui/Icon";
-import type { TabDescriptor, TabProviderDescriptor } from "../api/ITabProviderDescriptor";
-import { SettingsTabView } from "./SettingsTabView";
+import type { TabDescriptor, TabProviderDescriptor } from "./api/ITabProviderDescriptor";
+import { SettingsTabView } from "./view/SettingsTabView";
 
 const SETTINGS_TAB: TabDescriptor = {
   icon: <Icon iconId="settingsGear" size="sm" />,
