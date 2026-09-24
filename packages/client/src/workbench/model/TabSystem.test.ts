@@ -4,7 +4,7 @@ import { DescriptorNotFoundError, Registry } from "#core/registry";
 import { describe, expect, it, vi } from "vitest";
 import type { IStorage } from "./IStorage";
 import type { OpenTab, PaneNode } from "./ITabLayout";
-import type { TabDescriptor, TabProviderDescriptor } from "./ITabProviderDescriptor";
+import type { TabDescriptor, TabProviderDescriptor } from "../api/ITabProviderDescriptor";
 import { Notifications } from "./Notifications";
 import { collectTabs, findLeaf } from "./paneTree";
 import { TabLayout } from "./TabLayout";

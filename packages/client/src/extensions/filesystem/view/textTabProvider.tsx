@@ -1,5 +1,5 @@
 import { observable, observableRef } from "mobx";
-import type { TabProviderDescriptor } from "../../../workbench/model/ITabProviderDescriptor";
+import type { TabProviderDescriptor } from "#workbench";
 import { FileIcon } from "../component/FileIcon";
 import type { IFileContentViewModel } from "../viewmodel/IFileContentViewModel";
 import { FileContentView } from "./FileContentView";

@@ -1,6 +1,6 @@
 import type { Container, Disposable } from "#core/di";
 import type { PaneId, SplitOrientation } from "../model/ITabLayout";
-import type { TabDescriptor } from "../model/ITabProviderDescriptor";
+import type { TabDescriptor } from "../api/ITabProviderDescriptor";
 
 export type SplitEdge = "left" | "right" | "top" | "bottom";
 

@@ -1,7 +1,7 @@
 import type { URI } from "#contracts";
 import type { Container, Disposable } from "#core/di";
 import type { OpenTab } from "./ITabLayout";
-import type { OpenOptions, TabDescriptor } from "./ITabProviderDescriptor";
+import type { OpenOptions, TabDescriptor } from "../api/ITabProviderDescriptor";
 
 declare module "#core/di" {
   interface InstanceMap {

@@ -4,7 +4,7 @@ import { Emitter } from "#core/events";
 import { DescriptorNotFoundError, type Registry } from "#core/registry";
 import type { INotifications } from "./INotifications";
 import type { ITabLayout, OpenTab, PaneNode } from "./ITabLayout";
-import type { OpenOptions, TabDescriptor, TabProviderDescriptor } from "./ITabProviderDescriptor";
+import type { OpenOptions, TabDescriptor, TabProviderDescriptor } from "../api/ITabProviderDescriptor";
 import type { ITabSystem } from "./ITabSystem";
 import { collectTabs, findLeaf, firstLeafId, leafOfTab, pruneTree, replaceLeaf, withoutTabs } from "./paneTree";
 import { ROOT_PANE_ID } from "./tabsShare";

@@ -3,7 +3,7 @@ import { CommandService, type ICommandService } from "#core/commands";
 import { Registry } from "#core/registry";
 import { URI } from "#contracts";
 import { observable, observableRef, runInAction } from "mobx";
-import type { TabDescriptor, TabProviderDescriptor } from "../model/ITabProviderDescriptor";
+import type { TabDescriptor, TabProviderDescriptor } from "../api/ITabProviderDescriptor";
 import { Notifications } from "../model/Notifications";
 import { ROOT_PANE_ID } from "../model/tabsShare";
 import { TabLayout } from "../model/TabLayout";

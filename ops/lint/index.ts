@@ -133,7 +133,7 @@ const base: Linter.Config[] = [
         {
           "src/**/*.{ts,tsx,css}": "+([a-zA-Z0-9])*(.+([a-z0-9]))",
           "test/**/*.{ts,tsx}": "+([a-zA-Z0-9])*(.+([a-z0-9]))",
-          "src/**/{model,viewmodel,domain}/I*.ts": "I+([A-Z])*([a-zA-Z0-9])",
+          "src/**/{api,model,viewmodel,domain}/I*.ts": "I+([A-Z])*([a-zA-Z0-9])",
           "src/**/Mock*.ts": "Mock+([A-Z])*([a-zA-Z0-9])",
         },
         { ignoreMiddleExtensions: true },

@@ -19,10 +19,11 @@ const RESTRICTED_SYNTAX = [
 const SLICES = ["filesystem"];
 
 const LAYER_ALLOW: Readonly<Record<string, readonly string[]>> = {
-  model: ["model"],
-  infra: ["model", "infra"],
-  viewmodel: ["model", "viewmodel"],
-  view: ["model", "viewmodel", "view", "component"],
+  api: ["api"],
+  model: ["api", "model"],
+  infra: ["api", "model", "infra"],
+  viewmodel: ["api", "model", "viewmodel"],
+  view: ["api", "model", "viewmodel", "view", "component"],
   component: ["component"],
 };
 

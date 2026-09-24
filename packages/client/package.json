@@ -83,6 +83,7 @@
     "#core/*": "./src/core/*/index.ts",
     "#core/errors": "./src/core/errors.ts",
     "#utils/*": "./src/shared/utils/*.tsx",
-    "#visual-regression": "./src/shared/visualRegression.ts"
+    "#visual-regression": "./src/shared/visualRegression.ts",
+    "#workbench": "./src/workbench/index.ts"
   }
 }

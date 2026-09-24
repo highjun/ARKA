@@ -1,5 +1,5 @@
 import { Icon } from "#component/Icon";
-import type { TabDescriptor, TabProviderDescriptor } from "../model/ITabProviderDescriptor";
+import type { TabDescriptor, TabProviderDescriptor } from "../api/ITabProviderDescriptor";
 import { NotificationsTabView } from "./NotificationsTabView";
 
 const NOTIFICATIONS_TAB: TabDescriptor = {

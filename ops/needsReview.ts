@@ -4,7 +4,11 @@ import path from "node:path";
 import ts from "typescript";
 
 const REPO_ROOT = path.resolve(import.meta.dirname, "..");
-const CONTRACTS = "packages/contracts/src/";
+const CONTRACT_ROOTS: readonly { readonly root: string; readonly file: RegExp }[] = [
+  { root: "packages/contracts/src/", file: /^packages\/contracts\/src\/.+\.ts$/u },
+  { root: "packages/client/src/", file: /^packages\/client\/src\/workbench\/api\/.+\.ts$/u },
+  { root: "packages/client/src/", file: /^packages\/client\/src\/extensions\/[^/]+\/index\.ts$/u },
+];
 const SNAPSHOT = /^packages\/client\/src\/.+\/snapshots\/(?<story>[^/]+)\.png$/u;
 
 export type DeclarationKind = "type" | "interface" | "function" | "class" | "const";
@@ -108,22 +112,23 @@ const at = (rev: string, file: string): string => {
   return status === 0 ? stdout : "";
 };
 
-const isContractSource = (file: string): boolean =>
-  file.startsWith(CONTRACTS) && file.endsWith(".ts") && !file.endsWith(".test.ts");
+export const contractRoot = (file: string): string | undefined =>
+  file.endsWith(".test.ts") ? undefined : CONTRACT_ROOTS.find((c) => c.file.test(file))?.root;
 
 export const review = (base: string, head: string): Review => {
   const changed = changedFiles(base, head);
   const contracts: ContractChange[] = [];
 
   for (const { path: file } of changed) {
-    if (!isContractSource(file)) continue;
+    const root = contractRoot(file);
+    if (root === undefined) continue;
 
     const before = declarations(at(base, file));
     const after = declarations(at(head, file));
 
     for (const [key, text] of before) {
       const [kind, ...rest] = key.split(" ");
-      const entry = { file: file.slice(CONTRACTS.length), name: rest.join(" "), kind: kind as DeclarationKind };
+      const entry = { file: file.slice(root.length), name: rest.join(" "), kind: kind as DeclarationKind };
       if (!after.has(key)) contracts.push({ ...entry, change: "removed" });
       else if (after.get(key) !== text) contracts.push({ ...entry, change: "changed" });
     }
@@ -131,7 +136,7 @@ export const review = (base: string, head: string): Review => {
       if (before.has(key)) continue;
       const [kind, ...rest] = key.split(" ");
       contracts.push({
-        file: file.slice(CONTRACTS.length),
+        file: file.slice(root.length),
         name: rest.join(" "),
         kind: kind as DeclarationKind,
         change: "added",

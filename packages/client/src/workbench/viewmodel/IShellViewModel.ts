@@ -1,7 +1,7 @@
 import type { Disposable } from "#core/di";
 import type { IconId } from "#component/Icon";
-import type { BottomDescriptor } from "../model/IBottomDescriptor";
-import type { SidebarDescriptor } from "../model/ISidebarDescriptor";
+import type { BottomDescriptor } from "../api/IBottomDescriptor";
+import type { SidebarDescriptor } from "../api/ISidebarDescriptor";
 
 export interface SidebarRow {
   readonly id: string;

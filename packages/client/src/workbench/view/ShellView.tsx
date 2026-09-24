@@ -9,7 +9,7 @@ import { Tab } from "../component/Tab";
 import { PRODUCT_NAME } from "../model/product";
 import type { ReactNode } from "react";
 import type { ICommandService } from "#core/commands";
-import type { TabContentProps } from "../model/ITabProviderDescriptor";
+import type { TabContentProps } from "../api/ITabProviderDescriptor";
 import type { TabTree } from "../component/Tab";
 import type { PaneRowNode, TabContextTarget, TabRow } from "../viewmodel/ITabSystemViewModel";
 import styles from "./ShellView.module.css";

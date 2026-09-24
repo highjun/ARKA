@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { declarations, isClean, render } from "./needsReview.ts";
+import { contractRoot, declarations, isClean, render } from "./needsReview.ts";
 
 const one = (source: string, key: string): string | undefined => declarations(source).get(key);
 
@@ -137,5 +137,20 @@ describe("render", () => {
     expect(text).toContain("`FileEntry` (const) — 바뀜");
     expect(text).toContain("### `packages/` 밖 2건");
     expect(text).toContain("`pnpm-lock.yaml` — 고침");
+  });
+});
+
+describe("contractRoot", () => {
+  it("contracts 패키지·workbench/api·확장 배럴이 계약이다", () => {
+    expect(contractRoot("packages/contracts/src/filesystem/api.ts")).toBe("packages/contracts/src/");
+    expect(contractRoot("packages/client/src/workbench/api/ISidebarDescriptor.ts")).toBe("packages/client/src/");
+    expect(contractRoot("packages/client/src/extensions/filesystem/index.ts")).toBe("packages/client/src/");
+  });
+
+  it("테스트·구현·확장 안쪽 파일은 계약이 아니다", () => {
+    expect(contractRoot("packages/contracts/src/common/uri.test.ts")).toBeUndefined();
+    expect(contractRoot("packages/client/src/workbench/model/ITabSystem.ts")).toBeUndefined();
+    expect(contractRoot("packages/client/src/extensions/filesystem/model/IWorkspaceFiles.ts")).toBeUndefined();
+    expect(contractRoot("packages/client/src/workbench/index.ts")).toBeUndefined();
   });
 });
