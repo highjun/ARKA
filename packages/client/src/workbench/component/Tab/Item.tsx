@@ -1,7 +1,7 @@
 import type { ComponentPropsWithoutRef, Ref } from "react";
 import { clsx } from "clsx";
-import { Icon } from "#component/Icon";
-import { IconButton } from "#component/IconButton";
+import { Icon } from "#ui/Icon";
+import { IconButton } from "#ui/IconButton";
 import styles from "./Tab.module.css";
 import type { TabItem } from "./shared";
 

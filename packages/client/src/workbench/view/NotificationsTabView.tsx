@@ -1,9 +1,9 @@
 import { useViewModel } from "#core/viewmodel";
 import { observer } from "mobx-react-lite";
 import { Blankslate } from "@primer/react/experimental";
-import { Icon } from "#component/Icon";
-import { IconButton } from "#component/IconButton";
-import { Text } from "#component/Text";
+import { Icon } from "#ui/Icon";
+import { IconButton } from "#ui/IconButton";
+import { Text } from "#ui/Text";
 import type { Notification, Severity } from "../model/INotifications";
 import styles from "./NotificationsTabView.module.css";
 

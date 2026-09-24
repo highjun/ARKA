@@ -1,4 +1,4 @@
-import type { VisualRegressionDeclaration } from "#visual-regression";
+import type { VisualRegressionDeclaration } from "#lib/visualRegression";
 
 const declaration: VisualRegressionDeclaration = {
   shots: [

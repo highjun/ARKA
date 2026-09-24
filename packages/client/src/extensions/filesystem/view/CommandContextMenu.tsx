@@ -1,6 +1,6 @@
 import { useViewModel } from "#core/viewmodel";
 import { observer } from "mobx-react-lite";
-import { Menu } from "#component/Menu";
+import { Menu } from "#ui/Menu";
 import type { ReactNode } from "react";
 
 export const CommandContextMenu = observer(function CommandContextMenu({

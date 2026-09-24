@@ -1,5 +1,5 @@
 import type { Disposable } from "#core/di";
-import type { IconId } from "#component/Icon";
+import type { IconId } from "#ui/Icon";
 import type { BottomDescriptor } from "../api/IBottomDescriptor";
 import type { SidebarDescriptor } from "../api/ISidebarDescriptor";
 

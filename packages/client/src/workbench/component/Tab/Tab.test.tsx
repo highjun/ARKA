@@ -1,9 +1,9 @@
 import { createRef } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { expectNoA11yViolations } from "#utils/axe";
-import { implementsClassName, implementsDataComponent, implementsRef } from "#utils/testing";
-import { Icon } from "#component/Icon";
+import { expectNoA11yViolations } from "#lib/axe";
+import { implementsClassName, implementsDataComponent, implementsRef } from "#lib/testing";
+import { Icon } from "#ui/Icon";
 import { Tab } from "./index";
 import type { TabGroup, TabItem, TabSplit } from "./index";
 

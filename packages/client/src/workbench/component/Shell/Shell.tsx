@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
 import { clsx } from "clsx";
-import { PortalProvider } from "#utils/portal";
+import { PortalProvider } from "#lib/portal";
 import styles from "./Shell.module.css";
 import { SplitPageLayout, ThemeProvider } from "@primer/react";
 import { Bottom } from "../Bottom";

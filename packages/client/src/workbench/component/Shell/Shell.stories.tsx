@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { isNarrowViewport } from "#utils/story";
+import { isNarrowViewport } from "#lib/story";
 import { Shell } from "./index";
 import type { ShellProps } from "./Shell";
 import type { SidebarItem } from "../Sidebar";

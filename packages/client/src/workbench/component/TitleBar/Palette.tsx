@@ -1,7 +1,7 @@
 import type { ComponentPropsWithoutRef, Ref } from "react";
-import { Icon } from "#component/Icon";
-import { Kbd, keysOf } from "#component/Kbd";
-import { usePortalContainer } from "#utils/portal";
+import { Icon } from "#ui/Icon";
+import { Kbd, keysOf } from "#ui/Kbd";
+import { usePortalContainer } from "#lib/portal";
 import styles from "./TitleBar.module.css";
 import { Command } from "cmdk";
 

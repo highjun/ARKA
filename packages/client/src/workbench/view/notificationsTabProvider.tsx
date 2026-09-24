@@ -1,4 +1,4 @@
-import { Icon } from "#component/Icon";
+import { Icon } from "#ui/Icon";
 import type { TabDescriptor, TabProviderDescriptor } from "../api/ITabProviderDescriptor";
 import { NotificationsTabView } from "./NotificationsTabView";
 

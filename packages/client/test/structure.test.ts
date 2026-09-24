@@ -12,13 +12,14 @@ const walk = (dir: string): string[] =>
 
 const FILES = walk(SRC).map((file) => path.relative(SRC, file));
 
-const MARKER = "component/";
+const MARKERS = ["component/", "shared/ui/"];
 
 const folderOf = (file: string): string | null => {
-  const at = file.indexOf(MARKER);
-  if (at < 0) return null;
-  const name = file.slice(at + MARKER.length).split("/")[0] ?? "";
-  return name === "" || name.includes(".") ? null : `${file.slice(0, at + MARKER.length)}${name}`;
+  const marker = MARKERS.find((m) => file.includes(m));
+  if (marker === undefined) return null;
+  const at = file.indexOf(marker);
+  const name = file.slice(at + marker.length).split("/")[0] ?? "";
+  return name === "" || name.includes(".") ? null : `${file.slice(0, at + marker.length)}${name}`;
 };
 
 const nameOf = (folder: string): string => folder.split("/").at(-1) ?? "";
@@ -60,8 +61,8 @@ describe("컴포넌트 폴더 구조", () => {
     expect(missing).toEqual([]);
   });
 
-  it("컴포넌트 폴더 밖에는 `component/` 배럴이 없다 — 경로로 가져온다", () => {
-    const groupBarrels = FILES.filter((file) => /(?:^|\/)components?\/index\.ts$/u.test(file));
+  it("컴포넌트 폴더 밖에는 `component/`·`shared/ui/` 배럴이 없다 — 경로로 가져온다", () => {
+    const groupBarrels = FILES.filter((file) => /(?:^|\/)(?:components?|shared\/ui)\/index\.ts$/u.test(file));
 
     expect(groupBarrels).toEqual([]);
   });

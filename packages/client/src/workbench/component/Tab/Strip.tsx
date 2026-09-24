@@ -14,8 +14,8 @@ import type {
 } from "react";
 import { clsx } from "clsx";
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
-import { Container } from "#component/Container";
-import { Menu } from "#component/Menu";
+import { Container } from "#ui/Container";
+import { Menu } from "#ui/Menu";
 import styles from "./Tab.module.css";
 import { getStripItemStates, useStripScrollHandle, useTabStrip } from "./useTabStrip";
 import { Item } from "./Item";

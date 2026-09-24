@@ -4,8 +4,8 @@ import styles from "./TextEditor.module.css";
 import { useCodeMirrorEditor } from "./useCodeMirrorEditor";
 import type { RevealPosition } from "./useCodeMirrorEditor";
 import { Spinner } from "@primer/react";
-import { Icon } from "#component/Icon";
-import { IconButton } from "#component/IconButton";
+import { Icon } from "#ui/Icon";
+import { IconButton } from "#ui/IconButton";
 
 type TextEditorChrome = "bordered" | "none";
 

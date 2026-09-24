@@ -1,8 +1,8 @@
 import { clsx } from "clsx";
-import { Icon } from "#component/Icon";
-import { IconButton } from "#component/IconButton";
+import { Icon } from "#ui/Icon";
+import { IconButton } from "#ui/IconButton";
 import styles from "./Sidebar.module.css";
-import type { IconId } from "#component/Icon";
+import type { IconId } from "#ui/Icon";
 
 export interface SidebarItem {
   readonly id: string;

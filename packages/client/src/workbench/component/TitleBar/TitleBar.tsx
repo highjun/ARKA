@@ -1,9 +1,9 @@
 import { clsx } from "clsx";
 import type { ComponentPropsWithoutRef, Ref } from "react";
 import { CounterLabel } from "@primer/react";
-import { Icon } from "#component/Icon";
-import { IconButton } from "#component/IconButton";
-import { ModeToggle } from "#component/ModeToggle";
+import { Icon } from "#ui/Icon";
+import { IconButton } from "#ui/IconButton";
+import { ModeToggle } from "#ui/ModeToggle";
 import styles from "./TitleBar.module.css";
 import { Palette, PaletteField } from "./Palette";
 import type { CommandRow } from "./Palette";

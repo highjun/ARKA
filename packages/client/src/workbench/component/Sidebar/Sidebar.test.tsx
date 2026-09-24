@@ -5,7 +5,7 @@ import {
   implementsDataComponent,
   implementsRef,
   implementsNoA11yViolations,
-} from "#utils/testing";
+} from "#lib/testing";
 import { Sidebar } from "./index";
 import type { SidebarItem } from "./index";
 

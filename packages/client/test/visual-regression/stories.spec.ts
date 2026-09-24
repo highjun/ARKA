@@ -4,7 +4,7 @@ import { pathToFileURL } from "node:url";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { STORYBOOK_STATIC } from "./config.ts";
-import type { VisualRegressionDeclaration, VisualRegressionPseudo, VisualRegressionShot } from "#visual-regression";
+import type { VisualRegressionDeclaration, VisualRegressionPseudo, VisualRegressionShot } from "#lib/visualRegression";
 
 type StorybookIndex = {
   readonly entries: Record<string, { readonly type: string; readonly importPath: string }>;

@@ -5,7 +5,7 @@ import {
   implementsDataComponent,
   implementsRef,
   implementsNoA11yViolations,
-} from "#utils/testing";
+} from "#lib/testing";
 import { FileIcon } from "./FileIcon";
 
 describe("FileIcon", () => {

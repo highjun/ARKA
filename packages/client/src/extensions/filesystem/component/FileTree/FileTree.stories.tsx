@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ComponentProps } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Menu } from "#component/Menu";
+import { Menu } from "#ui/Menu";
 import { FileTree } from "./index";
 import type { FileTreeItem } from "./index";
 

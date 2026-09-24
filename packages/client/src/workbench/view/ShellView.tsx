@@ -1,9 +1,9 @@
 import { ContainerProvider, useViewModel } from "#core/viewmodel";
 import { observer } from "mobx-react-lite";
 import { Banner, ConfirmationDialog } from "@primer/react";
-import { Menu } from "#component/Menu";
-import { Text } from "#component/Text";
-import { Toast } from "#component/Toast";
+import { Menu } from "#ui/Menu";
+import { Text } from "#ui/Text";
+import { Toast } from "#ui/Toast";
 import { Shell } from "../component/Shell";
 import { Tab } from "../component/Tab";
 import { PRODUCT_NAME } from "../model/product";

@@ -1,7 +1,7 @@
 import { useViewModel } from "#core/viewmodel";
 import { observer } from "mobx-react-lite";
 import { Banner } from "@primer/react";
-import { ErrorBoundary } from "#utils/errorBoundary";
+import { ErrorBoundary } from "#lib/errorBoundary";
 import { ShellView } from "./ShellView";
 
 export const RootView = observer(function RootView() {

@@ -6,7 +6,7 @@ import {
   implementsDataComponent,
   implementsRef,
   implementsNoA11yViolations,
-} from "#utils/testing";
+} from "#lib/testing";
 import { Bottom } from "./Bottom";
 import * as stories from "./Bottom.stories";
 import type { BottomItem } from "./Bottom";

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PortalProvider } from "#utils/portal";
+import { PortalProvider } from "#lib/portal";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { TitleBar } from "./index";
 import type { CommandRow } from "./index";

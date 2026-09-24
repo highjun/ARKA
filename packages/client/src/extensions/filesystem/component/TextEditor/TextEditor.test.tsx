@@ -5,7 +5,7 @@ import {
   implementsDataComponent,
   implementsNoA11yViolations,
   implementsRef,
-} from "#utils/testing";
+} from "#lib/testing";
 import { TextEditor } from "./TextEditor";
 
 describe("TextEditor", () => {

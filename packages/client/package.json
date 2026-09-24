@@ -78,12 +78,12 @@
     "vitest": "catalog:"
   },
   "imports": {
-    "#component/*": "./src/shared/component/*/index.ts",
     "#contracts": "contracts",
     "#core/*": "./src/core/*/index.ts",
     "#core/errors": "./src/core/errors.ts",
-    "#utils/*": "./src/shared/utils/*.tsx",
-    "#visual-regression": "./src/shared/visualRegression.ts",
+    "#lib/*": "./src/shared/lib/*.tsx",
+    "#lib/visualRegression": "./src/shared/lib/visualRegression.ts",
+    "#ui/*": "./src/shared/ui/*/index.ts",
     "#workbench": "./src/workbench/index.ts"
   }
 }

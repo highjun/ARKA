@@ -15,7 +15,7 @@ import {
 import type { DroppableRow } from "./shared";
 import type { FlatTreeNode } from "./useTreeNavigation";
 import styles from "./FileTree.module.css";
-import { Icon } from "#component/Icon";
+import { Icon } from "#ui/Icon";
 import { FileIcon } from "../FileIcon";
 
 export type FileTreeItemId = string;

@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
-import { Icon } from "#component/Icon";
-import { IconButton } from "#component/IconButton";
+import { Icon } from "#ui/Icon";
+import { IconButton } from "#ui/IconButton";
 import type { ComponentPropsWithoutRef, Ref } from "react";
 import styles from "./Bottom.module.css";
 

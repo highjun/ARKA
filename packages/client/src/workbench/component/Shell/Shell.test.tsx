@@ -1,14 +1,14 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { expectNoA11yViolations } from "#utils/axe";
+import { expectNoA11yViolations } from "#lib/axe";
 import {
   implementsClassName,
   implementsDataComponent,
   implementsRef,
   implementsNoA11yViolations,
-} from "#utils/testing";
+} from "#lib/testing";
 import { Shell } from "./Shell";
-import { Menu } from "#component/Menu";
+import { Menu } from "#ui/Menu";
 
 const SIDEBARS = [{ id: "a", iconId: "files" as const, title: "탐색기", isActive: true }];
 const BOTTOMS = [

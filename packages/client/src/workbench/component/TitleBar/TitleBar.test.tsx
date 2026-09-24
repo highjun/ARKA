@@ -6,7 +6,7 @@ import {
   implementsDataComponent,
   implementsRef,
   implementsNoA11yViolations,
-} from "#utils/testing";
+} from "#lib/testing";
 import { TitleBar } from "./index";
 import * as stories from "./TitleBar.stories";
 

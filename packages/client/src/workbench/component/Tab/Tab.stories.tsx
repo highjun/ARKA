@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Icon } from "#component/Icon";
+import { Icon } from "#ui/Icon";
 import { Tab } from "./index";
 import type { TabGroup, TabItem, TabTree } from "./index";
 

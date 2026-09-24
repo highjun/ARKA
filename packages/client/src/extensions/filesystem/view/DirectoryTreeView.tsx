@@ -2,7 +2,7 @@ import { useViewModel } from "#core/viewmodel";
 import { observer } from "mobx-react-lite";
 import { ConfirmationDialog, Dialog, Spinner } from "@primer/react";
 import { Blankslate } from "@primer/react/experimental";
-import { Container } from "#component/Container";
+import { Container } from "#ui/Container";
 import { FileTree } from "../component/FileTree";
 import type { FileTreeItem } from "../component/FileTree";
 import type { MouseEvent } from "react";

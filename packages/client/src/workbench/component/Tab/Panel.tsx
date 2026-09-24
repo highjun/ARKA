@@ -1,6 +1,6 @@
 import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
 import { clsx } from "clsx";
-import { Container } from "#component/Container";
+import { Container } from "#ui/Container";
 import styles from "./Tab.module.css";
 
 /** 내용 자리. `role="tabpanel"`은 알아서 채우고, 넘치는 것은 `Container`가 든다. */

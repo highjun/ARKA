@@ -152,7 +152,7 @@ export default [
 
   {
     files: ["src/**/*.{ts,tsx}"],
-    ignores: ["src/shared/component/IconButton/**", "src/shared/component/ModeToggle/**"],
+    ignores: ["src/shared/ui/IconButton/**", "src/shared/ui/ModeToggle/**"],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -161,7 +161,7 @@ export default [
             {
               name: "@primer/react",
               importNames: ["IconButton"],
-              message: "`#component/IconButton`으로 가져오세요 — 터치 환경의 최소 타겟 CSS가 그 겹에만 있습니다.",
+              message: "`#ui/IconButton`으로 가져오세요 — 터치 환경의 최소 타겟 CSS가 그 겹에만 있습니다.",
             },
           ],
         },
