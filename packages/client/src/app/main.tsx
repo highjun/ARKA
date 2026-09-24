@@ -3,8 +3,8 @@ import "./globals.css";
 import { ContainerProvider } from "#core/viewmodel";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { RootView } from "./view/RootView";
-import { createApplication } from "./registerServices";
+import { RootView } from "../workbench/view/RootView";
+import { createApplication } from "./createApplication";
 
 const root = document.getElementById("root");
 if (!root) {

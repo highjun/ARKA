@@ -10,7 +10,8 @@ const clientRoot = path.resolve(import.meta.dirname);
 export const CLIENT_DIST = ".output/dist/client";
 
 export default defineConfig({
-  root: path.join(clientRoot, "src/workbench"),
+  root: path.join(clientRoot, "src/app"),
+  cacheDir: path.join(clientRoot, "node_modules/.vite"),
   plugins: [
     react(),
     {

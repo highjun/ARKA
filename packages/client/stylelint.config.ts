@@ -22,7 +22,7 @@ export default {
   ignoreFiles: ["**/node_modules/**", "**/.output/**"],
   overrides: [
     {
-      files: ["src/workbench/reset.css", "src/shared/component/Markdown/Markdown.module.css"],
+      files: ["src/app/reset.css", "src/shared/component/Markdown/Markdown.module.css"],
       rules: { "selector-max-type": null, "selector-max-id": null, "selector-max-specificity": null },
     },
   ],

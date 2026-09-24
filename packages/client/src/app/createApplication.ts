@@ -1,8 +1,8 @@
 import { Container } from "#core/di";
 import { activateExtensions, type ExtensionModule } from "#core/extensions";
-import { extensions } from "../extensions";
-import { collectTabs } from "./model/paneTree";
-import { workbench } from "./workbenchModule";
+import { extensions } from "./extensions";
+import { collectTabs } from "../workbench/model/paneTree";
+import { workbench } from "../workbench/workbenchModule";
 
 export function createApplication(overrides: readonly ExtensionModule[] = []): Container {
   const container = new Container("app");

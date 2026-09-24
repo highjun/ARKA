@@ -1,8 +1,8 @@
 import { ThemeProvider } from "@primer/react";
 import type { Preview } from "@storybook/react-vite";
 
-import "../src/workbench/reset.css";
-import "../src/workbench/globals.css";
+import "../src/app/reset.css";
+import "../src/app/globals.css";
 
 /** 코드의 중단점 두 개(768px·1080px)가 가르는 세 구간. 폭은 각 구간을 대표하는 기기에서 딴다. */
 const VIEWPORTS = {

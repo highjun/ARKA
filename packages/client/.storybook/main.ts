@@ -2,7 +2,7 @@ import type { StorybookConfig } from "@storybook/react-vite";
 
 const config: StorybookConfig = {
   stories: ["../src/**/*.stories.tsx"],
-  staticDirs: ["../src/workbench/public"],
+  staticDirs: ["../src/app/public"],
   addons: ["@storybook/addon-a11y", "@storybook/addon-docs"],
   framework: { name: "@storybook/react-vite", options: {} },
   core: { disableTelemetry: true },

@@ -9,7 +9,7 @@ const config: KnipConfig = {
     },
     "packages/client": {
       entry: [
-        "src/workbench/main.tsx",
+        "src/app/main.tsx",
         "src/**/*.stories.tsx",
         ".storybook/{main,preview}.ts",
         "test/visual-regression/run.ts",

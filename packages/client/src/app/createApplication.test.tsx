@@ -5,8 +5,8 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { IWorkspaceFiles } from "../extensions/filesystem";
 import { MockWorkspaceFiles } from "../extensions/filesystem/model/MockWorkspaceFiles";
-import { RootView } from "./view/RootView";
-import { createApplication } from "./registerServices";
+import { RootView } from "../workbench/view/RootView";
+import { createApplication } from "./createApplication";
 
 describe("registerServices", () => {
   const containers: Container[] = [];
