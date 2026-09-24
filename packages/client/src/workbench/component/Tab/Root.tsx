@@ -79,9 +79,7 @@ export const Root = ({
     caller: "Tab",
   });
   const resolvedGroupId =
-    currentGroupId !== undefined && hasGroup(visibleTree, currentGroupId)
-      ? currentGroupId
-      : firstGroupId(visibleTree);
+    currentGroupId !== undefined && hasGroup(visibleTree, currentGroupId) ? currentGroupId : firstGroupId(visibleTree);
   const { indicator, sourceHandlersFor, dropHandlersFor } = useTabDrop({ onGroupSplit, onItemMove });
 
   const renderGroup = (group: TabGroup, size: number | undefined): ReactNode => {
@@ -101,7 +99,9 @@ export const Root = ({
             }}
             onItemClose={onItemClose === undefined ? undefined : (itemId) => onItemClose(group.id, itemId)}
             onItemMove={
-              onItemMove === undefined ? undefined : (itemId, beforeItemId) => onItemMove(group.id, itemId, beforeItemId)
+              onItemMove === undefined
+                ? undefined
+                : (itemId, beforeItemId) => onItemMove(group.id, itemId, beforeItemId)
             }
             onItemPin={onItemPin === undefined ? undefined : (itemId) => onItemPin(group.id, itemId)}
           />

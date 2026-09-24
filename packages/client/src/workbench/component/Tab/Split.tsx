@@ -32,16 +32,7 @@ export interface TabSplitProps extends Omit<ComponentPropsWithoutRef<"div">, "ch
   readonly onResize?: (childIndex: number, nextSize: number) => void;
 }
 
-export const Split = ({
-  children,
-  orientation,
-  size,
-  onResize,
-  className,
-  style,
-  ref,
-  ...props
-}: TabSplitProps) => {
+export const Split = ({ children, orientation, size, onResize, className, style, ref, ...props }: TabSplitProps) => {
   const boxRef = useRef<HTMLDivElement | null>(null);
   /** 끌기를 시작한 순간의 자식 크기와 상자 크기. 이동량(px)을 비율(%)로 옮기는 기준이다. */
   const grabRef = useRef<{ index: number; childPx: number; boxPx: number } | null>(null);
